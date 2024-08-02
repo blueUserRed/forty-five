@@ -19,6 +19,7 @@ import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fortyfive.utils.*
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
@@ -48,16 +49,16 @@ abstract class Resource(
     @MainThreadOnly
     abstract fun finishLoadingMainThread()
 
-//    @MainThreadOnly
-//    fun <T> get(variantType: KClass<T>): T? where T : Any {
-//        if (state != ResourceState.LOADED) {
-//            runBlocking {
-//                mutex.withLock { load() }
-//            }
-//        }
-//        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
-//        return null
-//    }
+    @MainThreadOnly
+    fun <T> get(variantType: KClass<T>): T? where T : Any {
+        if (state != ResourceState.LOADED) {
+            runBlocking {
+                mutex.withLock { load() }
+            }
+        }
+        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
+        return null
+    }
 
     fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
         borrow(borrower, lifetime)
@@ -79,15 +80,15 @@ abstract class Resource(
         return variantType.cast(variant)
     }
 
-//    @MainThreadOnly
-//    private fun load() {
-//        if (state == ResourceState.NOT_LOADED) {
-//            loadDirectMainThread()
-//        } else if (state == ResourceState.PREPARED) {
-//            finishLoadingMainThread()
-//        }
-//        state = ResourceState.LOADED
-//    }
+    @MainThreadOnly
+    private fun load() {
+        if (state == ResourceState.NOT_LOADED) {
+            loadDirectMainThread()
+        } else if (state == ResourceState.PREPARED) {
+            finishLoadingMainThread()
+        }
+        state = ResourceState.LOADED
+    }
 
     @AllThreadsAllowed
     suspend fun prepare() = mutex.withLock {
@@ -96,13 +97,17 @@ abstract class Resource(
         state = ResourceState.PREPARED
     }
 
-    private fun borrow(borrower: ResourceBorrower, lifetime: Lifetime) {
+    fun borrow(borrower: ResourceBorrower, lifetime: Lifetime) {
         val added = borrowedBy.add(borrower)
         if (!added) return
         lifetime.onEnd { giveBack(borrower) }
     }
 
-    private fun giveBack(borrower: ResourceBorrower) {
+    fun borrow(borrower: ResourceBorrower) {
+        borrowedBy.add(borrower)
+    }
+
+    fun giveBack(borrower: ResourceBorrower) {
         if (!borrowedBy.remove(borrower)) return
         if (borrowedBy.isEmpty()) dispose()
     }

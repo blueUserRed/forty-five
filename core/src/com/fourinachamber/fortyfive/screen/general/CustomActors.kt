@@ -64,13 +64,10 @@ open class CustomLabel(
 
     var underline: Boolean = false
 
-    override var backgroundHandle: String? = null
-        set(value) {
-            field = value
-            background = null
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    override var backgroundHandle: String? by backgroundHandleObserver
 
-    private var background: Drawable? = null
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     override var detailActor: Actor? = null
     override var mainHoverDetailActor: String? = null
@@ -93,12 +90,6 @@ open class CustomLabel(
         "hoverText" to OnjString(hoverText)
     ).also {
         it.putAll(additionalHoverData)
-    }
-
-    private fun getBackground(): Drawable? {
-        if (backgroundHandle == null) return null
-        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
-        return background
     }
 
     override fun getBounds(): Rectangle {
@@ -148,15 +139,13 @@ open class CustomLabel(
     }
 
     protected fun drawBackground(batch: Batch, parentAlpha: Float) {
-        val background = getBackground()
-        background?.let {
-            batch.flush()
-            val old = batch.color.cpy()
-            batch.setColor(old.r, old.g, old.b, parentAlpha * alpha)
-            it.draw(batch, x, y, width, height)
-            batch.flush()
-            batch.setColor(old.r, old.g, old.b, old.a)
-        }
+        val background = background ?: return
+        batch.flush()
+        val old = batch.color.cpy()
+        batch.setColor(old.r, old.g, old.b, parentAlpha * alpha)
+        background.draw(batch, x, y, width, height)
+        batch.flush()
+        batch.setColor(old.r, old.g, old.b, old.a)
     }
 
     override fun initStyles(screen: OnjScreen) {
@@ -182,7 +171,7 @@ open class CustomLabel(
 
 }
 
-open class TemplateStringLabel @AllThreadsAllowed constructor(
+open class TemplateStringLabel(
     screen: OnjScreen,
     var templateString: TemplateString,
     labelStyle: LabelStyle,
@@ -220,7 +209,7 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor @AllThreadsAllowed constructor(
+open class CustomImageActor(
     drawableHandle: ResourceHandle?,
     _screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
@@ -257,13 +246,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
 
-    override var backgroundHandle: String? = drawableHandle
-        set(value) {
-            if (field != value) loadedDrawable = null
-            field = value
-        }
-    protected var loadedDrawable: Drawable? = null
-        private set
+    private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
+    override var backgroundHandle: String? by backgroundHandleObserver
+
+    protected val loadedDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     /**
      * overrides and ignores the background handle and the loaded drawable
@@ -307,15 +293,13 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
-        val backgroundHandle = backgroundHandle
-        if (programmedDrawable != null) drawable = programmedDrawable
-        else if (backgroundHandle != null && loadedDrawable == null) {
-            loadedDrawable = ResourceManager.get(screen, backgroundHandle)
-            invalidateHierarchy()
-        } else if (backgroundHandle == null && loadedDrawable != null) {
-            loadedDrawable = null
+
+        drawable = if (programmedDrawable != null) {
+            programmedDrawable
+        } else {
+            loadedDrawable
         }
-        drawable = loadedDrawable
+
         if (batch == null || drawable == null) {
             super.draw(batch, parentAlpha)
             return
@@ -363,14 +347,6 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
         x -= offsetX
         y -= offsetY
-    }
-
-    fun forceLoadDrawable() {
-        val backgroundHandle = backgroundHandle
-        if (backgroundHandle == null || loadedDrawable != null) return
-        loadedDrawable = ResourceManager.get(screen, backgroundHandle)
-        drawable = loadedDrawable
-        invalidateHierarchy()
     }
 
     override fun getMinWidth(): Float =
@@ -446,8 +422,6 @@ open class CustomFlexBox(
 
     override val actor: Actor = this
 
-    var background: Drawable? = null
-
     override var isDisabled: Boolean = false
 
     override var isHoveredOver: Boolean = false
@@ -460,11 +434,10 @@ open class CustomFlexBox(
 
     override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
 
-    override var backgroundHandle: String? = null
-        set(value) {
-            if (field != value) background = null
-            field = value
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    override var backgroundHandle: String? by backgroundHandleObserver
+
+    val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     private var reattachTo: Group? = null
 
@@ -492,7 +465,6 @@ open class CustomFlexBox(
             }
         }
     }
-
 
     init {
         bindHoverStateListeners(this)
@@ -559,10 +531,6 @@ open class CustomFlexBox(
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        val backgroundHandle = backgroundHandle
-        if (backgroundHandle != null && background == null) {
-            background = ResourceManager.get(screen, backgroundHandle)
-        }
         validate()
         x += offsetX
         y += offsetY
@@ -971,9 +939,6 @@ class CustomScrollableFlexBox(
             yPixel * height
         )
         if (!ScissorStack.pushScissors(scissorBack)) return true
-        val backgroundHandle = backgroundHandle
-        if (backgroundHandle != null && background == null) background =
-            ResourceManager.get(screen, backgroundHandle)
         validate()
         if (background != null) {
             if (isScrollDirectionVertical) background?.draw(
@@ -1177,25 +1142,15 @@ open class CustomHorizontalGroup(
 
     override var fixedZIndex: Int = 0
 
-    override var backgroundHandle: String? = null
-        set(value) {
-            field = value
-            background = null
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    override var backgroundHandle: String? by backgroundHandleObserver
 
-    private var background: Drawable? = null
-
-    private fun getBackground(): Drawable? {
-        if (backgroundHandle == null) return null
-        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
-        return background
-    }
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         this.x += offsetX
         this.y += offsetY
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
         this.x -= offsetX
@@ -1223,24 +1178,14 @@ open class CustomVerticalGroup(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
-    override var backgroundHandle: String? = null
-        set(value) {
-            field = value
-            background = null
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    override var backgroundHandle: String? by backgroundHandleObserver
 
-    private var background: Drawable? = null
-
-    private fun getBackground(): Drawable? {
-        if (backgroundHandle == null) return null
-        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
-        return background
-    }
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }

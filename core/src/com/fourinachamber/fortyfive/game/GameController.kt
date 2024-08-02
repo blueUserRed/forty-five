@@ -277,18 +277,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .toMutableList()
 
         cards.forEach { cardName ->
-            val card = cardPrototypes.find { it.name == cardName } ?: throw  RuntimeException("unknown card $cardName")
-            curScreen.borrowResource("${Card.cardTexturePrefix}$cardName")
-            card
-                .forceLoadCards
-                .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}$it") }
-        }
-        onj
-            .get<OnjArray>("alwaysLoadCards")
-            .value
-            .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
-
-        cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
