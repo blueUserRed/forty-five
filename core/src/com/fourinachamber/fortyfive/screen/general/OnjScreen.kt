@@ -424,6 +424,10 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
 
+    private val warpShader: BetterShader by lazy {
+        ResourceManager.get(this, "warp_shader")
+    }
+
     @MainThreadOnly
     override fun render(delta: Float) = try {
 //        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
@@ -433,7 +437,14 @@ open class OnjScreen @MainThreadOnly constructor(
             if (stage.batch.isDrawing) stage.batch.end()
             stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
+            warpShader.let {
+                stage.batch.flush()
+                it.shader.bind()
+                it.prepare(this)
+                stage.batch.shader = it.shader
+            }
             stage.draw()
+            stage.batch.flush()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             styleManagers
                 .filter { it !in oldStyleManagers }

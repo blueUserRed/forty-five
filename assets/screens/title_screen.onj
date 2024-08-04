@@ -34,6 +34,7 @@ assets: {
         "common_button_default", "common_button_hover",
 
         "main_theme",
+        "warp_shader",
         "swoosh_sound", "button_2_sound",
     ]
 },
