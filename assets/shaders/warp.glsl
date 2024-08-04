@@ -23,7 +23,7 @@ uniform float u_depth;// recommended beween 3 and 30, how strong it zooms
 
 float getNewDist(float dist, float maxDist){
     float oldDist=dist/maxDist;
-    float depth=35.0;
+    float depth=25.0;
     if (u_depth>1.0){
         depth=u_depth;
     }
@@ -72,7 +72,7 @@ void main() {
     //    vec2 center = u_center;
 
     float PI = radians(float(180));
-    float rotation = 4*PI*progress;
+    float rotation = getNewDist(progress, 1) * PI/2.0;
 
 
 
@@ -87,16 +87,13 @@ void main() {
     vec2 borderIntersection= getBorderIntersection(k, center, rotationRightOfCenter);
     float strechedPercent=getNewDist(hypo(distToCenter), hypo(borderIntersection-center));
 
-    vec2 newRot = rotate(k, rotation, rotationRightOfCenter); //first element new slope, second == 1 if new point is right
+    vec2 newRot = rotate(k, rotation*(1.0-strechedPercent), rotationRightOfCenter); //first element new slope, second == 1 if new point is right
 
     vec2 rotatedBorderToCenter = getBorderIntersection(newRot.x, center, newRot.y==1.0) - center;
 
-//        vec2 strechedPos = center+rotatedBorderToCenter*strechedPercent;
-    vec2 strechedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
-
-//    vec2 diffOldNew=strechedPos-tc;
-//        vec4 result = texture2D(u_texture, tc+diffOldNew*progress);
-    vec4 result = texture2D(u_texture, strechedPos);
+    vec2 rotatedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
+    vec2 rotatedStrechedPos=center+rotatedBorderToCenter*strechedPercent;
+    vec4 result = texture2D(u_texture, rotatedPos+(rotatedStrechedPos-rotatedPos)*progress);
 
     gl_FragColor = result;
 
@@ -193,7 +190,7 @@ void main() {
 //        rotationRightOfCenter=!rotationRightOfCenter;
 //    }
 //
-//    vec2 rotatedBorderToCenter = getBorderIntersection(newRot, tc, rotationRightOfCenter) - center;
+//    vec2 rotatedBorderToCenter = getBorderIntersection(newRot, center, rotationRightOfCenter) - center;
 //
 //    //        vec2 strechedPos = center+rotatedBorderToCenter*strechedPercent;
 //    vec2 strechedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
