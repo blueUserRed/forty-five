@@ -52,35 +52,30 @@ vec2 getBorderIntersection(float k, vec2 pointOnLine, bool rightOfCenter){
 }
 
 
-float rotate(float oldSlope, float rotation){
+vec2 rotate(float oldSlope, float rotation, bool isRightOfCenter){
+    float PI=radians(180.0);
     float oldRotation=atan(oldSlope, 1.0);
+    if(!isRightOfCenter) oldRotation+=PI;
     float newRotation=oldRotation+rotation;
-    float pi=radians(180.0);
-    //    while(newRotation < -pi){
-    //        newRotation+=pi;
-    //    }
-    //    while(newRotation>pi){
-    //        newRotation-=pi;
-    //    }
 
-    return tan(newRotation);
+    if(cos(newRotation)>0) return vec2(tan(newRotation),1.0);
+    else return vec2(tan(newRotation),0.0);
 }
 
 void main() {
 
-        float progress = (sin(abs(float(u_time*0.85)))+1.0)/2.0;
-//    float progress = (sin(abs(float(u_time*0.05)))+1.0)/2.0;
-    //            float progress = 1.0;
+    float progress = (sin(abs(float(u_time*0.85)))+1.0)/2.0;
+//    float progress = 1.0;
     //    float progress = u_progress;
 
     vec2 center = vec2(0.5, 0.8);
     //    vec2 center = u_center;
 
     float PI = radians(float(180));
-    float rotation = 2*PI*progress/4;
+    float rotation = 4*PI*progress;
 
-//        float rotation = PI*1.51;
-//        float rotation = 0;
+
+
 
     vec2 tc = v_texCoords;
     vec2 distToCenter= tc-center;
@@ -89,22 +84,19 @@ void main() {
 
     bool rotationRightOfCenter=tc.x>center.x;
 
-    vec2 borderIntersection= getBorderIntersection(k, tc, rotationRightOfCenter);
+    vec2 borderIntersection= getBorderIntersection(k, center, rotationRightOfCenter);
     float strechedPercent=getNewDist(hypo(distToCenter), hypo(borderIntersection-center));
 
-    float newRot=rotate(k, rotation);
-    if ((newRot<0 && k>0)) {
-        rotationRightOfCenter=!rotationRightOfCenter;
-    }
+    vec2 newRot = rotate(k, rotation, rotationRightOfCenter); //first element new slope, second == 1 if new point is right
 
-    vec2 rotatedBorderToCenter = getBorderIntersection(newRot, tc, rotationRightOfCenter) - center;
+    vec2 rotatedBorderToCenter = getBorderIntersection(newRot.x, center, newRot.y==1.0) - center;
 
-        vec2 strechedPos = center+rotatedBorderToCenter*strechedPercent;
-//    vec2 strechedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
+//        vec2 strechedPos = center+rotatedBorderToCenter*strechedPercent;
+    vec2 strechedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
 
-    vec2 diffOldNew=strechedPos-tc;
-        vec4 result = texture2D(u_texture, tc+diffOldNew*progress);
-//    vec4 result = texture2D(u_texture, strechedPos);
+//    vec2 diffOldNew=strechedPos-tc;
+//        vec4 result = texture2D(u_texture, tc+diffOldNew*progress);
+    vec4 result = texture2D(u_texture, strechedPos);
 
     gl_FragColor = result;
 
@@ -117,6 +109,125 @@ void main() {
     //        gl_FragColor = vec4(atan(-(tc.x*4*PI-2*PI),1.0),0.0,0.0,1.0);
     //    }
 }
+
+
+
+
+
+//another backup
+
+//
+//float getNewDist(float dist, float maxDist){
+//    float oldDist=dist/maxDist;
+//    float depth=35.0;
+//    if (u_depth>1.0){
+//        depth=u_depth;
+//    }
+//    float a = pow(2.0, depth);
+//    a=a/(a-1.0);
+//    return (a-a/pow(oldDist+1.0, depth));//from 0-1 returns 0-1 but "warped"
+//}
+//
+//float hypo(vec2 oldDist){
+//    return sqrt(oldDist.x*oldDist.x+oldDist.y*oldDist.y);
+//    //    return abs(oldDist.x)+abs(oldDist.y);
+//}
+//
+//
+//vec2 getBorderIntersection(float k, vec2 pointOnLine, bool rightOfCenter){
+//    //the position where the extended line between the center and the pixel hits the (0|0),(0|1),(1|1),(1|0) square
+//
+//    float d = pointOnLine.y - pointOnLine.x * k;
+//    vec2 borderIntersection;
+//    if (rightOfCenter) borderIntersection= vec2(1.0, k+d);
+//    else borderIntersection=vec2(0.0, d);
+//
+//    if (borderIntersection.y>1.0) borderIntersection=vec2((1.0-d) / k, 1.0);
+//    else if (borderIntersection.y<0.0) borderIntersection=vec2(-d/k, 0.0);
+//    return borderIntersection;
+//}
+//
+//
+//float rotate(float oldSlope, float rotation){
+//    float oldRotation=atan(oldSlope, 1.0);
+//    float newRotation=oldRotation+rotation;
+//    float pi=radians(180.0);
+//    //    while(newRotation < -pi){
+//    //        newRotation+=pi;
+//    //    }
+//    //    while(newRotation>pi){
+//    //        newRotation-=pi;
+//    //    }
+//
+//    return tan(newRotation);
+//}
+//
+//void main() {
+//
+//    float progress = (sin(abs(float(u_time*0.85)))+1.0)/2.0;
+//    //    float progress = (sin(abs(float(u_time*0.05)))+1.0)/2.0;
+//    //            float progress = 1.0;
+//    //    float progress = u_progress;
+//
+//    vec2 center = vec2(0.5, 0.8);
+//    //    vec2 center = u_center;
+//
+//    float PI = radians(float(180));
+//    float rotation = 2*PI*progress/4;
+//
+//    //        float rotation = PI*1.51;
+//    //        float rotation = 0;
+//
+//    vec2 tc = v_texCoords;
+//    vec2 distToCenter= tc-center;
+//
+//    float k = distToCenter.y/distToCenter.x;
+//
+//    bool rotationRightOfCenter=tc.x>center.x;
+//
+//    vec2 borderIntersection= getBorderIntersection(k, tc, rotationRightOfCenter);
+//    float strechedPercent=getNewDist(hypo(distToCenter), hypo(borderIntersection-center));
+//
+//    float newRot=rotate(k, rotation);
+//    if ((newRot<0 && k>0)) {
+//        rotationRightOfCenter=!rotationRightOfCenter;
+//    }
+//
+//    vec2 rotatedBorderToCenter = getBorderIntersection(newRot, tc, rotationRightOfCenter) - center;
+//
+//    //        vec2 strechedPos = center+rotatedBorderToCenter*strechedPercent;
+//    vec2 strechedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
+//
+//    //    vec2 diffOldNew=strechedPos-tc;
+//    //        vec4 result = texture2D(u_texture, tc+diffOldNew*progress);
+//    vec4 result = texture2D(u_texture, strechedPos);
+//
+//    gl_FragColor = result;
+//
+//    //    if(borderIntersection.x>center.x && borderIntersection.y==1.0){
+//    //        gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+//    //    }
+//    //    if(atan(tc.x*4*PI-2*PI,1.0)>0){
+//    //        gl_FragColor = vec4(0.0,atan(tc.x*4*PI-2*PI,1.0),0.0,1.0);
+//    //    }else{
+//    //        gl_FragColor = vec4(atan(-(tc.x*4*PI-2*PI),1.0),0.0,0.0,1.0);
+//    //    }
+//}
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //  //bad warp, as a backup or future refernce
 //
