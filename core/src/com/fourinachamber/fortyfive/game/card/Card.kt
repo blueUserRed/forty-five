@@ -4,7 +4,6 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.FileTextureData
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -20,6 +19,7 @@ import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.onjNamespaces.OnjPassiveEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -110,7 +110,7 @@ class Card(
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
     val additionalHoverInfos: List<String>,
-    font: PixmapFont,
+    font: Promise<PixmapFont>,
     fontScale: Float,
     screen: OnjScreen,
     val isSaved: Boolean?,
@@ -198,7 +198,6 @@ class Card(
     var lastEffectAffectedCardsCache: List<Card> = listOf()
 
     init {
-        screen.borrowResource(cardTexturePrefix + name)
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
         // card texture while the constructor is running and actor is not yet assigned
         synchronized(this) {
@@ -494,7 +493,7 @@ class Card(
 
     private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller), curCost(controller))
 
-    override fun dispose() = actor.disposeTexture()
+    override fun dispose() = actor.dispose()
 
     override fun toString(): String {
         return "card: $name"
@@ -606,7 +605,7 @@ class Card(
                     ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
-                font = GraphicsConfig.cardFont(onjScreen),
+                font = GraphicsConfig.cardFont(onjScreen, onjScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.get<Boolean>("dark"),
                 additionalHoverInfos = onj
@@ -691,13 +690,13 @@ class Card(
  */
 class CardActor(
     val card: Card,
-    val font: PixmapFont,
+    val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable, AnimationActor {
+    OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower {
 
     override val actor: Actor = this
 
@@ -727,13 +726,13 @@ class CardActor(
 
     private var inDestroyAnim: Boolean = false
 
-    private val destroyShader: BetterShader by lazy {
-        ResourceManager.get(screen, "dissolve_shader") // TODO: fix
-    }
+    private val lifetime: EndableLifetime = EndableLifetime()
 
-    private val markedSymbol: TransformDrawable by lazy {
-        ResourceManager.get(screen, "card_symbol_marked")
-    }
+    private val destroyShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "dissolve_shader")
+
+    private val markedSymbol: Promise<TransformDrawable> =
+        ResourceManager.request(this, this, "card_symbol_marked")
 
     override var isHoverDetailActive: Boolean
         get() = (card.shortDescription.isNotBlank() ||
@@ -775,6 +774,8 @@ class CardActor(
         }
     }
 
+    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
+
     private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
         val allKeys = card.getKeyWordsForDescriptions()
         DetailDescriptionHandler
@@ -815,7 +816,7 @@ class CardActor(
         val texture = texture ?: return
         val textureRegion = TextureRegion(texture)
         val shader = if (inDestroyAnim) {
-            destroyShader
+            destroyShader.getOrError()
         } else {
             null
         }
@@ -854,7 +855,7 @@ class CardActor(
         batch.flush()
         shader?.let { batch.shader = null }
         if (!isMarked) return
-        markedSymbol.draw(
+        markedSymbol.getOrNull()?.draw(
             batch,
             x + offsetX, y + offsetY,
             width / 2, height / 2,
@@ -864,7 +865,8 @@ class CardActor(
         )
     }
 
-    fun disposeTexture() {
+    override fun dispose() {
+        lifetime.die()
         FortyFive.cardTextureManager.giveTextureBack(cardTexturePromise.getOrNull() ?: return)
     }
 
@@ -882,7 +884,8 @@ class CardActor(
         action {
             SoundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
-            destroyShader.resetReferenceTime()
+            if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
+            destroyShader.getOrError().resetReferenceTime()
         }
         delay(1200)
         action { inDestroyAnim = false }

@@ -38,7 +38,10 @@ abstract class Resource(
 
     private val mutex = Mutex()
 
-    private var promise: Promise<Resource>? = null
+    private var promise: Promise<Resource> = Promise()
+    private val activePromises: MutableList<Promise<*>> = mutableListOf()
+
+    private var startedLoading: Boolean = false
 
     @MainThreadOnly
     protected abstract fun loadDirectMainThread()
@@ -52,26 +55,52 @@ abstract class Resource(
     @MainThreadOnly
     fun <T> get(variantType: KClass<T>): T? where T : Any {
         if (state != ResourceState.LOADED) {
-            runBlocking {
-                mutex.withLock { load() }
-            }
+            runBlocking { load() }
         }
         for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
         return null
     }
 
+    fun promiseMatches(check: Promise<*>): Boolean = activePromises.any { it === check }
+
+    fun forceResolve() {
+        runBlocking {
+            load()
+        }
+        if (!promise.isResolved) promise.resolve(this)
+    }
+
+    fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): T {
+        borrow(borrower, lifetime)
+        runBlocking {
+            load()
+        }
+        lifetime.onEnd { giveBack(borrower) }
+        if (!promise.isResolved) promise.resolve(this)
+        return getVariant(variantType)
+    }
+
     fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
         borrow(borrower, lifetime)
-        if (promise != null) return promise!!.map { getVariant(variantType) }
-        val message = ServiceThreadMessage.PrepareResource(this)
-        FortyFive.serviceThread.sendMessage(message)
-        promise = message.promise.chain {
-            FortyFive.mainThreadTask {
-                finishLoadingMainThread()
-                this
+        val returnPromise = if (startedLoading) {
+            promise.map { getVariant(variantType) }
+        } else {
+            val message = ServiceThreadMessage.PrepareResource(this)
+            FortyFive.serviceThread.sendMessage(message)
+            val loadPromise = message.promise.chain {
+                FortyFive.mainThreadTask {
+                    runBlocking { load() }
+                    this
+                }
             }
+            loadPromise.onResolve {
+                if (!promise.isResolved) promise.resolve(it)
+            }
+            promise.map { getVariant(variantType) }
         }
-        return promise!!.map { getVariant(variantType) }
+        activePromises.add(returnPromise)
+        lifetime.onEnd { activePromises.remove(returnPromise) }
+        return returnPromise
     }
 
     private fun <T : Any> getVariant(variantType: KClass<T>): T {
@@ -81,7 +110,7 @@ abstract class Resource(
     }
 
     @MainThreadOnly
-    private fun load() {
+    private suspend fun load() = mutex.withLock {
         if (state == ResourceState.NOT_LOADED) {
             loadDirectMainThread()
         } else if (state == ResourceState.PREPARED) {
@@ -117,6 +146,8 @@ abstract class Resource(
         disposables.forEach(Disposable::dispose)
         variants = listOf()
         disposables = listOf()
+        promise = Promise()
+        startedLoading = false
         state = ResourceState.NOT_LOADED
     }
 

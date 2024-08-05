@@ -33,14 +33,14 @@ class AnimationDrawable(
     var flipX: Boolean = false
     var flipY: Boolean = false
 
-    private val loadedAnimations: List<AnimationPart> = animations.map {
-        if (it is Either.Left) {
-            ResourceManager.borrow(this, it.value)
-            ResourceManager.get(this, it.value)
-        } else {
-            (it as Either.Right).value
-        }
-    }
+//    private val loadedAnimations: List<AnimationPart> = animations.map {
+//        if (it is Either.Left) {
+//            ResourceManager.borrow(this, it.value)
+//            ResourceManager.get(this, it.value)
+//        } else {
+//            (it as Either.Right).value
+//        }
+//    }
 
     init {
         if (animations.isEmpty()) throw RuntimeException("AnimationDrawable needs at least one Animation")
@@ -76,7 +76,7 @@ class AnimationDrawable(
     }
 
     fun update() {
-        loadedAnimations.forEach { it.update() }
+//        loadedAnimations.forEach { it.update() }
     }
 
     private fun nextAnimation(): AnimationPart? {
@@ -95,7 +95,8 @@ class AnimationDrawable(
     override fun getMinHeight(): Float = currentAnimation?.height() ?: 0f
 
     private fun getAnimation(num: Int): AnimationPart = if (num in animations.indices) {
-        loadedAnimations[num]
+//        loadedAnimations[num]
+        TODO()
     } else {
         throw RuntimeException("animationSequence returned out of bounds index $num")
     }
@@ -131,8 +132,9 @@ data class StillFrameAnimationPart(
 ) : AnimationPart, ResourceBorrower {
 
     private val frame: Drawable by lazy {
-        ResourceManager.borrow(this, frameHandle)
-        ResourceManager.get(this, frameHandle)
+        TODO()
+//        ResourceManager.borrow(this, frameHandle)
+//        ResourceManager.get(this, frameHandle)
     }
 
     override fun getFrame(progress: Int, frameOffset: Int): Drawable = frame

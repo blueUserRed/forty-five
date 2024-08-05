@@ -229,14 +229,17 @@ data class DetailMap(
         val instances: List<Pair<Vector2 /* = Position */, Float /* = scale */>>
     ) {
 
-        private var drawableCache: Drawable? = null
+        private var drawableCache: Promise<Drawable>? = null
+
+        fun requestDrawable(screen: OnjScreen, mapWidget: DetailMapWidget) {
+            drawableCache = ResourceManager.request<Drawable>(mapWidget, screen, drawableHandle)
+        }
 
         @MainThreadOnly
-        fun getDrawable(screen: OnjScreen): Drawable {
+        fun getDrawable(screen: OnjScreen, mapWidget: DetailMapWidget): Promise<Drawable> {
             drawableCache?.let { return it }
-            val drawable = ResourceManager.get<Drawable>(screen, drawableHandle)
-            this.drawableCache = drawable
-            return drawable
+            requestDrawable(screen, mapWidget)
+            return drawableCache!!
         }
 
         fun invalidateCachedAssets() {

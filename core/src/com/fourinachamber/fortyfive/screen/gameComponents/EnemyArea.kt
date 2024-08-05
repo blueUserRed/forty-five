@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -13,6 +14,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.utils.Promise
 
 /**
  * actor representing the area in which enemies can appear on the screen
@@ -20,7 +22,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 class EnemyArea(
     private val enemySelectionDrawableHandle: ResourceHandle,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, ResourceBorrower {
 
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
@@ -32,9 +34,8 @@ class EnemyArea(
 
     private var selectedEnemy: Enemy? = null
 
-    private val enemySelectionDrawable: Drawable by lazy {
-        ResourceManager.get(screen, enemySelectionDrawableHandle)
-    }
+    private val enemySelectionDrawable: Promise<Drawable> =
+        ResourceManager.request(this, screen, enemySelectionDrawableHandle)
 
     /**
      * all enemies in this area
@@ -84,6 +85,7 @@ class EnemyArea(
         _enemies.forEach(Enemy::update)
         val enemy = selectedEnemy ?: return
         val selectionWidth = 30f
+        val enemySelectionDrawable = enemySelectionDrawable.getOrNull() ?: return
         enemySelectionDrawable.draw(
             batch,
             x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,

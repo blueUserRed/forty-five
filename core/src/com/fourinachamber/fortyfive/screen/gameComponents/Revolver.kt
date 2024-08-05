@@ -13,6 +13,7 @@ import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameController.*
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -23,10 +24,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
-import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.component1
-import com.fourinachamber.fortyfive.utils.component2
-import com.fourinachamber.fortyfive.utils.setPosition
+import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.math.cos
@@ -42,7 +40,7 @@ class Revolver(
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, StyledActor {
+) : WidgetGroup(), ZIndexActor, StyledActor, ResourceBorrower {
 
 
     override var styleManager: StyleManager? = null
@@ -85,12 +83,10 @@ class Revolver(
     lateinit var slots: Array<RevolverSlot>
         private set
 
-    private val background: Drawable by lazy {
-        ResourceManager.get(screen, backgroundHandle)
-    }
+    private val background: Promise<Drawable> = ResourceManager.request(this, screen, backgroundHandle)
 
-    private val iceShader: BetterShader by lazy {
-        ResourceManager.get(screen, "ice_shader")
+    private val iceShader: Promise<BetterShader> by lazy {
+        ResourceManager.request(this, screen, "ice_shader")
     }
 
     init {
@@ -190,14 +186,15 @@ class Revolver(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         batch ?: return
-        background.draw(batch, x, y, width, height)
+        background.getOrNull()?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
         // This is really ugly but I won't bother with a better solution
-        if (EncounterModifier.Frost in FortyFive.currentGame!!.encounterModifiers) {
+        if (EncounterModifier.Frost in FortyFive.currentGame!!.encounterModifiers && iceShader.isResolved) {
+            val iceShader = iceShader.getOrError()
             batch.flush()
             batch.shader = iceShader.shader
             iceShader.prepare(screen)
-            background.draw(batch, x, y, width, height)
+            background.getOrNull()?.draw(batch, x, y, width, height)
             batch.flush()
             batch.shader = null
         }

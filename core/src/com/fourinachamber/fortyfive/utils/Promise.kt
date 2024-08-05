@@ -32,6 +32,10 @@ class Promise<T> {
 
 fun <T> T.asPromise(): Promise<T> = Promise<T>().also { it.resolve(this) }
 
+inline fun <T> Promise<T>.ifResolved(block: (T) -> Unit) {
+    if (isResolved) block(getOrError())
+}
+
 fun <T, U> Promise<T>.map(mapper: (T) -> U): Promise<U> {
     val promise = Promise<U>()
     this.onResolve { promise.resolve(mapper(it)) }

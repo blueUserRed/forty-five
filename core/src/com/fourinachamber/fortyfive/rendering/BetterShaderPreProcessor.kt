@@ -16,6 +16,7 @@ class BetterShaderPreProcessor(
 ) {
 
     private val uniformsToBind: MutableList<String> = mutableListOf()
+    private val requiredTextures: MutableList<String> = mutableListOf()
 
     fun preProcess(): Either<Pair<String /*=Vertex*/, String /*=Fragment*/>, String /*=export*/> {
         val text = fileHandle.file().readText(Charsets.UTF_8)
@@ -39,7 +40,7 @@ class BetterShaderPreProcessor(
                 FortyFiveLogger.dump(LogLevel.MEDIUM, code.first, "pre-processed vertex shader")
                 FortyFiveLogger.dump(LogLevel.MEDIUM, code.second, "pre-processed fragment shader")
             }
-            return BetterShader(shader, uniformsToBind)
+            return BetterShader(shader, uniformsToBind, requiredTextures)
         }
         FortyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
         FortyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
@@ -78,6 +79,7 @@ class BetterShaderPreProcessor(
                 val uniformName = line.substringAfter("%uniform").trim()
                 val uniformType = getUniformTypeOrError(uniformName)
                 uniformsToBind.add(uniformName)
+                if (uniformType == "sampler2D") requiredTextures.add(uniformName)
                 return@map "uniform $uniformType $uniformName;"
             } else if (line.startsWith("%constArg")) {
                 val definition = line.substringAfter("%constArg").trim()

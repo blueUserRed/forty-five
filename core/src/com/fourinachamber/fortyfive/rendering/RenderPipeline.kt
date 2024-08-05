@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.screen.Resource
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -37,11 +38,13 @@ interface Renderable {
 open class RenderPipeline(
     protected val screen: OnjScreen,
     private val baseRenderable: Renderable
-) : Disposable {
+) : Disposable, ResourceBorrower, Lifetime {
 
     var showDebugMenu: Boolean = false
     private val debugMenuPages: MutableList<DebugMenuPage> = mutableListOf()
     private var currentDebugMenuPage: Int = 0
+
+    private val lifetime: EndableLifetime = EndableLifetime()
 
     protected val frameBufferManager: FrameBufferManager = FrameBufferManager()
 
@@ -57,25 +60,17 @@ open class RenderPipeline(
 
     private val orbAnimations: MutableList<OrbAnimation> = mutableListOf()
 
-    private val alphaReductionShaderDelegate = lazy {
-        ResourceManager.get<BetterShader>(screen, "alpha_reduction_shader")
-    }
-    private val alphaReductionShader: BetterShader by alphaReductionShaderDelegate
+    private val alphaReductionShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "alpha_reduction_shader")
 
-    private val screenShakeShaderDelegate = lazy {
-        ResourceManager.get<BetterShader>(screen, "screen_shake_shader")
-    }
-    private val screenShakeShader: BetterShader by screenShakeShaderDelegate
+    private val screenShakeShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "screen_shake_shader")
 
-    private val screenShakePopoutShaderDelegate = lazy {
-        ResourceManager.get<BetterShader>(screen, "screen_shake_popout_shader")
-    }
-    private val screenShakePopoutShader: BetterShader by screenShakePopoutShaderDelegate
+    private val screenShakePopoutShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "screen_shake_popout_shader")
 
-    private val gaussianBlurShaderDelegate = lazy {
-        ResourceManager.get<BetterShader>(screen, "gaussian_blur_shader")
-    }
-    private val gaussianBlurShader: BetterShader by gaussianBlurShaderDelegate
+    private val gaussianBlurShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "gaussian_blur_shader")
 
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
@@ -116,6 +111,8 @@ open class RenderPipeline(
         addDebugMenuPage(CardTextureDebugMenuPage())
     }
 
+    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
+
     fun nextDebugPage() {
         currentDebugMenuPage++
         if (currentDebugMenuPage >= debugMenuPages.size) currentDebugMenuPage = 0
@@ -148,6 +145,8 @@ open class RenderPipeline(
     }
 
     fun getScreenShakeTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+        if (!screenShakeShader.isResolved) ResourceManager.forceResolve(screenShakeShader)
+        val screenShakeShader = screenShakeShader.getOrError()
         action { screenShakeShader.resetReferenceTime() }
         action { postPreprocessingSteps.add(screenShakePostProcessingStep) }
         delay(200)
@@ -155,6 +154,8 @@ open class RenderPipeline(
     } else Timeline()
 
     fun getScreenShakePopoutTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+        if (!screenShakePopoutShader.isResolved) ResourceManager.forceResolve(screenShakePopoutShader)
+        val screenShakePopoutShader = screenShakeShader.getOrError()
         action { screenShakePopoutShader.resetReferenceTime() }
         action { postPreprocessingSteps.add(screenShakePopoutPostProcessingStep) }
         delay(((1f / 30f) * 1000f).toInt())
@@ -168,7 +169,8 @@ open class RenderPipeline(
         ScreenUtils.clear(0f, 0f, 0f, 0f)
         batch.begin()
 
-        val shader = alphaReductionShader
+        if (!alphaReductionShader.isResolved) ResourceManager.forceResolve(alphaReductionShader)
+        val shader = alphaReductionShader.getOrError()
         batch.flush()
         batch.shader = shader.shader
         shader.shader.bind()
@@ -196,7 +198,8 @@ open class RenderPipeline(
                 return@forEach
             }
 
-            val drawable = ResourceManager.get<Drawable>(screen, anim.orbTexture)
+            if (!anim.orbTexturePromise.isResolved) ResourceManager.forceResolve(anim.orbTexturePromise)
+            val drawable = anim.orbTexturePromise.getOrError()
 
             val segments = anim.segments + 1
             var curProgress = lastProgress
@@ -222,7 +225,8 @@ open class RenderPipeline(
 
     private fun renderOrbFbo() {
         val (active, inactive) = frameBufferManager.getPingPongFrameBuffers("orb") ?: return
-        val shader = gaussianBlurShader
+        if (!gaussianBlurShader.isResolved) ResourceManager.forceResolve(gaussianBlurShader)
+        val shader = gaussianBlurShader.getOrError()
         batch.flush()
         batch.enableBlending()
         active.begin()
@@ -256,7 +260,8 @@ open class RenderPipeline(
         batch.flush()
         batch.shader = null
         orbAnimations.forEach { anim ->
-            val drawable = ResourceManager.get<Drawable>(screen, anim.orbTexture)
+            if (!anim.orbTexturePromise.isResolved) ResourceManager.forceResolve(anim.orbTexturePromise)
+            val drawable = anim.orbTexturePromise.getOrError()
             val time = TimeUtils.millis() - anim.startTime
             val progress = time.toFloat() / anim.duration.toFloat()
             val position = anim.position(progress)
@@ -289,7 +294,7 @@ open class RenderPipeline(
     }
 
     private fun showPerformanceInfo() {
-        val font = ResourceManager.get<BitmapFont>(screen, "red_wing_bmp")
+        val font = ResourceManager.forceGet<BitmapFont>(this, this, "red_wing_bmp")
         font.data.setScale(0.2f)
 
         val page = debugMenuPages[currentDebugMenuPage]
@@ -361,7 +366,9 @@ open class RenderPipeline(
         batch.end()
     }
 
-    protected fun shaderPostProcessingStep(shader: BetterShader): () -> Unit = lambda@{
+    protected fun shaderPostProcessingStep(shaderPromise: Promise<BetterShader>): () -> Unit = lambda@{
+        if (!shaderPromise.isResolved) ResourceManager.forceResolve(shaderPromise)
+        val shader = shaderPromise.getOrError()
         val (_, inactive) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return@lambda
         batch.flush()
         batch.shader = shader.shader
@@ -394,10 +401,7 @@ open class RenderPipeline(
         frameBufferManager.dispose()
         shapeRenderer.dispose()
         batch.dispose()
-        if (gaussianBlurShaderDelegate.isInitialized()) gaussianBlurShader.dispose()
-        if (alphaReductionShaderDelegate.isInitialized()) alphaReductionShader.dispose()
-        if (screenShakeShaderDelegate.isInitialized()) screenShakeShader.dispose()
-        if (screenShakePopoutShaderDelegate.isInitialized()) screenShakePopoutShader.dispose()
+        lifetime.die()
     }
 
     data class OrbAnimation(
@@ -408,8 +412,11 @@ open class RenderPipeline(
         val height: Float,
         val duration: Int,
         val segments: Int,
+        val renderPipeline: RenderPipeline,
         val position: (progress: Float) -> Vector2,
     ) {
+
+        val orbTexturePromise: Promise<Drawable> = ResourceManager.request(renderPipeline, renderPipeline, orbTexture)
 
         companion object {
 
@@ -444,23 +451,19 @@ open class RenderPipeline(
 
 class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
 
-    private val shootShaderDelegate = lazy {
-        GraphicsConfig.shootShader(screen)
-    }
-    private val shootShader: BetterShader by shootShaderDelegate
+    private val shootShader: Promise<BetterShader> = GraphicsConfig.shootShader(this, this)
     private val shootPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(shootShader)
     }
 
-    private val parryShaderDelegate = lazy {
-        ResourceManager.get<BetterShader>(screen, "parry_shader")
-    }
-    private val parryShader: BetterShader by parryShaderDelegate
+    private val parryShader: Promise<BetterShader> = ResourceManager.request(this, this, "parry_shader")
     private val parryPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(parryShader)
     }
 
     fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+        if (!shootShader.isResolved) ResourceManager.forceResolve(shootShader)
+        val shootShader = shootShader.getOrError()
         val duration = GraphicsConfig.shootPostProcessingDuration()
         action {
             shootShader.resetReferenceTime()

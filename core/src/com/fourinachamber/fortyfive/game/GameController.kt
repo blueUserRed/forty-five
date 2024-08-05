@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
@@ -18,6 +19,7 @@ import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContex
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -41,18 +43,16 @@ import kotlin.math.min
 /**
  * the Controller for the main game screen
  */
-class GameController(onj: OnjNamedObject) : ScreenController() {
+class GameController(onj: OnjNamedObject) : ScreenController(), ResourceBorrower {
     //TODO marvin, check for screen state "inStatusbarOverlay" (StatusbarWidget.OVERLAY_NAME)
 
     val gameDirector = GameDirector(this)
 
-    private val cardConfigFile = onj.get<String>("cardsFile")
     private val cardDragBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
     private val cardDropBehaviour = onj.get<OnjNamedObject>("cardDropBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
-    private val cardSelectorOnj = onj.get<OnjObject>("cardSelector")
     private val warningParentName = onj.get<String>("warningParentName")
     private val statusEffectDisplayName = onj.get<String>("statusEffectDisplayName")
     private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
@@ -881,7 +881,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val deckCoords = curScreen.centeredStageCoordsOfActor("deck_icon")
         val source = if (reverse) deckCoords else actorCoords
         val target = if (reverse) actorCoords else deckCoords
-        return GraphicsConfig.orbAnimation(source, target, false)
+        return GraphicsConfig.orbAnimation(source, target, false, gameRenderPipeline)
     }
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
@@ -972,14 +972,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             action {
                 turnCounter++
             }
-            include(bannerAnimationTimeline("enemy_turn_banner"))
+            include(bannerAnimationTimeline(false))
             include(gameDirector.checkActions())
             include(executePlayerStatusEffectsOnNewTurn())
             action {
                 gameDirector.chooseEnemyActions()
                 SoundPlayer.situation("turn_begin", curScreen)
             }
-            include(bannerAnimationTimeline("player_turn_banner"))
+            include(bannerAnimationTimeline(true))
             action {
                 curReserves = baseReserves
             }
@@ -993,33 +993,52 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
-    private fun bannerAnimationTimeline(drawableHandle: ResourceHandle): Timeline = BannerAnimation(
-        ResourceManager.get(curScreen, drawableHandle),
-        curScreen,
-        1_500,
-        500,
-        1.4f,
-        1.1f
-    ).asTimeline(this)
+    private val enemyBannerPromise: Promise<Drawable> =
+        ResourceManager.request(this, curScreen, "enemy_turn_banner")
 
-    private fun shieldAnimationTimeline(): Timeline = Timeline.timeline {
-        val bannerAnim = BannerAnimation(
-            ResourceManager.get(curScreen, "shield_icon_large"),
-            curScreen,
-            1_000,
-            150,
-            0.3f,
-            0.5f,
-            interpolation = Interpolation.pow2In,
-            customShader = ResourceManager.get<BetterShader>(curScreen, "glow_shader_shield")
-        ).asTimeline(this@GameController).asAction()
-        val postProcessorAction = Timeline.timeline {
-            delay(100)
-            include(gameRenderPipeline.getScreenShakePopoutTimeline())
-            delay(50)
-            action { SoundPlayer.situation("shield_anim", curScreen) }
-        }.asAction()
-        parallelActions(bannerAnim, postProcessorAction)
+    private val playerBannerPromise: Promise<Drawable> =
+        ResourceManager.request(this, curScreen, "player_turn_banner")
+
+    private fun bannerAnimationTimeline(isPlayer: Boolean): Timeline =
+        (if (isPlayer) playerBannerPromise else enemyBannerPromise).getOrNull()?.let { banner ->
+            BannerAnimation(
+                banner,
+                curScreen,
+                1_500,
+                500,
+                1.4f,
+                1.1f
+            ).asTimeline(this)
+        } ?: Timeline()
+
+    private val shieldIconPromise: Promise<Drawable> =
+        ResourceManager.request(this, curScreen, "shield_icon_large")
+
+    private val shieldShaderPromise: Promise<BetterShader> =
+        ResourceManager.request(this, curScreen, "glow_shader_shield")
+
+    private fun shieldAnimationTimeline(): Timeline {
+        val shieldIcon = shieldIconPromise.getOrNull() ?: return Timeline()
+        val shieldShader = shieldShaderPromise.getOrNull() ?: return Timeline()
+        return Timeline.timeline {
+            val bannerAnim = BannerAnimation(
+                shieldIcon,
+                curScreen,
+                1_000,
+                150,
+                0.3f,
+                0.5f,
+                interpolation = Interpolation.pow2In,
+                customShader = shieldShader
+            ).asTimeline(this@GameController).asAction()
+            val postProcessorAction = Timeline.timeline {
+                delay(100)
+                include(gameRenderPipeline.getScreenShakePopoutTimeline())
+                delay(50)
+                action { SoundPlayer.situation("shield_anim", curScreen) }
+            }.asAction()
+            parallelActions(bannerAnim, postProcessorAction)
+        }
     }
 
     private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
@@ -1396,7 +1415,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     stageCoordsOfReservesIcon(),
                     animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
                             Vector2(animTarget.width / 2, animTarget.height / 2),
-                    true
+                    true,
+                    gameRenderPipeline
                 ))
             }
             delay(50)
@@ -1411,7 +1431,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     animSource.localToStageCoordinates(Vector2(0f, 0f)) +
                             Vector2(animSource.width / 2, animSource.height / 2),
                     stageCoordsOfReservesIcon(),
-                    true
+                    true,
+                    gameRenderPipeline
                 ))
             }
             delay(50)
@@ -1464,6 +1485,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         height = 30f,
                         duration = 600,
                         segments = 20,
+                        renderPipeline = gameRenderPipeline,
                         position = RenderPipeline.OrbAnimation.curvedPath(start, end)
                     ))
                     SoundPlayer.situation("money_earned", curScreen)

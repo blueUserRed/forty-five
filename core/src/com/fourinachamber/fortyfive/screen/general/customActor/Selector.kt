@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
@@ -14,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.utils.Promise
 
 class Selector(
     private val font: BitmapFont,
@@ -23,7 +25,7 @@ class Selector(
     private val arrowHeight: Float,
     bind: String,
     private val screen: OnjScreen,
-) : Widget(), StyledActor {
+) : Widget(), StyledActor, ResourceBorrower {
 
     override var styleManager: StyleManager? = null
 
@@ -33,9 +35,7 @@ class Selector(
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
-    private val arrowTexture: Texture by lazy {
-        ResourceManager.get(screen, arrowTextureHandle)
-    }
+    private val arrowTexture: Promise<Texture> = ResourceManager.request(this, screen, arrowTextureHandle)
 
     private val bindTarget: BindTarget<*> = BindTargetFactory.getAnyType(bind)
 
@@ -64,6 +64,7 @@ class Selector(
         super.draw(batch, parentAlpha)
         if (batch == null) return
         checkValue()
+        val arrowTexture = arrowTexture.getOrNull() ?: return
         batch.draw(
             arrowTexture,
             x,

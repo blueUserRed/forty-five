@@ -148,24 +148,12 @@ open class OnjScreen(
             inputMultiplexer.addProcessor(stage)
         }
 
-    @MainThreadOnly
-    private val keySelectDrawable: Drawable by lazy {
-        GraphicsConfig.keySelectDrawable(this)
-    }
+    private val lifetime: EndableLifetime = EndableLifetime()
 
-    var background: ResourceHandle? = null
-        set(value) {
-            field = value
-            backgroundDrawable = null
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    var background: String? by backgroundHandleObserver
 
-    private var backgroundDrawable: Drawable? = null
-        get() {
-            if (field != null) return field
-            val background = background ?: return null
-            field = ResourceManager.get(this, background)
-            return field
-        }
+    private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this)
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
@@ -180,18 +168,16 @@ open class OnjScreen(
 
     private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
-    private val lifetime: EndableLifetime = EndableLifetime()
-
     init {
-        useAssets.forEach { ResourceManager.borrow(this, it) }
+//        useAssets.forEach { ResourceManager.borrow(this, it) }
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
-        addLateRenderTask {
-            val highlight = selectedActor?.getBounds() ?: return@addLateRenderTask
-            keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
-        }
+//        addLateRenderTask {
+//            val highlight = selectedActor?.getBounds() ?: return@addLateRenderTask
+//            keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
+//        }
         inputMultiplexer.addProcessor(screenInputProcessor)
         inputMultiplexer.addProcessor(stage)
     }
@@ -239,10 +225,10 @@ open class OnjScreen(
         invalidateGroup(stage.root)
     }
 
-    fun borrowResource(handle: ResourceHandle) {
-        useAssets.add(handle)
-        ResourceManager.borrow(this, handle)
-    }
+//    fun borrowResource(handle: ResourceHandle) {
+//        useAssets.add(handle)
+//        ResourceManager.borrow(this, handle)
+//    }
 
     @AllThreadsAllowed
     fun removeActorFromRoot(actor: Actor) {

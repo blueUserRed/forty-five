@@ -17,6 +17,8 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addBackgroundStyles
+import com.fourinachamber.fortyfive.utils.SubscribeableObserver
+import com.fourinachamber.fortyfive.utils.automaticResourceGetter
 import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.contains
 import onj.value.OnjNamedObject
@@ -36,12 +38,9 @@ class PutCardsUnderDeckWidget(
     var targetSize: Int = 0
     private val cards: MutableList<Card> = mutableListOf()
 
-    private var loadedBackground: Drawable? = null
-    override var backgroundHandle: ResourceHandle? = null
-        set(value) {
-            field = value
-            loadedBackground = null
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    override var backgroundHandle: ResourceHandle? by backgroundHandleObserver
+    private val loadedBackground: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     val isFinished: Boolean
         get() = cards.size >= targetSize
@@ -62,10 +61,6 @@ class PutCardsUnderDeckWidget(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        val backgroundHandle = backgroundHandle
-        if (loadedBackground == null && backgroundHandle != null) {
-            loadedBackground = ResourceManager.get(screen, backgroundHandle)
-        }
         loadedBackground?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }
