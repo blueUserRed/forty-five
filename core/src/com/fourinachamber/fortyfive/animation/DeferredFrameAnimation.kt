@@ -22,8 +22,9 @@ class DeferredFrameAnimation(
     private var loadedFrameAnimation: FrameAnimation? = null
 
     private val previewDrawableDelegate: Lazy<Drawable> = lazy {
-        ResourceManager.borrow(this, previewHandle)
-        ResourceManager.get(this, previewHandle)
+        TODO()
+//        ResourceManager.borrow(this, previewHandle)
+//        ResourceManager.get(this, previewHandle)
     }
 
     private val previewDrawable: Drawable by previewDrawableDelegate

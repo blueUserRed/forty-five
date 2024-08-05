@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.ServiceThreadMessage
 import com.fourinachamber.fortyfive.utils.asPromise
@@ -66,13 +67,15 @@ class CardTextureManager {
     ): Promise<Texture> = getCardPixmap(data, card)
         .chain { cardPixmap ->
             val pixmap = Pixmap(cardPixmap.width, cardPixmap.height, Pixmap.Format.RGBA8888)
+            if (!card.actor.font.isResolved) ResourceManager.forceResolve(card.actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
                 pixmap,
                 cardPixmap,
                 card,
                 damage,
                 cost,
-                null
+                null,
+                card.actor.font.getOrError()
             )
             FortyFive.serviceThread.sendMessage(message)
             message.promise

@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
@@ -55,6 +54,7 @@ class Enemy(
     val scale: Float,
     val coverIconScale: Float,
     val indicatorIconScale: Float,
+    val detailFontHandle: String,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
@@ -273,7 +273,11 @@ class Enemy(
             val curScreen = gameController.curScreen
             val drawableHandle = onj.get<String>("texture")
             val coverIconHandle = onj.get<String>("coverIcon")
-            val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
+            val detailFont = ResourceManager.forceGet<BitmapFont>(
+                object : ResourceBorrower {},
+                curScreen,
+                onj.get<String>("detailFont")
+            )
             val enemy = Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
@@ -283,6 +287,7 @@ class Enemy(
                 onj.get<Double>("scale").toFloat(),
                 onj.get<Double>("coverIconScale").toFloat(),
                 onj.get<Double>("indicatorIconScale").toFloat(),
+                onj.get<String>("detailFont"),
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
@@ -308,7 +313,7 @@ class EnemyActor(
     textEmitterConfig: OnjArray,
     private val hiddenActionIconHandle: ResourceHandle,
     val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor, ResourceBorrower {
 
     private val fontColor = if (GraphicsConfig.isEncounterBackgroundDark(MapManager.currentDetailMap.biome)) {
         enemy.detailFontColorDark
@@ -323,7 +328,7 @@ class EnemyActor(
     private val attackIcon = EnemyActionIcon(screen, hiddenActionIconHandle)
 
     private val attackLabel = AdvancedTextWidget(
-        Triple(enemy.detailFont, fontColor, enemy.detailFontScale * 1.5f),
+        Triple(enemy.detailFontHandle, fontColor, enemy.detailFontScale * 1.5f),
         screen,
         true
     )
@@ -338,13 +343,9 @@ class EnemyActor(
         enemy.detailFontScale
     )
 
-    private val enemyDrawable: Drawable by lazy {
-        ResourceManager.get(screen, enemy.drawableHandle)
-    }
+    private val enemyDrawable: Promise<Drawable> = ResourceManager.request(this, screen, enemy.drawableHandle)
 
-    private val defeatedDrawable: Drawable by lazy {
-        GraphicsConfig.defeatedEnemyDrawable(screen)
-    }
+    private val defeatedDrawable: Promise<Drawable> = GraphicsConfig.defeatedEnemyDrawable(this, screen)
 
     val healthLabel: CustomLabel = CustomLabel(
         screen,
@@ -438,21 +439,25 @@ class EnemyActor(
             0f, height / 2 - coverInfoBox.prefHeight / 2,
             coverInfoBox.prefWidth, coverInfoBox.prefHeight
         )
-        val drawable = if (enemy.isDefeated) {
+        val drawablePromise = if (enemy.isDefeated) {
             defeatedDrawable
         } else {
-            animation ?: enemyDrawable
+            enemyDrawable
+//            animation ?: enemyDrawable
         }
         val scale = if (enemy.isDefeated) {
             GraphicsConfig.defeatedEnemyDrawableScale()
         } else {
             enemy.scale
         }
-        drawable.draw(
-            batch,
-            x + coverInfoBox.width, y + healthLabel.prefHeight,
-            drawable.minWidth * scale, drawable.minHeight * scale
-        )
+        drawablePromise.getOrNull()?.let { drawable ->
+            drawable.draw(
+                batch,
+                x + coverInfoBox.width, y + healthLabel.prefHeight,
+                drawable.minWidth * scale, drawable.minHeight * scale
+            )
+        }
+        val enemyDrawable = enemyDrawable.getOrNull() ?: return
         statsBox.width = statsBox.prefWidth
         statsBox.height = statsBox.prefHeight
         statsBox.setPosition(width / 2 - statsBox.width / 2,  -statsBox.height)
@@ -467,14 +472,6 @@ class EnemyActor(
             (TimeUtils.millis().toDouble() + attackIndicatorAnimTimeOffset) * 0.0015
         ).toFloat() * 1.5f
         super.draw(batch, parentAlpha)
-    }
-
-    override fun getWidth(): Float {
-        return coverInfoBox.width + enemyDrawable.minWidth * enemy.scale
-    }
-
-    override fun getHeight(): Float {
-        return enemyDrawable.minHeight * enemy.scale + attackIndicator.prefHeight + statsBox.prefHeight
     }
 
     fun startHealthChangeAnimation(change: Int) {

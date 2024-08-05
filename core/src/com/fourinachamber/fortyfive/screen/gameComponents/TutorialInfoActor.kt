@@ -6,11 +6,13 @@ import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.BoundedActor
+import com.fourinachamber.fortyfive.utils.Promise
 import java.lang.Float.max
 
 class TutorialInfoActor(
@@ -18,13 +20,9 @@ class TutorialInfoActor(
     private val circleRadiusMultiplier: Float,
     private val circleRadiusExtension: Float,
     screen: OnjScreen
-) : CustomFlexBox(screen) {
+) : CustomFlexBox(screen), ResourceBorrower {
 
-    private val loadedBackground: Drawable by lazy {
-        ResourceManager.get(screen, maskedBackgroundTextureName)
-    }
-
-//    var focusActor: BoundedActor? = null
+    private val loadedBackground: Promise<Drawable> = ResourceManager.request(this, screen, maskedBackgroundTextureName)
 
     private var positionProvider: (() -> Circle)? = null
 
@@ -32,22 +30,18 @@ class TutorialInfoActor(
         batch ?: return
         val focus = positionProvider?.let { it() }
         if (focus == null) {
-            loadedBackground.draw(batch, x, y, width, height)
+            loadedBackground.getOrNull()?.draw(batch, x, y, width, height)
             super.draw(batch, parentAlpha)
             return
         }
         batch.flush()
         batch.shader = shader.shader
         shader.prepare(screen)
-//        val bounds = focusActor.getScreenSpaceBounds(screen)
-//        val center = Vector2(0, 0)
-//        bounds.getCenter(center)
-//        val radius = max(bounds.width, bounds.height) * 0.5f * circleRadiusMultiplier + circleRadiusExtension
         val center = Vector2(focus.x, focus.y)
         val radius = focus.radius
         shader.shader.setUniformf("u_center", center)
         shader.shader.setUniformf("u_radius", radius)
-        loadedBackground.draw(batch, x, y, width, height)
+        loadedBackground.getOrNull()?.draw(batch, x, y, width, height)
         batch.flush()
         batch.shader = null
         super.draw(batch, parentAlpha)

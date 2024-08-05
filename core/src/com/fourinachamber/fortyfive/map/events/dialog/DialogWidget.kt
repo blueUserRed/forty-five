@@ -10,11 +10,13 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import io.github.orioncraftmc.meditate.YogaNode
@@ -30,7 +32,7 @@ class DialogWidget(
     private val speakingPersonLabel: String,
     defaults: OnjObject,
     screen: OnjScreen
-) : AdvancedTextWidget(defaults, screen, true) {
+) : AdvancedTextWidget(defaults, screen, true), ResourceBorrower {
 
     private var isAnimFinished: Boolean = false
 
@@ -54,9 +56,7 @@ class DialogWidget(
 
     private var readyToAdvance: Boolean = false
 
-    private val advanceArrowDrawable: Drawable by lazy {
-        ResourceManager.get(screen, advanceArrowDrawableHandle)
-    }
+    private val advanceArrowDrawable: Promise<Drawable> = ResourceManager.request(this, screen, advanceArrowDrawableHandle)
 
     private var initialisedOptionsBox: Boolean = false
     private var initialisedNameSize: Boolean = false
@@ -217,12 +217,11 @@ class DialogWidget(
         super.draw(batch, parentAlpha)
         timeline.updateTimeline()
         currentPart?.text?.update()
-        if (batch != null && readyToAdvance) {
+        val advanceArrowDrawable = advanceArrowDrawable.getOrNull()
+        if (batch != null && advanceArrowDrawable != null && readyToAdvance) {
             val aspect = advanceArrowDrawable.minHeight / advanceArrowDrawable.minWidth
             val arrowWidth = width * (1f / 18f)
             val arrowHeight = arrowWidth / aspect
-//            val arrowHeight = height * (3f / 4f)
-//            val arrowWidth = arrowHeight * aspect
             advanceArrowDrawable.draw(
                 batch,
                 x + width - advanceArrowOffset - arrowWidth,

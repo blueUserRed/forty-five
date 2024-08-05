@@ -8,17 +8,29 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.Either
+import com.fourinachamber.fortyfive.utils.*
 
 // TODO: come up with better name
 class BetterShader(
     val shader: ShaderProgram,
-    val uniformsToBind: List<String>
-) : Disposable {
+    val uniformsToBind: List<String>,
+    private val neededTextures: List<String>,
+) : Disposable, ResourceBorrower, Lifetime {
 
     private var referenceTime = TimeUtils.millis()
+
+    private val lifetime: EndableLifetime = EndableLifetime()
+
+    private val textures: MutableMap<String, Pair<Promise<Texture>, Texture?>> = neededTextures
+        .associateWith {
+            ResourceManager.request<Texture>(this, this, uniformResourceNameMapping[it]!!) to null
+        }
+        .toMutableMap()
+
+    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     fun resetReferenceTime() {
         referenceTime = TimeUtils.millis()
@@ -58,7 +70,7 @@ class BetterShader(
         }
 
         "u_perlin512x512" -> {
-            val texture = ResourceManager.get<Texture>(screen, "prerendered_noise_perlin_512x512")
+            val texture = getTexture(uniformResourceNameMapping[uniform]!!)
             texture.bind(1)
             shader.setUniformi("u_perlin512x512", 1)
             Gdx.gl.glActiveTexture(GL_TEXTURE0)
@@ -66,7 +78,7 @@ class BetterShader(
 
         "u_iceTexture" -> {
             // TODO: This fails if both textures are included in a shader
-            val texture = ResourceManager.get<Texture>(screen, "ice_texture")
+            val texture = getTexture(uniformResourceNameMapping[uniform]!!)
             texture.bind(1)
             shader.setUniformi("u_iceTexture", 1)
             Gdx.gl.glActiveTexture(GL_TEXTURE0)
@@ -75,7 +87,17 @@ class BetterShader(
         else -> throw RuntimeException("unknown uniform: $uniform")
     }
 
+    private fun getTexture(name: String): Texture {
+        val (promise, texture) = textures[name]!!
+        promise.ifResolved { return it }
+        if (texture != null) return texture
+        val forceLoadedTexture = ResourceManager.forceGet<Texture>(this, this, name)
+        textures[name] = promise to forceLoadedTexture
+        return forceLoadedTexture
+    }
+
     override fun dispose() {
+        lifetime.die()
         shader.dispose()
     }
 
@@ -87,6 +109,11 @@ class BetterShader(
             if (code !is Either.Left) throw RuntimeException("shader $file is only meant for exporting")
             return preProcessor.compile(code.value)
         }
+
+        private val uniformResourceNameMapping = mapOf(
+            "u_perlin512x512" to "prerendered_noise_perlin_512x512",
+            "u_iceTexture" to "ice_texture"
+        )
 
     }
 

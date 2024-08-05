@@ -210,7 +210,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
         val data = imgData.value.toMutableMap()
         data["offsetX"] = ((data["offsetX"] as OnjFloat?)?.value?.toFloat() ?: 0F).toOnjYoga(YogaUnit.POINT)
-        screen.borrowResource(imgData.get<String>("textureName"))
         val flexParent =
             highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomFlexBox
         val person = onjScreen.screenBuilder.generateFromTemplate(

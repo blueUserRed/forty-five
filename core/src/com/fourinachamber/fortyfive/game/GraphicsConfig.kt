@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -55,12 +56,18 @@ object GraphicsConfig {
         }
     }
 
-    fun orbAnimation(source: Vector2, target: Vector2, isReserves: Boolean): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
+    fun orbAnimation(
+        source: Vector2,
+        target: Vector2,
+        isReserves: Boolean,
+        renderPipeline: RenderPipeline
+    ): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
         orbTexture = if (isReserves) "reserves_orb" else "card_orb",
         width = 10f,
         height = 10f,
         duration = 300,
         segments = 20,
+        renderPipeline = renderPipeline,
         position = RenderPipeline.OrbAnimation.curvedPath(
             source,
             target,
@@ -115,13 +122,10 @@ object GraphicsConfig {
     }
 
     @MainThreadOnly
-    fun cardFont(screen: OnjScreen): PixmapFont = ResourceManager.get(screen, cardFont)
+    fun cardFont(borrower: ResourceBorrower, screen: OnjScreen): Promise<PixmapFont> =
+        ResourceManager.request(borrower, screen, cardFont)
 
     fun cardFontScale(): Float = cardFontScale
-
-    fun cardSavedSymbol(screen: OnjScreen): Texture = ResourceManager.get(screen, cardSavedSymbol)
-
-    fun cardNotSavedSymbol(screen: OnjScreen): Texture = ResourceManager.get(screen, cardNotSavedSymbol)
 
     fun cardFontColor(isDark: Boolean, situation: String): Color {
         if (situation !in arrayOf("normal", "increase", "decrease")) {
@@ -130,11 +134,12 @@ object GraphicsConfig {
         return if (isDark) cardFontColors["dark-$situation"]!! else cardFontColors["light-$situation"]!!
     }
 
-    @MainThreadOnly
-    fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
+    fun keySelectDrawable(borrower: ResourceBorrower, screen: OnjScreen): Promise<Drawable> =
+        ResourceManager.request(borrower, screen, keySelectDrawable)
 
-    @MainThreadOnly
-    fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
+    fun shootShader(borrower: ResourceBorrower, lifetime: Lifetime): Promise<BetterShader> =
+        ResourceManager.request(borrower, lifetime, shootPostProcessor)
+
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
 
     fun encounterBackgroundFor(biome: String): ResourceHandle = config
@@ -161,8 +166,8 @@ object GraphicsConfig {
         ?.get<Boolean>("isDark")
         ?: throw RuntimeException("no background for biome $biome")
 
-    fun defeatedEnemyDrawable(screen: OnjScreen): Drawable =
-        ResourceManager.get(screen, config.access(".enemyGravestone.texture"))
+    fun defeatedEnemyDrawable(borrower: ResourceBorrower, screen: OnjScreen): Promise<Drawable> =
+        ResourceManager.request(borrower, screen, config.access(".enemyGravestone.texture"))
 
     fun revolverSlotIcon(slot: Int): ResourceHandle = slotIcons[slot - 1]
 

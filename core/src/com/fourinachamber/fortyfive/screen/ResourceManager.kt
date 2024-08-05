@@ -21,29 +21,44 @@ object ResourceManager {
     lateinit var resources: List<Resource>
         private set
 
-    @MainThreadOnly
-    fun borrow(borrower: ResourceBorrower, handle: ResourceHandle) {
-        val toBorrow = resources.find { it.handle == handle }
-            ?: throw RuntimeException("no resource with handle $handle")
-        toBorrow.borrow(borrower)
-    }
+//    @MainThreadOnly
+//    fun borrow(borrower: ResourceBorrower, handle: ResourceHandle) {
+//        val toBorrow = resources.find { it.handle == handle }
+//            ?: throw RuntimeException("no resource with handle $handle")
+//        toBorrow.borrow(borrower)
+//    }
 
     /**
      * this function can currently be used from every thread, but this may change in the future, so it should be treated
      * as `@MainThreadOnly`
      */
-    @MainThreadOnly
-    inline fun <reified T> get(borrower: ResourceBorrower, handle: ResourceHandle): T where T : Any {
-        return get(borrower, handle, T::class)
+//    @MainThreadOnly
+//    inline fun <reified T> get(borrower: ResourceBorrower, handle: ResourceHandle): T where T : Any {
+//        return get(borrower, handle, T::class)
+//    }
+//
+//    fun <T> get(borrower: ResourceBorrower, handle: ResourceHandle, type: KClass<T>): T where T : Any {
+//        val toGet = resources.find { it.handle == handle }
+//            ?: throw RuntimeException("no resource with handle $handle")
+//        if (borrower !in toGet.borrowedBy) {
+//            throw RuntimeException("resource $handle not borrowed by $borrower")
+//        }
+//        return toGet.get(type) ?: throw RuntimeException("no variant of type ${type.simpleName} for handle $handle")
+//    }
+
+    inline fun <reified T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle) =
+        forceGet(borrower, lifetime, handle, T::class)
+
+    fun forceResolve(promise: Promise<*>) {
+        val resource = resources.find { it.promiseMatches(promise) }
+            ?: throw RuntimeException("no resource with matching promise found")
+        resource.forceResolve()
     }
 
-    fun <T> get(borrower: ResourceBorrower, handle: ResourceHandle, type: KClass<T>): T where T : Any {
-        val toGet = resources.find { it.handle == handle }
+    fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle, type: KClass<T>): T {
+        val resource = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
-        if (borrower !in toGet.borrowedBy) {
-            throw RuntimeException("resource $handle not borrowed by $borrower")
-        }
-        return toGet.get(type) ?: throw RuntimeException("no variant of type ${type.simpleName} for handle $handle")
+        return resource.forceGet(borrower, lifetime, type)
     }
 
     inline fun <reified T : Any> request(
