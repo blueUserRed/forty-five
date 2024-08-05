@@ -19,13 +19,13 @@ uniform sampler2D u_texture;
 uniform float u_progress;// between 0-1
 uniform vec2 u_center;// between 0-1 for x and y
 uniform float u_depth;// recommended beween 3 and 30, how strong it zooms
+uniform float u_rotation;// rotation in radians
 
 
-float getNewDist(float dist, float maxDist){
-    float oldDist=dist/maxDist;
-    float depth=25.0;
+float getNewDist(float oldDist, float depthMulti){
+    float depth=15.0*depthMulti;
     if (u_depth>1.0){
-        depth=u_depth;
+        depth=u_depth*depthMulti;
     }
     float a = pow(2.0, depth);
     a=a/(a-1.0);
@@ -37,9 +37,8 @@ float hypo(vec2 oldDist){
     //    return abs(oldDist.x)+abs(oldDist.y);
 }
 
-
+//the position where the extended line between the center and the pixel hits the (0|0),(0|1),(1|1),(1|0) square
 vec2 getBorderIntersection(float k, vec2 pointOnLine, bool rightOfCenter){
-    //the position where the extended line between the center and the pixel hits the (0|0),(0|1),(1|1),(1|0) square
 
     float d = pointOnLine.y - pointOnLine.x * k;
     vec2 borderIntersection;
@@ -51,55 +50,83 @@ vec2 getBorderIntersection(float k, vec2 pointOnLine, bool rightOfCenter){
     return borderIntersection;
 }
 
-
+// rotates the slope, and the isRightOfCenter says if the direction is (oldSlope,1) if true or (-oldslope,-1) if false
 vec2 rotate(float oldSlope, float rotation, bool isRightOfCenter){
     float PI=radians(180.0);
     float oldRotation=atan(oldSlope, 1.0);
     if(!isRightOfCenter) oldRotation+=PI;
     float newRotation=oldRotation+rotation;
 
-    if(cos(newRotation)>0) return vec2(tan(newRotation),1.0);
+    if(cos(newRotation)>0.0) return vec2(tan(newRotation),1.0);
     else return vec2(tan(newRotation),0.0);
 }
 
+// This programm takes the following steps:
+// 1. calculate the line between the current position and the center
+// 2. get the point on the line where it hits the min/max box (Rectangle with coordiantes: (0|0),(0|1),(1|1),(1|0))
+// 3. calculate the distance in percent to that point from the center
+// 4. strech this position exponentially, so that the closer you are to the center, the stronger it streches and goes away from it
+// 5. then it rotates the line from 1
+// 6. repeat step 2 with the new line
+// 7. takes the percentages of the line from 1 and puts them on the line of line 2
+
 void main() {
 
-    float progress = (sin(abs(float(u_time*0.85)))+1.0)/2.0;
-//    float progress = 1.0;
-    //    float progress = u_progress;
+//    float progress = (sin(abs(float(u_time*0.85)))+1.0)/2.0;
+    float progress = u_progress;
 
-    vec2 center = vec2(0.5, 0.8);
-    //    vec2 center = u_center;
+    vec2 center = u_center;
+    if(u_center.x==0.0 && u_center.y==0.0) center=vec2(0.5, 0.5);
 
-    float PI = radians(float(180));
-    float rotation = getNewDist(progress, 1) * PI/2.0;
-
-
+//    float PI = radians(180.0);
+//    float rotation = getNewDist(progress, -1/10.0) * PI/2.0*16.0;
+    float rotation = getNewDist(progress, -0.1) * u_rotation;
 
 
     vec2 tc = v_texCoords;
     vec2 distToCenter= tc-center;
 
-    float k = distToCenter.y/distToCenter.x;
+    // 1.
+    float k = distToCenter.y/distToCenter.x; // slope of line from
 
-    bool rotationRightOfCenter=tc.x>center.x;
+    bool pointRightOfCenter=tc.x>center.x;
 
-    vec2 borderIntersection= getBorderIntersection(k, center, rotationRightOfCenter);
-    float strechedPercent=getNewDist(hypo(distToCenter), hypo(borderIntersection-center));
+    // 2.
+    vec2 borderIntersection= getBorderIntersection(k, center, pointRightOfCenter);
 
-    vec2 newRot = rotate(k, rotation*(1.0-strechedPercent), rotationRightOfCenter); //first element new slope, second == 1 if new point is right
 
+    // 3.
+    float maxDist=hypo(borderIntersection-center);
+
+
+    float maxDistToFurthestCorner=max(max(hypo(center),hypo(center-vec2(0.0,1.0))), max(hypo(center-vec2(1.0)),hypo(center-vec2(1.0,0.0))));
+    float outSideMultiplier=maxDist/maxDistToFurthestCorner; //this makes it from a rectangle to a circle
+    float oldPercent=hypo(distToCenter)/maxDist;
+
+    // 4.
+    float strechedPercent=getNewDist(oldPercent, outSideMultiplier);
+
+
+    //5.
+    vec2 newRot = rotate(k, rotation*(1.0-strechedPercent), pointRightOfCenter); //newRot[0]= new slope, newRot[1] == 1 if new point is right of center
+
+
+    //6
     vec2 rotatedBorderToCenter = getBorderIntersection(newRot.x, center, newRot.y==1.0) - center;
 
-    vec2 rotatedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ hypo(borderIntersection-center)));
-    vec2 rotatedStrechedPos=center+rotatedBorderToCenter*strechedPercent;
-    vec4 result = texture2D(u_texture, rotatedPos+(rotatedStrechedPos-rotatedPos)*progress);
 
+    //7
+    float maxRotatedDist=hypo(borderIntersection-center);
+    vec2 rotatedPos = center+rotatedBorderToCenter*((hypo(distToCenter)/ maxRotatedDist));
+    vec2 rotatedStrechedPos=center+rotatedBorderToCenter*strechedPercent;
+
+
+    vec4 result = texture2D(u_texture, rotatedPos+(rotatedStrechedPos-rotatedPos)*progress);
     gl_FragColor = result;
 
-    //    if(borderIntersection.x>center.x && borderIntersection.y==1.0){
-    //        gl_FragColor = vec4(1.0,0.0,0.0,1.0);
-    //    }
+//        if(maxDist/maxDistToFurthestCorner> 0.95){
+//            gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+//        }
     //    if(atan(tc.x*4*PI-2*PI,1.0)>0){
     //        gl_FragColor = vec4(0.0,atan(tc.x*4*PI-2*PI,1.0),0.0,1.0);
     //    }else{
