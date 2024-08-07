@@ -750,7 +750,7 @@ class CardActor(
 
     var isMarked: Boolean = false
 
-    private var cardTexturePromise: Promise<Texture>
+    private var cardTexturePromise: Promise<Texture>? = null
     private var texture: Texture? = null
 
     init {
@@ -809,9 +809,10 @@ class CardActor(
         validate()
         setBoundsOfHoverDetailActor(screen)
         batch ?: return
-        if (cardTexturePromise.isResolved) {
-            texture?.let { FortyFive.cardTextureManager.giveTextureBack(it) }
-            texture = cardTexturePromise.getOrError()
+        if (cardTexturePromise?.isResolved == true) {
+            texture?.let { FortyFive.cardTextureManager.giveTextureBack(card) }
+            texture = cardTexturePromise?.getOrError()
+            cardTexturePromise = null
         }
         val texture = texture ?: return
         val textureRegion = TextureRegion(texture)
@@ -867,7 +868,7 @@ class CardActor(
 
     override fun dispose() {
         lifetime.die()
-        FortyFive.cardTextureManager.giveTextureBack(cardTexturePromise.getOrNull() ?: return)
+        FortyFive.cardTextureManager.giveTextureBack(card)
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {

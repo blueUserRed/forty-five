@@ -43,9 +43,26 @@ class Backpack(
 ) : CustomFlexBox(screen), InOutAnimationActor {
 
     private val cardPrototypes: List<CardPrototype>
-    private val _allCards: MutableList<Card>
     private val minNameSize: Int
     private val maxNameSize: Int
+
+    init {
+        val backpackOnj = ConfigFileManager.getConfigFile("backpackConfig")
+
+        val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
+        minNameSize = nameOnj.get<Long>("minLength").toInt()
+        maxNameSize = nameOnj.get<Long>("maxLength").toInt()
+
+        val cardsOnj = ConfigFileManager.getConfigFile("cards")
+        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
+    }
+
+    private val _allCards: MutableList<Card> by lazy {
+        cardPrototypes
+            .filter { it.name in SaveState.cards }.filter { it.name in PermaSaveState.collection }
+            .map { it.create(screen, true) }
+            .toMutableList()
+    }
 
     private lateinit var deckNameWidget: CustomInputField
     private lateinit var deckCardsWidget: CustomScrollableFlexBox
@@ -111,28 +128,6 @@ class Backpack(
                 CustomWarningParent.Severity.MIDDLE
             )
         }
-    }
-
-    init {
-        //TODO
-//         0. (done(mostly)) background stop //mouse still active in background
-//         1. (done) Cards drag and drop (both direction)
-//         2. (done) automatic add to deck on double click or on press space or so
-//         3. (done) automatic add to deck if deck doesn't have enough cards
-//         4. (done) stop cards from moving if you don't have enough cards
-//         5. sorting system (ui missing)
-        val backpackOnj = ConfigFileManager.getConfigFile("backpackConfig")
-
-        val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
-        minNameSize = nameOnj.get<Long>("minLength").toInt()
-        maxNameSize = nameOnj.get<Long>("maxLength").toInt()
-
-        val cardsOnj = ConfigFileManager.getConfigFile("cards")
-        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
-        _allCards = cardPrototypes
-            .filter { it.name in SaveState.cards }.filter { it.name in PermaSaveState.collection }
-            .map { it.create(screen, true) }
-            .toMutableList()
     }
 
     fun initAfterChildrenExist() {
