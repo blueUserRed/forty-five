@@ -40,10 +40,12 @@ class CardTextureManager {
     fun cardTextureFor(card: Card, cost: Int, damage: Int): Promise<Texture> {
         statistics.lastLoadedCard = card.name
         val data = cardTextureDataFor(card)
-        val variant = data.findVariant(cost, damage) ?: return createVariant(data, card, cost, damage)
-        variant.rc++
+        val variant = data.findVariant(cost, damage) ?: run {
+            return createVariant(data, card, cost, damage)
+        }
+        variant.borrowers.add(card)
         statistics.cachedGets++
-        return variant.texture.asPromise()
+        return variant.texture
     }
 
     private fun getCardPixmap(data: CardTextureData, card: Card): Promise<Pixmap> {
@@ -64,8 +66,8 @@ class CardTextureManager {
         card: Card,
         cost: Int,
         damage: Int
-    ): Promise<Texture> = getCardPixmap(data, card)
-        .chain { cardPixmap ->
+    ): Promise<Texture> {
+        val pixmapPromise = getCardPixmap(data, card).chain { cardPixmap ->
             val pixmap = Pixmap(cardPixmap.width, cardPixmap.height, Pixmap.Format.RGBA8888)
             if (!card.actor.font.isResolved) ResourceManager.forceResolve(card.actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
@@ -80,23 +82,27 @@ class CardTextureManager {
             FortyFive.serviceThread.sendMessage(message)
             message.promise
         }
-        .chain { pixmap ->
+        val texturePromise = pixmapPromise.chain { pixmap ->
             FortyFive.mainThreadTask {
                 val texture = Texture(pixmap, true)
-                texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
-                val variant = CardTextureVariant(cost, damage, pixmap, texture)
-                data.variants.add(variant)
-                variant.rc++
+                texture.setFilter(
+                    Texture.TextureFilter.MipMapLinearLinear,
+                    Texture.TextureFilter.MipMapLinearLinear
+                )
                 statistics.textureDraws++
                 texture
             }
         }
+        val variant = CardTextureVariant(cost, damage, pixmapPromise, texturePromise, mutableListOf(card))
+        data.variants.add(variant)
+        return texturePromise
+    }
 
-    fun giveTextureBack(texture: Texture) {
+    fun giveTextureBack(card: Card) {
         cardTextures.forEach { data ->
-            val variant = data.variants.find { it.texture === texture } ?: return@forEach
-            variant.rc--
-            if (variant.rc > 0) return
+            val variant = data.variants.find { card in it.borrowers } ?: return@forEach
+            variant.borrowers.remove(card)
+            if (variant.borrowers.size > 0) return
             disposeVariant(variant, data)
         }
     }
@@ -107,8 +113,8 @@ class CardTextureManager {
     ) {
         val preventCompleteUnload = preventUnloadingOfCard(data)
         if (preventCompleteUnload && data.isStandardVariant(variant)) return
-        variant.pixmap.dispose()
-        variant.texture.dispose()
+        variant.pixmap.onResolve { it.dispose() }
+        variant.texture.onResolve { it.dispose() }
         data.variants.remove(variant)
         if (data.variants.isNotEmpty()) return
         if (preventCompleteUnload) return
@@ -141,9 +147,9 @@ class CardTextureManager {
     private data class CardTextureVariant(
         val cost: Int,
         val damage: Int,
-        val pixmap: Pixmap,
-        val texture: Texture,
-        var rc: Int = 0
+        val pixmap: Promise<Pixmap>,
+        val texture: Promise<Texture>,
+        val borrowers: MutableList<Card>
     )
 
     inner class Statistics {
@@ -158,7 +164,7 @@ class CardTextureManager {
             get() = cardTextures.flatMap { it.variants }.count()
 
         val textureUsages: Int
-            get() = cardTextures.flatMap { it.variants }.sumOf { it.rc }
+            get() = cardTextures.flatMap { it.variants }.sumOf { it.borrowers.size }
 
     }
 

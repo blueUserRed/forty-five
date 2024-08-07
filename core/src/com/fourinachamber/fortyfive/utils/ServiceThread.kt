@@ -26,7 +26,7 @@ class ServiceThread : Thread("ServiceThread") {
 
     private fun CoroutineScope.launchChannelListener() = launch {
         for (message in channel) {
-            FortyFiveLogger.debug(logTag, "received message $message")
+//            FortyFiveLogger.debug(logTag, "received message $message")
             try {
                 handleMessage(message)
             } catch (e: Exception) {
@@ -71,7 +71,6 @@ class ServiceThread : Thread("ServiceThread") {
 
     private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
         val pixmap = Pixmap(Gdx.files.internal("textures/cards/${message.name}.png"))
-        println("loaded ${message.name}")
         message.promise.resolve(pixmap)
     }
 

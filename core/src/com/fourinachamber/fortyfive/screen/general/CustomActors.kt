@@ -249,7 +249,7 @@ open class CustomImageActor(
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    protected val loadedDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    protected val loadedDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, _screen)
 
     /**
      * overrides and ignores the background handle and the loaded drawable
