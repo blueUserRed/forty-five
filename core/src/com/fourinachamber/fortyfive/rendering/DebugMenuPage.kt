@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.screen.Resource
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
@@ -35,6 +37,26 @@ class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
             card pixmap loads: ${statistics.pixmapLoads}
             
             last card get: ${statistics.lastLoadedCard}
+        """.trimIndent()
+    }
+}
+
+class ResourceDebugMenuPage : DebugMenuPage("") {
+
+    override fun getText(screen: OnjScreen): String {
+        val unloaded = ResourceManager.resources
+            .filter { it.state == Resource.ResourceState.NOT_LOADED && !it.startedLoading }
+            .size
+        val loading = ResourceManager.resources
+            .filter { it.startedLoading }
+            .size
+        val loaded = ResourceManager.resources
+            .filter { it.state == Resource.ResourceState.LOADED }
+            .size
+        return """
+            unloaded: $unloaded
+            loading: $loading
+            loaded: $loaded
         """.trimIndent()
     }
 }

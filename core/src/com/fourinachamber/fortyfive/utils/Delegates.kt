@@ -10,6 +10,8 @@ class SubscribeableObserver<T>(initialValue: T) {
     private val callbacks: MutableList<(old: T, new: T) -> Unit> = mutableListOf()
     private var backingField: T = initialValue
 
+    fun getValue(): T = backingField
+
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return backingField
     }
@@ -37,9 +39,11 @@ class AutomaticResourceGetter<T : Any>(
 
     init {
         handleProperty.subscribe(::onHandleChange)
+        onHandleChange(null, handleProperty.getValue())
     }
 
     private fun onHandleChange(old: String?, new: String?) {
+        if (old == new) return
         if (new == null) {
             currentLifetime?.die()
             backingField = null
@@ -51,6 +55,7 @@ class AutomaticResourceGetter<T : Any>(
         val promise = ResourceManager.request(this, guardedLifetime, new, resourceType)
         currentPromise = promise
         promise.onResolve { result ->
+            if (currentPromise !== promise) return@onResolve
             backingField = result
             currentLifetime?.die()
             currentPromise = null

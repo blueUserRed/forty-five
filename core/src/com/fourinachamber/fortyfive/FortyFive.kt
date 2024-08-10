@@ -112,7 +112,6 @@ object FortyFive : Game() {
         val screen = screenBuilder.build(controllerContext)
         // Updates StyleManagers immediately, to prevent the first frame from appearing bugged
         screen.update(Gdx.graphics.deltaTime, isEarly = true)
-        serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.screenName}")

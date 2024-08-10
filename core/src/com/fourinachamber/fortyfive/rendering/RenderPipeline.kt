@@ -109,6 +109,7 @@ open class RenderPipeline(
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
         addDebugMenuPage(StandardDebugMenuPage())
         addDebugMenuPage(CardTextureDebugMenuPage())
+        addDebugMenuPage(ResourceDebugMenuPage())
     }
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
