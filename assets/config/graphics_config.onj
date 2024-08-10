@@ -103,11 +103,6 @@ encounterModifiers: {
     },
 },
 
-encounterModifierAssets: [
-    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist",
-    "encounter_modifier_steel_nerves", "encounter_modifier_lookalike", "encounter_modifier_bewitched_mist"
-],
-
 encounterBackgrounds: [
     {
         biome: "wasteland",
@@ -157,10 +152,6 @@ keySelect: {
     drawable: "key_select_frame"
 },
 
-keySelectUsedAssets: [
-    "key_select_frame"
-],
-
 shootPostProcessor: {
     name: "shoot_shader",
     duration: 0.9
@@ -170,14 +161,6 @@ enemyGravestone: {
     texture: "enemy_gravestone",
     scale: 0.3,
 },
-
-gameUsedAssets: [
-    "shoot_shader", "red_wing", "transparent_black_texture", "white_texture",
-    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone", "bewitched_icon",
-    "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
-    "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland",
-    "game_screen_background_magenta_mountains",
-],
 
 revolverSlotIcons: {
     "1": "revolver_slot_icon_1",

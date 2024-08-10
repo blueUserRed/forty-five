@@ -10,20 +10,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "red_wing", "red_wing_bmp", "card_character", "hover_detail_background",
-
-        "map_theme",
-
-        "game_screen_background_bewitched_forest", "game_screen_background_wasteland", "secondary_background_wasteland",
-
-        "chooseCard_cardsBackground", "white_texture",
-        ...(sharedComponents.cardHoverDetailUsedAssets),
-        ...(sharedComponents.ambientSoundsUsedAssets),
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight

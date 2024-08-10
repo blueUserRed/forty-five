@@ -11,27 +11,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "shop_background_wasteland", "red_wing_cm", "red_wing", "red_wing_bmp", "roadgeek", "hover_detail_background", "reserves_texture",
-        "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
-        "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
-        "shop_add_to_backpack", "shop_add_to_deck",
-
-        "shop_back_button_hover", "shop_back_button",
-
-        "card_pickup_sound", "card_laydown_sound", "money_sound", "button_2_sound",
-
-        "map_theme",
-
-        ...(sharedComponents.ambientSoundsUsedAssets),
-        ...(sharedComponents.backpackAssets),
-        ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets),
-        ...(sharedComponents.cardHoverDetailUsedAssets),
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight

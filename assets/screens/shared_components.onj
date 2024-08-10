@@ -11,21 +11,11 @@ var buttonSoundBehaviour = $OnClickSoundSituationBehaviour {
     situation: "general_button_click",
 };
 
-var revolverSlotIconAssets = [
-    "revolver_slot_icon_1",
-    "revolver_slot_icon_2",
-    "revolver_slot_icon_3",
-    "revolver_slot_icon_4",
-    "revolver_slot_icon_5",
-];
-
 var hoverDetailStyleAnimation = {
     delay: 0.0,
     duration: 0.2,
     interpolation: interpolation.linear
 };
-
-revolverSlotIconAssets: revolverSlotIconAssets,
 
 buttonSoundBehaviour: buttonSoundBehaviour,
 
@@ -39,16 +29,6 @@ var buttonCursorBehaviour = $MouseHoverBehaviour {
 };
 
 buttonCursorBehaviour: buttonCursorBehaviour,
-
-ambientSoundsUsedAssets: [
-    "snake_sound", "owl_sound"
-],
-
-
-var settingsUsedAssets = [
-    "settings_background", "slider_shader", "common_slider_background", "single_setting_background",
-    "common_symbol_arrow",
-];
 
 var settingsBox = $Box {
     styles: [
@@ -390,15 +370,6 @@ settingsWidgets: [
     }
 ],
 
-navBarUsedAssets: [
-    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_balle",
-    "location_name_salem", "location_name_tabuletter_outpost", "location_name_spire_outpost", "statusbar_option",
-    "reserves_texture", "statusbar_background_left", "heart_texture",
-    "cash_symbol",
-    "button_1_sound",
-    ...(settingsUsedAssets),
-],
-
 generalHoverDetailTemplate: $Box {
     template_name: "general_hover_detail_template",
     template_keys: {
@@ -479,24 +450,6 @@ generalHoverDetailTemplate: $Box {
             ],
         },
     ]
-],
-
-var cardHoverDetailUsedAssetsDefinition = [
-    "red_wing",
-    "roadgeek",
-    "roadgeek_bmp",
-    "hover_detail_big_background",
-    "hover_detail_small_background",
-    "forty_white_texture",
-    "hover_detail_more_info",
-    "hover_detail_big_background_glow",
-    "hover_detail_small_background_glow",
-    "card_symbol_text_a_equals", "card_symbol_text_i_equals", "card_symbol_text_t_equals",
-    ...revolverSlotIconAssets
-];
-
-cardHoverDetailUsedAssets: [
-    ...cardHoverDetailUsedAssetsDefinition,
 ],
 
 cardCollectionTemplates: [
@@ -718,55 +671,6 @@ cardCollection: $Box {
             ],
         },
     ]
-],
-
-//                width: (worldWidth * 0.6)#points,
-//                height: (worldHeight * 1.0)#points,
-//                background: "settings_background",
-//                alignItems: align.center,
-//                justifyContent: justify.center
-
-cardCollectionAssets: [
-    "collection_icon",
-    "collection_next",
-    "collection_next_hover",
-    "collection_prev",
-    "collection_prev_hover",
-    "collection_slot_empty",
-    "collection_slot_glow",
-    "collection_slot_locked",
-    "collection_slot_missing",
-    "collection_background",
-],
-
-
-backpackAssets: [
-    "roadgeek_bmp",
-    "backpack_1",
-    "backpack_2",
-    "backpack_3",
-    "backpack_4",
-    "backpack_5",
-    "backpack_1_hover",
-    "backpack_2_hover",
-    "backpack_3_hover",
-    "backpack_4_hover",
-    "backpack_5_hover",
-    "backpack_deck_background",
-    "backpack_backpack_background", //This name intended, not an error
-    "backpack_scrollbar_background",
-    "backpack_scrollbar",
-    "backpack_empty_deck_slot",
-    "backpack_save",
-    "backpack_edit",
-    "backpack_sort_background",
-    "backpack_type_hover",
-    "backpack_direction_hover",
-    "backpack_direction_arrow",
-    "card_character",
-    "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
-    "card_symbol_saved", "card_symbol_not_saved",
-    ...cardHoverDetailUsedAssetsDefinition,
 ],
 
 
@@ -1527,11 +1431,6 @@ warningLabelTemplates: [
     ]
 ],
 
-warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "warning_label_background_grey", "title_screen_background",
-    "red_wing", "warning_label_close",
-],
-
 var cardHoverDetailExtrasWidth = 200.0;
 var cardHoverDetailMainWidth = 300.0;
 var cardHoverDetailTotalWidth = cardHoverDetailMainWidth + 2 * cardHoverDetailExtrasWidth;
@@ -1977,8 +1876,4 @@ tutorialInfoActor: $TutorialInfoActor {
             color: color.white,
         },
     ],
-],
-
-tutorialInfoActorUsedAssets: [
-    "red_wing", "common_button_hover", "common_button_default", "tutorial_info_actor_background"
 ],

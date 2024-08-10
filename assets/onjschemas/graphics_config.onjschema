@@ -46,8 +46,6 @@ encounterModifiers: {
     confused: encounterModifierConfig,
 },
 
-encounterModifierAssets: string[],
-
 encounterBackgrounds: {
     biome: string,
     isDark: boolean,
@@ -83,8 +81,6 @@ keySelect: {
     drawable: string
 },
 
-keySelectUsedAssets: string[],
-
 shootPostProcessor: {
     name: string,
     duration: float
@@ -102,5 +98,3 @@ revolverSlotIcons: {
     "4": string,
     "5": string,
 },
-
-gameUsedAssets: string[]

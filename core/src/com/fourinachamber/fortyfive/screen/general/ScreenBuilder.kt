@@ -39,8 +39,6 @@ import onj.value.*
 
 class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrower {
 
-    private var borrowed: List<String> = listOf()
-
     private val earlyRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
     private val lateRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
@@ -64,7 +62,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
         addedActorsDragAndDrops.clear()
         namedActors.clear()
 
-        readAssets(onj)
         doOptions(onj)
         doTemplates(onj)
 
@@ -73,7 +70,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
             batch = SpriteBatch(),
             controllerContext = controllerContext,
             styleManagers = listOf(),
-            useAssets = borrowed.toMutableList(),
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
@@ -242,17 +238,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
         options.ifHas<Double>("transitionAwayTime") {
             transitionAwayTime = (it * 1000).toInt()
         }
-    }
-
-    private fun readAssets(onj: OnjObject) {
-        val assets = onj.get<OnjObject>("assets")
-
-        val toBorrow = mutableListOf<String>()
-
-        assets.ifHas<OnjArray>("useAssets") { arr ->
-            toBorrow.addAll(arr.value.map { (it as OnjString).value })
-        }
-        borrowed = toBorrow
     }
 
     private fun doDragAndDrop(screen: OnjScreen) {

@@ -7,72 +7,8 @@ use Common;
 use Screen;
 use Style;
 
-
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
-
-assets: {
-    useAssets: [
-        "roadgeek", "red_wing_bmp",
-        "title_screen_background", "key_select_frame", "white_texture", "enemy_texture", "red_wing",
-        "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
-        "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
-        "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
-        "map_background_wasteland_tileable", "map_background_bewitched_forest_tileable",
-        "map_background_magenta_mountains_tileable",
-        "location_sign_salem", "transparent_black_texture",
-        "location_sign_tabu_letter_outpost",
-        "location_sign_spire_outpost",
-        "location_sign_aqua_balle", "common_symbol_arrow",
-        "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path",
-        "map_player", "location_sign_under_construction",
-        "map_node_default",
-        "map_node_shop",
-        "map_node_fight",
-        "map_node_exit",
-        "map_node_heal",
-        "map_node_choose_card",
-        "map_node_dialog",
-        "card_character",
-        "map_decoration_wasteland_snake_2", // there is no snake 1, because of Nils and/or Fillipo
-        "map_decoration_wasteland_dune_1", "map_decoration_wasteland_dune_2",
-        "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",
-        "map_decoration_wasteland_skull_1", "map_decoration_wasteland_skull_2",
-        "map_decoration_magenta_mountains_mountain", "map_decoration_magenta_mountains_fog",
-        "map_decoration_magenta_mountains_tree", "map_decoration_magenta_mountains_mountain_small_1",
-        "map_decoration_magenta_mountains_mountain_small_2",
-        "common_button_default", "common_button_hover", "common_button_disabled",
-        "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
-        "map_decoration_bewitched_forest_tree1",
-
-        "card_symbol_saved", "card_symbol_not_saved",
-
-        "map_detail_encounter_modifier_background",
-
-        "tutorial_info_actor_background",
-        "backpack_scrollbar_background", "backpack_scrollbar",
-
-        "aqua_balle_lower_row", "aqua_balle_upper_row", "aqua_balle_sign", "aqua_balle_background",
-        "tutorial_road_weird_corner_house",
-
-        "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
-        "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
-
-        "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound", "button_2_sound", "walk_sound",
-
-        "map_extraction_background", "map_extraction_symbol",
-        "map_extraction_card_background_blue", "map_extraction_card_background_white",
-
-        "map_theme",
-
-        ...(sharedComponents.ambientSoundsUsedAssets),
-        ...(graphicsConfig.encounterModifierAssets),
-        ...(sharedComponents.backpackAssets),
-        ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets),
-        ...(sharedComponents.tutorialInfoActorUsedAssets),
-    ]
-},
 
 viewport: $FitViewport {
     worldWidth: worldWidth,

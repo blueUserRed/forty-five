@@ -557,10 +557,6 @@ $KeyAction {
 
 viewport: $Viewport,
 
-assets: {
-    useAssets: string[]
-},
-
 options: {
     background?: string,
     screenControllers?: $ScreenController[],
