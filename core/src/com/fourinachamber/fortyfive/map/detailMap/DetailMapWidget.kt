@@ -227,7 +227,6 @@ class DetailMapWidget(
 
         animatedDecorations.forEach { (_, instances) ->
             instances.forEach { (_, _, animation) ->
-                screen.addDisposable(animation)
                 animation.start()
             }
         }
@@ -274,7 +273,7 @@ class DetailMapWidget(
 
     private fun createDecorationAnimation(name: String): AnimationDrawable = when (name) {
 
-        "sheep" -> createAnimation {
+        "sheep" -> createAnimation(this, screen) {
             val anim = deferredAnimation("map_decoration_sheep_animation")
             val still = stillFrame("map_decoration_bewitched_forest_sheep_1", 500)
             order {
@@ -283,7 +282,7 @@ class DetailMapWidget(
             }
         }
 
-        "tree" -> createAnimation {
+        "tree" -> createAnimation(this, screen) {
             val anim = deferredAnimation("map_decoration_tree_animation")
             val still = stillFrame("map_decoration_bewitched_forest_tree1", 100)
             val cycleOffset = (0..30).random()
@@ -301,7 +300,7 @@ class DetailMapWidget(
             }
         }
 
-        "grass" -> createAnimation {
+        "grass" -> createAnimation(this, screen) {
             val anim = deferredAnimation("map_decoration_grass_animation")
             order {
                 loop(anim)

@@ -16,7 +16,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completable {
+class HealOrMaxHPScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController(), Completable {
 
     private var context: HealOrMaxHPMapEvent? = null
 
@@ -24,9 +24,7 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completa
 
     private lateinit var amount: Pair<Int, Int>
 
-    private lateinit var screen: OnjScreen
-    override fun init(onjScreen: OnjScreen, context: Any?) {
-        screen = onjScreen
+    override fun init(context: Any?) {
         if (context !is HealOrMaxHPMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         val rnd = Random(context.seed)
         this.context = context

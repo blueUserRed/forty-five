@@ -46,7 +46,7 @@ configFiles: {
     },
     shopConfig: {
         file: "config/shops.onj",
-        validatedBy: "onjschemas/sounds.onjschema",
+        validatedBy: "onjschemas/shops.onjschema",
     },
     backpackConfig: {
         file: "config/backpack_config.onj",

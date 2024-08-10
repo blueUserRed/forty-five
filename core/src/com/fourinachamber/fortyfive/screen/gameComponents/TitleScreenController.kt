@@ -13,17 +13,14 @@ import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import kotlin.math.sin
 
-class TitleScreenController : ScreenController() {
-
-    private lateinit var screen: OnjScreen
+class TitleScreenController(private val screen: OnjScreen) : ScreenController() {
 
     private var transitionAwayVelocity: Float = -1f
     private val timeline: Timeline = Timeline()
 
     private var isConfirmed: Boolean = false
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
-        screen = onjScreen
+    override fun init(context: Any?) {
         timeline.startTimeline()
         TemplateString.updateGlobalParam(
             "title_screen.startButtonText",

@@ -18,22 +18,22 @@ import onj.value.OnjNamedObject
 
 object ScreenControllerFactory {
 
-    private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
-        "GameScreenController" to { onj -> GameController(onj) },
-        "IntroScreenController" to { onj -> IntroScreenController(onj) },
-        "DialogScreenController" to { onj -> DialogScreenController(onj) },
-        "ShopScreenController" to { onj -> ShopScreenController(onj) },
-        "ChooseCardScreenController" to { onj -> ChooseCardScreenController(onj) },
-        "HealOrMaxHPScreenController" to { onj -> HealOrMaxHPScreenController(onj) },
-        "AddMaxHPScreenController" to {onj -> AddMaxHPScreenController(onj) },
-        "MapScreenController" to { MapScreenController() },
-        "StatsScreenController" to { StatsScreenController() },
-        "TitleScreenController" to { TitleScreenController() },
-        "CreditScreenController" to { CreditScreenController() },
-        "BiomeBackgroundScreenController" to { onj -> BiomeBackgroundScreenController(onj) },
-        "DraftScreenController" to { DraftScreenController() },
-        "FadeToBlackScreenController" to { onj -> FadeToBlackScreenController(onj) },
-        "CardCollectionScreenController" to { onj -> CardCollectionScreenController(onj) },
+    private val controllers: MutableMap<String, (OnjNamedObject, OnjScreen) -> ScreenController> = mutableMapOf(
+        "GameScreenController" to { onj, screen -> GameController(screen, onj) },
+        "IntroScreenController" to { onj, screen -> IntroScreenController(screen, onj) },
+        "DialogScreenController" to { onj, screen -> DialogScreenController(screen, onj) },
+        "ShopScreenController" to { onj, screen -> ShopScreenController(screen, onj) },
+        "ChooseCardScreenController" to { onj, screen -> ChooseCardScreenController(screen, onj) },
+        "HealOrMaxHPScreenController" to { onj, screen -> HealOrMaxHPScreenController(screen, onj) },
+        "AddMaxHPScreenController" to {onj, screen -> AddMaxHPScreenController(screen, onj) },
+        "MapScreenController" to { _, screen -> MapScreenController(screen) },
+        "StatsScreenController" to { _, screen -> StatsScreenController(screen) },
+        "TitleScreenController" to { _, screen -> TitleScreenController(screen) },
+        "CreditScreenController" to { _, screen -> CreditScreenController(screen) },
+        "BiomeBackgroundScreenController" to { onj, screen -> BiomeBackgroundScreenController(screen, onj) },
+        "DraftScreenController" to { _, screen -> DraftScreenController(screen) },
+        "FadeToBlackScreenController" to { onj, screen -> FadeToBlackScreenController(screen, onj) },
+        "CardCollectionScreenController" to { onj, screen -> CardCollectionScreenController(screen, onj) },
     )
 
     /**
@@ -42,9 +42,9 @@ object ScreenControllerFactory {
      * @param onj the onjObject containing the configuration of the controller
      */
     @AllThreadsAllowed
-    fun controllerOrError(name: String, onj: OnjNamedObject): ScreenController {
+    fun controllerOrError(name: String, screen: OnjScreen, onj: OnjNamedObject): ScreenController {
         val behaviourCreator = controllers[name] ?: throw RuntimeException("Unknown behaviour: $name")
-        return behaviourCreator(onj)
+        return behaviourCreator(onj, screen)
     }
 }
 
@@ -59,7 +59,7 @@ abstract class ScreenController {
      * called when this is set as a controller for a screen
      */
     @MainThreadOnly
-    open fun init(onjScreen: OnjScreen, context: Any?) { }
+    open fun init(context: Any?) { }
 
     /**
      * called every frame
