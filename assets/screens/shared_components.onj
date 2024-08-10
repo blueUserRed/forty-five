@@ -1187,30 +1187,60 @@ backpack: $Backpack {
                 ],
             } children [
                 $Image {
+                    styles: [
+                        {
+                            width: (160.0 * 0.41)#points,
+                            height: (122.0 * 0.41)#points,
+                        }
+                    ],
                     textureName: "backpack_1",
                     scaleX: 0.41,
                     scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
+                    styles: [
+                        {
+                            width: (160.0 * 0.41)#points,
+                            height: (122.0 * 0.41)#points,
+                        }
+                    ],
                     textureName: "backpack_2",
                     scaleX: 0.41,
                     scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
+                    styles: [
+                        {
+                            width: (160.0 * 0.41)#points,
+                            height: (122.0 * 0.41)#points,
+                        }
+                    ],
                     textureName: "backpack_3",
                     scaleX: 0.41,
                     scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
+                    styles: [
+                        {
+                            width: (160.0 * 0.41)#points,
+                            height: (122.0 * 0.41)#points,
+                        }
+                    ],
                     textureName: "backpack_4",
                     scaleX: 0.41,
                     scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
+                    styles: [
+                        {
+                            width: (160.0 * 0.41)#points,
+                            height: (122.0 * 0.41)#points,
+                        }
+                    ],
                     textureName: "backpack_5",
                     scaleX: 0.41,
                     scaleY: 0.41,

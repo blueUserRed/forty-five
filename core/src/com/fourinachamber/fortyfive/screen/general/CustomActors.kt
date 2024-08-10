@@ -301,7 +301,6 @@ open class CustomImageActor(
         }
 
         if (batch == null || drawable == null) {
-            super.draw(batch, parentAlpha)
             return
         }
 

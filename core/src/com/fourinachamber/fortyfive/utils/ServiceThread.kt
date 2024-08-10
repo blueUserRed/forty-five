@@ -50,18 +50,8 @@ class ServiceThread : Thread("ServiceThread") {
             is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
             is ServiceThreadMessage.LoadCardPixmap -> loadCardPixmap(message)
             is ServiceThreadMessage.PrepareResource -> prepareResource(message)
-            is ServiceThreadMessage.PrepareResources -> prepareResources()
 
         }
-    }
-
-    private fun CoroutineScope.prepareResources() {
-        ResourceManager
-            .resources
-            .filter { it.state == Resource.ResourceState.NOT_LOADED && it.borrowedBy.isNotEmpty() }
-            .forEach {
-                launch(Dispatchers.IO) { it.prepare() }
-            }
     }
 
     private fun CoroutineScope.prepareResource(message: ServiceThreadMessage.PrepareResource) = launch {
@@ -177,8 +167,6 @@ sealed class ServiceThreadMessage {
         val resource: Resource,
         val promise: Promise<Resource> = Promise()
     ) : ServiceThreadMessage()
-
-    object PrepareResources : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""
 

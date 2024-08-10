@@ -41,13 +41,11 @@ abstract class Resource(
     private var promise: Promise<Resource> = Promise()
     private val activePromises: MutableList<Promise<*>> = mutableListOf()
 
-    private var startedLoading: Boolean = false
-
-    @MainThreadOnly
-    protected abstract fun loadDirectMainThread()
+    var startedLoading: Boolean = false
+        private set
 
     @AllThreadsAllowed
-    abstract fun prepareLoadingAllThreads()
+    abstract suspend fun prepareLoadingAllThreads()
 
     @MainThreadOnly
     abstract fun finishLoadingMainThread()
@@ -63,14 +61,14 @@ abstract class Resource(
 
     fun promiseMatches(check: Promise<*>): Boolean = activePromises.any { it === check }
 
-    fun forceResolve() {
+    open fun forceResolve() {
         runBlocking {
             load()
         }
         if (!promise.isResolved) promise.resolve(this)
     }
 
-    fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): T {
+    open fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): T {
         borrow(borrower, lifetime)
         runBlocking {
             load()
@@ -80,7 +78,7 @@ abstract class Resource(
         return getVariant(variantType)
     }
 
-    fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
+    open fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
         borrow(borrower, lifetime)
         val returnPromise = if (startedLoading) {
             promise.map { getVariant(variantType) }
@@ -103,16 +101,17 @@ abstract class Resource(
         return returnPromise
     }
 
-    private fun <T : Any> getVariant(variantType: KClass<T>): T {
+    protected fun <T : Any> getVariant(variantType: KClass<T>): T {
         val variant = variants.find { variantType.isInstance(it) }
             ?: throw RuntimeException("no variant of type ${variantType.simpleName} for resource $handle")
         return variantType.cast(variant)
     }
 
     @MainThreadOnly
-    private suspend fun load() = mutex.withLock {
+    protected open suspend fun load() = mutex.withLock {
         if (state == ResourceState.NOT_LOADED) {
-            loadDirectMainThread()
+            prepareLoadingAllThreads()
+            finishLoadingMainThread()
         } else if (state == ResourceState.PREPARED) {
             finishLoadingMainThread()
         }
@@ -120,7 +119,7 @@ abstract class Resource(
     }
 
     @AllThreadsAllowed
-    suspend fun prepare() = mutex.withLock {
+    open suspend fun prepare() = mutex.withLock {
         if (state != ResourceState.NOT_LOADED) return
         prepareLoadingAllThreads()
         state = ResourceState.PREPARED
@@ -169,17 +168,7 @@ class TextureResource(
 
     private var pixmap: Pixmap? = null
 
-    override fun loadDirectMainThread() {
-        val texture = Texture(Gdx.files.internal(file), useMipMaps)
-        if (useMipMaps) texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.Linear)
-        val region = TextureRegion(texture)
-        val drawable =
-            if (tileable) TiledDrawable(region).apply { scale = tileScale } else TextureRegionDrawable(region)
-        disposables = listOf(texture)
-        variants = listOf(texture, region, drawable)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         pixmap = Pixmap(Gdx.files.internal(file))
     }
 
@@ -211,18 +200,7 @@ class FontResource(
     private var pixmap: Pixmap? = null
     private var fontData: BitmapFontData? = null
 
-    override fun loadDirectMainThread() {
-        val texture = Texture(Gdx.files.internal(imageFile), true)
-        val font = BitmapFont(Gdx.files.internal(fontFile), TextureRegion(texture), false)
-        texture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.Linear)
-        font.setUseIntegerPositions(false)
-        font.color = Color.WHITE
-        font.data.markupEnabled = markupEnabled
-        disposables = listOf(texture, font)
-        variants = listOf(font)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         pixmap = Pixmap(Gdx.files.internal(imageFile))
         fontData = BitmapFontData(Gdx.files.internal(fontFile), false)
     }
@@ -254,21 +232,20 @@ class AtlasResource(
     private var data: TextureAtlasData? = null
     private var pages: MutableMap<String, Pixmap>? = null
 
-    override fun loadDirectMainThread() {
-        val atlas = TextureAtlas(Gdx.files.internal(file))
-        variants = listOf(atlas)
-        disposables = listOf(atlas)
-    }
-
-    override fun prepareLoadingAllThreads() {
-        val fileHandle = Gdx.files.internal(file)
-        val data = TextureAtlasData(fileHandle, fileHandle.parent(), false)
-        val pages = mutableMapOf<String, Pixmap>()
-        data.pages.forEach { page ->
-            pages[page.textureFile.path()] = Pixmap(page.textureFile)
+    private val prepMutex = Mutex()
+    
+    override suspend fun prepareLoadingAllThreads() {
+        prepMutex.withLock {
+            if (state != ResourceState.NOT_LOADED) return
+            val fileHandle = Gdx.files.internal(file)
+            val data = TextureAtlasData(fileHandle, fileHandle.parent(), false)
+            val pages = mutableMapOf<String, Pixmap>()
+            data.pages.forEach { page ->
+                pages[page.textureFile.path()] = Pixmap(page.textureFile)
+            }
+            this@AtlasResource.data = data
+            this@AtlasResource.pages = pages
         }
-        this.data = data
-        this.pages = pages
     }
 
     override fun finishLoadingMainThread() {
@@ -287,7 +264,6 @@ class AtlasResource(
 
     override fun dispose() {
         this.data = null
-        pages?.values?.forEach(Disposable::dispose)
         this.pages = null
         super.dispose()
     }
@@ -299,28 +275,49 @@ class AtlasRegionResource(
     val atlasResourceHandle: String
 ) : Resource(handle), ResourceBorrower {
 
-    override fun prepareLoadingAllThreads() {
+    private val atlasResource: AtlasResource by lazy {
+        val atlasResource = ResourceManager.resources.find { it.handle == atlasResourceHandle }
+            ?: throw RuntimeException("No atlas with handle $atlasResourceHandle")
+        atlasResource as? AtlasResource
+            ?: throw RuntimeException("resource with handle $atlasResourceHandle is not an atlas")
+        atlasResource
+    }
+
+    private var atlasPromise: Promise<TextureAtlas>? = null
+
+    override fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
+        atlasPromise = ResourceManager.request<TextureAtlas>(borrower, lifetime, atlasResourceHandle)
+        return atlasPromise!!.map {
+            loadFromAtlas()
+            getVariant(variantType)
+        }
+    }
+
+    override fun forceResolve() {
+        atlasResource.forceResolve()
+    }
+
+    override fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): T {
+        if (atlasPromise == null) request(borrower, lifetime, variantType)
+        forceResolve()
+        return getVariant(variantType)
+    }
+
+    private fun loadFromAtlas() {
+        val atlas = atlasResource.get(TextureAtlas::class)!!
+        val region = atlas.findRegion(regionName)
+        variants = listOf(region, TextureRegionDrawable(region))
+    }
+
+    override suspend fun prepareLoadingAllThreads() {
     }
 
     override fun finishLoadingMainThread() {
-//        ResourceManager.borrow(this, atlasResourceHandle)
-//        val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
-//        val region = atlas.findRegion(regionName)
-//        variants = listOf(region, TextureRegionDrawable(region))
-    }
-
-    override fun loadDirectMainThread() {
-//        ResourceManager.borrow(this, atlasResourceHandle)
-//        val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
-//        val region = atlas.findRegion(regionName)
-//        variants = listOf(region, TextureRegionDrawable(region))
     }
 
     @MainThreadOnly
     override fun dispose() {
-//        val atlas = ResourceManager.resources.find { it.handle == atlasResourceHandle }!!
-//        if (this in atlas.borrowedBy) ResourceManager.giveBack(this, atlasResourceHandle)
-//        super.dispose()
+        atlasPromise = null
     }
 
 }
@@ -334,18 +331,7 @@ class CursorResource(
 
     private var pixmap: Pixmap? = null
 
-    override fun loadDirectMainThread() {
-        val cursorPixmap = Pixmap(Gdx.files.internal(file))
-        val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
-        pixmap.drawPixmap(cursorPixmap, 0, 0)
-        cursorPixmap.dispose()
-        val cursor = Gdx.graphics.newCursor(pixmap, hotspotX, hotspotY)
-        pixmap.dispose()
-        disposables = listOf(cursor)
-        variants = listOf(cursor)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         val cursorPixmap = Pixmap(Gdx.files.internal(file))
         val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
         pixmap.drawPixmap(cursorPixmap, 0, 0)
@@ -371,16 +357,7 @@ class ShaderResource(
     private var preProcessor: BetterShaderPreProcessor? = null
     private var preProcessedCode: Pair<String, String>? = null
 
-    override fun loadDirectMainThread() {
-        val preProcessor = BetterShaderPreProcessor(Gdx.files.internal(file), constantArgs)
-        val code = preProcessor.preProcess()
-        if (code !is Either.Left) throw RuntimeException("shader $handle is only meant for exporting")
-        val shader = preProcessor.compile(code.value)
-        disposables = listOf(shader)
-        variants = listOf(shader, shader.shader)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         val preProcessor = BetterShaderPreProcessor(Gdx.files.internal(file), constantArgs)
         val code = preProcessor.preProcess()
         if (code !is Either.Left) throw RuntimeException("shader $handle is only meant for exporting")
@@ -404,17 +381,7 @@ class ColorTextureResource(
 
     private var pixmap: Pixmap? = null
 
-    override fun loadDirectMainThread() {
-        val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
-        colorPixmap.setColor(color)
-        colorPixmap.fill()
-        val texture = Texture(colorPixmap)
-        val textureRegion = TextureRegion(texture)
-        variants = listOf(colorPixmap, texture, textureRegion, TextureRegionDrawable(textureRegion))
-        disposables = listOf(texture, colorPixmap)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
         colorPixmap.setColor(color)
         colorPixmap.fill()
@@ -442,15 +409,7 @@ class ParticleResource(
     private val scale: Float
 ) : Resource(handle) {
 
-    override fun loadDirectMainThread() {
-        val effect = ParticleEffect()
-        effect.load(Gdx.files.internal(file), Gdx.files.internal(textureDirectory))
-        effect.scaleEffect(scale)
-        variants = listOf(effect)
-        disposables = listOf(effect)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         // TODO: figure out how to load resources early
     }
 
@@ -475,18 +434,7 @@ class NinepatchResource(
 
     private var pixmap: Pixmap? = null
 
-    override fun loadDirectMainThread() {
-        val texture = Texture(Gdx.files.internal(file))
-        val ninepatch = NinePatch(
-            TextureRegion(texture),
-            left, right, top, bottom
-        )
-        ninepatch.scale(scale, scale)
-        disposables = listOf(texture)
-        variants = listOf(ninepatch, NinePatchDrawable(ninepatch))
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         pixmap = Pixmap(Gdx.files.internal(file))
     }
 
@@ -515,13 +463,7 @@ class PixmapFontResource(
 
     private var font: PixmapFont? = null
 
-    override fun loadDirectMainThread() {
-        val font = PixmapFont(Gdx.files.internal(fontFile))
-        variants = listOf(font)
-        disposables = listOf(font)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         font = PixmapFont(Gdx.files.internal(fontFile))
     }
 
@@ -540,13 +482,7 @@ class DeferredFrameAnimationResource(
 
     private var anim: DeferredFrameAnimation? = null
 
-    override fun loadDirectMainThread() {
-        val anim = DeferredFrameAnimation(previewHandle, atlasHandle, frameTime)
-        variants = listOf(anim)
-        disposables = listOf(anim)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         anim = DeferredFrameAnimation(previewHandle, atlasHandle, frameTime)
     }
 
@@ -564,13 +500,7 @@ class SoundResource(
 
     private var sound: Sound? = null
 
-    override fun loadDirectMainThread() {
-        val sound = Gdx.audio.newSound(Gdx.files.internal(file))
-        variants = listOf(sound)
-        disposables = listOf(sound)
-    }
-
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         sound = Gdx.audio.newSound(Gdx.files.internal(file))
     }
 
@@ -592,13 +522,8 @@ class MusicResource(
 
     private var music: Music? = null
 
-    override fun loadDirectMainThread() {
-        val music = Gdx.audio.newMusic(Gdx.files.internal(file))
-        variants = listOf(music)
-        disposables = listOf(music)
-    }
 
-    override fun prepareLoadingAllThreads() {
+    override suspend fun prepareLoadingAllThreads() {
         music = Gdx.audio.newMusic(Gdx.files.internal(file))
     }
 
