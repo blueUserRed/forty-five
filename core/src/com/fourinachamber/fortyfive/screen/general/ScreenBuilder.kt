@@ -719,13 +719,14 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
 
         widgetOnj.ifHas<String>("onClick") { name -> // TODO: support more of these
             this.onButtonClick { event ->
-                val noMatch = screenControllers
+                val noMatch = screen
+                    .screenControllers
                     .map { it.handleEventListener(name, event) }
                     .all { !it }
                 if (noMatch) {
                     FortyFiveLogger.warn("screen", "No match found for event $name")
                 }
-                screenControllers.forEach { it.handleEventListener(name, event) }
+                screen.screenControllers.forEach { it.handleEventListener(name, event) }
             }
         }
 

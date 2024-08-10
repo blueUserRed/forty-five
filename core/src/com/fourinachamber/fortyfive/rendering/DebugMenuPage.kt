@@ -41,7 +41,7 @@ class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
     }
 }
 
-class ResourceDebugMenuPage : DebugMenuPage("") {
+class ResourceDebugMenuPage : DebugMenuPage("Resources") {
 
     override fun getText(screen: OnjScreen): String {
         val unloaded = ResourceManager.resources
