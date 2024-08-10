@@ -50,7 +50,6 @@ open class OnjScreen(
     val viewport: Viewport,
     batch: Batch,
     private val controllerContext: Any?,
-    private val useAssets: MutableList<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,

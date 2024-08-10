@@ -9,32 +9,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "shop_background_wasteland",
-        "transparent_black_texture",
-        "hover_detail_background", "red_wing_cm", "red_wing", "red_wing_bmp",
-        "heal_or_max_accept",
-        "heal_or_max_accept_hover",
-        "heal_or_max_accept_invalid",
-        "heal_or_max_add_health",
-        "heal_or_max_add_max_health",
-        "heal_or_max_background",
-        "heal_or_max_selector_background",
-        "heal_or_max_selector_background_selected",
-        "taupe_gray_rounded",
-        "map_node_heal",
-        "button_2_sound",
-        "heal_sound",
-        "map_theme",
-        //        "max_health_background",
-        ...(sharedComponents.ambientSoundsUsedAssets),
-        ...(sharedComponents.backpackAssets),
-        ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets),
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight

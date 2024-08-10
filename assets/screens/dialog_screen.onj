@@ -10,28 +10,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "red_wing_cm", "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
-        "game_screen_background_wasteland",
-        "enemy_texture",
-        "dialog_name_field",
-        "common_symbol_arrow",
-        "dialog_background",
-        "dialog_answer_option",
-        "dialog_answer_option_hover",
-        "shop_npcs_default",
-        "npc_stranger",
-        "npc_merchant",
-        "npc_witch",
-        "npc_priest",
-        "npc_traveler",
-        "map_theme",
-        "map_decoration_bewitched_forest_tree1",
-        ...(sharedComponents.ambientSoundsUsedAssets),
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight
