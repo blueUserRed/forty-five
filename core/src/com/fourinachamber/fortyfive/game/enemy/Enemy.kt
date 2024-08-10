@@ -51,7 +51,8 @@ class Enemy(
     val coverIconHandle: ResourceHandle,
     val hiddenActionIconHandle: ResourceHandle,
     val health: Int,
-    val scale: Float,
+    val enemyWidth: Float,
+    val enemyHeight: Float,
     val coverIconScale: Float,
     val indicatorIconScale: Float,
     val detailFontHandle: String,
@@ -285,7 +286,8 @@ class Enemy(
                 coverIconHandle,
                 onj.get<String>("hiddenActionIcon"),
                 health,
-                onj.get<Double>("scale").toFloat(),
+                onj.get<Double>("width").toFloat(),
+                onj.get<Double>("height").toFloat(),
                 onj.get<Double>("coverIconScale").toFloat(),
                 onj.get<Double>("indicatorIconScale").toFloat(),
                 onj.get<String>("detailFont"),
@@ -365,14 +367,14 @@ class EnemyActor(
     // animations are hardcoded, deal with it
     private val animation: AnimationDrawable? = when {
 
-        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime) {
+        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime.shorter(screen)) {
             val anim = deferredAnimation("outlaw_animation")
             order {
                 loop(anim, frameOffset = (0..50).random())
             }
         }
 
-        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime) {
+        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime.shorter(screen)) {
             val anim = deferredAnimation("pyro_animation")
             order {
                 loop(anim, frameOffset = (0..50).random())
@@ -437,35 +439,35 @@ class EnemyActor(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         coverInfoBox.setBounds(
-            0f, height / 2 - coverInfoBox.prefHeight / 2,
+            0f, enemy.enemyHeight / 2 - coverInfoBox.prefHeight / 2,
             coverInfoBox.prefWidth, coverInfoBox.prefHeight
         )
-        val drawable: Drawable? = if (enemy.isDefeated) {
-            defeatedDrawable.getOrNull()
+
+        if (enemy.isDefeated) {
+            val scale = GraphicsConfig.defeatedEnemyDrawableScale()
+            defeatedDrawable.getOrNull()?.let { drawable ->
+                drawable.draw(
+                    batch,
+                    x + coverInfoBox.width, y + healthLabel.prefHeight,
+                    drawable.minWidth * scale, drawable.minWidth * scale
+                )
+            }
         } else {
-            animation ?: enemyDrawable.getOrNull()
-        }
-        val scale = if (enemy.isDefeated) {
-            GraphicsConfig.defeatedEnemyDrawableScale()
-        } else {
-            enemy.scale
-        }
-        drawable?.let { drawable ->
-            drawable.draw(
+            (animation ?: enemyDrawable.getOrNull())?.draw(
                 batch,
                 x + coverInfoBox.width, y + healthLabel.prefHeight,
-                drawable.minWidth * scale, drawable.minHeight * scale
+                enemy.enemyWidth, enemy.enemyHeight
             )
         }
-        val enemyDrawable = enemyDrawable.getOrNull() ?: return
+
         statsBox.width = statsBox.prefWidth
         statsBox.height = statsBox.prefHeight
-        statsBox.setPosition(width / 2 - statsBox.width / 2,  -statsBox.height)
-        attackLabel.width = width
+        statsBox.setPosition(enemy.enemyWidth / 2 - statsBox.width / 2,  -statsBox.height)
+        attackLabel.width = enemy.enemyWidth
         attackLabel.y = attackLabel.height / 2f
         attackIndicator.setBounds(
-            width / 2 - attackIndicator.prefWidth / 2 + enemy.headOffset,
-            enemyDrawable.minHeight * enemy.scale + 20f,
+            enemy.enemyWidth / 2 - attackIndicator.prefWidth / 2 + enemy.headOffset,
+            enemy.enemyHeight + 20f,
             attackIndicator.prefWidth, attackIndicator.prefHeight
         )
         attackIndicator.offsetY = sin(

@@ -1,16 +1,12 @@
 package com.fourinachamber.fortyfive.animation
 
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.*
-import org.w3c.dom.Text
-import kotlin.system.measureTimeMillis
 
 class DeferredFrameAnimation(
     val previewHandle: ResourceHandle,
@@ -28,10 +24,6 @@ class DeferredFrameAnimation(
 
     override val duration: Int
         get() = loadedFrameAnimation?.duration ?: Int.MAX_VALUE
-
-    init {
-        load()
-    }
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
@@ -58,6 +50,12 @@ class DeferredFrameAnimation(
     }
 
     override fun update() {
+        if (loadedFrameAnimation != null) return
+        val loadingResources = ResourceManager.resources
+            .filter { it.startedLoading }
+            .size
+        if (loadingResources > 3) return // magic number
+        load()
     }
 
     override fun width(): Float = previewDrawable.getOrNull()?.minWidth ?: 0f
