@@ -126,7 +126,6 @@ object FortyFive : Game() {
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
             inScreenTransition = false
-            ResourceManager.trimPrepared()
             screenChangeCallbacks.forEach { it() }
         }
 
@@ -234,8 +233,8 @@ object FortyFive : Game() {
         UserPrefs.write()
         currentScreen?.dispose()
         serviceThread.close()
-        ResourceManager.trimPrepared()
         ResourceManager.end()
+        currentRenderPipeline?.dispose()
         super.dispose()
     }
 }

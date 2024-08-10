@@ -20,9 +20,8 @@ import onj.value.*
 import kotlin.math.ceil
 import kotlin.math.min
 
-class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
+class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
 
-    private lateinit var screen: OnjScreen
     //    private val lockedCardTextureName: String,  //TODO locked cards
 
     //TODO ugly, could be "val"
@@ -42,8 +41,7 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
     @Inject(name = "card_collection_cards_parent")
     private lateinit var cardsParentWidget: CustomFlexBox
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
-        screen = onjScreen
+    override fun init(context: Any?) {
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
             .filter { "not in collection" !in it.tags }

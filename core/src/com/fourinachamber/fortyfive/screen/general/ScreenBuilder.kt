@@ -97,6 +97,16 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
         screen.addActorToRoot(root)
         screen.buildKeySelectHierarchy()
 
+        onj
+            .get<OnjObject>("options")
+            .getOr<OnjArray?>("screenControllers", null)
+            ?.value
+            ?.map { obj ->
+                obj as OnjNamedObject
+                ScreenControllerFactory.controllerOrError(obj.name, screen, obj).also { it.initEventHandler() }
+            }
+            ?.forEach { screen.addScreenController(it) }
+
         screenControllers.forEach { screen.addScreenController(it) }
 
         doDragAndDrop(screen)
@@ -228,14 +238,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
             music = it
         }
         playAmbientSounds = options.get<Boolean>("playAmbientSounds")
-        screenControllers = options
-            .getOr<OnjArray?>("screenControllers", null)
-            ?.value
-            ?.map { obj ->
-                obj as OnjNamedObject
-                ScreenControllerFactory.controllerOrError(obj.name, obj).also { it.initEventHandler() }
-            }
-            ?: listOf()
 
         options.ifHas<Double>("transitionAwayTime") {
             transitionAwayTime = (it * 1000).toInt()

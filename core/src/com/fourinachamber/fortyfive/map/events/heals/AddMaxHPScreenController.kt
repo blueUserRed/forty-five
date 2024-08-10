@@ -17,14 +17,12 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-class AddMaxHPScreenController(onj: OnjObject) : ScreenController(), Completable {
+class AddMaxHPScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController(), Completable {
     private var context: AddMaxHPMapEvent? = null
 
     private var amount: Int = -1
 
-    private lateinit var screen: OnjScreen
-    override fun init(onjScreen: OnjScreen, context: Any?) {
-        screen = onjScreen
+    override fun init(context: Any?) {
         if (context !is AddMaxHPMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a AddMaxHPMapEvent")
         val rnd = Random(context.seed)
         this.context = context

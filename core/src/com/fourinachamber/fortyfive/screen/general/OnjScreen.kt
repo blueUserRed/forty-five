@@ -186,7 +186,7 @@ open class OnjScreen(
         _screenControllers.add(controller)
         if (!isVisible) return
         controller.injectActors(this)
-        controller.init(this, controllerContext)
+        controller.init(controllerContext)
     }
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
@@ -404,7 +404,7 @@ open class OnjScreen(
     override fun show() {
         screenControllers.forEach {
             it.injectActors(this)
-            it.init(this, controllerContext)
+            it.init(controllerContext)
         }
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)

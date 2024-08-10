@@ -18,9 +18,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 
-class MapScreenController : ScreenController() {
-
-    private lateinit var screen: OnjScreen
+class MapScreenController(private val screen: OnjScreen) : ScreenController() {
 
     private var currentlyShowingTutorialText: Boolean = false
     private var tutorialTextParts: MutableList<MapTutorialTextPart> = mutableListOf()
@@ -31,8 +29,7 @@ class MapScreenController : ScreenController() {
     @Inject(name = "map")
     private lateinit var mapWidget: DetailMapWidget
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
-        screen = onjScreen
+    override fun init(context: Any?) {
         PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
     }

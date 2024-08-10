@@ -6,9 +6,9 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.TemplateString
 
-class StatsScreenController : ScreenController() {
+class StatsScreenController(private val screen: OnjScreen) : ScreenController() {
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(context: Any?) {
         val cards = PermaSaveState.statCardsLastRun
         val prototypes = RandomCardSelection.allCardPrototypes
         TemplateString.updateGlobalParam("stat.bulletsCollected", cards.distinct().size)
@@ -16,30 +16,30 @@ class StatsScreenController : ScreenController() {
             .filter { "not in collection" !in it.tags }
             .size
         TemplateString.updateGlobalParam("stat.obtainableBullets", obtainableBullets)
-        initCards(onjScreen)
+        initCards()
     }
 
-    private fun initCards(onjScreen: OnjScreen) {
+    private fun initCards() {
         val cards = PermaSaveState.statCardsLastRun
         val lostCards = cards.toMutableList()
         val collection = PermaSaveState.collection
         collection.forEach { lostCards.remove(it) }
         val prototypes = RandomCardSelection.allCardPrototypes
-        val cardsContainer = onjScreen.namedActorOrError("cards_container") as? CustomFlexBox
+        val cardsContainer = screen.namedActorOrError("cards_container") as? CustomFlexBox
                 ?: throw RuntimeException("actor named cards_container must be a CustomFlexBox")
         lostCards.forEach { cardName ->
             val card = prototypes
                 .find { it.name == cardName }
-                ?.create(onjScreen, isSaved = false, areHoverDetailsEnabled = false)
+                ?.create(screen, isSaved = false, areHoverDetailsEnabled = false)
                     ?: throw RuntimeException("unknown card: $cardName")
-            onjScreen.screenBuilder.addDataToWidgetFromTemplate(
+            screen.screenBuilder.addDataToWidgetFromTemplate(
                 "cardTemplate",
                 mapOf(),
                 cardsContainer,
-                onjScreen,
+                screen,
                 card.actor
             )
-            onjScreen.addDisposable(card)
+            screen.addDisposable(card)
         }
     }
 

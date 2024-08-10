@@ -10,14 +10,13 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Either
+import com.fourinachamber.fortyfive.utils.Lifetime
+import com.fourinachamber.fortyfive.utils.Promise
 
-// TODO: It would be cleaner if this class would be responsible for borrowing the parts it needs
-// the current solution can cause problems if two drawables depend on the same animation and one is disposed when
-// the other is still used
 class AnimationDrawable(
-    val animations: List<Either<String, AnimationPart>>,
+    val animations: List<AnimationPart>,
     animationSequence: Sequence<Int>,
-): BaseDrawable(), ResourceBorrower, Disposable {
+): BaseDrawable() {
 
     private var startTime: Long = -1
 
@@ -32,15 +31,6 @@ class AnimationDrawable(
 
     var flipX: Boolean = false
     var flipY: Boolean = false
-
-//    private val loadedAnimations: List<AnimationPart> = animations.map {
-//        if (it is Either.Left) {
-//            ResourceManager.borrow(this, it.value)
-//            ResourceManager.get(this, it.value)
-//        } else {
-//            (it as Either.Right).value
-//        }
-//    }
 
     init {
         if (animations.isEmpty()) throw RuntimeException("AnimationDrawable needs at least one Animation")
@@ -76,7 +66,7 @@ class AnimationDrawable(
     }
 
     fun update() {
-//        loadedAnimations.forEach { it.update() }
+        animations.forEach { it.update() }
     }
 
     private fun nextAnimation(): AnimationPart? {
@@ -95,21 +85,9 @@ class AnimationDrawable(
     override fun getMinHeight(): Float = currentAnimation?.height() ?: 0f
 
     private fun getAnimation(num: Int): AnimationPart = if (num in animations.indices) {
-//        loadedAnimations[num]
-        TODO()
+        animations[num]
     } else {
         throw RuntimeException("animationSequence returned out of bounds index $num")
-    }
-
-    override fun dispose() {
-        animations.forEach {
-            if (it is Either.Left) {
-                ResourceManager.giveBack(this, it.value)
-            } else {
-                it as Either.Right
-                it.value.dispose()
-            }
-        }
     }
 }
 
@@ -128,21 +106,19 @@ interface AnimationPart : Disposable {
 
 data class StillFrameAnimationPart(
     val frameHandle: ResourceHandle,
+    val borrower: ResourceBorrower,
+    val lifetime: Lifetime,
     override val duration: Int
 ) : AnimationPart, ResourceBorrower {
 
-    private val frame: Drawable by lazy {
-        TODO()
-//        ResourceManager.borrow(this, frameHandle)
-//        ResourceManager.get(this, frameHandle)
-    }
+    private val frame: Promise<Drawable> = ResourceManager.request(borrower, lifetime, frameHandle)
 
-    override fun getFrame(progress: Int, frameOffset: Int): Drawable = frame
+    override fun getFrame(progress: Int, frameOffset: Int): Drawable? = frame.getOrNull()
 
     override fun dispose() {
         ResourceManager.giveBack(this, frameHandle)
     }
 
-    override fun width(): Float = frame.minWidth
-    override fun height(): Float = frame.minHeight
+    override fun width(): Float = frame.getOrNull()?.minWidth ?: 0f
+    override fun height(): Float = frame.getOrNull()?.minHeight ?: 0f
 }

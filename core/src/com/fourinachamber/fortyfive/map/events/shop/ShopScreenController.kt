@@ -22,9 +22,8 @@ import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
-class ShopScreenController(onj: OnjObject) : ScreenController() {
+class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
 
-    private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
 
     private val shopFilePath = onj.get<String>("shopsFile")
@@ -48,9 +47,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var random: Random
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(context: Any?) {
         //TODO fix bug with cards when being on the edge of other cards when drag and dropping
-        screen = onjScreen
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
@@ -69,12 +67,11 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == personData.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        initWidgets(onjScreen, imgData)
+        initWidgets(screen, imgData)
 
         TemplateString.updateGlobalParam("map.cur_event.personDisplayName", personData.get<String>("displayName"))
-        val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
+        val messageWidget = screen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = personData.get<OnjArray>("texts").value
-        val defaults = shopFile.get<OnjObject>("defaults")
 
         random = Random(context.seed)
         addCards(context.types)

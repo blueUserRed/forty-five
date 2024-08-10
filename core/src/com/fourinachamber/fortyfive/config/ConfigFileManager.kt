@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.config
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -10,6 +11,7 @@ import onj.value.OnjObject
 
 object ConfigFileManager {
 
+    private const val logTag: String = "ConfigFileManager"
     private const val path: String = "config/files.onj"
 
     private val schema: OnjSchema by lazy {
@@ -82,9 +84,15 @@ object ConfigFileManager {
     fun forceLoadConfigFile(configFile: String) {
         val file = configFileOrError(configFile)
         if (file.onj != null) return
-        val onj = OnjParser.parseFile(Gdx.files.internal(file.path).file())
-        val schema = file.schemaPath?.let { OnjSchemaParser.parseFile(Gdx.files.internal(it).file()) }
-        schema?.assertMatches(onj)
+        val onj = try {
+            val onj = OnjParser.parseFile(Gdx.files.internal(file.path).file())
+            val schema = file.schemaPath?.let { OnjSchemaParser.parseFile(Gdx.files.internal(it).file()) }
+            schema?.assertMatches(onj)
+            onj
+        } catch (e: Exception) {
+            FortyFiveLogger.severe(logTag, "Error parsing file: $configFile")
+            throw e
+        }
         file.onj = onj as OnjObject
     }
 

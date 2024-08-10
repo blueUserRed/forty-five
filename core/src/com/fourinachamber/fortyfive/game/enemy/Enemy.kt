@@ -87,6 +87,7 @@ class Enemy(
             field = max(value, -300)
             if (oldValue > 0 && value <= 0) {
                 gameController.enemyDefeated(this)
+                actor.defeated()
             }
         }
 
@@ -270,7 +271,7 @@ class Enemy(
         
         fun readEnemy(onj: OnjObject, health: Int): Enemy {
             val gameController = FortyFive.currentGame!!
-            val curScreen = gameController.curScreen
+            val curScreen = gameController.screen
             val drawableHandle = onj.get<String>("texture")
             val coverIconHandle = onj.get<String>("coverIcon")
             val detailFont = ResourceManager.forceGet<BitmapFont>(
@@ -359,17 +360,19 @@ class EnemyActor(
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
     private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
 
+    private val animationLifetime: EndableLifetime = EndableLifetime()
+
     // animations are hardcoded, deal with it
     private val animation: AnimationDrawable? = when {
 
-        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation {
+        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime) {
             val anim = deferredAnimation("outlaw_animation")
             order {
                 loop(anim, frameOffset = (0..50).random())
             }
         }
 
-        enemy.name.startsWith("Pyro") -> createAnimation {
+        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime) {
             val anim = deferredAnimation("pyro_animation")
             order {
                 loop(anim, frameOffset = (0..50).random())
@@ -378,8 +381,6 @@ class EnemyActor(
 
         else -> null
 
-    }?.apply {
-        screen.addDisposable(this)
     }
 
     init {
@@ -439,18 +440,17 @@ class EnemyActor(
             0f, height / 2 - coverInfoBox.prefHeight / 2,
             coverInfoBox.prefWidth, coverInfoBox.prefHeight
         )
-        val drawablePromise = if (enemy.isDefeated) {
-            defeatedDrawable
+        val drawable: Drawable? = if (enemy.isDefeated) {
+            defeatedDrawable.getOrNull()
         } else {
-            enemyDrawable
-//            animation ?: enemyDrawable
+            animation ?: enemyDrawable.getOrNull()
         }
         val scale = if (enemy.isDefeated) {
             GraphicsConfig.defeatedEnemyDrawableScale()
         } else {
             enemy.scale
         }
-        drawablePromise.getOrNull()?.let { drawable ->
+        drawable?.let { drawable ->
             drawable.draw(
                 batch,
                 x + coverInfoBox.width, y + healthLabel.prefHeight,
@@ -565,6 +565,10 @@ class EnemyActor(
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
     fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
+
+    fun defeated() {
+        animationLifetime.die()
+    }
 
     /**
      * updates the description text of the actor

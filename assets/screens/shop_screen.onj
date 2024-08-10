@@ -54,6 +54,9 @@ options: {
             addToBackpackWidgetName: "addToBackpackWidget",
             addToDeckWidgetName: "addToDeckWidget",
             hoverDetailActorTemplateName: sharedComponents.cardHoverDetailTemplates.0.template_name
+        },
+        $BiomeBackgroundScreenController {
+            useSecondary: false,
         }
     ]
 },
@@ -128,23 +131,6 @@ root: $Box {
         }
     ]
 } children [
-    $Image {       //TODO biome for background
-
-        name: "background_img",
-        textureName: "shop_background_wasteland",
-        scaleX: 0.0,
-        scaleY: 0.0,
-        width: worldWidth,
-        height: worldHeight,
-        reportDimensionsWithScaling: true,
-        styles: [
-            {
-                positionType: positionType.absolute,
-                width: (worldWidth)#points,
-                height: (worldHeight)#points,
-            }
-        ],
-    },
     $Box {
         zIndex: 20,
         styles: [
@@ -304,7 +290,7 @@ root: $Box {
                     sharedComponents.buttonCursorBehaviour,
                     sharedComponents.buttonSoundBehaviour,
                     $OnClickChangeScreenBehaviour {
-                        screenPath: "screens/map_screen.onj"
+                        screen: "mapScreen"
                     }
                 ]
             }
