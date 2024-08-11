@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
@@ -17,7 +16,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 
@@ -99,10 +97,8 @@ object FortyFive : Game() {
             (promise as Promise<Any?>).resolve(result)
         }
         mainThreadTasks.clear()
-//        val screen = currentScreen
         currentScreen?.update(Gdx.graphics.deltaTime)
         nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
-//        if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
@@ -110,7 +106,7 @@ object FortyFive : Game() {
         if (inScreenTransition) return@postRunnable
         inScreenTransition = true
         val currentScreen = currentScreen
-        if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
+        if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
         val screen = screenBuilder.build(controllerContext)
         nextScreen = screen
 
@@ -132,9 +128,12 @@ object FortyFive : Game() {
             screenChangeCallbacks.forEach { it() }
         }
 
+        val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
+            it[screenBuilder.screenName] ?: it["*"]
+        } ?: 0
         if (currentScreen == null) {
             onScreenChange()
-        } else currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
+        } else currentScreen.afterMs(transitionAwayTime) {
             onScreenChange()
         }
     }

@@ -16,7 +16,16 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 1.0,
+    transitionAwayTimes: [
+        {
+            screen: "mapScreen",
+            time: 0.0
+        },
+        {
+            screen: "*",
+            time: 1.0
+        },
+    ],
     background: "black_texture",
     music: "map_theme",
     playAmbientSounds: true,

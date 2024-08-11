@@ -21,10 +21,12 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $DialogScreenController {
-        npcsFile: "maps/events/npcs.onj",
-        dialogWidgetName: "dialog_widget"
-    }
+    screenControllers: [
+        $DialogScreenController {
+            npcsFile: "maps/events/npcs.onj",
+            dialogWidgetName: "dialog_widget"
+        }
+    ]
 },
 
 var dialogWidget = $Box {

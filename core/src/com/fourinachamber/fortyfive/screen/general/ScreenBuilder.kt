@@ -50,7 +50,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
     private var background: String? = null
     private var music: ResourceHandle? = null
     private var playAmbientSounds: Boolean = false
-    private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
     @MainThreadOnly
@@ -75,7 +74,7 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
             namedActors = namedActors,
             printFrameRate = false,
             namedCells = mapOf(),
-            transitionAwayTime = transitionAwayTime,
+            transitionAwayTimes = doTransitionAwayTimes(),
             screenBuilder = this,
             music = music,
             playAmbientSounds = playAmbientSounds
@@ -224,6 +223,17 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
         return result
     }
 
+    private fun doTransitionAwayTimes(): Map<String, Int> = onj
+        .get<OnjObject>("options")
+        .getOr<OnjArray?>("transitionAwayTimes", null)
+        ?.let { arr ->
+            arr
+                .value
+                .associate {
+                    it as OnjObject
+                    it.get<String>("screen") to (it.get<Double>("time") * 1000).toInt()
+                }
+        } ?: mapOf()
 
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
@@ -234,10 +244,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
             music = it
         }
         playAmbientSounds = options.get<Boolean>("playAmbientSounds")
-
-        options.ifHas<Double>("transitionAwayTime") {
-            transitionAwayTime = (it * 1000).toInt()
-        }
     }
 
     private fun doDragAndDrop(screen: OnjScreen) {

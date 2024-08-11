@@ -1,4 +1,5 @@
 import "imports/colors.onj" as color;
+import "imports/colors.onj" as color;
 
 var shake = $ShakeTextAction {
     xSpeed: 0.2,
@@ -81,7 +82,7 @@ npcs: [
                     rawText: "Here, this might be useful on your journey",
                     next: $GiftCardEnd {
                         card: "incendiaryBullet",
-                        changeToScreen: "screens/map_screen.onj"
+                        changeToScreen: "mapScreen"
                     }
                 },
             ],
@@ -211,7 +212,7 @@ npcs: [
                 {
                     rawText: "But I travel the frontier with my stock most of the time, so we’ll probably see each other anyway. Until then, take care.",
                     next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
+                        changeToScreen: "mapScreen"
                     }
                 },
             ],
@@ -264,7 +265,7 @@ npcs: [
                     ],
                     next: $GiftCardEnd {
                         card: "guardianAngelBullet",
-                        changeToScreen: "screens/map_screen.onj"
+                        changeToScreen: "mapScreen"
                     }
                 },
             ],
@@ -296,7 +297,7 @@ npcs: [
                 {
                     rawText: "Thanks for you patience!",
                     next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
+                        changeToScreen: "mapScreen"
                     }
                 },
             ],
@@ -418,7 +419,7 @@ npcs: [
                         }
                     ],
                     next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
+                        changeToScreen: "mapScreen"
                     }
                 },
             ],
@@ -582,7 +583,7 @@ npcs: [
                 {
                     rawText: "Bye",
                     next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
+                        changeToScreen: "mapScreen"
                     }
                 },
             ],

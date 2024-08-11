@@ -18,7 +18,12 @@ options: {
     background: "title_screen_background",
     music: "main_theme",
     playAmbientSounds: false,
-    transitionAwayTime: 1.0,
+    transitionAwayTimes: [
+        {
+            screen: "*",
+            time: 1.0
+        }
+    ],
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
