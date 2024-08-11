@@ -34,6 +34,7 @@ object FortyFive : Game() {
     val cardTextureManager: CardTextureManager = CardTextureManager()
 
     private var currentScreen: OnjScreen? = null
+    private var nextScreen: OnjScreen? = null
 
     var currentGame: GameController? = null
 
@@ -65,7 +66,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
         when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("intro_screen"))
+            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
             UserPrefs.StartScreen.MAP -> changeToInitialScreen()
         }
@@ -98,9 +99,10 @@ object FortyFive : Game() {
             (promise as Promise<Any?>).resolve(result)
         }
         mainThreadTasks.clear()
-        val screen = currentScreen
+//        val screen = currentScreen
         currentScreen?.update(Gdx.graphics.deltaTime)
-        if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)
+        nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+//        if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
@@ -110,14 +112,15 @@ object FortyFive : Game() {
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = screenBuilder.build(controllerContext)
-        // Updates StyleManagers immediately, to prevent the first frame from appearing bugged
-        screen.update(Gdx.graphics.deltaTime, isEarly = true)
+        nextScreen = screen
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.screenName}")
             SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
+            screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen
+            nextScreen = null
             currentRenderPipeline?.dispose()
             currentRenderPipeline = RenderPipeline(screen, screen).also {
                 it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false

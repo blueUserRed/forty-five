@@ -2,9 +2,7 @@ package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData
 import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.*
 import kotlinx.coroutines.*
@@ -17,7 +15,7 @@ class ServiceThread : Thread("ServiceThread") {
     private val channel: Channel<ServiceThreadMessage> = Channel(Channel.Factory.UNLIMITED)
 
     @OptIn(DelicateCoroutinesApi::class)
-    private val animationLoaderDispatcher = newSingleThreadContext("animation-loader")
+    private val cardDrawingDispatcher = newSingleThreadContext("card-drawer")
 
     override fun run(): Unit = runBlocking {
         FortyFiveLogger.debug(logTag, "starting up")
@@ -47,14 +45,13 @@ class ServiceThread : Thread("ServiceThread") {
         when (message) {
 
             is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
-            is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
             is ServiceThreadMessage.LoadCardPixmap -> loadCardPixmap(message)
             is ServiceThreadMessage.PrepareResource -> prepareResource(message)
 
         }
     }
 
-    private fun CoroutineScope.prepareResource(message: ServiceThreadMessage.PrepareResource) = launch {
+    private fun CoroutineScope.prepareResource(message: ServiceThreadMessage.PrepareResource) = launch(Dispatchers.IO) {
         message.resource.prepare()
         message.promise.resolve(message.resource)
     }
@@ -64,7 +61,7 @@ class ServiceThread : Thread("ServiceThread") {
         message.promise.resolve(pixmap)
     }
 
-    private fun CoroutineScope.drawCardPixmap(message: ServiceThreadMessage.DrawCardPixmap) = launch {
+    private fun CoroutineScope.drawCardPixmap(message: ServiceThreadMessage.DrawCardPixmap) = launch(cardDrawingDispatcher) {
         synchronized(message.pixmap) { synchronized(message.card) {
             val pixmap = message.pixmap
             val cardTexturePixmap = message.cardTexturePixmap
@@ -98,32 +95,6 @@ class ServiceThread : Thread("ServiceThread") {
         } }
     }
 
-
-    private fun CoroutineScope.loadAnimationResource(message: ServiceThreadMessage.LoadAnimationResource) = launch(animationLoaderDispatcher) {
-        val resource = ResourceManager
-            .resources
-            .find { it.handle == message.handle }
-            ?: throw RuntimeException("unknown resource: ${message.handle}")
-
-        resource as? AtlasResource ?: throw RuntimeException("resource loaded by LoadAnimationResourceMessage must" +
-                "be a AtlasRegionResource")
-
-
-        val fileHandle = Gdx.files.internal(resource.file)
-        val data = TextureAtlasData(fileHandle, fileHandle.parent(), false)
-        val pages = mutableMapOf<String, Pixmap>()
-        data.pages.forEach { page ->
-            pages[page.textureFile.path()] = Pixmap(page.textureFile)
-        }
-        message.data = data
-        message.pages = pages
-
-        synchronized(message) {
-            message.finished = true
-            if (message.cancelled) resource.dispose()
-        }
-    }
-
     fun sendMessage(message: ServiceThreadMessage): ChannelResult<Unit> = channel.trySendBlocking(message)
 
     fun close() {
@@ -153,14 +124,6 @@ sealed class ServiceThreadMessage {
     class LoadCardPixmap(
         val name: String,
         val promise: Promise<Pixmap> = Promise()
-    ) : ServiceThreadMessage()
-
-    class LoadAnimationResource(
-        val handle: ResourceHandle,
-        var data: TextureAtlasData? = null,
-        var pages: Map<String, Pixmap>? = null,
-        var finished: Boolean = false,
-        var cancelled: Boolean = false
     ) : ServiceThreadMessage()
 
     class PrepareResource(

@@ -208,7 +208,6 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
         encounterContext = context
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(screen)
-        FortyFive.useRenderPipeline(gameRenderPipeline)
         FortyFiveLogger.title("game starting")
 
         warningParent = screen.namedActorOrError(warningParentName) as? CustomWarningParent
@@ -252,6 +251,10 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
         screen.invalidateEverything()
         gameDirector.chooseEnemyActions()
         SoundPlayer.transitionToMusic(musicBeforeWin, musicTransitionTime, this.screen)
+    }
+
+    override fun onShow() {
+        FortyFive.useRenderPipeline(gameRenderPipeline)
     }
 
     private fun initCards() {

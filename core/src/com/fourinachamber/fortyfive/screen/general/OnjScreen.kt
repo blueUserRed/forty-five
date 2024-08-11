@@ -168,24 +168,19 @@ open class OnjScreen(
     private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
     init {
-//        useAssets.forEach { ResourceManager.borrow(this, it) }
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
-//        addLateRenderTask {
-//            val highlight = selectedActor?.getBounds() ?: return@addLateRenderTask
-//            keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
-//        }
         inputMultiplexer.addProcessor(screenInputProcessor)
         inputMultiplexer.addProcessor(stage)
     }
 
     fun addScreenController(controller: ScreenController) {
         _screenControllers.add(controller)
-        if (!isVisible) return
         controller.injectActors(this)
         controller.init(controllerContext)
+        if (isVisible) controller.onShow()
     }
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
@@ -401,13 +396,10 @@ open class OnjScreen(
 
     @MainThreadOnly
     override fun show() {
-        screenControllers.forEach {
-            it.injectActors(this)
-            it.init(controllerContext)
-        }
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
+        screenControllers.forEach { it.onShow() }
     }
 
     fun transitionAway() {

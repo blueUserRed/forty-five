@@ -29,6 +29,9 @@ options: {
             cardsParentName: "cardsParent",
             addToBackpackWidgetName: "addToBackpackWidget",
             addToDeckWidgetName: "addToDeckWidget",
+        },
+        $BiomeBackgroundScreenController {
+            useSecondary: true,
         }
     ],
 },

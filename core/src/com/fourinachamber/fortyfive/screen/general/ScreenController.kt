@@ -61,6 +61,8 @@ abstract class ScreenController {
     @MainThreadOnly
     open fun init(context: Any?) { }
 
+    open fun onShow() {}
+
     /**
      * called every frame
      */
