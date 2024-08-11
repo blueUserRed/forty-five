@@ -14,7 +14,12 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 5.0,
+    transitionAwayTimes: [
+        {
+            screen: "*",
+            time: 5.0
+        }
+    ],
     background: "microwave_studios_brown_texture",
     playAmbientSounds: false,
     screenControllers: [$IntroScreenController {}],

@@ -20,14 +20,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
@@ -56,7 +54,7 @@ open class OnjScreen(
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: MutableMap<String, Actor>,
     val printFrameRate: Boolean,
-    val transitionAwayTime: Int?,
+    val transitionAwayTimes: Map<String, Int>,
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean

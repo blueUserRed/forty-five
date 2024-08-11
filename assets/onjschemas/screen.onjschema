@@ -573,7 +573,10 @@ options: {
         action?: $KeyAction,
     }[],
     postProcessor?: string,
-    transitionAwayTime?: float
+    transitionAwayTimes?: {
+        screen: string,
+        time: float,
+    }[]
 //    printFrameRate?: boolean
 },
 
