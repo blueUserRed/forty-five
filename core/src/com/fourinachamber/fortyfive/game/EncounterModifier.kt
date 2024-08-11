@@ -132,7 +132,7 @@ sealed class EncounterModifier {
 
     object Draft : EncounterModifier() {
 
-        override fun intermediateScreen(): String = "draft_screen"
+        override fun intermediateScreen(): String = "draftScreen"
     }
 
     object AnOfferYouCantRefuse : EncounterModifier() {

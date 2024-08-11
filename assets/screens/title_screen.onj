@@ -386,7 +386,7 @@ root: $Box {
             behaviours: [
                 sharedComponents.buttonCursorBehaviour,
                 $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/credits_screen.onj",
+                    screen: "creditsScreen",
                 }
             ]
         },

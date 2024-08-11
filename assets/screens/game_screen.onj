@@ -80,9 +80,9 @@ options: {
         $BiomeBackgroundScreenController {
             useSecondary: false,
         },
-        $CardCollectionScreenController {
-            cardsFile: "config/cards.onj",
-        }
+//        $CardCollectionScreenController {
+//            cardsFile: "config/cards.onj",
+//        }
     ],
     playAmbientSounds: true,
     music: "map_theme",

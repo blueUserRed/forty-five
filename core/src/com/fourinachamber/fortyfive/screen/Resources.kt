@@ -14,9 +14,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
-import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fortyfive.utils.*
 import kotlinx.coroutines.runBlocking
@@ -83,11 +83,20 @@ abstract class Resource(
         val returnPromise = if (startedLoading) {
             promise.map { getVariant(variantType) }
         } else {
+            startedLoading = true
+
+            //// !! prints are left here intentionally !!
+
+//            val startedTime = TimeUtils.millis()
             val message = ServiceThreadMessage.PrepareResource(this)
             FortyFive.serviceThread.sendMessage(message)
             val loadPromise = message.promise.chain {
+//                println("${Thread.currentThread().name} $handle")
                 FortyFive.mainThreadTask {
+//                    val finishedPrep = TimeUtils.millis()
                     runBlocking { load() }
+//                    val finished = TimeUtils.millis()
+//                    println("$handle: ${finished - startedTime} (${finishedPrep - startedTime} / ${finished - finishedPrep})")
                     this
                 }
             }

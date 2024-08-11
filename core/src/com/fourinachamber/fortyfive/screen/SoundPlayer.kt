@@ -93,7 +93,7 @@ object SoundPlayer : ResourceBorrower {
             currentMusicHandle = null
             return
         }
-        val musicPromise = ResourceManager.request<Music>(this, screen, musicHandle)
+        val musicPromise = ResourceManager.request<Music>(screen, screen, musicHandle)
         currentMusic = musicPromise
         currentMusicHandle = musicHandle
         musicPromise.onResolve { music ->
