@@ -411,6 +411,27 @@ class UnderlineStyleProperty(
     override fun get(node: YogaNode): Boolean = target.underline
 }
 
+
+class FontColorStyleProperty(
+    target: CustomLabel,
+    screen: OnjScreen
+) : StyleProperty<CustomLabel, Color>(
+    "fontColor",
+    target,
+    Color.WHITE,
+    Color::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: Color, node: YogaNode) {
+        target.style.fontColor = data
+    }
+
+    override fun get(node: YogaNode): Color = target.style.fontColor
+}
+
 fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledActor {
     addActorStyles(screen)
     val styleManager = styleManager!!
@@ -443,6 +464,7 @@ fun <T> T.addTemplateLabelStyles(screen: OnjScreen) where T : TemplateStringLabe
     addLabelStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(TemplateStyleProperty(this, screen))
+    styleManager.addStyleProperty(FontColorStyleProperty(this, screen))
 }
 
 ///////////////////////////////////////////////////////////////////

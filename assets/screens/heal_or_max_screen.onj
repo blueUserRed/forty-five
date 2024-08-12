@@ -29,9 +29,9 @@ options: {
         ...(inputMaps.healOrMaxInputMap),
         ...(inputMaps.addMaxHPInputMap),
     ],
-    screenController: $HealOrMaxHPScreenController {
+    screenControllers: [$HealOrMaxHPScreenController {
         addLifeActorName: "add_lives_option",
-    }
+    }]
 },
 
 root: $Box { //TODO biomes
@@ -40,7 +40,7 @@ root: $Box { //TODO biomes
         {
             width: 100.0#percent,
             height: 100.0#percent,
-            background: "shop_background_wasteland",
+            background: "secondary_background_wasteland",
         }
     ]
 } children [

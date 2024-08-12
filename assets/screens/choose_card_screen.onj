@@ -16,7 +16,7 @@ viewport: $FitViewport {
 
 options: {
     transitionAwayTime: 0.0,
-    background: "hover_detail_background",
+    background: "secondary_background_wasteland",
     music: "map_theme",
     playAmbientSounds: true,
     inputMap: [

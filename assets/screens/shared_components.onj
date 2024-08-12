@@ -215,6 +215,48 @@ var settingsBox = $Box {
             }
         ],
 
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Fullscreen type: ",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Selector {
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "fullScreenMode",
+                font: "red_wing",
+                fontScale: 0.8,
+            }
+        ],
+
 
         $Label {
             styles: [
@@ -708,6 +750,7 @@ navBar: $Box {
 statusbarCenterDefaults: {
     mapIndicatorWidgetName: "map_indicator_parent",
     optionsWidgetName: "options_parent_center",
+    backgroundWidgetName: "statusbar_overlay_background",
     styles: [
         {
             width: 100#percent,
@@ -720,6 +763,25 @@ statusbarCenterDefaults: {
         }
     ],
     children: [
+        $Box {
+            name: "statusbar_overlay_background",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "transparent_black_texture",
+                    width: 100#percent,
+                    height: (100 / 0.14)#percent,
+                    positionType: positionType.absolute,
+                    touchable: touchable.enabled,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("inStatusbarOverlay"),
+                    visible: true
+                }
+            ],
+        },
         $Box {
             zIndex: 4,
             styles: [
@@ -746,25 +808,39 @@ statusbarCenterDefaults: {
                 ],
             } children [
                 $Image {
-                    textureName: "heart_texture",
+                    textureName: "statusbar_lives",
                     name: "player_health_icon",
                     scaleX: 0.1,
                     scaleY: 0.1,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 70#percent,
-                            aspectRatio: 1.0
+                            height: 60#percent,
+                            aspectRatio: 1.2121
                         }
                     ],
                 },
+                //                $Box {
+//                    debug:true,
+//                    styles: [
+//                        {
+//                            width: 10#percent,
+//                            height: 1#percent,
+//                        }
+//                    ],
+//                },
                 $TemplateLabel {
                     template: "{stat.playerLives}/{stat.maxPlayerLives}",
 
                     font: "red_wing_cm",
                     color: color.forty_white,
                     fontScale: 0.9,
-                    align: "center",
+                    align: "right",
+                    styles: [
+                        {
+                            marginLeft: 10#points,
+                        }
+                    ],
                 }
             ],
             $Box {
@@ -789,24 +865,24 @@ statusbarCenterDefaults: {
                     }
                 ],
             } children [
-                $TemplateLabel {
-                    template: "{stat.playerMoney} ",
-                    font: "red_wing_cm",
-                    color: color.forty_white,
-                    fontScale: 0.9,
-                    align: "center",
-                },
                 $Box {
                     name: "cash_symbol",
                     styles: [
                         {
                             background: "cash_symbol",
-                            width: 30#points,
-                            aspectRatio: 1.0,
+                            width: 40#points,
+                            aspectRatio: 1.4,
                             marginLeft: 10#points
                         }
                     ]
-                }
+                },
+                $TemplateLabel {
+                    template: "  ${stat.playerMoney}",
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.9,
+                    align: "center",
+                },
             ],
         ],
         $Box {
@@ -827,6 +903,7 @@ statusbarCenterDefaults: {
 
 statusbarLeftDefaults: {
     optionsWidgetName: "options_parent_left",
+    backgroundWidgetName: "statusbar_overlay_background_left",
     styles: [
         {
             width: 100#percent,
@@ -839,6 +916,25 @@ statusbarLeftDefaults: {
         }
     ],
     children: [
+        $Box {
+            name: "statusbar_overlay_background_left",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "transparent_black_texture",
+                    width: 100#percent,
+                    height: (100 / 0.14)#percent,
+                    positionType: positionType.absolute,
+                    touchable: touchable.enabled,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("inStatusbarOverlay"),
+                    visible: true
+                }
+            ],
+        },
         $Box {
             zIndex: 4,
             styles: [
@@ -1488,23 +1584,23 @@ var cardHoverDetailExtra = $Box {
             ]
         },
         $Box {
-            zIndex:-10,
+            zIndex: -10,
             styles: [
                 {
                     positionType: positionType.absolute,
                     background: "hover_detail_small_background_glow",
                     height: (110 * 1.6)#percent,
                     width: (100 * 1.225)#percent,
-                    positionLeft:(100 * -0.1)#percent,
-                    positionTop:(110 * -0.3)#percent,
+                    positionLeft: (100 * -0.1)#percent,
+                    positionTop: (110 * -0.3)#percent,
                     alignItems: align.center,
                     flexDirection: flexDirection.column,
-                    visible:false,
+                    visible: false,
                 },
-                    {
+                {
                     style_priority: 2,
                     style_condition: state("showHoverDetailGlow"),
-                    visible:true,
+                    visible: true,
                 }
             ],
         },

@@ -23,8 +23,8 @@ options: {
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.addMaxHPInputMap),
     ],
-    screenController: $AddMaxHPScreenController {
-    }
+    screenControllers: [$AddMaxHPScreenController {
+    }]
 },
 
 root: $Box { //TODO biomes
@@ -33,7 +33,7 @@ root: $Box { //TODO biomes
         {
             width: 100.0#percent,
             height: 100.0#percent,
-            background: "shop_background_wasteland",
+            background: "secondary_background_wasteland",
         }
     ]
 } children [
@@ -67,7 +67,7 @@ root: $Box { //TODO biomes
         $Label {
             text: "MAX HP Increased!",
             font: "red_wing_cm",
-            color: color.dark_brown,
+            color: color.forty_white,
             fontScale: 1.0,
             align: "center",
         },
@@ -91,7 +91,7 @@ root: $Box { //TODO biomes
                 $TemplateLabel {
                     template: "+{map.cur_event.max_hp.amount} MAX HP",
                     font: "red_wing_cm",
-                    color: color.dark_brown,
+                    color: color.forty_white,
                     fontScale: 1.1,
                     align: "center",
                     styles: [
@@ -104,13 +104,13 @@ root: $Box { //TODO biomes
                     reportDimensionsWithScaling: true,
                     textureName: "taupe_gray_rounded",
                     scaleX: 300.0,
-                    scaleY: 5.0,
+                    scaleY: 2.1,
                 },
                 $TemplateLabel {
                     template: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.max_hp.lives_new}/{map.cur_event.max_hp.maxLives_new} HP",
                     font: "red_wing_cm",
-                    color: color.dark_brown,
-                    fontScale: 0.5,
+                    color: color.forty_white,
+                    fontScale: 0.6,
                     align: "center",
                 },
             ],

@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
@@ -527,6 +528,21 @@ open class OnjScreen(
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
+        fun toggleFullScreen(width: Int = -1, height: Int = -1) {
+            val displayMode = Gdx.graphics.displayMode
+            if (!(Gdx.graphics.isFullscreen ||
+                        (Gdx.graphics.width == displayMode.width && Gdx.graphics.height == displayMode.height))
+                || (width == -1 && height == -1)) {
+                if (UserPrefs.useNormalFullScreenMode) {
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                } else {
+                    Gdx.graphics.setUndecorated(true)
+                    Gdx.graphics.setWindowedMode(displayMode.width, displayMode.height)
+                }
+            } else {
+                Gdx.graphics.setUndecorated(false)
+                Gdx.graphics.setWindowedMode(width, height)
+            }
+        }
     }
-
 }

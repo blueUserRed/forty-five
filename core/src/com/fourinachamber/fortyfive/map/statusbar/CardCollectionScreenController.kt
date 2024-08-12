@@ -45,6 +45,10 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
             .filter { "not in collection" !in it.tags }
+        cardPrototypes =
+            sort((Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
+                .filter { "not in collection" !in it.tags }.toMutableList()
+            )
         _allCards = cardPrototypes
             .map { it.create(screen, true) }
             .toMutableList()
@@ -57,24 +61,41 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         loadCollection()
     }
 
+    private fun sort(original: MutableList<CardPrototype>): List<CardPrototype> {
+        val res: MutableList<CardPrototype> = mutableListOf()
+        var i = 0
+        var notFoundCounter = 0 //TODO ugly
+        while (original.isNotEmpty()) {
+            val curRes = original.filter { "pool$i" in it.tags }
+            original.removeAll(curRes)
+            if (curRes.isEmpty())notFoundCounter++
+            if (notFoundCounter==3) break
+            res.addAll(curRes)
+            i++
+        }
+        res.addAll(original)
+        return res
+    }
+
     private fun formatToTwoDigits(a: Number): String = a.toInt().toString().padStart(2, '0')
 
     private var lastEvent: ButtonClickEvent? = null
 
     @EventHandler
     fun nextPage(event: ButtonClickEvent, actor: Actor) {
-        if (lastEvent==event) return
+        if (lastEvent == event) return
         if ((++curPage) == nbrOfPages) curPage = 0
         reloadCollection()
-        lastEvent=event //TODO VERY UGLY, marvin idk why this happens, but it needs to be fixed (this method is always called twice for one buttonpress, idk why)
+        lastEvent =
+            event //TODO VERY UGLY, marvin idk why this happens, but it needs to be fixed (this method is always called twice for one buttonpress, idk why)
     }
 
     @EventHandler
     fun prevPage(event: ButtonClickEvent, actor: Actor) {
-        if (lastEvent==event) return
+        if (lastEvent == event) return
         if ((--curPage) < 0) curPage += nbrOfPages
         reloadCollection()
-        lastEvent=event
+        lastEvent = event
     }
 
     private fun reloadCollection() {
@@ -135,7 +156,7 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
                 screen.enterState("showHoverDetailGlow")
                 cardCollectionWidget.isVisible = true
                 target.offsetY = -amount
-            }else{
+            } else {
                 screen.leaveState("showHoverDetailGlow")
             }
         }

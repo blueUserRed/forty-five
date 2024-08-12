@@ -82,10 +82,23 @@ var confirmationPopup = $Box {
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                background: "common_popup_background_black_large"
+                background: "common_popup_background_black_large" //TODO this
             }
         ],
     } children [
+        $TemplateLabel {
+            styles: [
+                {
+                    width: 500#points
+                },
+            ],
+            font: "red_wing_bmp",
+            fontScale: 0.4,
+            color: color.forty_white,
+//            wrap: true,
+            align: "center",
+            template: "{title_screen.popupTitle}",
+        },
 
         $TemplateLabel {
             styles: [
@@ -93,14 +106,13 @@ var confirmationPopup = $Box {
                     width: 500#points
                 },
             ],
-            font: "roadgeek",
-            fontScale: 1.1,
-            color: color.forty_white,
+            font: "red_wing_cm",
+            fontScale: 1.0,
+            color: color.taupe_gray,
             wrap: true,
             align: "center",
             template: "{title_screen.popupText}",
         },
-
         $Box {
             styles: [
                 {
@@ -127,9 +139,9 @@ var confirmationPopup = $Box {
                 ],
             } children [
                 $Label {
-                    font: "roadgeek",
+                    font: "red_wing_bmp",
                     text: "Cancel",
-                    fontScale: 1.0,
+                    fontScale: 0.25,
                     color: color.white,
                     behaviours: [
                         sharedComponents.buttonSoundBehaviour,
@@ -160,9 +172,9 @@ var confirmationPopup = $Box {
                 ]
             } children [
                 $Label {
-                    font: "roadgeek",
+                    font: "red_wing_bmp",
                     text: "Continue",
-                    fontScale: 1.0,
+                    fontScale: 0.25,
                     color: color.white,
                     behaviours: [
                         sharedComponents.buttonSoundBehaviour,
@@ -220,7 +232,7 @@ var inDevelopmentPopup = $Box {
                     width: 500#points
                 },
             ],
-            font: "roadgeek",
+            font: "red_wing_bmp",
             fontScale: 0.8,
             color: color.forty_white,
             wrap: true,
@@ -255,7 +267,7 @@ var inDevelopmentPopup = $Box {
                 ]
             } children [
                 $Label {
-                    font: "roadgeek",
+                    font: "red_wing_bmp",
                     text: "Continue",
                     fontScale: 1.0,
                     color: color.white,
