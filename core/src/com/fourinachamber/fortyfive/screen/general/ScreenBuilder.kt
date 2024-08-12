@@ -368,6 +368,7 @@ class ScreenBuilder(val file: FileHandle) {
         "Statusbar" -> StatusbarWidget(
             widgetOnj.get<String?>("mapIndicatorWidgetName"),
             widgetOnj.get<String>("optionsWidgetName"),
+            widgetOnj.get<String>("backgroundWidgetName"),
             widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
             screen
         ).apply {

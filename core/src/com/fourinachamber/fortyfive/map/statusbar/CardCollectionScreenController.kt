@@ -66,7 +66,6 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
     }
 
     private fun sort(original: MutableList<CardPrototype>): List<CardPrototype> {
-        println(original.map { it.name })
         val res: MutableList<CardPrototype> = mutableListOf()
         var i = 0
         var notFoundCounter = 0 //TODO ugly
@@ -79,7 +78,6 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
             i++
         }
         res.addAll(original)
-        println(res.map { it.name })
         return res
     }
 

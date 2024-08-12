@@ -56,7 +56,7 @@ assets: {
         "tutorial_road_weird_corner_house",
 
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
-        "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
+        "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader", "drop_shadow_shader", "gaussian_blur_shader", //TODO add this to the other screens
 
         "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound", "button_2_sound", "walk_sound",
 
@@ -246,6 +246,7 @@ var infoPopup = $Box {
     ],
 
     $Box {
+        name: "drop_shadow_testing_name",
         styles: [
             {
                 style_priority: 1,
