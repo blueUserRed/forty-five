@@ -43,6 +43,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
         is QuitGameEvent -> timeline.appendAction(Timeline.timeline {
             action {
                 screen.enterState(showConfirmationPopupScreenState)
+                TemplateString.updateGlobalParam("title_screen.popupTitle", "Quit?")
                 TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to quit?")
             }
             delayUntil { isConfirmed || showConfirmationPopupScreenState !in screen.screenState }
@@ -55,6 +56,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
         is AbandonRunEvent -> timeline.appendAction(Timeline.timeline {
             action {
                 screen.enterState(showConfirmationPopupScreenState)
+                TemplateString.updateGlobalParam("title_screen.popupTitle", "Abandon Run?")
                 TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to abandon" +
                         " your run? You will loose all the progress you made and all bullets that haven't been saved yet.")
             }
@@ -70,6 +72,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
         is ResetGameEvent -> timeline.appendAction(Timeline.timeline {
             action {
                 screen.enterState(showConfirmationPopupScreenState)
+                TemplateString.updateGlobalParam("title_screen.popupTitle", "Reset game?")
                 TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to reset" +
                         " the game? The game will behave as if it were freshly installed.")
             }

@@ -5,19 +5,21 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.*
+import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
 import onj.value.OnjArray
 import onj.value.OnjObject
+
 
 /**
  * main game object
@@ -46,6 +48,9 @@ object FortyFive : Game() {
     private val mainThreadTaskAddBuffer: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
 
     private val screenChangeCallbacks: MutableList<() -> Unit> = mutableListOf()
+
+    lateinit var steamHandler: SteamHandler
+        private set
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -100,6 +105,7 @@ object FortyFive : Game() {
         currentScreen?.update(Gdx.graphics.deltaTime)
         nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
+        steamHandler.update()
     }
 
     fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
@@ -180,6 +186,7 @@ object FortyFive : Game() {
         ConfigFileManager.init()
         TemplateString.init()
         FortyFiveLogger.init()
+        steamHandler = SteamHandler()
         UserPrefs.read()
         SoundPlayer.init()
         GameDirector.init()
@@ -199,7 +206,6 @@ object FortyFive : Game() {
         serviceThread.start()
         cardTextureManager.init()
         RandomCardSelection.init()
-
 //        resetAll()
 //        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
@@ -215,12 +221,14 @@ object FortyFive : Game() {
         .map { it as OnjObject }
         .zip { it.get<OnjArray>("tags") }
         .mapSecond { it.value.find { (it.value as String).startsWith("rarity") } }
-        .mapSecond { when (it?.value) {
-            "rarity1" -> 1
-            "rarity2" -> 2
-            "rarity3" -> 3
-            else -> null
-        } }
+        .mapSecond {
+            when (it?.value) {
+                "rarity1" -> 1
+                "rarity2" -> 2
+                "rarity3" -> 3
+                else -> null
+            }
+        }
         .filter { it.second != null }
         .map { (card, num) -> List(num!!) { card.get<String>("name") } }
         .flatten()
@@ -236,7 +244,6 @@ object FortyFive : Game() {
         currentScreen?.dispose()
         serviceThread.close()
         ResourceManager.end()
-        currentRenderPipeline?.dispose()
         super.dispose()
     }
 }

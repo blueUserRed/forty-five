@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.steam.UserStat
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
@@ -127,6 +129,9 @@ object SaveState {
 
     private var _playerMoney: Int by templateParam("stat.playerMoney", 0) {
         savefileDirty = true
+        if (it >=1000){
+            FortyFive.steamHandler.updateStats(UserStat.Cash1000InHand)
+        }
     }
 
     var totalMoneyEarned: Int = 0
@@ -198,7 +203,21 @@ object SaveState {
             ?.toMutableList()
             ?: run {
                 FortyFiveLogger.warn(logTag, "no cards array in savefile, falling back to some default bullets")
-                mutableListOf("bullet", "bullet", "bullet", "bigBullet") //this should NEVER happen
+                mutableListOf("bullet", "bullet", "bullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet", //TODO remove after finished testing
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+                ) //this should NEVER happen
             }
         FortyFiveLogger.debug(logTag, "cards: $_cards")
 
@@ -257,6 +276,7 @@ object SaveState {
         )
 
         savefileDirty = false
+//        playerLives=3 //TODO remove
     }
 
     fun earnMoney(amount: Int) {

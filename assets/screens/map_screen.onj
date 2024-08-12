@@ -191,26 +191,27 @@ var infoPopup = $Box {
     ],
 
     $Box {
+        name: "drop_shadow_testing_name",
         styles: [
             {
                 style_priority: 1,
                 disabled: false,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                height: 50#points,
-                width: 140#points,
-                background: "common_button_default"
+                height: 80#points,
+                width: 180#points,
+                background: "map_detail_encounter_button"
             },
             {
                 style_priority: 2,
                 style_condition: hover() and state("canStartEvent"),
-                background: "common_button_hover"
+                background: "map_detail_encounter_button_hover"
             },
             {
                 style_priority: 3,
                 style_condition: not(state("canStartEvent")),
                 disabled: true,
-                background: "common_button_disabled"
+                background: "map_detail_encounter_button_disabled"
             }
         ],
         behaviours: [
@@ -220,17 +221,24 @@ var infoPopup = $Box {
     } children [
 
         $TemplateLabel {
-            styles: [
-                {
-                    width: 140#points,
-                }
-            ],
             font: "red_wing",
             name: "start_button",
             template: "{map.cur_event.buttonText}",
             fontScale: 1.0,
             color: color.white,
             align: "center",
+            styles: [
+                {
+                    style_priority: 1,
+                    fontColor: color.red,
+                    width: 140#points,
+                },
+                {
+                    style_priority: 2,
+                    fontColor: color.white,
+                    style_condition: parent(hover()) or not(state("canStartEvent")),
+                },
+            ]
         }
 
     ]

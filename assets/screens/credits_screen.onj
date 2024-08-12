@@ -22,7 +22,7 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $CreditScreenController { },
+    screenControllers: [$CreditScreenController { },]
 },
 
 templates: [
