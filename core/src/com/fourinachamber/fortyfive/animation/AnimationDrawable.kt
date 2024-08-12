@@ -47,7 +47,6 @@ class AnimationDrawable(
 
     override fun draw(batch: Batch?, x: Float, y: Float, width: Float, height: Float) {
         if (!isRunning || batch == null) return
-
         val currentTime = TimeUtils.millis()
         var progress = currentTime - startTime
         var currentAnimation = currentAnimation ?: nextAnimation() ?: return

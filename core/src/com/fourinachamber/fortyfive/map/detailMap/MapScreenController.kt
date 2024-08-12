@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Event
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
@@ -32,6 +33,14 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
     override fun init(context: Any?) {
         PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
+    }
+
+    override fun onShow() {
+        FortyFive.currentRenderPipeline?.addDebugMenuPage(mapWidget.debugMenuPage)
+    }
+
+    override fun end() {
+        FortyFive.currentRenderPipeline?.removeDebugMenuPage(mapWidget.debugMenuPage)
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {

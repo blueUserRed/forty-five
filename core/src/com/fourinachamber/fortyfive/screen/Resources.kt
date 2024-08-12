@@ -87,16 +87,16 @@ abstract class Resource(
 
             //// !! prints are left here intentionally !!
 
-//            val startedTime = TimeUtils.millis()
+            val startedTime = TimeUtils.millis()
             val message = ServiceThreadMessage.PrepareResource(this)
             FortyFive.serviceThread.sendMessage(message)
             val loadPromise = message.promise.chain {
-//                println("${Thread.currentThread().name} $handle")
+                println("${Thread.currentThread().name} $handle")
                 FortyFive.mainThreadTask {
-//                    val finishedPrep = TimeUtils.millis()
+                    val finishedPrep = TimeUtils.millis()
                     runBlocking { load() }
-//                    val finished = TimeUtils.millis()
-//                    println("$handle: ${finished - startedTime} (${finishedPrep - startedTime} / ${finished - finishedPrep})")
+                    val finished = TimeUtils.millis()
+                    println("$handle: ${finished - startedTime} (${finishedPrep - startedTime} / ${finished - finishedPrep})")
                     this
                 }
             }
