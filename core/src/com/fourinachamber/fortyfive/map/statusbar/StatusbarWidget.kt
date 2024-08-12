@@ -18,6 +18,7 @@ import onj.value.OnjString
 class StatusbarWidget(
     private val mapIndicatorWidgetName: String?,
     private val optionsWidgetName: String,
+    private val backgroundWidgetName: String,
     private val options: List<OnjObject>,
     screen: OnjScreen
 ) : CustomFlexBox(screen) {
@@ -52,8 +53,16 @@ class StatusbarWidget(
     private fun initSpecialChildren() {
         initMapIndicator()
         initOptions()
+        initBackground()
         resortZIndices()
         timeline.startTimeline()
+    }
+
+    private fun initBackground() {
+        val backgroundActor=screen.namedActorOrError(backgroundWidgetName)
+        backgroundActor.onButtonClick {
+            buttonClicked(optionWidgets[displayedOptionIndex].first)
+        }
     }
 
     private fun initOptions() {
@@ -86,12 +95,12 @@ class StatusbarWidget(
             optionWidgets.add(curBox to action)
             curBox.onButtonClick {
                 buttonClicked(curBox)
-                SoundPlayer.situation("statusbar_button_clicked", screen)
             }
         }
     }
 
     private fun buttonClicked(clickedBox: CustomFlexBox) {
+        SoundPlayer.situation("statusbar_button_clicked", screen)
         if (timeline.isFinished) {
             val option = optionWidgets.find { it.first == clickedBox }!!
             when (displayedOptionIndex) {

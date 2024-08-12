@@ -23,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -448,6 +449,11 @@ open class CustomFlexBox(
 
     var background: Drawable? = null
 
+    private val dropShadowShader: BetterShader? by lazy {
+//        ResourceManager.get(screen, "drop_shadow_shader")
+        ResourceManager.get(screen, "gaussian_blur_shader")
+    }
+
     override var isDisabled: Boolean = false
 
     override var isHoveredOver: Boolean = false
@@ -570,8 +576,49 @@ open class CustomFlexBox(
             val old = batch.color.a
             if (parentAlpha * alpha < 1f) batch.flush()
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
-
             val background = background
+            if(name=="drop_shadow_testing_name"){
+                dropShadowShader?.let {
+                    batch.flush()
+                    it.shader.bind()
+                    it.prepare(screen)
+                    val oldShader=batch.shader
+
+//                    val glowDist = 0.05F                  //drop shadow config
+////                    val glowDist = 0.015F
+//                    val extraWidth = 1F/1.2F
+//                    val extraHeight = 1F/1.2F
+//                    val offset= Vector2(0.02F,0.1F)
+
+//                    val glowDist = 0.05F                    //glow config
+////                    val glowDist = 0.015F
+//                    val extraWidth = 1F
+//                    val extraHeight = 1F
+//                    val offset= Vector2(0.0F,0.0F)
+
+//                    batch.shader = it.shader
+//                    it.shader.setUniformf("u_multiplier", glowDist)
+//                    it.shader.setUniformf("u_color", Color.GREEN)
+//                    it.shader.setUniformf("u_offset", offset)
+//                    background?.draw(batch,
+//                        x-width*glowDist*extraWidth,
+//                        y-height*glowDist*extraHeight,
+//                        width*(1+glowDist*2*extraWidth),
+//                        height*(1+glowDist*2*extraHeight))
+
+
+//                    it.shader.setUniformf("u_radius", 30F)
+//                    it.shader.setUniformf("u_dir", Vector2(0F,0.001F))
+//                    background?.draw(batch, x, y+height*2, width, height)
+//                    batch.flush()
+//                    it.shader.setUniformf("u_radius", 30F)
+//                    it.shader.setUniformf("u_dir", Vector2(0.001F,0F))
+//                    background?.draw(batch, x, y+height*2, width, height)
+
+                    batch.flush()
+                    batch.shader = oldShader
+                }
+            } //else //TODO remove this else
             if (background is TransformDrawable) {
                 background.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {

@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
+import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 
@@ -40,6 +41,7 @@ object FortyFive : Game() {
     private var inScreenTransition: Boolean = false
 
     lateinit var steamHandler: SteamHandler
+        private set
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -177,6 +179,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
+//        printAllCards(cards)
 //        println(cards.get<OnjArray>("cards").value.size)
 //        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }

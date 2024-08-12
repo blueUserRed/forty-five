@@ -73,6 +73,7 @@ $Widget {
     $Statusbar{
         mapIndicatorWidgetName?: string,
         optionsWidgetName: string,
+        backgroundWidgetName: string,
         options: {
             actionName?: string,
             actorName?: string,
