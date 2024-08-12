@@ -295,6 +295,7 @@ open class RenderPipeline(
     }
 
     private fun showPerformanceInfo() {
+        debugMenuPages.forEach { it.update() }
         val font = ResourceManager.forceGet<BitmapFont>(this, this, "red_wing_bmp")
         font.data.setScale(0.2f)
 

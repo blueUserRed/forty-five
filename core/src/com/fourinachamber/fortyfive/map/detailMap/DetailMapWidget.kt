@@ -20,6 +20,7 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.rendering.MapDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -210,13 +211,8 @@ class DetailMapWidget(
         }
     }
 
-    fun moveToNextNode(mapNode: MapNode) {
-        if (movePlayerTo != null) {
-            finishMovement()
-            return
-        }
-        goToNode(mapNode)
-    }
+    val debugMenuPage = MapDebugMenuPage()
+    private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
 
     init {
         map.decorations.forEach { it.requestDrawable(screen, this) }
@@ -238,6 +234,14 @@ class DetailMapWidget(
         mapOffset.set(
             if (map.scrollable) idealPos else map.camPosOffset
         )
+    }
+
+    fun moveToNextNode(mapNode: MapNode) {
+        if (movePlayerTo != null) {
+            finishMovement()
+            return
+        }
+        goToNode(mapNode)
     }
 
     override fun act(delta: Float) {
@@ -315,7 +319,7 @@ class DetailMapWidget(
         if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
             FortyFiveLogger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
         }
-//        if (!canGoTo(node)) return
+        if (!walkEverywhere && !canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)

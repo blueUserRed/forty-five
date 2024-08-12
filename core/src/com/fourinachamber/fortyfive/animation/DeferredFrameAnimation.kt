@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.animation
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -52,7 +53,7 @@ class DeferredFrameAnimation(
     override fun update() {
         if (loadedFrameAnimation != null) return
         val loadingResources = ResourceManager.resources
-            .filter { it.startedLoading }
+            .filter { it.startedLoading && it.state != Resource.ResourceState.LOADED }
             .size
         if (loadingResources > 3) return // magic number
         load()
