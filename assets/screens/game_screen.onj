@@ -65,7 +65,7 @@ assets: {
         "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
         "card_destroy_sound", "holster_remove_sound", "metal_on_metal_sound",
 
-        "screen_shake_popout_shader",
+        "screen_shake_popout_shader", "warp_shader",
 
         "map_theme", "encounter_theme",
 

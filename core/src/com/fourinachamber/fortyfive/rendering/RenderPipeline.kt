@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
-import com.badlogic.gdx.math.CatmullRomSpline
-import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.*
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
@@ -20,12 +20,15 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.UserPrefs
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.LiftableActor
 import com.fourinachamber.fortyfive.utils.*
 import java.lang.Long.max
+import kotlin.math.abs
 import kotlin.math.absoluteValue
 
 interface Renderable {
@@ -74,6 +77,11 @@ open class RenderPipeline(
     }
     private val gaussianBlurShader: BetterShader by gaussianBlurShaderDelegate
 
+    private val warpShaderDelegate = lazy {
+        ResourceManager.get<BetterShader>(screen, "warp_shader")
+    }
+    private val warpShader: BetterShader by warpShaderDelegate
+
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
         get() = TimeUtils.millis() <= orbFinisesAt
@@ -90,6 +98,41 @@ open class RenderPipeline(
 
     private val screenShakePopoutPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(screenShakePopoutShader)
+    }
+
+    private var warpStartTime: Long = 0
+    private var warpDuration: Int = 0
+
+    private val warpPostProcessingStep: () -> Unit = lambda@{
+        val time = TimeUtils.millis()
+        val passedTime = time - warpStartTime
+        val absoluteProgress = passedTime.toFloat() / warpDuration.toFloat()
+        val progress = (1f - abs(absoluteProgress - 0.5f) - 0.5f) * 2f
+        val shader = warpShader
+        val (_, inactive) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return@lambda
+        batch.flush()
+        batch.shader = shader.shader
+        shader.shader.bind()
+        shader.prepare(screen)
+
+        var interpolated: Float = progress
+        interpolated = Interpolation.smoother.apply(interpolated)
+        interpolated = Interpolation.swing.apply(interpolated)
+
+        shader.shader.setUniformf("u_progress", interpolated)
+        shader.shader.setUniformf("u_center", Vector2(0.5f, 0.38f))
+        shader.shader.setUniformf("u_depth", 2.9f)
+        shader.shader.setUniformf("u_rotation", 0.19f * interpolated)
+        batch.enableBlending()
+        batch.draw(
+            inactive.colorBufferTexture,
+            0f, 0f,
+            screen.viewport.worldWidth,
+            screen.viewport.worldHeight,
+            0f, 0f, 1f, 1f // flips the y-axis
+        )
+        batch.flush()
+        batch.shader = null
     }
 
     private val fadeToBlackTask: () -> Unit = {
@@ -110,6 +153,52 @@ open class RenderPipeline(
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
 //        postPreprocessingSteps.add(shaderPostProcessingStep(ResourceManager.get(screen, "test_shader")))
+    }
+
+    fun liftActor(time: Int, actor: LiftableActor): Timeline = Timeline.timeline {
+        val task = liftActorTask(actor.actor, actor)
+        action {
+            actor.inLift = true
+            lateTasks.add(task)
+        }
+        delay(time)
+        action {
+            actor.inLift = false
+            lateTasks.remove(task)
+        }
+    }
+
+    private fun liftActorTask(actor: Actor, liftableActor: LiftableActor): () -> Unit = {
+        screen.viewport.apply()
+        shapeRenderer.projectionMatrix = screen.viewport.camera.combined
+
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+
+        val oldTransform = batch.transformMatrix.cpy()
+        val worldTransform = Affine2()
+        worldTransform.set(oldTransform)
+        worldTransform.translate(x - actor.x, y - actor.y)
+        val computed = Matrix4()
+        computed.set(worldTransform)
+        batch.transformMatrix = computed
+
+        liftableActor.inLiftRender = true
+        actor.draw(batch, 1f)
+        liftableActor.inLiftRender = false
+        batch.transformMatrix = oldTransform
+    }
+
+    fun getTimeWarpTimeline(): Timeline = Timeline.timeline {
+        val duration = 2000
+        action {
+            warpStartTime = TimeUtils.millis()
+            warpDuration = duration
+            postPreprocessingSteps.add(warpPostProcessingStep)
+        }
+        delay(duration)
+        action {
+            postPreprocessingSteps.remove(warpPostProcessingStep)
+        }
     }
 
     fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
@@ -386,6 +475,7 @@ open class RenderPipeline(
         if (alphaReductionShaderDelegate.isInitialized()) alphaReductionShader.dispose()
         if (screenShakeShaderDelegate.isInitialized()) screenShakeShader.dispose()
         if (screenShakePopoutShaderDelegate.isInitialized()) screenShakePopoutShader.dispose()
+        if (warpShaderDelegate.isInitialized()) warpShader.dispose()
     }
 
     data class OrbAnimation(

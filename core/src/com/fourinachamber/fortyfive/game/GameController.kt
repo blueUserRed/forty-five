@@ -139,6 +139,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var selectedCard: Card? = null
 
+    private val _limbo: MutableList<Card> = mutableListOf()
+    val limbo: List<Card>
+        get() = _limbo
+
     /**
      * counts up every turn; starts at 0, but gets immediately incremented to one
      */
@@ -368,6 +372,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         updateStatusEffects()
         updateGameAnimations()
         updateTutorialText()
+        val limboTimeline = _limbo.mapNotNull { it.updateInLimbo(this) }
+        if (limboTimeline.isEmpty()) return
+        appendMainTimeline(limboTimeline.collectTimeline())
+    }
+
+    fun removeFromLimbo(card: Card) {
+        _limbo.remove(card)
     }
 
     private fun updateTutorialText() {
@@ -553,6 +564,30 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         )
     })
 
+    fun placeBulletInRevolverDirect(card: Card, slot: Int): Timeline = Timeline.timeline {
+        val triggerInfo = TriggerInformation(sourceCard = card, controller = this@GameController)
+        action {
+            revolver.setCard(slot, card)
+            card.onEnter(this@GameController)
+        }
+        includeLater(
+            {
+                encounterModifiers
+                    .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
+                    .collectTimeline()
+            },
+            { true }
+        )
+        includeLater(
+            { checkEffectsSingleCard(Trigger.ON_ENTER, card, triggerInfo) },
+            { true }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_ANY_CARD_ENTER, triggerInfo) },
+            { true }
+        )
+    }
+
     fun putCardFromRevolverBackInHand(card: Card) {
         FortyFiveLogger.debug(logTag, "returning card $card from the revolver to the hand")
         revolver.removeCard(card)
@@ -707,13 +742,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot(this@GameController)) {
-                        if (!parryCard.isUndead) {
+                        if (!parryCard.isUndead && !parryCard.isWardenOfTime) {
                             SoundPlayer.situation("orb_anim_playing", curScreen)
                             gameRenderPipeline.addOrbAnimation(cardOrbAnim(parryCard.actor))
                         }
                         revolver.removeCard(parryCard)
                         if (parryCard.isUndead) {
                             cardHand.addCard(parryCard)
+                        } else if (parryCard.isWardenOfTime) {
+                            _limbo.add(parryCard)
                         } else {
                             putCardAtBottomOfStack(parryCard)
                         }
@@ -861,7 +898,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 )
                 action {
                     if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
-                        if (!cardToShoot.isUndead) {
+                        if (!cardToShoot.isUndead && !cardToShoot.isWardenOfTime) {
                             putCardAtBottomOfStack(cardToShoot)
                             SoundPlayer.situation("orb_anim_playing", curScreen)
                             gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
@@ -869,6 +906,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         revolver.removeCard(cardToShoot)
                     }
                     if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
+                    if (cardToShoot.isWardenOfTime) _limbo.add(cardToShoot)
                     cardToShoot.afterShot(this@GameController)
                 }
             }
