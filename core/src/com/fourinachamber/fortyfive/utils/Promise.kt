@@ -11,15 +11,22 @@ class Promise<T> {
     private val callbacks: MutableList<(result: T) -> Unit> = mutableListOf()
 
     fun onResolve(callback: (result: T) -> Unit) {
-        if (isResolved) callback(result as T)
-        callbacks.add(callback)
+        synchronized(callbacks) {
+            if (isResolved) {
+                callback(result as T)
+                return
+            }
+            callbacks.add(callback)
+        }
     }
 
     fun resolve(result: T) {
-        if (isResolved) throw RuntimeException("Promise was already resolved")
-        this.result = result
-        isResolved = true
-        callbacks.forEach { it(result) }
+        synchronized(callbacks) {
+            if (isResolved) throw RuntimeException("Promise was already resolved")
+            this.result = result
+            isResolved = true
+            callbacks.forEach { it(result) }
+        }
     }
 
     fun getOrError(): T = if (isResolved) result as T else throw RuntimeException("Promise was not resolved yet")
