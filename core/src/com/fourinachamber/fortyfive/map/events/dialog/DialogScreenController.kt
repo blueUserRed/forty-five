@@ -18,7 +18,6 @@ class DialogScreenController(private val screen: OnjScreen, onj: OnjObject) : Sc
 
     private lateinit var context: NPCMapEvent
     private val dialogWidgetName = onj.get<String>("dialogWidgetName")
-    private val npcFilePath = onj.get<String>("npcsFile")
     private lateinit var dialogWidget: DialogWidget
 
     override fun init(context: Any?) {

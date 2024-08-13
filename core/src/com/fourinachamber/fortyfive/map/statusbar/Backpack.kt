@@ -59,7 +59,7 @@ class Backpack(
 
     private val _allCards: MutableList<Card> by lazy {
         cardPrototypes
-            .filter { it.name in SaveState.cards }.filter { it.name in PermaSaveState.collection }
+            .filter { it.name in SaveState.cards }
             .map { it.create(screen, true) }
             .toMutableList()
     }

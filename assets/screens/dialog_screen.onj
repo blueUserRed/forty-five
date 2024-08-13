@@ -23,7 +23,6 @@ options: {
     ],
     screenControllers: [
         $DialogScreenController {
-            npcsFile: "maps/events/npcs.onj",
             dialogWidgetName: "dialog_widget"
         }
     ]

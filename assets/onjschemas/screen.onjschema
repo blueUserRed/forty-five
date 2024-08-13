@@ -452,7 +452,6 @@ $ScreenController {
     }
 
     $DialogScreenController {
-        npcsFile: string,
         dialogWidgetName: string
     }
 
@@ -494,7 +493,6 @@ $ScreenController {
     }
 
     $CardCollectionScreenController {
-        cardsFile: string,
     }
 
     $DraftScreenController { }

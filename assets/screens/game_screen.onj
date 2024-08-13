@@ -81,7 +81,6 @@ options: {
             useSecondary: false,
         },
 //        $CardCollectionScreenController {
-//            cardsFile: "config/cards.onj",
 //        }
     ],
     playAmbientSounds: true,

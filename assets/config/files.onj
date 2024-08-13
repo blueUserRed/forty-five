@@ -58,6 +58,8 @@ configFiles: {
     }
 },
 
+screenSchema: "onjschemas/screen.onjschema",
+
 screens: [
     {
         name: "encounterScreen",

@@ -35,13 +35,13 @@ class Promise<T> {
 
     fun getOr(default: T): T = if (isResolved) result as T else default
 
+    inline fun ifResolved(block: (T) -> Unit) {
+        if (isResolved) block(getOrError())
+    }
+
 }
 
 fun <T> T.asPromise(): Promise<T> = Promise<T>().also { it.resolve(this) }
-
-inline fun <T> Promise<T>.ifResolved(block: (T) -> Unit) {
-    if (isResolved) block(getOrError())
-}
 
 fun <T, U> Promise<T>.map(mapper: (T) -> U): Promise<U> {
     val promise = Promise<U>()
