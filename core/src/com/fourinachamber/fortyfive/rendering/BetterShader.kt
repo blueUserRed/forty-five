@@ -24,9 +24,9 @@ class BetterShader(
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
-    private val textures: MutableMap<String, Pair<Promise<Texture>, Texture?>> = neededTextures
+    private val textures: MutableMap<String, Promise<Texture>> = neededTextures
         .associateWith {
-            ResourceManager.request<Texture>(this, this, uniformResourceNameMapping[it]!!) to null
+            ResourceManager.request<Texture>(this, this, uniformResourceNameMapping[it]!!)
         }
         .toMutableMap()
 
@@ -88,12 +88,9 @@ class BetterShader(
     }
 
     private fun getTexture(name: String): Texture {
-        val (promise, texture) = textures[name]!!
-        promise.ifResolved { return it }
-        if (texture != null) return texture
-        val forceLoadedTexture = ResourceManager.forceGet<Texture>(this, this, name)
-        textures[name] = promise to forceLoadedTexture
-        return forceLoadedTexture
+        val promise = textures[name]!!
+        if (!promise.isResolved) ResourceManager.forceResolve(promise)
+        return promise.getOrError()
     }
 
     override fun dispose() {

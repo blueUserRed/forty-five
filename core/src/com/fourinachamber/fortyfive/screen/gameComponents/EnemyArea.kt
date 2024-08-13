@@ -85,7 +85,7 @@ class EnemyArea(
         _enemies.forEach(Enemy::update)
         val enemy = selectedEnemy ?: return
         val selectionWidth = 30f
-        val enemySelectionDrawable = enemySelectionDrawable.getOrNull() ?: return
+        val enemySelectionDrawable = this.enemySelectionDrawable.getOrNull() ?: return
         enemySelectionDrawable.draw(
             batch,
             x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,

@@ -81,7 +81,7 @@ abstract class Resource(
     open fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
         borrow(borrower, lifetime)
         val returnPromise = if (startedLoading) {
-            promise.map { getVariant(variantType) }
+            promise
         } else {
             startedLoading = true
 
@@ -103,8 +103,8 @@ abstract class Resource(
             loadPromise.onResolve {
                 if (!promise.isResolved) promise.resolve(it)
             }
-            promise.map { getVariant(variantType) }
-        }
+            promise
+        }.map { getVariant(variantType) }
         activePromises.add(returnPromise)
         lifetime.onEnd { activePromises.remove(returnPromise) }
         return returnPromise

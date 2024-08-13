@@ -155,7 +155,7 @@ object FortyFive : Game() {
         if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
         MapManager.newRunSync()
-        if (forwardToLooseScreen) changeToScreen(ConfigFileManager.screenBuilderFor("loose_screen"))
+        if (forwardToLooseScreen) changeToScreen(ConfigFileManager.screenBuilderFor("looseScreen"))
     }
 
     override fun resize(width: Int, height: Int) {

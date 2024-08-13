@@ -18,9 +18,7 @@ object ConfigFileManager {
         OnjSchemaParser.parseFile("onjschemas/files.onjschema")
     }
 
-    private val screenSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile("onjschemas/screen.onjschema")
-    }
+    private lateinit var screenSchema: OnjSchema
 
     private lateinit var configFiles: List<ConfigFile>
     private lateinit var screens: List<ScreenData>
@@ -41,6 +39,7 @@ object ConfigFileManager {
                     null
                 )
             }
+        screenSchema = OnjSchemaParser.parseFile(Gdx.files.internal(onj.get<String>("screenSchema")).file())
         screens = onj
             .get<OnjArray>("screens")
             .value

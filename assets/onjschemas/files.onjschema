@@ -21,6 +21,8 @@ configFiles: {
     mapConfig: fileConfig,
 },
 
+screenSchema: string,
+
 screens: {
     name: string,
     file: string,
