@@ -19,6 +19,7 @@ import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
 import onj.value.OnjArray
 import onj.value.OnjObject
+import kotlin.system.measureTimeMillis
 
 
 /**
@@ -94,18 +95,30 @@ object FortyFive : Game() {
     }
 
     override fun render() {
-        mainThreadTasks.addAll(mainThreadTaskAddBuffer)
-        mainThreadTaskAddBuffer.clear()
-        mainThreadTasks.forEach { (task, promise) ->
-            val result = task()
-            @Suppress("UNCHECKED_CAST")
-            (promise as Promise<Any?>).resolve(result)
+        measureTimeMillis {
+            mainThreadTasks.addAll(mainThreadTaskAddBuffer)
+            mainThreadTaskAddBuffer.clear()
+            mainThreadTasks.forEach { (task, promise) ->
+                val result = task()
+                @Suppress("UNCHECKED_CAST")
+                (promise as Promise<Any?>).resolve(result)
+            }
+            mainThreadTasks.clear()
+            measureTimeMillis {
+                currentScreen?.update(Gdx.graphics.deltaTime)
+            }.also {
+//                println("$it current")
+            }
+            measureTimeMillis {
+                nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+            }.also {
+//                println("$it next")
+            }
+            currentRenderPipeline?.render(Gdx.graphics.deltaTime)
+            steamHandler.update()
+        }.also {
+//            println(it)
         }
-        mainThreadTasks.clear()
-        currentScreen?.update(Gdx.graphics.deltaTime)
-        nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
-        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
-        steamHandler.update()
     }
 
     fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {

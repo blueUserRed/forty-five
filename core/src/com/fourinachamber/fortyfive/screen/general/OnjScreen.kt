@@ -447,7 +447,10 @@ open class OnjScreen(
             if (stage.batch.isDrawing) stage.batch.end()
             stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-            stage.draw()
+            val time = measureTimeMillis {
+                stage.draw()
+            }
+//            println(time)
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             styleManagers
                 .filter { it !in oldStyleManagers }
