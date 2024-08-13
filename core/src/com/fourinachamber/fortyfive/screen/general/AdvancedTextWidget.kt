@@ -309,7 +309,7 @@ class IconAdvancedTextPart(
     init {
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
-        fontPromise.onResolve { calculatedLayout = false }
+        fontPromise.then { calculatedLayout = false }
     }
 
     private fun recalcLayout() {

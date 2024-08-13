@@ -56,7 +56,7 @@ class CardTextureManager {
         }
         val message = ServiceThreadMessage.LoadCardPixmap(card.name)
         FortyFive.serviceThread.sendMessage(message)
-        message.promise.onResolve { data.cardPixmap = it }
+        message.promise.then { data.cardPixmap = it }
         statistics.pixmapLoads++
         return message.promise
     }
@@ -113,8 +113,8 @@ class CardTextureManager {
     ) {
         val preventCompleteUnload = preventUnloadingOfCard(data)
         if (preventCompleteUnload && data.isStandardVariant(variant)) return
-        variant.pixmap.onResolve { it.dispose() }
-        variant.texture.onResolve { it.dispose() }
+        variant.pixmap.then { it.dispose() }
+        variant.texture.then { it.dispose() }
         data.variants.remove(variant)
         if (data.variants.isNotEmpty()) return
         if (preventCompleteUnload) return
@@ -122,8 +122,7 @@ class CardTextureManager {
         data.cardPixmap = null
     }
 
-    private fun preventUnloadingOfCard(data: CardTextureData): Boolean =
-        FortyFive.currentGame != null && data.cardName in SaveState.curDeck.cards
+    private fun preventUnloadingOfCard(data: CardTextureData): Boolean = data.cardName in SaveState.curDeck.cards
 
     private fun cardTextureDataFor(card: Card): CardTextureData = cardTextures
         .find { it.cardName == card.name }

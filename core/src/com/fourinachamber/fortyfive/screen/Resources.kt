@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
@@ -100,7 +99,7 @@ abstract class Resource(
                     this
                 }
             }
-            loadPromise.onResolve {
+            loadPromise.then {
                 if (!promise.isResolved) promise.resolve(it)
             }
             promise

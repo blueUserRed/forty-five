@@ -10,7 +10,7 @@ class Promise<T> {
 
     private val callbacks: MutableList<(result: T) -> Unit> = mutableListOf()
 
-    fun onResolve(callback: (result: T) -> Unit) {
+    fun then(callback: (result: T) -> Unit) {
         synchronized(callbacks) {
             if (isResolved) {
                 callback(result as T)
@@ -45,15 +45,15 @@ fun <T> T.asPromise(): Promise<T> = Promise<T>().also { it.resolve(this) }
 
 fun <T, U> Promise<T>.map(mapper: (T) -> U): Promise<U> {
     val promise = Promise<U>()
-    this.onResolve { promise.resolve(mapper(it)) }
+    this.then { promise.resolve(mapper(it)) }
     return promise
 }
 
 fun <T, U> Promise<T>.chain(next: (T) -> Promise<U>): Promise<U> {
     val promise = Promise<U>()
-    this.onResolve { first ->
+    this.then { first ->
         val chained = next(first)
-        chained.onResolve { promise.resolve(it) }
+        chained.then { promise.resolve(it) }
     }
     return promise
 }

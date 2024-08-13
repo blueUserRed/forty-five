@@ -54,8 +54,8 @@ class AutomaticResourceGetter<T : Any>(
         val guardedLifetime = guardLifetime.shorter(newLifetime)
         val promise = ResourceManager.request(this, guardedLifetime, new, resourceType)
         currentPromise = promise
-        promise.onResolve { result ->
-            if (currentPromise !== promise) return@onResolve
+        promise.then { result ->
+            if (currentPromise !== promise) return@then
             backingField = result
             currentLifetime?.die()
             currentPromise = null
