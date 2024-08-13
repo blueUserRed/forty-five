@@ -35,7 +35,7 @@ class DeferredFrameAnimation(
     private fun load() {
         ResourceManager
             .request<TextureAtlas>(this, this, atlasHandle)
-            .onResolve(::createFrameAnimation)
+            .then(::createFrameAnimation)
     }
 
     private fun createFrameAnimation(textureAtlas: TextureAtlas) {

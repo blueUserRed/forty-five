@@ -96,7 +96,7 @@ object SoundPlayer : ResourceBorrower {
         val musicPromise = ResourceManager.request<Music>(screen, screen, musicHandle)
         currentMusic = musicPromise
         currentMusicHandle = musicHandle
-        musicPromise.onResolve { music ->
+        musicPromise.then { music ->
             music.isLooping = true
             music.play()
             music.volume = musicVolume * masterVolume
@@ -111,7 +111,7 @@ object SoundPlayer : ResourceBorrower {
         transitionStartTime = TimeUtils.millis()
         transitionToMusicHandle = musicHandle
         transitionDuration = duration
-        musicPromise?.onResolve { music ->
+        musicPromise?.then { music ->
             music.play()
             music.isLooping = true
             music.volume = 0f
@@ -133,14 +133,14 @@ object SoundPlayer : ResourceBorrower {
             return
         }
         val soundPromise = ResourceManager.request<Sound>(this, screen, situation.sound ?: return)
-        soundPromise.onResolve { sound ->
+        soundPromise.then { sound ->
             sound.play(situation.volume * soundEffectVolume * masterVolume)
         }
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
         val soundPromise = ResourceManager.request<Sound>(this, screen, soundHandle)
-        soundPromise.onResolve { sound ->
+        soundPromise.then { sound ->
             sound.play(soundEffectVolume * masterVolume)
         }
     }
@@ -176,12 +176,12 @@ object SoundPlayer : ResourceBorrower {
     }
 
     fun skipMusicTo(amount: Float) {
-        currentMusic?.onResolve { it.position = amount }
+        currentMusic?.then { it.position = amount }
     }
 
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
         val musicPromise = ResourceManager.request<Music>(this, screen, musicHandle)
-        musicPromise.onResolve { music ->
+        musicPromise.then { music ->
             music.play()
             music.volume = musicVolume * masterVolume
         }
