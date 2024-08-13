@@ -19,8 +19,8 @@ import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
 import onj.value.OnjArray
 import onj.value.OnjObject
-import kotlin.system.measureTimeMillis
 
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * main game object
@@ -45,8 +45,7 @@ object FortyFive : Game() {
 
     private var inScreenTransition: Boolean = false
 
-    private val mainThreadTasks: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
-    private val mainThreadTaskAddBuffer: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
+    private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
 
     private val screenChangeCallbacks: MutableList<() -> Unit> = mutableListOf()
 
@@ -86,7 +85,7 @@ object FortyFive : Game() {
 
     fun <T> mainThreadTask(task: () -> T): Promise<T> {
         val promise = Promise<T>()
-        mainThreadTaskAddBuffer.add(task to promise)
+        mainThreadTasks[task] = promise
         return promise
     }
 
@@ -95,30 +94,15 @@ object FortyFive : Game() {
     }
 
     override fun render() {
-        measureTimeMillis {
-            mainThreadTasks.addAll(mainThreadTaskAddBuffer)
-            mainThreadTaskAddBuffer.clear()
-            mainThreadTasks.forEach { (task, promise) ->
-                val result = task()
-                @Suppress("UNCHECKED_CAST")
-                (promise as Promise<Any?>).resolve(result)
-            }
-            mainThreadTasks.clear()
-            measureTimeMillis {
-                currentScreen?.update(Gdx.graphics.deltaTime)
-            }.also {
-//                println("$it current")
-            }
-            measureTimeMillis {
-                nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
-            }.also {
-//                println("$it next")
-            }
-            currentRenderPipeline?.render(Gdx.graphics.deltaTime)
-            steamHandler.update()
-        }.also {
-//            println(it)
+        mainThreadTasks.forEach { (task, promise) ->
+            val result = task()
+            @Suppress("UNCHECKED_CAST")
+            (promise as Promise<Any?>).resolve(result)
+            mainThreadTasks.remove(task)
         }
+        currentScreen?.update(Gdx.graphics.deltaTime)
+        nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
     fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
