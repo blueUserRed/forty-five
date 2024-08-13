@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.events
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
@@ -39,16 +40,10 @@ object RandomCardSelection {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/card_selection_types.onjschema").file())
     }
 
-    private val cardsFileSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/cards.onjschema").file())
-    }
-
     private var cardMaximums: Map<String, Int> = mapOf()
 
     val allCardPrototypes: List<CardPrototype> by lazy {
-        val onj = OnjParser.parseFile(cardConfigFile)
-        cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("cards")
         Card
             .getFrom(onj.get<OnjArray>("cards"), initializer = {})
     }
@@ -58,9 +53,7 @@ object RandomCardSelection {
     }
 
     fun init() {
-        val file = OnjParser.parseFile(Gdx.files.internal(TYPES_FILE_PATH).file())
-        cardSelectionSchema.assertMatches(file)
-        file as OnjObject
+        val file = ConfigFileManager.getConfigFile("cardSelectionTypeConfig")
         val allTypes: MutableMap<String, List<CardChange>> = mutableMapOf()
         val allTypesOnj = file.get<OnjArray>("types").value.map { it as OnjObject }
         allTypesOnj.forEach {

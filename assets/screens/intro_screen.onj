@@ -8,21 +8,18 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "red_wing_bmp",
-        "microwave_studios_brown_texture", "microwave_studios_logo",
-        "microwave_theme",
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight
 },
 
 options: {
-    transitionAwayTime: 5.0,
+    transitionAwayTimes: [
+        {
+            screen: "*",
+            time: 5.0
+        }
+    ],
     background: "microwave_studios_brown_texture",
     playAmbientSounds: false,
     screenControllers: [$IntroScreenController {}],

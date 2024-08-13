@@ -385,7 +385,7 @@ $Behaviour {
     $OnClickExitBehaviour { }
 
     $OnClickChangeScreenBehaviour {
-        screenPath: string,
+        screen: string,
     }
 
     $OnClickAbandonRunBehaviour { }
@@ -452,7 +452,6 @@ $ScreenController {
     }
 
     $DialogScreenController {
-        npcsFile: string,
         dialogWidgetName: string
     }
 
@@ -494,7 +493,6 @@ $ScreenController {
     }
 
     $CardCollectionScreenController {
-        cardsFile: string,
     }
 
     $DraftScreenController { }
@@ -530,7 +528,11 @@ $KeyAction {
 
     $DeselectAllKeyAction { }
 
-    $ToggleFpsKeyAction { }
+    $ToggleDebugMenuKeyAction { }
+
+    $NextDebugMenuPageKeyAction { }
+
+    $PreviousDebugMenuPageKeyAction { }
 
     $NextInHierarchyKeyAction { }
 
@@ -554,10 +556,6 @@ $KeyAction {
 
 viewport: $Viewport,
 
-assets: {
-    useAssets: string[]
-},
-
 options: {
     background?: string,
     screenControllers?: $ScreenController[],
@@ -574,7 +572,10 @@ options: {
         action?: $KeyAction,
     }[],
     postProcessor?: string,
-    transitionAwayTime?: float
+    transitionAwayTimes?: {
+        screen: string,
+        time: float,
+    }[]
 //    printFrameRate?: boolean
 },
 

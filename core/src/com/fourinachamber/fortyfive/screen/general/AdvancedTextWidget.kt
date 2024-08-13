@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
@@ -25,7 +26,7 @@ import onj.value.OnjObject
 import kotlin.math.sin
 
 open class AdvancedTextWidget(
-    private val defaults: Triple<BitmapFont, Color, Float>,
+    private val defaults: Triple<String, Color, Float>,
     val screen: OnjScreen,
     private val isDistanceField: Boolean,
 ) : WidgetGroup(), ZIndexActor, HoverStateActor, StyledActor {
@@ -56,7 +57,7 @@ open class AdvancedTextWidget(
         defaults: OnjObject,
         screen: OnjScreen,
         isDistanceFiled: Boolean
-    ) : this(AdvancedText.defaultsFromOnj(defaults, screen), screen, isDistanceFiled)
+    ) : this(AdvancedText.defaultsFromOnj(defaults), screen, isDistanceFiled)
 
     fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
         advancedText = AdvancedTextParser(text, screen, defaults, isDistanceField, effects ?: listOf()).parse()
@@ -170,16 +171,17 @@ data class AdvancedText(
             return AdvancedTextParser(
                 rawText,
                 screen,
-                defaultsFromOnj(defaults, screen),
+                defaultsFromOnj(defaults),
                 isDistanceField,
                 effects
-                ?.value
-                ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
-                    ?: listOf()).parse()
+                    ?.value
+                    ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
+                    ?: listOf()
+            ).parse()
         }
 
-        fun defaultsFromOnj(onj: OnjObject, screen: OnjScreen): Triple<BitmapFont, Color, Float> = Triple(
-            ResourceManager.get(screen, onj.get<String>("font")) as BitmapFont,
+        fun defaultsFromOnj(onj: OnjObject): Triple<String, Color, Float> = Triple(
+            onj.get<String>("font"),
             onj.get<Color>("color"),
             onj.get<Double>("fontScale").toFloat()
         )
@@ -212,13 +214,18 @@ interface AdvancedTextPart : OffSettable {
 
 class TextAdvancedTextPart(
     rawText: String,
-    font: BitmapFont,
+    font: String,
     fontColor: Color,
     fontScale: Float,
     screen: OnjScreen,
     isDistanceFiled: Boolean,
     override val breakLine: Boolean
-) : TemplateStringLabel(screen, TemplateString(rawText), LabelStyle(font, fontColor), isDistanceFiled), AdvancedTextPart {
+) : TemplateStringLabel(
+    screen,
+    TemplateString(rawText),
+    LabelStyle(ResourceManager.forceGet(object : ResourceBorrower {}, screen, font), fontColor), // TODO: better way to do ResourceBorrowers
+    isDistanceFiled
+), AdvancedTextPart {
 
     override val actor: Actor = this
 
@@ -279,11 +286,11 @@ class TextAdvancedTextPart(
 
 class IconAdvancedTextPart(
     private val resourceHandle: ResourceHandle,
-    private val font: BitmapFont,
+    private val font: String,
     override val screen: OnjScreen,
     private val dialogFontScale: Float,
     override val breakLine: Boolean
-) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart {
+) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart, ResourceBorrower {
 
 
     override val actor: Actor = this
@@ -297,12 +304,16 @@ class IconAdvancedTextPart(
 
     private var calculatedLayout = false
 
+    private val fontPromise: Promise<BitmapFont> = ResourceManager.request(this, screen, font)
+
     init {
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
+        fontPromise.then { calculatedLayout = false }
     }
 
     private fun recalcLayout() {
+        val font = fontPromise.getOrNull() ?: return
         val layout = GlyphLayout(font, "qh")
         iconHeight = layout.height * dialogFontScale * 1.5f
         val drawable = loadedDrawable!!
@@ -316,8 +327,6 @@ class IconAdvancedTextPart(
     }
 
     override fun update() {
-        if (loadedDrawable == null) forceLoadDrawable()
-        if (drawable == null) forceLoadDrawable()
         if (calculatedLayout && !isVisible) {
             isVisible = true
         }

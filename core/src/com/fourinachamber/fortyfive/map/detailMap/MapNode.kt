@@ -3,11 +3,13 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
+import com.fourinachamber.fortyfive.utils.Promise
 import kotlin.math.*
 
 data class MapNode(
@@ -19,11 +21,11 @@ data class MapNode(
     val imagePos: ImagePosition?,
     val nodeTexture: ResourceHandle?,
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
-) {
+) : ResourceBorrower {
 
 
-    private var imageCache: Drawable? = null
-    private var nodeTextureCache: Drawable? = null
+    private var imageCache: Promise<Drawable>? = null
+    private var nodeTextureCache: Promise<Drawable>? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
 
     fun getEdge(dir: Direction): MapNode? {
@@ -107,7 +109,7 @@ data class MapNode(
     }
 
     @MainThreadOnly
-    fun getImage(screen: OnjScreen): Drawable? {
+    fun getImage(screen: OnjScreen): Promise<Drawable>? {
         if (imageName == null) return null
         if (imageCache != null) return imageCache
         val handle = getImageData()?.resourceHandle
@@ -115,15 +117,15 @@ data class MapNode(
             FortyFiveLogger.warn(logTag, "No image data found for $imageName")
             return null
         }
-        imageCache = ResourceManager.get(screen, handle)
+        imageCache = ResourceManager.request(this, screen, handle)
         return imageCache
     }
 
     @MainThreadOnly
-    fun getNodeTexture(screen: OnjScreen): Drawable? {
+    fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache
-        nodeTextureCache = ResourceManager.get(screen, nodeTexture)
+        nodeTextureCache = ResourceManager.request(this, screen, nodeTexture)
         return nodeTextureCache
     }
 

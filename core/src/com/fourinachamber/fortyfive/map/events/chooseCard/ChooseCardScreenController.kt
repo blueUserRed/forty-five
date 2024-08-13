@@ -21,7 +21,7 @@ import kotlin.random.Random
 // evtl. straßen different
 // encounter modifier (wahrscheinlicher)
 
-class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
+class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
 
     private val leaveButtonName = onj.get<String>("leaveButtonName")
     private val cardsParentName = onj.get<String>("cardsParentName")
@@ -29,14 +29,12 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
-    private lateinit var screen: OnjScreen
     private lateinit var context: ChooseCardScreenContext
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(context: Any?) {
         if (context !is ChooseCardScreenContext) {
             throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardScreenContext")
         }
-        this.screen = onjScreen
         this.context = context
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor

@@ -1,0 +1,29 @@
+
+var fileConfig = {
+    file: string,
+    validatedBy: string?
+};
+
+configFiles: {
+    assets: fileConfig,
+    cards: fileConfig,
+    descriptions: fileConfig,
+    encounterDefinitions: fileConfig,
+    enemies: fileConfig,
+    gameConfig: fileConfig,
+    graphicsConfig: fileConfig,
+    soundConfig: fileConfig,
+    logConfig: fileConfig,
+    cardSelectionTypeConfig: fileConfig,
+    npcConfig: fileConfig,
+    shopConfig: fileConfig,
+    backpackConfig: fileConfig,
+    mapConfig: fileConfig,
+},
+
+screenSchema: string,
+
+screens: {
+    name: string,
+    file: string,
+}[]

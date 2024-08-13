@@ -9,17 +9,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "roadgeek", "red_wing_bmp", "red_wing",
-
-        "black_texture", "white_texture",
-        "logo_red", "microwave_studios_logo", "logo_htl3r",
-
-        "main_theme",
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight
@@ -29,7 +18,12 @@ options: {
     background: "black_texture",
     music: "main_theme",
     playAmbientSounds: false,
-    transitionAwayTime: 1.0,
+    transitionAwayTimes: [
+        {
+            screen: "*",
+            time: 1.0
+        }
+    ],
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

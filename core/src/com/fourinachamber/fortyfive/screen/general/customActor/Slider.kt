@@ -9,12 +9,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.between
 
 class Slider(
@@ -26,7 +28,7 @@ class Slider(
     val max: Float,
     bind: String?,
     val screen: OnjScreen
-) : Widget(), StyledActor {
+) : Widget(), StyledActor, ResourceBorrower {
 
     override var styleManager: StyleManager? = null
 
@@ -41,13 +43,9 @@ class Slider(
         renderer
     }
 
-    private val sliderDrawable: Drawable by lazy {
-        ResourceManager.get(screen, sliderBackground)
-    }
+    private val sliderDrawable: Promise<Drawable> = ResourceManager.request(this, screen, sliderBackground)
 
-    private val sliderShader: BetterShader by lazy {
-        ResourceManager.get(screen, "slider_shader")
-    }
+    private val sliderShader: Promise<BetterShader> = ResourceManager.request(this, screen, "slider_shader")
 
     private val inputListener = object : DragListener() {
 
@@ -74,7 +72,8 @@ class Slider(
         if (batch == null) return
         bindTarget?.let { cursorPos = 1 - (it.getter() - min) / (max - min) }
         batch.flush()
-        val shader = sliderShader
+        val shader = sliderShader.getOrNull() ?: return
+        val sliderDrawable = sliderDrawable.getOrNull() ?: return
         shader.shader.bind()
         shader.shader.setUniformf("u_pos", cursorPos)
         shader.prepare(screen)

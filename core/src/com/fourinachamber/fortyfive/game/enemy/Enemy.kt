@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
@@ -52,9 +51,11 @@ class Enemy(
     val coverIconHandle: ResourceHandle,
     val hiddenActionIconHandle: ResourceHandle,
     val health: Int,
-    val scale: Float,
+    val enemyWidth: Float,
+    val enemyHeight: Float,
     val coverIconScale: Float,
     val indicatorIconScale: Float,
+    val detailFontHandle: String,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
@@ -87,6 +88,7 @@ class Enemy(
             field = max(value, -300)
             if (oldValue > 0 && value <= 0) {
                 gameController.enemyDefeated(this)
+                actor.defeated()
             }
         }
 
@@ -270,19 +272,25 @@ class Enemy(
         
         fun readEnemy(onj: OnjObject, health: Int): Enemy {
             val gameController = FortyFive.currentGame!!
-            val curScreen = gameController.curScreen
+            val curScreen = gameController.screen
             val drawableHandle = onj.get<String>("texture")
             val coverIconHandle = onj.get<String>("coverIcon")
-            val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
+            val detailFont = ResourceManager.forceGet<BitmapFont>(
+                object : ResourceBorrower {},
+                curScreen,
+                onj.get<String>("detailFont")
+            )
             val enemy = Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
                 coverIconHandle,
                 onj.get<String>("hiddenActionIcon"),
                 health,
-                onj.get<Double>("scale").toFloat(),
+                onj.get<Double>("width").toFloat(),
+                onj.get<Double>("height").toFloat(),
                 onj.get<Double>("coverIconScale").toFloat(),
                 onj.get<Double>("indicatorIconScale").toFloat(),
+                onj.get<String>("detailFont"),
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
@@ -308,7 +316,7 @@ class EnemyActor(
     textEmitterConfig: OnjArray,
     private val hiddenActionIconHandle: ResourceHandle,
     val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor, ResourceBorrower {
 
     private val fontColor = if (GraphicsConfig.isEncounterBackgroundDark(MapManager.currentDetailMap.biome)) {
         enemy.detailFontColorDark
@@ -323,7 +331,7 @@ class EnemyActor(
     private val attackIcon = EnemyActionIcon(screen, hiddenActionIconHandle)
 
     private val attackLabel = AdvancedTextWidget(
-        Triple(enemy.detailFont, fontColor, enemy.detailFontScale * 1.5f),
+        Triple(enemy.detailFontHandle, fontColor, enemy.detailFontScale * 1.5f),
         screen,
         true
     )
@@ -338,13 +346,9 @@ class EnemyActor(
         enemy.detailFontScale
     )
 
-    private val enemyDrawable: Drawable by lazy {
-        ResourceManager.get(screen, enemy.drawableHandle)
-    }
+    private val enemyDrawable: Promise<Drawable> = ResourceManager.request(this, screen, enemy.drawableHandle)
 
-    private val defeatedDrawable: Drawable by lazy {
-        GraphicsConfig.defeatedEnemyDrawable(screen)
-    }
+    private val defeatedDrawable: Promise<Drawable> = GraphicsConfig.defeatedEnemyDrawable(this, screen)
 
     val healthLabel: CustomLabel = CustomLabel(
         screen,
@@ -358,17 +362,19 @@ class EnemyActor(
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
     private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
 
+    private val animationLifetime: EndableLifetime = EndableLifetime()
+
     // animations are hardcoded, deal with it
     private val animation: AnimationDrawable? = when {
 
-        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation {
+        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime.shorter(screen)) {
             val anim = deferredAnimation("outlaw_animation")
             order {
                 loop(anim, frameOffset = (0..50).random())
             }
         }
 
-        enemy.name.startsWith("Pyro") -> createAnimation {
+        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime.shorter(screen)) {
             val anim = deferredAnimation("pyro_animation")
             order {
                 loop(anim, frameOffset = (0..50).random())
@@ -377,8 +383,6 @@ class EnemyActor(
 
         else -> null
 
-    }?.apply {
-        screen.addDisposable(this)
     }
 
     init {
@@ -435,46 +439,41 @@ class EnemyActor(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         coverInfoBox.setBounds(
-            0f, height / 2 - coverInfoBox.prefHeight / 2,
+            0f, enemy.enemyHeight / 2 - coverInfoBox.prefHeight / 2,
             coverInfoBox.prefWidth, coverInfoBox.prefHeight
         )
-        val drawable = if (enemy.isDefeated) {
-            defeatedDrawable
+
+        if (enemy.isDefeated) {
+            val scale = GraphicsConfig.defeatedEnemyDrawableScale()
+            defeatedDrawable.getOrNull()?.let { drawable ->
+                drawable.draw(
+                    batch,
+                    x + coverInfoBox.width, y + healthLabel.prefHeight,
+                    drawable.minWidth * scale, drawable.minWidth * scale
+                )
+            }
         } else {
-            animation ?: enemyDrawable
+            (animation ?: enemyDrawable.getOrNull())?.draw(
+                batch,
+                x + coverInfoBox.width, y + healthLabel.prefHeight,
+                enemy.enemyWidth, enemy.enemyHeight
+            )
         }
-        val scale = if (enemy.isDefeated) {
-            GraphicsConfig.defeatedEnemyDrawableScale()
-        } else {
-            enemy.scale
-        }
-        drawable.draw(
-            batch,
-            x + coverInfoBox.width, y + healthLabel.prefHeight,
-            drawable.minWidth * scale, drawable.minHeight * scale
-        )
+
         statsBox.width = statsBox.prefWidth
         statsBox.height = statsBox.prefHeight
-        statsBox.setPosition(width / 2 - statsBox.width / 2,  -statsBox.height)
-        attackLabel.width = width
+        statsBox.setPosition(enemy.enemyWidth / 2 - statsBox.width / 2,  -statsBox.height)
+        attackLabel.width = enemy.enemyWidth
         attackLabel.y = attackLabel.height / 2f
         attackIndicator.setBounds(
-            width / 2 - attackIndicator.prefWidth / 2 + enemy.headOffset,
-            enemyDrawable.minHeight * enemy.scale + 20f,
+            enemy.enemyWidth / 2 - attackIndicator.prefWidth / 2 + enemy.headOffset,
+            enemy.enemyHeight + 20f,
             attackIndicator.prefWidth, attackIndicator.prefHeight
         )
         attackIndicator.offsetY = sin(
             (TimeUtils.millis().toDouble() + attackIndicatorAnimTimeOffset) * 0.0015
         ).toFloat() * 1.5f
         super.draw(batch, parentAlpha)
-    }
-
-    override fun getWidth(): Float {
-        return coverInfoBox.width + enemyDrawable.minWidth * enemy.scale
-    }
-
-    override fun getHeight(): Float {
-        return enemyDrawable.minHeight * enemy.scale + attackIndicator.prefHeight + statsBox.prefHeight
     }
 
     fun startHealthChangeAnimation(change: Int) {
@@ -568,6 +567,10 @@ class EnemyActor(
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
     fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
+
+    fun defeated() {
+        animationLifetime.die()
+    }
 
     /**
      * updates the description text of the actor

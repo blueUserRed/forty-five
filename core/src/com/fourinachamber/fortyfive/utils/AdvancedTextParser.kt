@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Action
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import onj.builder.buildOnjObject
@@ -15,7 +16,7 @@ import java.lang.Exception
 class AdvancedTextParser(
     val code: String,
     private val screen: OnjScreen,
-    private val defaultSettings: Triple<BitmapFont, Color, Float>,
+    private val defaultSettings: Triple<String, Color, Float>,
     private val isDistanceField: Boolean,
     private val changes: List<AdvancedTextEffect>
 ) {
@@ -41,7 +42,7 @@ class AdvancedTextParser(
 
     private val activeTextEffects: MutableList<AdvancedTextEffect> = mutableListOf()
 
-    private var curFont: BitmapFont = defaultSettings.first
+    private var curFont: String = defaultSettings.first
     private var curColor: Color = defaultSettings.second
     private var curFontScale = defaultSettings.third
     private var currentActions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
@@ -205,8 +206,7 @@ class AdvancedTextParser(
             private val screen: OnjScreen,
             override val indicator: String,
             private val fontName: String
-        ) :
-            AdvancedTextEffect {
+        ) : AdvancedTextEffect {
 
             override val overridesOthers: Boolean = true
 
@@ -217,7 +217,7 @@ class AdvancedTextParser(
             )
 
             override fun executeChange(parser: AdvancedTextParser) {
-                parser.curFont = ResourceManager.get(screen, fontName) as BitmapFont
+                parser.curFont = fontName
             }
 
             override fun backToDefault(parser: AdvancedTextParser) {

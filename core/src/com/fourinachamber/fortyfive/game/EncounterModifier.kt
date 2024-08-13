@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.card.Card
@@ -87,13 +86,13 @@ sealed class EncounterModifier {
         override fun getModifierTypes(): List<Type> = listOf(Type.RT_BASED)
 
         override fun onStart(controller: GameController) {
-            controller.curScreen.enterState("steel_nerves")
+            controller.screen.enterState("steel_nerves")
         }
 
         override fun update(controller: GameController) {
             if (baseTime == -1L) return
-            if (controller.playerLost || GameController.showWinScreen in controller.curScreen.screenState) {
-                controller.curScreen.leaveState("steel_nerves")
+            if (controller.playerLost || GameController.showWinScreen in controller.screen.screenState) {
+                controller.screen.leaveState("steel_nerves")
                 baseTime = -1
                 return
             }
@@ -133,7 +132,7 @@ sealed class EncounterModifier {
 
     object Draft : EncounterModifier() {
 
-        override fun intermediateScreen(): String = "screens/draft_screen.onj"
+        override fun intermediateScreen(): String = "draftScreen"
     }
 
     object AnOfferYouCantRefuse : EncounterModifier() {
@@ -202,6 +201,8 @@ sealed class EncounterModifier {
         ): Timeline = Timeline.timeline {
             include(controller.rotateRevolver(card.rotationDirection, ignoreEncounterModifiers = true))
         }
+
+        override fun disableEverlasting(): Boolean = true
     }
 
     open fun getModifierTypes(): List<Type> = listOf()

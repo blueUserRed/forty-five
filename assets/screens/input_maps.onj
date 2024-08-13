@@ -36,7 +36,31 @@ defaultInputMap: [
                 keycode: keys.T,
                 modifiers: [
                 ],
-                action: $ToggleFpsKeyAction {
+                action: $ToggleDebugMenuKeyAction {
+                }
+            },
+        ],
+    },
+    {
+        priority: (2.0 pow 30.0)#int - 1,
+        triggers: [
+            {
+                keycode: keys.Left,
+                modifiers: [
+                ],
+                action: $PreviousDebugMenuPageKeyAction {
+                }
+            },
+        ],
+    },
+    {
+        priority: (2.0 pow 30.0)#int - 1,
+        triggers: [
+            {
+                keycode: keys.Right,
+                modifiers: [
+                ],
+                action: $NextDebugMenuPageKeyAction {
                 }
             },
         ],

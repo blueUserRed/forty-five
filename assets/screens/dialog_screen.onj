@@ -1,7 +1,6 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "screens/shared_components.onj" as sharedComponents;
-import "dialog/dialog.onj" as dialogs;
 
 use Common;
 use Screen;
@@ -9,28 +8,6 @@ use Style;
 
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
-
-assets: {
-    useAssets: [
-        "red_wing_cm", "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
-        "game_screen_background_wasteland",
-        "enemy_texture",
-        "dialog_name_field",
-        "common_symbol_arrow",
-        "dialog_background",
-        "dialog_answer_option",
-        "dialog_answer_option_hover",
-        "shop_npcs_default",
-        "npc_stranger",
-        "npc_merchant",
-        "npc_witch",
-        "npc_priest",
-        "npc_traveler",
-        "map_theme",
-        "map_decoration_bewitched_forest_tree1",
-        ...(sharedComponents.ambientSoundsUsedAssets),
-    ]
-},
 
 viewport: $FitViewport {
     worldWidth: worldWidth,
@@ -44,10 +21,11 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenControllers: [$DialogScreenController {
-        npcsFile: "maps/events/npcs.onj",
-        dialogWidgetName: "dialog_widget"
-    }]
+    screenControllers: [
+        $DialogScreenController {
+            dialogWidgetName: "dialog_widget"
+        }
+    ]
 },
 
 var dialogWidget = $Box {

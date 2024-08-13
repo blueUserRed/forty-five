@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -17,10 +18,8 @@ import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjNamedObject
-import onj.value.OnjNull
 import onj.value.OnjObject
 import kotlin.reflect.KClass
-import kotlin.system.measureTimeMillis
 
 
 /**
@@ -29,19 +28,19 @@ import kotlin.system.measureTimeMillis
 object BehaviourFactory {
 
     private val behaviours: MutableMap<String, BehaviourCreator> = mutableMapOf(
-        "OnClickChangeScreenStateBehaviour" to { onj, actor -> OnClickChangeScreenStateBehaviour(onj, actor) },
-        "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
-        "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
-        "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
-        "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
-        "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
-        "CatchEventAndEmitBehaviour" to { onj, actor -> CatchEventAndEmitBehaviour(onj, actor) },
-        "OnClickSelectHealOrMaxOptionBehaviour" to { onj, actor -> OnClickSelectHealOrMaxOptionBehaviour(onj, actor) },
-        "OnClickSelectHealOptionBehaviour" to { onj, actor -> OnClickSelectHealOptionBehaviour(onj, actor) },
-        "OnClickRemoveWarningLabelBehaviour" to { onj, actor -> OnClickRemoveWarningLabelBehaviour(onj, actor) },
-        "SpamPreventionBehaviour" to { onj, actor -> SpamPreventionBehaviour(onj, actor) },
-        "OnClickSoundSituationBehaviour" to { onj, actor -> OnClickSoundSituationBehaviour(onj, actor) },
-        "OnClickChangeToInitialScreenBehaviour" to { onj, actor -> OnClickChangeToInitialScreenBehaviour(onj, actor) },
+        "OnClickChangeScreenStateBehaviour" to { onj, actor, screen -> OnClickChangeScreenStateBehaviour(onj, actor, screen) },
+        "MouseHoverBehaviour" to { onj, actor, screen -> MouseHoverBehaviour(onj, actor, screen) },
+        "OnClickExitBehaviour" to { _, actor, screen -> OnClickExitBehaviour(actor, screen) },
+        "OnClickAbandonRunBehaviour" to { onj, actor, screen -> OnClickAbandonRunBehaviour(onj, actor, screen) },
+        "OnClickChangeScreenBehaviour" to { onj, actor, screen -> OnClickChangeScreenBehaviour(onj, actor, screen) },
+        "OnClickResetSavefileBehaviour" to { onj, actor, screen -> OnClickResetSavefileBehaviour(onj, actor, screen) },
+        "CatchEventAndEmitBehaviour" to { onj, actor, screen -> CatchEventAndEmitBehaviour(onj, actor, screen) },
+        "OnClickSelectHealOrMaxOptionBehaviour" to { onj, actor, screen -> OnClickSelectHealOrMaxOptionBehaviour(onj, actor, screen) },
+        "OnClickSelectHealOptionBehaviour" to { onj, actor, screen -> OnClickSelectHealOptionBehaviour(onj, actor, screen) },
+        "OnClickRemoveWarningLabelBehaviour" to { onj, actor, screen -> OnClickRemoveWarningLabelBehaviour(onj, actor, screen) },
+        "SpamPreventionBehaviour" to { onj, actor, screen -> SpamPreventionBehaviour(onj, actor, screen) },
+        "OnClickSoundSituationBehaviour" to { onj, actor, screen -> OnClickSoundSituationBehaviour(onj, actor, screen) },
+        "OnClickChangeToInitialScreenBehaviour" to { onj, actor, screen -> OnClickChangeToInitialScreenBehaviour(onj, actor, screen) },
     )
 
     /**
@@ -49,9 +48,9 @@ object BehaviourFactory {
      * @throws RuntimeException when no behaviour with that name exists
      * @param onj the onjObject containing the configuration of the behaviour
      */
-    fun behaviorOrError(name: String, onj: OnjNamedObject, actor: Actor): Behaviour {
+    fun behaviorOrError(name: String, onj: OnjNamedObject, actor: Actor, screen: OnjScreen): Behaviour {
         val behaviourCreator = behaviours[name] ?: throw RuntimeException("Unknown behaviour: $name")
-        return behaviourCreator(onj, actor)
+        return behaviourCreator(onj, actor, screen)
     }
 
 }
@@ -59,12 +58,7 @@ object BehaviourFactory {
 /**
  * represents a behaviour of an [Actor]
  */
-abstract class Behaviour(val actor: Actor) {
-
-    /**
-     * the screenDataProvider; only available after [bindCallbacks] has been called
-     */
-    lateinit var onjScreen: OnjScreen
+abstract class Behaviour(val actor: Actor, val onjScreen: OnjScreen) {
 
     /**
      * called when a hover is started
@@ -91,12 +85,11 @@ abstract class Behaviour(val actor: Actor) {
 
     protected open val onDisabledEventCapture: @MainThreadOnly ((event: Event) -> Boolean)? = null
 
-    /**
-     * binds the callbacks to the actor and sets the [onjScreen]
-     */
-    @AllThreadsAllowed
-    fun bindCallbacks(onjScreen: OnjScreen) {
-        this.onjScreen = onjScreen
+    init {
+        bindCallbacks()
+    }
+
+    private fun bindCallbacks() {
         actor.addListener { event ->
             return@addListener if (actor is DisableActor) {
                 if (!actor.isDisabled) onEventCapture?.invoke(event) ?: false
@@ -117,7 +110,7 @@ abstract class Behaviour(val actor: Actor) {
 
 }
 
-class OnClickChangeScreenStateBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickChangeScreenStateBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     private val stateName = onj.get<String>("state")
     private val enter = onj.get<Boolean>("enter")
@@ -132,8 +125,9 @@ class OnClickChangeScreenStateBehaviour(onj: OnjNamedObject, actor: Actor) : Beh
  */
 class MouseHoverBehaviour(
     onj: OnjNamedObject,
-    actor: Actor
-) : Behaviour(actor) {
+    actor: Actor,
+    screen: OnjScreen
+) : Behaviour(actor, screen) {
 
     private val cursorName = onj.get<String>("cursorName")
     private val useSystemCursor = onj.get<Boolean>("useSystemCursor")
@@ -149,22 +143,21 @@ class MouseHoverBehaviour(
         }
     }
 
-    private val cursor: Either<Cursor, SystemCursor> by lazy {
-        Utils.loadCursor(useSystemCursor, cursorName, onjScreen)
-    }
+    private val cursor: Promise<Either<Cursor, SystemCursor>> = Utils.loadCursor(useSystemCursor, cursorName, onjScreen)
 
-    private val disabledCursor: Either<Cursor, SystemCursor>? by lazy {
-        if (disabledUseSystemCursor != null) {
+    private val disabledCursor: Promise<Either<Cursor, SystemCursor>>? = if (disabledUseSystemCursor != null) {
             Utils.loadCursor(disabledUseSystemCursor!!, disabledCursorName!!, onjScreen)
-        } else null
-    }
+        } else {
+            null
+        }
+
 
     override val onHoverEnter: BehaviourCallback = callback@{
-        if (disabledCursor != null && actor is DisableActor && actor.isDisabled) {
-            Utils.setCursor(disabledCursor!!)
+        if (disabledCursor != null && disabledCursor.isResolved && actor is DisableActor && actor.isDisabled) {
+            Utils.setCursor(disabledCursor.getOrError())
             return@callback
         }
-        Utils.setCursor(cursor)
+        cursor.ifResolved { Utils.setCursor(it) }
     }
 
     override val onHoverExit: BehaviourCallback = {
@@ -175,30 +168,30 @@ class MouseHoverBehaviour(
 /**
  * changes the screen when clicked
  */
-class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
-    private val screenPath = onj.get<String>("screenPath")
+    private val nextScreen = onj.get<String>("screen")
 
     private var changedScreen: Boolean = false
 
     override val onCLick: BehaviourCallback = lambda@{
         if (changedScreen) return@lambda
         changedScreen = true
-        FortyFive.changeToScreen(screenPath)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(nextScreen))
     }
 }
 
 /**
  * exits the application when the actor is clicked
  */
-class OnClickExitBehaviour(actor: Actor) : Behaviour(actor) {
+class OnClickExitBehaviour(actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     override val onCLick: BehaviourCallback = {
         Gdx.app.exit()
     }
 }
 
-class OnClickAbandonRunBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickAbandonRunBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     override val onCLick: BehaviourCallback = {
         FortyFiveLogger.debug("OnClickAbandonRunBehaviour", "abandoning run")
@@ -207,7 +200,7 @@ class OnClickAbandonRunBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
 }
 
-class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     override val onCLick: BehaviourCallback = {
         SaveState.reset()
@@ -215,7 +208,7 @@ class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
 
 }
 
-class CatchEventAndEmitBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class CatchEventAndEmitBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     private val eventToCatch: KClass<out Event> = EventFactory.eventClass(onj.get<String>("catch"))
     private val eventToEmit: String = onj.get<String>("emit")
@@ -229,7 +222,7 @@ class CatchEventAndEmitBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
     }
 }
 
-class OnClickSelectHealOrMaxOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickSelectHealOrMaxOptionBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
     val state = onj.get<String>("state")
     override val onCLick: BehaviourCallback = {
         if (this is StyledActor && inActorState(state)) {
@@ -242,7 +235,7 @@ class OnClickSelectHealOrMaxOptionBehaviour(onj: OnjNamedObject, actor: Actor) :
 
 }
 
-class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
     private val enterStateName = onj.get<String>("enterState")
     private val acceptButtonName = onj.get<String>("acceptButtonName")
     private val newButtonState = onj.get<String>("newButtonState")
@@ -259,14 +252,14 @@ class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Beha
     }
 }
 
-class OnClickRemoveWarningLabelBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickRemoveWarningLabelBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     override val onCLick: BehaviourCallback = {
         CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this.parent)
     }
 }
 
-class SpamPreventionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class SpamPreventionBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     private val eventName = onj.get<String>("event")
     private val eventClass = EventFactory.eventClass(eventName)
@@ -284,7 +277,7 @@ class SpamPreventionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(act
     }
 }
 
-class OnClickSoundSituationBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickSoundSituationBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     private val situation: String = onj.get<String>("situation")
 
@@ -293,12 +286,12 @@ class OnClickSoundSituationBehaviour(onj: OnjNamedObject, actor: Actor) : Behavi
     }
 }
 
-class OnClickChangeToInitialScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickChangeToInitialScreenBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
 
     override val onCLick: BehaviourCallback = {
         FortyFive.changeToInitialScreen()
     }
 }
 
-typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour
+typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor, screen: OnjScreen) -> Behaviour
 typealias BehaviourCallback = Actor.() -> Unit

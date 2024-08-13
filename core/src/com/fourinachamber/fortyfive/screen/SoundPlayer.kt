@@ -1,31 +1,26 @@
 package com.fourinachamber.fortyfive.screen
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.*
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
 
-object SoundPlayer {
-
-    const val soundsFile: String = "config/sounds.onj"
-    const val soundsSchemaFile: String = "onjschemas/sounds.onjschema"
+object SoundPlayer : ResourceBorrower {
 
     private lateinit var situations: List<Situation>
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
     private lateinit var biomeAmbience: Map<String, List<String>>
 
     private var currentMusicHandle: ResourceHandle? = null
-    private var currentMusic: Music? = null
+    private var currentMusic: Promise<Music>? = null
 
-    private var transitionToMusic: Music? = null
+    private var transitionToMusic: Promise<Music>? = null
     private var transitionToMusicHandle: ResourceHandle? = null
     private var transitionProgress: Float = -1f
     private var transitionStartTime: Long = -1L
@@ -34,22 +29,19 @@ object SoundPlayer {
     var masterVolume: Float = 1f
         set(value) {
             field = value
-            currentMusic?.volume = masterVolume * musicVolume
+            currentMusic?.getOrNull()?.volume = masterVolume * musicVolume
         }
 
     var musicVolume: Float = 1f
         set(value) {
             field = value
-            currentMusic?.volume = masterVolume * musicVolume
+            currentMusic?.getOrNull()?.volume = masterVolume * musicVolume
         }
 
     var soundEffectVolume: Float = 1f
 
     fun init() {
-        val onj = OnjParser.parseFile(Gdx.files.internal(soundsFile).file())
-        val schema = OnjSchemaParser.parseFile(Gdx.files.internal(soundsSchemaFile).file())
-        schema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("soundConfig")
         situations = onj
             .get<OnjArray>("situations")
             .value
@@ -91,43 +83,47 @@ object SoundPlayer {
     fun currentMusic(musicHandle: ResourceHandle?, screen: OnjScreen) {
         if (transitionProgress != -1f) {
             transitionProgress = -1f
-            transitionToMusic?.stop()
+            transitionToMusic?.getOrNull()?.stop()
             transitionToMusic = null
         }
         if (currentMusicHandle == musicHandle) return
-        currentMusic?.stop()
+        currentMusic?.getOrNull()?.stop()
         if (musicHandle == null) {
             currentMusic = null
             currentMusicHandle = null
             return
         }
-        val music = ResourceManager.get<Music>(screen, musicHandle)
-        currentMusic = music
+        val musicPromise = ResourceManager.request<Music>(screen, screen, musicHandle)
+        currentMusic = musicPromise
         currentMusicHandle = musicHandle
-        music.isLooping = true
-        music.play()
-        music.volume = musicVolume * masterVolume
+        musicPromise.then { music ->
+            music.isLooping = true
+            music.play()
+            music.volume = musicVolume * masterVolume
+        }
     }
 
     fun transitionToMusic(musicHandle: ResourceHandle?, duration: Int, screen: OnjScreen) {
         if (musicHandle == currentMusicHandle) return
-        val music = musicHandle?.let { ResourceManager.get<Music>(screen, it) }
+        val musicPromise = musicHandle?.let { ResourceManager.request<Music>(this, screen, it) }
         transitionProgress = 1f
-        transitionToMusic = music
+        transitionToMusic = musicPromise
         transitionStartTime = TimeUtils.millis()
         transitionToMusicHandle = musicHandle
         transitionDuration = duration
-        music?.play()
-        music?.isLooping = true
-        music?.volume = 0f
+        musicPromise?.then { music ->
+            music.play()
+            music.isLooping = true
+            music.volume = 0f
+        }
     }
 
     private fun finishTransition() {
-        currentMusic?.stop()
+        currentMusic?.getOrNull()?.stop()
         currentMusic = transitionToMusic
         currentMusicHandle = transitionToMusicHandle
-        currentMusic?.play()
-        currentMusic?.volume = musicVolume * masterVolume
+        currentMusic?.getOrNull()?.play()
+        currentMusic?.getOrNull()?.volume = musicVolume * masterVolume
         transitionProgress = -1f
     }
 
@@ -136,13 +132,17 @@ object SoundPlayer {
             FortyFiveLogger.warn(logTag, "No sound config for situation $name")
             return
         }
-        val sound = ResourceManager.get<Sound>(screen, situation.sound ?: return)
-        sound.play(situation.volume * soundEffectVolume * masterVolume)
+        val soundPromise = ResourceManager.request<Sound>(this, screen, situation.sound ?: return)
+        soundPromise.then { sound ->
+            sound.play(situation.volume * soundEffectVolume * masterVolume)
+        }
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
-        val sound = ResourceManager.get<Sound>(screen, soundHandle)
-        sound.play(soundEffectVolume * masterVolume)
+        val soundPromise = ResourceManager.request<Sound>(this, screen, soundHandle)
+        soundPromise.then { sound ->
+            sound.play(soundEffectVolume * masterVolume)
+        }
     }
 
     fun update(screen: OnjScreen, playAmbientSounds: Boolean) {
@@ -155,8 +155,8 @@ object SoundPlayer {
             return
         }
         transitionProgress = (finishTime - now).toFloat() / transitionDuration.toFloat()
-        currentMusic?.volume = transitionProgress * musicVolume * masterVolume
-        transitionToMusic?.volume = (1f - transitionProgress) * musicVolume * masterVolume
+        currentMusic?.getOrNull()?.volume = transitionProgress * musicVolume * masterVolume
+        transitionToMusic?.getOrNull()?.volume = (1f - transitionProgress) * musicVolume * masterVolume
     }
 
     private fun updateAmbientSounds(screen: OnjScreen) {
@@ -168,7 +168,7 @@ object SoundPlayer {
         }
         ambientSounds.filter { it.key.name in sounds }.forEach { (ambient, nextPlayTime) ->
             if (nextPlayTime > now) return@forEach
-            val sound = ResourceManager.get<Sound>(screen, ambient.sound)
+            val sound = ambient.getSoundPromise(screen).getOrNull() ?: return@forEach
             val id = sound.play()
             sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume * masterVolume)
             ambientSounds[ambient] = now + ambient.delay.random()
@@ -176,15 +176,15 @@ object SoundPlayer {
     }
 
     fun skipMusicTo(amount: Float) {
-        currentMusic?.let {
-            it.position = amount
-        }
+        currentMusic?.then { it.position = amount }
     }
 
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
-        val music = ResourceManager.get<Music>(screen, musicHandle)
-        music.play()
-        music.volume = musicVolume * masterVolume
+        val musicPromise = ResourceManager.request<Music>(this, screen, musicHandle)
+        musicPromise.then { music ->
+            music.play()
+            music.volume = musicVolume * masterVolume
+        }
     }
 
     private data class AmbientSound(
@@ -192,7 +192,16 @@ object SoundPlayer {
         val sound: ResourceHandle,
         val volume: Float,
         val delay: IntRange
-    )
+    ) {
+        private var soundPromise: Promise<Sound>? = null
+
+        fun getSoundPromise(lifetime: Lifetime): Promise<Sound> {
+            if (soundPromise == null) {
+                soundPromise = ResourceManager.request(SoundPlayer, lifetime, sound)
+            }
+            return soundPromise!!
+        }
+    }
 
     private data class Situation(
         val name: String,

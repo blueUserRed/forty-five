@@ -20,76 +20,6 @@ var cardZIndicesStart = 100;
 var cardZIndicesEnd = cardZIndicesStart + 100;
 var overlayZIndex = 500;
 
-assets: {
-    useAssets: [
-
-        "red_wing", "roadgeek", "red_wing_bmp",
-
-        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "wood_box", "deck_icon",
-        "end_turn_button_texture", "end_turn_button_hover_texture",
-        "shoot_button_texture", "shoot_button_hover_texture",
-        "pass_button_texture", "pass_button_hover_texture",
-        "parry_button_texture", "parry_button_hover_texture",
-        "revolver_drum", "common_popup_background_black", "card_orb",
-        "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
-        "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
-        "game_screen_player", "player_turn_banner", "enemy_turn_banner", "reserves_orb", "black_texture",
-        "status_effect_background", "enemy_selector", "shield_icon_large",
-
-        "enemy_action_damage", "enemy_action_cover",
-
-        "win_screen_background", "win_screen_spacer", "win_screen_item_cash", "cash_symbol", "win_screen_item_card",
-        "map_node_get_card", "common_button_default", "common_button_hover",
-
-        "enemy_pyro", "enemy_action_burning", "enemy_action_inferno",
-        "enemy_action_hot_potato", "enemy_action_unknown",
-        "enemy_pyro_action_comic_common_panel_1", "enemy_pyro_action_comic_common_panel_2",
-        "enemy_pyro_action_comic_common_panel_3", "enemy_pyro_action_comic_panel_burning",
-        "enemy_pyro_action_comic_panel_fire_resistance", "enemy_pyro_action_comic_panel_hot_potato",
-        "enemy_pyro_action_comic_panel_inferno",
-
-        "enemy_witch", "enemy_action_bewitched", "enemy_action_left_turn",
-        "enemy_witch_action_comic_common_panel_1", "enemy_witch_action_comic_common_panel_2",
-        "enemy_witch_action_comic_common_panel_3", "enemy_witch_action_comic_panel_left_turn",
-        "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
-        "enemy_witch_action_comic_panel_ward_of_the_witch",
-
-        "enemy_sniper", "enemy_action_piercing", "enemy_action_heads_up", "enemy_action_goodbyes",
-        "enemy_action_and_its_gone", "enemy_sniper_action_comic_common_panel_1",
-        "enemy_sniper_action_comic_common_panel_2", "enemy_sniper_action_comic_common_panel_3",
-        "enemy_sniper_action_comic_panel_goodbyes", "enemy_sniper_action_comic_panel_heads_up",
-        "enemy_sniper_action_comic_panel_and_its_gone",
-
-        "card_symbol_marked",
-
-        "tutorial_actor_shader",
-
-        "enemy_outlaw",
-
-        "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture", "glow_shader_shield",
-        "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader", "screen_shake_shader",
-
-        "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
-        "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
-        "card_destroy_sound", "holster_remove_sound", "metal_on_metal_sound",
-
-        "screen_shake_popout_shader",
-
-        "map_theme", "encounter_theme",
-
-        ...(sharedComponents.ambientSoundsUsedAssets),
-        ...(graphicsConfig.keySelectUsedAssets),
-        ...(graphicsConfig.gameUsedAssets),
-        ...(graphicsConfig.encounterModifierAssets),
-        ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets),
-        ...(sharedComponents.cardHoverDetailUsedAssets),
-        ...(sharedComponents.tutorialInfoActorUsedAssets),
-        ...(sharedComponents.backpackAssets),
-        ...(sharedComponents.cardCollectionAssets),
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight
@@ -150,9 +80,8 @@ options: {
         $BiomeBackgroundScreenController {
             useSecondary: false,
         },
-        $CardCollectionScreenController {
-            cardsFile: "config/cards.onj",
-        }
+//        $CardCollectionScreenController {
+//        }
     ],
     playAmbientSounds: true,
     music: "map_theme",
@@ -562,34 +491,6 @@ var popupActor = $Box {
             }
         ]
     },
-
-    $Box {
-        styles: [
-            {
-                style_priority: 1,
-                detached: true,
-            },
-            {
-                style_priority: 2,
-                style_condition: state("showPopupCardSelector"),
-                detached: false
-            }
-        ],
-    } children [
-        $CircularCardSelector {
-            styles: [
-                {
-                    width: (50 * 10)#points,
-                    height: (50 * 10)#points,
-                }
-            ],
-            name: "card_selector",
-            emptySlotTexture: "grey_texture",
-            disabledAlpha: 0.6,
-            radius: 200.0,
-            size: 3570.0 * 0.04
-        }
-    ],
 
 ];
 

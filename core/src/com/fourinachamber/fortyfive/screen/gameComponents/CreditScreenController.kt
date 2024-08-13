@@ -9,18 +9,16 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.Timeline
 
-class CreditScreenController : ScreenController() {
+class CreditScreenController(private val screen: OnjScreen) : ScreenController() {
 
     private lateinit var creditsScroller: CustomFlexBox
-    private lateinit var screen: OnjScreen
     private var scrollSpeed: Int = 0
 
     private val timeline: Timeline = Timeline()
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(context: Any?) {
         SoundPlayer.skipMusicTo(18.0f)
-        screen = onjScreen
-        creditsScroller = onjScreen.namedActorOrError("credits_scroller") as? CustomFlexBox
+        creditsScroller = screen.namedActorOrError("credits_scroller") as? CustomFlexBox
             ?: throw RuntimeException("actor named credits_scroller must be a CustomFlexBox")
         timeline.startTimeline()
         timeline.appendAction(Timeline.timeline {

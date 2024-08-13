@@ -20,7 +20,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
@@ -28,7 +27,6 @@ import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
@@ -47,22 +45,21 @@ import kotlin.system.measureTimeMillis
 /**
  * a screen that was build from an onj file.
  */
-open class OnjScreen @MainThreadOnly constructor(
+open class OnjScreen(
     val viewport: Viewport,
     batch: Batch,
     private val controllerContext: Any?,
-    private val useAssets: MutableList<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: MutableMap<String, Actor>,
     val printFrameRate: Boolean,
-    val transitionAwayTime: Int?,
+    val transitionAwayTimes: Map<String, Int>,
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
-) : ScreenAdapter(), Renderable, ResourceBorrower {
+) : ScreenAdapter(), Renderable, Lifetime, ResourceBorrower {
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
@@ -149,24 +146,12 @@ open class OnjScreen @MainThreadOnly constructor(
             inputMultiplexer.addProcessor(stage)
         }
 
-    @MainThreadOnly
-    private val keySelectDrawable: Drawable by lazy {
-        GraphicsConfig.keySelectDrawable(this)
-    }
+    private val lifetime: EndableLifetime = EndableLifetime()
 
-    var background: ResourceHandle? = null
-        set(value) {
-            field = value
-            backgroundDrawable = null
-        }
+    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    var background: String? by backgroundHandleObserver
 
-    private var backgroundDrawable: Drawable? = null
-        get() {
-            if (field != null) return field
-            val background = background ?: return null
-            field = ResourceManager.get(this, background)
-            return field
-        }
+    private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this)
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
@@ -182,16 +167,9 @@ open class OnjScreen @MainThreadOnly constructor(
     private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
     init {
-        useAssets.forEach {
-            ResourceManager.borrow(this, it)
-        }
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
-        }
-        addLateRenderTask {
-            val highlight = selectedActor?.getBounds() ?: return@addLateRenderTask
-            keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
         inputMultiplexer.addProcessor(screenInputProcessor)
         inputMultiplexer.addProcessor(stage)
@@ -199,12 +177,16 @@ open class OnjScreen @MainThreadOnly constructor(
 
     fun addScreenController(controller: ScreenController) {
         _screenControllers.add(controller)
-        if (!isVisible) return
         controller.injectActors(this)
-        controller.init(this, controllerContext)
+        controller.init(controllerContext)
+        if (isVisible) controller.onShow()
     }
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
+
+    override fun onEnd(callback: () -> Unit) {
+       lifetime.onEnd(callback)
+    }
 
     @AllThreadsAllowed
     fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
@@ -235,6 +217,11 @@ open class OnjScreen @MainThreadOnly constructor(
 
         invalidateGroup(stage.root)
     }
+
+//    fun borrowResource(handle: ResourceHandle) {
+//        useAssets.add(handle)
+//        ResourceManager.borrow(this, handle)
+//    }
 
     @AllThreadsAllowed
     fun removeActorFromRoot(actor: Actor) {
@@ -408,18 +395,10 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun show() {
-        screenControllers.forEach {
-            it.injectActors(this)
-            it.init(this, controllerContext)
-        }
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
-    }
-
-    fun borrowResource(handle: ResourceHandle) {
-        useAssets.add(handle)
-        ResourceManager.borrow(this, handle)
+        screenControllers.forEach { it.onShow() }
     }
 
     fun transitionAway() {
@@ -468,7 +447,10 @@ open class OnjScreen @MainThreadOnly constructor(
             if (stage.batch.isDrawing) stage.batch.end()
             stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-            stage.draw()
+            val time = measureTimeMillis {
+                stage.draw()
+            }
+//            println(time)
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             styleManagers
                 .filter { it !in oldStyleManagers }
@@ -540,11 +522,8 @@ open class OnjScreen @MainThreadOnly constructor(
         hide()
         screenControllers.forEach(ScreenController::end)
         stage.dispose()
-//        toDispose.forEach(Disposable::dispose)
-        useAssets.forEach {
-            ResourceManager.giveBack(this, it)
-        }
         additionalDisposables.forEach(Disposable::dispose)
+        lifetime.die()
     }
 
     companion object {

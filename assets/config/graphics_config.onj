@@ -44,7 +44,7 @@ encounterModifiers: {
     rain: {
         icon: "encounter_modifier_rain",
         displayName: "Rain",
-        description: "Status effects don't work"
+        description: "Status effects don't work."
     },
     frost: {
         icon: "encounter_modifier_frost",
@@ -54,42 +54,42 @@ encounterModifiers: {
     bewitchedMist: {
         icon: "encounter_modifier_bewitched_mist",
         displayName: "Bewitched Mist",
-        description: "Revolver rotations are inverted"
+        description: "Revolver rotations are inverted."
     },
     lookalike: {
         icon: "encounter_modifier_lookalike",
         displayName: "Lookalike",
-        description: "Whenever you place a bullet in the revolver, you get a copy of it in your hand"
+        description: "Whenever you place a bullet in the revolver, you get a copy of it in your hand."
     },
     moist: {
         icon: "encounter_modifier_moist",
         displayName: "Moist",
-        description: "Every bullet in the revolver loses one damage every time it turns"
+        description: "Every bullet in the revolver loses one damage every time it turns."
     },
     steelNerves: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Steel Nerves",
-        description: "The revolver shoots automatically every ten seconds"
+        description: "The revolver shoots automatically every ten seconds."
     },
     draft: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Draft",
-        description: "You draft your deck from random cards before the encounter"
+        description: "You draft your deck from random cards before the encounter."
     },
     anOfferYouCantRefuse: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "An Offer you can't refuse",
-        description: "All bullets cost 1 less, but shooting the revolver costs 1 reserve"
+        description: "All bullets cost 1 less, but shooting the revolver costs 1 reserve."
     },
     bulletSkipping: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Bullet Skipping",
-        description: "when a bullet shoots, it turns twice, skipping the slot inbetween"
+        description: "when a bullet shoots, it turns twice, skipping the slot in between."
     },
     sacrifice: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Sacrifice",
-        description: "At the beginning of every turn, destroy target bullet"
+        description: "At the beginning of every turn, destroy target bullet."
     },
     sorryNotSorry: {
         icon: "encounter_modifier_steel_nerves",
@@ -99,14 +99,9 @@ encounterModifiers: {
     confused: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Confused",
-        description: "The revolver rotates when a card is placed down, not when it is shot"
+        description: "The revolver rotates when a card is placed down, not when it is shot. Everlasting doesn't work."
     },
 },
-
-encounterModifierAssets: [
-    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist",
-    "encounter_modifier_steel_nerves", "encounter_modifier_lookalike", "encounter_modifier_bewitched_mist"
-],
 
 encounterBackgrounds: [
     {
@@ -157,10 +152,6 @@ keySelect: {
     drawable: "key_select_frame"
 },
 
-keySelectUsedAssets: [
-    "key_select_frame"
-],
-
 shootPostProcessor: {
     name: "shoot_shader",
     duration: 0.9
@@ -170,14 +161,6 @@ enemyGravestone: {
     texture: "enemy_gravestone",
     scale: 0.3,
 },
-
-gameUsedAssets: [
-    "shoot_shader", "red_wing", "transparent_black_texture", "white_texture",
-    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone", "bewitched_icon",
-    "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
-    "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland",
-    "game_screen_background_magenta_mountains",
-],
 
 revolverSlotIcons: {
     "1": "revolver_slot_icon_1",

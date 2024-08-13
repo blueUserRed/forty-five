@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
@@ -22,7 +23,6 @@ import java.io.File
 object MapManager {
 
     const val logTag: String = "MapManager"
-    const val mapConfigFilePath: String = "maps/map_config.onj"
 
     lateinit var roadMapsPath: String
         private set
@@ -31,8 +31,6 @@ object MapManager {
     lateinit var areaDefinitionsMapsPath: String
         private set
     lateinit var staticRoadMapsPath: String
-        private set
-    lateinit var mapScreenPath: String
         private set
 
     lateinit var currentDetailMap: DetailMap
@@ -68,15 +66,8 @@ object MapManager {
     lateinit var displayNames: Map<String, String>
         private set
 
-    private lateinit var screenPaths: Map<String, String>
-
-    lateinit var npcsOnj: OnjObject
-        private set
-
     fun init() {
-        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
-        mapConfigSchema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("mapConfig")
         mapImages = onj
             .get<OnjArray>("mapImages")
             .value
@@ -94,7 +85,6 @@ object MapManager {
         areaMapsPath = paths.get<String>("areas")
         roadMapsPath = paths.get<String>("roads")
         areaDefinitionsMapsPath = paths.get<String>("areaDefinitions")
-        mapScreenPath = paths.get<String>("mapScreen")
         staticRoadMapsPath = paths.get<String>("staticRoadDefinitions")
         val displayNames = onj
             .get<OnjArray>("displayNames")
@@ -102,15 +92,7 @@ object MapManager {
             .map { it as OnjObject }
             .associate { it.get<String>("name") to it.get<String>("display") }
             .toMutableMap()
-        screenPaths = onj
-            .get<OnjObject>("screens")
-            .value
-            .mapValues { (_, value) -> value.value as String }
-        val npcs = OnjParser.parseFile(Gdx.files.internal("maps/events/npcs.onj").file())
-        val npcsSchema =  OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/npcs.onjschema").file())
-        npcsSchema.assertMatches(npcs)
-        npcs as OnjObject
-        npcsOnj = npcs
+        val npcs = ConfigFileManager.getConfigFile("npcConfig")
         npcs
             .get<OnjArray>("npcs")
             .value
@@ -133,38 +115,38 @@ object MapManager {
             .map { it.intermediateScreen() }
             .find { it != null }
         if (intermediate != null && !immediate) {
-            FortyFive.changeToScreen(intermediate, context)
+            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(intermediate), context)
         } else {
-            FortyFive.changeToScreen(screenPaths["encounterScreen"]!!, context)
+            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("encounterScreen"), context)
         }
     }
 
     fun changeToDialogScreen(event: MapEvent) {
-        FortyFive.changeToScreen(screenPaths["dialogScreen"]!!, event)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("dialogScreen"), event)
     }
 
     fun changeToShopScreen(event: MapEvent) {
-        FortyFive.changeToScreen(screenPaths["shopScreen"]!!, event)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("shopScreen"), event)
     }
 
     fun changeToChooseCardScreen(context: ChooseCardScreenContext) {
-        FortyFive.changeToScreen(screenPaths["chooseCardScreen"]!!, context)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("chooseCardScreen"), context)
     }
 
     fun changeToHealOrMaxHPScreen(event: MapEvent) {
-        FortyFive.changeToScreen(screenPaths["changeToHealOrMaxHPScreen"]!!, event)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("healOrMaxHPScreen"), event)
     }
 
     fun changeToAddMaxHPScreen(event: MapEvent) {
-        FortyFive.changeToScreen(screenPaths["changeToAddMaxHPScreen"]!!, event)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("addMaxHPScreen"), event)
     }
 
     fun changeToTitleScreen() {
-        FortyFive.changeToScreen(screenPaths["titleScreen"]!!)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("titleScreen"))
     }
 
     fun changeToCreditsScreen() {
-        FortyFive.changeToScreen(screenPaths["creditsScreen"]!!)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("creditsScreen"))
     }
 
     /**
@@ -234,7 +216,7 @@ object MapManager {
     }
 
     fun changeToMapScreen() {
-        FortyFive.changeToScreen(mapScreenPath)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen"))
     }
 
     fun lookupMapFile(mapName: String): FileHandle =
@@ -252,9 +234,7 @@ object MapManager {
     }
 
     fun generateMapsSync() {
-        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
-        mapConfigSchema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("mapConfig")
         val generatorConfig = onj.get<OnjObject>("generatorConfig")
         val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
         generatorConfig
@@ -277,10 +257,6 @@ object MapManager {
         if (!File(file.parent).exists()) File(file.parent).mkdirs()
         file.createNewFile()
         file.writeText(map.asOnjObject().toMinifiedString())
-    }
-
-    private val mapConfigSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/map_config.onjschema").file())
     }
 
     data class MapImageData(

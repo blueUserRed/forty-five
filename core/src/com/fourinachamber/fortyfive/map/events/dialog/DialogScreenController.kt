@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.NPCMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
@@ -13,17 +14,13 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 
-class DialogScreenController(onj: OnjObject) : ScreenController() {
-
-    private lateinit var screen: OnjScreen
+class DialogScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
 
     private lateinit var context: NPCMapEvent
     private val dialogWidgetName = onj.get<String>("dialogWidgetName")
-    private val npcFilePath = onj.get<String>("npcsFile")
     private lateinit var dialogWidget: DialogWidget
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
-        screen = onjScreen
+    override fun init(context: Any?) {
         if (context !is NPCMapEvent) throw RuntimeException("context for DialogScreenController must be a NPCMapEvent")
         this.context = context
         val dialogWidget = screen.namedActorOrError(dialogWidgetName)
@@ -31,8 +28,8 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
             throw RuntimeException("widget with name $dialogWidgetName must be of type DialogWidget")
         }
         this.dialogWidget = dialogWidget
-        val npc = MapManager
-            .npcsOnj
+        val npc = ConfigFileManager
+            .getConfigFile("npcConfig")
             .get<OnjArray>("npcs")
             .value
             .map { it as OnjObject }

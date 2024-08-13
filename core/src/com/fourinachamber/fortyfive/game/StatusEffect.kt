@@ -31,7 +31,7 @@ abstract class StatusEffect(
     open val blocksStatusEffects: List<StatusEffectType> = listOf()
 
     fun initIcon(gameController: GameController) {
-        icon = CustomImageActor(iconHandle, gameController.curScreen)
+        icon = CustomImageActor(iconHandle, gameController.screen)
         icon.setScale(iconScale)
         icon.reportDimensionsWithScaling = true
         icon.ignoreScalingWhenDrawing = true

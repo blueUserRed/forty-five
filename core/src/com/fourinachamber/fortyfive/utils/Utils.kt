@@ -361,7 +361,7 @@ object Utils {
         useSystemCursor: Boolean,
         cursorName: String,
         onjScreen: OnjScreen
-    ): Either<Cursor, SystemCursor> {
+    ): Promise<Either<Cursor, SystemCursor>> {
 
         if (useSystemCursor) {
 
@@ -380,10 +380,10 @@ object Utils {
                 "none" -> SystemCursor.None
                 else -> throw RuntimeException("unknown system cursor: $cursorName")
 
-            }.eitherRight()
+            }.eitherRight().asPromise()
 
         } else {
-            return ResourceManager.get<Cursor>(onjScreen, cursorName).eitherLeft()
+            return ResourceManager.request<Cursor>(onjScreen, onjScreen, cursorName).map { it.eitherLeft() }
         }
     }
 

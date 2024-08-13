@@ -9,9 +9,7 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.onButtonClick
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -34,11 +32,27 @@ object KeyActionFactory {
             }
         },
 
-        "ToggleFps" to {
+        "ToggleDebugMenu" to {
             { _, _ ->
                 FortyFive.currentRenderPipeline?.let {
-                    it.showFps = !it.showFps
+                    it.showDebugMenu = !it.showDebugMenu
                 }
+                true
+            }
+        },
+
+        "NextDebugMenuPage" to {
+            {
+                _, _ ->
+                FortyFive.currentRenderPipeline?.nextDebugPage()
+                true
+            }
+        },
+
+        "PreviousDebugMenuPage" to {
+            {
+                _, _ ->
+                FortyFive.currentRenderPipeline?.previousDebugPage()
                 true
             }
         },

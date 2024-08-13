@@ -9,47 +9,30 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "hover_detail_background", "red_wing_cm", "red_wing", "red_wing_bmp", "card_character", "chooseCard_add_to_backpack",
-        "chooseCard_add_to_deck",
-        "secondary_background_wasteland", /*temp -> */ "card%%bullet",
-        "chooseCard_cardsBackground",
-        "transparent_black_texture",
-
-        "secondary_background_wasteland",
-
-        "card_pickup_sound", "card_laydown_sound",
-        "map_theme",
-
-        ...(sharedComponents.backpackAssets),
-        ...(sharedComponents.ambientSoundsUsedAssets),
-        ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets),
-        ...(sharedComponents.cardHoverDetailUsedAssets),
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight
 },
 
 options: {
-    transitionAwayTime: 0.0,
     background: "secondary_background_wasteland",
     music: "map_theme",
     playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenControllers: [$ChooseCardScreenController {
-        cardsFile: "config/cards.onj",
-        leaveButtonName: "leaveLabel",
-        cardsParentName: "cardsParent",
-        addToBackpackWidgetName: "addToBackpackWidget",
-        addToDeckWidgetName: "addToDeckWidget",
-    }]
+    screenControllers: [
+        $ChooseCardScreenController {
+            cardsFile: "config/cards.onj",
+            leaveButtonName: "leaveLabel",
+            cardsParentName: "cardsParent",
+            addToBackpackWidgetName: "addToBackpackWidget",
+            addToDeckWidgetName: "addToDeckWidget",
+        },
+        $BiomeBackgroundScreenController {
+            useSecondary: true,
+        }
+    ],
 },
 
 

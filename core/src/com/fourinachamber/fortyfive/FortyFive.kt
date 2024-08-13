@@ -3,8 +3,10 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.*
+import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
@@ -15,10 +17,10 @@ import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * main game object
@@ -30,7 +32,10 @@ object FortyFive : Game() {
     var currentRenderPipeline: RenderPipeline? = null
         private set
 
+    val cardTextureManager: CardTextureManager = CardTextureManager()
+
     private var currentScreen: OnjScreen? = null
+    private var nextScreen: OnjScreen? = null
 
     var currentGame: GameController? = null
 
@@ -40,6 +45,10 @@ object FortyFive : Game() {
 
     private var inScreenTransition: Boolean = false
 
+    private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
+
+    private val screenChangeCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     lateinit var steamHandler: SteamHandler
         private set
 
@@ -48,7 +57,7 @@ object FortyFive : Game() {
         override val encounterIndex: Int = 0 // = first tutorial encounter
 
         override val forwardToScreen: String
-            get() = MapManager.mapScreenPath
+            get() = "mapScreen"
 
         override fun completed() {
             SaveState.playerCompletedFirstTutorialEncounter = true
@@ -60,7 +69,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
         when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> changeToScreen("screens/intro_screen.onj")
+            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
             UserPrefs.StartScreen.MAP -> changeToInitialScreen()
         }
@@ -74,43 +83,60 @@ object FortyFive : Game() {
         }
     }
 
-    override fun render() {
-        val screen = currentScreen
-        currentScreen?.update(Gdx.graphics.deltaTime)
-        if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)
-        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
-        steamHandler.update()
+    fun <T> mainThreadTask(task: () -> T): Promise<T> {
+        val promise = Promise<T>()
+        mainThreadTasks[task] = promise
+        return promise
     }
 
-    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = Gdx.app.postRunnable {
+    fun onScreenChange(callback: () -> Unit) {
+        screenChangeCallbacks.add(callback)
+    }
+
+    override fun render() {
+        mainThreadTasks.forEach { (task, promise) ->
+            val result = task()
+            @Suppress("UNCHECKED_CAST")
+            (promise as Promise<Any?>).resolve(result)
+            mainThreadTasks.remove(task)
+        }
+        currentScreen?.update(Gdx.graphics.deltaTime)
+        nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
+    }
+
+    fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
         if (inScreenTransition) return@postRunnable
         inScreenTransition = true
         val currentScreen = currentScreen
-        if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
-        val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
-        // Updates StyleManagers immediately, to prevent the first frame from appearing bugged
-        screen.update(Gdx.graphics.deltaTime, isEarly = true)
-        serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
+        if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
+        val screen = screenBuilder.build(controllerContext)
+        nextScreen = screen
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen to $screenPath")
+            FortyFiveLogger.title("changing screen to ${screenBuilder.screenName}")
             SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
+            screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen
+            nextScreen = null
             currentRenderPipeline?.dispose()
             currentRenderPipeline = RenderPipeline(screen, screen).also {
-                it.showFps = currentRenderPipeline?.showFps ?: false
+                it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
             }
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
             inScreenTransition = false
-            ResourceManager.trimPrepared()
+            screenChangeCallbacks.forEach { it() }
         }
 
+        val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
+            it[screenBuilder.screenName] ?: it["*"]
+        } ?: 0
         if (currentScreen == null) {
             onScreenChange()
-        } else currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
+        } else currentScreen.afterMs(transitionAwayTime) {
             onScreenChange()
         }
     }
@@ -119,7 +145,7 @@ object FortyFive : Game() {
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
         currentRenderPipeline = renderPipeline.also {
-            it.showFps = currentRenderPipeline?.showFps ?: false
+            it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
         }
     }
 
@@ -129,7 +155,7 @@ object FortyFive : Game() {
         if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
         MapManager.newRunSync()
-        if (forwardToLooseScreen) changeToScreen("screens/loose_screen.onj")
+        if (forwardToLooseScreen) changeToScreen(ConfigFileManager.screenBuilderFor("looseScreen"))
     }
 
     override fun resize(width: Int, height: Int) {
@@ -154,6 +180,7 @@ object FortyFive : Game() {
             registerNameSpace("Screen", ScreenNamespace)
             registerNameSpace("Map", MapNamespace)
         }
+        ConfigFileManager.init()
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()
@@ -174,7 +201,7 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         serviceThread.start()
-        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
+        cardTextureManager.init()
         RandomCardSelection.init()
 //        resetAll()
 //        newRun()
@@ -213,9 +240,7 @@ object FortyFive : Game() {
         UserPrefs.write()
         currentScreen?.dispose()
         serviceThread.close()
-        ResourceManager.trimPrepared()
         ResourceManager.end()
-        steamHandler.end()
         super.dispose()
     }
 }

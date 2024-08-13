@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -42,9 +43,26 @@ class Backpack(
 ) : CustomFlexBox(screen), InOutAnimationActor {
 
     private val cardPrototypes: List<CardPrototype>
-    private val _allCards: MutableList<Card>
     private val minNameSize: Int
     private val maxNameSize: Int
+
+    init {
+        val backpackOnj = ConfigFileManager.getConfigFile("backpackConfig")
+
+        val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
+        minNameSize = nameOnj.get<Long>("minLength").toInt()
+        maxNameSize = nameOnj.get<Long>("maxLength").toInt()
+
+        val cardsOnj = ConfigFileManager.getConfigFile("cards")
+        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
+    }
+
+    private val _allCards: MutableList<Card> by lazy {
+        cardPrototypes
+            .filter { it.name in SaveState.cards }
+            .map { it.create(screen, true) }
+            .toMutableList()
+    }
 
     private lateinit var deckNameWidget: CustomInputField
     private lateinit var deckCardsWidget: CustomScrollableFlexBox
@@ -110,32 +128,6 @@ class Backpack(
                 CustomWarningParent.Severity.MIDDLE
             )
         }
-    }
-
-    init {
-        //TODO
-//         0. (done(mostly)) background stop //mouse still active in background
-//         1. (done) Cards drag and drop (both direction)
-//         2. (done) automatic add to deck on double click or on press space or so
-//         3. (done) automatic add to deck if deck doesn't have enough cards
-//         4. (done) stop cards from moving if you don't have enough cards
-//         5. sorting system (ui missing)
-        val backpackOnj = OnjParser.parseFile(backpackFile)
-        backpackFileSchema.assertMatches(backpackOnj)
-        backpackOnj as OnjObject
-
-        val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
-        minNameSize = nameOnj.get<Long>("minLength").toInt()
-        maxNameSize = nameOnj.get<Long>("maxLength").toInt()
-
-        val cardsOnj = OnjParser.parseFile(cardsFile)
-        cardsFileSchema.assertMatches(cardsOnj)
-        cardsOnj as OnjObject
-        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
-        _allCards = cardPrototypes
-            .filter { it.name in SaveState.cards }.filter { it.name in PermaSaveState.collection }
-            .map { it.create(screen, true) }
-            .toMutableList()
     }
 
     fun initAfterChildrenExist() {
@@ -481,13 +473,6 @@ class Backpack(
 
     companion object {
         const val NAME_SEPARATOR_STRING = "_-_"
-
-        private val backpackFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
-        }
-        private val cardsFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
-        }
         const val LOG_TAG: String = "Backpack"
     }
 

@@ -12,7 +12,7 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BounceOutAction
 import com.fourinachamber.fortyfive.utils.*
 
-class DraftScreenController : ScreenController() {
+class DraftScreenController(private val screen: OnjScreen) : ScreenController() {
 
     @Inject
     private lateinit var card1: CustomFlexBox
@@ -22,8 +22,6 @@ class DraftScreenController : ScreenController() {
 
     @Inject
     private lateinit var card3: CustomFlexBox
-
-    private lateinit var screen: OnjScreen
 
     private var inDiscardAnim: Boolean = false
 
@@ -40,10 +38,9 @@ class DraftScreenController : ScreenController() {
 
     private lateinit var context: GameController.EncounterContext
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(context: Any?) {
         this.context = context as? GameController.EncounterContext
             ?: throw RuntimeException("DraftScreenController needs a context of type EncounterContext")
-        this.screen = onjScreen
         cards = arrayOf(card1, card2, card3)
         TemplateString.updateGlobalParam("draft.target", targetAmount)
         timeline.startTimeline()

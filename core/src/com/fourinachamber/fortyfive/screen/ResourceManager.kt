@@ -2,10 +2,10 @@ package com.fourinachamber.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import onj.parser.OnjParser
+import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
@@ -18,42 +18,40 @@ typealias ResourceHandle = String
 
 object ResourceManager {
 
-    const val cardAtlasResourceHandle = "${Card.cardTexturePrefix}_cards_atlas"
-
     lateinit var resources: List<Resource>
         private set
 
-    @MainThreadOnly
-    fun borrow(borrower: ResourceBorrower, handle: ResourceHandle) {
-        val toBorrow = resources.find { it.handle == handle }
+    inline fun <reified T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle) =
+        forceGet(borrower, lifetime, handle, T::class)
+
+    fun forceResolve(promise: Promise<*>) {
+        val resource = resources.find { it.promiseMatches(promise) }
+            ?: throw RuntimeException("no resource with matching promise found")
+        resource.forceResolve()
+    }
+
+    fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle, type: KClass<T>): T {
+        val resource = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
-        toBorrow.borrow(borrower)
+        return resource.forceGet(borrower, lifetime, type)
     }
 
-    /**
-     * this function can currently be used from every thread, but this may change in the future, so it should be treated
-     * as `@MainThreadOnly`
-     */
-    @MainThreadOnly
-    inline fun <reified T> get(borrower: ResourceBorrower, handle: ResourceHandle): T where T : Any {
-        return get(borrower, handle, T::class)
-    }
+    inline fun <reified T : Any> request(
+        borrower: ResourceBorrower,
+        lifetime: Lifetime,
+        handle: ResourceHandle
+    ): Promise<T> =
+        request(borrower, lifetime, handle, T::class)
 
-    fun <T> get(borrower: ResourceBorrower, handle: ResourceHandle, type: KClass<T>): T where T : Any {
-        val toGet = resources.find { it.handle == handle }
+    fun <T : Any> request(
+        borrower: ResourceBorrower,
+        lifetime: Lifetime,
+        handle: ResourceHandle,
+        type: KClass<T>
+    ): Promise<T> {
+        val resource = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
-        if (borrower !in toGet.borrowedBy) {
-            throw RuntimeException("resource $handle not borrowed by $borrower")
-        }
-        return toGet.get(type) ?: throw RuntimeException("no variant of type ${type.simpleName} for handle $handle")
-    }
-
-    fun trimPrepared() {
-        resources
-            .filter { it.state != Resource.ResourceState.NOT_LOADED }
-            .filter { !it.handle.startsWith(Card.cardTexturePrefix) }
-            .filter { it.borrowedBy.isEmpty() }
-            .forEach { it.dispose() }
+        return resource.request(borrower, lifetime, type)
     }
 
     @MainThreadOnly
@@ -63,18 +61,10 @@ object ResourceManager {
         toGiveBack.giveBack(borrower)
     }
 
-    private const val assetsFile: String = "config/assets.onj"
-
-    private val assetsSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/assets.onjschema").file())
-    }
-
     @MainThreadOnly
     fun init() {
         val resources = mutableListOf<Resource>()
-        val assets = OnjParser.parseFile(Gdx.files.internal(assetsFile).file())
-        assetsSchema.assertMatches(assets)
-        assets as OnjObject
+        val assets = ConfigFileManager.getConfigFile("assets")
 
         assets.get<OnjArray>("textures").value.forEach {
             it as OnjObject

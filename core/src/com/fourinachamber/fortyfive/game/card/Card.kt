@@ -1,11 +1,9 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.FileTextureData
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -21,6 +19,7 @@ import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.onjNamespaces.OnjPassiveEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -111,7 +110,7 @@ class Card(
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
     val additionalHoverInfos: List<String>,
-    font: PixmapFont,
+    font: Promise<PixmapFont>,
     fontScale: Float,
     screen: OnjScreen,
     val isSaved: Boolean?,
@@ -199,7 +198,6 @@ class Card(
     var lastEffectAffectedCardsCache: List<Card> = listOf()
 
     init {
-        screen.borrowResource(cardTexturePrefix + name)
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
         // card texture while the constructor is running and actor is not yet assigned
         synchronized(this) {
@@ -495,7 +493,7 @@ class Card(
 
     private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller), curCost(controller))
 
-    override fun dispose() = actor.disposeTexture()
+    override fun dispose() = actor.dispose()
 
     override fun toString(): String {
         return "card: $name"
@@ -607,7 +605,7 @@ class Card(
                     ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
-                font = GraphicsConfig.cardFont(onjScreen),
+                font = GraphicsConfig.cardFont(onjScreen, onjScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.get<Boolean>("dark"),
                 additionalHoverInfos = onj
@@ -692,13 +690,13 @@ class Card(
  */
 class CardActor(
     val card: Card,
-    val font: PixmapFont,
+    val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable, AnimationActor {
+    OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower {
 
     override val actor: Actor = this
 
@@ -728,22 +726,13 @@ class CardActor(
 
     private var inDestroyAnim: Boolean = false
 
-    private val destroyShader: BetterShader by lazy {
-        ResourceManager.get(screen, "dissolve_shader") // TODO: fix
-    }
+    private val lifetime: EndableLifetime = EndableLifetime()
 
-    private val markedSymbol: TransformDrawable by lazy {
-        ResourceManager.get(screen, "card_symbol_marked")
-    }
+    private val destroyShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "dissolve_shader")
 
-    private val cardTexture: Texture = ResourceManager.get(screen, card.drawableHandle)
-
-    private val pixmap: Pixmap = Pixmap(cardTexture.width, cardTexture.height, Pixmap.Format.RGBA8888)
-
-    var pixmapTextureRegion: TextureRegion? = null
-        private set
-
-    private val cardTexturePixmap: Pixmap
+    private val markedSymbol: Promise<TransformDrawable> =
+        ResourceManager.request(this, this, "card_symbol_marked")
 
     override var isHoverDetailActive: Boolean
         get() = (card.shortDescription.isNotBlank() ||
@@ -753,8 +742,6 @@ class CardActor(
                 && enableHoverDetails
         set(value) {}
 
-    private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
-
     private var prevPosition: Vector2? = null
 
     private var inSelectionMode: Boolean = false
@@ -763,17 +750,15 @@ class CardActor(
 
     var isMarked: Boolean = false
 
+    private var cardTexturePromise: Promise<Texture>? = null
+    private var texture: Texture? = null
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
-        if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
-        cardTexturePixmap = cardTexture.textureData.consumePixmap()
-        // I HATE LIBGDX
-        // FileTextureData always loads a new pixmap that needs to be disposed
-        // PixmapTextureData always returns the same pixmap, that doesn't need to be disposed
-        // Which one is used is a race condition in the TextureResource class
-        if (cardTexture.textureData is FileTextureData) screen.addDisposable(cardTexturePixmap)
-        redrawPixmap(card.baseDamage, card.baseCost)
+
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
+
         onClick {
             if (!inSelectionMode) return@onClick
             // UGGGGGLLLLLLYYYYY
@@ -785,9 +770,11 @@ class CardActor(
         }
         onTouchEvent { event, _, _ ->
             if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
-            FortyFive.currentGame!!.cardRightClicked(card)
+            FortyFive.currentGame?.cardRightClicked(card)
         }
     }
+
+    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
         val allKeys = card.getKeyWordsForDescriptions()
@@ -820,14 +807,17 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        if (drawPixmapMessage?.isFinished ?: false) {
-            finishPixmapDrawing()
-        }
         setBoundsOfHoverDetailActor(screen)
         batch ?: return
-        val texture = pixmapTextureRegion ?: return
+        if (cardTexturePromise?.isResolved == true) {
+            texture?.let { FortyFive.cardTextureManager.giveTextureBack(card) }
+            texture = cardTexturePromise?.getOrError()
+            cardTexturePromise = null
+        }
+        val texture = texture ?: return
+        val textureRegion = TextureRegion(texture)
         val shader = if (inDestroyAnim) {
-            destroyShader
+            destroyShader.getOrError()
         } else {
             null
         }
@@ -855,7 +845,7 @@ class CardActor(
             y = this.y
         }
         batch.draw(
-            texture,
+            textureRegion,
             x + offsetX, y + offsetY,
             width / 2, height / 2,
             width, height,
@@ -866,7 +856,7 @@ class CardActor(
         batch.flush()
         shader?.let { batch.shader = null }
         if (!isMarked) return
-        markedSymbol.draw(
+        markedSymbol.getOrNull()?.draw(
             batch,
             x + offsetX, y + offsetY,
             width / 2, height / 2,
@@ -876,41 +866,13 @@ class CardActor(
         )
     }
 
-    fun disposeTexture() {
-        pixmapTextureRegion?.texture?.dispose()
-        pixmap.dispose()
-        pixmapTextureRegion = null
+    override fun dispose() {
+        lifetime.die()
+        FortyFive.cardTextureManager.giveTextureBack(card)
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
-        val savedPixmapTextureData = when (card.isSaved) {
-            null -> null
-            true -> GraphicsConfig.cardSavedSymbol(screen)
-            false -> GraphicsConfig.cardNotSavedSymbol(screen)
-        }?.textureData
-        if (savedPixmapTextureData != null && !savedPixmapTextureData.isPrepared) savedPixmapTextureData.prepare()
-        val savedPixmap = savedPixmapTextureData?.consumePixmap()
-        if (savedPixmapTextureData != null && savedPixmapTextureData is FileTextureData) {
-            screen.addDisposable(savedPixmap!!)
-        }
-        val message = ServiceThreadMessage.DrawCardPixmap(
-            pixmap,
-            cardTexturePixmap,
-            card,
-            damageValue,
-            costValue,
-            savedPixmap
-        )
-        FortyFive.serviceThread.sendMessage(message)
-        drawPixmapMessage = message
-    }
-
-    private fun finishPixmapDrawing() {
-        pixmapTextureRegion?.texture?.dispose()
-        val texture = Texture(pixmap, true)
-        texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
-        pixmapTextureRegion = TextureRegion(texture)
-        drawPixmapMessage = null
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue)
     }
 
     override fun getBounds(): Rectangle {
@@ -923,7 +885,8 @@ class CardActor(
         action {
             SoundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
-            destroyShader.resetReferenceTime()
+            if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
+            destroyShader.getOrError().resetReferenceTime()
         }
         delay(1200)
         action { inDestroyAnim = false }

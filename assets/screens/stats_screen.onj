@@ -9,23 +9,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "red_wing", "red_wing_bmp", "roadgeek", "card_character",
-
-        "stats_screen_background",
-
-        "stats_screen_spacer", "stats_screen_stat_box", "stats_screen_lost_cards_background",
-        "common_button_default", "common_button_hover",
-
-        "backpack_scrollbar_background", "backpack_scrollbar",
-
-        "card_symbol_not_saved",
-
-        "white_texture"
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight

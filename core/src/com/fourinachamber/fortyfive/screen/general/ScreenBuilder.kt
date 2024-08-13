@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -19,12 +18,11 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.events.dialog.DialogWidget
-import com.fourinachamber.fortyfive.map.events.shop.PersonWidget
 import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
-import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.onjNamespaces.OnjStyleInstruction
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
@@ -35,19 +33,14 @@ import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import ktx.actors.alpha
 import ktx.actors.onClick
-import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
 
-class ScreenBuilder(val file: FileHandle) {
-
-    private var borrowed: List<String> = listOf()
+class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrower {
 
     private val earlyRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
     private val lateRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
-
-    private val behavioursToBind: MutableList<Behaviour> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
     private val addedActorsDragAndDrops: MutableMap<String, MutableList<Actor>> = mutableMapOf()
 
@@ -57,16 +50,17 @@ class ScreenBuilder(val file: FileHandle) {
     private var background: String? = null
     private var music: ResourceHandle? = null
     private var playAmbientSounds: Boolean = false
-    private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
-        val onj = OnjParser.parseFile(file.file())
-        screenSchema.assertMatches(onj)
-        onj as OnjObject
 
-        readAssets(onj)
+        earlyRenderTasks.clear()
+        lateRenderTasks.clear()
+        actorsWithDragAndDrop.clear()
+        addedActorsDragAndDrops.clear()
+        namedActors.clear()
+
         doOptions(onj)
         doTemplates(onj)
 
@@ -75,13 +69,12 @@ class ScreenBuilder(val file: FileHandle) {
             batch = SpriteBatch(),
             controllerContext = controllerContext,
             styleManagers = listOf(),
-            useAssets = borrowed.toMutableList(),
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
             printFrameRate = false,
             namedCells = mapOf(),
-            transitionAwayTime = transitionAwayTime,
+            transitionAwayTimes = doTransitionAwayTimes(),
             screenBuilder = this,
             music = music,
             playAmbientSounds = playAmbientSounds
@@ -99,11 +92,19 @@ class ScreenBuilder(val file: FileHandle) {
         screen.addActorToRoot(root)
         screen.buildKeySelectHierarchy()
 
+        onj
+            .get<OnjObject>("options")
+            .getOr<OnjArray?>("screenControllers", null)
+            ?.value
+            ?.map { obj ->
+                obj as OnjNamedObject
+                ScreenControllerFactory.controllerOrError(obj.name, screen, obj).also { it.initEventHandler() }
+            }
+            ?.forEach { screen.addScreenController(it) }
+
         screenControllers.forEach { screen.addScreenController(it) }
 
         doDragAndDrop(screen)
-
-        for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
         root.addListener { event ->
             screen.screenControllers.forEach { it.onUnhandledEvent(event) }
@@ -132,12 +133,8 @@ class ScreenBuilder(val file: FileHandle) {
         val combinedData = combineTemplateValues(template.get<OnjObject>("template_keys"), onjData)
         val widgetOnj = generateTemplateOnjValue(template, combinedData, "")
         widgetOnj as OnjNamedObject
-        val oldBehaviours = behavioursToBind.toList()
         val curActor = getWidget(widgetOnj, parent, screen)
-        val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
-        for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
         doDragAndDrop(screen)
-//        screen.invalidateEverything()
         return curActor
     }
 
@@ -164,12 +161,8 @@ class ScreenBuilder(val file: FileHandle) {
                 }
             }
         }
-        val oldBehaviours = behavioursToBind.toList()
         applyWidgetKeysFromOnj(actor, widgetOnj, parent, screen)
-        val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
-        for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
         doDragAndDrop(screen)
-//        screen.invalidateEverything()
     }
 
     fun getAsOnjValue(value: Any?): OnjValue {
@@ -230,6 +223,17 @@ class ScreenBuilder(val file: FileHandle) {
         return result
     }
 
+    private fun doTransitionAwayTimes(): Map<String, Int> = onj
+        .get<OnjObject>("options")
+        .getOr<OnjArray?>("transitionAwayTimes", null)
+        ?.let { arr ->
+            arr
+                .value
+                .associate {
+                    it as OnjObject
+                    it.get<String>("screen") to (it.get<Double>("time") * 1000).toInt()
+                }
+        } ?: mapOf()
 
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
@@ -240,29 +244,6 @@ class ScreenBuilder(val file: FileHandle) {
             music = it
         }
         playAmbientSounds = options.get<Boolean>("playAmbientSounds")
-        screenControllers = options
-            .getOr<OnjArray?>("screenControllers", null)
-            ?.value
-            ?.map { obj ->
-                obj as OnjNamedObject
-                ScreenControllerFactory.controllerOrError(obj.name, obj).also { it.initEventHandler() }
-            }
-            ?: listOf()
-
-        options.ifHas<Double>("transitionAwayTime") {
-            transitionAwayTime = (it * 1000).toInt()
-        }
-    }
-
-    private fun readAssets(onj: OnjObject) {
-        val assets = onj.get<OnjObject>("assets")
-
-        val toBorrow = mutableListOf<String>()
-
-        assets.ifHas<OnjArray>("useAssets") { arr ->
-            toBorrow.addAll(arr.value.map { (it as OnjString).value })
-        }
-        borrowed = toBorrow
     }
 
     private fun doDragAndDrop(screen: OnjScreen) {
@@ -378,7 +359,7 @@ class ScreenBuilder(val file: FileHandle) {
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = LabelStyle().apply {
-                font = fontOrError(
+                font = forceLoadFont(
                     widgetOnj.get<String>("font"),
                     screen
                 ) // TODO: figure out how to not load the font immediatley
@@ -401,7 +382,7 @@ class ScreenBuilder(val file: FileHandle) {
         "InputField" -> CustomInputField(
             defText = widgetOnj.get<String>("text"),
             labelStyle = LabelStyle().apply {
-                font = fontOrError(
+                font = forceLoadFont(
                     widgetOnj.get<String>("font"),
                     screen
                 ) // TODO: figure out how to not load the font immediatley
@@ -455,7 +436,7 @@ class ScreenBuilder(val file: FileHandle) {
             screen,
             templateString = TemplateString(widgetOnj.get<String>("template")),
             labelStyle = LabelStyle(
-                fontOrError(widgetOnj.get<String>("font"), screen),
+                forceLoadFont(widgetOnj.get<String>("font"), screen),
                 widgetOnj.get<Color>("color")
             ),
             isDistanceField = widgetOnj.getOr("isDistanceField", true),
@@ -516,26 +497,6 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
-        "WorldView" -> WorldViewWidget(
-            OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
-            screen
-        )
-
-        "CircularCardSelector" -> CircularCardSelector(
-            widgetOnj.get<Double>("radius").toFloat(),
-            widgetOnj.get<Double>("size").toFloat(),
-            widgetOnj.get<String>("emptySlotTexture"),
-            widgetOnj.get<Double>("disabledAlpha").toFloat(),
-            screen
-        )
-
-        "PersonWidget" -> PersonWidget(
-            widgetOnj.get<Double>("offsetX").toFloat(),
-            widgetOnj.get<Double>("offsetY").toFloat(),
-            widgetOnj.get<Double>("scale").toFloat(),
-            screen
-        )
-
         "Backpack" -> Backpack(
             screen,
             widgetOnj.get<String>("cardsFile"),
@@ -571,7 +532,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         "StatusEffectDisplay" -> HorizontalStatusEffectDisplay(
             screen,
-            fontOrError(widgetOnj.get<String>("font"), screen),
+            forceLoadFont(widgetOnj.get<String>("font"), screen),
             widgetOnj.get<Color>("fontColor"),
             widgetOnj.get<Double>("fontScale").toFloat(),
             widgetOnj.getOr<Double>("iconScale", 1.0).toFloat(),
@@ -605,7 +566,7 @@ class ScreenBuilder(val file: FileHandle) {
         "SettingsWidget" -> SettingsWidget(screen)
 
         "Selector" -> Selector(
-            fontOrError(widgetOnj.get<String>("font"), screen),
+            forceLoadFont(widgetOnj.get<String>("font"), screen),
             widgetOnj.get<Double>("fontScale").toFloat(),
             widgetOnj.get<String>("arrowTexture"),
             widgetOnj.get<Double>("arrowWidth").toFloat(),
@@ -625,7 +586,7 @@ class ScreenBuilder(val file: FileHandle) {
         screen: OnjScreen
     ): Actor {
         // TODO: split this into multiple functions
-        applySharedWidgetKeys(actor, widgetOnj)
+        applySharedWidgetKeys(actor, widgetOnj, screen)
         val node = parent?.add(actor)
 
         node ?: return actor
@@ -710,7 +671,7 @@ class ScreenBuilder(val file: FileHandle) {
         }
     }
 
-    private fun applySharedWidgetKeys(actor: Actor, widgetOnj: OnjNamedObject) = with(actor) {
+    private fun applySharedWidgetKeys(actor: Actor, widgetOnj: OnjNamedObject, screen: OnjScreen) = with(actor) {
         debug = widgetOnj.getOr("debug", false)
 
         widgetOnj.ifHas<OnjNamedObject>("dragAndDrop") {
@@ -720,7 +681,7 @@ class ScreenBuilder(val file: FileHandle) {
         widgetOnj.ifHas<OnjArray>("behaviours") { arr ->
             arr.value.forEach {
                 it as OnjNamedObject
-                behavioursToBind.add(BehaviourFactory.behaviorOrError(it.name, it, this))
+                BehaviourFactory.behaviorOrError(it.name, it, this, screen)
             }
         }
 
@@ -750,13 +711,14 @@ class ScreenBuilder(val file: FileHandle) {
 
         widgetOnj.ifHas<String>("onClick") { name -> // TODO: support more of these
             this.onButtonClick { event ->
-                val noMatch = screenControllers
+                val noMatch = screen
+                    .screenControllers
                     .map { it.handleEventListener(name, event) }
                     .all { !it }
                 if (noMatch) {
                     FortyFiveLogger.warn("screen", "No match found for event $name")
                 }
-                screenControllers.forEach { it.handleEventListener(name, event) }
+                screen.screenControllers.forEach { it.handleEventListener(name, event) }
             }
         }
 
@@ -769,9 +731,8 @@ class ScreenBuilder(val file: FileHandle) {
         actorsWithDragAndDrop[group]!!.add(actor to onj)
     }
 
-    private fun fontOrError(name: String, screen: OnjScreen): BitmapFont {
-        return ResourceManager.get(screen, name)
-    }
+    private fun forceLoadFont(name: String, screen: OnjScreen): BitmapFont =
+        ResourceManager.forceGet(this, screen, name)
 
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
         "center" -> Align.center

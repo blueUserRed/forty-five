@@ -15,12 +15,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
-import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.rendering.MapDebugMenuPage
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -62,7 +63,7 @@ class DetailMapWidget(
     private val scrollMargin: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val mapScale: Float
-) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
+) : Widget(), ZIndexActor, StyledActor, BackgroundActor, ResourceBorrower {
 
     override var fixedZIndex: Int = 0
 
@@ -97,13 +98,8 @@ class DetailMapWidget(
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
-    private val nodeDrawable: Drawable by lazy {
-        ResourceManager.get(screen, defaultNodeDrawableHandle)
-    }
-
-    private val playerDrawable: Drawable by lazy {
-        ResourceManager.get(screen, playerDrawableHandle)
-    }
+    private val nodeDrawable: Promise<Drawable> = ResourceManager.request(this, screen, defaultNodeDrawableHandle)
+    private val playerDrawable: Promise<Drawable> = ResourceManager.request(this, screen, playerDrawableHandle)
 
     override var backgroundHandle: ResourceHandle? = null
         set(value) {
@@ -112,11 +108,11 @@ class DetailMapWidget(
             background = if (value == null) {
                 null
             } else {
-                ResourceManager.get(screen, value)
+                ResourceManager.request(this, screen, value)
             }
         }
 
-    private var background: Drawable? = null
+    private var background: Promise<Drawable>? = null
 
     var backgroundScale: Float? = null
         set(value) {
@@ -125,13 +121,8 @@ class DetailMapWidget(
             }
         }
 
-    private val edgeTexture: TextureRegion by lazy {
-        ResourceManager.get(screen, edgeTextureHandle)
-    }
-
-    private val directionIndicator: TextureRegion by lazy {
-        ResourceManager.get(screen, directionIndicatorHandle)
-    }
+    private val edgeTexture: Promise<TextureRegion> = ResourceManager.request(this, screen, edgeTextureHandle)
+    private val directionIndicator: Promise<TextureRegion> = ResourceManager.request(this, screen, directionIndicatorHandle)
 
     private var moveScreenToPoint: Vector2? = null
 
@@ -220,15 +211,11 @@ class DetailMapWidget(
         }
     }
 
-    fun moveToNextNode(mapNode: MapNode) {
-        if (movePlayerTo != null) {
-            finishMovement()
-            return
-        }
-        goToNode(mapNode)
-    }
+    val debugMenuPage = MapDebugMenuPage()
+    private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
 
     init {
+        map.decorations.forEach { it.requestDrawable(screen, this) }
         bindHoverStateListeners(this)
         addListener(dragListener)
         addListener(clickListener)
@@ -236,7 +223,6 @@ class DetailMapWidget(
 
         animatedDecorations.forEach { (_, instances) ->
             instances.forEach { (_, _, animation) ->
-                screen.addDisposable(animation)
                 animation.start()
             }
         }
@@ -248,6 +234,14 @@ class DetailMapWidget(
         mapOffset.set(
             if (map.scrollable) idealPos else map.camPosOffset
         )
+    }
+
+    fun moveToNextNode(mapNode: MapNode) {
+        if (movePlayerTo != null) {
+            finishMovement()
+            return
+        }
+        goToNode(mapNode)
     }
 
     override fun act(delta: Float) {
@@ -283,7 +277,7 @@ class DetailMapWidget(
 
     private fun createDecorationAnimation(name: String): AnimationDrawable = when (name) {
 
-        "sheep" -> createAnimation {
+        "sheep" -> createAnimation(this, screen) {
             val anim = deferredAnimation("map_decoration_sheep_animation")
             val still = stillFrame("map_decoration_bewitched_forest_sheep_1", 500)
             order {
@@ -292,7 +286,7 @@ class DetailMapWidget(
             }
         }
 
-        "tree" -> createAnimation {
+        "tree" -> createAnimation(this, screen) {
             val anim = deferredAnimation("map_decoration_tree_animation")
             val still = stillFrame("map_decoration_bewitched_forest_tree1", 100)
             val cycleOffset = (0..30).random()
@@ -310,7 +304,7 @@ class DetailMapWidget(
             }
         }
 
-        "grass" -> createAnimation {
+        "grass" -> createAnimation(this, screen) {
             val anim = deferredAnimation("map_decoration_grass_animation")
             order {
                 loop(anim)
@@ -325,7 +319,7 @@ class DetailMapWidget(
         if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
             FortyFiveLogger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
         }
-//        if (!canGoTo(node)) return
+        if (!walkEverywhere && !canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)
@@ -377,7 +371,7 @@ class DetailMapWidget(
         drawNodeImages(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
-        playerDrawable.draw(batch, playerX, playerY + playerHeightOffset, playerWidth, playerHeight)
+        playerDrawable.getOrNull()?.draw(batch, playerX, playerY + playerHeightOffset, playerWidth, playerHeight)
         super.draw(batch, parentAlpha)
 
         batch.flush()
@@ -393,7 +387,7 @@ class DetailMapWidget(
     }
 
     private fun drawBackground(batch: Batch) {
-        val background = background ?: return
+        val background = background?.getOrNull() ?: return
         val minWidth = background.minWidth * (backgroundScale ?: 1F)
         val minHeight = background.minHeight * (backgroundScale ?: 1F)
         val amountX = ceil(width / minWidth).toInt() + 2
@@ -418,7 +412,7 @@ class DetailMapWidget(
             val imageData = node.getImageData() ?: return@forEach
             val offset = getNodeImageOffset(node.imagePos ?: return@forEach, imageData.width, imageData.height)
             val (nodeX, nodeY) = scaledNodePos(node)
-            image.draw(
+            image.getOrNull()?.draw(
                 batch,
                 x + mapOffset.x + nodeX + offset.x,
                 y + mapOffset.y + nodeY + offset.y,
@@ -456,18 +450,20 @@ class DetailMapWidget(
             batch.flush()
             batch.setColor(old.r, old.g, old.b, disabledDirectionIndicatorAlpha)
         }
-        batch.draw(
-            directionIndicator,
-            x + nodeX + mapOffset.x + dx,
-            y + nodeY + mapOffset.y + dy,
-            (directionIndicator.regionWidth * 0.1f) / 2,
-            (directionIndicator.regionHeight * 0.1f) / 2,
-            directionIndicator.regionWidth * 0.1f,
-            directionIndicator.regionHeight * 0.1f,
-            1f,
-            1f,
-            if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees + 180f,
-        )
+        directionIndicator.getOrNull()?.let { directionIndicator ->
+            batch.draw(
+                directionIndicator,
+                x + nodeX + mapOffset.x + dx,
+                y + nodeY + mapOffset.y + dy,
+                (directionIndicator.regionWidth * 0.1f) / 2,
+                (directionIndicator.regionHeight * 0.1f) / 2,
+                directionIndicator.regionWidth * 0.1f,
+                directionIndicator.regionHeight * 0.1f,
+                1f,
+                1f,
+                if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees + 180f,
+            )
+        }
         if (!canGoToNode) {
             batch.flush()
             batch.color = old
@@ -501,11 +497,11 @@ class DetailMapWidget(
         offX: Float,
         offY: Float
     ) {
-        val drawable = decoration.getDrawable(screen)
+        val drawable = decoration.getDrawable(screen, this)
         val width = decoration.baseWidth
         val height = decoration.baseHeight
         decoration.instances.forEach { instance ->
-            drawable.draw(
+            drawable.getOrNull()?.draw(
                 batch,
                 x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
                 width * instance.second * mapScale, height * instance.second * mapScale
@@ -608,36 +604,36 @@ class DetailMapWidget(
 
     private fun drawNodes(batch: Batch) {
         val uniqueNodes = map.uniqueNodes
-        val shader = visitedNodeShader
+        val shaderPromise = visitedNodeShader
         val nodeDrawer: (MapNode) -> Unit = { node ->
             val (nodeX, nodeY) = scaledNodePos(node) + mapOffset
             val drawable = node.getNodeTexture(screen) ?: nodeDrawable
-            drawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
+            drawable.getOrNull()?.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
         val (grayNodes, normalNodes) = uniqueNodes.splitInTwo { it.event?.canBeStarted?.not() ?: false }
         batch.flush()
-        shader.shader.bind()
-        shader.prepare(screen)
-        batch.shader = shader.shader
-        grayNodes.forEach(nodeDrawer)
-        batch.flush()
-        batch.shader = null
+        shaderPromise.getOrNull()?.let { shader ->
+            shader.shader.bind()
+            shader.prepare(screen)
+            batch.shader = shader.shader
+            grayNodes.forEach(nodeDrawer)
+            batch.flush()
+            batch.shader = null
+        }
         normalNodes.forEach(nodeDrawer)
     }
 
     // TODO: remove
-    private val visitedNodeShader: BetterShader by lazy {
-        ResourceManager.get(screen, "grayscale_shader")
-    }
+    private val visitedNodeShader: Promise<BetterShader> = ResourceManager.request(this, screen, "grayscale_shader")
 
     // TODO: remove
-    private val edgeShader: BetterShader by lazy {
-        ResourceManager.get(screen, "map_edge_shader")
-    }
+    private val edgeShader: Promise<BetterShader> = ResourceManager.request(this, screen, "map_edge_shader")
 
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges
         batch.flush()
+        val edgeShader = edgeShader.getOrNull() ?: return
+        val edgeTexture = edgeTexture.getOrNull() ?: return
         edgeShader.prepare(screen)
         batch.shader = edgeShader.shader
         for ((node1, node2) in uniqueEdges) {

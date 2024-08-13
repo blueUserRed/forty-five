@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -21,9 +22,8 @@ import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
-class ShopScreenController(onj: OnjObject) : ScreenController() {
+class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
 
-    private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
 
     private val shopFilePath = onj.get<String>("shopsFile")
@@ -47,20 +47,14 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var random: Random
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(context: Any?) {
         //TODO fix bug with cards when being on the edge of other cards when drag and dropping
-        screen = onjScreen
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
-        val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
-        shopsSchema.assertMatches(shopFile)
-        shopFile as OnjObject
-        val npcsFile = OnjParser.parseFile(Gdx.files.internal(npcsFilePath).file())
-        npcsSchema.assertMatches(npcsFile)
-        npcsFile as OnjObject
-
+        val shopFile = ConfigFileManager.getConfigFile("shopConfig")
+        val npcsFile = ConfigFileManager.getConfigFile("npcConfig")
         val personData = shopFile
             .get<OnjArray>("people")
             .value
@@ -73,12 +67,11 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == personData.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        initWidgets(onjScreen, imgData)
+        initWidgets(screen, imgData)
 
         TemplateString.updateGlobalParam("map.cur_event.personDisplayName", personData.get<String>("displayName"))
-        val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
+        val messageWidget = screen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = personData.get<OnjArray>("texts").value
-        val defaults = shopFile.get<OnjObject>("defaults")
 
         random = Random(context.seed)
         addCards(context.types)
@@ -214,7 +207,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
         val data = imgData.value.toMutableMap()
         data["offsetX"] = ((data["offsetX"] as OnjFloat?)?.value?.toFloat() ?: 0F).toOnjYoga(YogaUnit.POINT)
-        screen.borrowResource(imgData.get<String>("textureName"))
         val flexParent =
             highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomFlexBox
         val person = onjScreen.screenBuilder.generateFromTemplate(
@@ -263,16 +255,4 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         addToBackpackWidget.leaveActorState("display")
     }
 
-    companion object {
-
-        private const val schemaPathShop: String = "onjschemas/shops.onjschema"
-        private const val schemaPathNpcs: String = "onjschemas/npcs.onjschema"
-
-        val shopsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathShop).file())
-        }
-        val npcsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathNpcs).file())
-        }
-    }
 }

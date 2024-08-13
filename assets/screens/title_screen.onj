@@ -9,35 +9,6 @@ use Style;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-assets: {
-    useAssets: [
-        "roadgeek", "red_wing_bmp","red_wing_cm",
-
-        "title_screen_background",
-        "title_screen_bullet_1",
-        "title_screen_bullet_2",
-        "title_screen_bullet_3",
-        "title_screen_bullet_4",
-        "title_screen_bullet_5",
-        "title_screen_bullet_6",
-        "title_screen_bullet_7",
-        "title_screen_bullet_8",
-        "title_screen_bullet_9",
-        "title_screen_bullet_10",
-        "title_screen_bullet_11",
-        "title_screen_bullet_12",
-        "title_screen_bullet_13",
-        "title_screen_bullet_14",
-        "title_screen_bullet_15",
-
-        "common_popup_background_black_large",
-        "common_button_default", "common_button_hover",
-
-        "main_theme",
-        "swoosh_sound", "button_2_sound",
-    ]
-},
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
     worldHeight: worldHeight
@@ -47,7 +18,12 @@ options: {
     background: "title_screen_background",
     music: "main_theme",
     playAmbientSounds: false,
-    transitionAwayTime: 1.0,
+    transitionAwayTimes: [
+        {
+            screen: "*",
+            time: 1.0
+        }
+    ],
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
@@ -427,7 +403,7 @@ root: $Box {
             behaviours: [
                 sharedComponents.buttonCursorBehaviour,
                 $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/credits_screen.onj",
+                    screen: "creditsScreen",
                 }
             ]
         },
