@@ -1528,7 +1528,7 @@ cards: [
         effects: [
         ],
         forceLoadCards: [],
-        dark: false,
+        dark: true,
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
