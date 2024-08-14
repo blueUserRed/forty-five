@@ -333,3 +333,23 @@ interface ActorWithAnimationSpawners {
 
 inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
     animationSpawners.find { it is T } as? T
+
+interface LiftableActor {
+
+    var inLift: Boolean
+    var inLiftRender: Boolean
+
+    val shouldRender: Boolean
+        get() = !inLift || (inLift && inLiftRender)
+
+    val actor: Actor
+
+    fun beginLift() {
+        inLift = true
+    }
+
+    fun endLift() {
+        inLift = false
+    }
+
+}
