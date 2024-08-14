@@ -734,7 +734,7 @@ navBar: $Box {
                 visible: false,
             }
         ],
-        textureName: "heart_texture",
+        textureName: "statusbar_lives",
         scaleX: 0.1,
         scaleY: 0.1,
         reportDimensionsWithScaling: true,
@@ -960,7 +960,7 @@ statusbarLeftDefaults: {
                 ],
             } children [
                 $Image {
-                    textureName: "heart_texture",
+                    textureName: "statusbar_lives",
                     name: "player_health_icon",
                     scaleX: 0.08,
                     scaleY: 0.08,

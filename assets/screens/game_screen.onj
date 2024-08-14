@@ -74,7 +74,6 @@ var controller = $GameScreenController {
 };
 
 options: {
-    background: "game_screen_background_wasteland",
     screenControllers: [
         controller,
         $BiomeBackgroundScreenController {

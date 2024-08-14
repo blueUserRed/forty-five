@@ -1,4 +1,4 @@
-![logo](./assets/textures/logo_red.png)
+![logo](./assets/logo.png)
 
 <br>
 <br>

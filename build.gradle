@@ -90,34 +90,14 @@ project(":core") {
 import com.badlogic.gdx.tools.texturepacker.TexturePacker
 import java.io.File
 
-task texturePacker {
-    doLast {
-        file("assets/textures/toPack.txt").eachLine { line ->
-            if (!line.allWhitespace) {
-
-                def atlasDir = file("assets/textures/packed/$line")
-                if (atlasDir.exists()) {
-                    atlasDir.deleteDir()
-                }
-                println(line)
-                TexturePacker.process(
-                        "assets/textures/$line",
-                        "assets/textures/packed/$line",
-                        line
-                )
-            }
-        }
-    }
-}
-
 def packAnimation(anim) {
     def atlasDir = file("assets/large_assets/packed/$anim")
     if (atlasDir.exists()) {
         atlasDir.deleteDir()
     }
     TexturePacker.process(
-        "assets/large_assets/$anim",
-        "assets/large_assets/packed/$anim",
+        "assets/blobs/animations/$anim",
+        "assets/blobs/animations/packed/$anim",
         anim
     )
 }

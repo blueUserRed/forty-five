@@ -15,7 +15,7 @@ viewport: $FitViewport {
 },
 
 options: {
-    background: "game_screen_background_wasteland",
+    background: "background_wasteland",
     music: "map_theme",
     playAmbientSounds: true,
     inputMap: [

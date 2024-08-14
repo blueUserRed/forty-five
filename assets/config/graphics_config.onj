@@ -107,20 +107,20 @@ encounterBackgrounds: [
     {
         biome: "wasteland",
         isDark: false,
-        background: "game_screen_background_wasteland",
-        secondaryBackground: "game_screen_background_wasteland",
+        background: "background_wasteland",
+        secondaryBackground: "secondary_background_wasteland",
     },
     {
         biome: "bewitched_forest",
         isDark: true,
-        background: "game_screen_background_bewitched_forest",
-        secondaryBackground: "game_screen_background_bewitched_forest",
+        background: "background_bewitched_forest",
+        secondaryBackground: "background_bewitched_forest",
     },
     {
         biome: "magenta_mountains",
         isDark: false,
-        background: "game_screen_background_magenta_mountains",
-        secondaryBackground: "game_screen_background_bewitched_forest",
+        background: "background_magenta_mountains",
+        secondaryBackground: "background_bewitched_forest",
     },
 ],
 

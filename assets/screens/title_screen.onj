@@ -106,7 +106,7 @@ var confirmationPopup = $Box {
                     width: 500#points
                 },
             ],
-            font: "red_wing_cm",
+            font: "red_wing",
             fontScale: 1.0,
             color: color.taupe_gray,
             wrap: true,
@@ -232,7 +232,7 @@ var inDevelopmentPopup = $Box {
                     width: 500#points
                 },
             ],
-            font: "red_wing_bmp",
+            font: "red_wing",
             fontScale: 0.8,
             color: color.forty_white,
             wrap: true,
@@ -267,7 +267,7 @@ var inDevelopmentPopup = $Box {
                 ]
             } children [
                 $Label {
-                    font: "red_wing_bmp",
+                    font: "red_wing",
                     text: "Continue",
                     fontScale: 1.0,
                     color: color.white,

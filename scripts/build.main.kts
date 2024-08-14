@@ -10,14 +10,13 @@ val assetDirs = arrayOf(
     "error_logs",
     "fonts",
     "imports",
-    "large_assets",
     "logging",
     "maps",
     "onjschemas",
     "saves",
     "screens",
     "shaders",
-    "textures",
+    "blobs",
 )
 
 build()
@@ -76,7 +75,7 @@ fun copyAssets(tmpDir: File) {
 fun cleanupAssets(tmpDir: File) {
     debug("cleaning up assets...")
     debug("removing extra jre")
-    (tmpDir / "large_assets/jre").deleteRecursively()
+    (tmpDir / "blobs/jre").deleteRecursively()
 
     debug("removing error logs")
     (tmpDir / "error_logs")
@@ -115,7 +114,7 @@ fun changeLoggingVersionTag(tmpDir: File, newTag: String) {
 
 fun copyJre(tmpDir: File) {
     debug("copying jre")
-    File("assets/large_assets/jre").copyRecursively(tmpDir / "jre")
+    File("assets/blobs/jre").copyRecursively(tmpDir / "jre")
 }
 
 fun createExe(tmpDir: File) {

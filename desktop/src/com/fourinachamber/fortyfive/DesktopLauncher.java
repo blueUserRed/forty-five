@@ -20,7 +20,7 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setTitle(".Forty-Five");
 		config.setWindowedMode(900,(900*9)/16);
-		config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "textures/icon.png");
+		config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "blobs/icon.png");
 		Exception exception = null;
 
 		try {

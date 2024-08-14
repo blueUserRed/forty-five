@@ -6,41 +6,41 @@ fonts: [
 
     {
         name: "red_wing",
-        fontFile: "fonts/red_wing_df.fnt",
-        imageFile: "fonts/red_wing_df.png"
+        fontFile: "blobs/fonts/red_wing_df.fnt",
+        imageFile: "blobs/fonts/red_wing_df.png"
     },
     {
         name: "red_wing_cm",
-        fontFile: "fonts/red_wing_df.fnt",
-        imageFile: "fonts/red_wing_df.png",
+        fontFile: "blobs/fonts/red_wing_df.fnt",
+        imageFile: "blobs/fonts/red_wing_df.png",
         markupEnabled: true
     },
     {
         name: "red_wing_bmp",
-        fontFile: "fonts/red_wing_bmp.fnt",
-        imageFile: "fonts/red_wing_bmp.png"
+        fontFile: "blobs/fonts/red_wing_bmp.fnt",
+        imageFile: "blobs/fonts/red_wing_bmp.png"
     },
     {
         name: "red_wing_bmp_cm",
-        fontFile: "fonts/red_wing_bmp.fnt",
-        imageFile: "fonts/red_wing_bmp.png",
+        fontFile: "blobs/fonts/red_wing_bmp.fnt",
+        imageFile: "blobs/fonts/red_wing_bmp.png",
         markupEnabled: true
     },
     {
         name: "roadgeek",
-        fontFile: "fonts/roadgeek_df.fnt",
-        imageFile: "fonts/roadgeek_df.png"
+        fontFile: "blobs/fonts/roadgeek_df.fnt",
+        imageFile: "blobs/fonts/roadgeek_df.png"
     },
     {
         name: "roadgeek_cm",
-        fontFile: "fonts/roadgeek_df.fnt",
-        imageFile: "fonts/roadgeek_df.png",
+        fontFile: "blobs/fonts/roadgeek_df.fnt",
+        imageFile: "blobs/fonts/roadgeek_df.png",
         markupEnabled: true
     },
     {
         name: "roadgeek_bmp",
-        fontFile: "fonts/roadgeek_bmp.fnt",
-        imageFile: "fonts/roadgeek_bmp.png",
+        fontFile: "blobs/fonts/roadgeek_bmp.fnt",
+        imageFile: "blobs/fonts/roadgeek_bmp.png",
     },
 
 ],
@@ -48,1176 +48,1132 @@ fonts: [
 pixmapFonts: [
     {
         name: "card_character",
-        fontFile: "fonts/card_character_bmp.fnt"
+        fontFile: "blobs/fonts/card_character_bmp.fnt"
     }
 ],
 
 textureAtlases: [
-
-    {
-        name: "title_screen_atlas",
-        file: "textures/packed/title_screen/title_screen.atlas",
-        regions: [
-            {
-                handle: "title_screen_background",
-                regionName: "background3"
-            },
-            {
-                handle: "logo",
-                regionName: "logo"
-            }
-        ]
-    },
     {
         name: "outlaw_animation_atlas",
-        file: "large_assets/packed/outlaw_animation/outlaw_animation.atlas",
+        file: "blobs/animations/packed/outlaw_animation/outlaw_animation.atlas",
         regions: []
     },
     {
         name: "pyro_animation_atlas",
-        file: "large_assets/packed/pyro_animation/pyro_animation.atlas",
+        file: "blobs/animations/packed/pyro_animation/pyro_animation.atlas",
         regions: []
     },
     {
         name: "map_decoration_sheep_animation_atlas",
-        file: "large_assets/packed/sheep_animation/sheep_animation.atlas",
+        file: "blobs/animations/packed/sheep_animation/sheep_animation.atlas",
         regions: []
     },
     {
         name: "map_decoration_tree_animation_atlas",
-        file: "large_assets/packed/tree_animation/tree_animation.atlas",
+        file: "blobs/animations/packed/tree_animation/tree_animation.atlas",
         regions: []
     },
     {
         name: "map_decoration_grass_animation_atlas",
-        file: "large_assets/packed/grass_animation/grass_animation.atlas",
+        file: "blobs/animations/packed/grass_animation/grass_animation.atlas",
         regions: []
     },
-    {
-        name: "world_view_background_atlas",
-        file: "maps/world_view/generated/background.atlas",
-        regions: [
-            {
-                handle: "world_view_background",
-                regionName: "world_view_background"
-            }
-        ]
-    },
-    {
-        name: "game_screen_atlas",
-        file: "textures/packed/game_screen/game_screen.atlas",
-        regions: [
-            {
-                handle: "revolver_slot_texture",
-                regionName: "revolver_slot"
-            },
-            {
-                handle: "reserves_orb",
-                regionName: "reserves_orb"
-            },
-            {
-                handle: "card_orb",
-                regionName: "card_orb"
-            },
-            {
-                handle: "enemy_texture",
-                regionName: "enemy"
-            },
-            {
-                handle: "normal_bullet",
-                regionName: "normal_bullet"
-            },
-            {
-                handle: "end_turn_button_texture",
-                regionName: "end_turn"
-            },
-            {
-                handle: "end_turn_button_hover_texture",
-                regionName: "end_turn_hover"
-            },
-            {
-                handle: "shoot_button_texture",
-                regionName: "shoot"
-            },
-            {
-                handle: "shoot_button_hover_texture",
-                regionName: "shoot_hover"
-            },
-            {
-                handle: "parry_button_texture",
-                regionName: "parry"
-            },
-            {
-                handle: "parry_button_hover_texture",
-                regionName: "parry_hover"
-            },
-            {
-                handle: "pass_button_texture",
-                regionName: "pass"
-            },
-            {
-                handle: "pass_button_hover_texture",
-                regionName: "pass_hover"
-            },
-            {
-                handle: "enemy_turn_banner",
-                regionName: "enemy_turn_banner"
-            },
-            {
-                handle: "player_turn_banner",
-                regionName: "player_turn_banner"
-            },
-            {
-                handle: "enemy_gravestone",
-                regionName: "enemy_gravestone"
-            },
-            {
-                handle: "heart_texture",
-                regionName: "heart"
-            },
-            {
-                handle: "hit_overlay",
-                regionName: "hit_overlay"
-            },
-            {
-                handle: "burning_icon",
-                regionName: "burning_icon",
-//                useMipMaps: true
-            },
-            {
-                handle: "insult_icon",
-                regionName: "insult_icon",
-//                useMipMaps: true
-            },
-            {
-                handle: "shield_icon",
-                regionName: "shield_icon",
-//                useMipMaps: true
-            },
-            {
-                handle: "poison_icon",
-                regionName: "poison_icon",
-//                useMipMaps: true
-            },
-            {
-                handle: "bewitched_icon",
-                regionName: "bewitched_icon",
-//                useMipMaps: true
-            },
-            {
-                handle: "draw_bullet",
-                regionName: "draw_bullet"
-            },
-            {
-                handle: "draw_cover",
-                regionName: "draw_cover"
-            },
-            {
-                handle: "player_bar",
-                regionName: "player_bar"
-            },
-            {
-                handle: "encounter_modifier_background",
-                regionName: "encounter_modifier_background"
-            },
-            {
-                handle: "under_deck_background",
-                regionName: "under_deck_background"
-            },
-            {
-                handle: "game_screen_player",
-                regionName: "player"
-            },
-            {
-                handle: "win_screen_background",
-                regionName: "win_screen_background"
-            },
-            {
-                handle: "win_screen_spacer",
-                regionName: "win_screen_spacer"
-            },
-            {
-                handle: "win_screen_item_cash",
-                regionName: "win_screen_item_cash"
-            },
-            {
-                handle: "win_screen_item_card",
-                regionName: "win_screen_item_card"
-            },
-            {
-                handle: "status_effect_background",
-                regionName: "status_effect_background"
-            },
-        ]
-    }
 
 ],
 
 textures: [
     {
-        name: "game_screen_background_wasteland",
-        file: "textures/game_screen_backgrounds/wasteland.png"
-    },
-    {
-        name: "game_screen_background_bewitched_forest",
-        file: "textures/game_screen_backgrounds/bewitched_forest.png"
-    },
-    {
-        name: "game_screen_background_magenta_mountains",
-        file: "textures/game_screen_backgrounds/magenta_mountains.png"
+        name: "revolver_slot_texture",
+        file: "blobs/game_screen/revolver_slot.png"
     },
     {
         name: "revolver_drum",
-        file: "textures/game_screen/revolver_drum.png"
+        file: "blobs/game_screen/revolver_drum.png"
     },
     {
-        name: "location_sign_aqua_dulche",
-        file: "textures/location_signs/aqua_dulche.png"
+        name: "reserves_orb",
+        file: "blobs/game_screen/reserves_orb.png"
     },
     {
-        name: "location_sign_salem",
-        file: "textures/location_signs/salem.png"
+        name: "card_orb",
+        file: "blobs/game_screen/card_orb.png"
     },
     {
-        name: "location_sign_salem",
-        file: "textures/location_signs/salem.png"
+        name: "enemy_texture",
+        file: "blobs/game_screen/enemy.png"
     },
     {
-        name: "location_sign_aqua_balle",
-        file: "textures/location_signs/aqua_balle.png"
+        name: "normal_bullet",
+        file: "blobs/game_screen/normal_bullet.png"
     },
     {
-        name: "location_sign_spire_outpost",
-        file: "textures/location_signs/spire_outpost.png"
+        name: "end_turn_button_texture",
+        file: "blobs/game_screen/end_turn.png"
     },
     {
-        name: "location_sign_tabu_letter_outpost",
-        file: "textures/location_signs/tabu_letter_outpost.png"
+        name: "end_turn_button_hover_texture",
+        file: "blobs/game_screen/end_turn_hover.png"
     },
     {
-        name: "location_sign_under_construction",
-        file: "textures/location_signs/under_construction.png"
+        name: "shoot_button_texture",
+        file: "blobs/game_screen/shoot.png"
     },
     {
-        name: "location_name_aqua_balle",
-        file: "textures/location_names/aqua_balle.png"
+        name: "shoot_button_hover_texture",
+        file: "blobs/game_screen/shoot_hover.png"
     },
     {
-        name: "location_name_spire_outpost",
-        file: "textures/location_names/spire_outpost.png"
+        name: "parry_button_texture",
+        file: "blobs/game_screen/parry.png"
     },
     {
-        name: "location_name_tabuletter_outpost",
-        file: "textures/location_names/tabuletter_outpost.png"
+        name: "parry_button_hover_texture",
+        file: "blobs/game_screen/parry_hover.png"
     },
     {
-        name: "location_name_salem",
-        file: "textures/location_names/salem.png"
+        name: "pass_button_texture",
+        file: "blobs/game_screen/pass.png"
     },
     {
-        name: "map_detail_background",
-        file: "textures/map/detail/background.png"
+        name: "pass_button_hover_texture",
+        file: "blobs/game_screen/pass_hover.png"
     },
     {
-        name: "map_detail_encounter_modifier_background",
-        file: "textures/map/detail/encounter_modifier_background.png"
+        name: "enemy_turn_banner",
+        file: "blobs/game_screen/enemy_turn_banner.png"
     },
     {
-        name: "map_background_grass_tileable",
-        file: "textures/map/backgrounds/grass.png",
+        name: "player_turn_banner",
+        file: "blobs/game_screen/player_turn_banner.png"
     },
     {
-        name: "map_background_snow_tileable",
-        file: "textures/map/backgrounds/snow.png",
+        name: "enemy_gravestone",
+        file: "blobs/game_screen/enemy_gravestone.png"
     },
     {
-        name: "map_background_wasteland_tileable",
-        file: "textures/map/backgrounds/wasteland.png",
+        name: "hit_overlay",
+        file: "blobs/game_screen/hit_overlay.png"
     },
     {
-        name: "map_background_bewitched_forest_tileable",
-        file: "textures/map/backgrounds/bewitched_forest.png",
+        name: "burning_icon",
+        file: "blobs/status_effects/burning_icon.png",
+        useMipMaps: true
     },
     {
-        name: "map_background_magenta_mountains_tileable",
-        file: "textures/map/backgrounds/magenta_mountains.png",
+        name: "shield_icon",
+        file: "blobs/status_effects/shield_icon.png",
+        useMipMaps: true
     },
     {
-        name: "map_path",
-        file: "textures/map/path.png"
+        name: "poison_icon",
+        file: "blobs/status_effects/poison_icon.png",
+        useMipMaps: true
     },
     {
-        name: "map_node_default",
-        file: "textures/map/nodes/default_node.png"
+        name: "bewitched_icon",
+        file: "blobs/status_effects/bewitched_icon.png",
+        useMipMaps: true
     },
     {
-        name: "map_node_heal",
-        file: "textures/map/nodes/heal.png"
+        name: "draw_bullet",
+        file: "blobs/game_screen/draw_bullet.png"
     },
     {
-        name: "map_node_exit",
-        file: "textures/map/nodes/exit.png"
+        name: "player_bar",
+        file: "blobs/game_screen/player_bar.png"
     },
     {
-        name: "map_node_fight",
-        file: "textures/map/nodes/fight.png"
+        name: "encounter_modifier_background",
+        file: "blobs/game_screen/encounter_modifier_background.png"
     },
     {
-        name: "map_node_shop",
-        file: "textures/map/nodes/shop.png"
+        name: "under_deck_background",
+        file: "blobs/game_screen/under_deck_background.png"
     },
     {
-        name: "map_node_get_card",
-        file: "textures/map/nodes/get_card.png"
+        name: "game_screen_player",
+        file: "blobs/game_screen/player.png"
     },
     {
-        name: "map_node_choose_card",
-        file: "textures/map/nodes/choose_card.png"
+        name: "win_screen_background",
+        file: "blobs/game_screen/win_screen_background.png"
     },
     {
-        name: "map_node_dialog",
-        file: "textures/map/nodes/dialog.png"
+        name: "win_screen_spacer",
+        file: "blobs/game_screen/win_screen_spacer.png"
     },
     {
-        name: "map_player",
-        file: "textures/map/player.png"
+        name: "win_screen_item_cash",
+        file: "blobs/game_screen/win_screen_item_cash.png"
     },
     {
-        name: "map_detail_encounter_button",
-        file: "textures/map/detail/encounter_button.png",
+        name: "win_screen_item_card",
+        file: "blobs/game_screen/win_screen_item_card.png"
     },
     {
-        name: "map_detail_encounter_button_hover",
-        file: "textures/map/detail/encounter_button_hover.png",
+        name: "status_effect_background",
+        file: "blobs/game_screen/status_effect_background.png"
     },
     {
-        name: "map_detail_encounter_button_disabled",
-        file: "textures/map/detail/encounter_button_disabled.png",
-    },
-    {
-        name: "nav_bar_background",
-        file: "textures/statusbar/background_old.png"
-    },
-    {
-        name: "cash_symbol",
-        file: "textures/statusbar/cash_symbol.png"
-    },
-    {
-        name: "map_decoration_grass",
-        file: "textures/map/decorations/grass.png"
-    },
-    {
-        name: "map_decoration_wasteland_skull_1",
-        file: "textures/map/decorations/wasteland_skull_1.png"
-    },
-    {
-        name: "map_decoration_wasteland_skull_2",
-        file: "textures/map/decorations/wasteland_skull_2.png"
-    },
-    {
-        name: "map_decoration_wasteland_dune_1",
-        file: "textures/map/decorations/wasteland_dune_1.png"
-    },
-    {
-        name: "map_decoration_wasteland_dune_2",
-        file: "textures/map/decorations/wasteland_dune_2.png"
-    },
-    {
-        name: "map_decoration_wasteland_dune_3",
-        file: "textures/map/decorations/wasteland_dune_3.png"
-    },
-    {
-        name: "map_decoration_wasteland_dune_4",
-        file: "textures/map/decorations/wasteland_dune_4.png"
-    },
-    {
-        name: "map_decoration_wasteland_cactus_1",
-        file: "textures/map/decorations/wasteland_cactus_1.png"
-    },
-    {
-        name: "map_decoration_wasteland_cactus_2",
-        file: "textures/map/decorations/wasteland_cactus_2.png"
-    },
-    {
-        name: "map_decoration_wasteland_snake_2",
-        file: "textures/map/decorations/wasteland_Snake_2.png"
-    },
-    {
-        name: "map_decoration_bewitched_forest_sheep_1",
-        file: "textures/map/decorations/bewitched_forest_sheep_1.png"
-    },
-    {
-        name: "map_decoration_bewitched_forest_sheep_2",
-        file: "textures/map/decorations/bewitched_forest_sheep_2.png"
-    },
-    {
-        name: "map_decoration_bewitched_forest_tree1",
-        file: "textures/map/decorations/bewitched_forest_tree1.png"
-    },
-    {
-        name: "map_decoration_magenta_mountains_mountain",
-        file: "textures/map/decorations/magenta_mountains_mountain.png"
-    },
-    {
-        name: "map_decoration_magenta_mountains_mountain_small_1",
-        file: "textures/map/decorations/magenta_mountains_mountain_small_1.png"
-    },
-    {
-        name: "map_decoration_magenta_mountains_mountain_small_2",
-        file: "textures/map/decorations/magenta_mountains_mountain_small_2.png"
-    },
-    {
-        name: "map_decoration_magenta_mountains_fog",
-        file: "textures/map/decorations/magenta_mountains_fog.png"
-    },
-    {
-        name: "map_decoration_magenta_mountains_tree",
-        file: "textures/map/decorations/magenta_mountains_tree.png"
-    },
-    {
-        name: "shop_dark_background",
-        file: "textures/events/shop/dark_background.png"
-    },
-    {
-        name: "shop_items_background",
-        file: "textures/events/shop/items_background.png"
+        name: "background_wasteland",
+        file: "blobs/backgrounds/wasteland.png"
     },
     {
         name: "secondary_background_wasteland",
-        file: "textures/game_screen_backgrounds/wasteland_secondary.png"
+        file: "blobs/backgrounds/wasteland_secondary.png"
+    },
+    {
+        name: "background_bewitched_forest",
+        file: "blobs/backgrounds/bewitched_forest.png"
+    },
+    {
+        name: "background_magenta_mountains",
+        file: "blobs/backgrounds/magenta_mountains.png"
+    },
+    {
+        name: "location_sign_aqua_dulche",
+        file: "blobs/map/location_signs/aqua_dulche.png"
+    },
+    {
+        name: "location_sign_salem",
+        file: "blobs/map/location_signs/salem.png"
+    },
+    {
+        name: "location_sign_salem",
+        file: "blobs/map/location_signs/salem.png"
+    },
+    {
+        name: "location_sign_aqua_balle",
+        file: "blobs/map/location_signs/aqua_balle.png"
+    },
+    {
+        name: "location_sign_spire_outpost",
+        file: "blobs/map/location_signs/spire_outpost.png"
+    },
+    {
+        name: "location_sign_tabu_letter_outpost",
+        file: "blobs/map/location_signs/tabu_letter_outpost.png"
+    },
+    {
+        name: "location_sign_under_construction",
+        file: "blobs/map/location_signs/under_construction.png"
+    },
+    {
+        name: "location_name_aqua_balle",
+        file: "blobs/map/location_names/aqua_balle.png"
+    },
+    {
+        name: "location_name_spire_outpost",
+        file: "blobs/map/location_names/spire_outpost.png"
+    },
+    {
+        name: "location_name_tabuletter_outpost",
+        file: "blobs/map/location_names/tabuletter_outpost.png"
+    },
+    {
+        name: "location_name_salem",
+        file: "blobs/map/location_names/salem.png"
+    },
+    {
+        name: "map_detail_background",
+        file: "blobs/map/detail/background.png"
+    },
+    {
+        name: "map_detail_encounter_modifier_background",
+        file: "blobs/map/detail/encounter_modifier_background.png"
+    },
+    {
+        name: "map_background_grass_tileable",
+        file: "blobs/map/backgrounds/grass.png",
+    },
+    {
+        name: "map_background_snow_tileable",
+        file: "blobs/map/backgrounds/snow.png",
+    },
+    {
+        name: "map_background_wasteland_tileable",
+        file: "blobs/map/backgrounds/wasteland.png",
+    },
+    {
+        name: "map_background_bewitched_forest_tileable",
+        file: "blobs/map/backgrounds/bewitched_forest.png",
+    },
+    {
+        name: "map_background_magenta_mountains_tileable",
+        file: "blobs/map/backgrounds/magenta_mountains.png",
+    },
+    {
+        name: "map_path",
+        file: "blobs/map/path.png"
+    },
+    {
+        name: "map_node_default",
+        file: "blobs/map/nodes/default_node.png"
+    },
+    {
+        name: "map_node_heal",
+        file: "blobs/map/nodes/heal.png"
+    },
+    {
+        name: "map_node_exit",
+        file: "blobs/map/nodes/exit.png"
+    },
+    {
+        name: "map_node_fight",
+        file: "blobs/map/nodes/fight.png"
+    },
+    {
+        name: "map_node_shop",
+        file: "blobs/map/nodes/shop.png"
+    },
+    {
+        name: "map_node_get_card",
+        file: "blobs/map/nodes/get_card.png"
+    },
+    {
+        name: "map_node_choose_card",
+        file: "blobs/map/nodes/choose_card.png"
+    },
+    {
+        name: "map_node_dialog",
+        file: "blobs/map/nodes/dialog.png"
+    },
+    {
+        name: "map_player",
+        file: "blobs/map/player.png"
+    },
+    {
+        name: "map_detail_encounter_button",
+        file: "blobs/map/detail/encounter_button.png",
+    },
+    {
+        name: "map_detail_encounter_button_hover",
+        file: "blobs/map/detail/encounter_button_hover.png",
+    },
+    {
+        name: "map_detail_encounter_button_disabled",
+        file: "blobs/map/detail/encounter_button_disabled.png",
+    },
+    {
+        name: "nav_bar_background",
+        file: "blobs/ui_elements/statusbar/background_old.png"
+    },
+    {
+        name: "cash_symbol",
+        file: "blobs/ui_elements/statusbar/cash_symbol.png"
+    },
+    {
+        name: "map_decoration_grass",
+        file: "blobs/map/decorations/grass.png"
+    },
+    {
+        name: "map_decoration_wasteland_skull_1",
+        file: "blobs/map/decorations/wasteland_skull_1.png"
+    },
+    {
+        name: "map_decoration_wasteland_skull_2",
+        file: "blobs/map/decorations/wasteland_skull_2.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_1",
+        file: "blobs/map/decorations/wasteland_dune_1.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_2",
+        file: "blobs/map/decorations/wasteland_dune_2.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_3",
+        file: "blobs/map/decorations/wasteland_dune_3.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_4",
+        file: "blobs/map/decorations/wasteland_dune_4.png"
+    },
+    {
+        name: "map_decoration_wasteland_cactus_1",
+        file: "blobs/map/decorations/wasteland_cactus_1.png"
+    },
+    {
+        name: "map_decoration_wasteland_cactus_2",
+        file: "blobs/map/decorations/wasteland_cactus_2.png"
+    },
+    {
+        name: "map_decoration_wasteland_snake_2",
+        file: "blobs/map/decorations/wasteland_Snake_2.png"
+    },
+    {
+        name: "map_decoration_bewitched_forest_sheep_1",
+        file: "blobs/map/decorations/bewitched_forest_sheep_1.png"
+    },
+    {
+        name: "map_decoration_bewitched_forest_sheep_2",
+        file: "blobs/map/decorations/bewitched_forest_sheep_2.png"
+    },
+    {
+        name: "map_decoration_bewitched_forest_tree1",
+        file: "blobs/map/decorations/bewitched_forest_tree1.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_mountain",
+        file: "blobs/map/decorations/magenta_mountains_mountain.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_mountain_small_1",
+        file: "blobs/map/decorations/magenta_mountains_mountain_small_1.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_mountain_small_2",
+        file: "blobs/map/decorations/magenta_mountains_mountain_small_2.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_fog",
+        file: "blobs/map/decorations/magenta_mountains_fog.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_tree",
+        file: "blobs/map/decorations/magenta_mountains_tree.png"
+    },
+    {
+        name: "shop_dark_background",
+        file: "blobs/events/shop/dark_background.png"
+    },
+    {
+        name: "shop_items_background",
+        file: "blobs/events/shop/items_background.png"
     },
     {
         name: "heal_or_max_accept",
-        file: "textures/events/heal_or_maxhp/accept.png"
+        file: "blobs/events/heal_or_maxhp/accept.png"
     },
     {
         name: "heal_or_max_accept_hover",
-        file: "textures/events/heal_or_maxhp/accept_hover.png"
+        file: "blobs/events/heal_or_maxhp/accept_hover.png"
     },
     {
         name: "heal_or_max_accept_invalid",
-        file: "textures/events/heal_or_maxhp/accept_invalid.png"
+        file: "blobs/events/heal_or_maxhp/accept_invalid.png"
     },
     {
         name: "heal_or_max_add_health",
-        file: "textures/events/heal_or_maxhp/add_health.png"
+        file: "blobs/events/heal_or_maxhp/add_health.png"
     },
     {
         name: "heal_or_max_add_max_health",
-        file: "textures/events/heal_or_maxhp/add_max_health.png"
+        file: "blobs/events/heal_or_maxhp/add_max_health.png"
     },
     {
         name: "heal_or_max_background",
-        file: "textures/events/heal_or_maxhp/heal_or_max_background.png"
+        file: "blobs/events/heal_or_maxhp/heal_or_max_background.png"
     },
     {
         name: "heal_or_max_selector_background",
-        file: "textures/events/heal_or_maxhp/heal_or_max_selector_background.png"
+        file: "blobs/events/heal_or_maxhp/heal_or_max_selector_background.png"
     },
     {
         name: "heal_or_max_selector_background_selected",
-        file: "textures/events/heal_or_maxhp/heal_or_max_selector_background_selected.png"
+        file: "blobs/events/heal_or_maxhp/heal_or_max_selector_background_selected.png"
     },
     {
         name: "max_health_background",
-        file: "textures/events/heal_or_maxhp/max_health_background.png"
+        file: "blobs/events/heal_or_maxhp/max_health_background.png"
     },
     {
         name: "shop_add_to_backpack",
-        file: "textures/events/shop/to_backpack.png"
+        file: "blobs/events/shop/to_backpack.png"
     },
     {
         name: "shop_add_to_deck",
-        file: "textures/events/shop/to_deck.png"
+        file: "blobs/events/shop/to_deck.png"
     },
     {
         name: "shop_npcs_default",
-        file: "textures/npcs/merchant.png",
+        file: "blobs/npcs/merchant.png",
     },
     {
         name: "shop_back_button",
-        file: "textures/events/shop/leave_button.png",
+        file: "blobs/events/shop/leave_button.png",
     },
     {
         name: "shop_back_button_hover",
-        file: "textures/events/shop/leave_button_hover.png",
+        file: "blobs/events/shop/leave_button_hover.png",
     },
     {
         name: "prerendered_noise_perlin_512x512",
-        file: "textures/shader_textures/prerendered_noise/perlin_512x512.png"
+        file: "blobs/shader_textures/prerendered_noise/perlin_512x512.png"
     },
     {
         name: "ice_texture",
-        file: "textures/shader_textures/ice.jpg"
+        file: "blobs/shader_textures/ice.jpg"
     },
     {
         name: "statusbar_background",
-        file: "textures/statusbar/statusbar_background.png"
+        file: "blobs/ui_elements/statusbar/statusbar_background.png"
     },
     {
         name: "statusbar_background_left",
-        file: "textures/statusbar/statusbar_background_left.png"
+        file: "blobs/ui_elements/statusbar/statusbar_background_left.png"
     },
     {
         name: "statusbar_option",
-        file: "textures/statusbar/option.png"
+        file: "blobs/ui_elements/statusbar/option.png"
     },
     {
         name: "statusbar_lives",
-        file: "textures/statusbar/statusbar_lives.png"
+        file: "blobs/ui_elements/statusbar/statusbar_lives.png"
     },
     {
         name: "backpack_1",
-        file: "textures/backpack/1.png"
+        file: "blobs/ui_elements/backpack/1.png"
     },
     {
         name: "backpack_2",
-        file: "textures/backpack/2.png"
+        file: "blobs/ui_elements/backpack/2.png"
     },
     {
         name: "backpack_3",
-        file: "textures/backpack/3.png"
+        file: "blobs/ui_elements/backpack/3.png"
     },
     {
         name: "backpack_4",
-        file: "textures/backpack/4.png"
+        file: "blobs/ui_elements/backpack/4.png"
     },
     {
         name: "backpack_5",
-        file: "textures/backpack/5.png"
+        file: "blobs/ui_elements/backpack/5.png"
     },
     {
         name: "backpack_1_hover",
-        file: "textures/backpack/1_hover.png"
+        file: "blobs/ui_elements/backpack/1_hover.png"
     },
     {
         name: "backpack_2_hover",
-        file: "textures/backpack/2_hover.png"
+        file: "blobs/ui_elements/backpack/2_hover.png"
     },
     {
         name: "backpack_3_hover",
-        file: "textures/backpack/3_hover.png"
+        file: "blobs/ui_elements/backpack/3_hover.png"
     },
     {
         name: "backpack_4_hover",
-        file: "textures/backpack/4_hover.png"
+        file: "blobs/ui_elements/backpack/4_hover.png"
     },
     {
         name: "backpack_5_hover",
-        file: "textures/backpack/5_hover.png"
+        file: "blobs/ui_elements/backpack/5_hover.png"
     },
     {
         name: "backpack_deck_background",
-        file: "textures/backpack/deck_background.png"
+        file: "blobs/ui_elements/backpack/deck_background.png"
     },
     {
         name: "backpack_backpack_background",
-        file: "textures/backpack/backpack_background.png"
+        file: "blobs/ui_elements/backpack/backpack_background.png"
     },
     {
         name: "backpack_empty_deck_slot",
-        file: "textures/backpack/empty_deck_slot.png"
+        file: "blobs/ui_elements/backpack/empty_deck_slot.png"
     },
     {
         name: "backpack_save",
-        file: "textures/backpack/save.png"
+        file: "blobs/ui_elements/backpack/save.png"
     },
     {
         name: "backpack_edit",
-        file: "textures/backpack/edit.png"
+        file: "blobs/ui_elements/backpack/edit.png"
     },
     {
         name: "backpack_sort_background",
-        file: "textures/backpack/sort_background.png"
+        file: "blobs/ui_elements/backpack/sort_background.png"
     },
     {
         name: "backpack_type_hover",
-        file: "textures/backpack/sort_type_hover.png"
+        file: "blobs/ui_elements/backpack/sort_type_hover.png"
     },
     {
         name: "backpack_direction_hover",
-        file: "textures/backpack/sort_direction_hover.png"
+        file: "blobs/ui_elements/backpack/sort_direction_hover.png"
     },
     {
         name: "backpack_direction_arrow",
-        file: "textures/backpack/sort_direction_arrow.png"
+        file: "blobs/ui_elements/backpack/sort_direction_arrow.png"
     },
     {
         name: "warning_label_background_red",
-        file: "textures/warning_label/background_red.png"
+        file: "blobs/ui_elements/warning_label//background_red.png"
     },
     {
         name: "warning_label_background_grey",
-        file: "textures/warning_label/background_grey.png"
+        file: "blobs/ui_elements/warning_label/background_grey.png"
     },
     {
         name: "warning_label_close",
-        file: "textures/warning_label/close_btn.png",
+        file: "blobs/ui_elements/warning_label/close_btn.png",
         useMipMaps: true,
     },
     {
         name: "collection_icon",
-        file: "textures/card_collection/collection_icon.png",
+        file: "blobs/ui_elements/card_collection/collection_icon.png",
         useMipMaps: true,
     },
     {
         name: "collection_next",
-        file: "textures/card_collection/collection_next.png",
+        file: "blobs/ui_elements/card_collection/collection_next.png",
         useMipMaps: true,
     },
     {
         name: "collection_next_hover",
-        file: "textures/card_collection/collection_next_hover.png",
+        file: "blobs/ui_elements/card_collection/collection_next_hover.png",
         useMipMaps: true,
     },
     {
         name: "collection_prev",
-        file: "textures/card_collection/collection_prev.png",
+        file: "blobs/ui_elements/card_collection/collection_prev.png",
         useMipMaps: true,
     },
     {
         name: "collection_prev_hover",
-        file: "textures/card_collection/collection_prev_hover.png",
+        file: "blobs/ui_elements/card_collection/collection_prev_hover.png",
         useMipMaps: true,
     },
     {
         name: "collection_slot_empty",
-        file: "textures/card_collection/collection_slot_empty.png",
+        file: "blobs/ui_elements/card_collection/collection_slot_empty.png",
         useMipMaps: true,
     },
     {
         name: "collection_slot_glow",
-        file: "textures/card_collection/collection_slot_glow.png",
+        file: "blobs/ui_elements/card_collection/collection_slot_glow.png",
         useMipMaps: true,
     },
     {
         name: "collection_slot_locked",
-        file: "textures/card_collection/collection_slot_locked.png",
+        file: "blobs/ui_elements/card_collection/collection_slot_locked.png",
         useMipMaps: true,
     },
     {
         name: "collection_slot_missing",
-        file: "textures/card_collection/collection_slot_missing.png",
+        file: "blobs/ui_elements/card_collection/collection_slot_missing.png",
         useMipMaps: true,
     },
     {
         name: "collection_background",
-        file: "textures/card_collection/collection_bg.png",
+        file: "blobs/ui_elements/card_collection/collection_bg.png",
         useMipMaps: true,
     },
     {
         name: "chooseCard_cardsBackground",
-        file: "textures/events/choose_card/cards_background.png"
+        file: "blobs/events/choose_card/cards_background.png"
     },
     {
         name: "chooseCard_add_to_backpack",
-        file: "textures/events/choose_card/to_backpack.png"
+        file: "blobs/events/choose_card/to_backpack.png"
     },
     {
         name: "chooseCard_add_to_deck",
-        file: "textures/events/choose_card/to_deck.png"
+        file: "blobs/events/choose_card/to_deck.png"
     },
     {
         name: "dialog_answer_option",
-        file: "textures/events/dialog/answer_option.png"
+        file: "blobs/events/dialog/answer_option.png"
     },
     {
         name: "dialog_answer_option_hover",
-        file: "textures/events/dialog/answer_option_hover.png"
+        file: "blobs/events/dialog/answer_option_hover.png"
     },
     {
         name: "dialog_background",
-        file: "textures/events/dialog/background.png"
+        file: "blobs/events/dialog/background.png"
     },
     {
         name: "dialog_name_field",
-        file: "textures/events/dialog/name_field.png"
+        file: "blobs/events/dialog/name_field.png"
     },
     {
         name: "enemy_action_burning",
-        file: "textures/enemies/action_symbols/burning.png",
+        file: "blobs/enemies/action_symbols/burning.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_cover",
-        file: "textures/enemies/action_symbols/cover.png",
+        file: "blobs/enemies/action_symbols/cover.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_damage",
-        file: "textures/enemies/action_symbols/damage.png",
+        file: "blobs/enemies/action_symbols/damage.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_fire_resistance",
-        file: "textures/enemies/action_symbols/fire_resistance.png",
+        file: "blobs/enemies/action_symbols/fire_resistance.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_hot_potato",
-        file: "textures/enemies/action_symbols/hot_potato.png",
+        file: "blobs/enemies/action_symbols/hot_potato.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_inferno",
-        file: "textures/enemies/action_symbols/inferno.png",
+        file: "blobs/enemies/action_symbols/inferno.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_bewitched",
-        file: "textures/enemies/action_symbols/bewitched.png",
+        file: "blobs/enemies/action_symbols/bewitched.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_left_turn",
-        file: "textures/enemies/action_symbols/left_turn.png",
+        file: "blobs/enemies/action_symbols/left_turn.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_and_its_gone",
-        file: "textures/enemies/action_symbols/and_its_gone.png",
+        file: "blobs/enemies/action_symbols/and_its_gone.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_goodbyes",
-        file: "textures/enemies/action_symbols/goodbyes.png",
+        file: "blobs/enemies/action_symbols/goodbyes.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_heads_up",
-        file: "textures/enemies/action_symbols/heads_up.png",
+        file: "blobs/enemies/action_symbols/heads_up.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_piercing",
-        file: "textures/enemies/action_symbols/piercing.png",
+        file: "blobs/enemies/action_symbols/piercing.png",
         useMipMaps: true
     },
     {
         name: "enemy_action_unknown",
-        file: "textures/enemies/action_symbols/unknown.png",
+        file: "blobs/enemies/action_symbols/unknown.png",
         useMipMaps: true
     },
     {
         name: "enemy_pyro_action_comic_common_panel_1",
-        file: "textures/enemies/pyro/action_comic_common_panel_1.png"
+        file: "blobs/enemies/pyro/action_comic_common_panel_1.png"
     },
     {
         name: "enemy_pyro_action_comic_common_panel_2",
-        file: "textures/enemies/pyro/action_comic_common_panel_2.png"
+        file: "blobs/enemies/pyro/action_comic_common_panel_2.png"
     },
     {
         name: "enemy_pyro_action_comic_common_panel_3",
-        file: "textures/enemies/pyro/action_comic_common_panel_3.png"
+        file: "blobs/enemies/pyro/action_comic_common_panel_3.png"
     },
     {
         name: "enemy_pyro_action_comic_panel_burning",
-        file: "textures/enemies/pyro/action_comic_panel_burning.png"
+        file: "blobs/enemies/pyro/action_comic_panel_burning.png"
     },
     {
         name: "enemy_pyro_action_comic_panel_fire_resistance",
-        file: "textures/enemies/pyro/action_comic_panel_fire_resistance.png"
+        file: "blobs/enemies/pyro/action_comic_panel_fire_resistance.png"
     },
     {
         name: "enemy_pyro_action_comic_panel_hot_potato",
-        file: "textures/enemies/pyro/action_comic_panel_hot_potato.png"
+        file: "blobs/enemies/pyro/action_comic_panel_hot_potato.png"
     },
     {
         name: "enemy_pyro_action_comic_panel_inferno",
-        file: "textures/enemies/pyro/action_comic_panel_inferno.png"
+        file: "blobs/enemies/pyro/action_comic_panel_inferno.png"
     },
     {
         name: "enemy_pyro",
-        file: "textures/enemies/pyro/pyro.png"
+        file: "blobs/enemies/pyro/pyro.png"
     },
     {
         name: "enemy_sniper_action_comic_common_panel_1",
-        file: "textures/enemies/sniper/action_comic_common_panel_1.png"
+        file: "blobs/enemies/sniper/action_comic_common_panel_1.png"
     },
     {
         name: "enemy_sniper_action_comic_common_panel_2",
-        file: "textures/enemies/sniper/action_comic_common_panel_2.png"
+        file: "blobs/enemies/sniper/action_comic_common_panel_2.png"
     },
     {
         name: "enemy_sniper_action_comic_common_panel_3",
-        file: "textures/enemies/sniper/action_comic_common_panel_3.png"
+        file: "blobs/enemies/sniper/action_comic_common_panel_3.png"
     },
     {
         name: "enemy_sniper_action_comic_panel_and_its_gone",
-        file: "textures/enemies/sniper/action_comic_panel_and_its_gone.png"
+        file: "blobs/enemies/sniper/action_comic_panel_and_its_gone.png"
     },
     {
         name: "enemy_sniper_action_comic_panel_goodbyes",
-        file: "textures/enemies/sniper/action_comic_panel_goodbyes.png"
+        file: "blobs/enemies/sniper/action_comic_panel_goodbyes.png"
     },
     {
         name: "enemy_sniper_action_comic_panel_heads_up",
-        file: "textures/enemies/sniper/action_comic_panel_heads_up.png"
+        file: "blobs/enemies/sniper/action_comic_panel_heads_up.png"
     },
     {
         name: "enemy_sniper",
-        file: "textures/enemies/sniper/sniper.png",
+        file: "blobs/enemies/sniper/sniper.png",
     },
     {
         name: "enemy_witch",
-        file: "textures/enemies/witch/witch.png"
+        file: "blobs/enemies/witch/witch.png"
     },
     {
         name: "enemy_witch_action_comic_common_panel_1",
-        file: "textures/enemies/witch/action_comic_common_panel_1.png"
+        file: "blobs/enemies/witch/action_comic_common_panel_1.png"
     },
     {
         name: "enemy_witch_action_comic_common_panel_2",
-        file: "textures/enemies/witch/action_comic_common_panel_2.png"
+        file: "blobs/enemies/witch/action_comic_common_panel_2.png"
     },
     {
         name: "enemy_witch_action_comic_common_panel_3",
-        file: "textures/enemies/witch/action_comic_common_panel_3.png"
+        file: "blobs/enemies/witch/action_comic_common_panel_3.png"
     },
     {
         name: "enemy_witch_action_comic_panel_bewitched",
-        file: "textures/enemies/witch/action_comic_panel_bewitched.png"
+        file: "blobs/enemies/witch/action_comic_panel_bewitched.png"
     },
     {
         name: "enemy_witch_action_comic_panel_left_turn",
-        file: "textures/enemies/witch/action_comic_panel_left_turn.png"
+        file: "blobs/enemies/witch/action_comic_panel_left_turn.png"
     },
     {
         name: "enemy_witch_action_comic_panel_ward_of_the_witch",
-        file: "textures/enemies/witch/action_comic_panel_ward_of_the_witch.png"
+        file: "blobs/enemies/witch/action_comic_panel_ward_of_the_witch.png"
     },
     {
         name: "enemy_witch_action_comic_panel_wrath_of_the_witch",
-        file: "textures/enemies/witch/action_comic_panel_wrath_of_the_witch.png"
+        file: "blobs/enemies/witch/action_comic_panel_wrath_of_the_witch.png"
     },
     {
         name: "enemy_outlaw",
-        file: "textures/enemies/outlaw/outlaw.png"
+        file: "blobs/enemies/outlaw/outlaw.png"
     },
     {
         name: "encounter_modifier_frost",
-        file: "textures/encounter_modifier/frost.png"
+        file: "blobs/encounter_modifier/frost.png"
     },
     {
         name: "encounter_modifier_rain",
-        file: "textures/encounter_modifier/rain.png"
+        file: "blobs/encounter_modifier/rain.png"
     },
     {
         name: "encounter_modifier_moist",
-        file: "textures/encounter_modifier/moist.png"
+        file: "blobs/encounter_modifier/moist.png"
     },
     {
         name: "encounter_modifier_steel_nerves",
-        file: "textures/encounter_modifier/steel_nerves.png"
+        file: "blobs/encounter_modifier/steel_nerves.png"
     },
     {
         name: "encounter_modifier_bewitched_mist",
-        file: "textures/encounter_modifier/bewitched_mist.png"
+        file: "blobs/encounter_modifier/bewitched_mist.png"
     },
     {
         name: "encounter_modifier_lookalike",
-        file: "textures/encounter_modifier/lookalike.png"
+        file: "blobs/encounter_modifier/lookalike.png"
     },
     {
         name: "common_button_default",
-        file: "textures/common/button/default.png"
+        file: "blobs/common/button/default.png"
     },
     {
         name: "common_button_hover",
-        file: "textures/common/button/hover.png"
+        file: "blobs/common/button/hover.png"
     },
     {
         name: "common_button_disabled",
-        file: "textures/common/button/disabled.png"
+        file: "blobs/common/button/disabled.png"
     },
     {
         name: "hover_detail_big_background",
-        file: "textures/cards/hover_detail/hover_detail_background.png"
+        file: "blobs/cards/hover_detail/hover_detail_background.png"
     },
     {
         name: "hover_detail_small_background",
-        file: "textures/cards/hover_detail/hover_detail_effect_background.png"
+        file: "blobs/cards/hover_detail/hover_detail_effect_background.png"
     },
     {
         name: "hover_detail_more_info",
-        file: "textures/cards/hover_detail/hover_detail_more_info.png"
+        file: "blobs/cards/hover_detail/hover_detail_more_info.png"
     },
     {
         name: "hover_detail_big_background_glow",
-        file: "textures/cards/hover_detail/hover_detail_big_glow.png"
+        file: "blobs/cards/hover_detail/hover_detail_big_glow.png"
     },
     {
         name: "hover_detail_small_background_glow",
-        file: "textures/cards/hover_detail/hover_detail_small_glow.png"
+        file: "blobs/cards/hover_detail/hover_detail_small_glow.png"
     },
     {
         name: "loose_screen_background",
-        file: "textures/loose_screen/background.png"
+        file: "blobs/loose_screen/background.png"
     },
     {
         name: "stats_screen_background",
-        file: "textures/stats_screen/background.png"
+        file: "blobs/stats_screen/background.png"
     },
     {
         name: "stats_screen_spacer",
-        file: "textures/stats_screen/spacer.png"
+        file: "blobs/stats_screen/spacer.png"
     },
     {
         name: "stats_screen_stat_box",
-        file: "textures/stats_screen/stat_box.png"
+        file: "blobs/stats_screen/stat_box.png"
     },
     {
         name: "stats_screen_lost_cards_background",
-        file: "textures/stats_screen/lost_cards_background.png"
+        file: "blobs/stats_screen/lost_cards_background.png"
     },
     {
         name: "card_symbol_saved",
-        file: "textures/cards/symbols/saved.png"
+        file: "blobs/cards/symbols/saved.png"
     },
     {
         name: "card_symbol_not_saved",
-        file: "textures/cards/symbols/not_saved.png"
+        file: "blobs/cards/symbols/not_saved.png"
     },
     {
         name: "card_symbol_marked",
-        file: "textures/cards/symbols/marked.png",
+        file: "blobs/cards/symbols/marked.png",
         useMipMaps: true,
     },
     {
         name: "microwave_studios_logo",
-        file: "textures/microwave_studios.png",
+        file: "blobs/microwave_studios.png",
         useMipMaps: true
     },
     {
         name: "logo_red",
-        file: "textures/logo_red.png",
+        file: "blobs/logo_red.png",
     },
     {
         name: "logo_htl3r",
-        file: "textures/htl3r.png",
+        file: "blobs/htl3r.png",
         useMipMaps: true
     },
     {
         name: "map_extraction_background",
-        file: "textures/map/extraction/background.png"
+        file: "blobs/map/extraction/background.png"
     },
     {
         name: "map_extraction_symbol",
-        file: "textures/map/extraction/symbol.png"
+        file: "blobs/map/extraction/symbol.png"
     },
     {
         name: "map_extraction_card_background_blue",
-        file: "textures/map/extraction/card_background_blue.png"
+        file: "blobs/map/extraction/card_background_blue.png"
     },
     {
         name: "map_extraction_card_background_white",
-        file: "textures/map/extraction/card_background_white.png"
+        file: "blobs/map/extraction/card_background_white.png"
     },
     {
         name: "revolver_slot_icon_1",
-        file: "textures/revolver_slot_icons/1.png",
+        file: "blobs/revolver_slot_icons/1.png",
         useMipMaps: true
     },
     {
         name: "revolver_slot_icon_2",
-        file: "textures/revolver_slot_icons/2.png",
+        file: "blobs/revolver_slot_icons/2.png",
         useMipMaps: true
     },
     {
         name: "revolver_slot_icon_3",
-        file: "textures/revolver_slot_icons/3.png",
+        file: "blobs/revolver_slot_icons/3.png",
         useMipMaps: true
     },
     {
         name: "revolver_slot_icon_4",
-        file: "textures/revolver_slot_icons/4.png",
+        file: "blobs/revolver_slot_icons/4.png",
         useMipMaps: true
     },
     {
         name: "revolver_slot_icon_5",
-        file: "textures/revolver_slot_icons/5.png",
+        file: "blobs/revolver_slot_icons/5.png",
         useMipMaps: true
     },
     {
         name: "title_screen_background",
-        file: "large_assets/title_screen/background.png",
+        file: "blobs/title_screen/background.png",
     },
     {
         name: "title_screen_bullet_1",
-        file: "large_assets/title_screen/b1.png",
+        file: "blobs/title_screen/b1.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_2",
-        file: "large_assets/title_screen/b2.png",
+        file: "blobs/title_screen/b2.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_3",
-        file: "large_assets/title_screen/b3.png",
+        file: "blobs/title_screen/b3.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_4",
-        file: "large_assets/title_screen/b4.png",
+        file: "blobs/title_screen/b4.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_5",
-        file: "large_assets/title_screen/b5.png",
+        file: "blobs/title_screen/b5.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_6",
-        file: "large_assets/title_screen/b6.png",
+        file: "blobs/title_screen/b6.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_7",
-        file: "large_assets/title_screen/b7.png",
+        file: "blobs/title_screen/b7.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_8",
-        file: "large_assets/title_screen/b8.png",
+        file: "blobs/title_screen/b8.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_9",
-        file: "large_assets/title_screen/b9.png",
+        file: "blobs/title_screen/b9.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_10",
-        file: "large_assets/title_screen/b10.png",
+        file: "blobs/title_screen/b10.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_11",
-        file: "large_assets/title_screen/b11.png",
+        file: "blobs/title_screen/b11.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_12",
-        file: "large_assets/title_screen/b12.png",
+        file: "blobs/title_screen/b12.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_13",
-        file: "large_assets/title_screen/b13.png",
+        file: "blobs/title_screen/b13.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_14",
-        file: "large_assets/title_screen/b14.png",
+        file: "blobs/title_screen/b14.png",
         useMipMaps: true
     },
     {
         name: "title_screen_bullet_15",
-        file: "large_assets/title_screen/b15.png",
+        file: "blobs/title_screen/b15.png",
         useMipMaps: true
     },
     {
         name: "common_popup_background_black",
-        file: "textures/common/backgrounds/popup_black.png",
+        file: "blobs/common/backgrounds/popup_black.png",
     },
     {
         name: "common_popup_background_black_large",
-        file: "textures/common/backgrounds/popup_black_large.png",
+        file: "blobs/common/backgrounds/popup_black_large.png",
     },
     {
         name: "aqua_balle_lower_row",
-        file: "textures/areas/aqua_balle/lower_row.png",
+        file: "blobs/areas/aqua_balle/lower_row.png",
     },
     {
         name: "aqua_balle_upper_row",
-        file: "textures/areas/aqua_balle/upper_row.png",
+        file: "blobs/areas/aqua_balle/upper_row.png",
     },
     {
         name: "aqua_balle_sign",
-        file: "textures/areas/aqua_balle/sign.png",
+        file: "blobs/areas/aqua_balle/sign.png",
     },
     {
         name: "aqua_balle_background",
-        file: "textures/areas/aqua_balle/background.png",
+        file: "blobs/areas/aqua_balle/background.png",
     },
     {
         name: "tutorial_road_weird_corner_house",
-        file: "textures/areas/tutorial_road/weird_corner_house.png",
+        file: "blobs/areas/tutorial_road/weird_corner_house.png",
     },
     {
         name: "npc_merchant",
-        file: "textures/npcs/merchant.png",
+        file: "blobs/npcs/merchant.png",
     },
     {
         name: "npc_priest",
-        file: "textures/npcs/priest.png",
+        file: "blobs/npcs/priest.png",
     },
     {
         name: "npc_stranger",
-        file: "textures/npcs/stranger.png",
+        file: "blobs/npcs/stranger.png",
     },
     {
         name: "npc_witch",
-        file: "textures/npcs/witch.png",
+        file: "blobs/npcs/witch.png",
     },
     {
         name: "npc_traveler",
-        file: "textures/npcs/traveler.png",
+        file: "blobs/npcs/traveler.png",
     },
     {
         name: "enemy_selector",
-        file: "textures/enemies/enemy_selector.png",
+        file: "blobs/enemies/enemy_selector.png",
     },
     {
         name: "settings_background",
-        file: "textures/settings/background.png",
+        file: "blobs/ui_elements/settings/background.png",
     },
     {
         name: "common_slider_background",
-        file: "textures/common/slider/slider.png",
+        file: "blobs/common/slider/slider.png",
         useMipMaps: true,
     },
     {
         name: "single_setting_background",
-        file: "textures/settings/setting_background.png",
+        file: "blobs/ui_elements/settings/setting_background.png",
     },
     {
         name: "common_symbol_arrow",
-        file: "textures/common/symbols/arrow.png",
+        file: "blobs/common/symbols/arrow.png",
     },
     {
         name: "shield_icon_large",
-        file: "textures/game_screen/shield_large.png",
+        file: "blobs/game_screen/shield_large.png",
     },
     {
         name: "wood_box",
-        file: "textures/game_screen/wood_box.png",
+        file: "blobs/game_screen/wood_box.png",
         useMipMaps: true,
     },
     {
         name: "deck_icon",
-        file: "textures/game_screen/deck_icon.png",
+        file: "blobs/game_screen/deck_icon.png",
         useMipMaps: true,
     },
     {
         name: "reserves_texture",
-        file: "textures/game_screen/reserves.png",
+        file: "blobs/game_screen/reserves.png",
         useMipMaps: true,
     },
     {
         name: "card_symbol_text_a_equals",
-        file: "textures/cards/symbols/text/a_equals.png",
+        file: "blobs/cards/symbols/text/a_equals.png",
         useMipMaps: true,
     },
     {
         name: "card_symbol_text_i_equals",
-        file: "textures/cards/symbols/text/i_equals.png",
+        file: "blobs/cards/symbols/text/i_equals.png",
         useMipMaps: true,
     },
     {
         name: "card_symbol_text_t_equals",
-        file: "textures/cards/symbols/text/t_equals.png",
+        file: "blobs/cards/symbols/text/t_equals.png",
         useMipMaps: true,
     },
 ],
@@ -1225,7 +1181,7 @@ textures: [
 cursors: [
     {
         name: "revolver_cursor",
-        file: "textures/cursors/revolver.png",
+        file: "blobs/cursors/revolver.png",
         hotspotX: 0,
         hotspotY: 0
     }
@@ -1421,17 +1377,8 @@ colorTextures: [
 
 ninepatches: [
     {
-        name: "cover_hook",
-        file: "textures/ninepatches/cover_hook.png",
-        top: 1,
-        bottom: 1,
-        left: 6,
-        right: 6,
-        scale: 0.2
-    },
-    {
         name: "key_select_frame",
-        file: "textures/ninepatches/key_select_frame.png",
+        file: "blobs/ninepatches/key_select_frame.png",
         top: 3,
         bottom: 3,
         left: 3,
@@ -1439,44 +1386,17 @@ ninepatches: [
         scale: 2.0
     },
     {
-        name: "white_rounded",
-        file: "textures/ninepatches/white_rounded.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.2
-    },
-    {
         name: "forty_white_rounded",
-        file: "textures/ninepatches/forty_white_rounded.png",
+        file: "blobs/ninepatches/forty_white_rounded.png",
         top: 24,
         bottom: 24,
         left: 24,
         right: 24,
         scale: 0.0025
-    },
-    {
-        name: "taupe_gray_rounded",
-        file: "textures/ninepatches/taupe_gray_rounded.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.0025
-    },
-    {
-        name: "hover_detail_background",
-        file: "textures/ninepatches/hover_detail_background.png",
-        top: 16,
-        bottom: 16,
-        left: 16,
-        right: 16,
-        scale: 0.1
     },
     {
         name: "backpack_scrollbar_background",
-        file: "textures/backpack/scrollbar_background.png",
+        file: "blobs/ui_elements/backpack/scrollbar_background.png",
         top: 10,
         bottom: 10,
         left: 10,
@@ -1485,7 +1405,7 @@ ninepatches: [
     },
     {
         name: "backpack_scrollbar",
-        file: "textures/backpack/scrollbar.png",
+        file: "blobs/ui_elements/backpack/scrollbar.png",
         top: 10,
         bottom: 10,
         left: 10,
@@ -1533,101 +1453,101 @@ frameAnimations: [
 sounds: [
     {
         name: "revolver_shot_sound",
-        file: "large_assets/sounds/revolver_shot.wav"
+        file: "blobs/sounds/revolver_shot.wav"
     },
     {
         name: "button_1_sound",
-        file: "large_assets/sounds/button_1.wav"
+        file: "blobs/sounds/button_1.wav"
     },
     {
         name: "card_hover_sound",
-        file: "large_assets/sounds/card_hover.wav"
+        file: "blobs/sounds/card_hover.wav"
     },
     {
         name: "card_laydown_sound",
-        file: "large_assets/sounds/card_laydown.wav"
+        file: "blobs/sounds/card_laydown.wav"
     },
     {
         name: "card_pickup_sound",
-        file: "large_assets/sounds/card_pickup.wav"
+        file: "blobs/sounds/card_pickup.wav"
     },
     {
         name: "not_allowed_sound",
-        file: "large_assets/sounds/not_allowed.wav"
+        file: "blobs/sounds/not_allowed.wav"
     },
     {
         name: "button_2_sound",
-        file: "large_assets/sounds/button_2.wav"
+        file: "blobs/sounds/button_2.wav"
     },
     {
         name: "holster_sound",
-        file: "large_assets/sounds/holster.wav"
+        file: "blobs/sounds/holster.wav"
     },
     {
         name: "holster_remove_sound",
-        file: "large_assets/sounds/holster_remove.wav"
+        file: "blobs/sounds/holster_remove.wav"
     },
     {
         name: "parry_sound",
-        file: "large_assets/sounds/parry.wav"
+        file: "blobs/sounds/parry.wav"
     },
     {
         name: "heal_sound",
-        file: "large_assets/sounds/heal.wav"
+        file: "blobs/sounds/heal.wav"
     },
     {
         name: "money_sound",
-        file: "large_assets/sounds/money.wav"
+        file: "blobs/sounds/money.wav"
     },
     {
         name: "revolver_drum_sound",
-        file: "large_assets/sounds/revolver_drum.wav"
+        file: "blobs/sounds/revolver_drum.wav"
     },
     {
         name: "walk_sound",
-        file: "large_assets/sounds/walk.wav"
+        file: "blobs/sounds/walk.wav"
     },
     {
         name: "snake_sound",
-        file: "large_assets/sounds/snake.wav"
+        file: "blobs/sounds/snake.wav"
     },
     {
         name: "owl_sound",
-        file: "large_assets/sounds/owl.wav"
+        file: "blobs/sounds/owl.wav"
     },
     {
         name: "swoosh_sound",
-        file: "large_assets/sounds/swoosh.wav"
+        file: "blobs/sounds/swoosh.wav"
     },
     {
         name: "card_destroy_sound",
-        file: "large_assets/sounds/card_destroy.wav"
+        file: "blobs/sounds/card_destroy.wav"
     },
     {
         name: "metal_on_metal_sound",
-        file: "large_assets/sounds/metal_on_metal.wav"
+        file: "blobs/sounds/metal_on_metal.wav"
     },
 ],
 
 music: [
     {
         name: "main_theme",
-        file: "large_assets/music/main_theme.wav"
+        file: "blobs/music/main_theme.wav"
     },
     {
         name: "map_theme",
-        file: "large_assets/music/map_theme.wav"
+        file: "blobs/music/map_theme.wav"
     },
     {
         name: "encounter_theme",
-        file: "large_assets/music/encounter_theme.wav"
+        file: "blobs/music/encounter_theme.wav"
     },
     {
         name: "microwave_theme", // Now part of the official .forty-five soundtrack
-        file: "large_assets/music/microwave.wav"
+        file: "blobs/music/microwave.wav"
     },
 ],
 
 cards: {
-    directory: "textures/cards",
+    directory: "blobs/cards",
 }
