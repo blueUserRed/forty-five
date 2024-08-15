@@ -73,7 +73,7 @@ root: $Box { //TODO biomes
     } children [
         $Label {
             text: "Choose your reward",
-            font: "red_wing_cm",
+            font: "red_wing",
             color: color.forty_white,
             fontScale: 1.0,
             align: "center",
@@ -101,7 +101,7 @@ root: $Box { //TODO biomes
                 },
                 $Label {
                     text: "or",
-                    font: "red_wing_cm",
+                    font: "red_wing",
                     color: color.forty_white,
                     fontScale: 1.3,
                     align: "center",
@@ -120,7 +120,7 @@ root: $Box { //TODO biomes
         },
         $TemplateLabel {
             template: "{map.cur_event.max_hp.distanceToEnd}",
-            font: "red_wing_cm",
+            font: "red_wing",
             color: color.forty_white,
             fontScale: 0.6,
             align: "center",
@@ -247,7 +247,7 @@ templates: [
             },
             $TemplateLabel {
                 template: "+5 Max HP",
-                font: "red_wing_cm",
+                font: "red_wing",
                 color: color.dark_brown,
                 fontScale: 1.1,
                 align: "center",
@@ -260,7 +260,7 @@ templates: [
             },
             $TemplateLabel {
                 template: "13/45 HP -> 43/45 HP",
-                font: "red_wing_cm",
+                font: "red_wing",
                 color: color.taupe_gray,
                 fontScale: 0.5,
                 align: "center",

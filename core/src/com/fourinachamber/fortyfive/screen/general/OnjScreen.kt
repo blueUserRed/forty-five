@@ -66,9 +66,6 @@ open class OnjScreen(
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
 
-    var lastRenderTime: Long = 0
-        private set
-
     private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -163,8 +160,6 @@ open class OnjScreen(
 
     var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
         private set
-
-    private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
     init {
         addEarlyRenderTask {
@@ -441,41 +436,29 @@ open class OnjScreen(
     @MainThreadOnly
     override fun render(delta: Float) = try {
 //        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
-        lastRenderTime = measureTimeMillis {
-            stage.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-            val oldStyleManagers = styleManagers.toList()
-            if (stage.batch.isDrawing) stage.batch.end()
-            stage.viewport.apply()
-            doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-            val time = measureTimeMillis {
-                stage.draw()
-            }
-//            println(time)
-            doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-            styleManagers
-                .filter { it !in oldStyleManagers }
-                .forEach(StyleManager::update) //all added items get updated too
-            if (dragAndDrop.none { it.value.isDragging }) {
-                stage.batch.begin()
-                currentDisplayDetailActor?.drawHoverDetail(this, stage.batch)
+        stage.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        val oldStyleManagers = styleManagers.toList()
+        if (stage.batch.isDrawing) stage.batch.end()
+        stage.viewport.apply()
+        doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
+        stage.draw()
+        doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
+        styleManagers
+            .filter { it !in oldStyleManagers }
+            .forEach(StyleManager::update) //all added items get updated too
+        if (dragAndDrop.none { it.value.isDragging }) {
+            stage.batch.begin()
+            currentDisplayDetailActor?.drawHoverDetail(this, stage.batch)
 //                currentHoverDetail?.draw(stage.batch, 1f)
-                if (currentHoverDetail != null) {
-                    currentHoverDetail!!.draw(stage.batch, 1f)
-                }
-                stage.batch.end()
+            if (currentHoverDetail != null) {
+                currentHoverDetail!!.draw(stage.batch, 1f)
             }
-        }
-        lastRenderTimes.add(lastRenderTime)
-        if (lastRenderTimes.size > 60 * 15) {
-            lastRenderTimes.removeAt(0)
+            stage.batch.end()
         }
         Unit
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
-
-    fun largestRenderTimeInLast15Sec(): Long = lastRenderTimes.max()
-    fun averageRenderTimeInLast15Sec(): Long = lastRenderTimes.average().roundToLong()
 
     fun styleManagerCount(): Int = styleManagers.size
 

@@ -68,31 +68,37 @@ object ResourceManager {
 
         assets.get<OnjArray>("textures").value.forEach {
             it as OnjObject
-            resources.add(TextureResource(
+            val resource = TextureResource(
                 it.get<String>("name"),
                 it.get<String>("file"),
                 it.getOr("tileable", false),
                 it.getOr("tileScale", 1.0).toFloat(),
                 it.getOr("useMipMaps", false)
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("fonts").value.forEach {
             it as OnjObject
-            resources.add(FontResource(
+            val resource = FontResource(
                 it.get<String>("name"),
                 it.get<String>("imageFile"),
                 it.get<String>("fontFile"),
                 it.getOr("markupEnabled", false)
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("pixmapFonts").value.forEach {
             it as OnjObject
-            resources.add(PixmapFontResource(
+            val resource = PixmapFontResource(
                 it.get<String>("name"),
                 it.get<String>("fontFile")
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("textureAtlases").value.forEach { obj ->
@@ -100,11 +106,14 @@ object ResourceManager {
             val name = obj.get<String>("name")
             val file = obj.get<String>("file")
             val atlasResource = AtlasResource(name, file)
+            atlasResource.stayLoaded = obj.getOr("stayLoaded", false)
             val regionResources = obj.get<OnjArray>("regions").value.map {
                 it as OnjObject
                 val handle = it.get<String>("handle")
                 val regionName = it.get<String>("regionName")
-                AtlasRegionResource(handle, regionName, name)
+                val resource = AtlasRegionResource(handle, regionName, name)
+                resource.stayLoaded = it.getOr("stayLoaded", false)
+                resource
             }
             resources.add(atlasResource)
             resources.addAll(regionResources)
@@ -112,46 +121,54 @@ object ResourceManager {
 
         assets.get<OnjArray>("cursors").value.forEach {
             it as OnjObject
-            resources.add(CursorResource(
+            val resource = CursorResource(
                 it.get<String>("name"),
                 it.get<String>("file"),
                 it.get<Long>("hotspotX").toInt(),
                 it.get<Long>("hotspotY").toInt()
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("shaders").value.forEach {
             it as OnjObject
-            resources.add(ShaderResource(
+            val resource = ShaderResource(
                 it.get<String>("name"),
                 it.get<String>("file"),
                 it.get<OnjObject>("constantArgs").value.entries.associate { (key, value) ->
                     "ca_$key" to value.value as Any
                 }
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("colorTextures").value.forEach {
             it as OnjObject
-            resources.add(ColorTextureResource(
+            val resource = ColorTextureResource(
                 it.get<String>("name"),
                 it.get<Color>("color")
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("particles").value.forEach {
             it as OnjObject
-            resources.add(ParticleResource(
+            val resource = ParticleResource(
                 it.get<String>("name"),
                 it.get<String>("file"),
                 it.get<String>("textureDir"),
                 it.get<Double>("scale").toFloat()
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("ninepatches").value.forEach {
             it as OnjObject
-            resources.add(NinepatchResource(
+            val resource = NinepatchResource(
                 it.get<String>("name"),
                 it.get<String>("file"),
                 it.get<Long>("left").toInt(),
@@ -159,33 +176,41 @@ object ResourceManager {
                 it.get<Long>("top").toInt(),
                 it.get<Long>("bottom").toInt(),
                 it.getOr("scale", 1.0).toFloat()
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("frameAnimations").value.forEach {
             it as OnjObject
-            resources.add(DeferredFrameAnimationResource(
+            val resource = DeferredFrameAnimationResource(
                 it.get<String>("name"),
                 it.get<String>("preview"),
                 it.get<String>("atlas"),
                 it.get<Long>("frameTime").toInt()
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("sounds").value.forEach {
             it as OnjObject
-            resources.add(SoundResource(
+            val resource = SoundResource(
                 it.get<String>("name"),
                 it.get<String>("file")
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         assets.get<OnjArray>("music").value.forEach {
             it as OnjObject
-            resources.add(MusicResource(
+            val resource = MusicResource(
                 it.get<String>("name"),
                 it.get<String>("file")
-            ))
+            )
+            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resources.add(resource)
         }
 
         val cardsFile = assets.access<String>(".cards.directory")
