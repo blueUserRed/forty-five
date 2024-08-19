@@ -1635,37 +1635,49 @@ var steelNervesOverlay = $Box {
 ];
 
 
-var afterlifeTemporaryCardTemplate = $Box{
-//    debug: true,
+var afterLifeCardTemplate = $Box{
     styles: [
          {
-            width: (52)#percent,
-            height: (80)#percent,
-             marginLeft: 5#percent,
-//            background: "afterlife_card_slot", //TODO change back after correct image is here
-            background: "backpack_empty_deck_slot",
+            width: (50)#percent,
+            height: (75)#percent,
+            marginLeft: 5#percent,
+            marginBottom: 2#percent,
+            background: "afterlife_card_slot",
         }
     ],
 };
 var afterlife = $Box{
-//    debug: true,
     styles: [
         {
             positionType: positionType.absolute,
             width: (worldWidth*0.35*2)#points,
             height: (worldHeight*0.3)#points,
-//            positionLeft: -(worldWidth*0.35)#points,
             positionTop: (worldHeight * 0.3)#points,
             flexDirection: flexDirection.column,
             paddingTop: (worldHeight*0.01)#points,
-//            paddingBottom: (worldHeight*0.035)#points,
             background: "afterlife_background",
             alignItems: align.flexEnd,
+        },
+        {
+            style_priority: 1,
+            style_animation: {
+                duration: 0.1,
+                interpolation: interpolation.linear
+            },
+            positionLeft: -(worldWidth * 0.35 * (1.83))#points,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("afterliveOpened"),
+            style_animation: {
+                duration: 0.1,
+                interpolation: interpolation.linear
+            },
+            positionLeft: -(worldWidth*0.35)#points,
         }
     ],
 } children[
     $Box{ //Text
-           debug: true,
         styles: [
             {
                 width: (worldWidth*0.35)#points,
@@ -1709,9 +1721,9 @@ var afterlife = $Box{
         ],
     } children[
         $ScrollBox {
-            name: "tempTestingName",
+            name: "afterlifeCardsParent", //TODO MARVIN ADD CHILDREN TO THIS ELEMENT
             isScrollDirectionVertical: false,
-            scrollDistance: 10.0,
+            scrollDistance: 50.0,
             backgroundStretched: false,
             scrollbarBackgroundName: "afterlife_scrollbar_handle_background",
             scrollbarName: "afterlife_scrollbar_handle",
@@ -1719,7 +1731,7 @@ var afterlife = $Box{
             styles: [
                 {
                     flexDirection: flexDirection.rowReverse,
-                    justifyContent: justify.center,
+                    justifyContent: justify.flexStart,
                     alignItems: align.center,
                     width: (worldWidth*0.17)#points,
                     height: (worldHeight * 0.2)#points,
@@ -1732,32 +1744,19 @@ var afterlife = $Box{
             children: [
                 $Image {
                     name: "afterlife_scrollbar_handle",
-                    textureName: "backpack_scrollbar",
+                    textureName: "afterlife_scrollbar",
                     scaleX: 1.0,
                     scaleY: 1.0
                 },
                 $Image {
                     name: "afterlife_scrollbar_handle_background",
-                    textureName: "backpack_scrollbar_background",
+                    textureName: "afterlife_scrollbar_background",
                     scaleX: 1.0,
                     scaleY: 1.0
                 },
-                afterlifeTemporaryCardTemplate,
-                afterlifeTemporaryCardTemplate,
-                afterlifeTemporaryCardTemplate,
-                afterlifeTemporaryCardTemplate,
-//                $Box{
-//                    //    debug: true,
-//    styles: [
-//                        {
-//                            width: (52)#percent,
-//                            height: (90)#percent,
-//                            marginLeft: 5#percent,
-//                            //            background: "afterlife_card_slot", //TODO change back after correct image is here
-//            background: "backpack_empty_deck_slot",
-//                        }
-//                    ],
-//                }
+                afterLifeCardTemplate,
+//                afterLifeCardTemplate,
+//                afterLifeCardTemplate,
             ]
         },
         $Box{ // main card
@@ -1778,8 +1777,8 @@ var afterlife = $Box{
                         positionTop: (worldHeight*0.022)#points,
                         width: (worldHeight * 0.15)#points,
                         height: (worldHeight * 0.15)#points,
-            //            background: "afterlife_card_slot", //TODO change back after correct image is here
-                        background: "backpack_empty_deck_slot",                    }
+                        background: "afterlife_card_slot",
+                    }
                 ],
             },
             $Box{
@@ -1792,21 +1791,37 @@ var afterlife = $Box{
                     }
                 ],
             }],
-        $Box{ // extendButton
+        $Box { // extendButton
             styles: [
                 {
-                    width: (worldWidth*0.08)#points,
-                    height: (worldHeight*0.18)#points,
+                    width: (worldWidth * 0.08)#points,
+                    height: (worldHeight * 0.18)#points,
                     alignItems: align.center,
                     justifyContent: justify.center,
+                    touchable:touchable.enabled,
                 }
             ],
-        } children[ //TODO ugly, this could be on the top level of the afterlife as well
-            $Image {
-                scaleX: 1.0,
-                scaleY: 1.0,
-                textureName: "afterlife_arrow_left",
-                styles: [ { marginBottom: (worldHeight*0.07)#points, } ],
+            behaviours: [
+                $OnClickToggleScreenStateBehaviour {
+                    state: "afterliveOpened",
+                }
+            ],
+        } children [
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        marginBottom: (worldHeight * 0.07)#points,
+                        width: (worldHeight * 0.04)#points,
+                        height: (worldHeight * 0.05)#points,
+                        background: "afterlife_arrow_right",
+                    },
+                    {
+                        style_priority: 2,
+                        background: "afterlife_arrow_left",
+                        style_condition: state("afterliveOpened"),
+                    }
+                ],
             },
         ],
     ],

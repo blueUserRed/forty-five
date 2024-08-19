@@ -33,6 +33,7 @@ import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import ktx.actors.*
@@ -752,8 +753,9 @@ class CustomScrollableFlexBox(
                 val max = lastMax
                 val curSize = curWidth * curWidth / (max + curWidth)
                 offset =
-                    -(scrollbarHandle!!.x - parentPos.x - (width - curWidth) / 2) * max / (curWidth - curSize) - cutLeft
+                    (scrollbarHandle!!.x - parentPos.x - (width - curWidth) / 2) * max / (curWidth - curSize) + cutLeft
             }
+            offset = if (isReversed) lastMax + cutRight - offset else offset
             invalidate()
         }
     }
@@ -766,7 +768,8 @@ class CustomScrollableFlexBox(
     }
 
     private fun scroll(offset: Float) {
-        this.offset += offset * scrollDistance
+        if (!isReversed == isScrollDirectionVertical) this.offset += offset * scrollDistance
+        else this.offset -= offset * scrollDistance
         invalidate()
     }
 
@@ -799,16 +802,20 @@ class CustomScrollableFlexBox(
 //            tempChildren.forEach { add(it) }
 //        }
         super.layout()
+        checkInitialLayout()
+        layoutChildren()
+        layoutScrollBar()
+    }
+
+    private fun checkInitialLayout() {
         if (isInitialLayout) {
             styleManager?.node?.let {
                 isInitialLayout = false
                 if (root.flexDirection == YogaFlexDirection.COLUMN_REVERSE || root.flexDirection == YogaFlexDirection.ROW_REVERSE) {
-                    offset = if (isScrollDirectionVertical) Float.POSITIVE_INFINITY else Float.NEGATIVE_INFINITY
+                    isReversed = true
                 }
             }
         }
-        layoutChildren()
-        layoutScrollBar()
     }
 
     private fun layoutScrollBar() {
@@ -840,14 +847,13 @@ class CustomScrollableFlexBox(
                 needsScrollbar = false
             }
         } else {
-            val negativeDist = -(children.minOfOrNull { it.x } ?: 0F)
-            lastMax = ((children.map { it.x + it.width }.maxOrNull() ?: 0F) - width) + negativeDist
-            if (-lastMax - cutRight < -cutLeft / scrollDistance) {
+            val negDist: Float = (children.minOf { it.x })
+            lastMax = ((children.map { it.x + it.width }.maxOrNull() ?: 0F) - width) - negDist
+            if (lastMax + cutRight > cutLeft / scrollDistance) {
                 needsScrollbar = true
-                println("1. $offset")
-                offset = offset.between(-lastMax - cutRight, -cutLeft / scrollDistance)
-                println("2. $offset")
-                children.forEach { it.x += offset + negativeDist }
+                offset = offset.between(cutLeft / scrollDistance, lastMax + cutRight)
+                val localOff = if (isReversed) lastMax + cutRight - offset else offset
+                children.forEach { it.x -= localOff + negDist }
             } else {
                 needsScrollbar = false
             }
@@ -879,12 +885,13 @@ class CustomScrollableFlexBox(
     }
 
     private fun layoutScrollbarHandle() {
+        val localOff = if (isReversed) lastMax + cutRight - offset else offset
         if (isScrollDirectionVertical) {
             val max = lastMax + cutBottom
             val maxSize =
                 (if (scrollbarLength.unit == YogaUnit.PERCENT) height * scrollbarLength.value / 100F else scrollbarLength.value)
             val curSize = maxSize * maxSize / (max + maxSize)
-            val curPos = offset / max * (maxSize - curSize)
+            val curPos = localOff / max * (maxSize - curSize)
             if (scrollbarSide != null && scrollbarSide == "left") {
                 scrollbarHandle!!.x = x
             } else {
@@ -894,7 +901,7 @@ class CustomScrollableFlexBox(
             scrollbarHandle!!.height = curSize
             scrollbarHandle!!.y = y + (height + maxSize) / 2 - curPos - curSize
         } else {
-            val offset = offset + cutLeft
+            val offset = localOff - cutLeft
             val max = lastMax
             val curWidth =
                 (if (scrollbarLength.unit == YogaUnit.PERCENT) width * scrollbarLength.value / 100F else scrollbarLength.value)
@@ -907,7 +914,7 @@ class CustomScrollableFlexBox(
             }
             scrollbarHandle!!.height = scrollbarWidth
             scrollbarHandle!!.width = curSize
-            scrollbarHandle!!.x = x - curPos + (width - curWidth) / 2
+            scrollbarHandle!!.x = x + curPos + (width - curWidth) / 2
         }
     }
 
@@ -926,6 +933,7 @@ class CustomScrollableFlexBox(
             if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) return
         }
         if (needsScrollbar) {
+            layoutScrollBar() //TODO ugly, but i don't know a better solution
             val off = getTotalOffset()
             scrollbarBackground?.let {
                 it.x += off.x

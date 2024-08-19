@@ -1439,7 +1439,25 @@ ninepatches: [
         left: 10,
         right: 10,
         scale: 0.5
-    }
+    },
+    {
+        name: "afterlife_scrollbar",
+        file: "blobs/game_screen/afterlife/scrollbar.png",
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
+    },
+    {
+        name: "afterlife_scrollbar_background",
+        file: "blobs/game_screen/afterlife/scrollbar_background.png",
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
+    },
 ],
 
 particles: [

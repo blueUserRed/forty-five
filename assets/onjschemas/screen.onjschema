@@ -374,6 +374,10 @@ $Behaviour {
         enter: boolean
     }
 
+    $OnClickToggleScreenStateBehaviour {
+        state: string,
+    }
+
     $MouseHoverBehaviour {
         useSystemCursor: boolean,
         cursorName: string,
