@@ -297,7 +297,7 @@ var mapBox = $Box {
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
         scrollMargin: 0.0,
-        directionIndicator: "common_symbol_arrow",
+        directionIndicator: "common_symbol_arrow_right",
         encounterModifierDisplayTemplateName: "encounter_modifier_display",
         encounterModifierParentName: "encounter_modifier_parent",
         screenSpeed: 25.0,

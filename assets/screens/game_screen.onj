@@ -1634,6 +1634,144 @@ var steelNervesOverlay = $Box {
 
 ];
 
+
+var afterlifeTemporaryCardTemplate = $Box{
+    debug: true,
+    styles: [
+         {
+            width: (worldHeight * 0.15)#points,
+            height: (worldHeight * 0.15)#points,
+            background: "afterlife_card_slot",
+        }
+    ],
+};
+var afterlife = $Box{
+//    debug: true,
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: (worldWidth*0.35*2)#points,
+            height: (worldHeight*0.3)#points,
+            positionLeft: -(worldWidth*0.35)#points,
+            positionTop: (worldHeight * 0.3)#points,
+            flexDirection: flexDirection.column,
+            paddingTop: (worldHeight*0.005)#points,
+            paddingBottom: (worldHeight*0.035)#points,
+            background: "afterlife_background",
+            alignItems: align.flexEnd,
+        }
+    ],
+} children[
+    $Box{ //Text
+        styles: [
+            {
+                width: (worldWidth*0.35)#points,
+                height: (worldHeight*0.08)#points,
+                flexDirection: flexDirection.row,
+            }
+        ],
+    } children[
+        $Image {
+            scaleX: 0.25,
+            scaleY: 0.25,
+            textureName: "afterlife_icon",
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    positionLeft: 20#points,
+                    positionTop: -210#points,
+                }
+            ],
+        },
+        $Label {
+            styles: [
+                {
+                    marginLeft: 120#points
+                }
+            ],
+            font: "red_wing",
+            fontScale: 1.1,
+            color: color.frosty_mint_green,
+            text: "The Afterlife"
+        },
+    ],
+    $Box{ // cards
+        styles: [
+            {
+                width: (worldWidth*0.35)#points,
+                height: (worldHeight*0.20)#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.center,
+            }
+        ],
+    } children[
+        $Box{ // cards
+        debug: true,
+            styles: [
+                {
+                    width: (worldWidth*0.17)#points,
+                    height: (worldHeight*0.18)#points,
+                    flexDirection: flexDirection.row,
+                }
+            ],
+        } children[
+        ],
+        $Box{ // main card
+//        debug: true,
+            styles: [
+                {
+                    width: (worldWidth*0.1)#points,
+                    height: (worldHeight*0.18)#points,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                }
+            ],
+        } children[
+            $Box{
+//                debug: true,
+                styles: [
+                    {
+                        positionType: positionType.absolute,
+                        positionTop: (worldHeight*0.009)#points,
+                        width: (worldHeight * 0.15)#points,
+                        height: (worldHeight * 0.15)#points,
+                        background: "afterlife_card_slot",
+                    }
+                ],
+            },
+            $Box{
+//                debug:true,
+                styles: [
+                    {
+                        positionType: positionType.absolute,
+                        width: (worldHeight * 0.165)#points,
+                        height: (worldHeight * 0.18)#points,
+                        background: "afterlife_bullet_affected",
+                    }
+                ],
+            }
+        ],
+        $Box{ // extendButton
+            styles: [
+                {
+                    width: (worldWidth*0.08)#points,
+                    height: (worldHeight*0.18)#points,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                }
+            ],
+        } children[ //TODO ugly, this could be on the top level of the afterlife as well
+            $Image {
+                scaleX: 1.0,
+                scaleY: 1.0,
+                textureName: "afterlife_arrow_left",
+                styles: [ { marginBottom: (worldHeight*0.07)#points, } ],
+            },
+        ],
+    ],
+];
+
 root: $Box {
     styles: [
         {
@@ -1674,7 +1812,7 @@ root: $Box {
             ],
             ...cardHand
         },
-
+        afterlife,
         winScreen,
 
         $Statusbar {

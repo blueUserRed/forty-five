@@ -253,11 +253,6 @@ open class CustomImageActor(
 
     protected val loadedDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, _screen)
 
-    /**
-     * overrides and ignores the background handle and the loaded drawable
-     */
-    var programmedDrawable: Drawable? = null
-
     override var isSelected: Boolean = false
 
     override var isHoveredOver: Boolean = false
@@ -296,11 +291,7 @@ open class CustomImageActor(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
 
-        drawable = if (programmedDrawable != null) {
-            programmedDrawable
-        } else {
-            loadedDrawable
-        }
+        drawable = loadedDrawable
 
         if (batch == null || drawable == null) {
             return
