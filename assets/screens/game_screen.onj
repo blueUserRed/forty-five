@@ -1636,12 +1636,14 @@ var steelNervesOverlay = $Box {
 
 
 var afterlifeTemporaryCardTemplate = $Box{
-    debug: true,
+//    debug: true,
     styles: [
          {
-            width: (worldHeight * 0.15)#points,
-            height: (worldHeight * 0.15)#points,
-            background: "afterlife_card_slot",
+            width: (52)#percent,
+            height: (80)#percent,
+             marginLeft: 5#percent,
+//            background: "afterlife_card_slot", //TODO change back after correct image is here
+            background: "backpack_empty_deck_slot",
         }
     ],
 };
@@ -1652,17 +1654,18 @@ var afterlife = $Box{
             positionType: positionType.absolute,
             width: (worldWidth*0.35*2)#points,
             height: (worldHeight*0.3)#points,
-            positionLeft: -(worldWidth*0.35)#points,
+//            positionLeft: -(worldWidth*0.35)#points,
             positionTop: (worldHeight * 0.3)#points,
             flexDirection: flexDirection.column,
-            paddingTop: (worldHeight*0.005)#points,
-            paddingBottom: (worldHeight*0.035)#points,
+            paddingTop: (worldHeight*0.01)#points,
+//            paddingBottom: (worldHeight*0.035)#points,
             background: "afterlife_background",
             alignItems: align.flexEnd,
         }
     ],
 } children[
     $Box{ //Text
+           debug: true,
         styles: [
             {
                 width: (worldWidth*0.35)#points,
@@ -1699,29 +1702,69 @@ var afterlife = $Box{
         styles: [
             {
                 width: (worldWidth*0.35)#points,
-                height: (worldHeight*0.20)#points,
+                height: (worldHeight*0.23)#points,
                 flexDirection: flexDirection.row,
                 justifyContent: justify.center,
             }
         ],
     } children[
-        $Box{ // cards
-        debug: true,
+        $ScrollBox {
+            name: "tempTestingName",
+            isScrollDirectionVertical: false,
+            scrollDistance: 10.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "afterlife_scrollbar_handle_background",
+            scrollbarName: "afterlife_scrollbar_handle",
+            scrollbarSide: "down",
             styles: [
                 {
+                    flexDirection: flexDirection.rowReverse,
+                    justifyContent: justify.center,
+                    alignItems: align.center,
                     width: (worldWidth*0.17)#points,
-                    height: (worldHeight*0.18)#points,
-                    flexDirection: flexDirection.row,
+                    height: (worldHeight * 0.2)#points,
+                    paddingRight: (10.0)#points,
+                    cuttingRight: 10.0,
+                    scrollbarWidth: 7.5,
+                    scrollbarLength: 90.0#percent,
                 }
             ],
-        } children[
-        ],
+            children: [
+                $Image {
+                    name: "afterlife_scrollbar_handle",
+                    textureName: "backpack_scrollbar",
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                },
+                $Image {
+                    name: "afterlife_scrollbar_handle_background",
+                    textureName: "backpack_scrollbar_background",
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                },
+                afterlifeTemporaryCardTemplate,
+                afterlifeTemporaryCardTemplate,
+                afterlifeTemporaryCardTemplate,
+                afterlifeTemporaryCardTemplate,
+//                $Box{
+//                    //    debug: true,
+//    styles: [
+//                        {
+//                            width: (52)#percent,
+//                            height: (90)#percent,
+//                            marginLeft: 5#percent,
+//                            //            background: "afterlife_card_slot", //TODO change back after correct image is here
+//            background: "backpack_empty_deck_slot",
+//                        }
+//                    ],
+//                }
+            ]
+        },
         $Box{ // main card
-//        debug: true,
             styles: [
                 {
                     width: (worldWidth*0.1)#points,
-                    height: (worldHeight*0.18)#points,
+                    height: (worldHeight*0.21)#points,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
                     justifyContent: justify.center,
@@ -1729,29 +1772,26 @@ var afterlife = $Box{
             ],
         } children[
             $Box{
-//                debug: true,
                 styles: [
                     {
                         positionType: positionType.absolute,
-                        positionTop: (worldHeight*0.009)#points,
+                        positionTop: (worldHeight*0.022)#points,
                         width: (worldHeight * 0.15)#points,
                         height: (worldHeight * 0.15)#points,
-                        background: "afterlife_card_slot",
-                    }
+            //            background: "afterlife_card_slot", //TODO change back after correct image is here
+                        background: "backpack_empty_deck_slot",                    }
                 ],
             },
             $Box{
-//                debug:true,
                 styles: [
                     {
                         positionType: positionType.absolute,
-                        width: (worldHeight * 0.165)#points,
-                        height: (worldHeight * 0.18)#points,
+                        width: (worldHeight * 0.18)#points,
+                        height: (worldHeight * 0.21)#points,
                         background: "afterlife_bullet_affected",
                     }
                 ],
-            }
-        ],
+            }],
         $Box{ // extendButton
             styles: [
                 {

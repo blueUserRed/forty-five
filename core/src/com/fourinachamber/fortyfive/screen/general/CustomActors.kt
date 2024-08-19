@@ -33,6 +33,7 @@ import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import ktx.actors.*
 import onj.value.*
@@ -535,12 +536,12 @@ open class CustomFlexBox(
             if (parentAlpha * alpha < 1f) batch.flush()
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
             val background = background
-            if(name=="drop_shadow_testing_name"){
+            if (name == "drop_shadow_testing_name") {
                 dropShadowShader.getOrNull()?.let {
                     batch.flush()
                     it.shader.bind()
                     it.prepare(screen)
-                    val oldShader=batch.shader
+                    val oldShader = batch.shader
 
 //                    val glowDist = 0.05F                  //drop shadow config
 ////                    val glowDist = 0.015F
@@ -618,6 +619,7 @@ open class CustomFlexBox(
         }
         return res
     }
+
     override fun display(): Timeline = onDisplay()
 
     override fun hide(): Timeline = onHide()
@@ -778,6 +780,8 @@ class CustomScrollableFlexBox(
     private var scrollbarHandle: CustomImageActor? = null
     var scrollbarWidth: Float = 0F
     var scrollbarLength: YogaValue = YogaValue(100F, YogaUnit.PERCENT)
+    private var isInitialLayout = true
+    private var isReversed = false
 
     override fun layout() {
 //        layoutScrollBar()
@@ -795,6 +799,14 @@ class CustomScrollableFlexBox(
 //            tempChildren.forEach { add(it) }
 //        }
         super.layout()
+        if (isInitialLayout) {
+            styleManager?.node?.let {
+                isInitialLayout = false
+                if (root.flexDirection == YogaFlexDirection.COLUMN_REVERSE || root.flexDirection == YogaFlexDirection.ROW_REVERSE) {
+                    offset = if (isScrollDirectionVertical) Float.POSITIVE_INFINITY else Float.NEGATIVE_INFINITY
+                }
+            }
+        }
         layoutChildren()
         layoutScrollBar()
     }
@@ -828,11 +840,14 @@ class CustomScrollableFlexBox(
                 needsScrollbar = false
             }
         } else {
-            lastMax = ((children.map { it.x + it.width }.maxOrNull() ?: 0F) - width)
+            val negativeDist = -(children.minOfOrNull { it.x } ?: 0F)
+            lastMax = ((children.map { it.x + it.width }.maxOrNull() ?: 0F) - width) + negativeDist
             if (-lastMax - cutRight < -cutLeft / scrollDistance) {
                 needsScrollbar = true
+                println("1. $offset")
                 offset = offset.between(-lastMax - cutRight, -cutLeft / scrollDistance)
-                children.forEach { it.x += offset }
+                println("2. $offset")
+                children.forEach { it.x += offset + negativeDist }
             } else {
                 needsScrollbar = false
             }

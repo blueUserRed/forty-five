@@ -114,6 +114,7 @@ $Widget {
         scrollbarBackgroundName?: string,
         scrollbarName?: string,
         scrollbarSide?: string,
+        progress?: float,
         ...widgetSharedKeys
     }
 
