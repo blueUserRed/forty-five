@@ -79,8 +79,7 @@ options: {
         $BiomeBackgroundScreenController {
             useSecondary: false,
         },
-//        $CardCollectionScreenController {
-//        }
+        $CardCollectionScreenController { },
     ],
     playAmbientSounds: true,
     music: "map_theme",
