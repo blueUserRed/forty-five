@@ -22,7 +22,7 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
 
     //TODO ugly, could be "val"
     private lateinit var cardPrototypes: List<CardPrototype>
-    private var curShownCards: MutableList<Card> = mutableListOf()
+    private var curShownCards: Array<Card?> = arrayOf()
 
     private val totalPagesGlobalStringName: String = "overlay.cardCollection.totalPages"
     private val curPageGlobalStringName: String = "overlay.cardCollection.curPage"
@@ -103,7 +103,7 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         val parents = cardsParentWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in curShownCards.indices) {
             val c = curShownCards[i]
-            if (c.name in PermaSaveState.collection)
+            if (c != null && c.name in PermaSaveState.collection) {
                 screen.screenBuilder.addDataToWidgetFromTemplate(
                     "card_collection_slot_card",
                     mapOf(),
@@ -111,24 +111,24 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
                     screen,
                     c.actor
                 )
-            else if (!c.lockedDescription.isNullOrEmpty()) { //TODO this if condition when locked system exists
-                screen.screenBuilder.generateFromTemplate(
-                    "card_collection_slot_glow_background",
-                    mapOf(),
-                    parents[i],
-                    screen
-                )
-                val curActor = screen.screenBuilder.generateFromTemplate(
-                    "card_collection_slot",
-                    mapOf(
-                        "background" to "collection_slot_locked",
-                        "hoverText" to c.lockedDescription
-                    ),
-                    parents[i],
-                    screen
-                ) as CustomFlexBox
-                curActor.touchable = Touchable.enabled
-                curActor.additionalHoverData["effects"] = DetailDescriptionHandler.allTextEffects
+//            } else if (c!=null && !c.lockedDescription.isNullOrEmpty()) { //TODO this if condition when locked system exists
+//                screen.screenBuilder.generateFromTemplate(
+//                    "card_collection_slot_glow_background",
+//                    mapOf(),
+//                    parents[i],
+//                    screen
+//                )
+//                val curActor = screen.screenBuilder.generateFromTemplate(
+//                    "card_collection_slot",
+//                    mapOf(
+//                        "background" to "collection_slot_locked",
+//                        "hoverText" to c.lockedDescription
+//                    ),
+//                    parents[i],
+//                    screen
+//                ) as CustomFlexBox
+//                curActor.touchable = Touchable.enabled
+//                curActor.additionalHoverData["effects"] = DetailDescriptionHandler.allTextEffects
             } else {
                 screen.screenBuilder.generateFromTemplate(
                     "card_collection_slot",
@@ -168,11 +168,12 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         }
     }
 
-    private fun loadCards() { //TODO fix error when changing between the pages to fast
-        curShownCards.forEach(Card::dispose)
-        curShownCards = mutableListOf()
+    private fun loadCards() {
+        curShownCards.forEach { it?.dispose() }
+        curShownCards = Array(cardsPerPage) { null }
         for (i in (0 until (min(cardsPerPage, cardPrototypes.size - curPage * cardsPerPage)))) {
-            curShownCards.add(cardPrototypes[i + curPage * cardsPerPage].create(screen, true))
+            val cardPrototype = cardPrototypes[i + curPage * cardsPerPage]
+            if (cardPrototype.name in PermaSaveState.collection) curShownCards[i] = cardPrototype.create(screen, true)
         }
     }
 }
