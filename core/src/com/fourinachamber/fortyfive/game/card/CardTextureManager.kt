@@ -122,9 +122,8 @@ class CardTextureManager {
         variant.texture.getOrError().dispose()
         if (data.variants.isNotEmpty()) return
         if (preventCompleteUnload) return
-//        println("disposing ${data.cardName}")
-//        data.cardPixmap?.dispose()
-//        data.cardPixmap = null
+        data.cardPixmap?.dispose()
+        data.cardPixmap = null
     }
 
     private fun preventUnloadingOfCard(data: CardTextureData): Boolean = data.cardName in SaveState.curDeck.cards
