@@ -1641,11 +1641,13 @@ var afterLifeCardTemplate = $Box{
             height: (75)#percent,
             marginLeft: 5#percent,
             marginBottom: 2#percent,
-            background: "afterlife_card_slot",
+//            background: "afterlife_card_slot",
+            background: "backpack_empty_deck_slot",
         }
     ],
 };
 var afterlife = $Box{
+    name: "testNameForInterpolation",
     styles: [
         {
             positionType: positionType.absolute,
@@ -1660,8 +1662,8 @@ var afterlife = $Box{
         {
             style_priority: 1,
             style_animation: {
-                duration: 0.1,
-                interpolation: interpolation.linear
+                duration: 0.2,
+                interpolation: interpolation.exp5In
             },
             positionLeft: -(worldWidth * 0.35 * (1.83))#points,
         },
@@ -1669,8 +1671,8 @@ var afterlife = $Box{
             style_priority: 2,
             style_condition: state("afterliveOpened"),
             style_animation: {
-                duration: 0.1,
-                interpolation: interpolation.linear
+                duration: 0.3,
+                interpolation: interpolation.exp10Out
             },
             positionLeft: -(worldWidth*0.35)#points,
         }
@@ -1686,8 +1688,8 @@ var afterlife = $Box{
         ],
     } children[
         $Image {
-            scaleX: 0.25,
-            scaleY: 0.25,
+            scaleX: 0.22,
+            scaleY: 0.22,
             textureName: "afterlife_icon",
             styles: [
                 {
@@ -1700,11 +1702,12 @@ var afterlife = $Box{
         $Label {
             styles: [
                 {
-                    marginLeft: 120#points
+                    marginLeft: 110#points,
+                    positionTop: 10#points,
                 }
             ],
             font: "red_wing",
-            fontScale: 1.1,
+            fontScale: 1.0,
             color: color.frosty_mint_green,
             text: "The Afterlife"
         },
@@ -1754,7 +1757,7 @@ var afterlife = $Box{
                     scaleY: 1.0
                 },
                 afterLifeCardTemplate,
-//                afterLifeCardTemplate,
+                afterLifeCardTemplate,
 //                afterLifeCardTemplate,
             ]
         },
