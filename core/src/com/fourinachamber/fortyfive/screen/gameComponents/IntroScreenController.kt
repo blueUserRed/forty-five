@@ -10,7 +10,7 @@ import onj.value.OnjNamedObject
 class IntroScreenController(private val screen: OnjScreen, onj: OnjNamedObject) : ScreenController() {
 
     override fun init(context: Any?) {
-        OnjScreen.toggleFullScreen()
+        OnjScreen.toggleFullScreen(true)
         FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("titleScreen")) // screen change occurs after 5s because of the transitionAwayTime
         screen.afterMs(500) { // changeToInitialScreen causes a lagSpike, this prevents it from interrupting the sound
             SoundPlayer.playMusicOnce("microwave_theme", screen)

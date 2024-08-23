@@ -185,7 +185,7 @@ open class OnjScreen(
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
 
     override fun onEnd(callback: () -> Unit) {
-       lifetime.onEnd(callback)
+        lifetime.onEnd(callback)
     }
 
     @AllThreadsAllowed
@@ -531,20 +531,15 @@ open class OnjScreen(
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
-        fun toggleFullScreen(width: Int = -1, height: Int = -1) {
-            val displayMode = Gdx.graphics.displayMode
-            if (!(Gdx.graphics.isFullscreen ||
-                        (Gdx.graphics.width == displayMode.width && Gdx.graphics.height == displayMode.height))
-                || (width == -1 && height == -1)) {
-                if (UserPrefs.useNormalFullScreenMode) {
-                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                } else {
-                    Gdx.graphics.setUndecorated(true)
-                    Gdx.graphics.setWindowedMode(displayMode.width, displayMode.height)
-                }
+        fun toggleFullScreen(forceFullscreen: Boolean = false) {
+            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
+                UserPrefs.windowMode =
+                    if (UserPrefs.lastFullScreenAsBorderless)
+                        UserPrefs.WindowMode.BorderlessWindow
+                    else
+                        UserPrefs.WindowMode.Fullscreen
             } else {
-                Gdx.graphics.setUndecorated(false)
-                Gdx.graphics.setWindowedMode(width, height)
+                UserPrefs.windowMode = UserPrefs.WindowMode.Window
             }
         }
     }

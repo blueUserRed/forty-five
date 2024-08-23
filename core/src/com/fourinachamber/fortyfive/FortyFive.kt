@@ -161,6 +161,7 @@ object FortyFive : Game() {
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         currentRenderPipeline?.sizeChanged()
+        if (UserPrefs.windowMode == UserPrefs.WindowMode.Window) UserPrefs.windowWidth = width
     }
 
     fun resetAll() {

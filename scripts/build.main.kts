@@ -81,11 +81,10 @@ fun cleanupAssets(tmpDir: File) {
     (tmpDir / "error_logs")
         .listFiles()?.forEach { it.delete() }
 
-    debug("removing raw animation frames")
-    (tmpDir / "large_assets")
-        .listFiles()!!
-        .filter { it.name.endsWith("_animation") }
-        .forEach { it.deleteRecursively() }
+//    debug("removing raw animation frames")
+//    (tmpDir / "large_assets")
+//        .listFiles()?.filter { it.name.endsWith("_animation") }
+//        ?.forEach { it.deleteRecursively() }
 
     debug("removing log file")
     (tmpDir / "logging/forty-five.log").delete()

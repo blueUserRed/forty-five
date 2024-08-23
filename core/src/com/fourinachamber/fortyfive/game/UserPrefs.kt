@@ -63,7 +63,20 @@ object UserPrefs {
             dirty = true
         }
 
-    var useNormalFullScreenMode: Boolean = false
+    var windowMode: WindowMode = WindowMode.Window
+        set(value) {
+            field = value
+            dirty = true
+            value.setScreenToOption()
+        }
+
+    var windowWidth: Int = 700
+        set(value) {
+            field = value
+            dirty = true
+        }
+
+    var lastFullScreenAsBorderless: Boolean = false
         set(value) {
             field = value
             dirty = true
@@ -85,7 +98,10 @@ object UserPrefs {
 
         val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
         if (version?.equals(userPrefsVersion)?.not() ?: true) {
-            FortyFiveLogger.warn(logTag, "incompatible userprefs found: version is $version; expected: $userPrefsVersion")
+            FortyFiveLogger.warn(
+                logTag,
+                "incompatible userprefs found: version is $version; expected: $userPrefsVersion"
+            )
             copyDefaultFile()
             obj = OnjParser.parseFile(file)
         }
@@ -99,14 +115,16 @@ object UserPrefs {
         }
 
         obj as OnjObject
-        
+
         soundEffectsVolume = obj.get<Double>("soundEffectsVolume").toFloat()
         musicVolume = obj.get<Double>("musicVolume").toFloat()
         masterVolume = obj.get<Double>("masterVolume").toFloat()
         enableScreenShake = obj.get<Boolean>("enableScreenShake")
         startScreen = StartScreen.valueOf(obj.get<String>("startScreen").uppercase())
         disableRtMechanics = obj.getOr("disableRtMechanics", false)
-        useNormalFullScreenMode = obj.get<Boolean>("useNormalFullScreenMode")
+        windowWidth = obj.get<Long>("windowWidth").toInt()
+        lastFullScreenAsBorderless = obj.get<Boolean>("lastFullScreenAsBorderless")
+        windowMode = WindowMode.valueOf(obj.get<String>("windowMode"))
         dirty = false
     }
 
@@ -120,7 +138,9 @@ object UserPrefs {
             "enableScreenShake" with enableScreenShake
             "startScreen" with startScreen.toString()
             "disableRtMechanics" with disableRtMechanics
-            "useNormalFullScreenMode" with useNormalFullScreenMode
+            "windowWidth" with windowWidth
+            "lastFullScreenAsBorderless" with lastFullScreenAsBorderless
+            "windowMode" with windowMode.javaClass.simpleName.lowercase()
         }
         Gdx.files.internal(userPrefsPath).file().writeText(obj.toString())
         dirty = false
@@ -140,4 +160,41 @@ object UserPrefs {
         INTRO, TITLE, MAP
     }
 
+    sealed class WindowMode {
+        object Window : WindowMode() {
+            override fun setScreenToOption() {
+                Gdx.graphics.setUndecorated(false)
+                Gdx.graphics.setWindowedMode(windowWidth, (windowWidth * 9 / 16))
+            }
+        }
+
+        object BorderlessWindow : WindowMode() {
+            override fun setScreenToOption() {
+                lastFullScreenAsBorderless = true
+                val displayMode = Gdx.graphics.displayMode
+                Gdx.graphics.setUndecorated(true)
+                Gdx.graphics.setWindowedMode(displayMode.width, displayMode.height)
+            }
+        }
+
+        object Fullscreen : WindowMode() {
+            override fun setScreenToOption() {
+                lastFullScreenAsBorderless = false
+                Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+            }
+        }
+
+        abstract fun setScreenToOption()
+
+        companion object {
+            fun valueOf(s: String): WindowMode {
+                return when (s) {
+                    "window" -> Window
+                    "borderlesswindow" -> BorderlessWindow
+                    "fullscreen" -> Fullscreen
+                    else -> throw RuntimeException("unknown windowMode modifier: $s")
+                }
+            }
+        }
+    }
 }

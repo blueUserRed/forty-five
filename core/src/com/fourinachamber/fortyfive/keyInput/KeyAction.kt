@@ -24,10 +24,8 @@ object KeyActionFactory {
     private val actions: Map<String, (onj: OnjObject) -> KeyAction> = mapOf(
 
         "ToggleFullscreen" to { obj ->
-            val width = obj.get<Long>("width").toInt()
-            val height = obj.get<Long>("height").toInt()
             ; { _, _ ->
-                OnjScreen.toggleFullScreen(width, height)
+                OnjScreen.toggleFullScreen()
                 true
             }
         },
