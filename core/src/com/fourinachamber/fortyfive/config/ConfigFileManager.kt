@@ -1,7 +1,8 @@
 package com.fourinachamber.fortyfive.config
 
 import com.badlogic.gdx.Gdx
-import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.FromOnjScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -21,7 +22,7 @@ object ConfigFileManager {
     private lateinit var screenSchema: OnjSchema
 
     private lateinit var configFiles: List<ConfigFile>
-    private lateinit var screens: List<ScreenData>
+    private lateinit var screens: MutableList<ScreenData>
 
     fun init() {
         val onj = OnjParser.parseFile(path)
@@ -48,27 +49,32 @@ object ConfigFileManager {
                 ScreenData(
                     it.get<String>("name"),
                     it.get<String>("file"),
+                    null,
                     null
                 )
             }
+            .toMutableList()
+    }
+
+    fun addScreen(name: String, creator: () -> ScreenBuilder) {
+        screens.add(ScreenData(name, null, creator, null))
     }
 
     fun screenBuilderFor(screen: String): ScreenBuilder {
         val s = screenOrError(screen)
+        s.creator?.let { return it() }
         if (s.onj == null) forceLoadScreen(screen)
-        return ScreenBuilder(s.name, s.onj!!)
-    }
-
-    fun getScreen(screen: String): OnjObject {
-        val s = screenOrError(screen)
-        if (s.onj == null) forceLoadScreen(screen)
-        return s.onj!!
+        return FromOnjScreenBuilder(s.name, s.onj!!)
     }
 
     fun forceLoadScreen(screen: String) {
         val s = screenOrError(screen)
+        val path = s.path ?: run {
+            FortyFiveLogger.warn(logTag, "couldn't load screen $screen because it is not associated with an onj file")
+            return
+        }
         if (s.onj != null) return
-        val onj = OnjParser.parseFile(s.path)
+        val onj = OnjParser.parseFile(path)
         screenSchema.assertMatches(onj)
         onj as OnjObject
         s.onj = onj
@@ -112,7 +118,8 @@ object ConfigFileManager {
 
     private data class ScreenData(
         val name: String,
-        val path: String,
+        val path: String?,
+        val creator: (() -> ScreenBuilder)?,
         var onj: OnjObject?
     )
 

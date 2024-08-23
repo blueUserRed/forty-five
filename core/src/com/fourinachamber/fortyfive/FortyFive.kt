@@ -13,8 +13,10 @@ import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.TestScreen
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -78,6 +80,8 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
+        changeToScreen(ConfigFileManager.screenBuilderFor("testScreen"))
+        return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
@@ -137,7 +141,7 @@ object FortyFive : Game() {
         nextScreen = screen
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen to ${screenBuilder.screenName}")
+            FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
             SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             screen.update(Gdx.graphics.deltaTime, isEarly = true)
@@ -160,7 +164,7 @@ object FortyFive : Game() {
         }
 
         val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
-            it[screenBuilder.screenName] ?: it["*"]
+            it[screenBuilder.name] ?: it["*"]
         } ?: 0
         if (currentScreen == null) {
             onScreenChange()
@@ -209,6 +213,7 @@ object FortyFive : Game() {
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
+        ConfigFileManager.addScreen("testScreen", creator = { FromKotlinScreenBuilder(TestScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()

@@ -34,6 +34,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActo
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
@@ -52,7 +53,6 @@ open class OnjScreen(
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,
-    private val namedCells: Map<String, Cell<*>>,
     private val namedActors: MutableMap<String, Actor>,
     val printFrameRate: Boolean,
     val transitionAwayTimes: Map<String, Int>,
