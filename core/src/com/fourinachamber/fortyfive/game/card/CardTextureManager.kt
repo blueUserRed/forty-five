@@ -6,10 +6,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.utils.Promise
-import com.fourinachamber.fortyfive.utils.ServiceThreadMessage
-import com.fourinachamber.fortyfive.utils.asPromise
-import com.fourinachamber.fortyfive.utils.chain
+import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.RuntimeException
@@ -67,7 +64,7 @@ class CardTextureManager {
         cost: Int,
         damage: Int
     ): Promise<Texture> {
-        val pixmapPromise = getCardPixmap(data, card).chain { cardPixmap ->
+        val pixmapPromise = getCardPixmap(data, card).chainMainThread { cardPixmap ->
             val pixmap = Pixmap(cardPixmap.width, cardPixmap.height, Pixmap.Format.RGBA8888)
             if (!card.actor.font.isResolved) ResourceManager.forceResolve(card.actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
@@ -80,9 +77,11 @@ class CardTextureManager {
                 card.actor.font.getOrError()
             )
             FortyFive.serviceThread.sendMessage(message)
+//            println("start drawing ${card.name}")
             message.promise
         }
         val texturePromise = pixmapPromise.chain { pixmap ->
+//            println("finished drawing ${card.name}")
             FortyFive.mainThreadTask {
                 val texture = Texture(pixmap, true)
                 texture.setFilter(
@@ -113,13 +112,19 @@ class CardTextureManager {
     ) {
         val preventCompleteUnload = preventUnloadingOfCard(data)
         if (preventCompleteUnload && data.isStandardVariant(variant)) return
-        variant.pixmap.then { it.dispose() }
-        variant.texture.then { it.dispose() }
+        if (variant.texture.isNotResolved) {
+            variant.isDisposing = true
+            variant.texture.thenMainThread { disposeVariant(variant, data) }
+            return
+        }
         data.variants.remove(variant)
+        variant.pixmap.getOrError().dispose()
+        variant.texture.getOrError().dispose()
         if (data.variants.isNotEmpty()) return
         if (preventCompleteUnload) return
-        data.cardPixmap?.dispose()
-        data.cardPixmap = null
+//        println("disposing ${data.cardName}")
+//        data.cardPixmap?.dispose()
+//        data.cardPixmap = null
     }
 
     private fun preventUnloadingOfCard(data: CardTextureData): Boolean = data.cardName in SaveState.curDeck.cards
@@ -137,7 +142,7 @@ class CardTextureManager {
     ) {
 
         fun findVariant(cost: Int, damage: Int): CardTextureVariant? =
-            variants.find { it.cost == cost && it.damage == damage }
+            variants.find { !it.isDisposing && it.cost == cost && it.damage == damage }
 
         fun isStandardVariant(variant: CardTextureVariant): Boolean =
             variant.cost == baseCost && variant.damage == baseDamage
@@ -148,7 +153,8 @@ class CardTextureManager {
         val damage: Int,
         val pixmap: Promise<Pixmap>,
         val texture: Promise<Texture>,
-        val borrowers: MutableList<Card>
+        val borrowers: MutableList<Card>,
+        var isDisposing: Boolean = false,
     )
 
     inner class Statistics {
