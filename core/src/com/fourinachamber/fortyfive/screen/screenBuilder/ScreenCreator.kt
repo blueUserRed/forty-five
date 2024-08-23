@@ -7,12 +7,15 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.config.ConfigFileManager
+import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.utils.TemplateString
+import onj.value.OnjArray
 
 abstract class ScreenCreator : ResourceBorrower {
 
@@ -34,6 +37,10 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     abstract fun getRoot(): Group
+
+    abstract fun getScreenControllers(): List<ScreenController>
+
+    abstract fun getInputMaps(): List<KeyInputMap>
 
     protected inline fun group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen)
@@ -155,5 +162,10 @@ abstract class ScreenCreator : ResourceBorrower {
         set(value) {
             style.fontColor = value
         }
+
+    protected fun loadInputMap(name: String, screen: OnjScreen): KeyInputMap {
+        val file = ConfigFileManager.getConfigFile("inputMaps")
+        return KeyInputMap.readFromOnj(file.get<OnjArray>(name), screen)
+    }
 
 }

@@ -55,6 +55,10 @@ configFiles: {
     mapConfig: {
         file: "config/map_config.onj",
         validatedBy: "onjschemas/map_config.onjschema",
+    },
+    inputMaps: {
+        file: "screens/input_maps.onj",
+        validatedBy: null,
     }
 },
 
