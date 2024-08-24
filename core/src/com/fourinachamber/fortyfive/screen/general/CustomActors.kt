@@ -236,7 +236,7 @@ open class CustomImageActor(
     override val partOfHierarchy: Boolean = false,
     var hoverText: String = "",
     var hasHoverDetail: Boolean = false
-) : Image(), Maskable, ZIndexActor, DisableActor,
+) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
     KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
@@ -262,6 +262,9 @@ open class CustomImageActor(
 
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
+
+    var forcedPrefWidth: Float? = null
+    var forcedPrefHeight: Float? = null
 
     override val actor: Actor = this
 
@@ -300,6 +303,8 @@ open class CustomImageActor(
 
     override var detailActor: Actor? = null
 
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, _screen)
@@ -309,6 +314,10 @@ open class CustomImageActor(
         "hoverText" to OnjString(hoverText)
     ).also {
         it.putAll(additionalHoverData)
+    }
+
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
     }
 
     @MainThreadOnly
@@ -369,13 +378,9 @@ open class CustomImageActor(
         y -= offsetY
     }
 
-    override fun hit(x: Float, y: Float, touchable: Boolean): Actor? { // workaround
-        return super.hit(x, y, touchable)
-//        if (!reportDimensionsWithScaling) return super.hit(x, y, touchable)
-//        if (touchable && this.touchable != Touchable.enabled) return null
-//        if (!isVisible) return null
-//        val didHit = x >= 0 && x < width / scaleX && y >= 0 && y < height / scaleY
-//        return if (didHit) this else null
+    override fun layout() {
+        onLayout.forEach { it() }
+        super.layout()
     }
 
     override fun getBounds(): Rectangle {
@@ -386,6 +391,9 @@ open class CustomImageActor(
             Rectangle(x, y, width * scaleX, height * scaleY)
         }
     }
+
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
@@ -1183,12 +1191,17 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  */
 open class CustomHorizontalGroup(
     override val screen: OnjScreen
-) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable {
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor {
 
     override var offsetX: Float = 0f
     override var offsetY: Float = 0f
 
     override var fixedZIndex: Int = 0
+
+    var forcedPrefWidth: Float? = null
+    var forcedPrefHeight: Float? = null
+
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
@@ -1204,12 +1217,25 @@ open class CustomHorizontalGroup(
         this.y -= offsetY
     }
 
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
+    }
+
+    override fun layout() {
+        onLayout.forEach { it() }
+        (0 until children.size).forEach { (children[it] as? Layout)?.validate() }
+        super.layout()
+    }
+
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
                     (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
     }
+
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
 
 }
 
@@ -1218,22 +1244,38 @@ open class CustomHorizontalGroup(
  */
 open class CustomVerticalGroup(
     override val screen: OnjScreen
-) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor, HasOnjScreen {
+) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor, HasOnjScreen, OnLayoutActor {
 
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
+    var forcedPrefWidth: Float? = null
+    var forcedPrefHeight: Float? = null
+
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
+
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
+    }
+
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
+    }
+
+    override fun layout() {
+        onLayout.forEach { it() }
+        // These cant use normal iterators because .validate may use an iterator over children as well,
+        // and LibGDX doesn't like that
+        (0 until children.size).forEach { (children[it] as? Layout)?.validate() }
+        super.layout()
     }
 
     override fun resortZIndices() {
@@ -1243,6 +1285,9 @@ open class CustomVerticalGroup(
         }
     }
 
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
+
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
@@ -1250,12 +1295,17 @@ open class CustomVerticalGroup(
 
 open class CustomGroup(
     override val screen: OnjScreen
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable {
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor {
 
     override var offsetX: Float = 0f
     override var offsetY: Float = 0f
 
     override var fixedZIndex: Int = 0
+
+    var forcedPrefWidth: Float? = null
+    var forcedPrefHeight: Float? = null
+
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
@@ -1271,12 +1321,25 @@ open class CustomGroup(
         this.y -= offsetY
     }
 
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
+    }
+
+    override fun layout() {
+        onLayout.forEach { it() }
+        (0 until children.size).forEach { (children[it] as? Layout)?.validate() }
+        super.layout()
+    }
+
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
                     (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
     }
+
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
 
 }
 
@@ -1297,6 +1360,10 @@ class Spacer(
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (growProportion != null) println(definedHeight)
     }
 
     override fun layout() {

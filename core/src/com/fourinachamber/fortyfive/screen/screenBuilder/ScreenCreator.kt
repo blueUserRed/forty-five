@@ -32,6 +32,10 @@ abstract class ScreenCreator : ResourceBorrower {
     lateinit var screen: OnjScreen
         private set
 
+    private val _namedActors: MutableMap<String, Actor> = mutableMapOf()
+    val namedActors: Map<String, Actor>
+        get() = _namedActors
+
     fun start(screen: OnjScreen) {
         this.screen = screen
     }
@@ -42,22 +46,35 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract fun getInputMaps(): List<KeyInputMap>
 
-    protected inline fun group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
+    protected inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen)
         builder(group)
         return group
     }
 
-    protected inline fun horizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
-        val group = CustomHorizontalGroup(screen)
+    protected inline fun Group.group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        val group = CustomGroup(screen)
+        addActor(group)
         builder(group)
         return group
     }
 
-    protected inline fun verticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
-        val group = CustomVerticalGroup(screen)
+    protected inline fun Group.horizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        val group = CustomHorizontalGroup(screen)
+        addActor(group)
         builder(group)
         return group
+    }
+
+    protected inline fun Group.verticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        val group = CustomVerticalGroup(screen)
+        addActor(group)
+        builder(group)
+        return group
+    }
+
+    protected fun Actor.name(name: String) {
+        _namedActors[name] = this
     }
 
     protected inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
@@ -118,28 +135,31 @@ abstract class ScreenCreator : ResourceBorrower {
 
     protected fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
 
-    protected inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit): T {
+    protected inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
         builder(actor)
         this.addActor(actor)
         return actor
     }
 
     protected fun <T> T.relativeWidth(percent: Float) where T : Actor, T : OnLayoutActor {
-        width = parent.width * (percent / 100f)
-        onLayout { width = parent.width * (percent / 100f) }
+        onLayoutAndNow { width = parent.width * (percent / 100f) }
     }
 
     protected fun <T> T.relativeHeight(percent: Float) where T : Actor, T : OnLayoutActor {
-        height = parent.height * (percent / 100f)
-        onLayout { height = parent.height * (percent / 100f) }
+        onLayoutAndNow { height = parent.height * (percent / 100f) }
+    }
+
+    protected fun <T> T.onLayoutAndNow(callback: () -> Unit) where T : Actor, T : OnLayoutActor {
+        callback()
+        onLayout(callback)
     }
 
     protected fun <T> T.syncHeight() where T : Actor, T : Layout, T : OnLayoutActor {
-        onLayout { height = prefHeight }
+        onLayoutAndNow { height = prefHeight }
     }
 
     protected fun <T> T.syncWidth() where T : Actor, T : Layout, T : OnLayoutActor {
-        onLayout { width = prefWidth }
+        onLayoutAndNow { width = prefWidth }
     }
 
     protected fun <T> T.syncDimensions() where T : Actor, T : Layout, T : OnLayoutActor {

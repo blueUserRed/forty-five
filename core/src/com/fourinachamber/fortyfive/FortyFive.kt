@@ -80,8 +80,6 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-        changeToScreen(ConfigFileManager.screenBuilderFor("testScreen"))
-        return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
@@ -213,7 +211,7 @@ object FortyFive : Game() {
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
-        ConfigFileManager.addScreen("testScreen", creator = { FromKotlinScreenBuilder(TestScreen()) })
+        ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(TestScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()

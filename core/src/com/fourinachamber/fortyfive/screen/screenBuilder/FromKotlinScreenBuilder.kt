@@ -29,11 +29,12 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             playAmbientSounds = creator.playAmbientSounds
         )
         creator.start(screen)
-//        creator.getScreenControllers().forEach { screen.addScreenController(it) }
-        screen.inputMap = KeyInputMap.combine(creator.getInputMaps())
         val root = creator.getRoot()
         screen.stage.root = root
         screen.background = creator.background
+        namedActors.putAll(creator.namedActors)
+        creator.getScreenControllers().forEach { screen.addScreenController(it) }
+        screen.inputMap = KeyInputMap.combine(creator.getInputMaps())
         return screen
     }
 

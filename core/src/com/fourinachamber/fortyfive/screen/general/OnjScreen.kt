@@ -13,7 +13,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
@@ -39,8 +38,6 @@ import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
 import ktx.actors.onExit
-import kotlin.math.roundToLong
-import kotlin.system.measureTimeMillis
 
 
 /**
@@ -245,9 +242,15 @@ open class OnjScreen(
         screenStateChangeListeners.forEach { it(false, state) }
     }
 
-    @AllThreadsAllowed
-    fun addScreenStateChangeListener(listener: @AllThreadsAllowed (entered: Boolean, state: String) -> Unit) {
+    fun addScreenStateChangeListener(listener: (entered: Boolean, state: String) -> Unit) {
         screenStateChangeListeners.add(listener)
+    }
+
+    inline fun listenToScreenState(listenToState: String, crossinline listener: (entered: Boolean) -> Unit) {
+        addScreenStateChangeListener { entered, state ->
+            if (state != listenToState) return@addScreenStateChangeListener
+            listener(entered)
+        }
     }
 
     @AllThreadsAllowed
