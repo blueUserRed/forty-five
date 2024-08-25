@@ -46,66 +46,85 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract fun getInputMaps(): List<KeyInputMap>
 
-    protected inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
+    inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen)
         builder(group)
         return group
     }
 
-    protected inline fun Group.group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
+    inline fun newHorizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        val group = CustomHorizontalGroup(screen)
+        builder(group)
+        return group
+    }
+
+    inline fun newVerticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        val group = CustomVerticalGroup(screen)
+        builder(group)
+        return group
+    }
+
+    inline fun Group.group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen)
         addActor(group)
         builder(group)
         return group
     }
 
-    protected inline fun Group.horizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+    inline fun Group.horizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
         val group = CustomHorizontalGroup(screen)
         addActor(group)
         builder(group)
         return group
     }
 
-    protected inline fun Group.verticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+    inline fun Group.verticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
         val group = CustomVerticalGroup(screen)
         addActor(group)
         builder(group)
         return group
     }
 
-    protected fun Actor.name(name: String) {
+    fun Actor.name(name: String) {
         _namedActors[name] = this
     }
 
-    protected inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
+    inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
         val image = CustomImageActor(null, screen, false, "", false)
         builder(image)
         this.addActor(image)
         return image
     }
 
-    protected inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
+    inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(definedWidth = width)
         builder(spacer)
         this.addActor(spacer)
         return spacer
     }
 
-    protected inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
+    inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(definedHeight = height)
         builder(spacer)
         this.addActor(spacer)
         return spacer
     }
 
-    protected inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
-        val spacer = Spacer(growProportion = proportion)
+    inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        val spacer = Spacer(growProportionHeight = proportion)
         builder(spacer)
         this.addActor(spacer)
         return spacer
     }
 
-    protected inline fun Group.label(
+    inline fun Group.horizontalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        val spacer = Spacer(growProportionWidth = proportion)
+        builder(spacer)
+        this.addActor(spacer)
+        return spacer
+    }
+
+    inline fun Group.label(
         font: String,
         text: String,
         color: Color = Color.BLACK,
@@ -133,57 +152,57 @@ abstract class ScreenCreator : ResourceBorrower {
         return label
     }
 
-    protected fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
+    fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
 
-    protected inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
+    inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
         builder(actor)
         this.addActor(actor)
         return actor
     }
 
-    protected fun <T> T.relativeWidth(percent: Float) where T : Actor, T : OnLayoutActor {
+    fun <T> T.relativeWidth(percent: Float) where T : Actor, T : OnLayoutActor {
         onLayoutAndNow { width = parent.width * (percent / 100f) }
     }
 
-    protected fun <T> T.relativeHeight(percent: Float) where T : Actor, T : OnLayoutActor {
+    fun <T> T.relativeHeight(percent: Float) where T : Actor, T : OnLayoutActor {
         onLayoutAndNow { height = parent.height * (percent / 100f) }
     }
 
-    protected fun <T> T.onLayoutAndNow(callback: () -> Unit) where T : Actor, T : OnLayoutActor {
+    fun <T> T.onLayoutAndNow(callback: () -> Unit) where T : Actor, T : OnLayoutActor {
         callback()
         onLayout(callback)
     }
 
-    protected fun <T> T.syncHeight() where T : Actor, T : Layout, T : OnLayoutActor {
+    fun <T> T.syncHeight() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { height = prefHeight }
     }
 
-    protected fun <T> T.syncWidth() where T : Actor, T : Layout, T : OnLayoutActor {
+    fun <T> T.syncWidth() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { width = prefWidth }
     }
 
-    protected fun <T> T.syncDimensions() where T : Actor, T : Layout, T : OnLayoutActor {
+    fun <T> T.syncDimensions() where T : Actor, T : Layout, T : OnLayoutActor {
         syncWidth()
         syncHeight()
     }
 
-    protected fun <T> T.centerX() where T : Actor, T : Layout, T : OnLayoutActor {
+    fun <T> T.centerX() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayout { x = parent.width / 2 - width / 2 }
     }
 
-    protected fun <T> T.backgrounds(normal: String?, hover: String) where T : Actor, T : BackgroundActor {
+    fun <T> T.backgrounds(normal: String?, hover: String) where T : Actor, T : BackgroundActor {
         backgroundHandle = normal
         onHoverEnter { backgroundHandle = hover }
         onHoverLeave { backgroundHandle = normal }
     }
 
-    protected var Label.fontColor: Color
+    var Label.fontColor: Color
         get() = style.fontColor
         set(value) {
             style.fontColor = value
         }
 
-    protected fun loadInputMap(name: String, screen: OnjScreen): KeyInputMap {
+    fun loadInputMap(name: String, screen: OnjScreen): KeyInputMap {
         val file = ConfigFileManager.getConfigFile("inputMaps")
         return KeyInputMap.readFromOnj(file.get<OnjArray>(name), screen)
     }

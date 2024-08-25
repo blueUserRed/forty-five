@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.MapNode
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
+import com.fourinachamber.fortyfive.screen.SharedComponents.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.onHoverEnter
@@ -101,6 +102,10 @@ class TestScreen : ScreenCreator() {
                 else -> null
             }
         }
+        actor(getSharedNavBar(worldWidth)) {
+            onLayoutAndNow { y = worldHeight - height }
+            centerX()
+        }
         getInfoPopup()
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
@@ -131,7 +136,7 @@ class TestScreen : ScreenCreator() {
 
         backgroundHandle = "map_detail_background"
         width = worldWidth * 0.23f
-        height = worldHeight * 0.9f
+        height = worldHeight * 0.8f
         y = (worldHeight / 2 - height / 2)
         val normalX = worldWidth - width + 10f
         val closedX = normalX + 300f
@@ -181,7 +186,7 @@ class TestScreen : ScreenCreator() {
             if (!event.displayDescription) return
             eventName.setText(event.displayName)
             eventDescription.setText(event.descriptionText)
-            children.forEach { (it as? Layout)?.invalidate() } // make sure spacers are invalidated
+            invalidateChildren() // make sure spacers are invalidated
         }
 
         updateDescription(mapWidget.playerNode)

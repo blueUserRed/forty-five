@@ -273,7 +273,8 @@ open class CustomImageActor(
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    protected val loadedDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, _screen)
+    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, _screen)
+    val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     /**
      * overrides and ignores the background handle and the loaded drawable
@@ -1217,6 +1218,10 @@ open class CustomHorizontalGroup(
         this.y -= offsetY
     }
 
+    fun invalidateChildren() {
+        children.forEach { (it as? Layout)?.invalidate() }
+    }
+
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
     }
@@ -1278,6 +1283,10 @@ open class CustomVerticalGroup(
         super.layout()
     }
 
+    fun invalidateChildren() {
+        children.forEach { (it as? Layout)?.invalidate() }
+    }
+
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
@@ -1331,6 +1340,10 @@ open class CustomGroup(
         super.layout()
     }
 
+    fun invalidateChildren() {
+        children.forEach { (it as? Layout)?.invalidate() }
+    }
+
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
@@ -1353,7 +1366,8 @@ class CustomParticleActor(
 class Spacer(
     var definedWidth: Float = 0f,
     var definedHeight: Float = 0f,
-    val growProportion: Float? = null
+    val growProportionHeight: Float? = null,
+    val growProportionWidth: Float? = null,
 ) : Widget(), OnLayoutActor {
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
@@ -1362,26 +1376,35 @@ class Spacer(
         onLayout.add(callback)
     }
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (growProportion != null) println(definedHeight)
-    }
-
     override fun layout() {
         onLayout.forEach { it() }
-        updateGrowth()
+        updateGrowthHeight()
+        updateGrowthWidth()
         super.layout()
     }
 
-    private fun updateGrowth() {
-        if (growProportion == null) return
+    private fun updateGrowthHeight() {
+        if (growProportionHeight == null) return
         val parentHeight = parent.height
         val siblingsHeight = parent
             .children
             .filter { it !== this}
-            .filter { !(it is Spacer && it.growProportion != null) }
+            .filter { !(it is Spacer && it.growProportionHeight != null) }
             .map { if (it is Layout) it.prefHeight else it.height }
             .sum()
-        definedHeight = max((parentHeight - siblingsHeight) * growProportion, 0f)
+        definedHeight = max((parentHeight - siblingsHeight) * growProportionHeight, 0f)
+    }
+
+    private fun updateGrowthWidth() {
+        if (growProportionWidth == null) return
+        val parentWidth = parent.width
+        val siblingsWidth = parent
+            .children
+            .filter { it !== this}
+            .filter { !(it is Spacer && it.growProportionWidth != null) }
+            .map { if (it is Layout) it.prefWidth else it.width }
+            .sum()
+        definedWidth = max((parentWidth - siblingsWidth) * growProportionWidth, 0f)
     }
 
     override fun drawDebug(renderer: ShapeRenderer?) {
