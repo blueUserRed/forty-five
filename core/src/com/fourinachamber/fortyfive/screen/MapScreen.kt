@@ -219,6 +219,13 @@ class MapScreen : ScreenCreator() {
                 mapWidget.onStartButtonClicked(this@label)
                 isDisabled = true
             }
+            dropShadow = DropShadow(
+                Color.RED,
+                scaleX = 1.7f,
+                scaleY = 1.7f,
+                offX = 5f,
+                offY = -5f,
+            )
         }
 
         verticalSpacer(40f)

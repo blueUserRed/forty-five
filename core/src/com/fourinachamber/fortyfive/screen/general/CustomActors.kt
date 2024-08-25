@@ -25,9 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.rendering.BetterShader
-import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
@@ -48,10 +46,12 @@ open class CustomLabel(
     private val hasHoverDetail: Boolean = false,
     private val hoverText: String = "",
     override val partOfHierarchy: Boolean = false
-) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor,
+) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
     StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor {
 
     override val actor: Actor = this
+
+    override var dropShadow: DropShadow? = null
 
     private val _animationSpawners: MutableList<AnimationSpawner> = mutableListOf()
 
@@ -153,6 +153,7 @@ open class CustomLabel(
 
     protected fun drawBackground(batch: Batch, parentAlpha: Float) {
         val background = background ?: return
+        dropShadow?.doDropShadow(batch, screen, background, this)
         batch.flush()
         val old = batch.color.cpy()
         batch.setColor(old.r, old.g, old.b, parentAlpha * alpha)
