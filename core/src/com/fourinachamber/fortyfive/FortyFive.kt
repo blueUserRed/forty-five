@@ -13,7 +13,7 @@ import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.TestScreen
+import com.fourinachamber.fortyfive.screen.MapScreen
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
@@ -211,7 +211,7 @@ object FortyFive : Game() {
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
-        ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(TestScreen()) })
+        ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(MapScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()

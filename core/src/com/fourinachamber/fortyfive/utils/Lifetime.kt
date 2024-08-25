@@ -19,6 +19,15 @@ interface Lifetime {
         return new
     }
 
+    companion object {
+
+        val endless = object : Lifetime {
+
+            override fun onEnd(callback: () -> Unit) {
+            }
+        }
+    }
+
 }
 
 interface EndableLifetime : Lifetime {

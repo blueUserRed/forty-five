@@ -8,7 +8,7 @@ import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 
-object SharedComponents {
+object NavbarCreator {
 
     val fortyWhite: Color = Color.valueOf("F0EADD")
 

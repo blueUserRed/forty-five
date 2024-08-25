@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -17,7 +16,7 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.MapNode
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
-import com.fourinachamber.fortyfive.screen.SharedComponents.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.onHoverEnter
@@ -25,7 +24,7 @@ import com.fourinachamber.fortyfive.screen.general.onHoverLeave
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import ktx.actors.onClick
 
-class TestScreen : ScreenCreator() {
+class MapScreen : ScreenCreator() {
 
     override val name: String = "mapScreen"
 
