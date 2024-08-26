@@ -17,12 +17,13 @@ interface DropShadowActor {
 }
 
 data class DropShadow(
-    val color: Color,
-    val multiplier: Float = 0.5f,
-    val offX: Float = 0f,
-    val offY: Float = 0f,
-    val scaleX: Float = 1f,
-    val scaleY: Float = 1f,
+    var color: Color,
+    var multiplier: Float = 0.5f,
+    var offX: Float = 0f,
+    var offY: Float = 0f,
+    var scaleX: Float = 1f,
+    var scaleY: Float = 1f,
+    var useOtherShader: Boolean = false,
 ) {
 
     fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) {
@@ -35,7 +36,8 @@ data class DropShadow(
 
     private inline fun doDropShadow(batch: Batch?, screen: OnjScreen, drawer: () -> Unit) {
         batch ?: return
-        val shader = dropShadowShader.getOrNull() ?: return
+        val shaderPromise = if (useOtherShader) otherDropShadowShader else dropShadowShader
+        val shader = shaderPromise.getOrNull() ?: return
         shader.prepare(screen)
         batch.shader = shader.shader
         shader.shader.setUniformf("u_multiplier", multiplier)
@@ -50,6 +52,10 @@ data class DropShadow(
 
         val dropShadowShader: Promise<BetterShader> by lazy {
             ResourceManager.request(this, Lifetime.endless, "drop_shadow_shader")
+        }
+
+        val otherDropShadowShader: Promise<BetterShader> by lazy {
+            ResourceManager.request(this, Lifetime.endless, "other_drop_shadow_shader")
         }
     }
 

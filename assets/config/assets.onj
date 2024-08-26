@@ -1334,6 +1334,12 @@ shaders: [
         }
     },
     {
+        name: "other_drop_shadow_shader",
+        file: "shaders/other_drop_shadow.glsl",
+        constantArgs: {
+        }
+    },
+    {
         name: "test_shader",
         file: "shaders/test.glsl",
         constantArgs: {

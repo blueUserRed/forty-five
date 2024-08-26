@@ -209,8 +209,22 @@ class MapScreen : ScreenCreator() {
             fontColor = Color.RED
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
-            onHoverEnter { fontColor = Color.WHITE }
-            onHoverLeave { fontColor = Color.RED }
+            dropShadow = DropShadow(
+                Color.WHITE,
+                scaleX = 1.1f,
+                scaleY = 1.1f,
+                offX = 5f,
+                offY = -5f,
+                useOtherShader = true
+            )
+            onHoverEnter {
+                fontColor = Color.WHITE
+                dropShadow?.color = Color.RED
+            }
+            onHoverLeave {
+                fontColor = Color.RED
+                dropShadow?.color = Color.WHITE
+            }
             backgrounds(
                 normal = "map_detail_encounter_button",
                 hover = "map_detail_encounter_button_hover",
@@ -219,13 +233,6 @@ class MapScreen : ScreenCreator() {
                 mapWidget.onStartButtonClicked(this@label)
                 isDisabled = true
             }
-            dropShadow = DropShadow(
-                Color.RED,
-                scaleX = 1.7f,
-                scaleY = 1.7f,
-                offX = 5f,
-                offY = -5f,
-            )
         }
 
         verticalSpacer(40f)
