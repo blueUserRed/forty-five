@@ -38,6 +38,10 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
         }.asAction())
     }
 
+    override fun onShow() {
+        SoundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
+    }
+
     override fun onUnhandledEvent(event: Event) = when (event) {
 
         is QuitGameEvent -> timeline.appendAction(Timeline.timeline {

@@ -250,11 +250,11 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
         })
         screen.invalidateEverything()
         gameDirector.chooseEnemyActions()
-        SoundPlayer.transitionToMusic(musicBeforeWin, musicTransitionTime, this.screen)
     }
 
     override fun onShow() {
         FortyFive.useRenderPipeline(gameRenderPipeline)
+        SoundPlayer.changeMusicTo(SoundPlayer.Theme.BATTLE, 5_000)
     }
 
     private fun initCards() {
@@ -1460,7 +1460,7 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
         val playerGetsCard = !gameDirector.encounter.special && Utils.coinFlip(rewardChance)
         appendMainTimeline(Timeline.timeline {
             action {
-                SoundPlayer.transitionToMusic(musicAfterWin, musicTransitionTime, this@GameController.screen)
+                SoundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
                 SaveState.encountersWon++
                 this@GameController.screen.enterState(showWinScreen)
                 if (money > 0) this@GameController.screen.enterState(showCashItem)

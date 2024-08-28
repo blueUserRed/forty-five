@@ -107,10 +107,10 @@ class MapScreen : ScreenCreator() {
             }
         }
         getInfoPopup()
-        actor(getSharedNavBar(worldWidth, worldHeight, navbarEvents)) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
-        }
+//        actor(getSharedNavBar(worldWidth, worldHeight, navbarEvents)) {
+//            onLayoutAndNow { y = worldHeight - height }
+//            centerX()
+//        }
 //        actor(getSharedSettingsMenu(worldWidth, worldHeight))
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")

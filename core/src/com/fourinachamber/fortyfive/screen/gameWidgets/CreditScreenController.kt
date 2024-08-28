@@ -17,7 +17,7 @@ class CreditScreenController(private val screen: OnjScreen) : ScreenController()
     private val timeline: Timeline = Timeline()
 
     override fun init(context: Any?) {
-        SoundPlayer.skipMusicTo(18.0f)
+        SoundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
         creditsScroller = screen.namedActorOrError("credits_scroller") as? CustomFlexBox
             ?: throw RuntimeException("actor named credits_scroller must be a CustomFlexBox")
         timeline.startTimeline()

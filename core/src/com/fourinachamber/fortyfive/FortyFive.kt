@@ -140,7 +140,6 @@ object FortyFive : Game() {
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
-            SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen

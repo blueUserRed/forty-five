@@ -212,6 +212,12 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             })
         }
 
+        fun delayUntilPromiseResolves(promise: Promise<*>) {
+            timelineActions.add(object : TimelineAction() {
+                override fun isFinished(timeline: Timeline): Boolean = promise.isResolved
+            })
+        }
+
         /**
          * includes the tasks of a second timeline. The second timeline must not have started yet
          */
