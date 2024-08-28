@@ -136,7 +136,7 @@ fun Double.between(min: Double, max: Double): Double {
     return this
 }
 
-fun Vector2(x: Int, y: Int): Vector2 {
+fun Vector2(x: Number, y: Number): Vector2 {
     return Vector2(x.toFloat(), y.toFloat())
 }
 

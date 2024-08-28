@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
@@ -183,6 +183,24 @@ interface HoverStateActor {
             isClicked = false
         }
     }
+}
+
+interface FocusableActor {
+
+    fun onFocusChange(oldElement: FocusableActor?, newElement: FocusableActor?) {
+        isFocused = this == newElement
+    }
+
+    fun onSelectChange(oldElements: List<FocusableActor>, newElements: List<FocusableActor>) {
+        isSelected = this in newElements
+    }
+
+    var group: SelectionGroup?
+
+    var isFocusable: Boolean
+    var isFocused: Boolean
+    var isSelected: Boolean
+
 }
 
 /**

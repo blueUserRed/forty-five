@@ -24,14 +24,12 @@ import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
-import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
-import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
@@ -115,6 +113,39 @@ open class OnjScreen(
             value?.actor?.let { selectedActor = it as KeySelectableActor }
             field = value
         }
+
+    var focusedActor: FocusableActor? = null
+    private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
+    fun getFocusableActors(): MutableList<FocusableActor> {
+        return getFocusableActors(stage.root)
+    }
+
+    private fun getFocusableActors(root: Group): MutableList<FocusableActor> {
+        val selectableActors = mutableListOf<FocusableActor>()
+        for (child in root.children) {
+            if (child is FocusableActor) {
+                if (child.group != null) selectableActors.add(child)
+            }
+            if (child is Group) selectableActors.addAll(getFocusableActors(child))
+        }
+        return selectableActors
+    }
+
+    fun focusNext(direction: Vector2?=null) {
+        if (selectionHierarchy.isEmpty()) return
+        val focusableElement = selectionHierarchy.last().focusNext(direction, this)
+        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
+        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
+        this.focusedActor = focusableElement
+    }
+
+    fun focusPrevious() {
+        if (selectionHierarchy.isEmpty()) return
+        val focusableElement = selectionHierarchy.last().focusPrevious(this)
+        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
+        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
+        this.focusedActor = focusableElement
+    }
 
     private var awaitingConfirmationClick: Boolean = false
 

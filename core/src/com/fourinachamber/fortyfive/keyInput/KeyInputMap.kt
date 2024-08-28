@@ -14,8 +14,8 @@ import onj.value.OnjObject
  */
 data class KeyInputMapKeyEntry(
     val keycode: Keycode,
-    val action: KeyAction?,
-    val modifierKeys: List<Keycode>
+    val action: KeyAction? = null,
+    val modifierKeys: List<Keycode> = listOf()
 )
 
 /**
@@ -159,7 +159,68 @@ class KeyInputMap(
                 }
             return KeyInputMap(entries, screen)
         }
+
+        /**
+         * creates a new KeyInputMap using keys
+         */
+        fun createFromKotlin(
+            actions: List<KeyInputMapEntry>,
+            screen: OnjScreen,
+            widthDefaults: Boolean = true
+        ): KeyInputMap {
+            if (widthDefaults) return KeyInputMap(actions + kotlinDefaultActions, screen)
+            return KeyInputMap(actions, screen)
+        }
+
+        private val kotlinDefaultActions: List<KeyInputMapEntry> = getDefaultList()
+
+        private fun getDefaultList(): List<KeyInputMapEntry> {
+            val entries = mutableListOf<KeyInputMapEntry>()
+            val defaultPriority = (1 shl 30) - 1
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.F),
+                        KeyInputMapKeyEntry(Keys.F11)
+                    ),
+                    KeyActionFactory.getAction("ToggleFullscreen")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(KeyInputMapKeyEntry(Keys.TAB)),
+                    KeyActionFactory.getAction("FocusNext")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(KeyInputMapKeyEntry(Keys.TAB, modifierKeys = listOf(Keys.SHIFT_LEFT))),
+                    KeyActionFactory.getAction("FocusPrevious")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.W),
+                        KeyInputMapKeyEntry(Keys.A),
+                        KeyInputMapKeyEntry(Keys.S),
+                        KeyInputMapKeyEntry(Keys.D),
+                        ),
+                    KeyActionFactory.getAction("FocusNextDirectional")
+                )
+            )
+            return entries
+        }
     }
+
 }
 
 enum class InputKeyRange {
