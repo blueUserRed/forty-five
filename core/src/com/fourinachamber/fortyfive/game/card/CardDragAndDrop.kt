@@ -7,8 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.gameComponents.PutCardsUnderDeckWidget
-import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fortyfive.screen.gameWidgets.PutCardsUnderDeckWidget
+import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject

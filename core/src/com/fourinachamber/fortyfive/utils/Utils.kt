@@ -126,6 +126,19 @@ fun Int.between(min: Int, max: Int): Int {
     return this
 }
 
+fun <T, U> MutableMap<T, U>.defaultValue(default: U): MutableMap<T, U> = object : HashMap<T, U>() {
+
+    init { putAll(this@defaultValue) }
+
+    override fun get(key: T): U? {
+        val result = super.get(key)
+        if (result == null) {
+            this@defaultValue[key] = default
+            return default
+        }
+        return result
+    }
+}
 
 /**
  * makes sure that [this] is between [min] and [max] (inclusive)

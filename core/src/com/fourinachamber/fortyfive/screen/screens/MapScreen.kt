@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen
+package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
@@ -16,12 +16,15 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.MapNode
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.onHoverEnter
 import com.fourinachamber.fortyfive.screen.general.onHoverLeave
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import ktx.actors.onClick
 
 class MapScreen : ScreenCreator() {
@@ -41,6 +44,8 @@ class MapScreen : ScreenCreator() {
         "mapScreen" to 0,
         "*" to 1000
     )
+
+    private val navbarEvents: EventPipeline = EventPipeline()
 
     private val mapWidget by lazy {
         DetailMapWidget(
@@ -101,11 +106,12 @@ class MapScreen : ScreenCreator() {
                 else -> null
             }
         }
-        actor(getSharedNavBar(worldWidth)) {
+        getInfoPopup()
+        actor(getSharedNavBar(worldWidth, worldHeight, navbarEvents)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
-        getInfoPopup()
+//        actor(getSharedSettingsMenu(worldWidth, worldHeight))
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
             x = 0f
@@ -209,14 +215,14 @@ class MapScreen : ScreenCreator() {
             fontColor = Color.RED
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
-            dropShadow = DropShadow(
-                Color.WHITE,
-                scaleX = 1.1f,
-                scaleY = 1.1f,
-                offX = 5f,
-                offY = -5f,
-                useOtherShader = true
-            )
+//            dropShadow = DropShadow(
+//                Color.WHITE,
+//                scaleX = 1.1f,
+//                scaleY = 1.1f,
+//                offX = 5f,
+//                offY = -5f,
+//                useOtherShader = true
+//            )
             onHoverEnter {
                 fontColor = Color.WHITE
                 dropShadow?.color = Color.RED

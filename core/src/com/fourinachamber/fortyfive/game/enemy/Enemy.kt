@@ -15,8 +15,8 @@ import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
-import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
-import com.fourinachamber.fortyfive.screen.gameComponents.VerticalStatusEffectDisplay
+import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter
+import com.fourinachamber.fortyfive.screen.gameWidgets.VerticalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.findAnimationSpawner

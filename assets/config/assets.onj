@@ -1144,7 +1144,7 @@ textures: [
     },
     {
         name: "common_symbol_arrow",
-        file: "blobs/common/symbols/arrow.png",
+        file: "blobs/common/symbols/arrow_right.png",
     },
     {
         name: "shield_icon_large",

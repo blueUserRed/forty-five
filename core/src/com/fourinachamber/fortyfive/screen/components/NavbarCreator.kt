@@ -1,22 +1,47 @@
-package com.fourinachamber.fortyfive.screen
+package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
+import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.utils.EventPipeline
 
 object NavbarCreator {
 
-    val fortyWhite: Color = Color.valueOf("F0EADD")
+    fun ScreenCreator.getSharedNavBar(worldWidth: Float, worldHeight: Float, events: EventPipeline) = newGroup {
+        x = 0f
+        y = 0f
+        width = worldWidth
+        height = worldHeight
 
-    fun ScreenCreator.getSharedNavBar(worldWidth: Float) = newVerticalGroup {
+        group {
+            x = 0f
+            y = 0f
+            width = worldWidth
+            height = worldHeight
+            backgroundHandle = "transparent_black_texture"
+            setColor(1f, 1f, 1f, 0.3f)
+        }
+
+        verticalGroup { getNavBar(this@getSharedNavBar, worldWidth, worldHeight) }
+    }
+
+    private fun CustomVerticalGroup.getNavBar(
+        creator: ScreenCreator,
+        worldWidth: Float,
+        worldHeight: Float
+    ) = with(creator) {
+        debug()
         width = worldWidth * 0.7f
         height = 130f
-
-        debug()
+        centerX()
+        onLayoutAndNow { y = worldHeight - height }
 
         horizontalGroup {
             debug()
@@ -38,12 +63,12 @@ object NavbarCreator {
             horizontalSpacer(10f)
 
             label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
-                fontColor = fortyWhite
+                fontColor = ScreenCreator.fortyWhite
             }
 
             horizontalGrowingSpacer(0.5f)
 
-            locationIndicator(this@getSharedNavBar)
+            locationIndicator(creator)
 
             horizontalGrowingSpacer(0.5f)
 
@@ -58,13 +83,45 @@ object NavbarCreator {
             horizontalSpacer(10f)
 
             label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
-                fontColor = fortyWhite
+                fontColor = ScreenCreator.fortyWhite
             }
 
             horizontalSpacer(70f)
 
         }
 
+        horizontalGroup {
+            forcedPrefWidth = parent.width
+            forcedPrefHeight = parent.height * 0.5f
+            syncDimensions()
+
+            horizontalSpacer(40f)
+            navBarButton(creator,"Settings")
+            horizontalGrowingSpacer(0.5f)
+            navBarButton(creator,"Settings")
+            horizontalGrowingSpacer(0.5f)
+            navBarButton(creator,"Settings")
+            horizontalSpacer(40f)
+        }
+
+    }
+
+    private fun CustomHorizontalGroup.navBarButton(creator: ScreenCreator, text: String) = with(creator) {
+        group {
+            offsetY = 30f // TODO: replace with better system once zwicki is finished
+            forcedPrefHeight = parent.parent.height * 0.7f
+            forcedPrefWidth = 250f
+            syncDimensions()
+            backgroundHandle = "statusbar_option"
+
+            label("red_wing", text) {
+                centerX()
+                centerY()
+                setAlignment(Align.center)
+                fontColor = ScreenCreator.fortyWhite
+                setFontScale(0.7f)
+            }
+        }
     }
 
     private fun CustomHorizontalGroup.locationIndicator(creator: ScreenCreator) = with(creator) {
