@@ -66,7 +66,7 @@ root: $Box { //TODO biomes
     } children [
         $Label {
             text: "MAX HP Increased!",
-            font: "red_wing_cm",
+            font: "red_wing",
             color: color.forty_white,
             fontScale: 1.0,
             align: "center",
@@ -90,7 +90,7 @@ root: $Box { //TODO biomes
                 },
                 $TemplateLabel {
                     template: "+{map.cur_event.max_hp.amount} MAX HP",
-                    font: "red_wing_cm",
+                    font: "red_wing",
                     color: color.forty_white,
                     fontScale: 1.1,
                     align: "center",
@@ -108,7 +108,7 @@ root: $Box { //TODO biomes
                 },
                 $TemplateLabel {
                     template: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.max_hp.lives_new}/{map.cur_event.max_hp.maxLives_new} HP",
-                    font: "red_wing_cm",
+                    font: "red_wing",
                     color: color.forty_white,
                     fontScale: 0.6,
                     align: "center",

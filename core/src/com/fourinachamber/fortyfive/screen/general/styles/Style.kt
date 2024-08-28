@@ -98,10 +98,6 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
                 is YogaValue -> {
                     to as YogaValue
                     if (to.unit != from.unit || to.unit in arrayOf(YogaUnit.AUTO, YogaUnit.UNDEFINED)) {
-                        FortyFiveLogger.warn(
-                            logTag, "attempted to animate a property of type YogaValue, " +
-                                    "but the units used are either mixed or set to auto or undefined"
-                        )
                         return null
                     }
                     YogaValue(from.value + (to.value - from.value) * percent, to.unit) as T
@@ -138,16 +134,16 @@ abstract class StyleProperty<Target, DataType>(
     private var currentInstruction: StyleInstruction<DataType>? = null
 
     fun update(node: YogaNode) {
-        val current = get(node)
         val top = _instructions
             .filter { it.condition.check(target, screen) }
             .maxByOrNull { it.priority }
         if (currentInstruction != top) {
             currentInstruction?.onControlLost()
             currentInstruction = top
-            currentInstruction?.onControlGained(current)
+            currentInstruction?.onControlGained(get(node))
         }
         top ?: return
+        val current = get(node)
         val value = top.value
         if (current == value) return
         set(value, node)

@@ -37,9 +37,15 @@ class AutomaticResourceGetter<T : Any>(
     private var currentPromise: Promise<T>? = null
     private var currentLifetime: EndableLifetime? = null
 
+    private val onResolveCallbacks: MutableList<(newResource: T) -> Unit> = mutableListOf()
+
     init {
         handleProperty.subscribe(::onHandleChange)
         onHandleChange(null, handleProperty.getValue())
+    }
+
+    fun onResourceChange(callback: (newResource: T) -> Unit) {
+        onResolveCallbacks.add(callback)
     }
 
     private fun onHandleChange(old: String?, new: String?) {
@@ -60,6 +66,7 @@ class AutomaticResourceGetter<T : Any>(
             currentLifetime?.die()
             currentPromise = null
             currentLifetime = newLifetime
+            onResolveCallbacks.forEach { it(result) }
         }
     }
 

@@ -23,13 +23,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
+import kotlin.system.measureTimeMillis
 
 
 abstract class Resource(
     val handle: String,
     var variants: List<Any> = listOf(),
     var disposables: List<Disposable> = listOf(),
-    val borrowedBy: MutableSet<ResourceBorrower> = mutableSetOf()
+    val borrowedBy: MutableSet<ResourceBorrower> = mutableSetOf(),
 ) : Disposable {
 
     var state: ResourceState = ResourceState.NOT_LOADED
@@ -42,6 +43,8 @@ abstract class Resource(
 
     var startedLoading: Boolean = false
         private set
+
+    var stayLoaded: Boolean = false
 
     @AllThreadsAllowed
     abstract suspend fun prepareLoadingAllThreads()
@@ -62,7 +65,12 @@ abstract class Resource(
 
     open fun forceResolve() {
         runBlocking {
-            load()
+            val time = measureTimeMillis {
+                load()
+            }
+            if (time > warnThreshold) {
+                FortyFiveLogger.warn(logTag, "force resolving $handle blocked the main thread for ${time}ms")
+            }
         }
         if (!promise.isResolved) promise.resolve(this)
     }
@@ -70,7 +78,12 @@ abstract class Resource(
     open fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): T {
         borrow(borrower, lifetime)
         runBlocking {
-            load()
+            val time = measureTimeMillis {
+                load()
+            }
+            if (time > warnThreshold) {
+                FortyFiveLogger.warn(logTag, "force getting $handle blocked the main thread for ${time}ms")
+            }
         }
         lifetime.onEnd { giveBack(borrower) }
         if (!promise.isResolved) promise.resolve(this)
@@ -83,19 +96,18 @@ abstract class Resource(
             promise
         } else {
             startedLoading = true
-
-            //// !! prints are left here intentionally !!
-
-//            val startedTime = TimeUtils.millis()
             val message = ServiceThreadMessage.PrepareResource(this)
             FortyFive.serviceThread.sendMessage(message)
             val loadPromise = message.promise.chain {
-//                println("${Thread.currentThread().name} $handle")
                 FortyFive.mainThreadTask {
-//                    val finishedPrep = TimeUtils.millis()
-                    runBlocking { load() }
-//                    val finished = TimeUtils.millis()
-//                    println("$handle: ${finished - startedTime} (${finishedPrep - startedTime} / ${finished - finishedPrep})")
+                    val time = measureTimeMillis { runBlocking { load() } }
+                    if (time > warnThreshold) {
+                        FortyFiveLogger.warn(
+                            logTag,
+                            "Resource $handle took ${time}ms to load on the main thread. Check if there is a way to speed" +
+                                    "up the load to avoid blocking the main thread."
+                        )
+                    }
                     this
                 }
             }
@@ -139,13 +151,9 @@ abstract class Resource(
         lifetime.onEnd { giveBack(borrower) }
     }
 
-    fun borrow(borrower: ResourceBorrower) {
-        borrowedBy.add(borrower)
-    }
-
     fun giveBack(borrower: ResourceBorrower) {
         if (!borrowedBy.remove(borrower)) return
-        if (borrowedBy.isEmpty()) dispose()
+        if (!stayLoaded && borrowedBy.isEmpty()) dispose()
     }
 
     @MainThreadOnly
@@ -162,6 +170,11 @@ abstract class Resource(
 
     enum class ResourceState {
         NOT_LOADED, PREPARED, LOADED
+    }
+
+    companion object {
+        const val logTag = "Resource"
+        const val warnThreshold: Int = 30
     }
 
 }

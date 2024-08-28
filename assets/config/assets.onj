@@ -7,7 +7,8 @@ fonts: [
     {
         name: "red_wing",
         fontFile: "blobs/fonts/red_wing_df.fnt",
-        imageFile: "blobs/fonts/red_wing_df.png"
+        imageFile: "blobs/fonts/red_wing_df.png",
+        stayLoaded: true,
     },
     {
         name: "red_wing_cm",
@@ -18,7 +19,8 @@ fonts: [
     {
         name: "red_wing_bmp",
         fontFile: "blobs/fonts/red_wing_bmp.fnt",
-        imageFile: "blobs/fonts/red_wing_bmp.png"
+        imageFile: "blobs/fonts/red_wing_bmp.png",
+        stayLoaded: true,
     },
     {
         name: "red_wing_bmp_cm",
@@ -29,7 +31,8 @@ fonts: [
     {
         name: "roadgeek",
         fontFile: "blobs/fonts/roadgeek_df.fnt",
-        imageFile: "blobs/fonts/roadgeek_df.png"
+        imageFile: "blobs/fonts/roadgeek_df.png",
+        stayLoaded: true,
     },
     {
         name: "roadgeek_cm",
@@ -41,6 +44,7 @@ fonts: [
         name: "roadgeek_bmp",
         fontFile: "blobs/fonts/roadgeek_bmp.fnt",
         imageFile: "blobs/fonts/roadgeek_bmp.png",
+        stayLoaded: true,
     },
 
 ],

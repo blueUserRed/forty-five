@@ -50,8 +50,10 @@ class StandardDebugMenuPage : DebugMenuPage("Performance infos") {
 
     override fun getText(screen: OnjScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
-        15s render lagSpike: ${screen.largestRenderTimeInLast15Sec()}ms
-        15s avg. render time: ${screen.averageRenderTimeInLast15Sec()}ms
+        15s render lagSpike: ${FortyFive.renderTimes.max()}ms
+        15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
+        screen transition max lagSpike: ${FortyFive.screenTransitionTimes.max()}ms
+        screen transition avg. lagSpike: ${FortyFive.screenTransitionTimes.average().toInt()}ms
         active style managers: ${screen.styleManagerCount()}
         version: ${FortyFiveLogger.versionTag}
     """.trimIndent()

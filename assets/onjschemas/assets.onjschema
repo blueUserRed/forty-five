@@ -2,23 +2,30 @@
 use Common;
 use Style;
 
+var resourceSharedKeys = {
+    stayLoaded?: boolean
+};
+
 textures: {
     name: string,
     file: string,
     tileable?: boolean,
     tileScale?: float,
     useMipMaps?: boolean,
+    ...resourceSharedKeys
 }[],
 fonts: {
     name: string,
     fontFile: string,
     imageFile: string,
     color?: Color,
-    markupEnabled?: boolean
+    markupEnabled?: boolean,
+   ...resourceSharedKeys
 }[],
 pixmapFonts: {
     name: string,
-    fontFile: string
+    fontFile: string,
+   ...resourceSharedKeys
 }[],
 textureAtlases: {
     name: string,
@@ -26,24 +33,23 @@ textureAtlases: {
     regions: {
         handle: string,
         regionName: string
-    }[]
+    }[],
+    ...resourceSharedKeys
 }[],
 cursors: {
     name: string,
     file: string,
     hotspotX: int,
     hotspotY: int,
+    ...resourceSharedKeys
 }[],
 shaders: {
     name: string,
     file: string,
-//    vertexShader: string,
-//    fragmentShader: string,
-//    timeOffset?: int,
-//    uniforms: string[],
     constantArgs: {
         ...*
-    }
+    },
+    ...resourceSharedKeys
 }[],
 animations: {
     name: string,
@@ -51,10 +57,12 @@ animations: {
     frames?: string[],
     initialFrame: int,
     frameTime: int,
+    ...resourceSharedKeys
 }[],
 colorTextures: {
     name: string,
     color: Color,
+    ...resourceSharedKeys
 }[],
 ninepatches: {
     name: string,
@@ -63,27 +71,32 @@ ninepatches: {
     right: int,
     top: int,
     bottom: int,
-    scale: float
+    scale: float,
+    ...resourceSharedKeys
 }[],
 particles: {
     name: string,
     file: string,
     textureDir: string,
     scale: float,
+    ...resourceSharedKeys
 }[],
 frameAnimations: {
     name: string,
     preview: string,
     atlas: string,
-    frameTime: int
+    frameTime: int,
+    ...resourceSharedKeys
 }[],
 sounds: {
     name: string,
     file: string,
+    ...resourceSharedKeys
 }[],
 music: {
     name: string,
     file: string,
+    ...resourceSharedKeys
 }[],
 cards: {
     directory: string

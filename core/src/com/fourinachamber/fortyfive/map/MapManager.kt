@@ -264,7 +264,7 @@ object MapManager {
         val resourceHandle: ResourceHandle,
         val width: Float,
         val height: Float,
-        val type: String,
+        val type: String, // TODO: why is this not an enum
     )
 
 }

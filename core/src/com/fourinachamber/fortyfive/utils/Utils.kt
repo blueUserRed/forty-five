@@ -319,6 +319,22 @@ infix fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else 
 
 fun Actor.setPosition(pos: Vector2) = setPosition(pos.x, pos.y)
 
+inline fun <T> MutableIterable<T>.iterateRemoving(block: (value: T, remover: () -> Unit) -> Unit) {
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        val next = iterator.next()
+        block(next, { iterator.remove() })
+    }
+}
+
+inline fun <T, U> MutableMap<T, U>.iterateRemoving(block: (value: MutableMap.MutableEntry<T, U>, remover: () -> Unit) -> Unit) {
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        val next = iterator.next()
+        block(next, { iterator.remove() })
+    }
+}
+
 object Utils {
 
     fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability

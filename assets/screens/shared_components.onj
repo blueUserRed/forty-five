@@ -832,7 +832,7 @@ statusbarCenterDefaults: {
                 $TemplateLabel {
                     template: "{stat.playerLives}/{stat.maxPlayerLives}",
 
-                    font: "red_wing_cm",
+                    font: "red_wing",
                     color: color.forty_white,
                     fontScale: 0.9,
                     align: "right",
@@ -878,7 +878,7 @@ statusbarCenterDefaults: {
                 },
                 $TemplateLabel {
                     template: "  ${stat.playerMoney}",
-                    font: "red_wing_cm",
+                    font: "red_wing",
                     color: color.forty_white,
                     fontScale: 0.9,
                     align: "center",
@@ -975,7 +975,7 @@ statusbarLeftDefaults: {
                 $TemplateLabel {
                     template: "{stat.playerLives}/{stat.maxPlayerLives}",
 
-                    font: "red_wing_cm",
+                    font: "red_wing",
                     color: color.forty_white,
                     fontScale: 0.9,
                     align: "center",
@@ -1006,7 +1006,7 @@ statusBarTemplates: [
         template_name: "statusbar_text",
         text: "", // template
 
-        font: "red_wing_cm",
+        font: "red_wing",
         color: color.forty_white,
         fontScale: 0.9,
         align: "center",
@@ -1051,7 +1051,7 @@ statusBarTemplates: [
                 name: "statusbar_text",
                 text: "", //template
 
-                font: "red_wing_cm",
+                font: "red_wing",
                 color: color.forty_white,
                 fontScale: 0.7,
                 align: "center",

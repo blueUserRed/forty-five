@@ -55,6 +55,10 @@ configFiles: {
     mapConfig: {
         file: "config/map_config.onj",
         validatedBy: "onjschemas/map_config.onjschema",
+    },
+    inputMaps: {
+        file: "screens/input_maps.onj",
+        validatedBy: null,
     }
 },
 
@@ -97,10 +101,10 @@ screens: [
         name: "looseScreen",
         file: "screens/loose_screen.onj"
     },
-    {
-        name: "mapScreen",
-        file: "screens/map_screen.onj"
-    },
+//    {
+//        name: "mapScreen",
+//        file: "screens/map_screen.onj"
+//    },
     {
         name: "shopScreen",
         file: "screens/shop_screen.onj"

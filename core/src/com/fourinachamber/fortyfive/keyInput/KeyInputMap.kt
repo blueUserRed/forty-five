@@ -219,6 +219,20 @@ class KeyInputMap(
             )
             return entries
         }
+        fun combine(maps: List<KeyInputMap>): KeyInputMap {
+            if (maps.isEmpty()) throw RuntimeException("Combining requires at least one input map")
+            val entries = maps.flatMap { it.entries }
+            val screen = maps[0].screen
+            maps
+                .drop(1)
+                .forEach {
+                    if (it.screen !== screen) {
+                        throw RuntimeException("all InputMaps need to have the same screen to be combined")
+                    }
+                }
+            return KeyInputMap(entries, screen)
+        }
+
     }
 
 }
