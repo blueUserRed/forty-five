@@ -93,7 +93,9 @@ class DetailMapWidget(
             )
         }
 
-    private var playerNode: MapNode = MapManager.currentMapNode
+    var playerNode: MapNode = MapManager.currentMapNode
+        private set
+
     private var playerPos: Vector2 = scaledNodePos(playerNode)
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
@@ -132,6 +134,8 @@ class DetailMapWidget(
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
 
+    val events: EventPipeline = EventPipeline()
+
     // I hate this
     private val animatedDecorations: List<Pair<DetailMap.MapDecoration, List<Triple<Vector2, Float, AnimationDrawable>>>> = map
         .animatedDecorations
@@ -139,10 +143,10 @@ class DetailMapWidget(
             decoration.instances.map { Triple(it.first, it.second, createDecorationAnimation(decoration.drawableHandle)) }
         }
 
-    private val encounterModifierParent: CustomFlexBox by lazy {
-        screen.namedActorOrError(encounterModifierParentName) as? CustomFlexBox
-            ?: throw RuntimeException("actor named $encounterModifierParentName must be a CustomFlexBox")
-    }
+//    private val encounterModifierParent: CustomFlexBox by lazy {
+//        screen.namedActorOrError(encounterModifierParentName) as? CustomFlexBox
+//            ?: throw RuntimeException("actor named $encounterModifierParentName must be a CustomFlexBox")
+//    }
 
 
     private val dragListener = object : DragListener() {
@@ -340,10 +344,10 @@ class DetailMapWidget(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (!setupStartButtonListener) {
-            val startButton = screen.namedActorOrError(startButtonName)
-            startButton.onButtonClick {
-                onStartButtonClicked(startButton)
-            }
+//            val startButton = screen.namedActorOrError(startButtonName)
+//            startButton.onButtonClick {
+//                onStartButtonClicked(startButton)
+//            }
             setupStartButtonListener = true
             setupMapEvent(playerNode.event)
         }
@@ -554,6 +558,8 @@ class DetailMapWidget(
     }
 
     private fun setupMapEvent(event: MapEvent?) {
+        events.fire(PlayerChangedNodeEvent(playerNode))
+        return
         if (event == null || !event.displayDescription) {
             screen.leaveState(displayEventDetailScreenState)
             screen.leaveState(eventCanBeStartedScreenState)
@@ -572,25 +578,25 @@ class DetailMapWidget(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
         )
-        screen.removeAllStyleManagersOfChildren(encounterModifierParent)
-        encounterModifierParent.clear()
+//        screen.removeAllStyleManagersOfChildren(encounterModifierParent)
+//        encounterModifierParent.clear()
         screen.enterState(noEncounterModifierScreenState)
         if (event !is EncounterMapEvent) return
         val encounter = GameDirector.encounters[event.encounterIndex]
         val encounterModifiers = encounter.encounterModifier
         if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
-        encounterModifiers.forEach { modifier ->
-            screen.screenBuilder.generateFromTemplate(
-                encounterModifierDisplayTemplateName,
-                mapOf(
-                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
-                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
-                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
-                ),
-                encounterModifierParent,
-                screen
-            )!!
-        }
+//        encounterModifiers.forEach { modifier ->
+//            screen.screenBuilder.generateFromTemplate(
+//                encounterModifierDisplayTemplateName,
+//                mapOf(
+//                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+//                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+//                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+//                ),
+//                encounterModifierParent,
+//                screen
+//            )!!
+//        }
     }
 
     private fun updateScreenState(event: MapEvent?) {
@@ -666,6 +672,10 @@ class DetailMapWidget(
         addActorStyles(screen)
         addMapStyles(screen)
     }
+
+    data class PlayerChangedNodeEvent(
+        val newNode: MapNode
+    )
 
     companion object {
         const val displayEventDetailScreenState: String = "displayEventDetail"

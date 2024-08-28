@@ -19,6 +19,7 @@ configFiles: {
     shopConfig: fileConfig,
     backpackConfig: fileConfig,
     mapConfig: fileConfig,
+    inputMaps: fileConfig,
 },
 
 screenSchema: string,

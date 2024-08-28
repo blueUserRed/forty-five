@@ -331,5 +331,11 @@ interface ActorWithAnimationSpawners {
 
 }
 
+interface OnLayoutActor {
+
+    fun onLayout(callback: () -> Unit)
+
+}
+
 inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
     animationSpawners.find { it is T } as? T

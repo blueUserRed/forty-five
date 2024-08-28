@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen.general
+package com.fourinachamber.fortyfive.screen.screenBuilder
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -26,6 +27,7 @@ import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
@@ -37,7 +39,10 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
 
-class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrower {
+class FromOnjScreenBuilder(
+    override val name: String,
+    val onj: OnjObject
+) : ScreenBuilder, ResourceBorrower {
 
     private val earlyRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
     private val lateRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
@@ -53,7 +58,7 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
     @MainThreadOnly
-    fun build(controllerContext: Any? = null): OnjScreen {
+    override fun build(controllerContext: Any?): OnjScreen {
 
         earlyRenderTasks.clear()
         lateRenderTasks.clear()
@@ -73,7 +78,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
             printFrameRate = false,
-            namedCells = mapOf(),
             transitionAwayTimes = doTransitionAwayTimes(),
             screenBuilder = this,
             music = music,
@@ -126,7 +130,8 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
         }
     }
 
-    fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: FlexBox?, screen: OnjScreen): Actor? {
+    override fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: Group?, screen: OnjScreen): Actor? {
+        if (parent !is CustomFlexBox) throw RuntimeException("FromOnjScreenBuilder can only parent templates to FlexBoxes")
         val onjData: MutableMap<String, OnjValue> = mutableMapOf()
         data.forEach { onjData[it.key] = getAsOnjValue(it.value) }
         val template = templateObjects[name] ?: return null
@@ -138,13 +143,13 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) : ResourceBorrow
         return curActor
     }
 
-    fun addDataToWidgetFromTemplate(
+    override fun addDataToWidgetFromTemplate(
         name: String,
         data: Map<String, Any?>,
         parent: FlexBox?,
         screen: OnjScreen,
         actor: Actor,
-        removeOldData: Boolean = true,
+        removeOldData: Boolean,
     ) {
         val onjData: MutableMap<String, OnjValue> = mutableMapOf()
         data.forEach { onjData[it.key] = getAsOnjValue(it.value) }

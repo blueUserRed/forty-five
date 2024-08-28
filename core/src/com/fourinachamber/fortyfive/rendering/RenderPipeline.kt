@@ -318,7 +318,6 @@ open class RenderPipeline(
         )
         val viewport = ExtendViewport(1600f, 900f)
         viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
-        val shapeRenderer = ShapeRenderer()
         shapeRenderer.begin(ShapeType.Filled)
         viewport.apply()
         shapeRenderer.projectionMatrix = viewport.camera.combined
@@ -331,7 +330,6 @@ open class RenderPipeline(
             layout.height + 100f
         )
         shapeRenderer.end()
-        shapeRenderer.dispose()
         batch.begin()
         viewport.apply()
         batch.projectionMatrix = viewport.camera.combined

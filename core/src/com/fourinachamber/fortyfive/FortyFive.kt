@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
@@ -12,8 +13,10 @@ import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.MapScreen
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -21,6 +24,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.system.measureTimeMillis
 
 /**
  * main game object
@@ -51,6 +55,14 @@ object FortyFive : Game() {
 
     lateinit var steamHandler: SteamHandler
         private set
+
+    private var renderCounter: Long = 0L
+    val renderTimes: IntArray = IntArray(15 * 60)
+
+    private var screenTransitionCount: Long = 0L
+    val screenTransitionTimes: IntArray = IntArray(5)
+
+    private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -89,20 +101,33 @@ object FortyFive : Game() {
         return promise
     }
 
+    fun inMs(time: Int, callback: () -> Unit) {
+        timedCallbacks[callback] = TimeUtils.millis() + time
+    }
+
     fun onScreenChange(callback: () -> Unit) {
         screenChangeCallbacks.add(callback)
     }
 
     override fun render() {
-        mainThreadTasks.forEach { (task, promise) ->
-            val result = task()
-            @Suppress("UNCHECKED_CAST")
-            (promise as Promise<Any?>).resolve(result)
-            mainThreadTasks.remove(task)
+        val renderTime = measureTimeMillis {
+            timedCallbacks.iterateRemoving { (callback, time), remove ->
+                if (TimeUtils.millis() < time) return@iterateRemoving
+                callback()
+                remove()
+            }
+            mainThreadTasks.forEach { (task, promise) ->
+                val result = task()
+                @Suppress("UNCHECKED_CAST")
+                (promise as Promise<Any?>).resolve(result)
+                mainThreadTasks.remove(task)
+            }
+            currentScreen?.update(Gdx.graphics.deltaTime)
+            nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+            currentRenderPipeline?.render(Gdx.graphics.deltaTime)
         }
-        currentScreen?.update(Gdx.graphics.deltaTime)
-        nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
-        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
+        renderTimes[(renderCounter % renderTimes.size).toInt()] = renderTime.toInt()
+        renderCounter++
     }
 
     fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
@@ -114,7 +139,7 @@ object FortyFive : Game() {
         nextScreen = screen
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen to ${screenBuilder.screenName}")
+            FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
             SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             screen.update(Gdx.graphics.deltaTime, isEarly = true)
@@ -129,10 +154,15 @@ object FortyFive : Game() {
             MapManager.invalidateCachedAssets()
             inScreenTransition = false
             screenChangeCallbacks.forEach { it() }
+            inMs(100) {
+                val lagSpike = renderTimes.max()
+                screenTransitionTimes[(screenTransitionCount % screenTransitionTimes.size).toInt()] = lagSpike
+                screenTransitionCount++
+            }
         }
 
         val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
-            it[screenBuilder.screenName] ?: it["*"]
+            it[screenBuilder.name] ?: it["*"]
         } ?: 0
         if (currentScreen == null) {
             onScreenChange()
@@ -181,6 +211,7 @@ object FortyFive : Game() {
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
+        ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(MapScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()
