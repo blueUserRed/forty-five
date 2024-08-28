@@ -709,8 +709,10 @@ class CardActor(
 
     override var fixedZIndex: Int = 0
 
-    override var offsetX: Float = 0F
-    override var offsetY: Float = 0F
+    override var drawOffsetX: Float = 0F
+    override var drawOffsetY: Float = 0F
+    override var logicalOffsetX: Float= 0F
+    override var logicalOffsetY: Float = 0F
     override var styleManager: StyleManager? = null
 
     override var isHoveredOver: Boolean = false
@@ -846,7 +848,7 @@ class CardActor(
         }
         batch.draw(
             textureRegion,
-            x + offsetX, y + offsetY,
+            x + drawOffsetX, y + drawOffsetY,
             width / 2, height / 2,
             width, height,
             scaleX, scaleY,
@@ -858,7 +860,7 @@ class CardActor(
         if (!isMarked) return
         markedSymbol.getOrNull()?.draw(
             batch,
-            x + offsetX, y + offsetY,
+            x + drawOffsetX, y + drawOffsetY,
             width / 2, height / 2,
             width, height,
             scaleX, scaleY,

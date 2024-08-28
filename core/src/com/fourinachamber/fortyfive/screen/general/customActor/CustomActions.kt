@@ -4,10 +4,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Action
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.utils.plus
 import com.fourinachamber.fortyfive.utils.times
 
@@ -33,8 +31,8 @@ class CustomMoveByAction(
         val target = this.target ?: return
         target as OffSettable
         val curDist = interpol - lastDist
-        target.offsetX += curDist * relX
-        target.offsetY += curDist * relY
+        target.drawOffsetX += curDist * relX
+        target.drawOffsetY += curDist * relY
         lastDist = interpol
     }
 }

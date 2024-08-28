@@ -89,10 +89,10 @@ screens: [
         name: "draftScreen",
         file: "screens/draft_screen.onj"
     },
-    {
-        name: "healOrMaxHPScreen",
-        file: "screens/heal_or_max_screen.onj"
-    },
+//    {
+//        name: "healOrMaxHPScreen",
+//        file: "screens/heal_or_max_screen.onj"
+//    },
     {
         name: "introScreen",
         file: "screens/intro_screen.onj"

@@ -3,12 +3,10 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
-import com.fourinachamber.fortyfive.game.card.DetailDescriptionHandler
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.utils.*
@@ -146,7 +144,7 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
             if (isGoingIn) {
                 screen.enterState("showHoverDetailGlow")
                 cardCollectionWidget.isVisible = true
-                target.offsetY = -amount
+                target.drawOffsetY = -amount
                 reloadCollection()
             } else {
                 screen.leaveState("showHoverDetailGlow")

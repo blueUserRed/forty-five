@@ -16,7 +16,7 @@ viewport: $FitViewport {
 },
 
 options: {
-    background: "hover_detail_background",
+    background: "hover_detail_big_background",
     music: "map_theme",
     playAmbientSounds: true,
     inputMap: [
@@ -112,7 +112,7 @@ root: $Box {
     $Image {       //TODO biome for background
 
         name: "background_img",
-        textureName: "shop_background_wasteland",
+        textureName: "background_wasteland",
         scaleX: 0.0,
         scaleY: 0.0,
         width: worldWidth,

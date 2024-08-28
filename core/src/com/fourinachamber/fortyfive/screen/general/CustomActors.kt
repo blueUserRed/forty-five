@@ -23,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
+import com.badlogic.gdx.utils.SnapshotArray
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.*
@@ -32,10 +33,11 @@ import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaUnit
-import ktx.actors.*
+import kotlinx.coroutines.newFixedThreadPoolContext
+import ktx.actors.alpha
+import ktx.actors.onTouchEvent
 import onj.value.*
 import kotlin.math.abs
 import kotlin.math.max
@@ -263,8 +265,10 @@ open class CustomImageActor(
     override var maskOffsetY: Float = 0f
     var tintColor: Color? = null
 
-    override var offsetX: Float = 0F
-    override var offsetY: Float = 0F
+    override var drawOffsetX: Float = 0F
+    override var drawOffsetY: Float = 0F
+    override var logicalOffsetX: Float = 0F
+    override var logicalOffsetY: Float = 0F
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -330,8 +334,8 @@ open class CustomImageActor(
         }
 
         validate()
-        x += offsetX
-        y += offsetY
+        x += drawOffsetX
+        y += drawOffsetY
         val width = if (ignoreScalingWhenDrawing) width else width * scaleX
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
@@ -369,8 +373,8 @@ open class CustomImageActor(
 
         batch.shader = prevShader
 
-        x -= offsetX
-        y -= offsetY
+        x -= drawOffsetX
+        y -= drawOffsetY
     }
 
     override fun layout() {
@@ -439,8 +443,10 @@ open class CustomFlexBox(
     override var styleManager: StyleManager? = null
     override var isClicked: Boolean = false
 
-    override var offsetX: Float = 0F
-    override var offsetY: Float = 0F
+    override var drawOffsetX: Float = 0F
+    override var drawOffsetY: Float = 0F
+    override var logicalOffsetX: Float = 0F
+    override var logicalOffsetY: Float = 0F
 
     override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
 
@@ -542,8 +548,8 @@ open class CustomFlexBox(
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        x += offsetX
-        y += offsetY
+        x += drawOffsetX
+        y += drawOffsetY
         if (batch != null && background != null) {
             val old = batch.color.a
             if (parentAlpha * alpha < 1f) batch.flush()
@@ -601,8 +607,8 @@ open class CustomFlexBox(
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, old)
         }
         super.draw(batch, parentAlpha)
-        x -= offsetX
-        y -= offsetY
+        x -= drawOffsetX
+        y -= drawOffsetY
     }
 
 
@@ -625,8 +631,8 @@ open class CustomFlexBox(
         while (cur.parent != null) {
             val parent = cur.parent
             if (parent is CustomFlexBox) {
-                res.x += parent.offsetX
-                res.y += parent.offsetY
+                res.x += parent.drawOffsetX
+                res.y += parent.drawOffsetY
             }
             cur = parent
         }
@@ -1209,8 +1215,10 @@ open class CustomHorizontalGroup(
     override val screen: OnjScreen
 ) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor {
 
-    override var offsetX: Float = 0f
-    override var offsetY: Float = 0f
+    override var drawOffsetX: Float = 0f
+    override var drawOffsetY: Float = 0f
+    override var logicalOffsetX: Float = 0F
+    override var logicalOffsetY: Float = 0F
 
     override var fixedZIndex: Int = 0
 
@@ -1225,12 +1233,12 @@ open class CustomHorizontalGroup(
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        this.x += offsetX
-        this.y += offsetY
+        this.x += drawOffsetX
+        this.y += drawOffsetY
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
-        this.x -= offsetX
-        this.y -= offsetY
+        this.x -= drawOffsetX
+        this.y -= drawOffsetY
     }
 
     fun invalidateChildren() {
@@ -1321,28 +1329,33 @@ open class CustomGroup(
     override val screen: OnjScreen
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor {
 
-    override var offsetX: Float = 0f
-    override var offsetY: Float = 0f
+    override var drawOffsetX: Float = 0f
+    override var drawOffsetY: Float = 0f
+    override var logicalOffsetX: Float = 0F
+    override var logicalOffsetY: Float = 0F
 
     override var fixedZIndex: Int = 0
+    protected val notZIndexedChildren: MutableList<Actor> = mutableListOf()
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
+
+    protected var layoutPrefWidth = 0F
+    protected var layoutPrefHeight = 0F
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
-
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        this.x += offsetX
-        this.y += offsetY
+        this.x += drawOffsetX
+        this.y += drawOffsetY
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
-        this.x -= offsetX
-        this.y -= offsetY
+        this.x -= drawOffsetX
+        this.y -= drawOffsetY
     }
 
     override fun onLayout(callback: () -> Unit) {
@@ -1353,6 +1366,7 @@ open class CustomGroup(
         onLayout.forEach { it() }
         (0 until children.size).forEach { (children[it] as? Layout)?.validate() }
         super.layout()
+        resortZIndices()
     }
 
     fun invalidateChildren() {
@@ -1366,8 +1380,27 @@ open class CustomGroup(
         }
     }
 
-    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
-    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
+    override fun addActor(actor: Actor) {
+        notZIndexedChildren.add(actor)
+        super.addActor(actor)
+    }
+
+    override fun addActorAt(index: Int, actor: Actor) {
+        notZIndexedChildren.add(index,actor)
+        super.addActorAt(index, actor)
+    }
+    override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
+        notZIndexedChildren.remove(actor)
+        return super.removeActor(actor, unfocus)
+    }
+
+    override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
+        notZIndexedChildren.removeAt(index)
+        return super.removeActorAt(index, unfocus)
+    }
+
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: layoutPrefWidth
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: layoutPrefHeight
 
 }
 
@@ -1403,7 +1436,7 @@ class Spacer(
         val parentHeight = parent.height
         val siblingsHeight = parent
             .children
-            .filter { it !== this}
+            .filter { it !== this }
             .filter { !(it is Spacer && it.growProportionHeight != null) }
             .map { if (it is Layout) it.prefHeight else it.height }
             .sum()
@@ -1415,7 +1448,7 @@ class Spacer(
         val parentWidth = parent.width
         val siblingsWidth = parent
             .children
-            .filter { it !== this}
+            .filter { it !== this }
             .filter { !(it is Spacer && it.growProportionWidth != null) }
             .map { if (it is Layout) it.prefWidth else it.width }
             .sum()
@@ -1433,8 +1466,10 @@ class Spacer(
 
     override fun setWidth(width: Float) {
     }
+
     override fun setHeight(height: Float) {
     }
+
     override fun setSize(width: Float, height: Float) {
     }
 

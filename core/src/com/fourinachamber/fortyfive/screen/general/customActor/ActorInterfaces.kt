@@ -226,8 +226,10 @@ interface Detachable {
 }
 
 interface OffSettable {
-    var offsetX: Float
-    var offsetY: Float
+    var drawOffsetX: Float
+    var drawOffsetY: Float
+    var logicalOffsetX: Float
+    var logicalOffsetY: Float
 }
 
 interface HasOnjScreen {
@@ -357,3 +359,20 @@ interface OnLayoutActor {
 
 inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
     animationSpawners.find { it is T } as? T
+
+
+interface KotlinStyledActor {
+    val marginData: Array<Float>
+    var marginTop: Float //These are all to set the data
+    var marginBottom: Float
+    var marginLeft: Float
+    var marginRight: Float
+
+    var positionType: PositionType
+
+    fun setMargin(value:Number){
+        for (i in marginData.indices){
+            marginData[i] = value.toFloat()
+        }
+    }
+}

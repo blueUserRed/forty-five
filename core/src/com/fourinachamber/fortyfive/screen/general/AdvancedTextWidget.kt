@@ -202,7 +202,7 @@ interface AdvancedTextPart : OffSettable {
     fun calcTransformationMatrixForOffsets(oldTransform: Matrix4): Matrix4 {
         val worldTransform = Affine2()
         worldTransform.set(oldTransform)
-        worldTransform.translate(offsetX ?: 0f, offsetY ?: 0f)
+        worldTransform.translate(drawOffsetX ?: 0f, drawOffsetY ?: 0f)
         val computed = Matrix4()
         computed.set(worldTransform)
         return computed
@@ -244,8 +244,10 @@ class TextAdvancedTextPart(
         actions.add(action)
     }
 
-    override var offsetX: Float = 0F
-    override var offsetY: Float = 0F
+    override var drawOffsetX: Float = 0F
+    override var drawOffsetY: Float = 0F
+    override var logicalOffsetX: Float= 0F
+    override var logicalOffsetY: Float = 0F
 
     override fun progress(): Boolean {
         progress++
@@ -269,7 +271,7 @@ class TextAdvancedTextPart(
             return
         }
 
-        val shouldTransform = offsetX != null || offsetY != null
+        val shouldTransform = drawOffsetX != null || drawOffsetY != null
 
         val oldTransform = batch.transformMatrix.cpy()
         if (shouldTransform) {
@@ -375,8 +377,8 @@ object AdvancedTextPartActionFactory {
             val yMagnitude = onj.get<Double>("yMagnitude").toFloat()
             ;
             {
-                offsetX = sin(TimeUtils.millis().toDouble() * xSpeed).toFloat() * xMagnitude
-                offsetY = sin(TimeUtils.millis().toDouble() * ySpeed + Math.PI.toFloat()).toFloat() * yMagnitude
+                drawOffsetX = sin(TimeUtils.millis().toDouble() * xSpeed).toFloat() * xMagnitude
+                drawOffsetY = sin(TimeUtils.millis().toDouble() * ySpeed + Math.PI.toFloat()).toFloat() * yMagnitude
             }
         }
     )

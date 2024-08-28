@@ -8,6 +8,7 @@ import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.math.max
 
 /**
  * an entry for the [KeyInputMap]
@@ -176,7 +177,8 @@ class KeyInputMap(
 
         private fun getDefaultList(): List<KeyInputMapEntry> {
             val entries = mutableListOf<KeyInputMapEntry>()
-            val defaultPriority = (1 shl 30) - 1
+            val maxPriority = (1 shl 30)
+            val defaultPriority = maxPriority - 1
             entries.add(
                 KeyInputMapEntry(
                     priority = defaultPriority,
@@ -215,6 +217,46 @@ class KeyInputMap(
                         KeyInputMapKeyEntry(Keys.D),
                         ),
                     KeyActionFactory.getAction("FocusNextDirectional")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.T),
+                        ),
+                    KeyActionFactory.getAction("ToggleDebugMenu")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.LEFT),
+                        ),
+                    KeyActionFactory.getAction("PreviousDebugMenuPage")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.RIGHT),
+                        ),
+                    KeyActionFactory.getAction("NextDebugMenuPage")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = maxPriority,
+                    KeyInputCondition.ScreenState("inInputField"),
+                    listOf(
+                        KeyInputMapKeyEntry(InputKeyRange.ASCII.getCode()),
+                        ),
+                    KeyActionFactory.getAction("NextDebugMenuPage")
                 )
             )
             return entries

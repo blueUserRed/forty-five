@@ -199,6 +199,30 @@ object KeyActionFactory {
                 true
             }
         },
+
+
+        "ToggleDebugMenu" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.let {
+                    it.showDebugMenu = !it.showDebugMenu
+                }
+                true
+            }
+        },
+        "NextDebugMenuPage" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.nextDebugPage()
+                true
+            }
+        },
+        "PreviousDebugMenuPage" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.previousDebugPage()
+                true
+            }
+        },
+
+
         "FocusNext" to {
             lambda@{ screen, _ ->
                 screen.focusNext()
@@ -225,6 +249,7 @@ object KeyActionFactory {
                 true
             }
         },
+
         )
 
     /**
