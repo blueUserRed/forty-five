@@ -7,7 +7,10 @@ import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import kotlin.math.max
 
-
+//TODO (optional):
+// widthFitContent and heightFitContent (including and/or exluding posType.absolute)
+// positionTop ... for PosType.absolute
+// VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
 class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor {
 
     override var positionType: PositionType = PositionType.RELATIV
@@ -45,8 +48,8 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
             invalidSize = false
             layoutSize(children.first.map { it.first })
         }
-        val prefWidth = (if (width==0F) getPrefWidth() else width) - paddingLeft - paddingRight
-        val prefHeight = (if (height==0F) getPrefHeight() else height) - paddingTop - paddingBottom
+        val prefWidth = (if (width == 0F) getPrefWidth() else width) - paddingLeft - paddingRight
+        val prefHeight = (if (height == 0F) getPrefHeight() else height) - paddingTop - paddingBottom
         if (prefHeight > 500) {
             println()
         }
@@ -56,7 +59,7 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
             else layoutWrapped(children.first, prefWidth, prefHeight)
         }
 
-        //TODO MAYBE,only MAYBE integrate the absolute ones into layoutPrefWidth/Height with fitWidth and fitHeight or so
+        //TODO MAYBE,only MAYBE integrate the absolute ones into layoutPrefWidth/Height with widthFitContent and heightFitContent or so
         children.second.forEach {
             it.second.setBounds(it.first.x, it.first.y, it.first.w, it.first.h)
         }
@@ -90,7 +93,26 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
                 layoutSingleColumn(it, prefHeight, biggestPerColumns[i], xColumnStarts[i])
             }
         } else {
-            //TODO this
+            var curLine: MutableList<Pair<Box, Actor>> = mutableListOf()
+            var curWidth = 0F
+            children.forEach {
+                if (curWidth != 0F && curWidth + it.first.w > prefWidth) {
+                    wrapLines.add(curLine)
+                    curLine = mutableListOf()
+                    curWidth = 0F
+                }
+                curWidth += it.first.w
+                curLine.add(it)
+            }
+            if (curLine.isNotEmpty()) wrapLines.add(curLine)
+
+            if (wrap == CustomWrap.WRAP_REVERSE) wrapLines.reverse()
+            val biggestPerColumns = wrapLines.map { it2 -> it2.maxOf { it.first.h } }
+            val yColumnStarts =
+                addDistInBetween(verticalAlign, biggestPerColumns, prefHeight, minVerticalDistBetweenElements)
+            wrapLines.forEachIndexed { i, it ->
+                layoutSingleRow(it, prefWidth, biggestPerColumns[i],  yColumnStarts[i])
+            }
         }
     }
 
@@ -169,7 +191,7 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
         }
         if (actor is OffSettable) {
             x1 += actor.logicalOffsetX
-            y1 += actor.logicalOffsetY
+            y1 -= actor.logicalOffsetY // i don't know if this is the way
         }
 
         x1 += paddingLeft // I don't know how well this works with VerticalAlign.End if the children are bigger than the element
@@ -200,11 +222,11 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
             }
         } else {
             if (flexDirection.isColumn) {
-                layoutPrefWidth = max(width, children.maxOfOrNull { it.w } ?: 0F)
-                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }.dropLast(1).sum())
+                layoutPrefWidth = max(width, (children.maxOfOrNull { it.w } ?: 0F)+paddingLeft+paddingRight)
+                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }.dropLast(1).sum() + paddingTop + paddingBottom)
             } else {
-                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }.dropLast(1).sum())
-                layoutPrefHeight = max(height, children.maxOfOrNull { it.h } ?: 0F)
+                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }.dropLast(1).sum() +paddingLeft+paddingRight)
+                layoutPrefHeight = max(height, (children.maxOfOrNull { it.h } ?: 0F) + paddingTop + paddingBottom)
             }
         }
     }

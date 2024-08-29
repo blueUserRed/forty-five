@@ -24,7 +24,7 @@ object ScreenControllerFactory {
         "DialogScreenController" to { onj, screen -> DialogScreenController(screen, onj) },
         "ShopScreenController" to { onj, screen -> ShopScreenController(screen, onj) },
         "ChooseCardScreenController" to { onj, screen -> ChooseCardScreenController(screen, onj) },
-        "HealOrMaxHPScreenController" to { onj, screen -> HealOrMaxHPScreenController(screen, onj) },
+        "HealOrMaxHPScreenController" to { onj, screen -> HealOrMaxHPScreenController(screen, onj.get<String>("addLifeActorName")) },
         "AddMaxHPScreenController" to {onj, screen -> AddMaxHPScreenController(screen, onj) },
         "MapScreenController" to { _, screen -> MapScreenController(screen) },
         "StatsScreenController" to { _, screen -> StatsScreenController(screen) },

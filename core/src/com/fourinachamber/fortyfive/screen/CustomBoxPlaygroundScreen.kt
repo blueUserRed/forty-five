@@ -4,14 +4,12 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.percent
 
-class HealOrMaxHPScreen : ScreenCreator() {
+class CustomBoxPlaygroundScreen : ScreenCreator() {
 
     override val name: String = "healOrMaxHPScreen"
 
@@ -33,7 +31,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        HealOrMaxHPScreenController(screen)
+//        HealOrMaxHPScreenController(screen)
     )
 
     override fun getRoot(): Group {
@@ -59,12 +57,12 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 debug = true
                 horizontalAlign = CustomAlign.SPACE_BETWEEN
                 verticalAlign = CustomAlign.SPACE_AROUND
-                flexDirection = FlexDirection.COLUMN_REVERSE
+                flexDirection = FlexDirection.ROW_REVERSE
 
-                wrap = CustomWrap.WRAP
+                wrap = CustomWrap.WRAP_REVERSE
                 minHorizontalDistBetweenElements = 5F
 //                minVerticalDistBetweenElements = 10F
-               paddingLeft=10F
+//               paddingLeft=10F
 //               paddingRight=30F
 //               paddingTop=20F
 //               paddingBottom=100F
@@ -81,7 +79,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
                     height = size
                     backgroundHandle = "card%%bigBullet"
                     debug = true
-//                    marginBottom=20F
+                    fixedZIndex=20
                 }
 
                 for (i in 0 until 7){
@@ -100,7 +98,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
                     name("bigBulletTestName")
                     width = size
                     height = size
-                    backgroundHandle = "card%%bigBullet"
+                    backgroundHandle = "card%%workerBullet"
                     debug = true
                 }
 
@@ -116,7 +114,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 }
             }
             screen.afterMs(3000){
-                val c = screen.namedActorOrError("bigBulletTestName") as CustomBox
+                val c = screen.namedActorOrError("bigBulletTestName") as CustomBox //this only takes the last one
                 c.fixedZIndex=20
                 b.invalidate()
             }
@@ -125,11 +123,6 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 val c = screen.namedActorOrError("bigBulletTestName2") as CustomBox
                 c.fixedZIndex=0
                 b.invalidate()
-            }
-
-            actor(getSharedNavBar(worldWidth)) {
-                onLayoutAndNow { y = worldHeight - height }
-                centerX()
             }
         }
     }

@@ -11,10 +11,11 @@ import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
-import com.fourinachamber.fortyfive.screen.HealOrMaxHPScreen
+import com.fourinachamber.fortyfive.screen.CustomBoxPlaygroundScreen
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.MapScreen
+import com.fourinachamber.fortyfive.screen.Screens.HealOrMaxHPScreen
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
@@ -214,7 +215,8 @@ object FortyFive : Game() {
         }
         ConfigFileManager.init()
         ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(MapScreen()) })
-        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
+        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(CustomBoxPlaygroundScreen()) })
+//        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()
