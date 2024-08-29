@@ -34,8 +34,7 @@ class CustomBoxPlaygroundScreen : ScreenCreator() {
 //        HealOrMaxHPScreenController(screen)
     )
 
-    override fun getRoot(): Group {
-        return newGroup {
+    override fun getRoot(): Group = newGroup {
             x = 0f
             y = 0f
             width = worldWidth
@@ -125,7 +124,4 @@ class CustomBoxPlaygroundScreen : ScreenCreator() {
                 b.invalidate()
             }
         }
-    }
-
-
 }
