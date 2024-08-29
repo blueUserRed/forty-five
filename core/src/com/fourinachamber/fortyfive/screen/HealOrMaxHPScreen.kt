@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.screen
 
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -58,13 +57,17 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 height = worldHeight.percent(80)
                 backgroundHandle = "heal_or_max_background"
                 debug = true
-                horizontalAlign = CustomAlign.START
-                verticalAlign = CustomAlign.START
-                flexDirection = FlexDirection.COLUMN
+                horizontalAlign = CustomAlign.SPACE_BETWEEN
+                verticalAlign = CustomAlign.SPACE_AROUND
+                flexDirection = FlexDirection.COLUMN_REVERSE
 
                 wrap = CustomWrap.WRAP
                 minHorizontalDistBetweenElements = 5F
-                minVerticalDistBetweenElements = 10F
+//                minVerticalDistBetweenElements = 10F
+               paddingLeft=10F
+//               paddingRight=30F
+//               paddingTop=20F
+//               paddingBottom=100F
 
                 val size = 150F
                 box {
@@ -78,6 +81,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
                     height = size
                     backgroundHandle = "card%%bigBullet"
                     debug = true
+//                    marginBottom=20F
                 }
 
                 for (i in 0 until 7){

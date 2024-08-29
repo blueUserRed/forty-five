@@ -362,7 +362,6 @@ inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimati
 
 
 interface KotlinStyledActor {
-    val marginData: Array<Float>
     var marginTop: Float //These are all to set the data
     var marginBottom: Float
     var marginLeft: Float
@@ -371,8 +370,10 @@ interface KotlinStyledActor {
     var positionType: PositionType
 
     fun setMargin(value:Number){
-        for (i in marginData.indices){
-            marginData[i] = value.toFloat()
-        }
+        val v=value.toFloat()
+        marginTop = v
+        marginBottom = v
+        marginRight = v
+        marginLeft = v
     }
 }

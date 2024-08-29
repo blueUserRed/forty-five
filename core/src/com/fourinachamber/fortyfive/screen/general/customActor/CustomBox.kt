@@ -1,9 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -25,49 +23,15 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
     var flexDirection = FlexDirection.COLUMN
     var wrap = CustomWrap.NONE
 
-    override val marginData: Array<Float> = Array(CustomDirection.entries.size) { 0F }
-    override var marginTop: Float
-        get() = marginData[CustomDirection.TOP.ordinal]
-        set(value) {
-            marginData[CustomDirection.TOP.ordinal] = value
-        }
-    override var marginBottom: Float
-        get() = marginData[CustomDirection.BOTTOM.ordinal]
-        set(value) {
-            marginData[CustomDirection.BOTTOM.ordinal] = value
-        }
-    override var marginLeft: Float
-        get() = marginData[CustomDirection.LEFT.ordinal]
-        set(value) {
-            marginData[CustomDirection.LEFT.ordinal] = value
-        }
-    override var marginRight: Float
-        get() = marginData[CustomDirection.RIGHT.ordinal]
-        set(value) {
-            marginData[CustomDirection.RIGHT.ordinal] = value
-        }
+    override var marginTop: Float=0F
+    override var marginBottom: Float=0F
+    override var marginLeft: Float=0F
+    override var marginRight: Float=0F
 
-    val paddingData: Array<Float> = Array(CustomDirection.entries.size) { 0F } //TODO padding
-     var paddingTop: Float
-        get() = paddingData[CustomDirection.TOP.ordinal]
-        set(value) {
-            paddingData[CustomDirection.TOP.ordinal] = value
-        }
-    var paddingBottom: Float
-        get() = paddingData[CustomDirection.BOTTOM.ordinal]
-        set(value) {
-            paddingData[CustomDirection.BOTTOM.ordinal] = value
-        }
-    var paddingLeft: Float
-        get() = paddingData[CustomDirection.LEFT.ordinal]
-        set(value) {
-            paddingData[CustomDirection.LEFT.ordinal] = value
-        }
-    var paddingRight: Float
-        get() = paddingData[CustomDirection.RIGHT.ordinal]
-        set(value) {
-            paddingData[CustomDirection.RIGHT.ordinal] = value
-        }
+    var paddingTop: Float=0F
+    var paddingBottom: Float=0F
+    var paddingLeft: Float=0F
+    var paddingRight: Float=0F
 
 
     init {
@@ -81,8 +45,8 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
             invalidSize = false
             layoutSize(children.first.map { it.first })
         }
-        val prefWidth = width
-        val prefHeight = height
+        val prefWidth = (if (width==0F) getPrefWidth() else width) - paddingLeft - paddingRight
+        val prefHeight = (if (height==0F) getPrefHeight() else height) - paddingTop - paddingBottom
         if (prefHeight > 500) {
             println()
         }
@@ -201,14 +165,17 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
         var y1 = y
         if (actor is KotlinStyledActor) {
             x1 += actor.marginLeft
-            y1 += actor.marginRight
+            y1 += actor.marginTop
         }
         if (actor is OffSettable) {
             x1 += actor.logicalOffsetX
             y1 += actor.logicalOffsetY
         }
 
-        // let's hope the "height - y1 - actor.height" doesn't break at some point something
+        x1 += paddingLeft // I don't know how well this works with VerticalAlign.End if the children are bigger than the element
+        y1 += paddingTop
+
+        // let's hope the "height - y1 - actor.height" doesn't break at some point something (maybe it already does with padding shit)
         actor.setBounds(x1, height - y1 - actor.height, actor.width, actor.height)
     }
 
@@ -219,20 +186,24 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
                 layoutPrefWidth = simulateChildrenFast(
                     children,
                     FlexDirection.COLUMN,
-                    layoutPrefHeight,
+                    layoutPrefHeight - paddingTop - paddingBottom,
                     minHorizontalDistBetweenElements
                 )
             } else {
                 layoutPrefWidth = (forcedPrefWidth ?: width)
                 layoutPrefHeight =
-                    simulateChildrenFast(children, FlexDirection.ROW, layoutPrefWidth, minVerticalDistBetweenElements)
+                    simulateChildrenFast(
+                        children,
+                        FlexDirection.ROW,
+                        layoutPrefWidth - paddingLeft - paddingRight,
+                        minVerticalDistBetweenElements)
             }
         } else {
             if (flexDirection.isColumn) {
                 layoutPrefWidth = max(width, children.maxOfOrNull { it.w } ?: 0F)
-                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat())
+                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }.dropLast(1).sum())
             } else {
-                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat())
+                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }.dropLast(1).sum())
                 layoutPrefHeight = max(height, children.maxOfOrNull { it.h } ?: 0F)
             }
         }
@@ -280,8 +251,8 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
                 w += it.marginLeft
                 w += it.marginRight
 
-                h += it.marginTop
                 h += it.marginBottom
+                h += it.marginTop
             }
             Box(0F, 0F, w, h) to it //only w and h are needed
         } to lists.second.map { Box(it.x, it.y, it.width, it.height) to it }
