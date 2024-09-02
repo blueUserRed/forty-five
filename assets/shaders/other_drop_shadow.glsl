@@ -14,48 +14,32 @@ precision mediump float;
 varying LOWP vec4 v_color;
 varying vec2 v_texCoords;
 uniform sampler2D u_texture;
-uniform float u_multiplier;
-uniform vec4 u_color;
-uniform vec2 u_offset;
 
 %uniform u_time
 %uniform u_resolution
 
+#define SQRT_TWO 1.41421
+
 void main() {
 
-    // TODO: change to card hightlight system
+    float squareScale = (1.0 / 1.6);
+    float w = squareScale;
+    float h = squareScale;
+    float xs = (1.0 - w) / 2.0;
+    float ys = (1.0 - h) / 2.0;
+    float x = v_texCoords.x;
+    float y = v_texCoords.y;
 
-    int samplePoints = 10;
-    float sampleDist = 0.008;
+    float dx = max(max(xs - x, x - (xs + w)), 0.0);
+    float dy = max(max(ys - y, y - (ys + h)), 0.0);
+    float dist = sqrt(dx * dx + dy * dy);
 
-    float curX = v_texCoords.x - (float(samplePoints) / 2.0) * sampleDist;
+    // This is equivalent to pythagoras (sqrt(x * x + y * y)) when x == y and is faster to compute
+    float maxDist = SQRT_TWO * xs;
 
-    float baseY = v_texCoords.y - (float(samplePoints) / 2.0) * sampleDist;
-    float curY = baseY;
+    float value = dist * (1.0 / maxDist);
+    value = 1.0 - value;
+    value = 0.6 * (value * value);
 
-    vec4 result = vec4(0.0, 0.0, 0.0, 0.0);
-    for (int i = 0; i < samplePoints; i++) {
-        for (int j = 0; j < samplePoints; j++) {
-            float outside = curX < 0.0 || curX > 1.0 || curY < 0.0 || curY > 1.0 ? 1 : 0;
-            vec4 color = texture2D(u_texture, vec2(curX, curY));
-            color.a *= 1 - outside;
-            result += color / (float(samplePoints) * float(samplePoints));
-
-            curY += sampleDist;
-        }
-        curY = baseY;
-        curX += sampleDist;
-    }
-
-    result.r = 1.0;
-    result.g = 0.0;
-    result.b = 0.0;
-    result.a *= 0.8;
-
-    float dist = abs(length(vec2(v_texCoords.x, v_texCoords.y) - vec2(0.5, 0.5))) * 0.8;
-    dist *= (1.0 / 0.707107);
-    dist = 1.0 - dist;
-    dist *= 0.8;
-
-    gl_FragColor = vec4(1.0, 0.0, 0.0, dist * result.a);
+    gl_FragColor = vec4(245.0 / 255.0, 198.0 / 255.0, 1.0 / 255.0, value);
 }
