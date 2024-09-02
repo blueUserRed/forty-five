@@ -852,10 +852,10 @@ class OffsetXStyleProperty<T>(
 ) where T : StyledActor, T : OffSettable, T : Actor {
 
     override fun set(data: Float, node: YogaNode) {
-        target.offsetX = data
+        target.drawOffsetX = data
     }
 
-    override fun get(node: YogaNode): Float = target.offsetX
+    override fun get(node: YogaNode): Float = target.drawOffsetX
 }
 
 class OffsetYStyleProperty<T>(
@@ -872,10 +872,10 @@ class OffsetYStyleProperty<T>(
 ) where T : StyledActor, T : OffSettable, T : Actor {
 
     override fun set(data: Float, node: YogaNode) {
-        target.offsetY = data
+        target.drawOffsetY = data
     }
 
-    override fun get(node: YogaNode): Float = target.offsetY
+    override fun get(node: YogaNode): Float = target.drawOffsetY
 }
 
 fun <T> T.addOffsetableStyles(

@@ -16,11 +16,11 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-class HealOrMaxHPScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController(), Completable {
+class HealOrMaxHPScreenController(private val screen: OnjScreen, healChosenName: String) : ScreenController(), Completable {
 
     private var context: HealOrMaxHPMapEvent? = null
 
-    private var healChosenTarekGeorgWidgetName: String = onj.get<String>("addLifeActorName")
+    private var healChosenTarekGeorgWidgetName: String = healChosenName
 
     private lateinit var amount: Pair<Int, Int>
 

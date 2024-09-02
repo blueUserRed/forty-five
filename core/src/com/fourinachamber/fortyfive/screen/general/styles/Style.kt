@@ -235,7 +235,7 @@ class AnimatedStyleInstruction<DataType>(
                 dataTypeClass,
                 startValue,
                 data,
-                percent.toFloat()
+                interpolation.apply(percent.toFloat())
             ) ?: run {
                 this.startValue = null
                 controlGainedTime = 0L

@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
@@ -22,9 +21,6 @@ import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import ktx.actors.onClick
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import kotlin.math.min
@@ -442,7 +438,7 @@ class Backpack(
         action {
             if (isGoingIn) {
                 isVisible = true
-                target.offsetX = amount * (if (goingRight) 1 else -1)
+                target.drawOffsetX = amount * (if (goingRight) 1 else -1)
             }
         }
         val action = CustomMoveByAction(

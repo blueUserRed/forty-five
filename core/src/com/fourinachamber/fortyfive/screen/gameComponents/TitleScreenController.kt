@@ -102,7 +102,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
         repeat(15) { i ->
             val actor = screen.namedActorOrError("title_screen_bullet_${i + 1}")
             actor as OffSettable
-            actor.offsetY -= transitionAwayVelocity
+            actor.drawOffsetY -= transitionAwayVelocity
         }
     }
 
@@ -124,7 +124,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
         repeat(15) { i ->
             val actor = screen.namedActorOrError("title_screen_bullet_${i + 1}")
             actor as OffSettable
-            actor.offsetY = sin(TimeUtils.millis() * 0.001 + i * i * 100).toFloat() * 6f
+            actor.drawOffsetY = sin(TimeUtils.millis() * 0.001 + i * i * 100).toFloat() * 6f
         }
     }
 

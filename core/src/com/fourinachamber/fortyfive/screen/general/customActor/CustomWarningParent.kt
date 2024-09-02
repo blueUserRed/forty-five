@@ -69,7 +69,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         var i = 0
         while (i < curShown.size) {
             val cur = curShown[i]
-            if (cur.offsetY >= cur.height && cur !in permanentsShown.values) {
+            if (cur.drawOffsetY >= cur.height && cur !in permanentsShown.values) {
                 cur.isVisible = false
                 curShown.remove(cur)
                 continue
@@ -242,7 +242,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
     private fun getInitialTimeline(target: CustomFlexBox, textLength: Int, permanentIndex: Int): Timeline {
         return Timeline.timeline {
             action {
-                target.offsetX = -target.width
+                target.drawOffsetX = -target.width
                 //this might be the ugliest but best possible solution ever //TODO ugly
                 val label = ((target.children[1] as CustomFlexBox).children[2] as CustomLabel)
                 val lastRowHeight = label.glyphLayout.runs.first().glyphs[0].height * label.fontScaleX

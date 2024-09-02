@@ -70,7 +70,7 @@ screens: [
         file: "screens/game_screen.onj"
     },
     {
-        name: "addMaxHpScreen",
+        name: "addMaxHPScreen",
         file: "screens/add_max_hp_screen.onj"
     },
     {
@@ -89,10 +89,10 @@ screens: [
         name: "draftScreen",
         file: "screens/draft_screen.onj"
     },
-    {
-        name: "healOrMaxScreen",
-        file: "screens/heal_or_max_screen.onj"
-    },
+//    {
+//        name: "healOrMaxHPScreen",
+//        file: "screens/heal_or_max_screen.onj"
+//    },
     {
         name: "introScreen",
         file: "screens/intro_screen.onj"

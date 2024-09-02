@@ -79,8 +79,7 @@ options: {
         $BiomeBackgroundScreenController {
             useSecondary: false,
         },
-//        $CardCollectionScreenController {
-//        }
+        $CardCollectionScreenController { },
     ],
     playAmbientSounds: true,
     music: "map_theme",
@@ -1634,6 +1633,202 @@ var steelNervesOverlay = $Box {
 
 ];
 
+
+var afterLifeCardTemplate = $Box{
+    styles: [
+         {
+            width: (50)#percent,
+            height: (75)#percent,
+            marginLeft: 5#percent,
+            marginBottom: 2#percent,
+//            background: "afterlife_card_slot",
+            background: "backpack_empty_deck_slot",
+        }
+    ],
+};
+var afterlife = $Box{
+    name: "testNameForInterpolation",
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: (worldWidth*0.35*2)#points,
+            height: (worldHeight*0.3)#points,
+            positionTop: (worldHeight * 0.3)#points,
+            flexDirection: flexDirection.column,
+            paddingTop: (worldHeight*0.01)#points,
+            background: "afterlife_background",
+            alignItems: align.flexEnd,
+        },
+        {
+            style_priority: 1,
+            style_animation: {
+                duration: 0.2,
+                interpolation: interpolation.exp5In
+            },
+            positionLeft: -(worldWidth * 0.35 * (1.83))#points,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("afterliveOpened"),
+            style_animation: {
+                duration: 0.3,
+                interpolation: interpolation.exp10Out
+            },
+            positionLeft: -(worldWidth*0.35)#points,
+        }
+    ],
+} children[
+    $Box{ //Text
+        styles: [
+            {
+                width: (worldWidth*0.35)#points,
+                height: (worldHeight*0.08)#points,
+                flexDirection: flexDirection.row,
+            }
+        ],
+    } children[
+        $Image {
+            scaleX: 0.22,
+            scaleY: 0.22,
+            textureName: "afterlife_icon",
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    positionLeft: 20#points,
+                    positionTop: -210#points,
+                }
+            ],
+        },
+        $Label {
+            styles: [
+                {
+                    marginLeft: 110#points,
+                    positionTop: 10#points,
+                }
+            ],
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.frosty_mint_green,
+            text: "The Afterlife"
+        },
+    ],
+    $Box{ // cards
+        styles: [
+            {
+                width: (worldWidth*0.35)#points,
+                height: (worldHeight*0.23)#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.center,
+            }
+        ],
+    } children[
+        $ScrollBox {
+            name: "afterlifeCardsParent", //TODO MARVIN ADD CHILDREN TO THIS ELEMENT
+            isScrollDirectionVertical: false,
+            scrollDistance: 50.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "afterlife_scrollbar_handle_background",
+            scrollbarName: "afterlife_scrollbar_handle",
+            scrollbarSide: "down",
+            styles: [
+                {
+                    flexDirection: flexDirection.rowReverse,
+                    justifyContent: justify.flexStart,
+                    alignItems: align.center,
+                    width: (worldWidth*0.17)#points,
+                    height: (worldHeight * 0.2)#points,
+                    paddingRight: (10.0)#points,
+                    cuttingRight: 10.0,
+                    scrollbarWidth: 7.5,
+                    scrollbarLength: 90.0#percent,
+                }
+            ],
+            children: [
+                $Image {
+                    name: "afterlife_scrollbar_handle",
+                    textureName: "afterlife_scrollbar",
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                },
+                $Image {
+                    name: "afterlife_scrollbar_handle_background",
+                    textureName: "afterlife_scrollbar_background",
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                },
+                afterLifeCardTemplate,
+                afterLifeCardTemplate,
+//                afterLifeCardTemplate,
+            ]
+        },
+        $Box{ // main card
+            styles: [
+                {
+                    width: (worldWidth*0.1)#points,
+                    height: (worldHeight*0.21)#points,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                }
+            ],
+        } children[
+            $Box{
+                styles: [
+                    {
+                        positionType: positionType.absolute,
+                        positionTop: (worldHeight*0.022)#points,
+                        width: (worldHeight * 0.15)#points,
+                        height: (worldHeight * 0.15)#points,
+                        background: "afterlife_card_slot",
+                    }
+                ],
+            },
+            $Box{
+                styles: [
+                    {
+                        positionType: positionType.absolute,
+                        width: (worldHeight * 0.18)#points,
+                        height: (worldHeight * 0.21)#points,
+                        background: "afterlife_bullet_affected",
+                    }
+                ],
+            }],
+        $Box { // extendButton
+            styles: [
+                {
+                    width: (worldWidth * 0.08)#points,
+                    height: (worldHeight * 0.18)#points,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                    touchable:touchable.enabled,
+                }
+            ],
+            behaviours: [
+                $OnClickToggleScreenStateBehaviour {
+                    state: "afterliveOpened",
+                }
+            ],
+        } children [
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        marginBottom: (worldHeight * 0.07)#points,
+                        width: (worldHeight * 0.04)#points,
+                        height: (worldHeight * 0.05)#points,
+                        background: "afterlife_arrow_right",
+                    },
+                    {
+                        style_priority: 2,
+                        background: "afterlife_arrow_left",
+                        style_condition: state("afterliveOpened"),
+                    }
+                ],
+            },
+        ],
+    ],
+];
+
 root: $Box {
     styles: [
         {
@@ -1674,7 +1869,7 @@ root: $Box {
             ],
             ...cardHand
         },
-
+        afterlife,
         winScreen,
 
         $Statusbar {

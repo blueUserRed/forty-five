@@ -225,8 +225,8 @@ class OnClickToCenter(private val src: CenteredDragSource) : ClickListener() {
         )
         startOffset?.let {
             val actor = src.actor as OffSettable
-            actor.offsetX += it.x
-            actor.offsetY += it.y
+            actor.drawOffsetX += it.x
+            actor.drawOffsetY += it.y
         }
         return super.touchDown(event, x, y, pointer, button)
     }
@@ -234,8 +234,8 @@ class OnClickToCenter(private val src: CenteredDragSource) : ClickListener() {
     override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
         startOffset?.let {
             val actor = src.actor as OffSettable
-            actor.offsetX -= it.x
-            actor.offsetY -= it.y
+            actor.drawOffsetX -= it.x
+            actor.drawOffsetY -= it.y
             if (!realStart) {
                 src.fakeStop(event, x, y, pointer)
             }

@@ -13,6 +13,7 @@ import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.utils.TemplateString
 import onj.value.OnjArray
@@ -87,10 +88,17 @@ abstract class ScreenCreator : ResourceBorrower {
 
     fun Actor.name(name: String) {
         _namedActors[name] = this
+        this.name = name
     }
 
     inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
         val image = CustomImageActor(null, screen, false, "", false)
+        builder(image)
+        this.addActor(image)
+        return image
+    }
+    inline fun Group.box(builder: CustomBox.() -> Unit = {}): CustomBox {
+        val image = CustomBox(screen)
         builder(image)
         this.addActor(image)
         return image

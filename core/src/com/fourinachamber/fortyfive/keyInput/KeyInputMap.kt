@@ -8,14 +8,15 @@ import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.math.max
 
 /**
  * an entry for the [KeyInputMap]
  */
 data class KeyInputMapKeyEntry(
     val keycode: Keycode,
-    val action: KeyAction?,
-    val modifierKeys: List<Keycode>
+    val action: KeyAction? = null,
+    val modifierKeys: List<Keycode> = listOf()
 )
 
 /**
@@ -160,6 +161,106 @@ class KeyInputMap(
             return KeyInputMap(entries, screen)
         }
 
+        /**
+         * creates a new KeyInputMap using keys
+         */
+        fun createFromKotlin(
+            actions: List<KeyInputMapEntry>,
+            screen: OnjScreen,
+            widthDefaults: Boolean = true
+        ): KeyInputMap {
+            if (widthDefaults) return KeyInputMap(actions + kotlinDefaultActions, screen)
+            return KeyInputMap(actions, screen)
+        }
+
+        private val kotlinDefaultActions: List<KeyInputMapEntry> = getDefaultList()
+
+        private fun getDefaultList(): List<KeyInputMapEntry> {
+            val entries = mutableListOf<KeyInputMapEntry>()
+            val maxPriority = (1 shl 30)
+            val defaultPriority = maxPriority - 1
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.F),
+                        KeyInputMapKeyEntry(Keys.F11)
+                    ),
+                    KeyActionFactory.getAction("ToggleFullscreen")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(KeyInputMapKeyEntry(Keys.TAB)),
+                    KeyActionFactory.getAction("FocusNext")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(KeyInputMapKeyEntry(Keys.TAB, modifierKeys = listOf(Keys.SHIFT_LEFT))),
+                    KeyActionFactory.getAction("FocusPrevious")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.W),
+                        KeyInputMapKeyEntry(Keys.A),
+                        KeyInputMapKeyEntry(Keys.S),
+                        KeyInputMapKeyEntry(Keys.D),
+                        ),
+                    KeyActionFactory.getAction("FocusNextDirectional")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.T),
+                        ),
+                    KeyActionFactory.getAction("ToggleDebugMenu")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.LEFT),
+                        ),
+                    KeyActionFactory.getAction("PreviousDebugMenuPage")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.RIGHT),
+                        ),
+                    KeyActionFactory.getAction("NextDebugMenuPage")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = maxPriority,
+                    KeyInputCondition.ScreenState("inInputField"),
+                    listOf(
+                        KeyInputMapKeyEntry(InputKeyRange.ASCII.getCode()),
+                        ),
+                    KeyActionFactory.getAction("NextDebugMenuPage")
+                )
+            )
+            return entries
+        }
         fun combine(maps: List<KeyInputMap>): KeyInputMap {
             if (maps.isEmpty()) throw RuntimeException("Combining requires at least one input map")
             val entries = maps.flatMap { it.entries }
@@ -175,6 +276,7 @@ class KeyInputMap(
         }
 
     }
+
 }
 
 enum class InputKeyRange {

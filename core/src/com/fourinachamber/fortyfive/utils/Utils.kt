@@ -136,7 +136,7 @@ fun Double.between(min: Double, max: Double): Double {
     return this
 }
 
-fun Vector2(x: Int, y: Int): Vector2 {
+fun Vector2(x: Number, y: Number): Vector2 {
     return Vector2(x.toFloat(), y.toFloat())
 }
 
@@ -152,6 +152,20 @@ val Float.radians: Float
 
 val Float.degrees: Float
     get() = Math.toDegrees(this.toDouble()).toFloat()
+
+fun Float.percent(x: Number): Float = (this * x / 100)
+
+private operator fun Float.times(x: Number): Float {
+    return when (x) {
+        is Byte -> this * x
+        is Float -> this * x
+        is Int -> this * x
+        is Long -> this * x
+        is Short -> this * x
+        else -> (this * x.toDouble()).toFloat()
+    }
+}
+
 
 fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
@@ -232,7 +246,7 @@ fun <T> Collection<Pair<Int, T>>.weightedRandom(random: Random = Random): T {
         acc += abs(weight)
         if (choice <= acc) return value
     }
-    throw  NoSuchElementException("weightedRandom called on an empty collection")
+    throw NoSuchElementException("weightedRandom called on an empty collection")
 }
 
 fun Collection<Timeline>.collectTimeline(): Timeline {

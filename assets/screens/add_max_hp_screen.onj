@@ -15,7 +15,7 @@ viewport: $FitViewport {
 },
 
 options: {
-    background: "hover_detail_background",
+    background: "hover_detail_big_background",
     transitionAwayTime: 1.5,
     music: "map_theme",
     playAmbientSounds: true,
@@ -102,7 +102,8 @@ root: $Box { //TODO biomes
                 },
                 $Image {
                     reportDimensionsWithScaling: true,
-                    textureName: "taupe_gray_rounded",
+//                    textureName: "taupe_gray_rounded",
+                    textureName: "forty_white_rounded",
                     scaleX: 300.0,
                     scaleY: 2.1,
                 },

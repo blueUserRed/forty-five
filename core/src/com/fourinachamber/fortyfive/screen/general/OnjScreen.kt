@@ -23,14 +23,12 @@ import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
-import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
-import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
@@ -110,6 +108,39 @@ open class OnjScreen(
             field = value
         }
 
+    var focusedActor: FocusableActor? = null
+    private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
+    fun getFocusableActors(): MutableList<FocusableActor> {
+        return getFocusableActors(stage.root)
+    }
+
+    private fun getFocusableActors(root: Group): MutableList<FocusableActor> {
+        val selectableActors = mutableListOf<FocusableActor>()
+        for (child in root.children) {
+            if (child is FocusableActor) {
+                if (child.group != null) selectableActors.add(child)
+            }
+            if (child is Group) selectableActors.addAll(getFocusableActors(child))
+        }
+        return selectableActors
+    }
+
+    fun focusNext(direction: Vector2?=null) {
+        if (selectionHierarchy.isEmpty()) return
+        val focusableElement = selectionHierarchy.last().focusNext(direction, this)
+        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
+        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
+        this.focusedActor = focusableElement
+    }
+
+    fun focusPrevious() {
+        if (selectionHierarchy.isEmpty()) return
+        val focusableElement = selectionHierarchy.last().focusPrevious(this)
+        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
+        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
+        this.focusedActor = focusableElement
+    }
+
     private var awaitingConfirmationClick: Boolean = false
 
     private var screenInputProcessor: InputProcessor = object : InputAdapter() {
@@ -177,7 +208,7 @@ open class OnjScreen(
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
 
     override fun onEnd(callback: () -> Unit) {
-       lifetime.onEnd(callback)
+        lifetime.onEnd(callback)
     }
 
     @AllThreadsAllowed
@@ -517,20 +548,15 @@ open class OnjScreen(
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
-        fun toggleFullScreen(width: Int = -1, height: Int = -1) {
-            val displayMode = Gdx.graphics.displayMode
-            if (!(Gdx.graphics.isFullscreen ||
-                        (Gdx.graphics.width == displayMode.width && Gdx.graphics.height == displayMode.height))
-                || (width == -1 && height == -1)) {
-                if (UserPrefs.useNormalFullScreenMode) {
-                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                } else {
-                    Gdx.graphics.setUndecorated(true)
-                    Gdx.graphics.setWindowedMode(displayMode.width, displayMode.height)
-                }
+        fun toggleFullScreen(forceFullscreen: Boolean = false) {
+            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
+                UserPrefs.windowMode =
+                    if (UserPrefs.lastFullScreenAsBorderless)
+                        UserPrefs.WindowMode.BorderlessWindow
+                    else
+                        UserPrefs.WindowMode.Fullscreen
             } else {
-                Gdx.graphics.setUndecorated(false)
-                Gdx.graphics.setWindowedMode(width, height)
+                UserPrefs.windowMode = UserPrefs.WindowMode.Window
             }
         }
     }
