@@ -470,7 +470,7 @@ class EnemyActor(
             enemy.enemyHeight + 20f,
             attackIndicator.prefWidth, attackIndicator.prefHeight
         )
-        attackIndicator.offsetY = sin(
+        attackIndicator.drawOffsetY = sin(
             (TimeUtils.millis().toDouble() + attackIndicatorAnimTimeOffset) * 0.0015
         ).toFloat() * 1.5f
         super.draw(batch, parentAlpha)

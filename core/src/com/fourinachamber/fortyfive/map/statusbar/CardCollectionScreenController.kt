@@ -3,19 +3,13 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.PermaSaveState
-import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
-import com.fourinachamber.fortyfive.game.card.DetailDescriptionHandler
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.utils.*
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.math.ceil
 import kotlin.math.min
@@ -26,13 +20,14 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
 
     //TODO ugly, could be "val"
     private lateinit var cardPrototypes: List<CardPrototype>
-    private lateinit var _allCards: List<Card>
+    private var curShownCards: Array<Card?> = arrayOf()
 
     private val totalPagesGlobalStringName: String = "overlay.cardCollection.totalPages"
     private val curPageGlobalStringName: String = "overlay.cardCollection.curPage"
 
     private var curPage = 0
     private var nbrOfPages = -1
+    private var cardsPerPage = -1
 
     @Inject(name = "card_collection_widget")
     private lateinit var cardCollectionWidget: CustomFlexBox
@@ -45,20 +40,15 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
             .filter { "not in collection" !in it.tags }
-        cardPrototypes =
-            sort((Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
-                .filter { "not in collection" !in it.tags }.toMutableList()
-            )
-        _allCards = cardPrototypes
-            .map { it.create(screen, true) }
-            .toMutableList()
-        //        _allCards.forEach { it.actor.actorTemplate = "card_hover_detail_glow" } //TODO comment back in once it exists
+        cardPrototypes = sort(cardPrototypes.toMutableList())
         nbrOfPages = ceil(cardPrototypes.size / 15.0).toInt()
         TemplateString.updateGlobalParam(totalPagesGlobalStringName, formatToTwoDigits(nbrOfPages))
 
         cardCollectionWidget.onDisplay = { getInOutTimeLine(isGoingIn = true, cardCollectionWidget) }
         cardCollectionWidget.onHide = { getInOutTimeLine(isGoingIn = false, cardCollectionWidget) }
-        loadCollection()
+
+        cardsPerPage = cardsParentWidget.children.filterIsInstance<CustomFlexBox>().size
+        //        loadCollection()
     }
 
     private fun sort(original: MutableList<CardPrototype>): List<CardPrototype> {
@@ -68,8 +58,8 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         while (original.isNotEmpty()) {
             val curRes = original.filter { "pool$i" in it.tags }
             original.removeAll(curRes)
-            if (curRes.isEmpty())notFoundCounter++
-            if (notFoundCounter==3) break
+            if (curRes.isEmpty()) notFoundCounter++
+            if (notFoundCounter == 3) break
             res.addAll(curRes)
             i++
         }
@@ -106,13 +96,12 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
     }
 
     private fun loadCollection() {
+        loadCards()
         TemplateString.updateGlobalParam(curPageGlobalStringName, formatToTwoDigits(curPage + 1))
-
-
         val parents = cardsParentWidget.children.filterIsInstance<CustomFlexBox>()
-        for (i in (0 until (min(parents.size, _allCards.size - curPage * parents.size)))) {
-            val c = _allCards[i + curPage * parents.size]
-            if (c.name in PermaSaveState.collection)
+        for (i in curShownCards.indices) {
+            val c = curShownCards[i]
+            if (c != null && c.name in PermaSaveState.collection) {
                 screen.screenBuilder.addDataToWidgetFromTemplate(
                     "card_collection_slot_card",
                     mapOf(),
@@ -120,24 +109,24 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
                     screen,
                     c.actor
                 )
-            else if (!c.lockedDescription.isNullOrEmpty()) { //TODO this if condition when locked system exists
-                screen.screenBuilder.generateFromTemplate(
-                    "card_collection_slot_glow_background",
-                    mapOf(),
-                    parents[i],
-                    screen
-                )
-                val curActor = screen.screenBuilder.generateFromTemplate(
-                    "card_collection_slot",
-                    mapOf(
-                        "background" to "collection_slot_locked",
-                        "hoverText" to c.lockedDescription
-                    ),
-                    parents[i],
-                    screen
-                ) as CustomFlexBox
-                curActor.touchable = Touchable.enabled
-                curActor.additionalHoverData["effects"] = DetailDescriptionHandler.allTextEffects
+//            } else if (c!=null && !c.lockedDescription.isNullOrEmpty()) { //TODO this if condition when locked system exists
+//                screen.screenBuilder.generateFromTemplate(
+//                    "card_collection_slot_glow_background",
+//                    mapOf(),
+//                    parents[i],
+//                    screen
+//                )
+//                val curActor = screen.screenBuilder.generateFromTemplate(
+//                    "card_collection_slot",
+//                    mapOf(
+//                        "background" to "collection_slot_locked",
+//                        "hoverText" to c.lockedDescription
+//                    ),
+//                    parents[i],
+//                    screen
+//                ) as CustomFlexBox
+//                curActor.touchable = Touchable.enabled
+//                curActor.additionalHoverData["effects"] = DetailDescriptionHandler.allTextEffects
             } else {
                 screen.screenBuilder.generateFromTemplate(
                     "card_collection_slot",
@@ -155,7 +144,8 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
             if (isGoingIn) {
                 screen.enterState("showHoverDetailGlow")
                 cardCollectionWidget.isVisible = true
-                target.offsetY = -amount
+                target.drawOffsetY = -amount
+                reloadCollection()
             } else {
                 screen.leaveState("showHoverDetailGlow")
             }
@@ -176,4 +166,12 @@ class CardCollectionScreenController(private val screen: OnjScreen, onj: OnjObje
         }
     }
 
+    private fun loadCards() {
+        curShownCards.forEach { it?.dispose() }
+        curShownCards = Array(cardsPerPage) { null }
+        for (i in (0 until (min(cardsPerPage, cardPrototypes.size - curPage * cardsPerPage)))) {
+            val cardPrototype = cardPrototypes[i + curPage * cardsPerPage]
+            if (cardPrototype.name in PermaSaveState.collection) curShownCards[i] = cardPrototype.create(screen, true)
+        }
+    }
 }

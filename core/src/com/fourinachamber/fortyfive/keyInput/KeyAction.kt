@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.keyInput
 
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -10,6 +11,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
+import com.fourinachamber.fortyfive.utils.Vector2
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
@@ -20,15 +22,13 @@ typealias KeyAction = @MainThreadOnly (screen: OnjScreen, event: Keycode?) -> Bo
  */
 object KeyActionFactory {
 
-    private val actions: Map<String, (onj: OnjObject) -> KeyAction> = mapOf(
+    private val onjActions: Map<String, (onj: OnjObject) -> KeyAction> = mapOf(
 
         "ToggleFullscreen" to { obj ->
-            val width = obj.get<Long>("width").toInt()
-            val height = obj.get<Long>("height").toInt()
             ; { _, _ ->
-                OnjScreen.toggleFullScreen(width, height)
-                true
-            }
+            OnjScreen.toggleFullScreen()
+            true
+        }
         },
 
         "ToggleDebugMenu" to {
@@ -41,16 +41,14 @@ object KeyActionFactory {
         },
 
         "NextDebugMenuPage" to {
-            {
-                _, _ ->
+            { _, _ ->
                 FortyFive.currentRenderPipeline?.nextDebugPage()
                 true
             }
         },
 
         "PreviousDebugMenuPage" to {
-            {
-                _, _ ->
+            { _, _ ->
                 FortyFive.currentRenderPipeline?.previousDebugPage()
                 true
             }
@@ -159,12 +157,12 @@ object KeyActionFactory {
         "FireClickEvent" to {
             lambda@{ screen, _ ->
                 val actor = it.get<String?>("actor")
-                if (actor == null){
+                if (actor == null) {
                     val selected = screen.selectedActor ?: return@lambda false
                     selected as Actor
                     selected.fire(ButtonClickEvent())
                     true
-                }else{
+                } else {
                     (screen.namedActorOrError(it.get<String>("actor"))).fire(ButtonClickEvent())
                     true
                 }
@@ -193,12 +191,82 @@ object KeyActionFactory {
         },
     )
 
+
+    private val kotlinActions: Map<String, (onj: Any?) -> KeyAction> = mapOf(
+        "ToggleFullscreen" to {
+            { _, _ ->
+                OnjScreen.toggleFullScreen()
+                true
+            }
+        },
+
+
+        "ToggleDebugMenu" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.let {
+                    it.showDebugMenu = !it.showDebugMenu
+                }
+                true
+            }
+        },
+        "NextDebugMenuPage" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.nextDebugPage()
+                true
+            }
+        },
+        "PreviousDebugMenuPage" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.previousDebugPage()
+                true
+            }
+        },
+
+
+        "FocusNext" to {
+            lambda@{ screen, _ ->
+                screen.focusNext()
+                true
+            }
+        },
+        "FocusNextDirectional" to {
+            lambda@{ screen, code ->
+                val dir= when(code){
+                    Keys.W-> Vector2(0,1)
+                    Keys.A-> Vector2(1,0)
+                    Keys.S-> Vector2(0,-1)
+                    Keys.D-> Vector2(1,0)
+                    else -> null
+                }
+                screen.focusNext(dir)
+                true
+            }
+        },
+        "FocusPrevious" to {
+            lambda@{ screen, code ->
+                println("keyCode: $code")
+                screen.focusPrevious()
+                true
+            }
+        },
+
+        )
+
     /**
      * creates a KeyAction using an OnjObject
      */
     fun getAction(obj: OnjNamedObject): KeyAction {
-        return actions[obj.name.removeSuffix("KeyAction")]?.invoke(obj) ?: throw RuntimeException(
-            "unknown key action ${obj.name}"
+        return onjActions[obj.name.removeSuffix("KeyAction")]?.invoke(obj) ?: throw RuntimeException(
+            "unknown ONJ key action ${obj.name}"
+        )
+    }
+
+    /**
+     * creates a KeyAction using an OnjObject
+     */
+    fun getAction(name: String, data: Any? = null): KeyAction {
+        return kotlinActions[name]?.invoke(data) ?: throw RuntimeException(
+            "unknown KOTLIN key action $name"
         )
     }
 }

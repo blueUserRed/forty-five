@@ -40,10 +40,10 @@ class CreditScreenController(private val screen: OnjScreen) : ScreenController()
 
     override fun update() {
         timeline.updateTimeline()
-        if (creditsScroller.offsetY >= creditsScroller.height - screen.viewport.worldHeight) {
+        if (creditsScroller.drawOffsetY >= creditsScroller.height - screen.viewport.worldHeight) {
             scrollSpeed = 0
             return
         }
-        creditsScroller.offsetY += scrollSpeed * Gdx.graphics.deltaTime
+        creditsScroller.drawOffsetY += scrollSpeed * Gdx.graphics.deltaTime
     }
 }

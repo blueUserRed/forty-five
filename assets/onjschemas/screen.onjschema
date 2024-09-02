@@ -114,6 +114,7 @@ $Widget {
         scrollbarBackgroundName?: string,
         scrollbarName?: string,
         scrollbarSide?: string,
+        progress?: float,
         ...widgetSharedKeys
     }
 
@@ -371,6 +372,10 @@ $Behaviour {
     $OnClickChangeScreenStateBehaviour {
         state: string,
         enter: boolean
+    }
+
+    $OnClickToggleScreenStateBehaviour {
+        state: string,
     }
 
     $MouseHoverBehaviour {

@@ -40,6 +40,8 @@ object CommonNamespace {
             "pow2In" with OnjInterpolation(Interpolation.pow2In)
             "pow2InInverse" with OnjInterpolation(Interpolation.pow2InInverse)
             "pow4In" with OnjInterpolation(Interpolation.pow4In)
+            "exp5In" with OnjInterpolation(Interpolation.exp5In)
+            "exp10Out" with OnjInterpolation(Interpolation.exp10Out)
 //            "pow2InInverse" with OnjInterpolation(Interpolation.pow4InInverse)
         }
     )

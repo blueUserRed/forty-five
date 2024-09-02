@@ -60,7 +60,7 @@ class MapScreen : ScreenCreator() {
             nodeSize = 60f,
             lineWidth = 10f,
             playerMoveTime = 300,
-            directionIndicatorHandle = "common_symbol_arrow",
+            directionIndicatorHandle = "common_symbol_arrow_right",
             startButtonName = "",
             encounterModifierParentName = "",
             encounterModifierDisplayTemplateName = "",

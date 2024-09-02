@@ -56,7 +56,7 @@ var dialogWidget = $Box {
             }
         ],
         progressTime: 0.01,
-        advanceArrowDrawable: "common_symbol_arrow",
+        advanceArrowDrawable: "common_symbol_arrow_right",
         advanceArrowOffset: -75.0,
         touchable: "enabled",
         optionsBox: "options_box",

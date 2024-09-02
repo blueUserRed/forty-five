@@ -120,7 +120,7 @@ var settingsBox = $Box {
                         positionRight: 40#points,
                     }
                 ],
-                arrowTexture: "common_symbol_arrow",
+                arrowTexture: "common_symbol_arrow_right",
                 arrowWidth: 20.0,
                 arrowHeight: 20.0,
                 bindTo: "enableScreenShake",
@@ -163,7 +163,7 @@ var settingsBox = $Box {
                         positionRight: 40#points,
                     }
                 ],
-                arrowTexture: "common_symbol_arrow",
+                arrowTexture: "common_symbol_arrow_right",
                 arrowWidth: 20.0,
                 arrowHeight: 20.0,
                 bindTo: "startScreen",
@@ -206,7 +206,7 @@ var settingsBox = $Box {
                         positionRight: 40#points,
                     }
                 ],
-                arrowTexture: "common_symbol_arrow",
+                arrowTexture: "common_symbol_arrow_right",
                 arrowWidth: 20.0,
                 arrowHeight: 20.0,
                 bindTo: "disableRt",
@@ -235,7 +235,7 @@ var settingsBox = $Box {
                     }
                 ],
                 font: "red_wing",
-                text: "Fullscreen type: ",
+                text: "Window mode: ",
                 fontScale: 0.8,
                 color: color.forty_white,
             },
@@ -248,10 +248,10 @@ var settingsBox = $Box {
                         positionRight: 40#points,
                     }
                 ],
-                arrowTexture: "common_symbol_arrow",
+                arrowTexture: "common_symbol_arrow_right",
                 arrowWidth: 20.0,
                 arrowHeight: 20.0,
-                bindTo: "fullScreenMode",
+                bindTo: "windowMode",
                 font: "red_wing",
                 fontScale: 0.8,
             }

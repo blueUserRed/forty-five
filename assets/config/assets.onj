@@ -159,6 +159,30 @@ textures: [
         file: "blobs/game_screen/hit_overlay.png"
     },
     {
+        name: "afterlife_arrow_left",
+        file: "blobs/game_screen/afterlife/afterlife_arrow_left.png"
+    },
+    {
+        name: "afterlife_arrow_right",
+        file: "blobs/game_screen/afterlife/afterlife_arrow_right.png"
+    },
+    {
+        name: "afterlife_background",
+        file: "blobs/game_screen/afterlife/afterlife_background.png"
+    },
+    {
+        name: "afterlife_bullet_affected",
+        file: "blobs/game_screen/afterlife/afterlife_bullet_affected.png"
+    },
+    {
+        name: "afterlife_card_slot",
+        file: "blobs/game_screen/afterlife/afterlife_card_slot.png"
+    },
+    {
+        name: "afterlife_icon",
+        file: "blobs/game_screen/afterlife/afterlife_icon.png"
+    },
+    {
         name: "burning_icon",
         file: "blobs/status_effects/burning_icon.png",
         useMipMaps: true
@@ -1143,8 +1167,12 @@ textures: [
         file: "blobs/ui_elements/settings/setting_background.png",
     },
     {
-        name: "common_symbol_arrow",
+        name: "common_symbol_arrow_right",
         file: "blobs/common/symbols/arrow_right.png",
+    },
+    {
+        name: "common_symbol_arrow_left",
+        file: "blobs/common/symbols/arrow_left.png",
     },
     {
         name: "shield_icon_large",
@@ -1421,7 +1449,25 @@ ninepatches: [
         left: 10,
         right: 10,
         scale: 0.5
-    }
+    },
+    {
+        name: "afterlife_scrollbar",
+        file: "blobs/game_screen/afterlife/scrollbar.png",
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
+    },
+    {
+        name: "afterlife_scrollbar_background",
+        file: "blobs/game_screen/afterlife/scrollbar_background.png",
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
+    },
 ],
 
 particles: [

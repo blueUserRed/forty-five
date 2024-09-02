@@ -29,6 +29,7 @@ object BehaviourFactory {
 
     private val behaviours: MutableMap<String, BehaviourCreator> = mutableMapOf(
         "OnClickChangeScreenStateBehaviour" to { onj, actor, screen -> OnClickChangeScreenStateBehaviour(onj, actor, screen) },
+        "OnClickToggleScreenStateBehaviour" to { onj, actor, screen -> OnClickToggleScreenStateBehaviour(onj, actor, screen) },
         "MouseHoverBehaviour" to { onj, actor, screen -> MouseHoverBehaviour(onj, actor, screen) },
         "OnClickExitBehaviour" to { _, actor, screen -> OnClickExitBehaviour(actor, screen) },
         "OnClickAbandonRunBehaviour" to { onj, actor, screen -> OnClickAbandonRunBehaviour(onj, actor, screen) },
@@ -117,6 +118,15 @@ class OnClickChangeScreenStateBehaviour(onj: OnjNamedObject, actor: Actor, scree
 
     override val onCLick: BehaviourCallback = {
         if (enter) onjScreen.enterState(stateName) else onjScreen.leaveState(stateName)
+    }
+}
+
+class OnClickToggleScreenStateBehaviour(onj: OnjNamedObject, actor: Actor, screen: OnjScreen) : Behaviour(actor, screen) {
+
+    private val stateName = onj.get<String>("state")
+
+    override val onCLick: BehaviourCallback = {
+        if (stateName in onjScreen.screenState) onjScreen.leaveState(stateName) else onjScreen.enterState(stateName)
     }
 }
 
