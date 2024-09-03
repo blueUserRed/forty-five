@@ -2,6 +2,9 @@ package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -11,9 +14,20 @@ import kotlin.math.max
 // widthFitContent and heightFitContent (including and/or exluding posType.absolute)
 // positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
-class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor {
+class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor {
 
     override var positionType: PositionType = PositionType.RELATIV
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false //needs touchable enabled to work
+        set(value) {
+            if (this.isFocused) screen.focusedActor = null
+            field = value
+        }
+    override var isFocused: Boolean = false
+    override var isSelected: Boolean = false
+    override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean = false
+    override var isDisabled: Boolean = false
 
     var verticalAlign: CustomAlign = CustomAlign.START      // top
     var horizontalAlign: CustomAlign = CustomAlign.START    // left
@@ -26,19 +40,20 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
     var flexDirection = FlexDirection.COLUMN
     var wrap = CustomWrap.NONE
 
-    override var marginTop: Float=0F
-    override var marginBottom: Float=0F
-    override var marginLeft: Float=0F
-    override var marginRight: Float=0F
+    override var marginTop: Float = 0F
+    override var marginBottom: Float = 0F
+    override var marginLeft: Float = 0F
+    override var marginRight: Float = 0F
 
-    var paddingTop: Float=0F
-    var paddingBottom: Float=0F
-    var paddingLeft: Float=0F
-    var paddingRight: Float=0F
+    var paddingTop: Float = 0F
+    var paddingBottom: Float = 0F
+    var paddingLeft: Float = 0F
+    var paddingRight: Float = 0F
 
 
     init {
         touchable = Touchable.childrenOnly
+        bindFocusStateListeners(this, screen)
     }
 
     override fun layout() {
@@ -111,7 +126,7 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
             val yColumnStarts =
                 addDistInBetween(verticalAlign, biggestPerColumns, prefHeight, minVerticalDistBetweenElements)
             wrapLines.forEachIndexed { i, it ->
-                layoutSingleRow(it, prefWidth, biggestPerColumns[i],  yColumnStarts[i])
+                layoutSingleRow(it, prefWidth, biggestPerColumns[i], yColumnStarts[i])
             }
         }
     }
@@ -218,14 +233,23 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
                         children,
                         FlexDirection.ROW,
                         layoutPrefWidth - paddingLeft - paddingRight,
-                        minVerticalDistBetweenElements)
+                        minVerticalDistBetweenElements
+                    )
             }
         } else {
             if (flexDirection.isColumn) {
-                layoutPrefWidth = max(width, (children.maxOfOrNull { it.w } ?: 0F)+paddingLeft+paddingRight)
-                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }.dropLast(1).sum() + paddingTop + paddingBottom)
+                layoutPrefWidth = max(width, (children.maxOfOrNull { it.w } ?: 0F) + paddingLeft + paddingRight)
+                layoutPrefHeight = max(
+                    height,
+                    children.sumOf { it.h.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }
+                        .dropLast(1).sum() + paddingTop + paddingBottom
+                )
             } else {
-                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }.dropLast(1).sum() +paddingLeft+paddingRight)
+                layoutPrefWidth = max(
+                    width,
+                    children.sumOf { it.w.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }
+                        .dropLast(1).sum() + paddingLeft + paddingRight
+                )
                 layoutPrefHeight = max(height, (children.maxOfOrNull { it.h } ?: 0F) + paddingTop + paddingBottom)
             }
         }
@@ -265,7 +289,8 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
      * first element are all "relativ" children (the ones that are placed dynamically), second element all "absolute" children
      */
     private fun childrenAsBoxes(): Pair<List<Pair<Box, Actor>>, List<Pair<Box, Actor>>> {
-        val lists = notZIndexedChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+        val lists =
+            notZIndexedChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
         return lists.first.map {
             var w = it.width
             var h = it.height

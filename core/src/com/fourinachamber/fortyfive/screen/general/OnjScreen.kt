@@ -91,25 +91,38 @@ open class OnjScreen(
     val screenControllers: List<ScreenController>
         get() = _screenControllers
 
-    var selectedActor: KeySelectableActor? = null
-        @AllThreadsAllowed set(value) {
-            field?.isSelected = false
-            field = value
-            field?.isSelected = true
-            selectedNode = null
-        }
+    private val selectedActors: MutableList<Actor> = mutableListOf()
 
-    var selectedNode: KeySelectionHierarchyNode? = null
-        @AllThreadsAllowed set(value) {
-            if (!(value?.isSelectable ?: true)) {
-                throw RuntimeException("only a node that is selectable can be assigned to 'selectedNode'")
-            }
-            value?.actor?.let { selectedActor = it as KeySelectableActor }
-            field = value
-        }
+    fun selectActor(actor: Actor) {
+        val oldList = selectedActors.toList()
+        selectedActors.add(actor)
+        selectedActors.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+    }
+
+    fun deselectActor(actor: Actor) {
+        val oldList = selectedActors.toList()
+        selectedActors.remove(actor)
+        oldList.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+    }
+
+    fun escapeSelectionHierarchy() {
+        focusedActor = null
+        selectionHierarchy.removeLast()
+    }
 
     var focusedActor: FocusableActor? = null
+        set(value) {
+            field?.let { if (it is Actor) it.fire(FocusChangeEvent(it, value as Actor?)) }
+            value?.let { if (it is Actor) it.fire(FocusChangeEvent(field as Actor?, it)) }
+            field = value
+        }
     private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
+
+    fun addToSelectionHierarchy(child: FocusableParent) {
+        selectionHierarchy.add(child)
+        selectionHierarchy.last().updateFocusableActors(this)
+    }
+
     fun getFocusableActors(): MutableList<FocusableActor> {
         return getFocusableActors(stage.root)
     }
@@ -125,19 +138,15 @@ open class OnjScreen(
         return selectableActors
     }
 
-    fun focusNext(direction: Vector2?=null) {
+    fun focusNext(direction: Vector2? = null) {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = selectionHierarchy.last().focusNext(direction, this)
-        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
-        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
         this.focusedActor = focusableElement
     }
 
     fun focusPrevious() {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = selectionHierarchy.last().focusPrevious(this)
-        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
-        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
         this.focusedActor = focusableElement
     }
 
@@ -273,13 +282,13 @@ open class OnjScreen(
         screenStateChangeListeners.forEach { it(false, state) }
     }
 
-    fun addScreenStateChangeListener(listener: (entered: Boolean, state: String) -> Unit) {
+    fun addOnScreenStateChangedListener(listener: (entered: Boolean, state: String) -> Unit) {
         screenStateChangeListeners.add(listener)
     }
 
     inline fun listenToScreenState(listenToState: String, crossinline listener: (entered: Boolean) -> Unit) {
-        addScreenStateChangeListener { entered, state ->
-            if (state != listenToState) return@addScreenStateChangeListener
+        addOnScreenStateChangedListener { entered, state ->
+            if (state != listenToState) return@addOnScreenStateChangedListener
             listener(entered)
         }
     }
@@ -331,16 +340,17 @@ open class OnjScreen(
         //TODO remove from behaviour and dragAndDrop and so on
     }
 
-    fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
+    fun <T> addOnFocusDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
         val showHoverDetailLambda = { showHoverDetail(actor, actor, actor.actorTemplate) }
-        if (actor is HoverStateActor) {
-            actor.onHoverEnter {
-                if (dragAndDrop.none { it.value.isDragging }) { //TODO MARVIN has to add that this if works in a fight too
-                    Gdx.app.postRunnable(showHoverDetailLambda)
+        if (actor is FocusableActor) {
+            actor.onFocusChange { _, new ->
+                if (new == actor) {
+                    if (dragAndDrop.none { it.value.isDragging }) { //TODO MARVIN has to add that this if works in a fight too
+                        Gdx.app.postRunnable(showHoverDetailLambda)
+                    }
+                } else {
+                    hideHoverDetail()
                 }
-            }
-            actor.onHoverLeave {
-                hideHoverDetail()
             }
         } else {
             actor.onEnter {
@@ -350,7 +360,6 @@ open class OnjScreen(
                 hideHoverDetail()
             }
         }
-
     }
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
@@ -359,13 +368,13 @@ open class OnjScreen(
         if (currentHoverDetail != null) hideHoverDetail()
         val detail = screenBuilder.generateFromTemplate(
             detailTemplate,
-            displayDetailActor.getHoverDetailData(),
+            displayDetailActor.getFocusDetailData(),
             null,
             this
         ) ?: throw RuntimeException("hover template '$detailTemplate' does not exist")
         displayDetailActor.detailActor = detail
 
-        displayDetailActor.setBoundsOfHoverDetailActor(this)
+        displayDetailActor.setBoundsOfFocusDetailActor(this)
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
@@ -482,7 +491,7 @@ open class OnjScreen(
             .forEach(StyleManager::update) //all added items get updated too
         if (dragAndDrop.none { it.value.isDragging }) {
             stage.batch.begin()
-            currentDisplayDetailActor?.drawHoverDetail(this, stage.batch)
+            currentDisplayDetailActor?.drawFocusDetail(this, stage.batch)
 //                currentHoverDetail?.draw(stage.batch, 1f)
             if (currentHoverDetail != null) {
                 currentHoverDetail!!.draw(stage.batch, 1f)
@@ -541,6 +550,10 @@ open class OnjScreen(
         stage.dispose()
         additionalDisposables.forEach(Disposable::dispose)
         lifetime.die()
+    }
+
+    fun updateSelectable() {
+        selectionHierarchy.last().updateFocusableActors(this)
     }
 
     companion object {

@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -46,6 +47,7 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract fun getScreenControllers(): List<ScreenController>
 
     abstract fun getInputMaps(): List<KeyInputMap>
+    abstract fun getSelectionHierarchyStructure(): List<FocusableParent>
 
     inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen)
@@ -93,42 +95,42 @@ abstract class ScreenCreator : ResourceBorrower {
 
     inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
         val image = CustomImageActor(null, screen, false, "", false)
-        builder(image)
         this.addActor(image)
+        builder(image)
         return image
     }
     inline fun Group.box(builder: CustomBox.() -> Unit = {}): CustomBox {
         val image = CustomBox(screen)
-        builder(image)
         this.addActor(image)
+        builder(image)
         return image
     }
 
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(definedWidth = width)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
     inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(definedHeight = height)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
     inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(growProportionHeight = proportion)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
     inline fun Group.horizontalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(growProportionWidth = proportion)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
@@ -163,8 +165,8 @@ abstract class ScreenCreator : ResourceBorrower {
     fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
-        builder(actor)
         this.addActor(actor)
+        builder(actor)
         return actor
     }
 

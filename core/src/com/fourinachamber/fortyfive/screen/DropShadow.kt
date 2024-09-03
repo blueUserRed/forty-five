@@ -17,7 +17,7 @@ interface DropShadowActor {
 }
 
 data class DropShadow(
-    val color: Color,
+    val color: Color, //WILL BE NULLABLE if it is not set, it just takes the color of the objects around it, this needs to be implemented by me
     val multiplier: Float = 0.5f,
     val offX: Float = 0f,
     val offY: Float = 0f,
@@ -40,7 +40,7 @@ data class DropShadow(
         batch.shader = shader.shader
         shader.shader.setUniformf("u_multiplier", multiplier)
         shader.shader.setUniformf("u_offset", Vector2(0f, 0f))
-        shader.shader.setUniformf("u_color", color)
+        color.let { shader.shader.setUniformf("u_color", it) }
         drawer()
         batch.flush()
         batch.shader = null

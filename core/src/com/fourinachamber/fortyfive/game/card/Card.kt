@@ -717,7 +717,7 @@ class CardActor(
 
     override var isHoveredOver: Boolean = false
 
-    override var isSelected: Boolean = false
+//    override var isSelected: Boolean = false
     override var partOfHierarchy: Boolean = true
     override var isClicked: Boolean = false
 
@@ -757,7 +757,7 @@ class CardActor(
 
     init {
         bindHoverStateListeners(this)
-        registerOnHoverDetailActor(this, screen)
+        registerOnFocusDetailActor(this, screen)
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
@@ -809,7 +809,7 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        setBoundsOfHoverDetailActor(screen)
+        setBoundsOfFocusDetailActor(screen)
         batch ?: return
         if (cardTexturePromise?.isResolved == true) {
             texture?.let { FortyFive.cardTextureManager.giveTextureBack(card) }
@@ -962,7 +962,7 @@ class CardActor(
         playSoundsOnHover = false
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+    override fun getFocusDetailData(): Map<String, OnjValue> = mapOf(
         "description" to OnjString(
             card.shortDescription.ifBlank { card.flavourText }
         ),
@@ -975,12 +975,12 @@ class CardActor(
 
     override fun positionChanged() {
         super.positionChanged()
-        setBoundsOfHoverDetailActor(screen)
+        setBoundsOfFocusDetailActor(screen)
     }
 
     override fun sizeChanged() {
         super.sizeChanged()
-        setBoundsOfHoverDetailActor(screen)
+        setBoundsOfFocusDetailActor(screen)
     }
 
     override fun onDetailDisplayStarted() {

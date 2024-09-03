@@ -137,7 +137,7 @@ interface KeySelectableActor : BoundedActor {
     /**
      * true when the actor is currently selected
      */
-    var isSelected: Boolean
+//    var isSelected: Boolean
 
     /**
      * true when the actor wants to be part of the hierarchy used to determine the next actor.
@@ -185,22 +185,26 @@ interface HoverStateActor {
     }
 }
 
-interface FocusableActor {
-
-    fun onFocusChange(oldElement: FocusableActor?, newElement: FocusableActor?) {
-        isFocused = this == newElement
-    }
-
-    fun onSelectChange(oldElements: List<FocusableActor>, newElements: List<FocusableActor>) {
-        isSelected = this in newElements
-    }
+interface FocusableActor : HoverStateActor {
 
     var group: SelectionGroup?
 
+    /**
+     * make sure this is only set to false if it is NOT SELECTED
+     */
     var isFocusable: Boolean
     var isFocused: Boolean
     var isSelected: Boolean
 
+    fun bindFocusStateListeners(actor: Actor, screen: OnjScreen) {
+        bindHoverStateListeners(actor)
+        actor.onHoverEnter {
+            if (isFocusable) screen.focusedActor = this
+        }
+        actor.onHoverLeave {
+            if (screen.focusedActor == actor) screen.focusedActor = null
+        }
+    }
 }
 
 /**
@@ -244,12 +248,12 @@ interface DisplayDetailsOnHoverActor {
     var isHoverDetailActive: Boolean
     val actor: Actor
 
-    fun <T> registerOnHoverDetailActor(
+    fun <T> registerOnFocusDetailActor(
         actor: T,
         screen: OnjScreen
-    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
+    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnFocusDetailActor(actor)
 
-    fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
+    fun setBoundsOfFocusDetailActor(screen: OnjScreen) {
         val actor = actor
         val detailActor = detailActor
         if (detailActor !is Layout) return
@@ -286,11 +290,11 @@ interface DisplayDetailsOnHoverActor {
         detailActor.invalidateHierarchy()
     }
 
-    fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
+    fun drawFocusDetail(screen: OnjScreen, batch: Batch) {
         detailActor?.draw(batch, 1f)
     }
 
-    fun getHoverDetailData(): Map<String, OnjValue>
+    fun getFocusDetailData(): Map<String, OnjValue>
 
     fun onDetailDisplayStarted() {}
     fun onDetailDisplayEnded() {}
@@ -305,10 +309,10 @@ interface GeneralDisplayDetailOnHoverActor : DisplayDetailsOnHoverActor {
         get() = "general_hover_detail_template"
         set(value) {}
 
-    override fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
+    override fun setBoundsOfFocusDetailActor(screen: OnjScreen) {
     }
 
-    override fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
+    override fun drawFocusDetail(screen: OnjScreen, batch: Batch) {
         val detailActor = detailActor ?: return
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
         if (detailActor is Layout) {
@@ -361,7 +365,7 @@ inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimati
     animationSpawners.find { it is T } as? T
 
 
-interface KotlinStyledActor {
+interface KotlinStyledActor : FocusableActor {
     var marginTop: Float //These are all to set the data
     var marginBottom: Float
     var marginLeft: Float
@@ -369,8 +373,8 @@ interface KotlinStyledActor {
 
     var positionType: PositionType
 
-    fun setMargin(value:Number){
-        val v=value.toFloat()
+    fun setMargin(value: Number) {
+        val v = value.toFloat()
         marginTop = v
         marginBottom = v
         marginRight = v

@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
@@ -29,6 +30,8 @@ class CustomBoxPlaygroundScreen : ScreenCreator() {
     override fun getInputMaps(): List<KeyInputMap> = listOf(
         loadInputMap("defaultInputMap", screen)
     )
+
+    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf()
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
 //        HealOrMaxHPScreenController(screen)

@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
@@ -82,6 +83,8 @@ class MapScreen : ScreenCreator() {
     override fun getScreenControllers(): List<ScreenController> = listOf(
         MapScreenController(screen)
     )
+
+    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf()
 
     override fun getRoot(): Group = newGroup {
         x = 0f

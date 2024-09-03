@@ -215,7 +215,7 @@ object FortyFive : Game() {
         }
         ConfigFileManager.init()
         ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(MapScreen()) })
-        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(CustomBoxPlaygroundScreen()) })
+        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
 //        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()

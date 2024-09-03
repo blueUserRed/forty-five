@@ -30,7 +30,7 @@ object ScreenControllerFactory {
         "StatsScreenController" to { _, screen -> StatsScreenController(screen) },
         "TitleScreenController" to { _, screen -> TitleScreenController(screen) },
         "CreditScreenController" to { _, screen -> CreditScreenController(screen) },
-        "BiomeBackgroundScreenController" to { onj, screen -> BiomeBackgroundScreenController(screen, onj) },
+        "BiomeBackgroundScreenController" to { onj, screen -> BiomeBackgroundScreenController(screen, onj.get<Boolean>("useSecondary")) },
         "DraftScreenController" to { _, screen -> DraftScreenController(screen) },
         "FadeToBlackScreenController" to { onj, screen -> FadeToBlackScreenController(screen, onj) },
         "CardCollectionScreenController" to { onj, screen -> CardCollectionScreenController(screen, onj) },

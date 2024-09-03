@@ -492,7 +492,7 @@ textures: [
     },
     {
         name: "heal_or_max_background",
-        file: "blobs/events/heal_or_maxhp/heal_or_max_background.png"
+        file: "blobs/events/heal_or_maxhp/heal_and_or_maxhp_background.png"
     },
     {
         name: "heal_or_max_selector_background",
@@ -501,10 +501,6 @@ textures: [
     {
         name: "heal_or_max_selector_background_selected",
         file: "blobs/events/heal_or_maxhp/heal_or_max_selector_background_selected.png"
-    },
-    {
-        name: "max_health_background",
-        file: "blobs/events/heal_or_maxhp/max_health_background.png"
     },
     {
         name: "shop_add_to_backpack",
