@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.CustomBoxPlaygroundScreen
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.MapScreen
+import com.fourinachamber.fortyfive.screen.Screens.AddMaxHPScreen
 import com.fourinachamber.fortyfive.screen.Screens.HealOrMaxHPScreen
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
@@ -217,6 +218,7 @@ object FortyFive : Game() {
         ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(MapScreen()) })
         ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
 //        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
+        ConfigFileManager.addScreen("addMaxHPScreen", creator = { FromKotlinScreenBuilder(AddMaxHPScreen()) })
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()

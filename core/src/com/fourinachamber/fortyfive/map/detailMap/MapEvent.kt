@@ -436,7 +436,7 @@ class HealOrMaxHPMapEvent(
 
     override fun completed() {
         isCompleted = true
-//        canBeStarted = false //TODO comment back in, THIS IS IMPORTANT TO NOT HAVE INIFINTE HEALS MARVIN TELL MEE PLEAAAASSSEEE
+        canBeStarted = false
         currentlyBlocks = false
         MapManager.changeToMapScreen()
     }

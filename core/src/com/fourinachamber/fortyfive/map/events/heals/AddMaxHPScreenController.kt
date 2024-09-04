@@ -17,7 +17,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-class AddMaxHPScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController(), Completable {
+class AddMaxHPScreenController(private val screen: OnjScreen) : ScreenController(), Completable {
     private var context: AddMaxHPMapEvent? = null
 
     private var amount: Int = -1

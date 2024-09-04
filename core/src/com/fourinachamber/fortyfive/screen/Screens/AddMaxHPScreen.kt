@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondition
+import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
@@ -22,9 +23,9 @@ import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
 
-class HealOrMaxHPScreen : ScreenCreator() {
+class AddMaxHPScreen : ScreenCreator() {
 
-    override val name: String = "healOrMaxHPScreen"
+    override val name: String = "addMaxHPScreen"
 
     val worldWidth = 1600f
     val worldHeight = 900f
@@ -49,15 +50,10 @@ class HealOrMaxHPScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     SelectionTransition.TransitionType.SEAMLESS,
-                    groups = listOf("healOrMaxHP_selection")
-                ),
-                SelectionTransition(
-                    SelectionTransition.TransitionType.SEAMLESS,
-                    condition = SelectionTransitionCondition.Screenstate("healOrMaxHP_optionSelected"),
-                    groups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept")
+                    groups = listOf("addMaxHP_accept")
                 ),
             ),
-            startGroup = "healOrMaxHP_selection",
+            startGroup = "addMaxHP_accept",
         )
     }
 
@@ -66,7 +62,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        HealOrMaxHPScreenController(screen, "add_lives_option"),
+        AddMaxHPScreenController(screen),
         BiomeBackgroundScreenController(screen, true)
     )
 
@@ -84,10 +80,10 @@ class HealOrMaxHPScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
         box {
-            x = worldWidth.percent(26.5)
-            y = worldHeight.percent(19)
-            width = worldWidth.percent(48)
-            height = worldHeight.percent(58)
+            width = worldWidth.percent(38)
+            height = worldHeight.percent(46)
+            x = (worldWidth - width) / 2
+            y = worldHeight.percent(27)
             backgroundHandle = "heal_or_max_background"
 
             flexDirection = FlexDirection.COLUMN
@@ -105,47 +101,45 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 backgroundHandle = "map_node_heal"
             }
 
-            label("red_wing", "Choose your reward", color = Color.FortyWhite)
+            label("red_wing", "MAX HP Increased!", color = Color.FortyWhite)
 
-            chooseElementBox()
+//            chooseElementBox()
 
-            val img = image {
-                backgroundHandle = "forty_white_rounded"
-                height = 1F
-                logicalOffsetY = -10F
+            image {
+                backgroundHandle = "heal_or_max_add_max_health"
+                width = worldHeight.percent(17)
+                height = worldHeight.percent(17)
+                marginTop = 35F
+                marginBottom = 25F
             }
 
-            val text =
-                label("red_wing", "{map.cur_event.max_hp.distanceToEnd}", isTemplate = true, color = Color.FortyWhite) {
-                    setFontScale(0.6F)
-                    setAlignment(Align.center)
-                }
-            text.onLayout { img.width = text.prefWidth * 1.5F }
 
+            label("red_wing", "+{map.cur_event.max_hp.amount} MAX HP", isTemplate = true, color = Color.FortyWhite) {
+                setFontScale(1.1F)
+                setAlignment(Align.center)
+            }
+
+            label(
+                "red_wing",
+                "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.max_hp.lives_new}/{map.cur_event.max_hp.maxLives_new} HP",
+                isTemplate = true,
+                color = Color.FortyWhite
+            ) {
+                setFontScale(0.5F)
+                setAlignment(Align.center)
+            }
 
             box {
-                name("acceptButton")
-                group = "healOrMaxHP_accept"
+                group = "addMaxHP_accept"
                 backgroundHandle = "heal_or_max_accept_invalid"
-                relativeWidth(23F)
-                relativeHeight(10F)
-                marginTop = parent.height.percent(6)
+                relativeWidth(28F)
+                relativeHeight(13F)
+//                marginTop = parent.height.percent(6)
                 touchable = Touchable.enabled
-                screen.addOnScreenStateChangedListener { entered, state ->
-                    if (state == "healOrMaxHP_optionSelected") {
-                        if (entered) {
-                            backgroundHandle = "heal_or_max_accept"
-                            isFocusable = true
-                            isDisabled = false
-                            isSelectable = true
-                        } else {
-                            isDisabled = true
-                            isFocusable = false
-                            isSelectable = false
-                            backgroundHandle = "heal_or_max_accept_invalid"
-                        }
-                    }
-                }
+                backgroundHandle = "heal_or_max_accept"
+                isFocusable = true
+                isSelectable = true
+
                 onFocusChange { _, _ ->
                     backgroundHandle = if (isFocused) {
                         "heal_or_max_accept_hover"
@@ -155,9 +149,9 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 }
                 onSelect {
                     val controller =
-                        screen.screenControllers.filterIsInstance<HealOrMaxHPScreenController>().firstOrNull()
+                        screen.screenControllers.filterIsInstance<AddMaxHPScreenController>().firstOrNull()
                     controller
-                        ?: throw RuntimeException("The HealOrMaxHPScreen needs a corresponding Controller to work")
+                        ?: throw RuntimeException("The AddMaxHPScreen needs a corresponding Controller to work")
                     controller.completed()
                 }
             }
@@ -216,7 +210,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
         isSelectable = true
         group = "healOrMaxHP_selection"
 
-        dropShadow = DropShadow(Color.Yellow, scaleY=1f, showDropShadow = false)
+        dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
         onFocusChange { _, _ ->
             updateDesignForElement()
         }
@@ -251,6 +245,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
             height = 2F
             logicalOffsetY = -10F
         }
+
         val subtext = label("red_wing", templateSubText, isTemplate = true, color = Color.Taupe_gray) {
             setFontScale(0.5F)
             setAlignment(Align.center)
@@ -265,8 +260,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
         } else {
             "heal_or_max_selector_background"
         }
-        dropShadow?.maxOpacity=0.2f
-        dropShadow?.showDropShadow = true
+        dropShadow?.maxOpacity = 0.2f
         if (isFocused) {
             if (isSelected) {
                 dropShadow?.color = Color.FortyWhite.interpolate(Color.Yellow)
@@ -274,10 +268,13 @@ class HealOrMaxHPScreen : ScreenCreator() {
             } else {
                 dropShadow?.color = Color.FortyWhite
             }
+            dropShadow?.showDropShadow = true
         } else if (isSelected) {
             dropShadow?.color = Color.Yellow
+            dropShadow?.showDropShadow = true
         } else {
             dropShadow?.showDropShadow = false
         }
+
     }
 }

@@ -69,10 +69,10 @@ screens: [
         name: "encounterScreen",
         file: "screens/game_screen.onj"
     },
-    {
-        name: "addMaxHPScreen",
-        file: "screens/add_max_hp_screen.onj"
-    },
+//    {
+//        name: "addMaxHPScreen",
+//        file: "screens/add_max_hp_screen.onj"
+//    },
     {
         name: "chooseCardScreen",
         file: "screens/choose_card_screen.onj"
