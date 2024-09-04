@@ -26,10 +26,6 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
     override var isFocused: Boolean = false
     override var isSelected: Boolean = false
     override var isSelectable: Boolean = false
-        set(value) {
-            if (value) customClickable()
-            field = value
-        }
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
     override var isDisabled: Boolean = false
@@ -58,7 +54,7 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
 
     init {
         touchable = Touchable.childrenOnly
-        bindFocusStateListeners(this, screen)
+        bindDefaultListeners(this, screen)
     }
 
     override fun layout() {

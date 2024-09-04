@@ -4,7 +4,6 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
@@ -50,7 +49,7 @@ open class CustomLabel(
     private val hoverText: String = "",
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor, KotlinStyledActor {
 
     override val actor: Actor = this
 
@@ -63,7 +62,19 @@ open class CustomLabel(
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
-//    override var isSelected: Boolean = false
+
+    override var marginTop: Float = 0F
+    override var marginBottom: Float = 0F
+    override var marginLeft: Float = 0F
+    override var marginRight: Float = 0F
+    override var positionType: PositionType = PositionType.RELATIV
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false
+    override var isFocused: Boolean = false
+    override var isSelectable: Boolean = false
+    override var isSelected: Boolean = false
+
+    //    override var isSelected: Boolean = false
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
@@ -93,7 +104,7 @@ open class CustomLabel(
     var forcedPrefWidth: Float? = null
 
     init {
-        bindHoverStateListeners(this)
+        bindDefaultListeners(this, screen)
         registerOnFocusDetailActor(this, screen)
     }
 
@@ -322,7 +333,7 @@ open class CustomImageActor(
     override var marginRight: Float=0F
 
     init {
-        bindFocusStateListeners(this,screen)
+        bindDefaultListeners(this, screen)
         registerOnFocusDetailActor(this, _screen)
     }
 
@@ -446,7 +457,8 @@ open class CustomFlexBox(
     override val actor: Actor = this
 
     private val dropShadowShader: Promise<BetterShader> by lazy {
-        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
+//        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
+        ResourceManager.request<BetterShader>(this, screen, "drop_shadow_shader")
     }
 
     override var isDisabled: Boolean = false
@@ -568,48 +580,6 @@ open class CustomFlexBox(
             if (parentAlpha * alpha < 1f) batch.flush()
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
             val background = background
-            if (name == "drop_shadow_testing_name") {
-                dropShadowShader.getOrNull()?.let {
-                    batch.flush()
-                    it.shader.bind()
-                    it.prepare(screen)
-                    val oldShader = batch.shader
-
-//                    val glowDist = 0.05F                  //drop shadow config
-////                    val glowDist = 0.015F
-//                    val extraWidth = 1F/1.2F
-//                    val extraHeight = 1F/1.2F
-//                    val offset= Vector2(0.02F,0.1F)
-
-//                    val glowDist = 0.05F                    //glow config
-////                    val glowDist = 0.015F
-//                    val extraWidth = 1F
-//                    val extraHeight = 1F
-//                    val offset= Vector2(0.0F,0.0F)
-
-//                    batch.shader = it.shader
-//                    it.shader.setUniformf("u_multiplier", glowDist)
-//                    it.shader.setUniformf("u_color", Color.GREEN)
-//                    it.shader.setUniformf("u_offset", offset)
-//                    background?.draw(batch,
-//                        x-width*glowDist*extraWidth,
-//                        y-height*glowDist*extraHeight,
-//                        width*(1+glowDist*2*extraWidth),
-//                        height*(1+glowDist*2*extraHeight))
-
-
-//                    it.shader.setUniformf("u_radius", 30F)
-//                    it.shader.setUniformf("u_dir", Vector2(0F,0.001F))
-//                    background?.draw(batch, x, y+height*2, width, height)
-//                    batch.flush()
-//                    it.shader.setUniformf("u_radius", 30F)
-//                    it.shader.setUniformf("u_dir", Vector2(0.001F,0F))
-//                    background?.draw(batch, x, y+height*2, width, height)
-
-                    batch.flush()
-                    batch.shader = oldShader
-                }
-            } //else //TODO remove this else
             if (background is TransformDrawable) {
                 background.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
@@ -1135,7 +1105,7 @@ class RotatableImageActor(
                 else -> {}
             }
         }
-        touchable = Touchable.enabled
+        touchable = Touchable.enabled //TODO remove i guess, why is this here, this probably shouldn't be here i think
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -1476,7 +1446,7 @@ class Spacer(
     override fun drawDebug(renderer: ShapeRenderer?) {
         renderer ?: return
         renderer.flush()
-        renderer.color = Color.RED
+        renderer.color = Color.Red
         val width = max(definedWidth, 10f)
         val height = max(definedHeight, 10f)
         renderer.rect(x, y, width, height)

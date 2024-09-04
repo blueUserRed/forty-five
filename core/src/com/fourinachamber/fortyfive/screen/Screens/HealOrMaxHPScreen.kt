@@ -19,6 +19,7 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
 
 class HealOrMaxHPScreen : ScreenCreator() {
@@ -108,18 +109,26 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
             chooseElementBox()
 
-            label("red_wing", "{map.cur_event.max_hp.distanceToEnd}", isTemplate = true, color = Color.FortyWhite) {
-                setFontScale(0.6F)
-                setAlignment(Align.center)
+            val img = image {
+                backgroundHandle = "forty_white_rounded"
+                height = 1F
+                logicalOffsetY = -10F
             }
+
+            val text =
+                label("red_wing", "{map.cur_event.max_hp.distanceToEnd}", isTemplate = true, color = Color.FortyWhite) {
+                    setFontScale(0.6F)
+                    setAlignment(Align.center)
+                }
+            text.onLayout { img.width = text.prefWidth * 1.5F }
 
 
             box {
                 name("acceptButton")
                 group = "healOrMaxHP_accept"
                 backgroundHandle = "heal_or_max_accept_invalid"
-                width = parent.width.percent(23)
-                height = parent.height.percent(10)
+                relativeWidth(23F)
+                relativeHeight(10F)
                 marginTop = parent.height.percent(6)
                 touchable = Touchable.enabled
                 screen.addOnScreenStateChangedListener { entered, state ->
@@ -135,7 +144,6 @@ class HealOrMaxHPScreen : ScreenCreator() {
                             isSelectable = false
                             backgroundHandle = "heal_or_max_accept_invalid"
                         }
-//                        screen.updateSelectable()
                     }
                 }
                 onFocusChange { _, _ ->
@@ -149,8 +157,10 @@ class HealOrMaxHPScreen : ScreenCreator() {
                     }
                 }
                 onSelect {
-                    val controller= screen.screenControllers.filterIsInstance<HealOrMaxHPScreenController>().firstOrNull()
-                    controller ?: throw RuntimeException("The HealOrMaxHPScreen needs a corresponding Controller to work")
+                    val controller =
+                        screen.screenControllers.filterIsInstance<HealOrMaxHPScreenController>().firstOrNull()
+                    controller
+                        ?: throw RuntimeException("The HealOrMaxHPScreen needs a corresponding Controller to work")
                     controller.completed()
                 }
             }
@@ -164,8 +174,8 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
 
     private fun Group.chooseElementBox() = box {
-        width = parent.width.percent(70)
-        height = parent.height.percent(63)
+        relativeWidth(70F)
+        relativeHeight(63F)
         flexDirection = FlexDirection.ROW
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.SPACE_BETWEEN
@@ -198,45 +208,40 @@ class HealOrMaxHPScreen : ScreenCreator() {
         textureName: ResourceHandle
     ) = box {
         name(name)
-        width = parent.width.percent(40)
-        height = parent.height.percent(93)
+        relativeWidth(40F)
+        relativeHeight(93F)
         flexDirection = FlexDirection.COLUMN
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.CENTER
-        touchable = Touchable.enabled
         backgroundHandle = "heal_or_max_selector_background"
+        touchable = Touchable.enabled
         isFocusable = true
         isSelectable = true
-        touchable = Touchable.enabled
         group = "healOrMaxHP_selection"
+
+        dropShadow = DropShadow(Color.Yellow, scaleY=1f, showDropShadow = false)
         onFocusChange { _, _ ->
-            if (isFocused) {
-                this.dropShadow = DropShadow(Color.FortyWhite)
-                debug = true
-            } else {
-                this.dropShadow = null
-                debug = false
-            }
+            updateDesignForElement()
         }
         onSelectChange { old, new ->
+            updateDesignForElement()
             if (isSelected) {
-                backgroundHandle = "heal_or_max_selector_background_selected"
                 FortyFive.mainThreadTask {
                     old.filter { it != this }.forEach { screen.deselectActor(it) }
                 }
                 screen.enterState("healOrMaxHP_optionSelected")
-            } else {
-                backgroundHandle = "heal_or_max_selector_background"
             }
-            if (new.isEmpty()){
+            if (new.isEmpty()) {
                 screen.leaveState("healOrMaxHP_optionSelected")
             }
         }
 
-
         image {
             backgroundHandle = textureName
-//            setScale(0.8F)
+            width = worldHeight.percent(12)
+            height = worldHeight.percent(12)
+            marginTop = 40F
+            marginBottom = 30F
         }
 
         label("red_wing", templateMainText, isTemplate = true, color = Color.DarkBrown) {
@@ -244,16 +249,41 @@ class HealOrMaxHPScreen : ScreenCreator() {
             setAlignment(Align.center)
         }
 
-
-        image {
-            backgroundHandle = "forty_white_rounded"
-            setScale(300F, 5F)
+        val img = image {
+            backgroundHandle = "taupe_gray_rounded"
+            height = 2F
+            logicalOffsetY = -10F
         }
 
-
-        label("red_wing", templateSubText, isTemplate = true, color = Color.Taupe_gray) {
+        val subtext = label("red_wing", templateSubText, isTemplate = true, color = Color.Taupe_gray) {
             setFontScale(0.5F)
             setAlignment(Align.center)
         }
+
+        subtext.onLayout { img.width = subtext.prefWidth * 1.2F }
+    }
+
+    private fun CustomBox.updateDesignForElement() {
+        backgroundHandle = if (isSelected) {
+            "heal_or_max_selector_background_selected"
+        } else {
+            "heal_or_max_selector_background"
+        }
+        dropShadow?.maxOpacity=0.2f
+        if (isFocused) {
+            if (isSelected) {
+                dropShadow?.color = Color.FortyWhite.interpolate(Color.Yellow)
+                dropShadow?.maxOpacity=0.4f
+            } else {
+                dropShadow?.color = Color.FortyWhite
+            }
+            dropShadow?.showDropShadow = true
+        } else if (isSelected) {
+            dropShadow?.color = Color.Yellow
+            dropShadow?.showDropShadow = true
+        } else {
+            dropShadow?.showDropShadow = false
+        }
+
     }
 }

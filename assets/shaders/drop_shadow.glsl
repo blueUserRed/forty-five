@@ -16,7 +16,7 @@ varying vec2 v_texCoords;
 uniform sampler2D u_texture;
 uniform float u_multiplier;
 uniform vec4 u_color;
-uniform vec2 u_offset;
+uniform float u_maxOpacity;
 
 %uniform u_time
 %uniform u_resolution
@@ -35,7 +35,7 @@ void main() {
     int depthPerDist=30;
     int maxSum=int(float(depthPerDist)*1.6);
 
-    float distancePerDirection = u_multiplier/(u_multiplier*2.0+1.0);
+    float distancePerDirection = u_multiplier/(u_multiplier * 2.0 + 1.0);
     float stepDist=distancePerDirection/float(depthPerDist);
 
 //    float depthSq=(depthPerDist*2.0)*(depthPerDist*2.0)+1.0;
@@ -47,14 +47,14 @@ void main() {
             if(abs(float(i))+abs(float(j))>float(maxSum)) break;
             float curMulti=getGauss(i,j);
             totalSum+=curMulti;
-            alpha += texture2D(u_texture, vec2(v_texCoords.x+float(i)*stepDist,v_texCoords.y+float(j)*stepDist)*(1.0+u_multiplier*2.0)-u_multiplier-u_offset).a * curMulti;
+            alpha += texture2D(u_texture, vec2(v_texCoords.x+float(i)*stepDist,v_texCoords.y+float(j)*stepDist)*(1.0+u_multiplier*2.0)-u_multiplier).a * curMulti;
         }
     }
     float alphaNew=alpha/totalSum*2.0; //this was for testing or other functions higher
-    if (alphaNew>=1.0){
-        alphaNew=1.0;
+    if (alphaNew >= 1.0){
+        alphaNew = 1.0;
     }
-    gl_FragColor = vec4(u_color.xyz, alphaNew*0.6);
+    gl_FragColor = vec4(u_color.xyz, alphaNew * u_maxOpacity);
 //    gl_FragColor = vec4(alphaNew*0.5, 0.0, 0.0, 1.0);
 
     /*else{

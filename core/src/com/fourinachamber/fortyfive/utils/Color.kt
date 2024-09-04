@@ -3,7 +3,7 @@ package com.fourinachamber.fortyfive.utils
 import com.badlogic.gdx.graphics.Color
 import kotlin.reflect.KProperty
 
-object Color : com.badlogic.gdx.graphics.Color() {
+object Color : Color() {
     // regex to replace from colors.onj
     // (\w+): color\(\"(.{6})\"\),
     // val $1 = Color(0x$2ff)

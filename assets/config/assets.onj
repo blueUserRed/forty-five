@@ -1423,6 +1423,15 @@ ninepatches: [
         scale: 0.0025
     },
     {
+        name: "taupe_gray_rounded",
+        file: "blobs/ninepatches/taupe_gray_rounded.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.0025
+    },
+    {
         name: "backpack_scrollbar_background",
         file: "blobs/ui_elements/backpack/scrollbar_background.png",
         top: 10,

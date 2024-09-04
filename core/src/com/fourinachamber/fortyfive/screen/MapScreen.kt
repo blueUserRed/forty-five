@@ -19,9 +19,7 @@ import com.fourinachamber.fortyfive.map.detailMap.MapNode
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
-import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.general.onHoverEnter
-import com.fourinachamber.fortyfive.screen.general.onHoverLeave
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import ktx.actors.onClick
 
@@ -208,26 +206,23 @@ class MapScreen : ScreenCreator() {
 
         label("red_wing", "Start") {
             setAlignment(Align.center)
-            onLayout { height = prefHeight }
             fontColor = Color.RED
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
+            syncHeight()
             onHoverEnter { fontColor = Color.WHITE }
             onHoverLeave { fontColor = Color.RED }
             backgrounds(
                 normal = "map_detail_encounter_button",
                 hover = "map_detail_encounter_button_hover",
             )
-            onClick {
+            onButtonClick {
                 mapWidget.onStartButtonClicked(this@label)
                 isDisabled = true
             }
             dropShadow = DropShadow(
                 Color.RED,
-                scaleX = 1.7f,
-                scaleY = 1.7f,
-                offX = 5f,
-                offY = -5f,
+                maxOpacity = 0.4f
             )
         }
 

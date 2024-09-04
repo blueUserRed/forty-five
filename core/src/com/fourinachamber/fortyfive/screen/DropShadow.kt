@@ -13,23 +13,32 @@ import com.fourinachamber.fortyfive.utils.Promise
 interface DropShadowActor {
 
     var dropShadow: DropShadow?
-
 }
 
 data class DropShadow(
-    val color: Color, //WILL BE NULLABLE if it is not set, it just takes the color of the objects around it, this needs to be implemented by me
-    val multiplier: Float = 0.5f,
+    var color: Color,
+    val multiplier: Float = 0.3f, // zwischen 0.2f und 0.6f ist es okay, kommt halt auf den zweck an, für den rest muss man die anderen werte auch setzten
     val offX: Float = 0f,
     val offY: Float = 0f,
-    val scaleX: Float = 1f,
-    val scaleY: Float = 1f,
+    var scaleX: Float = 0f,
+    var scaleY: Float = 0f,
+    var maxOpacity: Float = 0.2f,
+    var showDropShadow: Boolean = true
 ) {
 
+    init {
+        if (scaleX == 0f) scaleX = 1 + multiplier / 2
+        if (scaleY == 0f) scaleY = 1 + multiplier / 2
+    }
+
     fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) {
-        val sWidth = actor.width * scaleX
-        val sHeight = actor.height * scaleY
-        val x = actor.x - (sWidth - actor.width) / 2 + offX
-        val y = actor.y - (sHeight - actor.height) / 2 + offY
+        if (!showDropShadow) return
+        val scaleX2 = scaleX * (1 + multiplier)
+        val scaleY2 = scaleY * (1 + multiplier)
+        val x = actor.x - actor.width * (scaleX2 - 1) / 2 + offX
+        val y = actor.y - actor.height * (scaleY2 - 1) / 2 + offY
+        val sWidth = actor.width * scaleX2
+        val sHeight = actor.height * scaleY2
         doDropShadow(batch, screen, drawer = { drawable.draw(batch, x, y, sWidth, sHeight) })
     }
 
@@ -39,8 +48,8 @@ data class DropShadow(
         shader.prepare(screen)
         batch.shader = shader.shader
         shader.shader.setUniformf("u_multiplier", multiplier)
-        shader.shader.setUniformf("u_offset", Vector2(0f, 0f))
-        color.let { shader.shader.setUniformf("u_color", it) }
+        shader.shader.setUniformf("u_maxOpacity", maxOpacity)
+        shader.shader.setUniformf("u_color", color)
         drawer()
         batch.flush()
         batch.shader = null
@@ -50,6 +59,13 @@ data class DropShadow(
 
         val dropShadowShader: Promise<BetterShader> by lazy {
             ResourceManager.request(this, Lifetime.endless, "drop_shadow_shader")
+        }
+
+        fun dropShadowDefaults(
+            color: Color, multiplier: Float = 0.02f, offX: Float = 0f, offY: Float = 0f,
+            scaleX: Float = -1f, scaleY: Float = -1f, maxOpacity: Float = 0.6f
+        ): DropShadow {
+            return DropShadow(color, multiplier, offX, offY, scaleX, scaleY, maxOpacity)
         }
     }
 
