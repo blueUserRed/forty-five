@@ -9,9 +9,9 @@ import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
-import onj.value.OnjObject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -20,7 +20,7 @@ class HealOrMaxHPScreenController(private val screen: OnjScreen, healChosenName:
 
     private var context: HealOrMaxHPMapEvent? = null
 
-    private var healChosenTarekGeorgWidgetName: String = healChosenName
+    private var healWidgetName: String = healChosenName
 
     private lateinit var amount: Pair<Int, Int>
 
@@ -51,7 +51,7 @@ class HealOrMaxHPScreenController(private val screen: OnjScreen, healChosenName:
      */
     override fun completed() {
         SoundPlayer.situation("heal", screen)
-        if ((screen.namedActorOrError(healChosenTarekGeorgWidgetName) as CustomFlexBox).inActorState("selected")) {
+        if ((screen.namedActorOrError(healWidgetName) as BackgroundActor).backgroundHandle?.contains("selected") == true) {
             val newLives = min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
             FortyFiveLogger.debug(logTag, "Lives healed from ${SaveState.playerLives} to $newLives!")
             SaveState.playerLives = newLives

@@ -318,6 +318,7 @@ class RevolverSlot(
 ) : CustomImageActor(drawableHandle, screen), AnimationActor, KeySelectableActor {
 
     override var isSelected: Boolean = false
+    override var isSelectable: Boolean = false
 
     override var inAnimation: Boolean = false
 

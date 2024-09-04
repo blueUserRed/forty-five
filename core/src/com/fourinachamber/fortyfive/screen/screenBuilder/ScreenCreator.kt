@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.utils.TemplateString
+import ktx.actors.onClick
 import onj.value.OnjArray
 
 abstract class ScreenCreator : ResourceBorrower {

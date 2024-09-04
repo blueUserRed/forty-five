@@ -231,11 +231,11 @@ object KeyActionFactory {
         },
         "FocusNextDirectional" to {
             lambda@{ screen, code ->
-                val dir= when(code){
-                    Keys.W-> Vector2(0,-1)
-                    Keys.A-> Vector2(-1,0)
-                    Keys.S-> Vector2(0,1)
-                    Keys.D-> Vector2(1,0)
+                val dir = when (code) {
+                    Keys.W -> Vector2(0, -1)
+                    Keys.A -> Vector2(-1, 0)
+                    Keys.S -> Vector2(0, 1)
+                    Keys.D -> Vector2(1, 0)
                     else -> null
                 }
                 screen.focusNext(dir)
@@ -244,11 +244,19 @@ object KeyActionFactory {
         },
         "FocusPrevious" to {
             lambda@{ screen, code ->
-                println("keyCode: $code")
                 screen.focusPrevious()
                 true
             }
         },
+        "SelectFocusedElement" to {
+            lambda@{ screen, code ->
+                val actor= screen.focusedActor
+                if (actor !is Actor) return@lambda false
+                screen.changeSelectionFor(actor)
+                true
+            }
+        },
+
 
         )
 

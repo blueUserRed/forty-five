@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
@@ -194,15 +196,24 @@ interface FocusableActor : HoverStateActor {
      */
     var isFocusable: Boolean
     var isFocused: Boolean
+    var isSelectable: Boolean
     var isSelected: Boolean
 
     fun bindFocusStateListeners(actor: Actor, screen: OnjScreen) {
         bindHoverStateListeners(actor)
+        bindSelectableListener(actor, screen)
         actor.onHoverEnter {
             if (isFocusable) screen.focusedActor = this
         }
         actor.onHoverLeave {
             if (screen.focusedActor == actor) screen.focusedActor = null
+        }
+    }
+
+    fun bindSelectableListener(actor: Actor, screen: OnjScreen) {
+        actor.onButtonClick {
+            if (actor !is FocusableActor) screen.changeSelectionFor(actor)
+            else if (actor.isSelectable) screen.changeSelectionFor(actor)
         }
     }
 }
@@ -380,4 +391,6 @@ interface KotlinStyledActor : FocusableActor {
         marginRight = v
         marginLeft = v
     }
+    fun Group.customClickable() { onClick { fire(ButtonClickEvent()) } }
+
 }

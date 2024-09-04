@@ -224,6 +224,18 @@ class KeyInputMap(
                     priority = defaultPriority,
                     KeyInputCondition.Always,
                     listOf(
+                        KeyInputMapKeyEntry(Keys.SPACE),
+                        KeyInputMapKeyEntry(Keys.ENTER),
+                        KeyInputMapKeyEntry(Keys.NUMPAD_ENTER),
+                        ),
+                    KeyActionFactory.getAction("SelectFocusedElement")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
                         KeyInputMapKeyEntry(Keys.T),
                         ),
                     KeyActionFactory.getAction("ToggleDebugMenu")

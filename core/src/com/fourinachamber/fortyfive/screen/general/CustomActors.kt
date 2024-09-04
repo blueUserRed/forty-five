@@ -282,6 +282,7 @@ open class CustomImageActor(
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     override var isSelected: Boolean = false
+    override var isSelectable: Boolean = false
     override var group: SelectionGroup? = null
     override var isFocusable: Boolean = false
         set(value) {

@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
@@ -60,7 +61,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
     }
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(),screen)
+        KeyInputMap.createFromKotlin(listOf(), screen)
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
@@ -114,7 +115,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
 
             box {
-                name = "acceptButton"
+                name("acceptButton")
                 group = "healOrMaxHP_accept"
                 backgroundHandle = "heal_or_max_accept_invalid"
                 width = parent.width.percent(23)
@@ -127,9 +128,11 @@ class HealOrMaxHPScreen : ScreenCreator() {
                             backgroundHandle = "heal_or_max_accept"
                             isFocusable = true
                             isDisabled = false
+                            isSelectable = true
                         } else {
                             isDisabled = true
                             isFocusable = false
+                            isSelectable = false
                             backgroundHandle = "heal_or_max_accept_invalid"
                         }
 //                        screen.updateSelectable()
@@ -137,21 +140,19 @@ class HealOrMaxHPScreen : ScreenCreator() {
                 }
                 onFocusChange { _, _ ->
                     if (isFocused) {
-                        this.dropShadow = DropShadow(Color.FortyWhite)
+//                        this.dropShadow = DropShadow(Color.FortyWhite) //TODO this
                         backgroundHandle = "heal_or_max_accept_hover"
 
                     } else {
-                        this.dropShadow = null
+//                        this.dropShadow = null
                         backgroundHandle = "heal_or_max_accept"
                     }
                 }
-
-//                onSelect {
-//
-//                    onjScreen.screenControllers
-//                        .filterIsInstance<Completable>()
-//                        .forEach { it.completed() }
-//                }
+                onSelect {
+                    val controller= screen.screenControllers.filterIsInstance<HealOrMaxHPScreenController>().firstOrNull()
+                    controller ?: throw RuntimeException("The HealOrMaxHPScreen needs a corresponding Controller to work")
+                    controller.completed()
+                }
             }
         }
 
@@ -196,7 +197,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
         templateSubText: String,
         textureName: ResourceHandle
     ) = box {
-        this.name = name
+        name(name)
         width = parent.width.percent(40)
         height = parent.height.percent(93)
         flexDirection = FlexDirection.COLUMN
@@ -205,25 +206,30 @@ class HealOrMaxHPScreen : ScreenCreator() {
         touchable = Touchable.enabled
         backgroundHandle = "heal_or_max_selector_background"
         isFocusable = true
+        isSelectable = true
         touchable = Touchable.enabled
         group = "healOrMaxHP_selection"
         onFocusChange { _, _ ->
             if (isFocused) {
                 this.dropShadow = DropShadow(Color.FortyWhite)
                 debug = true
-                screen.enterState("healOrMaxHP_optionSelected")
             } else {
                 this.dropShadow = null
                 debug = false
             }
         }
-        onSelectChange { old, _ ->
+        onSelectChange { old, new ->
             if (isSelected) {
-                if (old.isEmpty()) {
-                    screen.enterState("healOrMaxHP_optionSelected")
-                } else {
-                    screen.deselectActor(old[0])
+                backgroundHandle = "heal_or_max_selector_background_selected"
+                FortyFive.mainThreadTask {
+                    old.filter { it != this }.forEach { screen.deselectActor(it) }
                 }
+                screen.enterState("healOrMaxHP_optionSelected")
+            } else {
+                backgroundHandle = "heal_or_max_selector_background"
+            }
+            if (new.isEmpty()){
+                screen.leaveState("healOrMaxHP_optionSelected")
             }
         }
 
