@@ -105,10 +105,10 @@ screens: [
 //        name: "mapScreen",
 //        file: "screens/map_screen.onj"
 //    },
-    {
-        name: "shopScreen",
-        file: "screens/shop_screen.onj"
-    },
+//    {
+//        name: "shopScreen",
+//        file: "screens/shop_screen.onj"
+//    },
     {
         name: "statsScreen",
         file: "screens/stats_screen.onj"

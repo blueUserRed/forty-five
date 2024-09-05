@@ -1,10 +1,10 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
-import com.fourinachamber.fortyfive.screen.DropShadow
-import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -14,13 +14,14 @@ import kotlin.math.max
 // widthFitContent and heightFitContent (including and/or exluding posType.absolute)
 // positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
-class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor {
+open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor {
 
     override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
     override var isFocusable: Boolean = false //needs touchable enabled to work
         set(value) {
-            if (this.isFocused) screen.focusedActor = null
+            if (this.isFocused && !value) screen.focusedActor = null
+            if (value) touchable = Touchable.enabled
             field = value
         }
     override var isFocused: Boolean = false
@@ -207,7 +208,7 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
         }
         if (actor is OffSettable) {
             x1 += actor.logicalOffsetX
-            y1 -= actor.logicalOffsetY // i don't know if this is the way
+            y1 -= actor.logicalOffsetY // I don't know if this is the way
         }
 
         x1 += paddingLeft // I don't know how well this works with VerticalAlign.End if the children are bigger than the element
@@ -396,4 +397,58 @@ enum class CustomDirection {
 
 enum class PositionType {
     ABSOLUTE, RELATIV
+}
+
+
+class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
+    // padding=cutdistance except for PositionType-ABSOLUTE elements (like the bar)
+    //    setScrollbarWithDefaultsTo(Direction, barName, barBackgroundName)
+    //    private val scrollDistance: Float,
+
+
+    //    scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP  // based on reverse placement or not
+    var scrollDirectionStart: CustomDirection = CustomDirection.TOP
+
+    var scrollDistancePerScroll: Float = 30F
+    private var scrollBar: Actor? = null
+    private var scrollBarBackground: Actor? = null
+
+    private var scrolledDistance = 0F
+    private var maxScrollableDistanceInDirection = -1F
+
+    private val scrollListener = object : InputListener() {
+        override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
+            stage.scrollFocus = this@CustomScrollableBox
+        }
+
+        override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
+            if (x > width || x < 0 || y > height || y < 0) stage?.scrollFocus = null
+        }
+
+        override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
+            this@CustomScrollableBox.scrolledBy(amountY)
+            return super.scrolled(event, x, y, amountX, amountY)
+        }
+    }
+    fun scrolledBy(amount: Float){
+        scrolledDistance += amount * scrollDistancePerScroll
+    }
+
+    fun setScrollBar(bar:Actor?, barBackground: Actor?) {
+        this.scrollBar = bar
+        this.scrollBarBackground = barBackground
+        invalidate()
+    }
+
+
+    fun setScrollBar(bar:String?, barBackground: String?){
+        val bar2=if (bar == null) null else screen.namedActorOrError(bar)
+        val barBack2=if (barBackground == null) null else screen.namedActorOrError(barBackground)
+        setScrollBar(bar2, barBack2)
+    }
+
+    init {
+        addListener(scrollListener)
+        //draglistener for bar
+    }
 }

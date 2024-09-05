@@ -1374,17 +1374,19 @@ open class CustomGroup(
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
-        notZIndexedChildren.add(index,actor)
+        notZIndexedChildren.add(index, actor)
         super.addActorAt(index, actor)
     }
     override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
-        notZIndexedChildren.remove(actor)
-        return super.removeActor(actor, unfocus)
+        val index = children.indexOf(actor, true)
+        if (index == -1) return false
+        removeActorAt(notZIndexedChildren.indexOf(actor), unfocus)//TODO ugly, but there is no better way i think (same with next method)
+        return true
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
-        notZIndexedChildren.removeAt(index)
-        return super.removeActorAt(index, unfocus)
+        val actor = notZIndexedChildren.removeAt(index)
+        return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: layoutPrefWidth

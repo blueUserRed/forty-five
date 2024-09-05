@@ -19,8 +19,8 @@ object Color : Color() {
     }
 
     val FortyWhite = Color(0xF0EADDff)
-    val White = Color(0xffffff)
-    val Red = Color(0xff0000)
+    val White = Color(0xffffffff)
+    val Red = Color(0xff0000ff)
     val Green = Color(0x00ff00ff)
     val DarkGreen = Color(0x6a8759ff)
     val Blue = Color(0x0000ffff)

@@ -215,10 +215,7 @@ object FortyFive : Game() {
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
-        ConfigFileManager.addScreen("mapScreen", creator = { FromKotlinScreenBuilder(MapScreen()) })
-        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
-//        ConfigFileManager.addScreen("healOrMaxHPScreen", creator = { FromKotlinScreenBuilder(HealOrMaxHPScreen()) })
-        ConfigFileManager.addScreen("addMaxHPScreen", creator = { FromKotlinScreenBuilder(AddMaxHPScreen()) })
+        ConfigFileManager.addKotlinScreens()
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()

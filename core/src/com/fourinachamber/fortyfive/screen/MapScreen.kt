@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.screen
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
@@ -12,6 +11,7 @@ import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.utils.Color
 import ktx.actors.onClick
 
 class MapScreen : ScreenCreator() {
@@ -38,7 +39,7 @@ class MapScreen : ScreenCreator() {
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "mapScreen" to 0,
-        "*" to 1000
+        "*" to 200 //TODO maybe change back to 1000
     )
 
     private val mapWidget by lazy {
@@ -75,14 +76,24 @@ class MapScreen : ScreenCreator() {
     }
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(
-        loadInputMap("defaultInputMap", screen)
+        KeyInputMap.createFromKotlin(listOf(),screen)
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         MapScreenController(screen)
     )
 
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf()
+    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
+        FocusableParent(
+            listOf(
+                SelectionTransition(
+                    SelectionTransition.TransitionType.SEAMLESS,
+                    groups = listOf("Map_startEvent")
+                ),
+            ),
+            startGroup = "Map_startEvent",
+        )
+    )
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -118,7 +129,7 @@ class MapScreen : ScreenCreator() {
         val tutorialText = label("red_wing", "") {
             name("tutorial_info_text")
             wrap = true
-            fontColor = Color.WHITE
+            fontColor = Color.White
             setAlignment(Align.center)
             centerX()
             onLayout { y = worldHeight - prefHeight }
@@ -163,7 +174,7 @@ class MapScreen : ScreenCreator() {
 
         val eventName = label("red_wing", "") {
             wrap = true
-            fontColor = Color.WHITE
+            fontColor = Color.White
             setAlignment(Align.center)
             relativeWidth(90f)
             centerX()
@@ -175,7 +186,7 @@ class MapScreen : ScreenCreator() {
             wrap = true
             setFontScale(0.5f)
             setAlignment(Align.center)
-            fontColor = Color.WHITE
+            fontColor = Color.White
             relativeWidth(90f)
             centerX()
             syncHeight()
@@ -205,25 +216,38 @@ class MapScreen : ScreenCreator() {
         verticalGrowingSpacer(1f)
 
         label("red_wing", "Start") {
+            name("StartButton")
             setAlignment(Align.center)
-            fontColor = Color.RED
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
+            isFocusable = true
+            isSelectable = true
+            group = "Map_startEvent"
+            onSelect { fire(ButtonClickEvent()) }
+
             syncHeight()
-            onHoverEnter { fontColor = Color.WHITE }
-            onHoverLeave { fontColor = Color.RED }
-            backgrounds(
-                normal = "map_detail_encounter_button",
-                hover = "map_detail_encounter_button_hover",
+            dropShadow = DropShadow(
+                Color.Red,
+                maxOpacity = 0.4f
+            )
+            styles(
+                normal = {
+                    fontColor = Color.Red
+                    backgroundHandle = "map_detail_encounter_button"
+                    dropShadow?.color = Color.White
+                    dropShadow?.maxOpacity = 0.2f
+                },
+                focused = {
+                    fontColor = Color.White
+                    backgroundHandle = "map_detail_encounter_button_hover"
+                    dropShadow?.color = Color.Red
+                    dropShadow?.maxOpacity = 0.4f
+                }
             )
             onButtonClick {
                 mapWidget.onStartButtonClicked(this@label)
                 isDisabled = true
             }
-            dropShadow = DropShadow(
-                Color.RED,
-                maxOpacity = 0.4f
-            )
         }
 
         verticalSpacer(40f)
@@ -262,7 +286,7 @@ class MapScreen : ScreenCreator() {
                 align(Align.left)
 
                 label("red_wing", name) {
-                    fontColor = Color.RED
+                    fontColor = Color.Red
                     setAlignment(Align.left)
                     setFontScale(0.6f)
                     relativeWidth(100f)
@@ -271,7 +295,7 @@ class MapScreen : ScreenCreator() {
                 }
 
                 label("red_wing", description) {
-                    fontColor = Color.BLACK
+                    fontColor = Color.Black
                     wrap = true
                     setAlignment(Align.left)
                     setFontScale(0.5f)

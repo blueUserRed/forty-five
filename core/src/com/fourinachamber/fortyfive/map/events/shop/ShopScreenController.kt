@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.toIntRange
@@ -22,18 +23,15 @@ import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
-class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
+class ShopScreenController(
+    private val screen: OnjScreen,
+    private val messageWidgetName: String,
+    private val cardsParentName: String,
+    private val addToDeckWidgetName: String,
+    private val addToBackpackWidgetName: String,
+) : ScreenController() {
 
     private lateinit var context: ShopMapEvent
-
-    private val shopFilePath = onj.get<String>("shopsFile")
-    private val npcsFilePath = onj.get<String>("npcsFile")
-
-    private val messageWidgetName = onj.get<String>("messageWidgetName")
-    private val cardsParentName = onj.get<String>("cardsParentName")
-    private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
-    private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
-    private val cardHoverDetailTemplateName = onj.get<String>("hoverDetailActorTemplateName")
 
     private lateinit var person: CustomImageActor
 
@@ -48,9 +46,9 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
     private lateinit var random: Random
 
     override fun init(context: Any?) {
-        //TODO fix bug with cards when being on the edge of other cards when drag and dropping
-        addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
-        addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
+//        //TODO comment back in before push
+//        addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
+//        addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
         val shopFile = ConfigFileManager.getConfigFile("shopConfig")
@@ -67,15 +65,15 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
             .map { it as OnjObject }
             .find { it.get<String>("name") == personData.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        initWidgets(screen, imgData)
+//        initWidgets(screen, imgData)
 
         TemplateString.updateGlobalParam("map.cur_event.personDisplayName", personData.get<String>("displayName"))
         val messageWidget = screen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = personData.get<OnjArray>("texts").value
 
         random = Random(context.seed)
-        addCards(context.types)
-
+//        addCards(context.types)
+//
         val textToShow = text[(random.nextDouble() * text.size).toInt()] as OnjObject
 
         messageWidget.setRawText(
@@ -208,7 +206,7 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
         val data = imgData.value.toMutableMap()
         data["offsetX"] = ((data["offsetX"] as OnjFloat?)?.value?.toFloat() ?: 0F).toOnjYoga(YogaUnit.POINT)
         val flexParent =
-            highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomFlexBox
+            highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomBox
         val person = onjScreen.screenBuilder.generateFromTemplate(
             "personWidget",
             data,
@@ -222,14 +220,14 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
         this.cardsParentWidget = cardsParentWidget
     }
 
-    private fun highestFlexParent(actor: Actor): CustomFlexBox? {
+    private fun highestFlexParent(actor: Actor): CustomBox? {
         var curActor = actor
         val ladder = mutableListOf<Actor>()
         while (curActor.parent != null) {
             curActor = curActor.parent
             ladder.add(curActor)
         }
-        return ladder.last { it is CustomFlexBox } as CustomFlexBox?
+        return ladder.last { it is CustomBox } as CustomBox?
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {

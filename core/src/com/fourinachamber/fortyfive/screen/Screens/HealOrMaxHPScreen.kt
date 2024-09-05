@@ -36,7 +36,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
     override val playAmbientSounds: Boolean = false
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 1000
+        "*" to 100
     )
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
@@ -216,15 +216,11 @@ class HealOrMaxHPScreen : ScreenCreator() {
         isSelectable = true
         group = "healOrMaxHP_selection"
 
-        dropShadow = DropShadow(Color.Yellow, scaleY=1f, showDropShadow = false)
-        onFocusChange { _, _ ->
-            updateDesignForElement()
-        }
+        dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
         onSelectChange { old, new ->
-            updateDesignForElement()
             if (isSelected) {
                 FortyFive.mainThreadTask {
-                    old.filter { it != this }.forEach { screen.deselectActor(it) }
+                    screen.deselectAllExcept(this)
                 }
                 screen.enterState("healOrMaxHP_optionSelected")
             }
@@ -257,27 +253,28 @@ class HealOrMaxHPScreen : ScreenCreator() {
         }
 
         subtext.onLayout { img.width = subtext.prefWidth * 1.2F }
-    }
 
-    private fun CustomBox.updateDesignForElement() {
-        backgroundHandle = if (isSelected) {
-            "heal_or_max_selector_background_selected"
-        } else {
-            "heal_or_max_selector_background"
-        }
-        dropShadow?.maxOpacity=0.2f
-        dropShadow?.showDropShadow = true
-        if (isFocused) {
-            if (isSelected) {
+        styles( resetEachTime = true,
+            normal = {
+                backgroundHandle = "heal_or_max_selector_background"
+                dropShadow?.maxOpacity = 0.2f
+                dropShadow?.showDropShadow = false
+            },
+            focused = {
+                dropShadow?.color=Color.FortyWhite
+                dropShadow?.showDropShadow = true
+            },
+            selected = {
+                backgroundHandle = "heal_or_max_selector_background_selected"
+                dropShadow?.color=Color.Yellow
+                dropShadow?.showDropShadow = true
+                       },
+            selectedAndFocused = {
+                backgroundHandle = "heal_or_max_selector_background_selected"
                 dropShadow?.color = Color.FortyWhite.interpolate(Color.Yellow)
                 dropShadow?.maxOpacity = 0.4f
-            } else {
-                dropShadow?.color = Color.FortyWhite
+                dropShadow?.showDropShadow = true
             }
-        } else if (isSelected) {
-            dropShadow?.color = Color.Yellow
-        } else {
-            dropShadow?.showDropShadow = false
-        }
+        )
     }
 }

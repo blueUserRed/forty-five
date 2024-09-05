@@ -13,11 +13,9 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
-import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
-import ktx.actors.onClick
 import onj.value.OnjArray
 
 abstract class ScreenCreator : ResourceBorrower {
@@ -100,11 +98,13 @@ abstract class ScreenCreator : ResourceBorrower {
         builder(image)
         return image
     }
-    inline fun Group.box(builder: CustomBox.() -> Unit = {}): CustomBox {
-        val image = CustomBox(screen)
-        this.addActor(image)
-        builder(image)
-        return image
+
+    inline fun Group.box(isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
+        val box = if (isScrollable) CustomScrollableBox(screen)
+        else CustomBox(screen)
+        this.addActor(box)
+        builder(box)
+        return box
     }
 
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
@@ -163,6 +163,19 @@ abstract class ScreenCreator : ResourceBorrower {
         return label
     }
 
+    inline fun Group.advancedText(
+        defaultFont: String,
+        defaultColor: Color,
+        defaultFontScale: Float,
+        isDistanceField: Boolean = true,
+        builder: AdvancedTextWidget.() -> Unit = {}
+    ): AdvancedTextWidget {
+        val advancedText = AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
+        this.addActor(advancedText)
+        builder(advancedText)
+        return advancedText
+    }
+
     fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
@@ -205,6 +218,26 @@ abstract class ScreenCreator : ResourceBorrower {
         backgroundHandle = normal
         onHoverEnter { backgroundHandle = hover }
         onHoverLeave { backgroundHandle = normal }
+    }
+
+    fun <T> T.styles(
+        normal: () -> Unit = {},
+        focused: () -> Unit = {},
+        selected: () -> Unit = {},
+        selectedAndFocused: () -> Unit = {},
+        resetEachTime:Boolean = false
+    ) where T : Actor, T : KotlinStyledActor {
+        fun update() {
+            if (resetEachTime) normal()
+            if (isSelected) {
+                if (isFocused) selectedAndFocused()
+                else selected()
+            } else if (isFocused) focused()
+            else normal()
+        }
+        onFocusChange { _, _ -> update() }
+        onSelectChange { _, _ -> update() }
+        update()
     }
 
     var Label.fontColor: Color

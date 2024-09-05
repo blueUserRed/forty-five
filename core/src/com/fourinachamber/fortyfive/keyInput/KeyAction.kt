@@ -250,7 +250,11 @@ object KeyActionFactory {
         },
         "SelectFocusedElement" to {
             lambda@{ screen, code ->
-                val actor= screen.focusedActor
+                val actor = screen.focusedActor
+                if (actor == null) {
+                    screen.focusNext()
+                    return@lambda screen.focusedActor != null
+                }
                 if (actor !is Actor) return@lambda false
                 screen.changeSelectionFor(actor)
                 true

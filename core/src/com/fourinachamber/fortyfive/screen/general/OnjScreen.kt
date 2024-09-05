@@ -93,10 +93,11 @@ open class OnjScreen(
 
     private val selectedActors: MutableSet<Actor> = mutableSetOf()
 
-    fun changeSelectionFor(actor: Actor){
+    fun changeSelectionFor(actor: Actor) {
         if (actor in selectedActors) deselectActor(actor)
         else selectActor(actor)
     }
+
     fun selectActor(actor: Actor) {
         val oldList = selectedActors.toList()
         if (selectedActors.add(actor))
@@ -107,7 +108,14 @@ open class OnjScreen(
         val oldList = selectedActors.toList()
         if (selectedActors.remove(actor))
             oldList.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
-}
+    }
+
+    fun deselectAllExcept(actor: Actor) {
+        val oldList = selectedActors.toList()
+        selectedActors.removeIf { it != actor }
+        if (oldList.size != selectedActors.size)
+            oldList.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+    }
 
     fun escapeSelectionHierarchy() {
         focusedActor = null
