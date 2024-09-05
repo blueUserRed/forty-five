@@ -217,11 +217,9 @@ class HealOrMaxHPScreen : ScreenCreator() {
         group = "healOrMaxHP_selection"
 
         dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
-        onSelectChange { old, new ->
+        onSelectChange { _, new ->
             if (isSelected) {
-                FortyFive.mainThreadTask {
-                    screen.deselectAllExcept(this)
-                }
+                screen.deselectAllExcept(this)
                 screen.enterState("healOrMaxHP_optionSelected")
             }
             if (new.isEmpty()) {
@@ -254,21 +252,25 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
         subtext.onLayout { img.width = subtext.prefWidth * 1.2F }
 
-        styles( resetEachTime = true,
+        styles(
             normal = {
                 backgroundHandle = "heal_or_max_selector_background"
                 dropShadow?.maxOpacity = 0.2f
                 dropShadow?.showDropShadow = false
             },
             focused = {
-                dropShadow?.color=Color.FortyWhite
+                backgroundHandle = "heal_or_max_selector_background"
+                dropShadow?.color = Color.FortyWhite
                 dropShadow?.showDropShadow = true
+                dropShadow?.maxOpacity = 0.2f
             },
             selected = {
                 backgroundHandle = "heal_or_max_selector_background_selected"
-                dropShadow?.color=Color.Yellow
+                dropShadow?.color = Color.Yellow
                 dropShadow?.showDropShadow = true
-                       },
+                dropShadow?.maxOpacity = 0.2f
+
+            },
             selectedAndFocused = {
                 backgroundHandle = "heal_or_max_selector_background_selected"
                 dropShadow?.color = Color.FortyWhite.interpolate(Color.Yellow)

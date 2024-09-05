@@ -100,21 +100,23 @@ open class OnjScreen(
 
     fun selectActor(actor: Actor) {
         val oldList = selectedActors.toList()
-        if (selectedActors.add(actor))
-            selectedActors.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+        if (selectedActors.add(actor)){
+            val newList = selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the last element
+            newList.reversed().forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+        }
     }
 
     fun deselectActor(actor: Actor) {
         val oldList = selectedActors.toList()
         if (selectedActors.remove(actor))
-            oldList.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+            oldList.reversed().forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
     }
 
     fun deselectAllExcept(actor: Actor) {
         val oldList = selectedActors.toList()
         selectedActors.removeIf { it != actor }
         if (oldList.size != selectedActors.size)
-            oldList.forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+            oldList.reversed().forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
     }
 
     fun escapeSelectionHierarchy() {

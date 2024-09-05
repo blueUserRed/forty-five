@@ -225,10 +225,10 @@ abstract class ScreenCreator : ResourceBorrower {
         focused: () -> Unit = {},
         selected: () -> Unit = {},
         selectedAndFocused: () -> Unit = {},
-        resetEachTime:Boolean = false
+        resetEachTime: () -> Unit = {},
     ) where T : Actor, T : KotlinStyledActor {
         fun update() {
-            if (resetEachTime) normal()
+            resetEachTime()
             if (isSelected) {
                 if (isFocused) selectedAndFocused()
                 else selected()
