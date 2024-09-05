@@ -463,12 +463,12 @@ textures: [
         file: "blobs/map/decorations/magenta_mountains_tree.png"
     },
     {
-        name: "shop_dark_background",
-        file: "blobs/events/shop/dark_background.png"
+        name: "shop_background",
+        file: "blobs/events/shop/shop_background.png"
     },
     {
         name: "shop_items_background",
-        file: "blobs/events/shop/items_background.png"
+        file: "blobs/events/shop/shop_items_background.png"
     },
     {
         name: "heal_or_max_accept",

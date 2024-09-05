@@ -100,8 +100,7 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.box(isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
-        val box = if (isScrollable) CustomScrollableBox(screen)
-        else CustomBox(screen)
+        val box = if (isScrollable) CustomScrollableBox(screen) else CustomBox(screen)
         this.addActor(box)
         builder(box)
         return box

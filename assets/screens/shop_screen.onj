@@ -134,7 +134,7 @@ root: $Box {
                 positionLeft: (worldWidth * 0.37)#points,
                 height: (worldHeight * 0.89)#points,
                 width: (worldWidth * 0.65)#points,
-                background: "shop_dark_background"
+                background: "shop_background"
             }
         ]
     },
