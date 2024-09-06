@@ -256,7 +256,13 @@ object KeyActionFactory {
                     return@lambda screen.focusedActor != null
                 }
                 if (actor !is Actor) return@lambda false
-                screen.changeSelectionFor(actor)
+                screen.changeSelectionFor(actor, false)
+                true
+            }
+        },
+        "EscapeInSelectionHierarchy" to {
+            lambda@{ screen, _ ->
+                screen.escapeSelectionHierarchy()
                 true
             }
         },

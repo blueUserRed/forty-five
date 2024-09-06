@@ -2,8 +2,6 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import kotlin.reflect.KClass
@@ -91,7 +89,7 @@ class AbandonRunEvent : Event()
 class ResetGameEvent : Event()
 
 class FocusChangeEvent(val old: Actor?, val new: Actor?) : Event()
-class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>) : Event()
+class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>, val fromMouse: Boolean = true) : Event()
 
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
@@ -154,6 +152,18 @@ inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>,
             this.isSelected = this in event.new
         }
         block(event.old, event.new)
+        true
+    }
+}
+inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>, Boolean) -> Unit) {
+    this.addListener { event ->
+        if (event !is SelectChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+//            if (!this.isTouchable) throw RuntimeException("You tried to select an unTouchable Element") // this should never happen
+//            this.touchable = if (this in event.new) Touchable.enabled else Touchable.childrenOnly
+            this.isSelected = this in event.new
+        }
+        block(event.old, event.new, event.fromMouse)
         true
     }
 }

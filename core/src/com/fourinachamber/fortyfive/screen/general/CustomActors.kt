@@ -1330,7 +1330,7 @@ open class CustomGroup(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
     override var dropShadow: DropShadow? = null
 
 

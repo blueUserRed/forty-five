@@ -6,9 +6,12 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
@@ -217,6 +220,13 @@ interface FocusableActor : HoverStateActor {
             screen.changeSelectionFor(actor)
         }
     }
+//
+//    fun bindSubSelectableListener(actor: Actor, screen: OnjScreen) {
+//
+//        actor.onSelectChange {_,_,it->
+//            println(it)
+//        }
+//    }
 }
 
 /**
@@ -399,6 +409,51 @@ interface KotlinStyledActor : FocusableActor {
     }
 
     private fun Actor.customClickable() {
-        onClick {fire(ButtonClickEvent())}
+        onClickEvent { _, x, y ->
+            if (CustomScrollableBox.isInsideScrollableParents(this, x, y))
+                fire(ButtonClickEvent())
+        }
+    }
+}
+
+interface DraggableActor : FocusableActor {
+    var isDraggable: Boolean
+    var targetGroups: List<String>
+    fun bindDragging(actor: Actor, screen: OnjScreen) {
+        val dragAndDrops = screen._dragAndDrop
+        val dragAndDrop = group?.let { dragAndDrops.getOrPut(it) { DragAndDrop() } }
+
+        dragAndDrop?.addSource(CustomCenteredDragSource(dragAndDrop, actor))
+
+        actor.onSelectChange { _, new, fromMouse ->
+            if (!isDraggable) return@onSelectChange
+            if ("draggingAnElement" in screen.screenState) return@onSelectChange
+            if (isSelected) {
+                if (!fromMouse) actorDragStarted(actor, screen, false)
+            } else {
+                if (fromMouse) screen.escapeSelectionHierarchy()
+                screen.focusedActor = actor as FocusableActor
+            }
+        }
+    }
+
+
+    fun actorDragStarted(actor: Actor, screen: OnjScreen, fromMouse: Boolean = true) {
+        screen.enterState("draggableActor_draggingElement")
+        if (fromMouse) {
+            screen.focusedActor = null
+        }
+        screen.addToSelectionHierarchy(
+            FocusableParent(
+                onSelection = {
+                    if ((it !is FocusableActor || it.group !in targetGroups) && !fromMouse)
+                        screen.focusNext() //select the first of the possible placement options
+                },
+                transitions = listOf(SelectionTransition(groups = targetGroups)),
+                onLeave = {
+                    screen.leaveState("draggableActor_draggingElement")
+                }
+            )
+        )
     }
 }

@@ -1,22 +1,31 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
+import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
+import com.fourinachamber.fortyfive.screen.general.CustomScrollableFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.between
+import ktx.actors.alpha
 import kotlin.math.max
 
 //TODO (optional):
 // widthFitContent and heightFitContent (including and/or exluding posType.absolute)
 // positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
-open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor {
+open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor,
+    DraggableActor {
 
     override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
@@ -53,6 +62,15 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     var paddingBottom: Float = 0F
     var paddingLeft: Float = 0F
     var paddingRight: Float = 0F
+
+
+    override var isDraggable: Boolean = false
+        set(value) {
+            field = value
+            isFocusable = true
+            isSelectable = true
+        }
+    override var targetGroups: List<String> = listOf()
 
     /**
      * only calculate it once per Layout call, not multiple times
@@ -413,9 +431,9 @@ enum class PositionType {
 
 
 class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
-    // TODO cut out stuff that isn't shown,
     // TODO focusable actors within scroll stuff important (especially the focus next part of it)
-
+    // TODO make sure elements outside which are hidden are not shown
+    // TODO drag and drop and stuff for children
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */
@@ -464,6 +482,9 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         }
     }
 
+
+    var overflowHidden = true //TODO change back to true
+
     fun scrolledBy(amount: Float) {
         //it just feels wrong if it starts at the bottom to scroll like that, for everything else it is okay
         //TODO ask phillip which is better, let him test it a few times
@@ -483,7 +504,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         if (!fromDefaults) defaultsForScrollLayout = null
         this.scrollBarBackground = barBackground
         this.scrollBar = bar
-        invalidate() //maybe only call layout instead of invalidate, if there are performance issues OR DO IT BETTER
+        invalidate() //maybe call layout instead of invalidate OR JUST DO IT BETTER (but idk how)
     }
 
     init {
@@ -567,6 +588,8 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
             defaultsForScrollLayout?.invoke()
             layoutScrollBar()
         } else {
+            scrollBar?.isVisible = false
+            scrollBarBackground?.isVisible = false
             super.layout()
         }
     }
@@ -584,6 +607,9 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         val scrollBarBackground = this.scrollBarBackground
         if (scrollBar == null || scrollBarBackground == null) return
 
+        scrollBar.isVisible = true
+        scrollBarBackground.isVisible = true
+
         var completedPart = scrolledDistance / maxScrollableDistanceInDirection
 
         if (scrollDirectionStart.isHorizontal) {
@@ -594,7 +620,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
             scrollBar.height = scrollBarBackground.height
             scrollBar.x = scrollBarBackground.x +
                     completedPart * (scrollBarBackground.width - scrollBar.width)
-        }else{
+        } else {
             if (wrap != CustomWrap.WRAP_REVERSE) completedPart = 1 - completedPart
 
             scrollBar.x = scrollBarBackground.x
@@ -637,6 +663,79 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
             horizontalAlign = if (scrollDirection == CustomDirection.RIGHT) CustomAlign.END else CustomAlign.START
         } else {
             verticalAlign = if (scrollDirection == CustomDirection.BOTTOM) CustomAlign.END else CustomAlign.START
+        }
+    }
+
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (!overflowHidden) {
+            super.draw(batch, parentAlpha)
+            return
+        }
+
+        batch ?: return
+        batch.flush()
+        val viewport = screen.stage.viewport
+        background?.draw(batch, x, y, width, height)
+        if (drawItemsWithScissor(viewport, batch, parentAlpha)) return
+
+        if (maxScrollableDistanceInDirection != 0F) {
+            if (isTransform) applyTransform(batch, computeTransform())
+            scrollBarBackground?.draw(batch, parentAlpha)
+            scrollBar?.draw(batch, alpha)
+            if (isTransform) resetTransform(batch)
+        }
+//        val curChild = this.currentlyDraggedChild //TODO maybe this, this needs to be checked if it is nessessary
+//        if (curChild != null) {
+//            val coordinates = curChild.parent.localToStageCoordinates(Vector2())
+//            curChild.x += coordinates.x
+//            curChild.y += coordinates.y
+//            curChild.draw(batch, alpha)
+//            curChild.x -= coordinates.x
+//            curChild.y -= coordinates.y
+//        }
+    }
+
+    private fun drawItemsWithScissor(
+        viewport: Viewport,
+        batch: Batch,
+        parentAlpha: Float
+    ): Boolean {
+        val xPixel =
+            (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
+        val yPixel =
+            (Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight
+        val pos = localToStageCoordinates(Vector2(0f, 0f))
+        val scissor = Rectangle(
+            xPixel * (pos.x + paddingLeft) + viewport.leftGutterWidth,
+            yPixel * (pos.y + paddingBottom) + viewport.bottomGutterHeight,
+            xPixel * (width - paddingLeft - paddingRight),
+            yPixel * (height - paddingTop - paddingBottom)
+        )
+        batch.flush()
+        if (!ScissorStack.pushScissors(scissor)) return true
+//        currentlyDraggedChild?.isVisible = false
+        super.draw(batch, parentAlpha)
+//        currentlyDraggedChild?.isVisible = true
+        batch.flush()
+        ScissorStack.popScissors()
+        batch.flush()
+        return false
+    }
+
+
+    companion object {
+        fun isInsideScrollableParents(actor: Actor, x: Float, y: Float): Boolean { //TODO check if this is actually correct
+            var cur: Actor? = actor
+            while (cur != null) {
+                cur = cur.parent
+                if (cur is CustomScrollableBox && cur.maxScrollableDistanceInDirection != 0F) {
+                    val coordinates = actor.localToActorCoordinates(cur, Vector2(x, y))
+                    if (coordinates.x < 0 || coordinates.y < 0 || coordinates.x > cur.width || coordinates.y > cur.height)
+                        return false
+                }
+            }
+            return true
         }
     }
 }

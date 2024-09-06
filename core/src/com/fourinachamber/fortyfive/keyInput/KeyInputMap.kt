@@ -263,6 +263,17 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
+                    priority = defaultPriority,
+                    KeyInputCondition.Always,
+                    listOf(
+                        KeyInputMapKeyEntry(Keys.E),
+                        KeyInputMapKeyEntry(Keys.ESCAPE),
+                        ),
+                    KeyActionFactory.getAction("EscapeInSelectionHierarchy")
+                )
+            )
+            entries.add(
+                KeyInputMapEntry(
                     priority = maxPriority,
                     KeyInputCondition.ScreenState("inInputField"),
                     listOf(

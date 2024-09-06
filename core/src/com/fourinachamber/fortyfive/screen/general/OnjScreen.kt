@@ -59,7 +59,8 @@ open class OnjScreen(
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
 
-    var dragAndDrop: Map<String, DragAndDrop> = mapOf()
+    var _dragAndDrop: MutableMap<String, DragAndDrop> = mutableMapOf()
+    val dragAndDrop: Map<String, DragAndDrop> get() = _dragAndDrop.toMap()
 
     private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -91,43 +92,51 @@ open class OnjScreen(
     val screenControllers: List<ScreenController>
         get() = _screenControllers
 
-    private val selectedActors: MutableSet<Actor> = mutableSetOf()
+    private val _selectedActors: MutableSet<Actor> = mutableSetOf()
 
-    fun changeSelectionFor(actor: Actor) {
-        if (actor in selectedActors) deselectActor(actor)
-        else selectActor(actor)
+    val selectedActors: List<Actor> get() = _selectedActors.toList()
+
+    fun changeSelectionFor(actor: Actor, fromMouse: Boolean = true) {
+        if (actor in _selectedActors) deselectActor(actor)
+        else selectActor(actor, fromMouse)
     }
 
-    fun selectActor(actor: Actor) {
-        val oldList = selectedActors.toList()
-        if (selectedActors.add(actor)){
-            val newList = selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the last element
-            newList.reversed().forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+    fun selectActor(actor: Actor, fromMouse: Boolean = true) {
+        val oldList = _selectedActors.toList()
+        if (selectionHierarchy.isEmpty() || !selectionHierarchy.last().hasActor(actor)) return
+        if (_selectedActors.add(actor)) {
+            val newList =
+                _selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the newest element
+            newList.reversed()
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList(), fromMouse)) }
+            selectionHierarchy.last().onSelection(newList)
         }
     }
 
     fun deselectActor(actor: Actor) {
-        val oldList = selectedActors.toList()
-        if (selectedActors.remove(actor))
-            oldList.reversed().forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
+        val oldList = _selectedActors.toList()
+        if (_selectedActors.remove(actor))
+            oldList.reversed()
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
     }
 
-    fun deselectAllExcept(actor: Actor) {
-        val oldList = selectedActors.toList()
-        selectedActors.removeIf { it != actor }
-        if (oldList.size != selectedActors.size)
-            oldList.reversed().forEach { it.fire(SelectChangeEvent(oldList, selectedActors.toMutableList().toList())) }
-    }
-
-    fun escapeSelectionHierarchy() {
-        focusedActor = null
-        selectionHierarchy.removeLast()
+    fun deselectAllExcept(actor: Actor?) {
+        val oldList = _selectedActors.toList()
+        _selectedActors.removeIf { it != actor }
+        if (oldList.size != _selectedActors.size)
+            oldList.reversed()
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
     }
 
     var focusedActor: FocusableActor? = null
         set(value) {
-            field?.let { if (it is Actor) it.fire(FocusChangeEvent(it, value as Actor?)) }
-            value?.let { if (it is Actor) it.fire(FocusChangeEvent(field as Actor?, it)) }
+            if (value == null) {
+                field?.let { if (it is Actor) it.fire(FocusChangeEvent(it, null)) }
+            } else {
+                if (selectionHierarchy.isEmpty() || !selectionHierarchy.last().hasActor(value as Actor)) return
+                field?.let { if (it is Actor) it.fire(FocusChangeEvent(it, value)) }
+                value.let { it.fire(FocusChangeEvent(field as Actor?, it)) }
+            }
             field = value
         }
     private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
@@ -135,6 +144,16 @@ open class OnjScreen(
     fun addToSelectionHierarchy(child: FocusableParent) {
         selectionHierarchy.add(child)
         selectionHierarchy.last().updateFocusableActors(this)
+    }
+
+    fun escapeSelectionHierarchy() {
+        focusedActor = selectedActors.lastOrNull() as FocusableActor?
+        deselectAllExcept(null)
+        if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
+            val s = selectionHierarchy.removeLast()
+            s.onLeave()
+            selectionHierarchy.last().updateFocusableActors(this)
+        }
     }
 
     fun getFocusableActors(): MutableList<FocusableActor> {

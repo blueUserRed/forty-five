@@ -11,12 +11,14 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
+import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.gameComponents.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
 import ktx.actors.onChange
 import ktx.actors.onClick
@@ -139,25 +141,52 @@ class ShopScreen : ScreenCreator() {
     }
 
     private fun Group.addRandomChildren() {
-        val size = 150f
-        box {
+
+
+        fun CustomBox.addBasicStyles() {
+            val size = 150f
+            val listOf = listOf("shop_leave")
             width = size
             height = size
-            backgroundHandle="card%%leadersBullet"
+            targetGroups = listOf
+            isDraggable = true
+            onClick { println(name) }
+            group = "shop_cards"
+            dropShadow = DropShadow(Color.Green, showDropShadow = false)
+            styles(
+                normal = {
+                    dropShadow?.showDropShadow = false
+                },
+                focused = {
+                    dropShadow?.color = Color.Red
+                    dropShadow?.showDropShadow = true
+                },
+                selected = {
+                    dropShadow?.color = Color.Yellow
+                    dropShadow?.showDropShadow = true
+                },
+                selectedAndFocused = {
+                    dropShadow?.color = Color.Yellow.interpolate(Color.Red)
+                    dropShadow?.showDropShadow = true
+                }
+            )
+            bindDragging(this,screen)
         }
         box {
-            width = size
-            height = size
-            backgroundHandle="card%%incendiaryBullet"
+            backgroundHandle = "card%%leadersBullet"
+            name("leadersBullet")
+            addBasicStyles()
+        }
+        box {
+            backgroundHandle = "card%%incendiaryBullet"
+            name("incendiaryBullet")
+            addBasicStyles()
         }
         for (i in 0 until 15) {
             box {
-                width = size
-                height = size
-                backgroundHandle="card%%bullet"
-                touchable=Touchable.enabled
+                backgroundHandle = "card%%bullet"
                 name("bullet: $i")
-                onClick { println(name) }
+                addBasicStyles()
             }
         }
     }

@@ -13,9 +13,9 @@ class FocusableParent(
     var onLeave: () -> Unit = {},
     private val startGroup: SelectionGroup? = null,
     groups: List<SelectionGroup> = listOf(),
-    var onSelection: (List<FocusableActor>) -> Unit = {},
+    var onSelection: (List<Actor>) -> Unit = {},
 ) {
-    private val groups: Set<SelectionGroup>
+    val groups: Set<SelectionGroup>
 
     init {
         val allGroups = mutableSetOf<SelectionGroup>()
@@ -25,6 +25,7 @@ class FocusableParent(
     }
 
     private var focusableActors: Map<SelectionGroup, List<FocusableActor>> = mutableMapOf()
+        //TODO maybe cache focusableActors.values.flatten() as it is needed quite often
 
     fun updateFocusableActors(screen: OnjScreen) {
         val actors = screen.getFocusableActors()
@@ -75,7 +76,7 @@ class FocusableParent(
         val oldPos = oldFocusedActor.centerPos()
         val polarDir = toPolarCoords(direction)
         val prios = getFocusablePrioritised(oldFocusedActor, screen)
-        val newActor= focusableActors //TODO check why this is wrong
+        val newActor= focusableActors
             .values
             .flatten()
             .filter { it.isFocusable && it!=oldFocusedActor }
@@ -212,10 +213,14 @@ class FocusableParent(
         val pos = actor.centerPos()
         return Vector2(pos.x - target.x, target.y - pos.y)
     }
+
+    fun hasActor(actor: Actor): Boolean {
+        return actor in focusableActors.values.flatten().filterIsInstance<Actor>()
+    }
 }
 
 class SelectionTransition(
-    val type: TransitionType,
+    val type: TransitionType = TransitionType.SEAMLESS,
     val condition: SelectionTransitionCondition = SelectionTransitionCondition.Always,
     val groups: List<SelectionGroup>
 ) {

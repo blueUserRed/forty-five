@@ -276,7 +276,7 @@ class FromOnjScreenBuilder(
             }
             dragAndDrops[group] = dragAndDrop
         }
-        screen.dragAndDrop = dragAndDrops
+        screen._dragAndDrop = dragAndDrops
     }
 
     private fun initFlexBox(
