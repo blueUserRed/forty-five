@@ -94,7 +94,6 @@ class FromOnjScreenBuilder(
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
         screen.addActorToRoot(root)
-        screen.buildKeySelectHierarchy()
 
         onj
             .get<OnjObject>("options")

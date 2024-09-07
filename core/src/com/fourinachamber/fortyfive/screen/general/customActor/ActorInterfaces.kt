@@ -205,7 +205,7 @@ interface FocusableActor : HoverStateActor {
         bindHoverStateListeners(actor)
         bindSelectableListener(actor, screen)
         actor.onHoverEnter {
-            if (isFocusable) screen.focusedActor = this
+            if (isFocusable) screen.focusedActor = actor
         }
         actor.onHoverLeave {
             if (screen.focusedActor == actor) screen.focusedActor = null
@@ -380,7 +380,6 @@ interface ActorWithAnimationSpawners {
 interface OnLayoutActor {
 
     fun onLayout(callback: () -> Unit)
-
 }
 
 inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
@@ -426,16 +425,18 @@ interface DraggableActor : FocusableActor {
         val dragAndDrops = screen._dragAndDrop
         val dragAndDrop = group?.let { dragAndDrops.getOrPut(it) { DragAndDrop() } }
 
+//        dragAndDrop?.setTapSquareSize(-1F) //other possibilty for dragAndDrop
         dragAndDrop?.addSource(CustomCenteredDragSource(dragAndDrop, actor))
 
         actor.onSelectChange { _, new, fromMouse ->
             if (!isDraggable) return@onSelectChange
             if ("draggingAnElement" in screen.screenState) return@onSelectChange
             if (isSelected) {
-                if (!fromMouse) actorDragStarted(actor, screen, false)
+                if (!fromMouse) //current possibilty for dragAndDrop
+                    actorDragStarted(actor, screen, false)
             } else {
                 if (fromMouse) screen.escapeSelectionHierarchy()
-                screen.focusedActor = actor as FocusableActor
+                screen.focusedActor = actor
             }
         }
     }

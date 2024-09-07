@@ -128,26 +128,30 @@ open class OnjScreen(
                 .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
     }
 
-    var focusedActor: FocusableActor? = null
+    var focusedActor: Actor? = null
         set(value) {
             if (value == null) {
-                field?.let { if (it is Actor) it.fire(FocusChangeEvent(it, null)) }
+                field?.let { it.fire(FocusChangeEvent(it, null)) }
             } else {
-                if (selectionHierarchy.isEmpty() || !selectionHierarchy.last().hasActor(value as Actor)) return
-                field?.let { if (it is Actor) it.fire(FocusChangeEvent(it, value)) }
-                value.let { it.fire(FocusChangeEvent(field as Actor?, it)) }
+                if (selectionHierarchy.isEmpty() || !selectionHierarchy.last().hasActor(value)) return
+                field?.let { it.fire(FocusChangeEvent(it, value)) }
+                value.let { it.fire(FocusChangeEvent(field, it)) }
             }
             field = value
         }
     private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
+
+    var draggedPreviewActor: Actor? = null //current possibilty for dragAndDrop
+    val draggedActor: Actor? get() = dragAndDrop.values.map { it.dragActor }.firstOrNull() ?: draggedPreviewActor
 
     fun addToSelectionHierarchy(child: FocusableParent) {
         selectionHierarchy.add(child)
         selectionHierarchy.last().updateFocusableActors(this)
     }
 
-    fun escapeSelectionHierarchy() {
-        focusedActor = selectedActors.lastOrNull() as FocusableActor?
+    fun escapeSelectionHierarchy(fromMouse:Boolean = true) {
+        if (!fromMouse && draggedActor != null) return
+        focusedActor = selectedActors.lastOrNull()
         deselectAllExcept(null)
         if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
             val s = selectionHierarchy.removeLast()
@@ -174,13 +178,13 @@ open class OnjScreen(
     fun focusNext(direction: Vector2? = null) {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = selectionHierarchy.last().focusNext(direction, this)
-        this.focusedActor = focusableElement
+        this.focusedActor = focusableElement as Actor
     }
 
     fun focusPrevious() {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = selectionHierarchy.last().focusPrevious(this)
-        this.focusedActor = focusableElement
+        this.focusedActor = focusableElement as Actor
     }
 
     private var awaitingConfirmationClick: Boolean = false
@@ -222,8 +226,6 @@ open class OnjScreen(
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
-    var keySelectionHierarchy: KeySelectionHierarchyNode? = null
-        private set
 
     var currentHoverDetail: Actor? = null
         private set
@@ -324,11 +326,6 @@ open class OnjScreen(
             if (state != listenToState) return@addOnScreenStateChangedListener
             listener(entered)
         }
-    }
-
-    @AllThreadsAllowed
-    fun buildKeySelectHierarchy() {
-        keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
     }
 
     @AllThreadsAllowed
@@ -522,12 +519,26 @@ open class OnjScreen(
         styleManagers
             .filter { it !in oldStyleManagers }
             .forEach(StyleManager::update) //all added items get updated too
-        if (dragAndDrop.none { it.value.isDragging }) {
+        val draggedActor = draggedActor
+        if (draggedActor == null) {
             stage.batch.begin()
             currentDisplayDetailActor?.drawFocusDetail(this, stage.batch)
 //                currentHoverDetail?.draw(stage.batch, 1f)
             if (currentHoverDetail != null) {
                 currentHoverDetail!!.draw(stage.batch, 1f)
+            }
+            stage.batch.end()
+        } else {
+            stage.batch.begin()
+            if (draggedActor == draggedPreviewActor && draggedActor is OffSettable){//current possibilty for dragAndDrop
+                val pos= draggedActor.parent.localToStageCoordinates(Vector2(0F, 0F))
+                draggedActor.drawOffsetX+= pos.x //current possibilty for dragAndDrop
+                draggedActor.drawOffsetY+= pos.y//TODO ugly VERY UGLY (the part in the if at least)
+                draggedActor.draw(stage.batch,1f)
+                draggedActor.drawOffsetX-= pos.x
+                draggedActor.drawOffsetY-= pos.y
+            }else{
+                draggedActor.draw(stage.batch,1f)
             }
             stage.batch.end()
         }

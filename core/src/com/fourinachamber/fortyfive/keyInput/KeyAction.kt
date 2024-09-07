@@ -262,12 +262,10 @@ object KeyActionFactory {
         },
         "EscapeInSelectionHierarchy" to {
             lambda@{ screen, _ ->
-                screen.escapeSelectionHierarchy()
+                screen.escapeSelectionHierarchy(false)
                 true
             }
         },
-
-
         )
 
     /**

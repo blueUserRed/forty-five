@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.obj
 import kotlin.math.abs
@@ -32,8 +33,10 @@ open class CustomCenteredDragSource(
 
 
     init {
-        if (actor is HasOnjScreen)
-            actor.addListener(CustomClickListener(actor.screen))
+//        if (actor is HasOnjScreen)
+//            actor.addListener(CustomClickListener(actor.screen))
+        if (actor is HasOnjScreen)   //current possibilty for dragAndDrop
+            actor.addListener(CustomClickListener(actor.screen)) //current possibilty for dragAndDrop
     }
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
@@ -50,6 +53,7 @@ open class CustomCenteredDragSource(
             actor.actorDragStarted(actor, actor.screen, true)
             obj.resetScreenForDraggableActor(actor, actor.screen)
         }
+        actor.isVisible = false
 
         addToPayload(actor, obj)
 
@@ -59,16 +63,12 @@ open class CustomCenteredDragSource(
         return payload
     }
 
-    private fun addToPayload(actor: Actor, obj: CustomExecutionPayload) {}
+    open fun addToPayload(actor: Actor, obj: CustomExecutionPayload) {}
 
 
     override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-        super.drag(event, x, y, pointer)
-        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
-        dragAndDrop.setDragActorPosition(
-            -parentOff.x + actor.width / 2,
-            -parentOff.y - actor.height / 2
-        )
+        dragAndDrop.setDragActorPosition(actor.width / 2, -actor.height / 2)
+        actor.isVisible = false
     }
 
     override fun dragStop(
@@ -111,6 +111,9 @@ class CustomClickListener(private val screen: OnjScreen) : InputListener() {
         touchDownY = y
         actor.drawOffsetX += addedData.x
         actor.drawOffsetY += addedData.y
+        screen.draggedPreviewActor = actor
+        if (screen.focusedActor == actor) screen.focusedActor = null
+        actor.isVisible = false
         return true
     }
 
@@ -122,16 +125,25 @@ class CustomClickListener(private val screen: OnjScreen) : InputListener() {
             actor.drawOffsetY -= addedData.y
             addedData = Vector2()
             if (actor is DraggableActor) actor.inDragPreview = false
+            screen.draggedPreviewActor = null
         }
     }
 
     override fun touchUp(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int) {
         val actor = event.target
         if (actor !is OffSettable) return
-        if (actor is DraggableActor) actor.inDragPreview = false
+        if (actor is DraggableActor) {
+            actor.inDragPreview = false
+        }
         actor.drawOffsetX -= addedData.x
         actor.drawOffsetY -= addedData.y
         addedData = Vector2()
+        screen.draggedPreviewActor = null
+        if (screen.draggedActor != actor) {
+            actor.isVisible = true
+            screen.focusedActor = actor
+            if (actor is HoverStateActor) actor.isClicked = false
+        }
     }
 }
 
@@ -178,7 +190,10 @@ open class CustomExecutionPayload {
      * when the drag is stopped, the actor will be reset to [pos]
      */
     fun resetToStartIfNoTargetFound(actor: Actor, pos: Vector2) = tasks.add { target ->
-        if (target == null) actor.setPosition(pos.x, pos.y)
+        if (target == null) {
+            actor.setPosition(pos.x, pos.y)
+            actor.isVisible = true
+        }
     }
 
     fun resetScreenForDraggableActor(actor: Actor, screen: OnjScreen) = tasks.add {

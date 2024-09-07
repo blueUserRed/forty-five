@@ -65,7 +65,8 @@ class FocusableParent(
 
     fun focusNext(direction: Vector2?, screen: OnjScreen): FocusableActor? {
         val oldFocusedActor = screen.focusedActor
-        if (oldFocusedActor == null || oldFocusedActor !is Actor) {
+
+        if (oldFocusedActor !is FocusableActor) {
             return if (startGroup == null || focusableActors[startGroup]?.isNotEmpty() != true) {
                 getFirstFocused(focusableActors.values.flatten()) as FocusableActor?
             } else {
