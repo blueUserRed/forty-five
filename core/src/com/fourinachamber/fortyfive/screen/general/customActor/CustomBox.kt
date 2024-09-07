@@ -41,6 +41,7 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
     override var isDisabled: Boolean = false
+    override var inDragPreview: Boolean = false
 
     var verticalAlign: CustomAlign = CustomAlign.START      // top
     var horizontalAlign: CustomAlign = CustomAlign.START    // left

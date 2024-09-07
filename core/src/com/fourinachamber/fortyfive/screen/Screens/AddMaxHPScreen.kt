@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondition
+import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
@@ -49,7 +50,7 @@ class AddMaxHPScreen : ScreenCreator() {
         return FocusableParent(
             listOf(
                 SelectionTransition(
-                    SelectionTransition.TransitionType.SEAMLESS,
+                    TransitionType.Seamless,
                     groups = listOf("addMaxHP_accept")
                 ),
             ),

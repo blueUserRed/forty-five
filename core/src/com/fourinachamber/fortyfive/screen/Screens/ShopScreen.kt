@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
+import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
@@ -54,9 +55,13 @@ class ShopScreen : ScreenCreator() {
         return FocusableParent(
             listOf(
                 SelectionTransition(
-                    SelectionTransition.TransitionType.SEAMLESS,
+                    TransitionType.Seamless,
                     groups = listOf("shop_leave", "shop_cards")
                 ),
+                SelectionTransition(
+                    TransitionType.Prioritized,
+                    groups = listOf("shop_cards")
+                )
             ),
             startGroup = "shop_cards",
         )

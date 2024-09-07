@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
+import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
@@ -87,7 +88,7 @@ class MapScreen : ScreenCreator() {
         FocusableParent(
             listOf(
                 SelectionTransition(
-                    SelectionTransition.TransitionType.SEAMLESS,
+                    TransitionType.Seamless,
                     groups = listOf("Map_startEvent")
                 ),
             ),

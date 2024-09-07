@@ -91,7 +91,13 @@ class CustomClickListener(private val screen: OnjScreen) : InputListener() {
     private val tapSquareSize = 14f
     private var touchDownX: Float = -1f
     private var touchDownY: Float = -1f
-    override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean { //TODO intercept mouse click to ButtonClick
+    override fun touchDown(
+        event: InputEvent,
+        x: Float,
+        y: Float,
+        pointer: Int,
+        button: Int
+    ): Boolean { //TODO intercept mouse click to ButtonClick
         val actor = event.target
         if (actor !is OffSettable) return false
         if (actor is DisableActor && actor.isDisabled) return false
@@ -100,6 +106,7 @@ class CustomClickListener(private val screen: OnjScreen) : InputListener() {
         if ("draggableActor_draggingElement" in screen.screenState) return false
         addedData = Vector2(-(actor.width / 2 - x), -(actor.height / 2 - y))
 
+        if (actor is DraggableActor) actor.inDragPreview = true
         touchDownX = x
         touchDownY = y
         actor.drawOffsetX += addedData.x
@@ -114,12 +121,14 @@ class CustomClickListener(private val screen: OnjScreen) : InputListener() {
             actor.drawOffsetX -= addedData.x
             actor.drawOffsetY -= addedData.y
             addedData = Vector2()
+            if (actor is DraggableActor) actor.inDragPreview = false
         }
     }
 
     override fun touchUp(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int) {
         val actor = event.target
         if (actor !is OffSettable) return
+        if (actor is DraggableActor) actor.inDragPreview = false
         actor.drawOffsetX -= addedData.x
         actor.drawOffsetY -= addedData.y
         addedData = Vector2()

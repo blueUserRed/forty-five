@@ -410,14 +410,17 @@ interface KotlinStyledActor : FocusableActor {
 
     private fun Actor.customClickable() {
         onClickEvent { _, x, y ->
-            if (CustomScrollableBox.isInsideScrollableParents(this, x, y))
+            if (CustomScrollableBox.isInsideScrollableParents(this, x, y)){
+                if (this is DraggableActor && inDragPreview) return@onClickEvent
                 fire(ButtonClickEvent())
+            }
         }
     }
 }
 
 interface DraggableActor : FocusableActor {
     var isDraggable: Boolean
+    var inDragPreview: Boolean
     var targetGroups: List<String>
     fun bindDragging(actor: Actor, screen: OnjScreen) {
         val dragAndDrops = screen._dragAndDrop

@@ -50,6 +50,7 @@ class KeyInputMap(
             return true
         }
         var bestCandidate: KeyAction? = null
+        var bestCandidateModifiers: List<Keycode>? = null
         var bestCandidatePriority: Int = Int.MIN_VALUE
         val inputRanges = InputKeyRange.values()
         entries.filter { it.condition.check(screen) }
@@ -61,11 +62,15 @@ class KeyInputMap(
                     }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
                     .forEach { keyEntry ->
-                        if (bestCandidatePriority < entryList.priority) {
+                        if (bestCandidatePriority < entryList.priority ||
+                            (bestCandidatePriority == entryList.priority &&
+                                    (bestCandidateModifiers?.size?: 0) < keyEntry.modifierKeys.size)
+                        ) {
                             bestCandidate = keyEntry.action ?: entryList.defaultAction
                             bestCandidatePriority = entryList.priority
-                        } else if (bestCandidatePriority == entryList.priority) {
-                            FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority!")
+                            bestCandidateModifiers = keyEntry.modifierKeys
+                        } else {
+                            FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority and modifier length!")
                             return false
                         }
                     }
@@ -215,7 +220,7 @@ class KeyInputMap(
                         KeyInputMapKeyEntry(Keys.A),
                         KeyInputMapKeyEntry(Keys.S),
                         KeyInputMapKeyEntry(Keys.D),
-                        ),
+                    ),
                     KeyActionFactory.getAction("FocusNextDirectional")
                 )
             )
@@ -227,7 +232,7 @@ class KeyInputMap(
                         KeyInputMapKeyEntry(Keys.SPACE),
                         KeyInputMapKeyEntry(Keys.ENTER),
                         KeyInputMapKeyEntry(Keys.NUMPAD_ENTER),
-                        ),
+                    ),
                     KeyActionFactory.getAction("SelectFocusedElement")
                 )
             )
@@ -237,7 +242,7 @@ class KeyInputMap(
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.T),
-                        ),
+                    ),
                     KeyActionFactory.getAction("ToggleDebugMenu")
                 )
             )
@@ -247,7 +252,7 @@ class KeyInputMap(
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.LEFT),
-                        ),
+                    ),
                     KeyActionFactory.getAction("PreviousDebugMenuPage")
                 )
             )
@@ -257,7 +262,7 @@ class KeyInputMap(
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.RIGHT),
-                        ),
+                    ),
                     KeyActionFactory.getAction("NextDebugMenuPage")
                 )
             )
@@ -268,7 +273,7 @@ class KeyInputMap(
                     listOf(
                         KeyInputMapKeyEntry(Keys.E),
                         KeyInputMapKeyEntry(Keys.ESCAPE),
-                        ),
+                    ),
                     KeyActionFactory.getAction("EscapeInSelectionHierarchy")
                 )
             )
@@ -278,12 +283,13 @@ class KeyInputMap(
                     KeyInputCondition.ScreenState("inInputField"),
                     listOf(
                         KeyInputMapKeyEntry(InputKeyRange.ASCII.getCode()),
-                        ),
+                    ),
                     KeyActionFactory.getAction("NextDebugMenuPage")
                 )
             )
             return entries
         }
+
         fun combine(maps: List<KeyInputMap>): KeyInputMap {
             if (maps.isEmpty()) throw RuntimeException("Combining requires at least one input map")
             val entries = maps.flatMap { it.entries }

@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondition
+import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
@@ -48,11 +49,11 @@ class HealOrMaxHPScreen : ScreenCreator() {
         return FocusableParent(
             listOf(
                 SelectionTransition(
-                    SelectionTransition.TransitionType.SEAMLESS,
+                    TransitionType.Seamless,
                     groups = listOf("healOrMaxHP_selection")
                 ),
                 SelectionTransition(
-                    SelectionTransition.TransitionType.SEAMLESS,
+                    TransitionType.Seamless,
                     condition = SelectionTransitionCondition.Screenstate("healOrMaxHP_optionSelected"),
                     groups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept")
                 ),
