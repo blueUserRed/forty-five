@@ -72,7 +72,7 @@ class FocusableParent(
                 getFirstFocused(focusableActors[startGroup]!!) as FocusableActor?
             }
         }
-        if (direction == null) return focusNext(screen) //TODO this is fucked
+        if (direction == null) return focusNext(screen)
         val oldPos = oldFocusedActor.centerPos()
         val polarDir = toPolarCoords(direction)
         val prios = getFocusablePrioritised(oldFocusedActor, screen)
@@ -92,9 +92,12 @@ class FocusableParent(
                     )
                 )
                 val distMulti = distanceSpreadMultiplier(curPolar, it, prios)
-                curPolar to (if (distMulti == Float.MAX_VALUE) distMulti else curPolar.x * distMulti) to it
+                curPolar.x = (if (distMulti == Float.MAX_VALUE) distMulti else curPolar.x * distMulti)
+                curPolar to it
             }
-        val res = newActor.filter { it.first.second < Float.MAX_VALUE }.minByOrNull { it.first.second }?.second
+        val res = newActor.filter { it.first.x < Float.MAX_VALUE }
+            .minWithOrNull(Comparator.comparingDouble<Pair<Vector2, Actor>?> { it.first.x.toDouble() }
+                .thenComparingDouble { it.first.y.toDouble() })?.second
 
         return (res ?: screen.focusedActor) as FocusableActor?
     }
@@ -105,14 +108,14 @@ class FocusableParent(
         prios: Map<TransitionType, List<FocusableActor>>
     ): Float {
         if (v.y > PI / 2) return Float.MAX_VALUE
-
-        TransitionType.entries.forEach {
+        var curMin: Float = Float.MAX_VALUE
+        TransitionType.entries().forEach {
             if ((actor as FocusableActor) in (prios[it] ?: listOf())) {
-                if (v.y < it.barrier) return it.multiplier
-                return ((1 + v.y).pow(it.exponent) * it.multiplier)
+                if (v.y < it.barrier) curMin = min(curMin, it.multiplier)
+                else curMin = min(curMin, ((1 + v.y-it.barrier).pow(it.exponent) * it.multiplier))
             }
         }
-        return Float.MAX_VALUE
+        return curMin
     }
 
     private fun toPolarCoords(v: Vector2): Vector2 {
@@ -207,7 +210,7 @@ class FocusableParent(
     }
 
     private fun Actor.centerPos(): Vector2 {
-        val pos = Vector2(this.width / 2, - this.height / 2)
+        val pos = Vector2(this.width / 2, -this.height / 2)
         return localToScreenCoordinates(pos) //screen coords start on top left, that's why the Minus in front of height
     }
 
@@ -233,16 +236,16 @@ data class SelectionTransition(
  * @param exponent the exponent, the distance it exponentially grows as the angle gets bigger
  * @param barrier the minimum angle, that the exponent is used (before the exponent is just a multiplier)
  */
-sealed class TransitionType(val exponent: Float, val barrier: Float, val multiplier:Float) {
+sealed class TransitionType(val exponent: Float, val barrier: Float, val multiplier: Float) {
 
     //this barrier is so big, that it is never the exponent and always just a multiplier 
-    data object Prioritized : TransitionType(3F, (PI * 6).toFloat(), 1/2F)
+    data object Prioritized : TransitionType(3F, (PI / 4).toFloat(), 1 / 2F)
 
-    data object Seamless : TransitionType(4.5F, (PI / 6).toFloat(), 4.5F)
+    data object Seamless : TransitionType(4.5F, (PI / 4).toFloat(), 1F)
 
-    data object LastResort : TransitionType(7F, 0F,7F)
+    data object LastResort : TransitionType(7F, 0F, 7F)
     companion object {
-        val entries = listOf(Prioritized, Seamless, LastResort)
+        fun entries () = listOf(Prioritized, Seamless, LastResort)
     }
 }
 
