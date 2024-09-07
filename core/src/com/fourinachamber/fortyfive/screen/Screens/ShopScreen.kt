@@ -177,6 +177,7 @@ class ShopScreen : ScreenCreator() {
             )
             bindDragging(this,screen)
         }
+
         box {
             backgroundHandle = "card%%leadersBullet"
             name("leadersBullet")

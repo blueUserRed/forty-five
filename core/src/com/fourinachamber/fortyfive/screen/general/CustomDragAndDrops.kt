@@ -162,6 +162,7 @@ class CustomDropTarget(
         println("this is dragged over the following: ${actor.name}")
         if (actor is DisableActor && actor.isDisabled) return false
         if (actor is FocusableActor && !actor.isSelectable) return false
+        if (actor is HasOnjScreen && !actor.screen.curSelectionParent.hasActor(actor)) return false
         return true
     }
 
