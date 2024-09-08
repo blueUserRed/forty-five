@@ -346,6 +346,7 @@ open class OnjScreen(
 
     fun addNamedActor(name: String, actor: Actor) {
         namedActors[name] = actor
+        actor.name = name
     }
 
     fun removeNamedActor(name: String) {

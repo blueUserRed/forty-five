@@ -129,7 +129,6 @@ class ShopScreen : ScreenCreator() {
                 relativeHeight(59f)
                 name(cardsParentName)
                 backgroundHandle = "shop_items_background"
-                addRandomChildren()
                 minVerticalDistBetweenElements = 15F
                 minHorizontalDistBetweenElements = 15F
                 scrollDistancePerScroll = 50F
@@ -167,9 +166,7 @@ class ShopScreen : ScreenCreator() {
         }
     }
 
-    private fun Group.addRandomChildren() {
-
-
+       private fun Group.addRandomChildren() {
         fun CustomBox.addBasicStyles() {
             val size = 150f
             val listOf = listOf("shop_targets")
@@ -198,30 +195,13 @@ class ShopScreen : ScreenCreator() {
             )
             bindDragging(this, screen)
             resetCondition = { true }
-//            onDragAndDrop.add { s, t ->
-//                if (s == this){
-////                    isVisible = true
-//                }
-//            }
         }
 
-        box {
-            backgroundHandle = "card%%leadersBullet"
-            name("leadersBullet")
-            addBasicStyles()
-        }
-        box {
-            backgroundHandle = "card%%incendiaryBullet"
-            name("incendiaryBullet")
-            addBasicStyles()
-        }
-        for (i in 0 until 15) {
-            box {
-                backgroundHandle = "card%%bullet"
-                name("bullet: $i")
-                addBasicStyles()
-            }
-        }
+//        box {
+//            backgroundHandle = "card%%leadersBullet"
+//            name("leadersBullet")
+//            addBasicStyles()
+//        }
     }
 
     private fun Group.textsAtTheTop(childrenSize: Float) = box {

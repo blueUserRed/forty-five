@@ -42,8 +42,6 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var isClicked: Boolean = false
     override var isDisabled: Boolean = false
 
-
-
     var verticalAlign: CustomAlign = CustomAlign.START      // top
     var horizontalAlign: CustomAlign = CustomAlign.START    // left
 
@@ -437,6 +435,7 @@ enum class PositionType {
 
 class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
     // TODO focusable actors within scroll stuff important (especially the focus next part of it)
+    // TODO drag and drop of the bar on the side
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */

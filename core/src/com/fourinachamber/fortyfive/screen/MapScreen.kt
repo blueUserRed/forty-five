@@ -230,7 +230,8 @@ class MapScreen : ScreenCreator() {
             dropShadow = DropShadow(
                 Color.Red,
                 maxOpacity = 0.4f,
-                scaleX = 1.1f,
+                scaleX = 0.95f,
+                scaleY = 1.2f
             )
             styles(
                 normal = {
