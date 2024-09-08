@@ -250,9 +250,9 @@ open class CustomImageActor(
     _screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
     var hoverText: String = "",
-    var hasHoverDetail: Boolean = false
+    var hasHoverDetail: Boolean = false,
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
-    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen, KotlinStyledActor {
+    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen, KotlinStyledActor, DragAndDroppableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -294,6 +294,13 @@ open class CustomImageActor(
 
     override var isSelected: Boolean = false
     override var isSelectable: Boolean = false
+
+    override var isDraggable: Boolean = false
+    override var inDragPreview: Boolean = false
+    override var targetGroups: List<String> = listOf()
+    override val resetCondition: ((Actor?) -> Boolean)? = null
+    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
+
     override var group: SelectionGroup? = null
     override var isFocusable: Boolean = false
         set(value) {

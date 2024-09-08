@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
@@ -220,13 +219,6 @@ interface FocusableActor : HoverStateActor {
             screen.changeSelectionFor(actor)
         }
     }
-//
-//    fun bindSubSelectableListener(actor: Actor, screen: OnjScreen) {
-//
-//        actor.onSelectChange {_,_,it->
-//            println(it)
-//        }
-//    }
 }
 
 /**
@@ -252,6 +244,13 @@ interface Detachable {
 }
 
 interface OffSettable {
+    fun resetAllOffsets() {
+        drawOffsetX = 0F
+        drawOffsetY = 0F
+        logicalOffsetX = 0F
+        logicalOffsetY = 0F
+    }
+
     var drawOffsetX: Float
     var drawOffsetY: Float
     var logicalOffsetX: Float
@@ -409,24 +408,50 @@ interface KotlinStyledActor : FocusableActor {
 
     private fun Actor.customClickable() {
         onClickEvent { _, x, y ->
-            if (CustomScrollableBox.isInsideScrollableParents(this, x, y)){
-                if (this is DraggableActor && inDragPreview) return@onClickEvent
+            if (CustomScrollableBox.isInsideScrollableParents(this, x, y)) {
+                if (this is DragAndDroppableActor && inDragPreview) return@onClickEvent
                 fire(ButtonClickEvent())
             }
         }
     }
 }
 
-interface DraggableActor : FocusableActor {
+interface DragAndDroppableActor : FocusableActor {
     var isDraggable: Boolean
+
+    /**
+     * the part, where you click on it, and it jumps there, but actually stays in place if you don't move your mouse
+     */
     var inDragPreview: Boolean
+
+    /**
+     * the groups of the POSSIBLE dragAndDropTargets (the targets themselves can be deactivated via "isSelectable" or "isDisabled")
+     */
     var targetGroups: List<String>
+
+    /**
+     * when it should execute the reset to the start for dragAndDrop, if null, then [CustomCenteredDragSource.defaultResetCondition] is choosen instead
+     */
+    val resetCondition: ((Actor?) -> Boolean)?
+
+    /**
+     * when it should execute the reset to the start for dragAndDrop, if null, then [CustomCenteredDragSource.defaultResetCondition] is choosen instead
+     */
+    val onDragAndDrop: MutableList<(Actor, Actor) -> Unit>
     fun bindDragging(actor: Actor, screen: OnjScreen) {
         val dragAndDrops = screen._dragAndDrop
-        val dragAndDrop = group?.let { dragAndDrops.getOrPut(it) { DragAndDrop() } }
+        val group = group
+        if (group == null) {
+            FortyFiveLogger.warn(
+                "DragAndDroppableActor",
+                "You tried to bind a source without a group, this will not work"
+            )
+            return
+        }
+        val dragAndDrop = dragAndDrops.getOrPut(group) { DragAndDrop() }
 
 //        dragAndDrop?.setTapSquareSize(-1F) //other possibilty for dragAndDrop
-        dragAndDrop?.addSource(CustomCenteredDragSource(dragAndDrop, actor))
+        dragAndDrop.addSource(CustomCenteredDragSource(dragAndDrop, actor, screen))
 
         actor.onSelectChange { _, new, fromMouse ->
             if (!isDraggable) return@onSelectChange
@@ -449,9 +474,14 @@ interface DraggableActor : FocusableActor {
         }
         screen.addToSelectionHierarchy(
             FocusableParent(
-                onSelection = {
-                    if ((it !is FocusableActor || it.group !in targetGroups) && !fromMouse)
-                        screen.focusNext() //select the first of the possible placement options
+                onSelection = { it2 ->
+                    val target= it2.last()
+                    val source = screen.draggedActor ?: it2.first()
+                    if (source!=target){
+                        onDragAndDrop.forEach { it.invoke(source,target) }
+                        if (target is DragAndDroppableActor)
+                            target.onDragAndDrop.forEach { it.invoke(source,target) }
+                    }
                 },
                 transitions = listOf(SelectionTransition(groups = targetGroups)),
                 onLeave = {
@@ -459,5 +489,23 @@ interface DraggableActor : FocusableActor {
                 }
             )
         )
+        if ((actor !is FocusableActor || actor.group !in targetGroups) && !fromMouse)
+            screen.focusNext()
+    }
+
+    fun bindDroppable(actor: Actor, screen: OnjScreen, sourceGroups: List<String>) {
+        val dragAndDrops = screen._dragAndDrop
+        val group = group
+        if (group == null) {
+            FortyFiveLogger.warn(
+                "DragAndDroppableActor",
+                "You need to set the target group, or it will not be accepted as a target"
+            )
+            return
+        }
+        sourceGroups.forEach {
+            val dragAndDrop = dragAndDrops.getOrPut(it) { DragAndDrop() }
+            dragAndDrop.addTarget(CustomDropTarget(actor,screen))
+        }
     }
 }

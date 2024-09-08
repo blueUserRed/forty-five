@@ -21,8 +21,6 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
-import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -101,9 +99,10 @@ open class OnjScreen(
         else selectActor(actor, fromMouse)
     }
 
-    fun selectActor(actor: Actor, fromMouse: Boolean = true) {
+    private fun selectActor(actor: Actor, fromMouse: Boolean = true) {
         val oldList = _selectedActors.toList()
         if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(actor)) return
+        if (actor is FocusableActor && !actor.isSelectable) return
         if (_selectedActors.add(actor)) {
             val newList =
                 _selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the newest element
@@ -113,14 +112,14 @@ open class OnjScreen(
         }
     }
 
-    fun deselectActor(actor: Actor) {
+    private fun deselectActor(actor: Actor) {
         val oldList = _selectedActors.toList()
         if (_selectedActors.remove(actor))
             oldList.reversed()
                 .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
     }
 
-    fun deselectAllExcept(actor: Actor?) {
+    fun deselectAllExcept(actor: Actor? = null) {
         val oldList = _selectedActors.toList()
         _selectedActors.removeIf { it != actor }
         if (oldList.size != _selectedActors.size)
@@ -143,17 +142,17 @@ open class OnjScreen(
     val curSelectionParent: FocusableParent get() = selectionHierarchy.last()
 
     var draggedPreviewActor: Actor? = null //current possibilty for dragAndDrop
-    val draggedActor: Actor? get() = dragAndDrop.values.map { it.dragActor }.firstOrNull() ?: draggedPreviewActor
+    val draggedActor: Actor? get() = dragAndDrop.values.firstNotNullOfOrNull { it.dragActor } ?: draggedPreviewActor
 
     fun addToSelectionHierarchy(child: FocusableParent) {
         selectionHierarchy.add(child)
         curSelectionParent.updateFocusableActors(this)
     }
 
-    fun escapeSelectionHierarchy(fromMouse:Boolean = true) {
+    fun escapeSelectionHierarchy(fromMouse: Boolean = true) {
         if (!fromMouse && draggedActor != null) return
         focusedActor = selectedActors.lastOrNull()
-        deselectAllExcept(null)
+        deselectAllExcept()
         if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
             val s = selectionHierarchy.removeLast()
             s.onLeave()
@@ -520,8 +519,8 @@ open class OnjScreen(
         styleManagers
             .filter { it !in oldStyleManagers }
             .forEach(StyleManager::update) //all added items get updated too
-        val draggedActor = draggedActor
-        if (draggedActor == null) {
+        val draggedActorLocal = draggedActor
+        if (draggedActorLocal == null) {
             stage.batch.begin()
             currentDisplayDetailActor?.drawFocusDetail(this, stage.batch)
 //                currentHoverDetail?.draw(stage.batch, 1f)
@@ -531,15 +530,16 @@ open class OnjScreen(
             stage.batch.end()
         } else {
             stage.batch.begin()
-            if (draggedActor == draggedPreviewActor && draggedActor is OffSettable){//current possibilty for dragAndDrop
-                val pos= draggedActor.parent.localToStageCoordinates(Vector2(0F, 0F))
-                draggedActor.drawOffsetX+= pos.x //current possibilty for dragAndDrop
-                draggedActor.drawOffsetY+= pos.y//TODO ugly VERY UGLY (the part in the if at least)
-                draggedActor.draw(stage.batch,1f)
-                draggedActor.drawOffsetX-= pos.x
-                draggedActor.drawOffsetY-= pos.y
-            }else{
-                draggedActor.draw(stage.batch,1f)
+//            println("x: ${draggedActor.x}  y: ${draggedActor.y}   stagePos: ${draggedActor.localToStageCoordinates(Vector2(0F,0F))}")
+            if (draggedActorLocal == draggedPreviewActor && draggedActorLocal is OffSettable) {//current possibilty for dragAndDrop
+                val pos = draggedActorLocal.parent.localToStageCoordinates(Vector2(0F, 0F))
+                draggedActorLocal.drawOffsetX += pos.x //current possibilty for dragAndDrop
+                draggedActorLocal.drawOffsetY += pos.y//TODO ugly VERY UGLY (the part in the if at least, the else is okay)
+                draggedActorLocal.draw(stage.batch, 1f)
+                draggedActorLocal.drawOffsetX -= pos.x
+                draggedActorLocal.drawOffsetY -= pos.y
+            } else {
+                draggedActorLocal.draw(stage.batch, 1f)
             }
             stage.batch.end()
         }

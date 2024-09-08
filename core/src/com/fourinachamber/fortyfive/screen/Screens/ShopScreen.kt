@@ -21,7 +21,6 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
-import ktx.actors.onChange
 import ktx.actors.onClick
 
 class ShopScreen : ScreenCreator() {
@@ -90,6 +89,9 @@ class ShopScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
 
+        dropTarget(worldHeight * 0.5F, "shop_add_to_deck", addToDeckWidgetName)
+        dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", addToBackpackWidgetName)
+
         //TODO add to deck + add to backpack
         box {
             width = worldWidth.percent(63)
@@ -150,12 +152,11 @@ class ShopScreen : ScreenCreator() {
 
         fun CustomBox.addBasicStyles() {
             val size = 150f
-            val listOf = listOf("shop_leave")
+            val listOf = listOf("shop_targets")
             width = size
             height = size
             targetGroups = listOf
             isDraggable = true
-            onClick { println(name) }
             group = "shop_cards"
             dropShadow = DropShadow(Color.Green, showDropShadow = false)
             styles(
@@ -175,7 +176,13 @@ class ShopScreen : ScreenCreator() {
                     dropShadow?.showDropShadow = true
                 }
             )
-            bindDragging(this,screen)
+            bindDragging(this, screen)
+            resetCondition = { true }
+//            onDragAndDrop.add { s, t ->
+//                if (s == this){
+////                    isVisible = true
+//                }
+//            }
         }
 
         box {
@@ -259,4 +266,30 @@ class ShopScreen : ScreenCreator() {
             syncHeight()
         }
     }
+
+
+    private fun Group.dropTarget(yStart: Float, textureName: String, actorName: String) = image {
+        name(actorName)
+        y = yStart
+        relativeHeight(40F)
+        relativeWidth(30F)
+
+        backgroundHandle = textureName
+        fixedZIndex = 200
+        touchable = Touchable.enabled
+        isSelectable = true
+        isFocusable = true
+        group = "shop_targets"
+        bindDroppable(this, screen, listOf("shop_cards"))
+        styles(focused = { debug() },
+            normal = {debug = false})
+        onDragAndDrop.add{ source, target ->
+           val controller= getScreenControllers().filterIsInstance<ShopScreenController>().first()
+            controller.buyCard(source, target.name==addToDeckWidgetName)
+        }
+        if (name == "shop_addToBackpack"){
+            isSelectable = false
+        }
+    }
+
 }

@@ -14,7 +14,6 @@ import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.screen.general.CustomScrollableFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.between
 import ktx.actors.alpha
@@ -25,7 +24,7 @@ import kotlin.math.max
 // positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
 open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor,
-    DraggableActor {
+    DragAndDroppableActor {
 
     override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
@@ -38,10 +37,12 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var isFocused: Boolean = false
     override var isSelected: Boolean = false
     override var isSelectable: Boolean = false
+
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
     override var isDisabled: Boolean = false
-    override var inDragPreview: Boolean = false
+
+
 
     var verticalAlign: CustomAlign = CustomAlign.START      // top
     var horizontalAlign: CustomAlign = CustomAlign.START    // left
@@ -72,6 +73,9 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
             isSelectable = true
         }
     override var targetGroups: List<String> = listOf()
+    override var resetCondition: ((Actor?) -> Boolean)? = null
+    override var inDragPreview: Boolean = false
+    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
 
     /**
      * only calculate it once per Layout call, not multiple times
