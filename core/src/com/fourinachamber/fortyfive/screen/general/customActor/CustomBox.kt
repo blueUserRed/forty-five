@@ -437,8 +437,6 @@ enum class PositionType {
 
 class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
     // TODO focusable actors within scroll stuff important (especially the focus next part of it)
-    // TODO make sure elements outside which are hidden are not shown
-    // TODO drag and drop and stuff for children
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */

@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.map.events.shop
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
@@ -11,15 +10,12 @@ import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomScrollableBox
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
-import com.fourinachamber.fortyfive.utils.toIntRange
 import com.fourinachamber.fortyfive.utils.toOnjYoga
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaUnit
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
@@ -29,13 +25,14 @@ class ShopScreenController(
     private val cardsParentName: String,
     private val addToDeckWidgetName: String,
     private val addToBackpackWidgetName: String,
+    private val shopPersonWidgetName: String,
 ) : ScreenController() {
 
     private lateinit var context: ShopMapEvent
 
-    private lateinit var person: CustomImageActor
+    private lateinit var personWidget: CustomImageActor
 
-    private lateinit var cardsParentWidget: CustomScrollableFlexBox
+    private lateinit var cardsParentWidget: CustomScrollableBox
 
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
@@ -47,8 +44,8 @@ class ShopScreenController(
 
     override fun init(context: Any?) {
 //        //TODO comment back in before push
-//        addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
-//        addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
+        addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
+        addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
         val shopFile = ConfigFileManager.getConfigFile("shopConfig")
@@ -65,7 +62,7 @@ class ShopScreenController(
             .map { it as OnjObject }
             .find { it.get<String>("name") == personData.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-//        initWidgets(screen, imgData)
+        initWidgets(screen, imgData)
 
         TemplateString.updateGlobalParam("map.cur_event.personDisplayName", personData.get<String>("displayName"))
         val messageWidget = screen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
@@ -203,20 +200,19 @@ class ShopScreenController(
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
-        val data = imgData.value.toMutableMap()
-        data["offsetX"] = ((data["offsetX"] as OnjFloat?)?.value?.toFloat() ?: 0F).toOnjYoga(YogaUnit.POINT)
-        val flexParent =
-            highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomBox
-        val person = onjScreen.screenBuilder.generateFromTemplate(
-            "personWidget",
-            data,
-            flexParent,
-            onjScreen
-        ) as CustomImageActor
-        this.person = person
-        flexParent.resortZIndices()
+        val shopPersonWidget = onjScreen.namedActorOrError(shopPersonWidgetName)
+        if (shopPersonWidget !is CustomImageActor) throw RuntimeException("widget with name $shopPersonWidgetName must be of type CustomImageActor")
+        this.personWidget = shopPersonWidget
+
+        personWidget.backgroundHandle = imgData.get<String>("textureName")
+        val scale = imgData.get<Double>("scale").toFloat()
+        personWidget.scaleX = scale
+        personWidget.scaleY = scale
+        personWidget.drawOffsetX = imgData.getOr<Double>("offsetX",0.0).toFloat()
+        personWidget.drawOffsetY = imgData.getOr<Double>("offsetY",0.0).toFloat()
+
         val cardsParentWidget = onjScreen.namedActorOrError(cardsParentName)
-        if (cardsParentWidget !is CustomScrollableFlexBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableFlexBox")
+        if (cardsParentWidget !is CustomScrollableBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableBox")
         this.cardsParentWidget = cardsParentWidget
     }
 

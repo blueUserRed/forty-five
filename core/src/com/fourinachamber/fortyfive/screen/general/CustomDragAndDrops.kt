@@ -44,7 +44,7 @@ open class CustomCenteredDragSource(
         if (actor is DisableActor && actor.isDisabled) return null
         if (actor is FocusableActor && !actor.isSelectable) return null
         if (actor is DragAndDroppableActor && !actor.isDraggable) return null
-        if ("draggableActor_draggingElement" in screen.screenState) return null
+        if (DragAndDroppableActor.dragAndDropStateName in screen.screenState) return null
 
         val obj = CustomExecutionPayload()
         if (actor is DragAndDroppableActor) {
@@ -104,7 +104,7 @@ class CustomClickListener(private val screen: OnjScreen) : InputListener() {
         if (actor is DisableActor && actor.isDisabled) return false
         if (actor is FocusableActor && !actor.isSelectable) return false
         if (actor is DragAndDroppableActor && !actor.isDraggable) return false
-        if ("draggableActor_draggingElement" in screen.screenState) return false
+        if (DragAndDroppableActor.dragAndDropStateName in screen.screenState) return false
         addedData = Vector2(-(actor.width / 2 - x), -(actor.height / 2 - y))
 
         if (actor is DragAndDroppableActor) actor.inDragPreview = true

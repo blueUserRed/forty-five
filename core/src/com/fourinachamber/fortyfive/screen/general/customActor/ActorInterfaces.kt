@@ -468,7 +468,7 @@ interface DragAndDroppableActor : FocusableActor {
 
 
     fun actorDragStarted(actor: Actor, screen: OnjScreen, fromMouse: Boolean = true) {
-        screen.enterState("draggableActor_draggingElement")
+        screen.enterState(dragAndDropStateName)
         if (fromMouse) {
             screen.focusedActor = null
         }
@@ -485,7 +485,7 @@ interface DragAndDroppableActor : FocusableActor {
                 },
                 transitions = listOf(SelectionTransition(groups = targetGroups)),
                 onLeave = {
-                    screen.leaveState("draggableActor_draggingElement")
+                    screen.leaveState(dragAndDropStateName)
                 }
             )
         )
@@ -507,5 +507,9 @@ interface DragAndDroppableActor : FocusableActor {
             val dragAndDrop = dragAndDrops.getOrPut(it) { DragAndDrop() }
             dragAndDrop.addTarget(CustomDropTarget(actor,screen))
         }
+    }
+
+    companion object{
+        const val dragAndDropStateName:String = "draggableActor_draggingElement"
     }
 }

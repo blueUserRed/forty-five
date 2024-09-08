@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.screen.Screens
 
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
@@ -21,9 +22,14 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
+import dev.lyze.flexbox.FlexBox
 import ktx.actors.onClick
 
 class ShopScreen : ScreenCreator() {
+
+    //TODO logic addToBackpack extends when needed,  add Cards accordingly
+
+    //TODO  children in CustomFocusableBox autoscroll + bar
 
     override val name: String = "shopScreen"
 
@@ -44,6 +50,7 @@ class ShopScreen : ScreenCreator() {
     private val cardsParentName: String = "shop_cardsParent"
     private val addToDeckWidgetName: String = "shop_addToDeck"
     private val addToBackpackWidgetName: String = "shop_addToBackpack"
+    private val shopPersonWidgetName: String = "shop_personWidget"
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
 
@@ -71,7 +78,7 @@ class ShopScreen : ScreenCreator() {
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        ShopScreenController(screen, messageWidgetName, cardsParentName, addToDeckWidgetName, addToBackpackWidgetName),
+        ShopScreenController(screen, messageWidgetName, cardsParentName, addToDeckWidgetName, addToBackpackWidgetName, shopPersonWidgetName),
         BiomeBackgroundScreenController(screen, true)
     )
 
@@ -89,10 +96,10 @@ class ShopScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
 
+        //TODO add to deck + add to backpack  -  logic
         dropTarget(worldHeight * 0.5F, "shop_add_to_deck", addToDeckWidgetName)
         dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", addToBackpackWidgetName)
 
-        //TODO add to deck + add to backpack
         box {
             width = worldWidth.percent(63)
             height = worldHeight.percent(89)
@@ -115,18 +122,15 @@ class ShopScreen : ScreenCreator() {
                 this as CustomScrollableBox
                 relativeWidth(childrenSize)
                 relativeHeight(59f)
-//                addScrollbarFromDefaults(CustomDirection.RIGHT,"backpack_scrollbar",null)
-//                scrollDirectionStart = CustomDirection.RIGHT
+                name(cardsParentName)
                 backgroundHandle = "shop_items_background"
                 addRandomChildren()
                 minVerticalDistBetweenElements = 15F
                 minHorizontalDistBetweenElements = 15F
                 scrollDistancePerScroll = 50F
                 paddingLeft = 30f
-//                paddingRight = 15f
                 paddingTop = 15f
                 paddingBottom = 30f
-//                scrollDirectionStart = CustomDirection.BOTTOM
                 addScrollbarFromDefaults(CustomDirection.RIGHT, "backpack_scrollbar", "backpack_scrollbar_background")
             }
 
@@ -140,6 +144,19 @@ class ShopScreen : ScreenCreator() {
                 syncWidth()
             }
         }
+
+        image {
+            this.name(shopPersonWidgetName)
+            reportDimensionsWithScaling = true
+            debug = true
+            fixedZIndex = 100
+            onLayout {
+                val loadedDrawable1 = loadedDrawable ?: return@onLayout
+                width = loadedDrawable1.minWidth * scaleX
+                height = loadedDrawable1.minHeight * scaleY
+            }
+        }
+
 
         actor(getSharedNavBar(worldWidth)) {
             onLayoutAndNow { y = worldHeight - height }
@@ -269,6 +286,8 @@ class ShopScreen : ScreenCreator() {
 
 
     private fun Group.dropTarget(yStart: Float, textureName: String, actorName: String) = image {
+        //TODO appear and dissapear on screenStates
+        isVisible=false
         name(actorName)
         y = yStart
         relativeHeight(40F)
@@ -282,13 +301,10 @@ class ShopScreen : ScreenCreator() {
         group = "shop_targets"
         bindDroppable(this, screen, listOf("shop_cards"))
         styles(focused = { debug() },
-            normal = {debug = false})
-        onDragAndDrop.add{ source, target ->
-           val controller= getScreenControllers().filterIsInstance<ShopScreenController>().first()
-            controller.buyCard(source, target.name==addToDeckWidgetName)
-        }
-        if (name == "shop_addToBackpack"){
-            isSelectable = false
+            normal = { debug = false })
+        onDragAndDrop.add { source, target ->
+            val controller = getScreenControllers().filterIsInstance<ShopScreenController>().first()
+            controller.buyCard(source, target.name == addToDeckWidgetName)
         }
     }
 

@@ -384,6 +384,9 @@ open class CustomImageActor(
                 drawable.draw(batch, x, y, width, height)
             }
             batch.color = c
+
+            x -= drawOffsetX
+            y -= drawOffsetY
             return
         }
 
