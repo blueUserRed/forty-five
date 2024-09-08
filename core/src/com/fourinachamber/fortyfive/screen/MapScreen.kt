@@ -229,7 +229,8 @@ class MapScreen : ScreenCreator() {
             syncHeight()
             dropShadow = DropShadow(
                 Color.Red,
-                maxOpacity = 0.4f
+                maxOpacity = 0.4f,
+                scaleX = 1.1f,
             )
             styles(
                 normal = {
@@ -246,8 +247,10 @@ class MapScreen : ScreenCreator() {
                 }
             )
             onButtonClick {
-                mapWidget.onStartButtonClicked(this@label)
-                isDisabled = true
+                if (mapWidget.playerNode.event?.canBeStarted==true){
+                    mapWidget.onStartButtonClicked(this@label)
+                    isDisabled = true
+                }
             }
         }
 

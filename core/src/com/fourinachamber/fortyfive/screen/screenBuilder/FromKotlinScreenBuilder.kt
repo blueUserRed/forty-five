@@ -56,6 +56,8 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
         actor: Actor,
         removeOldData: Boolean
     ) {
+//        val function = creator.addWidgetData?.get(name)
+//        function?.invoke(data, parent, screen, actor, removeOldData)
         TODO("Not yet implemented")
     }
 }

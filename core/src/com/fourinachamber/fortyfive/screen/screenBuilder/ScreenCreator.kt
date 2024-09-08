@@ -31,6 +31,8 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract val transitionAwayTimes: Map<String, Int>
 
+//    val addWidgetData: (Map<String, (Map<String, Any?>, Group?, OnjScreen, Actor, Boolean) -> Unit>)? = null
+
     lateinit var screen: OnjScreen
         private set
 
@@ -220,14 +222,14 @@ abstract class ScreenCreator : ResourceBorrower {
         onHoverLeave { backgroundHandle = normal }
     }
 
-    fun <T> T.styles(
-        normal: () -> Unit = {},
-        focused: () -> Unit = {},
-        selected: () -> Unit = {},
-        selectedAndFocused: () -> Unit = {},
-        resetEachTime: () -> Unit = {},
+    inline fun <T> T.styles(
+        crossinline normal: () -> Unit = {},
+        crossinline focused: () -> Unit = {},
+        crossinline selected: () -> Unit = {},
+        crossinline selectedAndFocused: () -> Unit = {},
+        crossinline resetEachTime: () -> Unit = {},
     ) where T : Actor, T : KotlinStyledActor {
-        fun update() {
+        onFocusChange { _, _ ->
             resetEachTime()
             if (isSelected) {
                 if (isFocused) selectedAndFocused()
@@ -235,9 +237,18 @@ abstract class ScreenCreator : ResourceBorrower {
             } else if (isFocused) focused()
             else normal()
         }
-        onFocusChange { _, _ -> update() }
-        onSelectChange { _, _ -> update() }
-        update()
+        onSelectChange { _, _ -> resetEachTime()
+            if (isSelected) {
+                if (isFocused) selectedAndFocused()
+                else selected()
+            } else if (isFocused) focused()
+            else normal() }
+        resetEachTime()
+        if (isSelected) {
+            if (isFocused) selectedAndFocused()
+            else selected()
+        } else if (isFocused) focused()
+        else normal()
     }
 
     var Label.fontColor: Color

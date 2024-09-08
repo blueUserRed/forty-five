@@ -1,8 +1,9 @@
 package com.fourinachamber.fortyfive.screen.Screens
 
-import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -22,14 +23,12 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
-import dev.lyze.flexbox.FlexBox
-import ktx.actors.onClick
 
 class ShopScreen : ScreenCreator() {
 
-    //TODO logic addToBackpack extends when needed,  add Cards accordingly
+    //TODO logic addToBackpack extends when needed finish, add Cards to shop
 
-    //TODO  children in CustomFocusableBox autoscroll + bar
+    //TODO  children in CustomFocusableBox autoscroll + bar drag and drop
 
     override val name: String = "shopScreen"
 
@@ -78,7 +77,14 @@ class ShopScreen : ScreenCreator() {
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        ShopScreenController(screen, messageWidgetName, cardsParentName, addToDeckWidgetName, addToBackpackWidgetName, shopPersonWidgetName),
+        ShopScreenController(
+            screen,
+            messageWidgetName,
+            cardsParentName,
+            addToDeckWidgetName,
+            addToBackpackWidgetName,
+            shopPersonWidgetName
+        ),
         BiomeBackgroundScreenController(screen, true)
     )
 
@@ -96,7 +102,6 @@ class ShopScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
 
-        //TODO add to deck + add to backpack  -  logic
         dropTarget(worldHeight * 0.5F, "shop_add_to_deck", addToDeckWidgetName)
         dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", addToBackpackWidgetName)
 
@@ -140,7 +145,6 @@ class ShopScreen : ScreenCreator() {
                 color = Color.FortyWhite
             ) {
                 setFontScale(0.7f)
-//                setAlignment(Align.center)
                 syncWidth()
             }
         }
@@ -148,7 +152,6 @@ class ShopScreen : ScreenCreator() {
         image {
             this.name(shopPersonWidgetName)
             reportDimensionsWithScaling = true
-            debug = true
             fixedZIndex = 100
             onLayout {
                 val loadedDrawable1 = loadedDrawable ?: return@onLayout
@@ -286,13 +289,11 @@ class ShopScreen : ScreenCreator() {
 
 
     private fun Group.dropTarget(yStart: Float, textureName: String, actorName: String) = image {
-        //TODO appear and dissapear on screenStates
-        isVisible=false
         name(actorName)
-        y = yStart
         relativeHeight(40F)
         relativeWidth(30F)
-
+        y = yStart
+        x = -width
         backgroundHandle = textureName
         fixedZIndex = 200
         touchable = Touchable.enabled
@@ -300,12 +301,35 @@ class ShopScreen : ScreenCreator() {
         isFocusable = true
         group = "shop_targets"
         bindDroppable(this, screen, listOf("shop_cards"))
-        styles(focused = { debug() },
-            normal = { debug = false })
+        val distanceNotSelected = -20F
+        styles(
+            focused = { addAction(getAction(0F, y)) },
+            normal = {
+                if (DragAndDroppableActor.dragAndDropStateName in screen.screenState) //TODO add check for screenstate when in Navbar
+                    addAction(getAction(distanceNotSelected, y))
+            }
+        )
         onDragAndDrop.add { source, target ->
             val controller = getScreenControllers().filterIsInstance<ShopScreenController>().first()
             controller.buyCard(source, target.name == addToDeckWidgetName)
         }
+        screen.addOnScreenStateChangedListener { entered, state ->
+            //TODO add check for screenstate when in Navbar
+            if (state == DragAndDroppableActor.dragAndDropStateName) {
+                val targetX = if (entered) {
+                    distanceNotSelected
+                } else {
+                    -width
+                }
+                addAction(getAction(targetX, y))
+            }
+        }
     }
 
+    private fun getAction(to: Float, y: Float) = MoveToAction().also {
+        it.x = to
+        it.y = y
+        it.duration = 0.2f
+        it.interpolation = Interpolation.pow2Out
+    }
 }

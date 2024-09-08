@@ -23,60 +23,33 @@ uniform float u_maxOpacity;
 
 //%include shaders/includes/noise_utils.glsl
 
-float getGauss(int i, int j){
-    return 1.0;
-//    return pow(2.7182,-float(i*i+j*j)/4.5); //gauss but already simplified with sigma=1.5
-}
+//float getGauss(int i, int j){
+//    return 1.0;
+//    //    return pow(2.7182,-float(i*i+j*j)/4.5); //gauss but already simplified with sigma=1.5
+//}
 
 void main() {
-    //    resAlpha=v_texCoords.y*1000/u_resolution.y;
-    //    vec4 resAlpha=texture(u_texture,v_texCoords*(1+u_multiplier*2)-u_multiplier);
-    //    gl_FragColor = resAlpha;
-    int depthPerDist=30;
-    int maxSum=int(float(depthPerDist)*1.6);
+    int depthPerDist = 30;
+    int maxSum = int(float(depthPerDist)*1.6);
 
     float distancePerDirection = u_multiplier/(u_multiplier * 2.0 + 1.0);
     float stepDist=distancePerDirection/float(depthPerDist);
 
-//    float depthSq=(depthPerDist*2.0)*(depthPerDist*2.0)+1.0;
+    float alpha = 0.0;
 
-    float alpha=0.0;
-    float totalSum=0.0;
+    float multi = (1.0 + u_multiplier * 2.0);
     for (int i=-depthPerDist;i<=depthPerDist;i++){
         for (int j=-depthPerDist;j<=depthPerDist;j++){
-            if(abs(float(i))+abs(float(j))>float(maxSum)) break;
-            float curMulti=getGauss(i,j);
-            totalSum+=curMulti;
-            alpha += texture2D(u_texture, vec2(v_texCoords.x+float(i)*stepDist,v_texCoords.y+float(j)*stepDist)*(1.0+u_multiplier*2.0)-u_multiplier).a * curMulti;
+            vec2 calcPos = (v_texCoords.xy + vec2(float(i) * stepDist, float(j) * stepDist)) *multi  - u_multiplier;
+            if (!(calcPos.x <= 0 || calcPos.y <= 0 || calcPos.x > 1.0 || calcPos.y > 1.0)) alpha += texture2D(u_texture, calcPos).a;
         }
     }
-    float alphaNew=alpha/totalSum*2.0; //this was for testing or other functions higher
+    float totalSum = float((depthPerDist * 2) * (depthPerDist * 2));
+    float alphaNew = alpha / totalSum * 2.0  * u_maxOpacity;
     if (alphaNew >= 1.0){
         alphaNew = 1.0;
     }
-    gl_FragColor = vec4(u_color.xyz, alphaNew * u_maxOpacity);
-//    gl_FragColor = vec4(alphaNew*0.5, 0.0, 0.0, 1.0);
-
-    /*else{
-        gl_FragColor = vec4(alpha/totalSum*10, 0.0, 0.0, 1.0);
-
-    }*/
-
-//    if (totalSum<0.2){awas
-//        gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-//    }
-
-//    vec4 finalVec = vec4(0.0);
-//    if (v_texCoords.y<distanceOneDir){
-//        finalVec += vec4(1.0, 0.0, 0.0, 1.0);
-//    }
-//    if (v_texCoords.x<distanceOneDir){
-//        finalVec += vec4(0.0, 1.0, 0.0, 1.0);
-//    }
-//    gl_FragColor=finalVec;
-    //    else {
-    //        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-    //    }
+    gl_FragColor = vec4(u_color.xyz, alphaNew);
 }
 
 

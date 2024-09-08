@@ -142,7 +142,6 @@ inline fun Actor.onFocusChange(crossinline block: (Actor?, Actor?) -> Unit) {
     }
 }
 
-
 inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>) -> Unit) {
     this.addListener { event ->
         if (event !is SelectChangeEvent) return@addListener false

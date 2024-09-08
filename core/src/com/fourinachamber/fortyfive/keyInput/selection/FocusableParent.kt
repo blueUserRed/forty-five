@@ -150,7 +150,7 @@ class FocusableParent(
 
     private fun getFirstFocused(actors: List<FocusableActor>): Actor? {
         var curBest: Actor? = null
-        var curBestPos = Float.MAX_VALUE
+        var curBestPos:Float = Float.POSITIVE_INFINITY
         actors.filter { it.isFocusable }.filterIsInstance<Actor>().forEach {
             val newPos = getDistFromStart(it)
             if (curBestPos > newPos) {
@@ -206,7 +206,7 @@ class FocusableParent(
 
     private fun getDistFromStart(actor: Actor): Float {
         val pos = actor.centerPos()
-        if (pos.x < 0 || pos.y < 0) return Float.MAX_VALUE
+        if (pos.x+actor.width/2 < 0 || pos.y + actor.height/2 < 0) return Float.MAX_VALUE
         return ((pos.x * 3) + (pos.y))
     }
 

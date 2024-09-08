@@ -1358,6 +1358,12 @@ shaders: [
         }
     },
     {
+        name: "better_drop_shadow_shader",
+        file: "shaders/better_drop_shadow.glsl",
+        constantArgs: {
+        }
+    },
+    {
         name: "test_shader",
         file: "shaders/test.glsl",
         constantArgs: {

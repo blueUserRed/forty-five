@@ -106,7 +106,7 @@ open class OnjScreen(
         if (_selectedActors.add(actor)) {
             val newList =
                 _selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the newest element
-            newList.reversed()
+            newList.reversed().filterNotNull()
                 .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList(), fromMouse)) }
             curSelectionParent.onSelection(newList)
         }
@@ -543,7 +543,6 @@ open class OnjScreen(
             }
             stage.batch.end()
         }
-        Unit
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
