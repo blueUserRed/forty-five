@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen.Screens
+package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
