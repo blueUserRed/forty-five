@@ -9,13 +9,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
-import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
+import dev.lyze.flexbox.FlexBox
 import onj.value.OnjArray
 
 abstract class ScreenCreator : ResourceBorrower {
@@ -29,6 +30,8 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract val background: String?
 
     abstract val transitionAwayTimes: Map<String, Int>
+
+//    val addWidgetData: (Map<String, (Map<String, Any?>, Group?, OnjScreen, Actor, Boolean) -> Unit>)? = null
 
     lateinit var screen: OnjScreen
         private set
@@ -46,6 +49,7 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract fun getScreenControllers(): List<ScreenController>
 
     abstract fun getInputMaps(): List<KeyInputMap>
+    abstract fun getSelectionHierarchyStructure(): List<FocusableParent>
 
     inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen)
@@ -93,42 +97,43 @@ abstract class ScreenCreator : ResourceBorrower {
 
     inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
         val image = CustomImageActor(null, screen, false, "", false)
-        builder(image)
         this.addActor(image)
+        builder(image)
         return image
     }
-    inline fun Group.box(builder: CustomBox.() -> Unit = {}): CustomBox {
-        val image = CustomBox(screen)
-        builder(image)
-        this.addActor(image)
-        return image
+
+    inline fun Group.box(isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
+        val box = if (isScrollable) CustomScrollableBox(screen) else CustomBox(screen)
+        this.addActor(box)
+        builder(box)
+        return box
     }
 
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(definedWidth = width)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
     inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(definedHeight = height)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
     inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(growProportionHeight = proportion)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
     inline fun Group.horizontalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
         val spacer = Spacer(growProportionWidth = proportion)
-        builder(spacer)
         this.addActor(spacer)
+        builder(spacer)
         return spacer
     }
 
@@ -160,11 +165,24 @@ abstract class ScreenCreator : ResourceBorrower {
         return label
     }
 
+    inline fun Group.advancedText(
+        defaultFont: String,
+        defaultColor: Color,
+        defaultFontScale: Float,
+        isDistanceField: Boolean = true,
+        builder: AdvancedTextWidget.() -> Unit = {}
+    ): AdvancedTextWidget {
+        val advancedText = AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
+        this.addActor(advancedText)
+        builder(advancedText)
+        return advancedText
+    }
+
     fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
-        builder(actor)
         this.addActor(actor)
+        builder(actor)
         return actor
     }
 
@@ -202,6 +220,35 @@ abstract class ScreenCreator : ResourceBorrower {
         backgroundHandle = normal
         onHoverEnter { backgroundHandle = hover }
         onHoverLeave { backgroundHandle = normal }
+    }
+
+    inline fun <T> T.styles(
+        crossinline normal: () -> Unit = {},
+        crossinline focused: () -> Unit = {},
+        crossinline selected: () -> Unit = {},
+        crossinline selectedAndFocused: () -> Unit = {},
+        crossinline resetEachTime: () -> Unit = {},
+    ) where T : Actor, T : KotlinStyledActor {
+        onFocusChange { _, _ ->
+            resetEachTime()
+            if (isSelected) {
+                if (isFocused) selectedAndFocused()
+                else selected()
+            } else if (isFocused) focused()
+            else normal()
+        }
+        onSelectChange { _, _ -> resetEachTime()
+            if (isSelected) {
+                if (isFocused) selectedAndFocused()
+                else selected()
+            } else if (isFocused) focused()
+            else normal() }
+        resetEachTime()
+        if (isSelected) {
+            if (isFocused) selectedAndFocused()
+            else selected()
+        } else if (isFocused) focused()
+        else normal()
     }
 
     var Label.fontColor: Color

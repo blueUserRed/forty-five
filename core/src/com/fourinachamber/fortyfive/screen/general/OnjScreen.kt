@@ -21,8 +21,6 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
-import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -59,7 +57,8 @@ open class OnjScreen(
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
 
-    var dragAndDrop: Map<String, DragAndDrop> = mapOf()
+    var _dragAndDrop: MutableMap<String, DragAndDrop> = mutableMapOf()
+    val dragAndDrop: Map<String, DragAndDrop> get() = _dragAndDrop.toMap()
 
     private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -91,25 +90,76 @@ open class OnjScreen(
     val screenControllers: List<ScreenController>
         get() = _screenControllers
 
-    var selectedActor: KeySelectableActor? = null
-        @AllThreadsAllowed set(value) {
-            field?.isSelected = false
-            field = value
-            field?.isSelected = true
-            selectedNode = null
-        }
+    private val _selectedActors: MutableSet<Actor> = mutableSetOf()
 
-    var selectedNode: KeySelectionHierarchyNode? = null
-        @AllThreadsAllowed set(value) {
-            if (!(value?.isSelectable ?: true)) {
-                throw RuntimeException("only a node that is selectable can be assigned to 'selectedNode'")
+    val selectedActors: List<Actor> get() = _selectedActors.toList()
+
+    fun changeSelectionFor(actor: Actor, fromMouse: Boolean = true) {
+        if (actor in _selectedActors) deselectActor(actor)
+        else selectActor(actor, fromMouse)
+    }
+
+    private fun selectActor(actor: Actor, fromMouse: Boolean = true) {
+        val oldList = _selectedActors.toList()
+        if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(actor)) return
+        if (actor is FocusableActor && !actor.isSelectable) return
+        if (_selectedActors.add(actor)) {
+            val newList =
+                _selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the newest element
+            newList.reversed().filterNotNull()
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList(), fromMouse)) }
+            curSelectionParent.onSelection(newList)
+        }
+    }
+
+    private fun deselectActor(actor: Actor) {
+        val oldList = _selectedActors.toList()
+        if (_selectedActors.remove(actor))
+            oldList.reversed()
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
+    }
+
+    fun deselectAllExcept(actor: Actor? = null) {
+        val oldList = _selectedActors.toList()
+        _selectedActors.removeIf { it != actor }
+        if (oldList.size != _selectedActors.size)
+            oldList.reversed()
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
+    }
+
+    var focusedActor: Actor? = null
+        set(value) {
+            if (value == null) {
+                field?.let { it.fire(FocusChangeEvent(it, null)) }
+            } else {
+                if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(value)) return
+                field?.let { it.fire(FocusChangeEvent(it, value)) }
+                value.let { it.fire(FocusChangeEvent(field, it)) }
             }
-            value?.actor?.let { selectedActor = it as KeySelectableActor }
             field = value
         }
-
-    var focusedActor: FocusableActor? = null
     private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
+    val curSelectionParent: FocusableParent get() = selectionHierarchy.last()
+
+    var draggedPreviewActor: Actor? = null //current possibilty for dragAndDrop
+    val draggedActor: Actor? get() = dragAndDrop.values.firstNotNullOfOrNull { it.dragActor } ?: draggedPreviewActor
+
+    fun addToSelectionHierarchy(child: FocusableParent) {
+        selectionHierarchy.add(child)
+        curSelectionParent.updateFocusableActors(this)
+    }
+
+    fun escapeSelectionHierarchy(fromMouse: Boolean = true) {
+        if (!fromMouse && draggedActor != null) return
+        focusedActor = selectedActors.lastOrNull()
+        deselectAllExcept()
+        if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
+            val s = selectionHierarchy.removeLast()
+            s.onLeave()
+            curSelectionParent.updateFocusableActors(this)
+        }
+    }
+
     fun getFocusableActors(): MutableList<FocusableActor> {
         return getFocusableActors(stage.root)
     }
@@ -125,20 +175,16 @@ open class OnjScreen(
         return selectableActors
     }
 
-    fun focusNext(direction: Vector2?=null) {
+    fun focusNext(direction: Vector2? = null) {
         if (selectionHierarchy.isEmpty()) return
-        val focusableElement = selectionHierarchy.last().focusNext(direction, this)
-        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
-        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
-        this.focusedActor = focusableElement
+        val focusableElement = curSelectionParent.focusNext(direction, this)
+        this.focusedActor = focusableElement as Actor
     }
 
     fun focusPrevious() {
         if (selectionHierarchy.isEmpty()) return
-        val focusableElement = selectionHierarchy.last().focusPrevious(this)
-        focusedActor?.let{ it.onFocusChange(it, focusableElement) }
-        focusableElement?.let{ it.onFocusChange(it, focusableElement) }
-        this.focusedActor = focusableElement
+        val focusableElement = curSelectionParent.focusPrevious(this)
+        this.focusedActor = focusableElement as Actor
     }
 
     private var awaitingConfirmationClick: Boolean = false
@@ -180,8 +226,6 @@ open class OnjScreen(
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
-    var keySelectionHierarchy: KeySelectionHierarchyNode? = null
-        private set
 
     var currentHoverDetail: Actor? = null
         private set
@@ -273,20 +317,15 @@ open class OnjScreen(
         screenStateChangeListeners.forEach { it(false, state) }
     }
 
-    fun addScreenStateChangeListener(listener: (entered: Boolean, state: String) -> Unit) {
+    fun addOnScreenStateChangedListener(listener: (entered: Boolean, state: String) -> Unit) {
         screenStateChangeListeners.add(listener)
     }
 
     inline fun listenToScreenState(listenToState: String, crossinline listener: (entered: Boolean) -> Unit) {
-        addScreenStateChangeListener { entered, state ->
-            if (state != listenToState) return@addScreenStateChangeListener
+        addOnScreenStateChangedListener { entered, state ->
+            if (state != listenToState) return@addOnScreenStateChangedListener
             listener(entered)
         }
-    }
-
-    @AllThreadsAllowed
-    fun buildKeySelectHierarchy() {
-        keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
     }
 
     @AllThreadsAllowed
@@ -307,6 +346,7 @@ open class OnjScreen(
 
     fun addNamedActor(name: String, actor: Actor) {
         namedActors[name] = actor
+        actor.name = name
     }
 
     fun removeNamedActor(name: String) {
@@ -331,16 +371,17 @@ open class OnjScreen(
         //TODO remove from behaviour and dragAndDrop and so on
     }
 
-    fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
+    fun <T> addOnFocusDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
         val showHoverDetailLambda = { showHoverDetail(actor, actor, actor.actorTemplate) }
-        if (actor is HoverStateActor) {
-            actor.onHoverEnter {
-                if (dragAndDrop.none { it.value.isDragging }) { //TODO MARVIN has to add that this if works in a fight too
-                    Gdx.app.postRunnable(showHoverDetailLambda)
+        if (actor is FocusableActor) {
+            actor.onFocusChange { _, new ->
+                if (new == actor) {
+                    if (dragAndDrop.none { it.value.isDragging }) { //TODO MARVIN has to add that this if works in a fight too
+                        Gdx.app.postRunnable(showHoverDetailLambda)
+                    }
+                } else {
+                    hideHoverDetail()
                 }
-            }
-            actor.onHoverLeave {
-                hideHoverDetail()
             }
         } else {
             actor.onEnter {
@@ -350,7 +391,6 @@ open class OnjScreen(
                 hideHoverDetail()
             }
         }
-
     }
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
@@ -359,13 +399,13 @@ open class OnjScreen(
         if (currentHoverDetail != null) hideHoverDetail()
         val detail = screenBuilder.generateFromTemplate(
             detailTemplate,
-            displayDetailActor.getHoverDetailData(),
+            displayDetailActor.getFocusDetailData(),
             null,
             this
         ) ?: throw RuntimeException("hover template '$detailTemplate' does not exist")
         displayDetailActor.detailActor = detail
 
-        displayDetailActor.setBoundsOfHoverDetailActor(this)
+        displayDetailActor.setBoundsOfFocusDetailActor(this)
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
@@ -480,16 +520,30 @@ open class OnjScreen(
         styleManagers
             .filter { it !in oldStyleManagers }
             .forEach(StyleManager::update) //all added items get updated too
-        if (dragAndDrop.none { it.value.isDragging }) {
+        val draggedActorLocal = draggedActor
+        if (draggedActorLocal == null) {
             stage.batch.begin()
-            currentDisplayDetailActor?.drawHoverDetail(this, stage.batch)
+            currentDisplayDetailActor?.drawFocusDetail(this, stage.batch)
 //                currentHoverDetail?.draw(stage.batch, 1f)
             if (currentHoverDetail != null) {
                 currentHoverDetail!!.draw(stage.batch, 1f)
             }
             stage.batch.end()
+        } else {
+            stage.batch.begin()
+//            println("x: ${draggedActor.x}  y: ${draggedActor.y}   stagePos: ${draggedActor.localToStageCoordinates(Vector2(0F,0F))}")
+            if (draggedActorLocal == draggedPreviewActor && draggedActorLocal is OffSettable) {//current possibilty for dragAndDrop
+                val pos = draggedActorLocal.parent.localToStageCoordinates(Vector2(0F, 0F))
+                draggedActorLocal.drawOffsetX += pos.x //current possibilty for dragAndDrop
+                draggedActorLocal.drawOffsetY += pos.y//TODO ugly VERY UGLY (the part in the if at least, the else is okay)
+                draggedActorLocal.draw(stage.batch, 1f)
+                draggedActorLocal.drawOffsetX -= pos.x
+                draggedActorLocal.drawOffsetY -= pos.y
+            } else {
+                draggedActorLocal.draw(stage.batch, 1f)
+            }
+            stage.batch.end()
         }
-        Unit
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
@@ -541,6 +595,10 @@ open class OnjScreen(
         stage.dispose()
         additionalDisposables.forEach(Disposable::dispose)
         lifetime.die()
+    }
+
+    fun updateSelectable() {
+        curSelectionParent.updateFocusableActors(this)
     }
 
     companion object {

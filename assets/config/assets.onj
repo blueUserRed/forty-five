@@ -463,12 +463,12 @@ textures: [
         file: "blobs/map/decorations/magenta_mountains_tree.png"
     },
     {
-        name: "shop_dark_background",
-        file: "blobs/events/shop/dark_background.png"
+        name: "shop_background",
+        file: "blobs/events/shop/shop_background.png"
     },
     {
         name: "shop_items_background",
-        file: "blobs/events/shop/items_background.png"
+        file: "blobs/events/shop/shop_items_background.png"
     },
     {
         name: "heal_or_max_accept",
@@ -492,7 +492,7 @@ textures: [
     },
     {
         name: "heal_or_max_background",
-        file: "blobs/events/heal_or_maxhp/heal_or_max_background.png"
+        file: "blobs/events/heal_or_maxhp/heal_and_or_maxhp_background.png"
     },
     {
         name: "heal_or_max_selector_background",
@@ -501,10 +501,6 @@ textures: [
     {
         name: "heal_or_max_selector_background_selected",
         file: "blobs/events/heal_or_maxhp/heal_or_max_selector_background_selected.png"
-    },
-    {
-        name: "max_health_background",
-        file: "blobs/events/heal_or_maxhp/max_health_background.png"
     },
     {
         name: "shop_add_to_backpack",
@@ -1362,6 +1358,12 @@ shaders: [
         }
     },
     {
+        name: "better_drop_shadow_shader",
+        file: "shaders/better_drop_shadow.glsl",
+        constantArgs: {
+        }
+    },
+    {
         name: "test_shader",
         file: "shaders/test.glsl",
         constantArgs: {
@@ -1420,6 +1422,15 @@ ninepatches: [
     {
         name: "forty_white_rounded",
         file: "blobs/ninepatches/forty_white_rounded.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.0025
+    },
+    {
+        name: "taupe_gray_rounded",
+        file: "blobs/ninepatches/taupe_gray_rounded.png",
         top: 24,
         bottom: 24,
         left: 24,

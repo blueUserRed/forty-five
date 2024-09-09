@@ -6,9 +6,7 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import onj.value.OnjObject
 
-class BiomeBackgroundScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
-
-    private val useSecondary: Boolean = onj.get<Boolean>("useSecondary")
+class BiomeBackgroundScreenController(private val screen: OnjScreen, private val useSecondary: Boolean) : ScreenController() {
 
     override fun init(context: Any?) {
         val background = if (useSecondary) {

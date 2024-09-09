@@ -1,7 +1,9 @@
 package com.fourinachamber.fortyfive.map.events.shop
 
-import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -9,35 +11,35 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomScrollableBox
+import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
+import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.TemplateString
-import com.fourinachamber.fortyfive.utils.toIntRange
-import com.fourinachamber.fortyfive.utils.toOnjYoga
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.enums.YogaUnit
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
+import ktx.actors.alpha
 import onj.value.*
 import kotlin.random.Random
 
-class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
+class ShopScreenController(
+    private val screen: OnjScreen,
+    private val messageWidgetName: String,
+    private val cardsParentName: String,
+    private val addToDeckWidgetName: String,
+    private val addToBackpackWidgetName: String,
+    private val shopPersonWidgetName: String,
+) : ScreenController() {
 
     private lateinit var context: ShopMapEvent
 
-    private val shopFilePath = onj.get<String>("shopsFile")
-    private val npcsFilePath = onj.get<String>("npcsFile")
+    private lateinit var personWidget: CustomImageActor
 
-    private val messageWidgetName = onj.get<String>("messageWidgetName")
-    private val cardsParentName = onj.get<String>("cardsParentName")
-    private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
-    private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
-    private val cardHoverDetailTemplateName = onj.get<String>("hoverDetailActorTemplateName")
-
-    private lateinit var person: CustomImageActor
-
-    private lateinit var cardsParentWidget: CustomScrollableFlexBox
+    private lateinit var cardsParentWidget: CustomScrollableBox
 
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
@@ -48,7 +50,7 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
     private lateinit var random: Random
 
     override fun init(context: Any?) {
-        //TODO fix bug with cards when being on the edge of other cards when drag and dropping
+//        //TODO comment back in before push
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
@@ -75,7 +77,7 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
 
         random = Random(context.seed)
         addCards(context.types)
-
+//
         val textToShow = text[(random.nextDouble() * text.size).toInt()] as OnjObject
 
         messageWidget.setRawText(
@@ -138,41 +140,50 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
             updateStateOfCard(cardActor.card, setBought = true, label = label)
         }
         TemplateString.updateGlobalParam("shop.currentRerollPrice", context.currentRerollPrice)
+
+        cardsParentWidget.invalidate()
     }
 
     private fun addCard(card: Card) {
-        val curParent = screen.screenBuilder.generateFromTemplate(
-            "cardsWidgetParent",
-            mapOf(),
-            cardsParentWidget,
-            screen
-        ) as FlexBox
 
-        val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
-        tempMap["name"] = OnjString("Card_${curParent.children.size}")
-        screen.screenBuilder.addDataToWidgetFromTemplate(
-            "cardsWidgetImage",
-            tempMap,
-            curParent,
-            screen,
-            card.actor
-        )
-        val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
-        tempMap2["name"] = OnjString("CardLabel" + cardsParentWidget.children.size)
-        tempMap2["text"] = OnjString("" + card.price + "$")
-        val label = screen.screenBuilder.generateFromTemplate(
-            "cardsWidgetPrice",
-            tempMap2,
-            curParent,
-            screen
-        ) as CustomLabel
-        label.setText("${card.price}$")
+        val curParent = CustomBox(screen)
+        cardsParentWidget.addActor(curParent)
+        curParent.width = curParent.parent.width * 0.21f
+        curParent.height = curParent.parent.height * 0.445f
+        curParent.onLayout {
+            curParent.width = curParent.parent.width * 0.21f
+            curParent.height = curParent.parent.height * 0.445f
+        }
+        curParent.flexDirection = FlexDirection.COLUMN
+        curParent.minVerticalDistBetweenElements = 2f
+        curParent.horizontalAlign = CustomAlign.CENTER
+        screen.addNamedActor("cardsWidgetParent", curParent)
+
+
+        curParent.addActor(card.actor)
+        screen.addNamedActor("Card_${curParent.children.size}", card.actor)
+        curParent.onLayout {
+            card.actor.width = card.actor.parent.width
+            card.actor.height = card.actor.parent.height * 0.75f
+        }
+        card.actor.targetGroups = listOf("shop_targets")
+        card.actor.isDraggable = true
+        card.actor.group = "shop_cards"
+        card.actor.onFocusChange { _, _ -> card.actor.debug = card.actor.isFocused }
+
+
+        val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
+        val label = CustomLabel( screen,"${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
+        curParent.addActor(label)
+        label.setFontScale(0.8f)
+        label.setAlignment(Align.center)
+        screen.addNamedActor("CardLabel" + cardsParentWidget.children.size, label)
         cardWidgets.add(card.actor)
         labels.add(label)
     }
 
     private fun updateStatesOfUnboughtCards() {
-        cardWidgets.forEachIndexed { index, cardActor ->
+        cardWidgets.forEachIndexed { index, cardActor -> //TODO this and everything else once hoverdetails work fine
             if (cardActor.inActorState("unbuyable")) return@forEachIndexed
             updateStateOfCard(cardActor.card, label = labels[index])
         }
@@ -184,52 +195,49 @@ class ShopScreenController(private val screen: OnjScreen, onj: OnjObject) : Scre
         setSoldOut: Boolean = false,
         label: CustomLabel = labels[cardWidgets.indexOf(card.actor)]
     ) {
-        label.leaveActorState("bought")
-        label.leaveActorState("poor")
-        card.actor.leaveActorState("unbuyable")
+        label.alpha = 0.6f
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
-            label.enterActorState("poor")
-            card.actor.enterActorState("unbuyable")
+            label.alpha = 0.6f
+            card.actor.alpha = 0.5f
             return
         }
         if (setBought) {
-            label.enterActorState("bought")
+            label.alpha = 0.9f
             label.setText("bought")
-            card.actor.enterActorState("unbuyable")
+            card.actor.alpha=0.5f
+
         }
         if (setSoldOut) {
-            label.enterActorState("sold out")
             label.setText("sold out")
-            card.actor.enterActorState("unbuyable")
+            card.actor.alpha = 0.5f
         }
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
-        val data = imgData.value.toMutableMap()
-        data["offsetX"] = ((data["offsetX"] as OnjFloat?)?.value?.toFloat() ?: 0F).toOnjYoga(YogaUnit.POINT)
-        val flexParent =
-            highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomFlexBox
-        val person = onjScreen.screenBuilder.generateFromTemplate(
-            "personWidget",
-            data,
-            flexParent,
-            onjScreen
-        ) as CustomImageActor
-        this.person = person
-        flexParent.resortZIndices()
+        val shopPersonWidget = onjScreen.namedActorOrError(shopPersonWidgetName)
+        if (shopPersonWidget !is CustomImageActor) throw RuntimeException("widget with name $shopPersonWidgetName must be of type CustomImageActor")
+        this.personWidget = shopPersonWidget
+
+        personWidget.backgroundHandle = imgData.get<String>("textureName")
+        val scale = imgData.get<Double>("scale").toFloat()
+        personWidget.scaleX = scale
+        personWidget.scaleY = scale
+        personWidget.drawOffsetX = imgData.getOr<Double>("offsetX", 0.0).toFloat()
+        personWidget.drawOffsetY = imgData.getOr<Double>("offsetY", 0.0).toFloat()
+
         val cardsParentWidget = onjScreen.namedActorOrError(cardsParentName)
-        if (cardsParentWidget !is CustomScrollableFlexBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableFlexBox")
+        if (cardsParentWidget !is CustomScrollableBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableBox")
         this.cardsParentWidget = cardsParentWidget
     }
 
-    private fun highestFlexParent(actor: Actor): CustomFlexBox? {
+    private fun highestFlexParent(actor: Actor): CustomBox? {
         var curActor = actor
         val ladder = mutableListOf<Actor>()
         while (curActor.parent != null) {
             curActor = curActor.parent
             ladder.add(curActor)
         }
-        return ladder.last { it is CustomFlexBox } as CustomFlexBox?
+        return ladder.last { it is CustomBox } as CustomBox?
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {

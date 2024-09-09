@@ -16,10 +16,10 @@ object NavbarCreator {
         width = worldWidth * 0.7f
         height = 130f
 
-        debug()
+//        debug()
 
         horizontalGroup {
-            debug()
+//            debug()
             forcedPrefWidth = parent.width
             forcedPrefHeight = parent.height * 0.5f
             syncDimensions()

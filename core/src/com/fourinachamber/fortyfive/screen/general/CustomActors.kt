@@ -4,7 +4,6 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
@@ -23,8 +22,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
-import com.badlogic.gdx.utils.SnapshotArray
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -35,7 +34,6 @@ import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaUnit
-import kotlinx.coroutines.newFixedThreadPoolContext
 import ktx.actors.alpha
 import ktx.actors.onTouchEvent
 import onj.value.*
@@ -51,7 +49,7 @@ open class CustomLabel(
     private val hoverText: String = "",
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor, KotlinStyledActor {
 
     override val actor: Actor = this
 
@@ -64,7 +62,19 @@ open class CustomLabel(
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
+
+    override var marginTop: Float = 0F
+    override var marginBottom: Float = 0F
+    override var marginLeft: Float = 0F
+    override var marginRight: Float = 0F
+    override var positionType: PositionType = PositionType.RELATIV
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false
+    override var isFocused: Boolean = false
+    override var isSelectable: Boolean = false
     override var isSelected: Boolean = false
+
+    //    override var isSelected: Boolean = false
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
@@ -94,15 +104,15 @@ open class CustomLabel(
     var forcedPrefWidth: Float? = null
 
     init {
-        bindHoverStateListeners(this)
-        registerOnHoverDetailActor(this, screen)
+        bindDefaultListeners(this, screen)
+        registerOnFocusDetailActor(this, screen)
     }
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
+    override fun getFocusDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
         "hoverText" to OnjString(hoverText)
     ).also {
         it.putAll(additionalHoverData)
@@ -240,13 +250,12 @@ open class CustomImageActor(
     _screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
     var hoverText: String = "",
-    var hasHoverDetail: Boolean = false
+    var hasHoverDetail: Boolean = false,
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
-    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen {
+    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen, KotlinStyledActor, DragAndDroppableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
-    override var isClicked: Boolean = false
     override var mainHoverDetailActor: String? = null
 
     override var isHoverDetailActive: Boolean
@@ -284,6 +293,22 @@ open class CustomImageActor(
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     override var isSelected: Boolean = false
+    override var isSelectable: Boolean = false
+
+    override var isDraggable: Boolean = false
+    override var inDragPreview: Boolean = false
+    override var targetGroups: List<String> = listOf()
+    override val resetCondition: ((Actor?) -> Boolean)? = null
+    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
+
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false
+        set(value) {
+            if (this.isFocused) screen.focusedActor = null
+            field = value
+        }
+    override var isFocused: Boolean = false
+    override var isClicked: Boolean = false
 
     override var isHoveredOver: Boolean = false
 
@@ -308,12 +333,18 @@ open class CustomImageActor(
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
+    override var positionType: PositionType = PositionType.RELATIV
+    override var marginTop: Float=0F
+    override var marginBottom: Float=0F
+    override var marginLeft: Float=0F
+    override var marginRight: Float=0F
+
     init {
-        bindHoverStateListeners(this)
-        registerOnHoverDetailActor(this, _screen)
+        bindDefaultListeners(this, screen)
+        registerOnFocusDetailActor(this, _screen)
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
+    override fun getFocusDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
         "hoverText" to OnjString(hoverText)
     ).also {
         it.putAll(additionalHoverData)
@@ -353,6 +384,9 @@ open class CustomImageActor(
                 drawable.draw(batch, x, y, width, height)
             }
             batch.color = c
+
+            x -= drawOffsetX
+            y -= drawOffsetY
             return
         }
 
@@ -433,7 +467,8 @@ open class CustomFlexBox(
     override val actor: Actor = this
 
     private val dropShadowShader: Promise<BetterShader> by lazy {
-        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
+//        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
+        ResourceManager.request<BetterShader>(this, screen, "drop_shadow_shader")
     }
 
     override var isDisabled: Boolean = false
@@ -484,10 +519,10 @@ open class CustomFlexBox(
 
     init {
         bindHoverStateListeners(this)
-        registerOnHoverDetailActor(this, screen)
+        registerOnFocusDetailActor(this, screen)
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
+    override fun getFocusDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
         "hoverText" to OnjString(hoverText)
     ).also {
         it.putAll(additionalHoverData)
@@ -555,48 +590,6 @@ open class CustomFlexBox(
             if (parentAlpha * alpha < 1f) batch.flush()
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
             val background = background
-            if (name == "drop_shadow_testing_name") {
-                dropShadowShader.getOrNull()?.let {
-                    batch.flush()
-                    it.shader.bind()
-                    it.prepare(screen)
-                    val oldShader = batch.shader
-
-//                    val glowDist = 0.05F                  //drop shadow config
-////                    val glowDist = 0.015F
-//                    val extraWidth = 1F/1.2F
-//                    val extraHeight = 1F/1.2F
-//                    val offset= Vector2(0.02F,0.1F)
-
-//                    val glowDist = 0.05F                    //glow config
-////                    val glowDist = 0.015F
-//                    val extraWidth = 1F
-//                    val extraHeight = 1F
-//                    val offset= Vector2(0.0F,0.0F)
-
-//                    batch.shader = it.shader
-//                    it.shader.setUniformf("u_multiplier", glowDist)
-//                    it.shader.setUniformf("u_color", Color.GREEN)
-//                    it.shader.setUniformf("u_offset", offset)
-//                    background?.draw(batch,
-//                        x-width*glowDist*extraWidth,
-//                        y-height*glowDist*extraHeight,
-//                        width*(1+glowDist*2*extraWidth),
-//                        height*(1+glowDist*2*extraHeight))
-
-
-//                    it.shader.setUniformf("u_radius", 30F)
-//                    it.shader.setUniformf("u_dir", Vector2(0F,0.001F))
-//                    background?.draw(batch, x, y+height*2, width, height)
-//                    batch.flush()
-//                    it.shader.setUniformf("u_radius", 30F)
-//                    it.shader.setUniformf("u_dir", Vector2(0.001F,0F))
-//                    background?.draw(batch, x, y+height*2, width, height)
-
-                    batch.flush()
-                    batch.shader = oldShader
-                }
-            } //else //TODO remove this else
             if (background is TransformDrawable) {
                 background.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
@@ -1122,7 +1115,7 @@ class RotatableImageActor(
                 else -> {}
             }
         }
-        touchable = Touchable.enabled
+        touchable = Touchable.enabled //TODO remove i guess, why is this here, this probably shouldn't be here i think
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -1327,7 +1320,7 @@ open class CustomVerticalGroup(
 
 open class CustomGroup(
     override val screen: OnjScreen
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor {
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, DropShadowActor {
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
@@ -1347,12 +1340,17 @@ open class CustomGroup(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    override var dropShadow: DropShadow? = null
+
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         this.x += drawOffsetX
         this.y += drawOffsetY
-        background?.draw(batch, x, y, width, height)
+        background?.let {
+            dropShadow?.doDropShadow(batch, screen, it,this)
+            it.draw(batch, x, y, width, height)
+        }
         super.draw(batch, parentAlpha)
         this.x -= drawOffsetX
         this.y -= drawOffsetY
@@ -1386,17 +1384,19 @@ open class CustomGroup(
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
-        notZIndexedChildren.add(index,actor)
+        notZIndexedChildren.add(index, actor)
         super.addActorAt(index, actor)
     }
     override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
-        notZIndexedChildren.remove(actor)
-        return super.removeActor(actor, unfocus)
+        val index = children.indexOf(actor, true)
+        if (index == -1) return false
+        removeActorAt(notZIndexedChildren.indexOf(actor), unfocus)//TODO ugly, but there is no better way i think (same with next method)
+        return true
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
-        notZIndexedChildren.removeAt(index)
-        return super.removeActorAt(index, unfocus)
+        val actor = notZIndexedChildren.removeAt(index)
+        return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: layoutPrefWidth
@@ -1458,7 +1458,7 @@ class Spacer(
     override fun drawDebug(renderer: ShapeRenderer?) {
         renderer ?: return
         renderer.flush()
-        renderer.color = Color.RED
+        renderer.color = Color.Red
         val width = max(definedWidth, 10f)
         val height = max(definedHeight, 10f)
         renderer.rect(x, y, width, height)

@@ -35,6 +35,7 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
         namedActors.putAll(creator.namedActors)
         creator.getScreenControllers().forEach { screen.addScreenController(it) }
         screen.inputMap = KeyInputMap.combine(creator.getInputMaps())
+        creator.getSelectionHierarchyStructure().forEach { screen.addToSelectionHierarchy(it) }
         return screen
     }
 
@@ -55,6 +56,8 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
         actor: Actor,
         removeOldData: Boolean
     ) {
+//        val function = creator.addWidgetData?.get(name)
+//        function?.invoke(data, parent, screen, actor, removeOldData)
         TODO("Not yet implemented")
     }
 }

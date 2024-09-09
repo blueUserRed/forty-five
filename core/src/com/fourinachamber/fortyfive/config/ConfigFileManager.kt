@@ -1,6 +1,12 @@
 package com.fourinachamber.fortyfive.config
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.screen.CustomBoxPlaygroundScreen
+import com.fourinachamber.fortyfive.screen.MapScreen
+import com.fourinachamber.fortyfive.screen.Screens.AddMaxHPScreen
+import com.fourinachamber.fortyfive.screen.Screens.HealOrMaxHPScreen
+import com.fourinachamber.fortyfive.screen.Screens.ShopScreen
+import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromOnjScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -56,7 +62,7 @@ object ConfigFileManager {
             .toMutableList()
     }
 
-    fun addScreen(name: String, creator: () -> ScreenBuilder) {
+    private fun addScreen(name: String, creator: () -> ScreenBuilder) {
         screens.add(ScreenData(name, null, creator, null))
     }
 
@@ -108,6 +114,17 @@ object ConfigFileManager {
     private fun screenOrError(screen: String): ScreenData = screens
         .find { it.name == screen }
         ?: throw RuntimeException("no screen called $screen")
+
+    fun addKotlinScreens() {
+        val data = listOf(
+            "mapScreen" to { FromKotlinScreenBuilder(MapScreen()) },
+            "healOrMaxHPScreen" to { FromKotlinScreenBuilder(HealOrMaxHPScreen()) },
+//            "healOrMaxHPScreen" to { FromKotlinScreenBuilder(CustomBoxPlaygroundScreen()) },
+            "addMaxHPScreen" to { FromKotlinScreenBuilder(AddMaxHPScreen()) },
+            "shopScreen" to { FromKotlinScreenBuilder(ShopScreen()) },
+        )
+        data.forEach { addScreen(it.first,it.second) }
+    }
 
     private data class ConfigFile(
         val name: String,

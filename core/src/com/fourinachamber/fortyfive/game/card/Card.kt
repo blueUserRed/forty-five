@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.onjNamespaces.OnjPassiveEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
@@ -52,7 +53,7 @@ class CardPrototype(
 
     var creator: ((screen: OnjScreen, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
-    private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
+    private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
     /**
      * creates an actual instance of this card
@@ -157,9 +158,9 @@ class Card(
         private set
 
     fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
-        (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
-        protectingModifiers.isNotEmpty()
-    )
+            (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
+                    protectingModifiers.isNotEmpty()
+            )
 
     private var lastDamageValue: Int = baseDamage
     private var lastCostValue: Int = baseCost
@@ -491,7 +492,8 @@ class Card(
         actor.updateDetailStates(detailActor)
     }
 
-    private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller), curCost(controller))
+    private fun updateTexture(controller: GameController) =
+        actor.redrawPixmap(curDamage(controller), curCost(controller))
 
     override fun dispose() = actor.dispose()
 
@@ -514,6 +516,7 @@ class Card(
                     val slotIcon = GraphicsConfig.revolverSlotIcon(slot)
                     "entered in slot $slot§§$slotIcon§§"
                 } ?: ""
+
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
                     val mostExpensive = FortyFive.currentGame!!
@@ -524,6 +527,7 @@ class Card(
                         ?: 0
                     "most expensive bullet costs $mostExpensive"
                 }
+
                 else -> throw RuntimeException("unknown additional hover info $info")
             }
         }
@@ -696,7 +700,7 @@ class CardActor(
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower {
+    OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DragAndDroppableActor {
 
     override val actor: Actor = this
 
@@ -711,13 +715,34 @@ class CardActor(
 
     override var drawOffsetX: Float = 0F
     override var drawOffsetY: Float = 0F
-    override var logicalOffsetX: Float= 0F
+    override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
     override var styleManager: StyleManager? = null
 
+    override var marginTop: Float = 0F
+    override var marginBottom: Float = 0F
+    override var marginLeft: Float = 0F
+    override var marginRight: Float = 0F
+    override var positionType: PositionType = PositionType.RELATIV
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false
+    override var isFocused: Boolean = false
+    override var isSelectable: Boolean = false
+    override var isSelected: Boolean = false
+    override var isDraggable: Boolean = false
+        set(value) {
+            field = value
+            isFocusable = true
+            isSelectable = true
+        }
+    override var inDragPreview: Boolean = false
+    override var targetGroups: List<String> = listOf()
+    override val resetCondition: ((Actor?) -> Boolean)? = null
+    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
+
     override var isHoveredOver: Boolean = false
 
-    override var isSelected: Boolean = false
+    //    override var isSelected: Boolean = false
     override var partOfHierarchy: Boolean = true
     override var isClicked: Boolean = false
 
@@ -757,7 +782,7 @@ class CardActor(
 
     init {
         bindHoverStateListeners(this)
-        registerOnHoverDetailActor(this, screen)
+        registerOnFocusDetailActor(this, screen)
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
@@ -809,7 +834,7 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        setBoundsOfHoverDetailActor(screen)
+        setBoundsOfFocusDetailActor(screen)
         batch ?: return
         if (cardTexturePromise?.isResolved == true) {
             texture?.let { FortyFive.cardTextureManager.giveTextureBack(card) }
@@ -962,7 +987,7 @@ class CardActor(
         playSoundsOnHover = false
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+    override fun getFocusDetailData(): Map<String, OnjValue> = mapOf(
         "description" to OnjString(
             card.shortDescription.ifBlank { card.flavourText }
         ),
@@ -975,12 +1000,12 @@ class CardActor(
 
     override fun positionChanged() {
         super.positionChanged()
-        setBoundsOfHoverDetailActor(screen)
+        setBoundsOfFocusDetailActor(screen)
     }
 
     override fun sizeChanged() {
         super.sizeChanged()
-        setBoundsOfHoverDetailActor(screen)
+        setBoundsOfFocusDetailActor(screen)
     }
 
     override fun onDetailDisplayStarted() {
@@ -1030,7 +1055,9 @@ class CardActor(
             screen.enterState("hoverDetailHasFlavorText")
         }
 
-        if (card.getKeyWordsForDescriptions().isEmpty() && (FortyFive.currentGame == null || card.getAdditionalHoverDescriptions().isEmpty())) {
+        if (card.getKeyWordsForDescriptions()
+                .isEmpty() && (FortyFive.currentGame == null || card.getAdditionalHoverDescriptions().isEmpty())
+        ) {
             screen.leaveState("hoverDetailHasMoreInfo")
         } else {
             screen.enterState("hoverDetailHasMoreInfo")
