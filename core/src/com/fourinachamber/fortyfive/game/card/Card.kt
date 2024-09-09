@@ -705,7 +705,7 @@ class CardActor(
 
     override var inAnimation: Boolean = false
 
-    override var detailWidget: DetailWidget? = DetailWidget.SimpleDetailActor(screen) { "steadfast" }
+    override var detailWidget: DetailWidget? = DetailWidget.SimpleDetailActor(screen) { "stead fgT qyöü #äast stead fgT qyöü #äasts tead fgT qyöü #ä aststead fgT qyöü #äast " }
 
     override var fixedZIndex: Int = 0
 
@@ -726,14 +726,9 @@ class CardActor(
     override var isSelectable: Boolean = false
     override var isSelected: Boolean = false
     override var isDraggable: Boolean = false
-        set(value) {
-            field = value
-            isFocusable = true
-            isSelectable = true
-        }
     override var inDragPreview: Boolean = false
     override var targetGroups: List<String> = listOf()
-    override val resetCondition: ((Actor?) -> Boolean)? = null
+    override var resetCondition: ((Actor?) -> Boolean)? = null
     override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
 
     override var isHoveredOver: Boolean = false
@@ -769,7 +764,7 @@ class CardActor(
     private var texture: Texture? = null
 
     init {
-        bindHoverStateListeners(this)
+        bindDefaultListeners(this,screen)
         registerOnFocusDetailActor(this, screen)
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)

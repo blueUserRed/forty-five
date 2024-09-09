@@ -157,7 +157,6 @@ class ShopScreenController(
         curParent.horizontalAlign = CustomAlign.CENTER
         screen.addNamedActor("cardsWidgetParent", curParent)
 
-
         curParent.addActor(card.actor)
         screen.addNamedActor("Card_${curParent.children.size}", card.actor)
         curParent.onLayout {
@@ -165,14 +164,14 @@ class ShopScreenController(
             card.actor.setSize(fl, fl)
         }
         card.actor.targetGroups = listOf("shop_targets")
-        card.actor.isDraggable = true
+        card.actor.makeDraggable(card.actor)
         card.actor.group = "shop_cards"
-        card.actor.onFocusChange { _, _ -> card.actor.debug = card.actor.isFocused }
-        card.actor.bindDragging(card.actor,screen)
-
+        card.actor.resetCondition = { true }
+        card.actor.bindDragging(card.actor, screen)
 
         val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
-        val label = CustomLabel( screen,"${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
+        val label =
+            CustomLabel(screen, "${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
         curParent.addActor(label)
         label.setFontScale(0.8f)
         label.setAlignment(Align.center)
@@ -182,8 +181,7 @@ class ShopScreenController(
     }
 
     private fun updateStatesOfUnboughtCards() {
-        cardWidgets.forEachIndexed { index, cardActor -> //TODO this and everything else once hoverdetails work fine
-            if (cardActor.inActorState("unbuyable")) return@forEachIndexed
+        cardWidgets.forEachIndexed { index, cardActor ->
             updateStateOfCard(cardActor.card, label = labels[index])
         }
     }
@@ -194,21 +192,24 @@ class ShopScreenController(
         setSoldOut: Boolean = false,
         label: CustomLabel = labels[cardWidgets.indexOf(card.actor)]
     ) {
-        label.alpha = 0.6f
+        fun CardActor.unavailable(){
+            this.alpha = 0.5f
+            this.isSelectable = false
+            this.isDraggable = false
+        }
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
             label.alpha = 0.6f
-            card.actor.alpha = 0.5f
+            card.actor.unavailable()
             return
         }
         if (setBought) {
             label.alpha = 0.9f
             label.setText("bought")
-            card.actor.alpha=0.5f
-
+            card.actor.unavailable()
         }
         if (setSoldOut) {
             label.setText("sold out")
-            card.actor.alpha = 0.5f
+            card.actor.unavailable()
         }
     }
 
@@ -229,20 +230,8 @@ class ShopScreenController(
         this.cardsParentWidget = cardsParentWidget
     }
 
-    private fun highestFlexParent(actor: Actor): CustomBox? {
-        var curActor = actor
-        val ladder = mutableListOf<Actor>()
-        while (curActor.parent != null) {
-            curActor = curActor.parent
-            ladder.add(curActor)
-        }
-        return ladder.last { it is CustomBox } as CustomBox?
-    }
-
     fun buyCard(actor: Actor, addToDeck: Boolean) {
         actor as CardActor
-        if (actor.inActorState("unbuyable")) return
-        if (actor.card.price > SaveState.playerMoney) return
         SaveState.payMoney(actor.card.price)
         SaveState.buyCard(actor.card.name)
         context.boughtIndices.add(cardWidgets.indexOf(actor))
@@ -250,16 +239,4 @@ class ShopScreenController(
         updateStateOfCard(actor.card, setBought = true)
         updateStatesOfUnboughtCards()
     }
-
-    fun displayBuyPopups() {
-        val curDeck = SaveState.curDeck
-        if (curDeck.canAddCards()) addToDeckWidget.enterActorState("display")
-        if (curDeck.hasEnoughCards()) addToBackpackWidget.enterActorState("display")
-    }
-
-    fun closeBuyPopups() {
-        addToDeckWidget.leaveActorState("display")
-        addToBackpackWidget.leaveActorState("display")
-    }
-
 }

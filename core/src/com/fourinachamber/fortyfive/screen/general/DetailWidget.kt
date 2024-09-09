@@ -51,9 +51,11 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                 screen, true
             )
             actor.backgroundHandle = defBackground
-            actor.width = 200F
+            actor.width = 300F
             actor.height = 100F
             actor.setRawText(text.invoke(), effects)
+            actor.setPadding(20F)
+            actor.validate() //this is needed, or it flashed on the first frame
             return actor
         }
     }

@@ -286,7 +286,7 @@ open class CustomImageActor(
     override var isDraggable: Boolean = false
     override var inDragPreview: Boolean = false
     override var targetGroups: List<String> = listOf()
-    override val resetCondition: ((Actor?) -> Boolean)? = null
+    override var resetCondition: ((Actor?) -> Boolean)? = null
     override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
 
     override var group: SelectionGroup? = null
@@ -1304,8 +1304,11 @@ open class CustomGroup(
 
     override var fixedZIndex: Int = 0
 
+    /**
+     * the children in the original order as they were added
+     */
+    protected val originalChildren: MutableList<Actor> = mutableListOf()
     private var sortedChildrenDirty: Boolean = false
-    private var sortedChildren: List<Actor> = listOf()
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -1338,12 +1341,10 @@ open class CustomGroup(
             background?.draw(batch, x, y, width, height)
         }
         if (sortedChildrenDirty) {
-            sortedChildren = children.sortedBy { if (it is ZIndexActor) it.fixedZIndex else -1 }
+            resortZIndices()
             sortedChildrenDirty = false
         }
-        if (isTransform) applyTransform(batch, computeTransform())
-        sortedChildren.forEach { if (it.isVisible) it.draw(batch, parentAlpha) }
-        if (isTransform) resetTransform(batch)
+        super.draw(batch, parentAlpha)
         this.x -= drawOffsetX
         this.y -= drawOffsetY
     }
@@ -1363,31 +1364,36 @@ open class CustomGroup(
     }
 
     override fun resortZIndices() {
-        Thread.dumpStack()
-//        children.sort { el1, el2 ->
-//            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-//                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-//        }
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
     }
 
     override fun addActor(actor: Actor) {
         sortedChildrenDirty = true
+        originalChildren.add(actor)
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
         sortedChildrenDirty = true
+        originalChildren.add(index, actor)
         super.addActorAt(index, actor)
     }
 
     override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
         sortedChildrenDirty = true
-        return super.removeActor(actor, unfocus)
+        val index = children.indexOf(actor, true)
+        if (index == -1) return false
+        removeActorAt(originalChildren.indexOf(actor), unfocus)
+        return true
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
         sortedChildrenDirty = true
-        return super.removeActorAt(index, unfocus)
+        val actor = originalChildren.removeAt(index)
+        return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
     override fun clearChildren(unfocus: Boolean) {

@@ -1,13 +1,12 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
@@ -263,6 +262,7 @@ interface HasOnjScreen {
 interface DisplayDetailActor {
 
     var detailWidget: DetailWidget?
+
     //TODO maybe add disabled option
     fun <T> registerOnFocusDetailActor(
         actor: T,
@@ -270,6 +270,7 @@ interface DisplayDetailActor {
     ) where T : DisplayDetailActor, T : Actor = screen.addOnFocusDetailActor(actor)
 
 }
+
 interface AnimationSpawner {
 
     val actor: Actor
@@ -302,6 +303,21 @@ interface OnLayoutActor {
 inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
     animationSpawners.find { it is T } as? T
 
+
+interface HasPaddingActor {
+    var paddingTop: Float
+    var paddingBottom: Float
+    var paddingLeft: Float
+    var paddingRight: Float
+
+    fun setPadding(value: Number) {
+        val v = value.toFloat()
+        paddingTop = v
+        paddingBottom = v
+        paddingRight = v
+        paddingLeft = v
+    }
+}
 
 interface KotlinStyledActor : FocusableActor {
     var marginTop: Float //These are all to set the data
@@ -350,12 +366,21 @@ interface DragAndDroppableActor : FocusableActor {
     /**
      * when it should execute the reset to the start for dragAndDrop, if null, then [CustomCenteredDragSource.defaultResetCondition] is choosen instead
      */
-    val resetCondition: ((Actor?) -> Boolean)?
+    var resetCondition: ((Actor?) -> Boolean)?
 
     /**
      * when it should execute the reset to the start for dragAndDrop, if null, then [CustomCenteredDragSource.defaultResetCondition] is choosen instead
      */
     val onDragAndDrop: MutableList<(Actor, Actor) -> Unit>
+
+
+    fun <T> makeDraggable(actor: T) where T:Actor, T:DragAndDroppableActor{
+        actor.isDraggable = true
+        actor.isFocusable = true
+        actor.isSelectable = true
+        actor.touchable = Touchable.enabled
+    }
+
     fun bindDragging(actor: Actor, screen: OnjScreen) {
         val dragAndDrops = screen._dragAndDrop
         val group = group

@@ -144,6 +144,17 @@ inline fun Actor.onFocusChange(crossinline block: (Actor?, Actor?) -> Unit) {
         true
     }
 }
+inline fun Actor.onFocus(crossinline block: () -> Unit) {
+    this.addListener { event ->
+        if (event !is FocusChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+            if (!this.isFocusable) throw RuntimeException("You tried to focus an unfocusable Element") // this should never happen
+            isFocused = this == event.new
+        }
+        block()
+        true
+    }
+}
 
 inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>) -> Unit) {
     this.addListener { event ->

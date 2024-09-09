@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -27,13 +28,20 @@ open class AdvancedTextWidget(
     private val defaults: Triple<String, Color, Float>,
     screen: OnjScreen,
     private val isDistanceField: Boolean,
-) : CustomGroup(screen), HoverStateActor, StyledActor {
+) : CustomGroup(screen), HoverStateActor, StyledActor, HasPaddingActor {
 
     override var fixedZIndex: Int = 0
 
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
+
+    override var paddingTop: Float = 0F
+    override var paddingBottom: Float = 0F
+    override var paddingLeft: Float = 0F
+    override var paddingRight: Float = 0F
+
+    var fitContent: Boolean = false
 
     open var advancedText: AdvancedText = AdvancedText.EMPTY
         set(value) {
@@ -74,14 +82,14 @@ open class AdvancedTextWidget(
                 child.width = child.prefWidth
                 child.height = child.prefHeight
             }
-        var curX = 0f
+        var curX = paddingLeft
         val lines = advancedText
             .parts
             .splitAt { part ->
                 val child = part.actor
-                val shouldSplit = curX + child.width > width
+                val shouldSplit = curX + child.width > width - paddingRight
                 if (shouldSplit) {
-                    curX = 0f
+                    curX = paddingLeft
                 } else if (part.breakLine) {
                     curX = width + 1f
                 }
@@ -90,8 +98,8 @@ open class AdvancedTextWidget(
             }
             .map { line -> line.map { it.actor } }
 
-        var curY = 0f
-        curX = 0f
+        var curY = paddingBottom
+        curX = paddingLeft
         lines
             .reversed()
             .zip { line -> line.maxOf { it.height } }
@@ -100,10 +108,16 @@ open class AdvancedTextWidget(
                     actor.setPosition(curX, curY)
                     curX += actor.width
                 }
-                curX = 0f
+                curX = paddingLeft
                 curY += height
             }
-        height = curY
+        if (fitContent) {
+            width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+            height = curY + paddingTop
+        } else {
+            layoutPrefWidth = lines.maxOf { it.last().x + it.last().width } + paddingRight
+            layoutPrefHeight = curY + paddingTop
+        }
     }
 
     private fun initText(value: AdvancedText) {
@@ -168,7 +182,13 @@ data class AdvancedText(
     companion object {
         val EMPTY = AdvancedText(listOf())
 
-        fun readFromOnj(rawText: String, isDistanceField: Boolean, effects: OnjArray?, screen: OnjScreen, defaults: OnjObject): AdvancedText {
+        fun readFromOnj(
+            rawText: String,
+            isDistanceField: Boolean,
+            effects: OnjArray?,
+            screen: OnjScreen,
+            defaults: OnjObject
+        ): AdvancedText {
             return AdvancedTextParser(
                 rawText,
                 screen,
@@ -224,7 +244,10 @@ class TextAdvancedTextPart(
 ) : TemplateStringLabel(
     screen,
     TemplateString(rawText),
-    LabelStyle(ResourceManager.forceGet(object : ResourceBorrower {}, screen, font), fontColor), // TODO: better way to do ResourceBorrowers
+    LabelStyle(
+        ResourceManager.forceGet(object : ResourceBorrower {}, screen, font),
+        fontColor
+    ), // TODO: better way to do ResourceBorrowers
     isDistanceFiled
 ), AdvancedTextPart {
 
@@ -247,7 +270,7 @@ class TextAdvancedTextPart(
 
     override var drawOffsetX: Float = 0F
     override var drawOffsetY: Float = 0F
-    override var logicalOffsetX: Float= 0F
+    override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
 
     override fun progress(): Boolean {

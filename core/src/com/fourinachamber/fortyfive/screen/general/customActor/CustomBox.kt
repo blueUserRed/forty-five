@@ -24,7 +24,7 @@ import kotlin.math.max
 // positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
 open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor,
-    DragAndDroppableActor {
+    DragAndDroppableActor, HasPaddingActor {
 
     override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
@@ -58,20 +58,13 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
 
-    var paddingTop: Float = 0F
-    var paddingBottom: Float = 0F
-    var paddingLeft: Float = 0F
-    var paddingRight: Float = 0F
+    override var paddingTop: Float = 0F
+    override var paddingBottom: Float = 0F
+    override var paddingLeft: Float = 0F
+    override var paddingRight: Float = 0F
 
 
     override var isDraggable: Boolean = false
-        set(value) {
-            field = value
-            if (value){
-                isFocusable = true
-                isSelectable = true
-            }
-        }
     override var targetGroups: List<String> = listOf()
     override var resetCondition: ((Actor?) -> Boolean)? = null
     override var inDragPreview: Boolean = false
@@ -325,7 +318,7 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
         var cachedChildren1 = cachedChildren
         if (cachedChildren1 != null) return cachedChildren1
         val lists =
-            children.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+        originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
         cachedChildren1 = lists.first.map {
             var w = it.width
             var h = it.height

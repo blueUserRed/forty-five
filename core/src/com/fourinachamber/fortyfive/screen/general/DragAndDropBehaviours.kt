@@ -11,8 +11,6 @@ import com.fourinachamber.fortyfive.game.card.PutCardsUnderDeckDropTarget
 import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDragSource
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDropTarget
-import com.fourinachamber.fortyfive.map.events.shop.ShopDragSource
-import com.fourinachamber.fortyfive.map.events.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
@@ -37,12 +35,6 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["CardDropTarget"] = { dragAndDrop, actor, onj ->
             CardDropTarget(dragAndDrop, actor, onj)
-        }
-        dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
-            ShopDragSource(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
-            ShopDropTarget(dragAndDrop, actor, onj)
         }
         dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
             BackpackDragSource(dragAndDrop, actor, onj)
