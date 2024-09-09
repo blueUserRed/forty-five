@@ -96,7 +96,7 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
-        val image = CustomImageActor(null, screen, false, "", false)
+        val image = CustomImageActor(null, screen, false)
         this.addActor(image)
         builder(image)
         return image

@@ -49,7 +49,7 @@ open class CustomLabel(
     private val hoverText: String = "",
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor, KotlinStyledActor {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, DisplayDetailActor, KotlinStyledActor {
 
     override val actor: Actor = this
 
@@ -86,11 +86,7 @@ open class CustomLabel(
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
-    override var detailActor: Actor? = null
-    override var mainHoverDetailActor: String? = null
-    override var isHoverDetailActive: Boolean = hasHoverDetail
-
-    override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
+    override var detailWidget: DetailWidget? = null
 
     private val shapeRenderer: ShapeRenderer by lazy {
         val renderer = ShapeRenderer()
@@ -110,12 +106,6 @@ open class CustomLabel(
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
-    }
-
-    override fun getFocusDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
-        "hoverText" to OnjString(hoverText)
-    ).also {
-        it.putAll(additionalHoverData)
     }
 
     override fun getBounds(): Rectangle {
@@ -249,20 +239,13 @@ open class CustomImageActor(
     drawableHandle: ResourceHandle?,
     _screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
-    var hoverText: String = "",
-    var hasHoverDetail: Boolean = false,
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
-    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen, KotlinStyledActor, DragAndDroppableActor {
+    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailActor, HasOnjScreen,
+    KotlinStyledActor, DragAndDroppableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
-    override var mainHoverDetailActor: String? = null
 
-    override var isHoverDetailActive: Boolean
-        get() = hasHoverDetail
-        set(value) {
-            hasHoverDetail = value
-        }
 
     override val screen: OnjScreen = _screen
 
@@ -282,9 +265,7 @@ open class CustomImageActor(
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
 
-    override val actor: Actor = this
-
-    override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
+    override var detailWidget: DetailWidget? = null
 
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     override var backgroundHandle: String? by backgroundHandleObserver
@@ -329,26 +310,24 @@ open class CustomImageActor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
-    override var detailActor: Actor? = null
-
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     override var positionType: PositionType = PositionType.RELATIV
-    override var marginTop: Float=0F
-    override var marginBottom: Float=0F
-    override var marginLeft: Float=0F
-    override var marginRight: Float=0F
+    override var marginTop: Float = 0F
+    override var marginBottom: Float = 0F
+    override var marginLeft: Float = 0F
+    override var marginRight: Float = 0F
 
     init {
         bindDefaultListeners(this, screen)
         registerOnFocusDetailActor(this, _screen)
     }
 
-    override fun getFocusDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
-        "hoverText" to OnjString(hoverText)
-    ).also {
-        it.putAll(additionalHoverData)
-    }
+//    override fun generateDetailActor(): Actor? = mutableMapOf<String, OnjValue>(
+//        "hoverText" to OnjString(hoverText)
+//    ).also {
+//        it.putAll(additionalHoverData)
+//    }
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
@@ -459,12 +438,11 @@ open class CustomFlexBox(
     private val hasHoverDetail: Boolean = false,
     private val hoverText: String = ""
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
-    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, GeneralDisplayDetailOnHoverActor,
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, DisplayDetailActor,
     InOutAnimationActor, ResourceBorrower {
 
     override var fixedZIndex: Int = 0
 
-    override val actor: Actor = this
 
     private val dropShadowShader: Promise<BetterShader> by lazy {
 //        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
@@ -483,7 +461,7 @@ open class CustomFlexBox(
     override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
 
-    override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
+    override var detailWidget: DetailWidget? = null
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
@@ -495,11 +473,6 @@ open class CustomFlexBox(
     override val attached: Boolean
         get() = reattachTo == null
 
-    override var detailActor: Actor? = null
-    override var mainHoverDetailActor: String? = null
-
-    override var isHoverDetailActive: Boolean = hasHoverDetail
-        set(value) {}
 
     var onDisplay: () -> Timeline = {
         Timeline.timeline {
@@ -522,11 +495,11 @@ open class CustomFlexBox(
         registerOnFocusDetailActor(this, screen)
     }
 
-    override fun getFocusDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
-        "hoverText" to OnjString(hoverText)
-    ).also {
-        it.putAll(additionalHoverData)
-    }
+//    override fun generateDetailActor(): Actor? = mutableMapOf<String, OnjValue>(
+//        "hoverText" to OnjString(hoverText)
+//    ).also {
+//        it.putAll(additionalHoverData)
+//    }
 
     @Suppress("UNCHECKED_CAST")
     fun getAllChildren(): List<Pair<YogaNode, Actor>> {
@@ -1320,7 +1293,8 @@ open class CustomVerticalGroup(
 
 open class CustomGroup(
     override val screen: OnjScreen
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, DropShadowActor {
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
+    DropShadowActor {
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
@@ -1348,7 +1322,7 @@ open class CustomGroup(
         this.x += drawOffsetX
         this.y += drawOffsetY
         background?.let {
-            dropShadow?.doDropShadow(batch, screen, it,this)
+            dropShadow?.doDropShadow(batch, screen, it, this)
             it.draw(batch, x, y, width, height)
         }
         super.draw(batch, parentAlpha)
@@ -1387,10 +1361,14 @@ open class CustomGroup(
         notZIndexedChildren.add(index, actor)
         super.addActorAt(index, actor)
     }
+
     override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
         val index = children.indexOf(actor, true)
         if (index == -1) return false
-        removeActorAt(notZIndexedChildren.indexOf(actor), unfocus)//TODO ugly, but there is no better way i think (same with next method)
+        removeActorAt(
+            notZIndexedChildren.indexOf(actor),
+            unfocus
+        )//TODO ugly, but there is no better way i think (same with next method)
         return true
     }
 

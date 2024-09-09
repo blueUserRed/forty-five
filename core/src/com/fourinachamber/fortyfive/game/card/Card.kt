@@ -487,7 +487,7 @@ class Card(
         }
 
         currentHoverTexts = currentEffects
-        val detailActor = actor.detailActor ?: return
+        val detailActor = actor.detailWidget?.detailActor ?: return
         detailActor as StyledActor
         actor.updateDetailStates(detailActor)
     }
@@ -699,17 +699,13 @@ class CardActor(
     val isDark: Boolean,
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
-) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
+) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailActor, HoverStateActor, HasOnjScreen, StyledActor,
     OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DragAndDroppableActor {
 
-    override val actor: Actor = this
-
-    override var actorTemplate: String = "card_hover_detail" // TODO: fix
-    override var detailActor: Actor? = null
 
     override var inAnimation: Boolean = false
 
-    override var mainHoverDetailActor: String? = "cardHoverDetailMain"
+    override var detailWidget: DetailWidget? = DetailWidget.SimpleDetailActor(screen) { "steadfast" }
 
     override var fixedZIndex: Int = 0
 
@@ -761,14 +757,6 @@ class CardActor(
     private val markedSymbol: Promise<TransformDrawable> =
         ResourceManager.request(this, this, "card_symbol_marked")
 
-    override var isHoverDetailActive: Boolean
-        get() = (card.shortDescription.isNotBlank() ||
-                card.flavourText.isNotBlank() ||
-                card.getKeyWordsForDescriptions().isNotEmpty() ||
-                card.getAdditionalHoverDescriptions().isNotEmpty())
-                && enableHoverDetails
-        set(value) {}
-
     private var prevPosition: Vector2? = null
 
     private var inSelectionMode: Boolean = false
@@ -798,6 +786,9 @@ class CardActor(
         onTouchEvent { event, _, _ ->
             if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
             FortyFive.currentGame?.cardRightClicked(card)
+        }
+        onDetailDisplayStateChange {
+            if (it) onDetailDisplayStarted()
         }
     }
 
@@ -834,7 +825,7 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        setBoundsOfFocusDetailActor(screen)
+        detailWidget?.updateBounds(this)
         batch ?: return
         if (cardTexturePromise?.isResolved == true) {
             texture?.let { FortyFive.cardTextureManager.giveTextureBack(card) }
@@ -987,34 +978,24 @@ class CardActor(
         playSoundsOnHover = false
     }
 
-    override fun getFocusDetailData(): Map<String, OnjValue> = mapOf(
-        "description" to OnjString(
-            card.shortDescription.ifBlank { card.flavourText }
-        ),
-        "flavorText" to OnjString(
-            if (card.shortDescription.isBlank()) "" else card.flavourText
-        ),
-        "effects" to DetailDescriptionHandler.allTextEffects,
-//        "rotation" to OnjFloat(rotation.toDouble()),
-    )
 
     override fun positionChanged() {
         super.positionChanged()
-        setBoundsOfFocusDetailActor(screen)
+        detailWidget?.updateBounds(this)
     }
 
     override fun sizeChanged() {
         super.sizeChanged()
-        setBoundsOfFocusDetailActor(screen)
+        detailWidget?.updateBounds(this)
     }
 
-    override fun onDetailDisplayStarted() {
-        val detailActor = detailActor ?: return
-        detailActor as StyledActor
-        updateDetailStates(detailActor)
-        val tempInfoParent = getParentsForExtras(detailActor).second
-        card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
-        showExtraDescriptions(getParentsForExtras(detailActor).first)
+    fun onDetailDisplayStarted() {
+//        val detailActor = detailWidget?.detailActor ?: return
+//        detailActor as StyledActor
+//        updateDetailStates(detailActor)
+//        val tempInfoParent = getParentsForExtras(detailActor).second
+//        card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
+//        showExtraDescriptions(getParentsForExtras(detailActor).first)
     }
 
     private fun addHoverItemToParent(

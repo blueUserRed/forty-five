@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.math.Affine2
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -15,7 +14,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import io.github.orioncraftmc.meditate.YogaValue
@@ -178,7 +176,7 @@ data class AdvancedText(
                 isDistanceField,
                 effects
                     ?.value
-                    ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
+                    ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject) }
                     ?: listOf()
             ).parse()
         }

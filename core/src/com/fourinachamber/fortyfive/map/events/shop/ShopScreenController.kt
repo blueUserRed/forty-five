@@ -11,7 +11,6 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -84,7 +83,6 @@ class ShopScreenController(
             textToShow.get<String>("rawText"),
             textToShow.get<OnjArray?>("effects")?.value?.map {
                 AdvancedTextParser.AdvancedTextEffect.getFromOnj(
-                    screen,
                     it as OnjNamedObject
                 )
             } ?: listOf()
@@ -149,10 +147,10 @@ class ShopScreenController(
         val curParent = CustomBox(screen)
         cardsParentWidget.addActor(curParent)
         curParent.width = curParent.parent.width * 0.21f
-        curParent.height = curParent.parent.height * 0.445f
+        curParent.height = curParent.parent.height * 0.42f
         curParent.onLayout {
             curParent.width = curParent.parent.width * 0.21f
-            curParent.height = curParent.parent.height * 0.445f
+            curParent.height = curParent.parent.height * 0.42f
         }
         curParent.flexDirection = FlexDirection.COLUMN
         curParent.minVerticalDistBetweenElements = 2f
@@ -163,13 +161,14 @@ class ShopScreenController(
         curParent.addActor(card.actor)
         screen.addNamedActor("Card_${curParent.children.size}", card.actor)
         curParent.onLayout {
-            card.actor.width = card.actor.parent.width
-            card.actor.height = card.actor.parent.height * 0.75f
+            val fl = card.actor.parent.height * 0.8f
+            card.actor.setSize(fl, fl)
         }
         card.actor.targetGroups = listOf("shop_targets")
         card.actor.isDraggable = true
         card.actor.group = "shop_cards"
         card.actor.onFocusChange { _, _ -> card.actor.debug = card.actor.isFocused }
+        card.actor.bindDragging(card.actor,screen)
 
 
         val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")

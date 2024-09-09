@@ -485,7 +485,6 @@ class FromOnjScreenBuilder(
                 widgetOnj.get<String>("rawText"),
                 widgetOnj.get<OnjArray?>("effects")?.value?.map {
                     AdvancedTextParser.AdvancedTextEffect.getFromOnj(
-                        screen,
                         it as OnjNamedObject
                     )
                 } ?: listOf())
@@ -690,8 +689,8 @@ class FromOnjScreenBuilder(
         }
 
         widgetOnj.ifHas<String>("hoverDetailActor") { name ->
-            actor as DisplayDetailsOnHoverActor
-            actor.actorTemplate = name
+            actor as DisplayDetailActor
+            throw RuntimeException("hover Details are only implemented in the kotlin ScreenCreator")
         }
 
         widgetOnj.ifHas<Long>("zIndex") {

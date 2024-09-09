@@ -67,8 +67,10 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var isDraggable: Boolean = false
         set(value) {
             field = value
-            isFocusable = true
-            isSelectable = true
+            if (value){
+                isFocusable = true
+                isSelectable = true
+            }
         }
     override var targetGroups: List<String> = listOf()
     override var resetCondition: ((Actor?) -> Boolean)? = null

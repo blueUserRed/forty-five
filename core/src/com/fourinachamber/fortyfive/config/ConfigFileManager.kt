@@ -3,9 +3,9 @@ package com.fourinachamber.fortyfive.config
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.screen.CustomBoxPlaygroundScreen
 import com.fourinachamber.fortyfive.screen.MapScreen
-import com.fourinachamber.fortyfive.screen.Screens.AddMaxHPScreen
-import com.fourinachamber.fortyfive.screen.Screens.HealOrMaxHPScreen
-import com.fourinachamber.fortyfive.screen.Screens.ShopScreen
+import com.fourinachamber.fortyfive.screen.screens.AddMaxHPScreen
+import com.fourinachamber.fortyfive.screen.screens.HealOrMaxHPScreen
+import com.fourinachamber.fortyfive.screen.screens.ShopScreen
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromOnjScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder

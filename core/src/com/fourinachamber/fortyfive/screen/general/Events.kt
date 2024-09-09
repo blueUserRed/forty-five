@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
+import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import kotlin.reflect.KClass
@@ -91,6 +92,8 @@ class ResetGameEvent : Event()
 class FocusChangeEvent(val old: Actor?, val new: Actor?) : Event()
 class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>, val fromMouse: Boolean = true) : Event()
 
+class DetailDisplayStateChange(val displayStarted: Boolean = true) : Event()
+
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
  * a popup
@@ -154,6 +157,7 @@ inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>,
         true
     }
 }
+
 inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>, Boolean) -> Unit) {
     this.addListener { event ->
         if (event !is SelectChangeEvent) return@addListener false
@@ -180,5 +184,13 @@ inline fun Actor.onSelect(crossinline block: @MainThreadOnly () -> Unit) {
             }
         }
         false
+    }
+}
+
+inline fun <T> T.onDetailDisplayStateChange(crossinline block: @MainThreadOnly (Boolean) -> Unit) where T : DisplayDetailActor, T : Actor {
+    this.addListener { event ->
+        if (event !is DetailDisplayStateChange) return@addListener false
+        block(event.displayStarted)
+        true
     }
 }

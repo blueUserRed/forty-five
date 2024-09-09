@@ -3,21 +3,17 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.card.DetailDescriptionHandler
-import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
-import com.fourinachamber.fortyfive.screen.general.CustomLabel
-import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import java.lang.RuntimeException
+import onj.value.OnjNamedObject
 
 interface StatusEffectDisplay : StyledActor {
 
@@ -43,11 +39,15 @@ interface StatusEffectDisplay : StyledActor {
         remainingLabel.setFontScale(fontScale)
         effect.icon.scaleX *= iconScale
         effect.icon.scaleY *= iconScale
-        effect.icon.hasHoverDetail = true
-        effect.icon.additionalHoverData["effects"] = DetailDescriptionHandler.allTextEffects
-        effect.icon.hoverText = DetailDescriptionHandler.descriptions[effect.name]?.second ?: run {
-            FortyFiveLogger.warn("StatusEffectDisplay", "No description for effect ${effect.name}")
-            ""
+
+        effect.icon.detailWidget = DetailWidget.SimpleDetailActor(
+            screen,
+            DetailDescriptionHandler.allTextEffects.value.map {
+                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)}){
+            DetailDescriptionHandler.descriptions[effect.name]?.second ?: run {
+                FortyFiveLogger.warn("StatusEffectDisplay", "No description for effect ${effect.name}")
+                ""
+            }
         }
         val group = CustomHorizontalGroup(screen)
         group.addActor(effect.icon)

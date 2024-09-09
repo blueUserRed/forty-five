@@ -15,7 +15,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.*
-import onj.value.OnjValue
 
 /**
  * an object which is rendered and to which a mask can be applied
@@ -261,97 +260,16 @@ interface HasOnjScreen {
     val screen: OnjScreen
 }
 
-interface DisplayDetailsOnHoverActor {
+interface DisplayDetailActor {
 
-    var actorTemplate: String
-    var detailActor: Actor?
-    var mainHoverDetailActor: String?
-    var isHoverDetailActive: Boolean
-    val actor: Actor
-
+    var detailWidget: DetailWidget?
+    //TODO maybe add disabled option
     fun <T> registerOnFocusDetailActor(
         actor: T,
         screen: OnjScreen
-    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnFocusDetailActor(actor)
-
-    fun setBoundsOfFocusDetailActor(screen: OnjScreen) {
-        val actor = actor
-        val detailActor = detailActor
-        if (detailActor !is Layout) return
-        val prefHeight = detailActor.prefHeight
-        val prefWidth = detailActor.prefWidth
-        if (mainHoverDetailActor == null || actor !is HasOnjScreen || actor.stage == null) {
-            val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-            detailActor.setBounds(
-                x + actor.width / 2 - detailActor.width / 2,
-                y + actor.height,
-                if (prefWidth == 0f) detailActor.width else prefWidth,
-                prefHeight
-            )
-        } else {
-            val mainActor = actor.screen.namedActorOrError(mainHoverDetailActor!!)
-            val distToRoot = mainActor.localToActorCoordinates(detailActor, Vector2(0F, 0F))
-            val actorPos = actor.localToStageCoordinates(Vector2(0, 0))
-            val yCoordinate =
-                if (actorPos.y + actor.height - distToRoot.y + mainActor.height > actor.stage.viewport.worldHeight) {
-                    actorPos.y - mainActor.height - distToRoot.y //if it would be too high up, it will be lower
-                } else {
-                    actorPos.y + actor.height - distToRoot.y
-                }
-            detailActor.setBounds(
-                (actorPos.x + actor.width / 2 - mainActor.width / 2 - distToRoot.x).between(
-                    -distToRoot.x,
-                    actor.stage.viewport.worldWidth - distToRoot.x - mainActor.width
-                ),
-                yCoordinate,
-                if (prefWidth == 0f) detailActor.width else prefWidth,
-                prefHeight
-            )
-        }
-        detailActor.invalidateHierarchy()
-    }
-
-    fun drawFocusDetail(screen: OnjScreen, batch: Batch) {
-        detailActor?.draw(batch, 1f)
-    }
-
-    fun getFocusDetailData(): Map<String, OnjValue>
-
-    fun onDetailDisplayStarted() {}
-    fun onDetailDisplayEnded() {}
+    ) where T : DisplayDetailActor, T : Actor = screen.addOnFocusDetailActor(actor)
 
 }
-
-interface GeneralDisplayDetailOnHoverActor : DisplayDetailsOnHoverActor {
-
-    val additionalHoverData: MutableMap<String, OnjValue>
-
-    override var actorTemplate: String
-        get() = "general_hover_detail_template"
-        set(value) {}
-
-    override fun setBoundsOfFocusDetailActor(screen: OnjScreen) {
-    }
-
-    override fun drawFocusDetail(screen: OnjScreen, batch: Batch) {
-        val detailActor = detailActor ?: return
-        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-        if (detailActor is Layout) {
-            detailActor.width = detailActor.prefWidth
-            detailActor.height = detailActor.prefHeight
-        }
-        var chosenY = y + actor.height
-        if (chosenY + detailActor.height > screen.viewport.worldHeight) {
-            chosenY = y - detailActor.height
-        }
-        detailActor.setPosition(
-            x + actor.width / 2 - detailActor.width / 2,
-            chosenY,
-        )
-        detailActor.draw(batch, 1f)
-    }
-}
-
 interface AnimationSpawner {
 
     val actor: Actor
@@ -475,12 +393,12 @@ interface DragAndDroppableActor : FocusableActor {
         screen.addToSelectionHierarchy(
             FocusableParent(
                 onSelection = { it2 ->
-                    val target= it2.last()
+                    val target = it2.last()
                     val source = screen.draggedActor ?: it2.first()
-                    if (source!=target){
-                        onDragAndDrop.forEach { it.invoke(source,target) }
+                    if (source != target) {
+                        onDragAndDrop.forEach { it.invoke(source, target) }
                         if (target is DragAndDroppableActor)
-                            target.onDragAndDrop.forEach { it.invoke(source,target) }
+                            target.onDragAndDrop.forEach { it.invoke(source, target) }
                     }
                 },
                 transitions = listOf(SelectionTransition(groups = targetGroups)),
@@ -505,11 +423,11 @@ interface DragAndDroppableActor : FocusableActor {
         }
         sourceGroups.forEach {
             val dragAndDrop = dragAndDrops.getOrPut(it) { DragAndDrop() }
-            dragAndDrop.addTarget(CustomDropTarget(actor,screen))
+            dragAndDrop.addTarget(CustomDropTarget(actor, screen))
         }
     }
 
-    companion object{
-        const val dragAndDropStateName:String = "draggableActor_draggingElement"
+    companion object {
+        const val dragAndDropStateName: String = "draggableActor_draggingElement"
     }
 }
