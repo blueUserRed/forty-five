@@ -42,7 +42,7 @@ import ktx.actors.onExit
 open class OnjScreen(
     val viewport: Viewport,
     batch: Batch,
-    private val controllerContext: Any?,
+    /*private*/ val controllerContext: Any?,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,

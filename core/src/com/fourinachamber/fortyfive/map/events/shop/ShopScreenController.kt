@@ -49,7 +49,6 @@ class ShopScreenController(
     private lateinit var random: Random
 
     override fun init(context: Any?) {
-//        //TODO comment back in before push
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
@@ -178,6 +177,7 @@ class ShopScreenController(
         screen.addNamedActor("CardLabel" + cardsParentWidget.children.size, label)
         cardWidgets.add(card.actor)
         labels.add(label)
+        updateStateOfCard(card, label=label)
     }
 
     private fun updateStatesOfUnboughtCards() {
@@ -231,6 +231,7 @@ class ShopScreenController(
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
+        println("this works definitly too i hope${this.context}")
         actor as CardActor
         SaveState.payMoney(actor.card.price)
         SaveState.buyCard(actor.card.name)

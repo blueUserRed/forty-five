@@ -23,6 +23,7 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
+import ktx.actors.onClick
 
 class ShopScreen : ScreenCreator() {
 
@@ -135,6 +136,7 @@ class ShopScreen : ScreenCreator() {
                 paddingLeft = 30f
                 paddingTop = 15f
                 paddingBottom = 30f
+//                addRandomChildren()
                 addScrollbarFromDefaults(CustomDirection.RIGHT, "backpack_scrollbar", "backpack_scrollbar_background")
             }
 
@@ -166,42 +168,32 @@ class ShopScreen : ScreenCreator() {
         }
     }
 
-       private fun Group.addRandomChildren() {
+    private fun Group.addRandomChildren() {
         fun CustomBox.addBasicStyles() {
             val size = 150f
             val listOf = listOf("shop_targets")
             width = size
             height = size
             targetGroups = listOf
-            isDraggable = true
+            makeDraggable(this)
             group = "shop_cards"
-            dropShadow = DropShadow(Color.Green, showDropShadow = false)
             styles(
                 normal = {
-                    dropShadow?.showDropShadow = false
+                    debug = isFocused
                 },
                 focused = {
-                    dropShadow?.color = Color.Red
-                    dropShadow?.showDropShadow = true
-                },
-                selected = {
-                    dropShadow?.color = Color.Yellow
-                    dropShadow?.showDropShadow = true
-                },
-                selectedAndFocused = {
-                    dropShadow?.color = Color.Yellow.interpolate(Color.Red)
-                    dropShadow?.showDropShadow = true
+                    debug = isFocused
                 }
             )
             bindDragging(this, screen)
             resetCondition = { true }
         }
 
-//        box {
-//            backgroundHandle = "card%%leadersBullet"
-//            name("leadersBullet")
-//            addBasicStyles()
-//        }
+        box {
+            backgroundHandle = "card%%leadersBullet"
+            name("leadersBullet")
+            addBasicStyles()
+        }
     }
 
     private fun Group.textsAtTheTop(childrenSize: Float) = box {
@@ -264,11 +256,13 @@ class ShopScreen : ScreenCreator() {
             name(messageWidgetName)
             relativeWidth(100f)
             syncHeight()
+            fitContent = true
         }
     }
 
 
     private fun Group.dropTarget(yStart: Float, textureName: String, actorName: String) = image {
+
         name(actorName)
         relativeHeight(40F)
         relativeWidth(30F)
@@ -276,9 +270,8 @@ class ShopScreen : ScreenCreator() {
         x = -width
         backgroundHandle = textureName
         fixedZIndex = 200
-        touchable = Touchable.enabled
-        isSelectable = true
-        isFocusable = true
+        makeDraggable(this)
+        isDraggable = false
         group = "shop_targets"
         bindDroppable(this, screen, listOf("shop_cards"))
         val distanceNotSelected = -20F
@@ -290,7 +283,7 @@ class ShopScreen : ScreenCreator() {
             }
         )
         onDragAndDrop.add { source, target ->
-            val controller = getScreenControllers().filterIsInstance<ShopScreenController>().first()
+            val controller = screen.findController<ShopScreenController>() ?: return@add
             controller.buyCard(source, target.name == addToDeckWidgetName)
         }
         screen.addOnScreenStateChangedListener { entered, state ->
