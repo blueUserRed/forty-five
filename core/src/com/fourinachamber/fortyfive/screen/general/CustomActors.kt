@@ -45,8 +45,7 @@ open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
     private val isDistanceField: Boolean,
-    private val hasHoverDetail: Boolean = false,
-    private val hoverText: String = "",
+    override var detailWidget: DetailWidget? = null,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
     StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, DisplayDetailActor, KotlinStyledActor {
@@ -81,7 +80,6 @@ open class CustomLabel(
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
-    override var detailWidget: DetailWidget? = null
 
     override var marginTop: Float = 0f
     override var marginBottom: Float = 0f
@@ -204,16 +202,14 @@ open class TemplateStringLabel(
     var templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
-    hasHoverDetail: Boolean = false,
-    hoverText: String = "",
+    detailWidget: DetailWidget? = null,
     partOfHierarchy: Boolean = false
 ) : CustomLabel(
     screen,
     templateString.string,
     labelStyle,
     isDistanceField,
-    hasHoverDetail,
-    hoverText,
+    detailWidget,
     partOfHierarchy
 ), BackgroundActor {
 

@@ -225,7 +225,7 @@ class MapScreen : ScreenCreator() {
             setAlignment(Align.center)
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
-            isFocusable = true
+            setFocusableTo(true,this)
             isSelectable = true
             group = "Map_startEvent"
             onSelect { fire(ButtonClickEvent()) }

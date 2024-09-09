@@ -28,12 +28,7 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
 
     override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false //needs touchable enabled to work
-        set(value) {
-            if (this.isFocused && !value) screen.focusedActor = null
-            if (value) touchable = Touchable.enabled
-            field = value
-        }
+    override var isFocusable: Boolean = false
     override var isFocused: Boolean = false
     override var isSelected: Boolean = false
     override var isSelectable: Boolean = false

@@ -217,6 +217,13 @@ interface FocusableActor : HoverStateActor {
             screen.changeSelectionFor(actor)
         }
     }
+
+    fun setFocusableTo(newVal: Boolean, actor: Actor) {
+        if (actor !is FocusableActor ) throw RuntimeException("tried to make non Focusable Element focusbale")
+        if (actor.isFocused && !newVal && actor is HasOnjScreen) actor.screen.focusedActor = null
+        if (newVal) actor.touchable = Touchable.enabled
+        actor.isFocusable = newVal
+    }
 }
 
 /**
@@ -374,11 +381,10 @@ interface DragAndDroppableActor : FocusableActor {
     val onDragAndDrop: MutableList<(Actor, Actor) -> Unit>
 
 
-    fun <T> makeDraggable(actor: T) where T:Actor, T:DragAndDroppableActor{
+    fun <T> makeDraggable(actor: T) where T : Actor, T : DragAndDroppableActor {
         actor.isDraggable = true
-        actor.isFocusable = true
+        actor.setFocusableTo(true, actor)
         actor.isSelectable = true
-        actor.touchable = Touchable.enabled
     }
 
     fun bindDragging(actor: Actor, screen: OnjScreen) {
