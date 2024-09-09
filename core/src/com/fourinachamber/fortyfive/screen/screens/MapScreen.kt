@@ -26,7 +26,6 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
-import ktx.actors.onClick
 
 class MapScreen : ScreenCreator() {
 
@@ -123,7 +122,7 @@ class MapScreen : ScreenCreator() {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
-//        actor(settings)
+        actor(settings)
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
             x = 0f

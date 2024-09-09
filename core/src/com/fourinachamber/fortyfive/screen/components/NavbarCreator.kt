@@ -25,6 +25,7 @@ object NavbarCreator {
         y = 0f
         width = worldWidth
         height = worldHeight
+        touchable = Touchable.childrenOnly
 
         val navBarEvents = EventPipeline()
         val navBarTimeline = Timeline()
