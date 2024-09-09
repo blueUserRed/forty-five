@@ -45,8 +45,6 @@ class MapScreen : ScreenCreator() {
         "*" to 1000
     )
 
-    private val navbarEvents: EventPipeline = EventPipeline()
-
     private val mapWidget by lazy {
         DetailMapWidget(
             screen = screen,
@@ -107,11 +105,12 @@ class MapScreen : ScreenCreator() {
             }
         }
         getInfoPopup()
-//        actor(getSharedNavBar(worldWidth, worldHeight, navbarEvents)) {
-//            onLayoutAndNow { y = worldHeight - height }
-//            centerX()
-//        }
-//        actor(getSharedSettingsMenu(worldWidth, worldHeight))
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
+            onLayoutAndNow { y = worldHeight - height }
+            centerX()
+        }
+        actor(settings)
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
             x = 0f

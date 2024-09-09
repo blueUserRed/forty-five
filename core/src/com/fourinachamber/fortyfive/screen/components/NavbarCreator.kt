@@ -1,131 +1,209 @@
 package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
+import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
-import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
+import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
+import com.fourinachamber.fortyfive.screen.general.customActor.PropertyAction
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.Timeline
+import ktx.actors.onClick
 
 object NavbarCreator {
 
-    fun ScreenCreator.getSharedNavBar(worldWidth: Float, worldHeight: Float, events: EventPipeline) = newGroup {
+    fun ScreenCreator.getSharedNavBar(worldWidth: Float, worldHeight: Float, objects: List<NavBarObject>, screen: OnjScreen) = newGroup {
         x = 0f
         y = 0f
         width = worldWidth
         height = worldHeight
 
-        group {
+        val navBarEvents = EventPipeline()
+        val navBarTimeline = Timeline()
+        navBarTimeline.startTimeline()
+
+        box {
             x = 0f
             y = 0f
             width = worldWidth
             height = worldHeight
             backgroundHandle = "transparent_black_texture"
-            setColor(1f, 1f, 1f, 0.3f)
+            touchable = Touchable.enabled
+            navBarEvents.watchFor<ChangeBlackBackground> { (show) ->
+                isVisible = show
+            }
+            isVisible = false
+            onClick {
+                if (!isVisible) return@onClick
+                navBarEvents.fire(CloseNavBarButtons)
+                isVisible = false
+            }
         }
 
-        verticalGroup { getNavBar(this@getSharedNavBar, worldWidth, worldHeight) }
+        val boxWithTimeline = boxWithTimeline(navBarTimeline, screen)
+
+        actor(boxWithTimeline) {
+            flexDirection = FlexDirection.COLUMN
+            getNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+        }
     }
 
-    private fun CustomVerticalGroup.getNavBar(
+    private fun boxWithTimeline(timeline: Timeline, screen: OnjScreen): CustomBox = object : CustomBox(screen) {
+
+        override fun act(delta: Float) {
+            timeline.updateTimeline()
+            super.act(delta)
+        }
+    }
+
+    private fun CustomBox.getNavBar(
         creator: ScreenCreator,
         worldWidth: Float,
-        worldHeight: Float
+        worldHeight: Float,
+        events: EventPipeline,
+        objects: List<NavBarObject>,
+        timeline: Timeline
     ) = with(creator) {
-        debug()
+        x = 0f
+        y = 0f
         width = worldWidth * 0.7f
         height = 130f
         centerX()
         onLayoutAndNow { y = worldHeight - height }
 
-        horizontalGroup {
-            debug()
-            forcedPrefWidth = parent.width
-            forcedPrefHeight = parent.height * 0.5f
-            syncDimensions()
+        box {
+            flexDirection = FlexDirection.ROW
+            relativeWidth(100f)
+            relativeHeight(50f)
             backgroundHandle = "statusbar_background"
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            verticalAlign = CustomAlign.CENTER
+            paddingLeft = 50f
+            paddingRight = 50f
 
-            horizontalSpacer(70f)
-
-            image {
-                name("player_health_icon")
-                forcedPrefWidth = 30f
-                forcedPrefHeight = 30f
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
                 syncDimensions()
-                backgroundHandle = "statusbar_lives"
+                image {
+                    name("player_health_icon")
+                    marginRight = 10f
+                    width = 30f
+                    height = 30f
+                    backgroundHandle = "statusbar_lives"
+                }
+
+                label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
+                    fontColor = ScreenCreator.fortyWhite
+                }
             }
 
-            horizontalSpacer(10f)
-
-            label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
-                fontColor = ScreenCreator.fortyWhite
-            }
-
-            horizontalGrowingSpacer(0.5f)
-
-            locationIndicator(creator)
-
-            horizontalGrowingSpacer(0.5f)
-
-            image {
-                name("cash_symbol")
-                backgroundHandle = "cash_symbol"
-                forcedPrefWidth = 30f
-                forcedPrefHeight = 30f
+            box {
                 syncDimensions()
+                flexDirection = FlexDirection.ROW
+                locationIndicator(creator)
             }
 
-            horizontalSpacer(10f)
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                syncDimensions()
+                image {
+                    name("cash_symbol")
+                    marginRight = 10f
+                    backgroundHandle = "cash_symbol"
+                    width = 30f
+                    height = 30f
+                }
 
-            label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
-                fontColor = ScreenCreator.fortyWhite
+                label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
+                    fontColor = ScreenCreator.fortyWhite
+                }
             }
-
-            horizontalSpacer(70f)
-
         }
 
-        horizontalGroup {
-            forcedPrefWidth = parent.width
-            forcedPrefHeight = parent.height * 0.5f
-            syncDimensions()
-
-            horizontalSpacer(40f)
-            navBarButton(creator,"Settings")
-            horizontalGrowingSpacer(0.5f)
-            navBarButton(creator,"Settings")
-            horizontalGrowingSpacer(0.5f)
-            navBarButton(creator,"Settings")
-            horizontalSpacer(40f)
+        box {
+            fixedZIndex = -1
+            relativeWidth(100f)
+            relativeHeight(50f)
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.START
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            objects.forEach {
+                navBarButton(creator, events, it, timeline)
+            }
         }
 
     }
 
-    private fun CustomHorizontalGroup.navBarButton(creator: ScreenCreator, text: String) = with(creator) {
+    private fun CustomBox.navBarButton(
+        creator: ScreenCreator,
+        events: EventPipeline,
+        obj: NavBarObject,
+        timeline: Timeline,
+    ) = with(creator) {
+        var isOpened = false
         group {
-            offsetY = 30f // TODO: replace with better system once zwicki is finished
-            forcedPrefHeight = parent.parent.height * 0.7f
-            forcedPrefWidth = 250f
-            syncDimensions()
+            height = parent.parent.height * 0.7f
+            width = 250f
             backgroundHandle = "statusbar_option"
+            logicalOffsetY = 30f
+            touchable = Touchable.enabled
 
-            label("red_wing", text) {
+            label("red_wing", obj.name) {
                 centerX()
-                centerY()
+                y = 15f
                 setAlignment(Align.center)
                 fontColor = ScreenCreator.fortyWhite
                 setFontScale(0.7f)
             }
+
+            fun createAction(end: Float): PropertyAction = PropertyAction(
+                this@group,
+                this@group::logicalOffsetY,
+                end,
+                invalidateHierarchyOf = this
+            ).also {
+                it.duration = 0.12f
+                it.interpolation = Interpolation.pow2In
+            }
+
+            events.watchFor<CloseNavBarButtons> {
+                if (!isOpened) return@watchFor
+                this@group.addAction(createAction(30f))
+                isOpened = false
+                timeline.appendAction(obj.closeTimelineCreator().asAction())
+            }
+
+            onClick {
+                if (isOpened) {
+                    this@group.addAction(createAction(30f))
+                    isOpened = false
+                    events.fire(ChangeBlackBackground(false))
+                    timeline.appendAction(obj.closeTimelineCreator().asAction())
+                } else {
+                    events.fire(CloseNavBarButtons)
+                    val action = createAction(16f)
+                    this@group.addAction(action)
+                    isOpened = true
+                    events.fire(ChangeBlackBackground(true))
+                    timeline.appendAction(obj.openTimelineCreator().asAction())
+                }
+            }
         }
     }
 
-    private fun CustomHorizontalGroup.locationIndicator(creator: ScreenCreator) = with(creator) {
+    private fun CustomBox.locationIndicator(creator: ScreenCreator) = with(creator) {
         val map = MapManager.currentDetailMap
+        minHorizontalDistBetweenElements = 10f
         if (map.isArea) {
             image {
                 backgroundHandle = nameTextureForMap(map.name)
@@ -137,15 +215,15 @@ object NavbarCreator {
             if (enterMap == null || exitMap == null) {
                 label("red_wing", "You are on a road", color = Color.WHITE)
             } else {
-                label("red_wing", "Road between", color = Color.WHITE) { setFontScale(0.8f) }
-                horizontalSpacer(10f)
+                label("red_wing", "Road between", color = Color.WHITE) {
+                    setFontScale(0.8f)
+                    syncWidth()
+                }
                 image {
                     backgroundHandle = nameTextureForMap(enterMap)
                     setupDimensionsForAreaName(this@locationIndicator)
                 }
-                horizontalSpacer(10f)
-                label("red_wing", "and", color = Color.WHITE) { setFontScale(0.8f) }
-                horizontalSpacer(10f)
+                label("red_wing", "and", color = Color.WHITE) { setFontScale(0.8f)}
                 image {
                     backgroundHandle = nameTextureForMap(exitMap)
                     setupDimensionsForAreaName(this@locationIndicator)
@@ -158,18 +236,27 @@ object NavbarCreator {
         MapManager.mapImages.find { it.name == mapName && it.type == "name" }?.resourceHandle
 
 
-    private fun CustomImageActor.setupDimensionsForAreaName(parent: CustomHorizontalGroup) {
+    private fun CustomImageActor.setupDimensionsForAreaName(parent: CustomBox) {
 
         fun setup(drawable: Drawable) {
             val height = 40f
             val aspectRatio = drawable.minWidth / drawable.minHeight
-            this.forcedPrefHeight = height
-            this.forcedPrefWidth = height * aspectRatio
+            this.height = height
+            this.width = height * aspectRatio
             parent.invalidate()
             parent.invalidateChildren()
         }
 
         loadedDrawable?.let { setup(it) } ?: loadedDrawableResourceGetter.onResourceChange { drawable -> setup(drawable) }
     }
+
+    private data object CloseNavBarButtons
+    private data class ChangeBlackBackground(val show: Boolean)
+
+    data class NavBarObject(
+        val name: String,
+        val openTimelineCreator: () -> Timeline,
+        val closeTimelineCreator: () -> Timeline,
+    )
 
 }

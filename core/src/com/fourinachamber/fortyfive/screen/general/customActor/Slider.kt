@@ -73,7 +73,7 @@ class Slider(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         if (batch == null) return
-        bindTarget?.let { cursorPos = 1 - (it.getter() - min) / (max - min) }
+        bindTarget?.let { cursorPos = (it.getter() - min) / (max - min) }
         batch.flush()
         val shader = sliderShader.getOrNull() ?: return
         val sliderDrawable = sliderDrawable.getOrNull() ?: return
@@ -102,7 +102,7 @@ class Slider(
 
     private fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
-        bindTarget?.let { it.setter(min + (1f - cursorPos) * (max - min)) }
+        bindTarget?.let { it.setter(min + cursorPos * (max - min)) }
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()

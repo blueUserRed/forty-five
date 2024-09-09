@@ -23,7 +23,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
-import com.badlogic.gdx.utils.SnapshotArray
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.*
@@ -35,7 +34,6 @@ import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaUnit
-import kotlinx.coroutines.newFixedThreadPoolContext
 import ktx.actors.alpha
 import ktx.actors.onTouchEvent
 import onj.value.*
@@ -51,7 +49,7 @@ open class CustomLabel(
     private val hoverText: String = "",
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor, KotlinStyledActor {
 
     override val actor: Actor = this
 
@@ -79,6 +77,12 @@ open class CustomLabel(
     override var detailActor: Actor? = null
     override var mainHoverDetailActor: String? = null
     override var isHoverDetailActive: Boolean = hasHoverDetail
+
+    override var marginTop: Float = 0f
+    override var marginBottom: Float = 0f
+    override var marginLeft: Float = 0f
+    override var marginRight: Float = 0f
+    override var positionType: PositionType = PositionType.RELATIV
 
     override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
 
@@ -241,13 +245,19 @@ open class CustomImageActor(
     override val partOfHierarchy: Boolean = false,
     var hoverText: String = "",
     var hasHoverDetail: Boolean = false
-) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
+) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, KotlinStyledActor,
     KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
     override var isClicked: Boolean = false
     override var mainHoverDetailActor: String? = null
+
+    override var marginTop: Float = 0f
+    override var marginBottom: Float = 0f
+    override var marginLeft: Float = 0f
+    override var marginRight: Float = 0f
+    override var positionType: PositionType = PositionType.RELATIV
 
     override var isHoverDetailActive: Boolean
         get() = hasHoverDetail
@@ -1335,7 +1345,9 @@ open class CustomGroup(
     override var logicalOffsetY: Float = 0F
 
     override var fixedZIndex: Int = 0
-    protected val notZIndexedChildren: MutableList<Actor> = mutableListOf()
+
+    private var sortedChildrenDirty: Boolean = false
+    private var sortedChildren: List<Actor> = listOf()
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -1350,10 +1362,25 @@ open class CustomGroup(
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        batch ?: return
         this.x += drawOffsetX
         this.y += drawOffsetY
-        background?.draw(batch, x, y, width, height)
-        super.draw(batch, parentAlpha)
+        if (color != batch.color) {
+            val batchColor = batch.color.cpy()
+            batch.color = color
+            background?.draw(batch, x, y, width, height)
+            batch.color = batchColor
+        } else {
+            background?.draw(batch, x, y, width, height)
+        }
+        if (sortedChildrenDirty) {
+            sortedChildren = children.sortedBy { if (it is ZIndexActor) it.fixedZIndex else -1 }
+            sortedChildrenDirty = false
+        }
+        if (isTransform) applyTransform(batch, computeTransform())
+        sortedChildren.forEach { if (it.isVisible) it.draw(batch, parentAlpha) }
+        if (isTransform) resetTransform(batch)
         this.x -= drawOffsetX
         this.y -= drawOffsetY
     }
@@ -1366,7 +1393,6 @@ open class CustomGroup(
         onLayout.forEach { it() }
         (0 until children.size).forEach { (children[it] as? Layout)?.validate() }
         super.layout()
-        resortZIndices()
     }
 
     fun invalidateChildren() {
@@ -1374,29 +1400,35 @@ open class CustomGroup(
     }
 
     override fun resortZIndices() {
-        children.sort { el1, el2 ->
-            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-        }
+        Thread.dumpStack()
+//        children.sort { el1, el2 ->
+//            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+//                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+//        }
     }
 
     override fun addActor(actor: Actor) {
-        notZIndexedChildren.add(actor)
+        sortedChildrenDirty = true
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
-        notZIndexedChildren.add(index,actor)
+        sortedChildrenDirty = true
         super.addActorAt(index, actor)
     }
     override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
-        notZIndexedChildren.remove(actor)
+        sortedChildrenDirty = true
         return super.removeActor(actor, unfocus)
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
-        notZIndexedChildren.removeAt(index)
+        sortedChildrenDirty = true
         return super.removeActorAt(index, unfocus)
+    }
+
+    override fun clearChildren(unfocus: Boolean) {
+        sortedChildrenDirty = true
+        super.clearChildren(unfocus)
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: layoutPrefWidth

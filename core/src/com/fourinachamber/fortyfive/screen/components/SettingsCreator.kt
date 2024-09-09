@@ -1,26 +1,67 @@
 package com.fourinachamber.fortyfive.screen.components
 
+import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.utils.Timeline
 
 object SettingsCreator {
 
-    fun ScreenCreator.getSharedSettingsMenu(worldWidth: Float, worldHeight: Float) = newVerticalGroup {
-        forcedPrefWidth = worldWidth * 0.6f
-        forcedPrefHeight = worldHeight
-        syncDimensions()
-        backgroundHandle = "settings_background"
+    fun ScreenCreator.getSharedSettingsMenu(
+        worldWidth: Float,
+        worldHeight: Float
+    ): Pair<CustomVerticalGroup, NavbarCreator.NavBarObject> {
 
-        centerX()
-        y = -40f
+        val openTimelineCreator: () -> Timeline
+        val closeTimelineCreator: () -> Timeline
 
-        verticalGroup {
-            forcedPrefWidth = (worldWidth * 0.6f) * 0.9f
+        val group = newVerticalGroup {
+            forcedPrefWidth = worldWidth * 0.6f
             forcedPrefHeight = worldHeight
-            verticalSpacer(30f)
-            settings(this@getSharedSettingsMenu, forcedPrefWidth!!)
+            syncDimensions()
+            backgroundHandle = "settings_background"
+
+            onLayout { x = parent.width / 2 - width / 2 }
+            y = -height
+
+            verticalGroup {
+                forcedPrefWidth = (worldWidth * 0.6f) * 0.9f
+                forcedPrefHeight = worldHeight
+                verticalSpacer(30f)
+                settings(this@getSharedSettingsMenu, forcedPrefWidth!!)
+            }
+
+            fun getAction(to: Float) = MoveToAction().also {
+                it.duration = 0.4f
+                it.interpolation = Interpolation.pow2In
+                it.y = to
+                it.x = x
+            }
+
+            openTimelineCreator = {
+                val action = getAction(-120f)
+                Timeline.timeline {
+                    action {
+                        addAction(action)
+                    }
+                    delayUntil { action.isComplete }
+                }
+            }
+
+            closeTimelineCreator = {
+                val action = getAction(-height)
+                Timeline.timeline {
+                    action {
+                        addAction(action)
+                    }
+                    delayUntil { action.isComplete }
+                }
+            }
+
         }
 
+        return group to NavbarCreator.NavBarObject("Settings", openTimelineCreator, closeTimelineCreator)
     }
 
     fun CustomVerticalGroup.settings(creator: ScreenCreator, parentWidth: Float) = with(creator) {
@@ -34,7 +75,7 @@ object SettingsCreator {
         singleSettingSelector(creator, parentWidth, "Show Screenshake", "enableScreenShake")
         singleSettingSelector(creator, parentWidth, "Start game on:", "startScreen")
         singleSettingSelector(creator, parentWidth, "Realtime based mechanics", "disableRt")
-        singleSettingSelector(creator, parentWidth, "Fullscreen type (press 'f' to toggle)", "fullScreenMode")
+        singleSettingSelector(creator, parentWidth, "Window Mode:", "windowMode")
 
 
         label("red_wing", "Audio") {

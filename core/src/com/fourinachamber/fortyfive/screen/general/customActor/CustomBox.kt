@@ -11,7 +11,7 @@ import kotlin.math.max
 // widthFitContent and heightFitContent (including and/or exluding posType.absolute)
 // positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
-class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor {
+open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor {
 
     override var positionType: PositionType = PositionType.RELATIV
 
@@ -223,9 +223,9 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
         } else {
             if (flexDirection.isColumn) {
                 layoutPrefWidth = max(width, (children.maxOfOrNull { it.w } ?: 0F)+paddingLeft+paddingRight)
-                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }.dropLast(1).sum() + paddingTop + paddingBottom)
+                layoutPrefHeight = max(height, children.sumOf { it.h.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }.dropLast(1).sum() + paddingTop + paddingBottom)
             } else {
-                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat() + children.map { minVerticalDistBetweenElements }.dropLast(1).sum() +paddingLeft+paddingRight)
+                layoutPrefWidth = max(width, children.sumOf { it.w.toDouble() }.toFloat() + children.map { minHorizontalDistBetweenElements }.dropLast(1).sum() +paddingLeft+paddingRight)
                 layoutPrefHeight = max(height, (children.maxOfOrNull { it.h } ?: 0F) + paddingTop + paddingBottom)
             }
         }
@@ -265,7 +265,7 @@ class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, Kotl
      * first element are all "relativ" children (the ones that are placed dynamically), second element all "absolute" children
      */
     private fun childrenAsBoxes(): Pair<List<Pair<Box, Actor>>, List<Pair<Box, Actor>>> {
-        val lists = notZIndexedChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+        val lists = children.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
         return lists.first.map {
             var w = it.width
             var h = it.height
