@@ -198,6 +198,7 @@ class ShopScreenController(
             this.isDraggable = false
         }
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
+            if (label.alpha != 1f) return
             label.alpha = 0.6f
             card.actor.unavailable()
             return
@@ -208,6 +209,7 @@ class ShopScreenController(
             card.actor.unavailable()
         }
         if (setSoldOut) {
+            label.alpha = 0.9f
             label.setText("sold out")
             card.actor.unavailable()
         }

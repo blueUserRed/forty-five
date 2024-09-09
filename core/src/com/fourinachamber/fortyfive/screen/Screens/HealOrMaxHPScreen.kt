@@ -135,12 +135,12 @@ class HealOrMaxHPScreen : ScreenCreator() {
                     if (state == "healOrMaxHP_optionSelected") {
                         if (entered) {
                             backgroundHandle = "heal_or_max_accept"
-                            isFocusable = true
+                            setFocusableTo(true,this)
                             isDisabled = false
                             isSelectable = true
                         } else {
                             isDisabled = true
-                            isFocusable = false
+                            setFocusableTo(false,this)
                             isSelectable = false
                             backgroundHandle = "heal_or_max_accept_invalid"
                         }
@@ -212,7 +212,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.CENTER
         backgroundHandle = "heal_or_max_selector_background"
         touchable = Touchable.enabled
-        isFocusable = true
+        setFocusableTo(true,this)
         isSelectable = true
         group = "healOrMaxHP_selection"
 

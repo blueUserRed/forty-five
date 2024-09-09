@@ -129,7 +129,7 @@ class AddMaxHPScreen : ScreenCreator() {
                 relativeHeight(13F)
                 touchable = Touchable.enabled
                 backgroundHandle = "heal_or_max_accept"
-                isFocusable = true
+                setFocusableTo(true,this)
                 isSelectable = true
 
                 onFocusChange { _, _ ->

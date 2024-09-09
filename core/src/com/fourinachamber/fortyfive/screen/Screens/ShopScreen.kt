@@ -227,10 +227,11 @@ class ShopScreen : ScreenCreator() {
             }
 
             box {// leave
+                name("shop_back_button_name")
                 backgroundHandle = "shop_back_button"
                 width = 200F
-                isFocusable = true
                 isSelectable = true
+                setFocusableTo(true,this)
                 group = "shop_leave"
                 relativeHeight(70F)
                 onFocusChange { _, _ ->
@@ -238,6 +239,7 @@ class ShopScreen : ScreenCreator() {
                 }
                 onSelect { FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen")) }
             }
+
         }
 
         image { //line between
