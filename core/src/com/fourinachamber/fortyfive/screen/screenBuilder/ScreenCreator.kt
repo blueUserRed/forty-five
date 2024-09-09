@@ -218,7 +218,8 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
-        val advancedText = AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
+        val advancedText =
+            AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
         this.addActor(advancedText)
         builder(advancedText)
         return advancedText
@@ -272,6 +273,33 @@ abstract class ScreenCreator : ResourceBorrower {
         onHoverLeave { backgroundHandle = normal }
     }
 
+    fun <T> T.addButtonDefaults() where T : Actor, T : KotlinStyledActor, T : BackgroundActor {
+        setFocusableTo(true, this)
+        isSelectable = true
+        styles(
+            normal = {
+                backgroundHandle = if (this !is DisableActor || !isDisabled)
+                    "common_button_default"
+                else
+                    "common_button_disabled"
+            },
+            focused = {
+                backgroundHandle = if (this !is DisableActor || !isDisabled)
+                    "common_button_hover"
+                else
+                    "common_button_disabled"
+            },
+            selectedAndFocused = {
+                backgroundHandle = if (this !is DisableActor || !isDisabled)
+                    "common_button_hover"
+                else
+                    "common_button_disabled"
+
+            }
+        )
+        onSelect { screen.changeSelectionFor(this) }
+    }
+
     inline fun <T> T.styles(
         crossinline normal: () -> Unit = {},
         crossinline focused: () -> Unit = {},
@@ -287,12 +315,14 @@ abstract class ScreenCreator : ResourceBorrower {
             } else if (isFocused) focused()
             else normal()
         }
-        onSelectChange { _, _ -> resetEachTime()
+        onSelectChange { _, _ ->
+            resetEachTime()
             if (isSelected) {
                 if (isFocused) selectedAndFocused()
                 else selected()
             } else if (isFocused) focused()
-            else normal() }
+            else normal()
+        }
         resetEachTime()
         if (isSelected) {
             if (isFocused) selectedAndFocused()

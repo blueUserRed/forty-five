@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.config.ConfigFileManager
@@ -32,6 +33,7 @@ class ShopScreenController(
     private val addToDeckWidgetName: String,
     private val addToBackpackWidgetName: String,
     private val shopPersonWidgetName: String,
+    private val rerollWidgetName: String,
 ) : ScreenController() {
 
     private lateinit var context: ShopMapEvent
@@ -88,8 +90,7 @@ class ShopScreenController(
         )
     }
 
-    @EventHandler
-    fun rerollShop(event: ButtonClickEvent, actor: CustomLabel) {
+    fun rerollShop() {
         val rerollPrice = context.currentRerollPrice
         if (SaveState.playerMoney < rerollPrice) return
         SaveState.payMoney(rerollPrice)
@@ -100,7 +101,6 @@ class ShopScreenController(
         screen.removeAllStyleManagersOfChildren(cardsParentWidget)
         cardsParentWidget.clear()
         cardWidgets.clear()
-        labels.forEach { (it.parent as FlexBox).remove(it.styleManager!!.node) }
         labels.clear()
         addCards(context.types)
     }
@@ -137,6 +137,10 @@ class ShopScreenController(
             updateStateOfCard(cardActor.card, setBought = true, label = label)
         }
         TemplateString.updateGlobalParam("shop.currentRerollPrice", context.currentRerollPrice)
+        if (context.currentRerollPrice>SaveState.playerMoney){
+            val customLabel = screen.namedActorOrNull(rerollWidgetName) as CustomLabel
+            customLabel.isDisabled = true
+        }
 
         cardsParentWidget.invalidate()
     }
@@ -177,7 +181,7 @@ class ShopScreenController(
         screen.addNamedActor("CardLabel" + cardsParentWidget.children.size, label)
         cardWidgets.add(card.actor)
         labels.add(label)
-        updateStateOfCard(card, label=label)
+        updateStateOfCard(card, label = label)
     }
 
     private fun updateStatesOfUnboughtCards() {
@@ -192,7 +196,7 @@ class ShopScreenController(
         setSoldOut: Boolean = false,
         label: CustomLabel = labels[cardWidgets.indexOf(card.actor)]
     ) {
-        fun CardActor.unavailable(){
+        fun CardActor.unavailable() {
             this.alpha = 0.5f
             this.isSelectable = false
             this.isDraggable = false

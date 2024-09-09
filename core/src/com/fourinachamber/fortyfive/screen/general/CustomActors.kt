@@ -1400,6 +1400,12 @@ open class CustomGroup(
     override fun getPrefWidth(): Float = forcedPrefWidth ?: layoutPrefWidth
     override fun getPrefHeight(): Float = forcedPrefHeight ?: layoutPrefHeight
 
+    override fun clear() {
+        originalChildren.clear()
+        super.clear()
+        invalidate()
+    }
+
 }
 
 class CustomParticleActor(

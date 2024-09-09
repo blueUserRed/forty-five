@@ -42,7 +42,7 @@ import ktx.actors.onExit
 open class OnjScreen(
     val viewport: Viewport,
     batch: Batch,
-    /*private*/ val controllerContext: Any?,
+    private val controllerContext: Any?,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,
@@ -106,7 +106,7 @@ open class OnjScreen(
         if (_selectedActors.add(actor)) {
             val newList =
                 _selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the newest element
-            newList.reversed().filterNotNull()
+            newList.reversed()
                 .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList(), fromMouse)) }
             curSelectionParent.onSelection(newList)
         }
