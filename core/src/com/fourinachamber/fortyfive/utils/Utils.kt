@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Interpolation
@@ -360,6 +361,15 @@ inline fun <T, U> MutableMap<T, U>.iterateRemoving(block: (value: MutableMap.Mut
         val next = iterator.next()
         block(next, { iterator.remove() })
     }
+}
+
+fun Color.interpolate(other: Color): Color {
+    return Color(
+        (this.r + other.r) / 2,
+        (this.g + other.g) / 2,
+        (this.b + other.b) / 2,
+        (this.a + other.a) / 2
+    )
 }
 
 object Utils {

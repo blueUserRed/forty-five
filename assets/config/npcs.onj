@@ -223,7 +223,8 @@ npcs: [
         },
         image: {
             textureName: "npc_merchant",
-            scale: 0.58
+            scale: 0.72,
+            offsetX: -25.0,
         }
     },
 

@@ -59,7 +59,7 @@ object KeyActionFactory {
             lambda@{ screen, _ ->
                 val game = FortyFive.currentGame ?: return@lambda false
                 val card = game.cardHand.cards.getOrElse(num) { return@lambda false }
-                screen.selectedActor = card.actor
+//                screen.selectedActor = card.actor
                 true
             }
         },
@@ -71,94 +71,94 @@ object KeyActionFactory {
             lambda@{ screen, _ ->
                 val game = FortyFive.currentGame ?: return@lambda false
                 val slot = game.revolver.slots.getOrElse(num) { return@lambda false }
-                screen.selectedActor = slot
+//                screen.selectedActor = slot
                 true
             }
         },
 
-        "SelectAdjacent" to { obj ->
-            val isLeft = obj.get<String>("direction") == "left"
-            lambda@{ screen, _ ->
-                val curSelected = screen.selectedActor ?: return@lambda false
-                val curGame = FortyFive.currentGame ?: return@lambda false
-                when (curSelected) {
-                    is CardActor -> {
-                        val index = curGame.cardHand.cards.indexOf(curSelected.card)
-                        if (index == -1) return@lambda false
-                        val adjacentIndex = if (isLeft) index - 1 else index + 1
-                        val newSelected = curGame.cardHand.cards.getOrElse(adjacentIndex) { return@lambda false }
-                        screen.selectedActor = newSelected.actor
-                    }
+//        "SelectAdjacent" to { obj ->
+//            val isLeft = obj.get<String>("direction") == "left"
+//            lambda@{ screen, _ ->
+//                val curSelected = screen.selectedActor ?: return@lambda false
+//                val curGame = FortyFive.currentGame ?: return@lambda false
+//                when (curSelected) {
+//                    is CardActor -> {
+//                        val index = curGame.cardHand.cards.indexOf(curSelected.card)
+//                        if (index == -1) return@lambda false
+//                        val adjacentIndex = if (isLeft) index - 1 else index + 1
+//                        val newSelected = curGame.cardHand.cards.getOrElse(adjacentIndex) { return@lambda false }
+//                        screen.selectedActor = newSelected.actor
+//                    }
+//
+//                    is RevolverSlot -> {
+//                        val index = curGame.revolver.slots.indexOfFirst { it === curSelected }
+//                        if (index == -1) return@lambda false
+//                        val adjacentIndex = if (isLeft) index - 1 else index + 1
+//                        val newSelected = curGame.revolver.slots.getOrElse(adjacentIndex) { return@lambda false }
+//                        screen.selectedActor = newSelected
+//                    }
+//
+//                    else -> {
+//                        return@lambda false
+//                    }
+//                }
+//                true
+//            }
+//        },
 
-                    is RevolverSlot -> {
-                        val index = curGame.revolver.slots.indexOfFirst { it === curSelected }
-                        if (index == -1) return@lambda false
-                        val adjacentIndex = if (isLeft) index - 1 else index + 1
-                        val newSelected = curGame.revolver.slots.getOrElse(adjacentIndex) { return@lambda false }
-                        screen.selectedActor = newSelected
-                    }
+//        "PlaceSelectedCardInRevolver" to { obj ->
+//            var num = obj.get<Long>("revolverSlot").toInt()
+//            num = if (num == 5) 5 else 5 - num
+//            lambda@{ screen, _ ->
+//                val curSelected = screen.selectedActor ?: return@lambda false
+//                if (curSelected !is CardActor) return@lambda false
+//                val game = FortyFive.currentGame ?: return@lambda false
+//                if (num !in 1..5) return@lambda false
+//                game.loadBulletInRevolver(curSelected.card, num)
+//                val slot = game.revolver.slots[num - 1]
+//                screen.selectedActor = slot
+//                true
+//            }
+//        },
+//
+//        "DeselectAll" to {
+//            { screen, _ ->
+//                screen.selectedActor = null
+//                true
+//            }
+//        },
 
-                    else -> {
-                        return@lambda false
-                    }
-                }
-                true
-            }
-        },
-
-        "PlaceSelectedCardInRevolver" to { obj ->
-            var num = obj.get<Long>("revolverSlot").toInt()
-            num = if (num == 5) 5 else 5 - num
-            lambda@{ screen, _ ->
-                val curSelected = screen.selectedActor ?: return@lambda false
-                if (curSelected !is CardActor) return@lambda false
-                val game = FortyFive.currentGame ?: return@lambda false
-                if (num !in 1..5) return@lambda false
-                game.loadBulletInRevolver(curSelected.card, num)
-                val slot = game.revolver.slots[num - 1]
-                screen.selectedActor = slot
-                true
-            }
-        },
-
-        "DeselectAll" to {
-            { screen, _ ->
-                screen.selectedActor = null
-                true
-            }
-        },
-
-        "NextInHierarchy" to {
-            lambda@{ screen, _ ->
-                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
-                if (screen.selectedNode == null) {
-                    screen.selectedNode = hierarchy.getFirstSelectableNodeInHierarchy()
-                } else {
-                    val selected = screen.selectedNode!!
-                    screen.selectedNode = selected.getNextOrWrap()
-                }
-                true
-            }
-        },
-
-        "PreviousInHierarchy" to {
-            lambda@{ screen, _ ->
-                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
-                if (screen.selectedNode == null) {
-                    screen.selectedNode = hierarchy.getLastSelectableNodeInHierarchy()
-                } else {
-                    val selected = screen.selectedNode!!
-                    screen.selectedNode = selected.getPreviousOrWrap()
-                }
-                true
-            }
-        },
+//        "NextInHierarchy" to {
+//            lambda@{ screen, _ ->
+//                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
+//                if (screen.selectedNode == null) {
+//                    screen.selectedNode = hierarchy.getFirstSelectableNodeInHierarchy()
+//                } else {
+//                    val selected = screen.selectedNode!!
+//                    screen.selectedNode = selected.getNextOrWrap()
+//                }
+//                true
+//            }
+//        },
+//
+//        "PreviousInHierarchy" to {
+//            lambda@{ screen, _ ->
+//                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
+//                if (screen.selectedNode == null) {
+//                    screen.selectedNode = hierarchy.getLastSelectableNodeInHierarchy()
+//                } else {
+//                    val selected = screen.selectedNode!!
+//                    screen.selectedNode = selected.getPreviousOrWrap()
+//                }
+//                true
+//            }
+//        },
 
         "FireClickEvent" to {
             lambda@{ screen, _ ->
                 val actor = it.get<String?>("actor")
                 if (actor == null) {
-                    val selected = screen.selectedActor ?: return@lambda false
+                    val selected = screen.focusedActor ?: return@lambda false
                     selected as Actor
                     selected.fire(ButtonClickEvent())
                     true
@@ -231,11 +231,11 @@ object KeyActionFactory {
         },
         "FocusNextDirectional" to {
             lambda@{ screen, code ->
-                val dir= when(code){
-                    Keys.W-> Vector2(0,1)
-                    Keys.A-> Vector2(1,0)
-                    Keys.S-> Vector2(0,-1)
-                    Keys.D-> Vector2(1,0)
+                val dir = when (code) {
+                    Keys.W -> Vector2(0, -1)
+                    Keys.A -> Vector2(-1, 0)
+                    Keys.S -> Vector2(0, 1)
+                    Keys.D -> Vector2(1, 0)
                     else -> null
                 }
                 screen.focusNext(dir)
@@ -244,12 +244,28 @@ object KeyActionFactory {
         },
         "FocusPrevious" to {
             lambda@{ screen, code ->
-                println("keyCode: $code")
                 screen.focusPrevious()
                 true
             }
         },
-
+        "SelectFocusedElement" to {
+            lambda@{ screen, code ->
+                val actor = screen.focusedActor
+                if (actor == null) {
+                    screen.focusNext()
+                    return@lambda screen.focusedActor != null
+                }
+                if (actor !is Actor) return@lambda false
+                screen.changeSelectionFor(actor, false)
+                true
+            }
+        },
+        "EscapeInSelectionHierarchy" to {
+            lambda@{ screen, _ ->
+                screen.escapeSelectionHierarchy(false)
+                true
+            }
+        },
         )
 
     /**

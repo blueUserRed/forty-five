@@ -27,9 +27,9 @@ import kotlin.math.sin
 
 open class AdvancedTextWidget(
     private val defaults: Triple<String, Color, Float>,
-    val screen: OnjScreen,
+    screen: OnjScreen,
     private val isDistanceField: Boolean,
-) : WidgetGroup(), ZIndexActor, HoverStateActor, StyledActor {
+) : CustomGroup(screen), HoverStateActor, StyledActor {
 
     override var fixedZIndex: Int = 0
 
@@ -51,6 +51,8 @@ open class AdvancedTextWidget(
         bindHoverStateListeners(this)
         @Suppress("LeakingThis")
         initText(advancedText)
+
+        height = Float.MAX_VALUE
     }
 
     constructor(
@@ -74,7 +76,6 @@ open class AdvancedTextWidget(
                 child.width = child.prefWidth
                 child.height = child.prefHeight
             }
-
         var curX = 0f
         val lines = advancedText
             .parts
@@ -136,7 +137,9 @@ open class AdvancedTextWidget(
         super.draw(batch, parentAlpha)
     }
 
-    private fun clearText() = advancedText.parts.forEach { removeActor(it.actor) }
+    private fun clearText() = advancedText.parts.forEach {
+        removeActor(it.actor)
+    }
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)

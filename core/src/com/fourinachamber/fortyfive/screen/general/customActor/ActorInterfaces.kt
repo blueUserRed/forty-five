@@ -6,8 +6,11 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
@@ -137,7 +140,7 @@ interface KeySelectableActor : BoundedActor {
     /**
      * true when the actor is currently selected
      */
-    var isSelected: Boolean
+//    var isSelected: Boolean
 
     /**
      * true when the actor wants to be part of the hierarchy used to determine the next actor.
@@ -185,22 +188,37 @@ interface HoverStateActor {
     }
 }
 
-interface FocusableActor {
-
-    fun onFocusChange(oldElement: FocusableActor?, newElement: FocusableActor?) {
-        isFocused = this == newElement
-    }
-
-    fun onSelectChange(oldElements: List<FocusableActor>, newElements: List<FocusableActor>) {
-        isSelected = this in newElements
-    }
+interface FocusableActor : HoverStateActor {
 
     var group: SelectionGroup?
 
+    /**
+     * make sure this is only set to false if it is NOT SELECTED
+     */
     var isFocusable: Boolean
     var isFocused: Boolean
+    var isSelectable: Boolean
     var isSelected: Boolean
 
+    fun bindFocusStateListeners(actor: Actor, screen: OnjScreen) {
+        bindHoverStateListeners(actor)
+        bindSelectableListener(actor, screen)
+        actor.onHoverEnter {
+            if (isFocusable) screen.focusedActor = actor
+        }
+        actor.onHoverLeave {
+            if (screen.focusedActor == actor) screen.focusedActor = null
+        }
+    }
+
+    private fun bindSelectableListener(actor: Actor, screen: OnjScreen) {
+        actor.onButtonClick {
+            if (actor != it.target) return@onButtonClick //THIS IS VERY IMPORTANT, OR IT GETS EXECUTED MULTIPLE TIMES
+            if (actor is DisableActor && actor.isDisabled) return@onButtonClick
+            if (actor !is FocusableActor || !actor.isSelectable) return@onButtonClick
+            screen.changeSelectionFor(actor)
+        }
+    }
 }
 
 /**
@@ -226,6 +244,13 @@ interface Detachable {
 }
 
 interface OffSettable {
+    fun resetAllOffsets() {
+        drawOffsetX = 0F
+        drawOffsetY = 0F
+        logicalOffsetX = 0F
+        logicalOffsetY = 0F
+    }
+
     var drawOffsetX: Float
     var drawOffsetY: Float
     var logicalOffsetX: Float
@@ -244,12 +269,12 @@ interface DisplayDetailsOnHoverActor {
     var isHoverDetailActive: Boolean
     val actor: Actor
 
-    fun <T> registerOnHoverDetailActor(
+    fun <T> registerOnFocusDetailActor(
         actor: T,
         screen: OnjScreen
-    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
+    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnFocusDetailActor(actor)
 
-    fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
+    fun setBoundsOfFocusDetailActor(screen: OnjScreen) {
         val actor = actor
         val detailActor = detailActor
         if (detailActor !is Layout) return
@@ -286,11 +311,11 @@ interface DisplayDetailsOnHoverActor {
         detailActor.invalidateHierarchy()
     }
 
-    fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
+    fun drawFocusDetail(screen: OnjScreen, batch: Batch) {
         detailActor?.draw(batch, 1f)
     }
 
-    fun getHoverDetailData(): Map<String, OnjValue>
+    fun getFocusDetailData(): Map<String, OnjValue>
 
     fun onDetailDisplayStarted() {}
     fun onDetailDisplayEnded() {}
@@ -305,10 +330,10 @@ interface GeneralDisplayDetailOnHoverActor : DisplayDetailsOnHoverActor {
         get() = "general_hover_detail_template"
         set(value) {}
 
-    override fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
+    override fun setBoundsOfFocusDetailActor(screen: OnjScreen) {
     }
 
-    override fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
+    override fun drawFocusDetail(screen: OnjScreen, batch: Batch) {
         val detailActor = detailActor ?: return
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
         if (detailActor is Layout) {
@@ -354,14 +379,13 @@ interface ActorWithAnimationSpawners {
 interface OnLayoutActor {
 
     fun onLayout(callback: () -> Unit)
-
 }
 
 inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
     animationSpawners.find { it is T } as? T
 
 
-interface KotlinStyledActor {
+interface KotlinStyledActor : FocusableActor {
     var marginTop: Float //These are all to set the data
     var marginBottom: Float
     var marginLeft: Float
@@ -369,11 +393,123 @@ interface KotlinStyledActor {
 
     var positionType: PositionType
 
-    fun setMargin(value:Number){
-        val v=value.toFloat()
+    fun setMargin(value: Number) {
+        val v = value.toFloat()
         marginTop = v
         marginBottom = v
         marginRight = v
         marginLeft = v
+    }
+
+    fun bindDefaultListeners(actor: Actor, screen: OnjScreen) {
+        actor.customClickable()
+        bindFocusStateListeners(actor, screen)
+    }
+
+    private fun Actor.customClickable() {
+        onClickEvent { _, x, y ->
+            if (CustomScrollableBox.isInsideScrollableParents(this, x, y)) {
+                if (this is DragAndDroppableActor && inDragPreview) return@onClickEvent
+                fire(ButtonClickEvent())
+            }
+        }
+    }
+}
+
+interface DragAndDroppableActor : FocusableActor {
+    var isDraggable: Boolean
+
+    /**
+     * the part, where you click on it, and it jumps there, but actually stays in place if you don't move your mouse
+     */
+    var inDragPreview: Boolean
+
+    /**
+     * the groups of the POSSIBLE dragAndDropTargets (the targets themselves can be deactivated via "isSelectable" or "isDisabled")
+     */
+    var targetGroups: List<String>
+
+    /**
+     * when it should execute the reset to the start for dragAndDrop, if null, then [CustomCenteredDragSource.defaultResetCondition] is choosen instead
+     */
+    val resetCondition: ((Actor?) -> Boolean)?
+
+    /**
+     * when it should execute the reset to the start for dragAndDrop, if null, then [CustomCenteredDragSource.defaultResetCondition] is choosen instead
+     */
+    val onDragAndDrop: MutableList<(Actor, Actor) -> Unit>
+    fun bindDragging(actor: Actor, screen: OnjScreen) {
+        val dragAndDrops = screen._dragAndDrop
+        val group = group
+        if (group == null) {
+            FortyFiveLogger.warn(
+                "DragAndDroppableActor",
+                "You tried to bind a source without a group, this will not work"
+            )
+            return
+        }
+        val dragAndDrop = dragAndDrops.getOrPut(group) { DragAndDrop() }
+
+//        dragAndDrop?.setTapSquareSize(-1F) //other possibilty for dragAndDrop
+        dragAndDrop.addSource(CustomCenteredDragSource(dragAndDrop, actor, screen))
+
+        actor.onSelectChange { _, new, fromMouse ->
+            if (!isDraggable) return@onSelectChange
+            if ("draggingAnElement" in screen.screenState) return@onSelectChange
+            if (isSelected) {
+                if (!fromMouse) //current possibilty for dragAndDrop
+                    actorDragStarted(actor, screen, false)
+            } else {
+                if (fromMouse) screen.escapeSelectionHierarchy()
+                screen.focusedActor = actor
+            }
+        }
+    }
+
+
+    fun actorDragStarted(actor: Actor, screen: OnjScreen, fromMouse: Boolean = true) {
+        screen.enterState(dragAndDropStateName)
+        if (fromMouse) {
+            screen.focusedActor = null
+        }
+        screen.addToSelectionHierarchy(
+            FocusableParent(
+                onSelection = { it2 ->
+                    val target= it2.last()
+                    val source = screen.draggedActor ?: it2.first()
+                    if (source!=target){
+                        onDragAndDrop.forEach { it.invoke(source,target) }
+                        if (target is DragAndDroppableActor)
+                            target.onDragAndDrop.forEach { it.invoke(source,target) }
+                    }
+                },
+                transitions = listOf(SelectionTransition(groups = targetGroups)),
+                onLeave = {
+                    screen.leaveState(dragAndDropStateName)
+                }
+            )
+        )
+        if ((actor !is FocusableActor || actor.group !in targetGroups) && !fromMouse)
+            screen.focusNext()
+    }
+
+    fun bindDroppable(actor: Actor, screen: OnjScreen, sourceGroups: List<String>) {
+        val dragAndDrops = screen._dragAndDrop
+        val group = group
+        if (group == null) {
+            FortyFiveLogger.warn(
+                "DragAndDroppableActor",
+                "You need to set the target group, or it will not be accepted as a target"
+            )
+            return
+        }
+        sourceGroups.forEach {
+            val dragAndDrop = dragAndDrops.getOrPut(it) { DragAndDrop() }
+            dragAndDrop.addTarget(CustomDropTarget(actor,screen))
+        }
+    }
+
+    companion object{
+        const val dragAndDropStateName:String = "draggableActor_draggingElement"
     }
 }

@@ -36,7 +36,6 @@ object NavbarCreator {
             width = worldWidth
             height = worldHeight
             backgroundHandle = "transparent_black_texture"
-            touchable = Touchable.enabled
             navBarEvents.watchFor<ChangeBlackBackground> { (show) ->
                 isVisible = show
             }

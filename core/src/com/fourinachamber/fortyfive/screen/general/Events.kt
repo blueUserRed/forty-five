@@ -2,7 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
-import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import kotlin.reflect.KClass
 
@@ -18,6 +18,7 @@ object EventFactory {
         "TutorialConfirmedEvent" to { TutorialConfirmedEvent() },
         "HoverEnterEvent" to { HoverEnterEvent() },
         "HoverLeaveEvent" to { HoverLeaveEvent() },
+        "FocusChangeEvent" to { HoverLeaveEvent() },
         "QuitGameEvent" to { QuitGameEvent() },
         "AbandonRunEvent" to { AbandonRunEvent() },
         "ResetGameEvent" to { ResetGameEvent() },
@@ -33,6 +34,7 @@ object EventFactory {
         "TutorialConfirmedEvent" to TutorialConfirmedEvent::class,
         "HoverEnterEvent" to HoverEnterEvent::class,
         "HoverLeaveEvent" to HoverLeaveEvent::class,
+        "FocusChangeEvent" to HoverLeaveEvent::class,
         "QuitGameEvent" to QuitGameEvent::class,
         "AbandonRunEvent" to AbandonRunEvent::class,
         "ResetGameEvent" to ResetGameEvent::class,
@@ -86,6 +88,9 @@ class QuitGameEvent : Event()
 class AbandonRunEvent : Event()
 class ResetGameEvent : Event()
 
+class FocusChangeEvent(val old: Actor?, val new: Actor?) : Event()
+class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>, val fromMouse: Boolean = true) : Event()
+
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
  * a popup
@@ -122,5 +127,58 @@ inline fun Actor.onHoverLeave(crossinline block: @MainThreadOnly () -> Unit) {
         if (event !is HoverLeaveEvent) return@addListener false
         block()
         true
+    }
+}
+
+inline fun Actor.onFocusChange(crossinline block: (Actor?, Actor?) -> Unit) {
+    this.addListener { event ->
+        if (event !is FocusChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+            if (!this.isFocusable) throw RuntimeException("You tried to focus an unfocusable Element") // this should never happen
+            isFocused = this == event.new
+        }
+        block(event.old, event.new)
+        true
+    }
+}
+
+inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>) -> Unit) {
+    this.addListener { event ->
+        if (event !is SelectChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+//            if (!this.isTouchable) throw RuntimeException("You tried to select an unTouchable Element") // this should never happen
+//            this.touchable = if (this in event.new) Touchable.enabled else Touchable.childrenOnly
+            this.isSelected = this in event.new
+        }
+        block(event.old, event.new)
+        true
+    }
+}
+inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>, Boolean) -> Unit) {
+    this.addListener { event ->
+        if (event !is SelectChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+//            if (!this.isTouchable) throw RuntimeException("You tried to select an unTouchable Element") // this should never happen
+//            this.touchable = if (this in event.new) Touchable.enabled else Touchable.childrenOnly
+            this.isSelected = this in event.new
+        }
+        block(event.old, event.new, event.fromMouse)
+        true
+    }
+}
+
+inline fun Actor.onSelect(crossinline block: @MainThreadOnly () -> Unit) {
+    this.addListener { event ->
+        if (event !is SelectChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+//            if (!this.isTouchable) throw RuntimeException("You tried to select an unTouchable Element") // this should never happen
+//            this.touchable = if (this in event.new) Touchable.enabled else Touchable.childrenOnly
+            this.isSelected = this in event.new
+            if (isSelected) {
+                block()
+                return@addListener true
+            }
+        }
+        false
     }
 }
