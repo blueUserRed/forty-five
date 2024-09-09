@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen.gameComponents
+package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.general.OnjScreen

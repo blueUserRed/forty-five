@@ -13,11 +13,19 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
+import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
+import com.fourinachamber.fortyfive.screen.general.customActor.Selector
+import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
 import onj.value.OnjArray
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 abstract class ScreenCreator : ResourceBorrower {
 
@@ -57,13 +65,23 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
+    inline fun newBox(builder: CustomBox.() -> Unit = {}): CustomBox {
+        val box = CustomBox(screen)
+        builder(box)
+        return box
+    }
+
     inline fun newHorizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
         val group = CustomHorizontalGroup(screen)
         builder(group)
         return group
     }
 
+    @OptIn(ExperimentalContracts::class)
     inline fun newVerticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val group = CustomVerticalGroup(screen)
         builder(group)
         return group
@@ -107,6 +125,34 @@ abstract class ScreenCreator : ResourceBorrower {
         this.addActor(box)
         builder(box)
         return box
+    }
+
+    inline fun Group.selector(font: String, bindTarget: String, builder: Selector.() -> Unit = {}): Selector {
+        val selector = Selector(
+            forceLoadFont(font),
+            arrowTextureHandle = "common_symbol_arrow_right",
+            bind = bindTarget,
+            screen = screen
+        )
+        this.addActor(selector)
+        builder(selector)
+        return selector
+    }
+
+    inline fun Group.slider(min: Float, max: Float, bindTarget: String, builder: Slider.() -> Unit = {}): Slider {
+        val slider = Slider(
+            sliderBackground = "common_slider_background",
+            handleRadius = 7f,
+            handleColor = Color.GRAY,
+            sliderHeight = 10f,
+            bind = bindTarget,
+            screen = screen,
+            min = min,
+            max = max,
+        )
+        this.addActor(slider)
+        builder(slider)
+        return slider
     }
 
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
@@ -213,7 +259,11 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     fun <T> T.centerX() where T : Actor, T : Layout, T : OnLayoutActor {
-        onLayout { x = parent.width / 2 - width / 2 }
+        onLayoutAndNow { x = parent.width / 2 - width / 2 }
+    }
+
+    fun <T> T.centerY() where T : Actor, T : Layout, T : OnLayoutActor {
+        onLayoutAndNow { y = parent.height / 2 - height / 2 }
     }
 
     fun <T> T.backgrounds(normal: String?, hover: String) where T : Actor, T : BackgroundActor {
@@ -260,6 +310,10 @@ abstract class ScreenCreator : ResourceBorrower {
     fun loadInputMap(name: String, screen: OnjScreen): KeyInputMap {
         val file = ConfigFileManager.getConfigFile("inputMaps")
         return KeyInputMap.readFromOnj(file.get<OnjArray>(name), screen)
+    }
+
+    companion object {
+        val fortyWhite: Color = Color.valueOf("F0EADD")
     }
 
 }

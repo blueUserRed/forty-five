@@ -26,7 +26,7 @@ import com.fourinachamber.fortyfive.onjNamespaces.OnjStyleInstruction
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.gameComponents.*
+import com.fourinachamber.fortyfive.screen.gameWidgets.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -130,7 +130,6 @@ class FromOnjScreenBuilder(
     }
 
     override fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: Group?, screen: OnjScreen): Actor? {
-        if (parent !is CustomFlexBox) throw RuntimeException("FromOnjScreenBuilder can only parent templates to FlexBoxes")
         val onjData: MutableMap<String, OnjValue> = mutableMapOf()
         data.forEach { onjData[it.key] = getAsOnjValue(it.value) }
         val template = templateObjects[name] ?: return null
@@ -317,7 +316,7 @@ class FromOnjScreenBuilder(
 
     private fun getWidget(
         widgetOnj: OnjNamedObject,
-        parent: FlexBox?,
+        parent: Group?,
         screen: OnjScreen
     ): Actor = when (widgetOnj.name) {
 
@@ -586,12 +585,15 @@ class FromOnjScreenBuilder(
     private fun applyWidgetKeysFromOnj( //this is needed as a function to give styles to the cards,  // TODO ugly
         actor: Actor,
         widgetOnj: OnjNamedObject,
-        parent: FlexBox?,
+        parent: Group?,
         screen: OnjScreen
     ): Actor {
         // TODO: split this into multiple functions
         applySharedWidgetKeys(actor, widgetOnj, screen)
-        val node = parent?.add(actor)
+
+        if (parent !is CustomFlexBox) return actor
+
+        val node = parent.add(actor)
 
         node ?: return actor
         if (actor !is StyledActor) {

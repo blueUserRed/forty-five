@@ -1,11 +1,10 @@
-package com.fourinachamber.fortyfive.screen.Screens
+package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
@@ -15,7 +14,7 @@ import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.gameComponents.BiomeBackgroundScreenController
+import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator

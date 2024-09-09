@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen.gameComponents
+package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Event
@@ -36,6 +36,10 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
                 PermaSaveState.hasSeenInDevPopup = true
             }
         }.asAction())
+    }
+
+    override fun onShow() {
+        SoundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {

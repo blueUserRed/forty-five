@@ -1,12 +1,10 @@
-package com.fourinachamber.fortyfive.screen.gameComponents
+package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.card.DetailDescriptionHandler
 import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
@@ -17,7 +15,6 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import java.lang.RuntimeException
 
 interface StatusEffectDisplay : StyledActor {
 

@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen.gameComponents
+package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.fourinachamber.fortyfive.screen.general.OnjScreen

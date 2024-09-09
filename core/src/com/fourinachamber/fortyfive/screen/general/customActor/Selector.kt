@@ -19,15 +19,18 @@ import com.fourinachamber.fortyfive.utils.Promise
 
 class Selector(
     private val font: BitmapFont,
-    private val fontScale: Float,
+    var fontScale: Float = 1f,
     private val arrowTextureHandle: ResourceHandle,
-    private val arrowWidth: Float,
-    private val arrowHeight: Float,
+    private val arrowWidth: Float = 20f,
+    private val arrowHeight: Float = 20f,
     bind: String,
     private val screen: OnjScreen,
 ) : Widget(), StyledActor, ResourceBorrower {
 
     override var styleManager: StyleManager? = null
+
+    var forcedPrefHeight: Float? = null
+    var forcedPrefWidth: Float? = null
 
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
@@ -112,6 +115,10 @@ class Selector(
         x > width / 2 -> switch(1)
         else -> switch(-1)
     }
+
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
+
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)

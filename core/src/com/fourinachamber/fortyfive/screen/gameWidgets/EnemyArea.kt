@@ -1,9 +1,8 @@
-package com.fourinachamber.fortyfive.screen.gameComponents
+package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle

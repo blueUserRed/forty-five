@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen.Screens
+package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
@@ -16,7 +16,7 @@ import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.gameComponents.BiomeBackgroundScreenController
+import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator

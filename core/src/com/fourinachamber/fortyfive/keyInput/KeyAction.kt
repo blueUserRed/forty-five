@@ -7,7 +7,7 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
-import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.MainThreadOnly

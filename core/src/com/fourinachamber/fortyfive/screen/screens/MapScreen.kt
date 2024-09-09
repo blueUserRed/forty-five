@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.screen
+package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
@@ -18,12 +18,14 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.MapNode
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
+import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
-import ktx.actors.onClick
 
 class MapScreen : ScreenCreator() {
 
@@ -114,11 +116,13 @@ class MapScreen : ScreenCreator() {
                 else -> null
             }
         }
-        actor(getSharedNavBar(worldWidth)) {
+        getInfoPopup()
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
-        getInfoPopup()
+        actor(settings)
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
             x = 0f
