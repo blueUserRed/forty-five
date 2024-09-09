@@ -63,11 +63,6 @@ open class CustomLabel(
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
 
-    override var marginTop: Float = 0F
-    override var marginBottom: Float = 0F
-    override var marginLeft: Float = 0F
-    override var marginRight: Float = 0F
-    override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
     override var isFocusable: Boolean = false
     override var isFocused: Boolean = false
@@ -87,6 +82,13 @@ open class CustomLabel(
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
 
     override var detailWidget: DetailWidget? = null
+
+    override var marginTop: Float = 0f
+    override var marginBottom: Float = 0f
+    override var marginLeft: Float = 0f
+    override var marginRight: Float = 0f
+    override var positionType: PositionType = PositionType.RELATIV
+
 
     private val shapeRenderer: ShapeRenderer by lazy {
         val renderer = ShapeRenderer()
@@ -246,6 +248,11 @@ open class CustomImageActor(
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
 
+    override var marginTop: Float = 0f
+    override var marginBottom: Float = 0f
+    override var marginLeft: Float = 0f
+    override var marginRight: Float = 0f
+    override var positionType: PositionType = PositionType.RELATIV
 
     override val screen: OnjScreen = _screen
 
@@ -311,12 +318,6 @@ open class CustomImageActor(
     var ignoreScalingWhenDrawing: Boolean = false
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
-
-    override var positionType: PositionType = PositionType.RELATIV
-    override var marginTop: Float = 0F
-    override var marginBottom: Float = 0F
-    override var marginLeft: Float = 0F
-    override var marginRight: Float = 0F
 
     init {
         bindDefaultListeners(this, screen)
@@ -1302,7 +1303,9 @@ open class CustomGroup(
     override var logicalOffsetY: Float = 0F
 
     override var fixedZIndex: Int = 0
-    protected val notZIndexedChildren: MutableList<Actor> = mutableListOf()
+
+    private var sortedChildrenDirty: Boolean = false
+    private var sortedChildren: List<Actor> = listOf()
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -1319,13 +1322,28 @@ open class CustomGroup(
 
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        batch ?: return
         this.x += drawOffsetX
         this.y += drawOffsetY
-        background?.let {
-            dropShadow?.doDropShadow(batch, screen, it, this)
-            it.draw(batch, x, y, width, height)
+        if (color != batch.color) {
+            val batchColor = batch.color.cpy()
+            batch.color = color
+            background?.let {
+                dropShadow?.doDropShadow(batch, screen, it,this)
+                it.draw(batch, x, y, width, height)
+            }
+            batch.color = batchColor
+        } else {
+            background?.draw(batch, x, y, width, height)
         }
-        super.draw(batch, parentAlpha)
+        if (sortedChildrenDirty) {
+            sortedChildren = children.sortedBy { if (it is ZIndexActor) it.fixedZIndex else -1 }
+            sortedChildrenDirty = false
+        }
+        if (isTransform) applyTransform(batch, computeTransform())
+        sortedChildren.forEach { if (it.isVisible) it.draw(batch, parentAlpha) }
+        if (isTransform) resetTransform(batch)
         this.x -= drawOffsetX
         this.y -= drawOffsetY
     }
@@ -1338,7 +1356,6 @@ open class CustomGroup(
         onLayout.forEach { it() }
         (0 until children.size).forEach { (children[it] as? Layout)?.validate() }
         super.layout()
-        resortZIndices()
     }
 
     fun invalidateChildren() {
@@ -1346,35 +1363,36 @@ open class CustomGroup(
     }
 
     override fun resortZIndices() {
-        children.sort { el1, el2 ->
-            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-        }
+        Thread.dumpStack()
+//        children.sort { el1, el2 ->
+//            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+//                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+//        }
     }
 
     override fun addActor(actor: Actor) {
-        notZIndexedChildren.add(actor)
+        sortedChildrenDirty = true
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
-        notZIndexedChildren.add(index, actor)
+        sortedChildrenDirty = true
         super.addActorAt(index, actor)
     }
 
     override fun removeActor(actor: Actor, unfocus: Boolean): Boolean {
-        val index = children.indexOf(actor, true)
-        if (index == -1) return false
-        removeActorAt(
-            notZIndexedChildren.indexOf(actor),
-            unfocus
-        )//TODO ugly, but there is no better way i think (same with next method)
-        return true
+        sortedChildrenDirty = true
+        return super.removeActor(actor, unfocus)
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
-        val actor = notZIndexedChildren.removeAt(index)
-        return super.removeActorAt(children.indexOf(actor), unfocus)
+        sortedChildrenDirty = true
+        return super.removeActorAt(index, unfocus)
+    }
+
+    override fun clearChildren(unfocus: Boolean) {
+        sortedChildrenDirty = true
+        super.clearChildren(unfocus)
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: layoutPrefWidth

@@ -6,16 +6,13 @@ import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.map.statusbar.Backpack
-import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
+import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
-import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.Utils
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
-import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 
@@ -31,6 +28,7 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
     private lateinit var mapWidget: DetailMapWidget
 
     override fun init(context: Any?) {
+        SoundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN)
         PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
     }

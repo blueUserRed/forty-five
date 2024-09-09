@@ -35,6 +35,9 @@ class Slider(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
+    var forcedPrefHeight: Float? = null
+    var forcedPrefWidth: Float? = null
+
     private var cursorPos: Float = 0.5f
 
     private val shapeRenderer: ShapeRenderer by lazy {
@@ -70,7 +73,7 @@ class Slider(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         if (batch == null) return
-        bindTarget?.let { cursorPos = 1 - (it.getter() - min) / (max - min) }
+        bindTarget?.let { cursorPos = (it.getter() - min) / (max - min) }
         batch.flush()
         val shader = sliderShader.getOrNull() ?: return
         val sliderDrawable = sliderDrawable.getOrNull() ?: return
@@ -89,8 +92,8 @@ class Slider(
         batch.end()
         val r = shapeRenderer
         r.begin(ShapeRenderer.ShapeType.Filled)
-        screen.viewport.apply()
-        r.projectionMatrix = screen.viewport.camera.combined
+        r.projectionMatrix = batch.projectionMatrix
+        r.transformMatrix = batch.transformMatrix
         r.color = handleColor
         r.circle(x + width * cursorPos, y + height / 2, handleRadius)
         r.end()
@@ -99,8 +102,12 @@ class Slider(
 
     private fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
-        bindTarget?.let { it.setter(min + (1f - cursorPos) * (max - min)) }
+        bindTarget?.let { it.setter(min + cursorPos * (max - min)) }
     }
+
+    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
+
+    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)

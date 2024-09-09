@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.utils.Promise
 interface DropShadowActor {
 
     var dropShadow: DropShadow?
+
 }
 
 data class DropShadow(

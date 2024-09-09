@@ -29,7 +29,7 @@ uniform float u_maxOpacity;
 //}
 
 void main() {
-    int depthPerDist = 30;
+    int depthPerDist = 20;
     int maxSum = int(float(depthPerDist)*1.6);
 
     float distancePerDirection = u_multiplier/(u_multiplier * 2.0 + 1.0);

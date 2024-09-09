@@ -17,28 +17,29 @@ object SoundPlayer : ResourceBorrower {
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
     private lateinit var biomeAmbience: Map<String, List<String>>
 
-    private var currentMusicHandle: ResourceHandle? = null
-    private var currentMusic: Promise<Music>? = null
-
-    private var transitionToMusic: Promise<Music>? = null
-    private var transitionToMusicHandle: ResourceHandle? = null
-    private var transitionProgress: Float = -1f
-    private var transitionStartTime: Long = -1L
-    private var transitionDuration: Int = 0
-
     var masterVolume: Float = 1f
         set(value) {
             field = value
-            currentMusic?.getOrNull()?.volume = masterVolume * musicVolume
+            currentMusic?.volume = masterVolume * musicVolume
         }
 
     var musicVolume: Float = 1f
         set(value) {
             field = value
-            currentMusic?.getOrNull()?.volume = masterVolume * musicVolume
+            currentMusic?.volume = masterVolume * musicVolume
         }
 
+    private val musicTimeline = Timeline().also { it.startTimeline() }
+
     var soundEffectVolume: Float = 1f
+
+    private var currentMusic: Music? = null
+    private var currentMusicLifetime: EndableLifetime? = null
+    private var currentMusicTheme: Theme? = null
+
+    private var nextMusic: Music? = null
+    private var transitionStartTime: Long = 0
+    private var transitionDuration: Int = 0
 
     fun init() {
         val onj = ConfigFileManager.getConfigFile("soundConfig")
@@ -80,52 +81,39 @@ object SoundPlayer : ResourceBorrower {
             .associate { it.second to it.first }
     }
 
-    fun currentMusic(musicHandle: ResourceHandle?, screen: OnjScreen) {
-        if (transitionProgress != -1f) {
-            transitionProgress = -1f
-            transitionToMusic?.getOrNull()?.stop()
-            transitionToMusic = null
-        }
-        if (currentMusicHandle == musicHandle) return
-        currentMusic?.getOrNull()?.stop()
-        if (musicHandle == null) {
-            currentMusic = null
-            currentMusicHandle = null
-            return
-        }
-        val musicPromise = ResourceManager.request<Music>(screen, screen, musicHandle)
-        currentMusic = musicPromise
-        currentMusicHandle = musicHandle
-        musicPromise.then { music ->
-            music.isLooping = true
-            music.play()
-            music.volume = musicVolume * masterVolume
-        }
-    }
+    fun changeMusicTo(theme: Theme, transitionDuration: Int = 3_000) = Timeline.timeline {
+        if (theme == currentMusicTheme) return@timeline
 
-    fun transitionToMusic(musicHandle: ResourceHandle?, duration: Int, screen: OnjScreen) {
-        if (musicHandle == currentMusicHandle) return
-        val musicPromise = musicHandle?.let { ResourceManager.request<Music>(this, screen, it) }
-        transitionProgress = 1f
-        transitionToMusic = musicPromise
-        transitionStartTime = TimeUtils.millis()
-        transitionToMusicHandle = musicHandle
-        transitionDuration = duration
-        musicPromise?.then { music ->
-            music.play()
-            music.isLooping = true
+        val nextMusicLifetime = EndableLifetime()
+        val nextMusic: Promise<Music> = ResourceManager.request(
+            this@SoundPlayer,
+            nextMusicLifetime,
+            theme.resourceHandle
+        )
+
+        delayUntilPromiseResolves(nextMusic)
+
+        action {
+            val music = nextMusic.getOrError()
             music.volume = 0f
+            music.isLooping = true
+            music.play()
+            this@SoundPlayer.nextMusic = music
+            this@SoundPlayer.transitionStartTime = TimeUtils.millis()
+            this@SoundPlayer.transitionDuration = transitionDuration
         }
-    }
 
-    private fun finishTransition() {
-        currentMusic?.getOrNull()?.stop()
-        currentMusic = transitionToMusic
-        currentMusicHandle = transitionToMusicHandle
-        currentMusic?.getOrNull()?.play()
-        currentMusic?.getOrNull()?.volume = musicVolume * masterVolume
-        transitionProgress = -1f
-    }
+        delay(transitionDuration)
+
+        action {
+            currentMusic?.stop()
+            currentMusicLifetime?.die()
+            currentMusic = nextMusic.getOrError()
+            currentMusicLifetime = nextMusicLifetime
+            this@SoundPlayer.nextMusic = null
+        }
+
+    }.let { musicTimeline.appendAction(it.asAction()) }
 
     fun situation(name: String, screen: OnjScreen) {
         val situation = situations.find { it.name == name } ?: run {
@@ -147,16 +135,13 @@ object SoundPlayer : ResourceBorrower {
 
     fun update(screen: OnjScreen, playAmbientSounds: Boolean) {
         if (playAmbientSounds) updateAmbientSounds(screen)
-        if (transitionProgress == -1f) return
-        val now = TimeUtils.millis()
-        val finishTime = transitionStartTime + transitionDuration
-        if (now >= finishTime) {
-            finishTransition()
-            return
-        }
-        transitionProgress = (finishTime - now).toFloat() / transitionDuration.toFloat()
-        currentMusic?.getOrNull()?.volume = transitionProgress * musicVolume * masterVolume
-        transitionToMusic?.getOrNull()?.volume = (1f - transitionProgress) * musicVolume * masterVolume
+        musicTimeline.updateTimeline()
+
+        if (nextMusic == null) return
+        val timeInTransition = TimeUtils.millis() - transitionStartTime
+        val transitionProgress = (timeInTransition.toFloat() / transitionDuration.toFloat()).coerceAtMost(1f)
+        currentMusic?.volume = musicVolume * masterVolume * (1 - transitionProgress)
+        nextMusic?.volume = musicVolume * masterVolume * transitionProgress
     }
 
     private fun updateAmbientSounds(screen: OnjScreen) {
@@ -173,10 +158,6 @@ object SoundPlayer : ResourceBorrower {
             sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume * masterVolume)
             ambientSounds[ambient] = now + ambient.delay.random()
         }
-    }
-
-    fun skipMusicTo(amount: Float) {
-        currentMusic?.then { it.position = amount }
     }
 
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
@@ -208,6 +189,12 @@ object SoundPlayer : ResourceBorrower {
         val sound: ResourceHandle?,
         val volume: Float
     )
+
+    enum class Theme(val resourceHandle: ResourceHandle) {
+        TITLE("main_theme"),
+        MAIN("map_theme"),
+        BATTLE("encounter_theme")
+    }
 
     const val logTag = "SoundPlayer"
 

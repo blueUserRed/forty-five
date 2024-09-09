@@ -11,14 +11,9 @@ import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
-import com.fourinachamber.fortyfive.screen.CustomBoxPlaygroundScreen
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.MapScreen
-import com.fourinachamber.fortyfive.screen.screens.AddMaxHPScreen
-import com.fourinachamber.fortyfive.screen.screens.HealOrMaxHPScreen
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
@@ -143,7 +138,6 @@ object FortyFive : Game() {
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
-            SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen
