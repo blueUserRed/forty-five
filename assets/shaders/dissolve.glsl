@@ -12,13 +12,15 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
-varying vec4 v_position;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
+in vec4 v_position;
 uniform sampler2D u_texture;
 
 %uniform u_time
 %uniform u_perlin512x512
+
+out vec4 outColor;
 
 %constArg ca_duration float
 %constArg ca_border float
@@ -35,10 +37,10 @@ void main() {
 
 
     if (noise < progress) {
-        gl_FragColor = vec4(baseColor.rgb, 0.0);
+        outColor = vec4(baseColor.rgb, 0.0);
     } else if (noise < progress + ca_border) {
-        gl_FragColor = vec4(ca_borderColor.rgb, baseColor.a);
+        outColor = vec4(ca_borderColor.rgb, baseColor.a);
     } else {
-        gl_FragColor = baseColor;
+        outColor = baseColor;
     }
 }

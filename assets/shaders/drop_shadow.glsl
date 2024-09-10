@@ -11,12 +11,13 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
 uniform sampler2D u_texture;
 uniform float u_multiplier;
 uniform vec4 u_color;
 uniform float u_maxOpacity;
+out vec4 outColor;
 
 %uniform u_time
 %uniform u_resolution
@@ -49,7 +50,7 @@ void main() {
     if (alphaNew >= 1.0){
         alphaNew = 1.0;
     }
-    gl_FragColor = vec4(u_color.xyz, alphaNew);
+    outColor = vec4(u_color.xyz, alphaNew);
 }
 
 

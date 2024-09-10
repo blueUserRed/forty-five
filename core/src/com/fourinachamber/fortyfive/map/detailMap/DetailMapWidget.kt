@@ -559,44 +559,44 @@ class DetailMapWidget(
 
     private fun setupMapEvent(event: MapEvent?) {
         events.fire(PlayerChangedNodeEvent(playerNode))
-        return
-        if (event == null || !event.displayDescription) {
-            screen.leaveState(displayEventDetailScreenState)
-            screen.leaveState(eventCanBeStartedScreenState)
-        } else {
-            screen.enterState(displayEventDetailScreenState)
-        }
-        event ?: return
-        if (event.canBeStarted) {
-            screen.enterState(eventCanBeStartedScreenState)
-        } else {
-            screen.leaveState(eventCanBeStartedScreenState)
-        }
-        TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
-        TemplateString.updateGlobalParam("map.cur_event.buttonText", event.buttonText)
-        TemplateString.updateGlobalParam(
-            "map.cur_event.description",
-            if (event.isCompleted) event.completedDescriptionText else event.descriptionText
-        )
-//        screen.removeAllStyleManagersOfChildren(encounterModifierParent)
-//        encounterModifierParent.clear()
-        screen.enterState(noEncounterModifierScreenState)
-        if (event !is EncounterMapEvent) return
-        val encounter = GameDirector.encounters[event.encounterIndex]
-        val encounterModifiers = encounter.encounterModifier
-        if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
-//        encounterModifiers.forEach { modifier ->
-//            screen.screenBuilder.generateFromTemplate(
-//                encounterModifierDisplayTemplateName,
-//                mapOf(
-//                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
-//                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
-//                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
-//                ),
-//                encounterModifierParent,
-//                screen
-//            )!!
+//        return
+//        if (event == null || !event.displayDescription) {
+//            screen.leaveState(displayEventDetailScreenState)
+//            screen.leaveState(eventCanBeStartedScreenState)
+//        } else {
+//            screen.enterState(displayEventDetailScreenState)
 //        }
+//        event ?: return
+//        if (event.canBeStarted) {
+//            screen.enterState(eventCanBeStartedScreenState)
+//        } else {
+//            screen.leaveState(eventCanBeStartedScreenState)
+//        }
+//        TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
+//        TemplateString.updateGlobalParam("map.cur_event.buttonText", event.buttonText)
+//        TemplateString.updateGlobalParam(
+//            "map.cur_event.description",
+//            if (event.isCompleted) event.completedDescriptionText else event.descriptionText
+//        )
+////        screen.removeAllStyleManagersOfChildren(encounterModifierParent)
+////        encounterModifierParent.clear()
+//        screen.enterState(noEncounterModifierScreenState)
+//        if (event !is EncounterMapEvent) return
+//        val encounter = GameDirector.encounters[event.encounterIndex]
+//        val encounterModifiers = encounter.encounterModifier
+//        if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
+////        encounterModifiers.forEach { modifier ->
+////            screen.screenBuilder.generateFromTemplate(
+////                encounterModifierDisplayTemplateName,
+////                mapOf(
+////                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+////                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+////                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+////                ),
+////                encounterModifierParent,
+////                screen
+////            )!!
+////        }
     }
 
     private fun updateScreenState(event: MapEvent?) {
