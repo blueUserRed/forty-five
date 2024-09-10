@@ -408,8 +408,6 @@ open class OnjScreen(
         if (detailWidget.isShown) return
         val detailActor = detailWidget.generateDetailActor()
         detailWidget.detailActor = detailActor
-//        detailWidget.stage=stage
-
         detailWidget.updateBounds(actor)
         actor.fire(DetailDisplayStateChange(true)) //this may be never needed, but its nice to have if we do
     }

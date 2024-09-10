@@ -705,7 +705,7 @@ class CardActor(
 
     override var inAnimation: Boolean = false
 
-    override var detailWidget: DetailWidget? = DetailWidget.SimpleBigDetailActor(screen, effects = cardDetailEffects()) { card.shortDescription }
+    override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(screen, effects = cardDetailEffects(), text =  {listOf(card.shortDescription, card.flavourText)})
 
     override var fixedZIndex: Int = 0
 
