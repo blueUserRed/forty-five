@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
@@ -51,6 +52,7 @@ class ShopScreen : ScreenCreator() {
     private val addToDeckWidgetName: String = "shop_addToDeck"
     private val addToBackpackWidgetName: String = "shop_addToBackpack"
     private val shopPersonWidgetName: String = "shop_personWidget"
+    private val rerollWidgetName: String = "shop_rerollWidget"
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
 
@@ -62,7 +64,7 @@ class ShopScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("shop_leave", "shop_cards")
+                    groups = listOf("shop_leave", "shop_cards", "shop_reroll")
                 ),
                 SelectionTransition(
                     TransitionType.Prioritized,
@@ -84,7 +86,8 @@ class ShopScreen : ScreenCreator() {
             cardsParentName,
             addToDeckWidgetName,
             addToBackpackWidgetName,
-            shopPersonWidgetName
+            shopPersonWidgetName,
+            rerollWidgetName,
         ),
         BiomeBackgroundScreenController(screen, true)
     )
@@ -147,6 +150,27 @@ class ShopScreen : ScreenCreator() {
             ) {
                 setFontScale(0.7f)
                 syncWidth()
+            }
+
+            label(
+                "red_wing",
+                "reroll Shop: {shop.currentRerollPrice}\$",
+                isTemplate = true,
+                color = Color.FortyWhite
+            ) {
+                name(rerollWidgetName)
+                setFontScale(0.7f)
+                width = 200F
+                setAlignment(Align.center)
+                positionType = PositionType.ABSOLUTE
+
+                onSelect { screen.findController<ShopScreenController>()?.rerollShop() }
+                group = "shop_reroll"
+                onLayoutAndNow {
+                    x = (parent.width - width) / 2
+                    y = 70F
+                }
+                addButtonDefaults()
             }
         }
 
@@ -231,7 +255,7 @@ class ShopScreen : ScreenCreator() {
                 backgroundHandle = "shop_back_button"
                 width = 200F
                 isSelectable = true
-                setFocusableTo(true,this)
+                setFocusableTo(true, this)
                 group = "shop_leave"
                 relativeHeight(70F)
                 onFocusChange { _, _ ->
