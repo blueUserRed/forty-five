@@ -12,9 +12,10 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
 uniform sampler2D u_texture;
+out vec4 outColor;
 
 uniform float u_alphaReduction;
 
@@ -24,5 +25,5 @@ void main() {
 //    color.a -= 2000.0;
 //    color.a = 0.0;
     color.a -= u_alphaReduction;
-    gl_FragColor = color;
+    outColor = color;
 }

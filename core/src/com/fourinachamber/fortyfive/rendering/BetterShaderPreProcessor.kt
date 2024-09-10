@@ -97,7 +97,10 @@ class BetterShaderPreProcessor(
                 return@map line
             }
         }
-        .joinToString(separator = "\n")
+        .joinToString(
+            separator = "\n",
+            prefix = "#version ${majorVersion * 100 + minorVersion}\n"
+        )
 
     private fun include(toInclude: String): String {
         val preProcessor = BetterShaderPreProcessor(Gdx.files.internal(toInclude), mapOf())
@@ -164,6 +167,9 @@ class BetterShaderPreProcessor(
     }
 
     companion object {
+
+        const val majorVersion = 3
+        const val minorVersion = 30
 
         const val sectionMarker = "~~~section "
         const val logTag = "BetterShaderPreProcessor"

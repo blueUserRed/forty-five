@@ -1390,7 +1390,6 @@ open class CustomGroup(
     }
 
     override fun resortZIndices() {
-        Thread.dumpStack()
 //        children.sort { el1, el2 ->
 //            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
 //                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)

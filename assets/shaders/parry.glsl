@@ -12,9 +12,11 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
 uniform sampler2D u_texture;
+
+out vec4 outColor;
 
 %uniform u_time
 %uniform u_resolution
@@ -40,5 +42,5 @@ void main() {
     strength = pow(ca_blackFallOff, distance(pos, ca_center)) / ca_blackFallOff;
     color = mix(color, vec4(0.0, 0.0, 0.0, 0.0), clamp(strength + ca_blackStrength, 0.0, 1.0));
 
-    gl_FragColor = color;
+    outColor = color;
 }
