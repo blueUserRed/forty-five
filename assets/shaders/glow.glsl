@@ -12,10 +12,12 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
-varying vec4 v_position;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
+in vec4 v_position;
 uniform sampler2D u_texture;
+
+out vec4 outColor;
 
 %constArg ca_texSize vec2
 %constArg ca_cardSize vec2
@@ -51,5 +53,5 @@ void main() {
     float dist = distanceFromGlow(time, pos);
 
     vec3 color = glow(time, pos, baseColor.rgb);
-    gl_FragColor = vec4(color, baseColor.a);
+    outColor = vec4(color, baseColor.a);
 }

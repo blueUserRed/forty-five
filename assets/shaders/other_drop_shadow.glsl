@@ -11,9 +11,11 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
 uniform sampler2D u_texture;
+
+out vec4 outColor;
 
 %uniform u_time
 %uniform u_resolution
@@ -41,5 +43,5 @@ void main() {
     value = 1.0 - value;
     value = 0.6 * (value * value);
 
-    gl_FragColor = vec4(245.0 / 255.0, 198.0 / 255.0, 1.0 / 255.0, value);
+    outColor = vec4(245.0 / 255.0, 198.0 / 255.0, 1.0 / 255.0, value);
 }

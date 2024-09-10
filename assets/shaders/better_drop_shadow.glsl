@@ -11,8 +11,8 @@ precision mediump float;
 #define LOWP
 #endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
+in LOWP vec4 v_color;
+in vec2 v_texCoords;
 uniform sampler2D u_texture;
 uniform float u_blurDepth;
 uniform vec4 u_color;
@@ -20,6 +20,8 @@ uniform float u_maxOpacity;
 
 %uniform u_time
 %uniform u_resolution
+
+out vec4 outColor;
 
 //%include shaders/includes/noise_utils.glsl
 //#define M_E 2.7182818284590452353602874713527
@@ -80,13 +82,13 @@ void main() {
     //    gl_FragColor = vec4(u_color.xyz, 1.0);
 
     if (alphaNew >= 1.0){
-        gl_FragColor = vec4(u_color.xyz, 0.1);
+        outColor = vec4(u_color.xyz, 0.1);
     }else if (alphaNew >= 0.6){
-        gl_FragColor = vec4(1.0,0.0,0.0, 1.0);
+        outColor = vec4(1.0,0.0,0.0, 1.0);
     }else if (alphaNew >= 0.2){
-        gl_FragColor = vec4(1.0,1.0,0.0, 1.0);
+        outColor = vec4(1.0,1.0,0.0, 1.0);
     }else {
-        gl_FragColor = vec4(1.0,0.0,1.0, 1.0);
+        outColor = vec4(1.0,0.0,1.0, 1.0);
     }
 
     //    float alpha=0.0;

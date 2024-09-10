@@ -42,24 +42,16 @@ import kotlin.math.min
  * the Controller for the main game screen
  */
 class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenController(), ResourceBorrower {
-    //TODO marvin, check for screen state "inStatusbarOverlay" (StatusbarWidget.OVERLAY_NAME)
 
     val gameDirector = GameDirector(this)
 
     private val cardDragBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
     private val cardDropBehaviour = onj.get<OnjNamedObject>("cardDropBehaviour")
-    private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
-    private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
     private val warningParentName = onj.get<String>("warningParentName")
     private val statusEffectDisplayName = onj.get<String>("statusEffectDisplayName")
     private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
     private val encounterModifierDisplayTemplateName = onj.get<String>("encounterModifierDisplayTemplateName")
-    private val encounterModifierParentName = onj.get<String>("encounterModifierParentName")
-    private val tutorialInfoActorName = onj.get<String>("tutorialInfoActorName")
-    private val musicAfterWin = onj.get<String>("musicAfterWin")
-    private val musicBeforeWin = onj.get<String>("musicBeforeWin")
-    private val musicTransitionTime = onj.get<Long>("musicTransitionTime").toInt()
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -77,25 +69,23 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
 
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
-    // TODO: Change to @Inject
+    @Inject lateinit var cardHand: CardHand
+        private set
+    @Inject lateinit var revolver: Revolver
+        private set
+    @Inject lateinit var enemyArea: EnemyArea
+        private set
+    @Inject lateinit var putCardsUnderDeckWidget: PutCardsUnderDeckWidget
+        private set
+    @Inject lateinit var statusEffectDisplay: StatusEffectDisplay
+        private set
+    @Inject lateinit var tutorialInfoActor: TutorialInfoActor
+        private set
+    @Inject lateinit var shootButton: CustomFlexBox
+        private set
 
-    lateinit var cardHand: CardHand
-        private set
-    lateinit var revolver: Revolver
-        private set
-    lateinit var enemyArea: EnemyArea
-        private set
+    @Inject(name = "WARNING_PARENT")
     lateinit var warningParent: CustomWarningParent
-        private set
-    lateinit var putCardsUnderDeckWidget: PutCardsUnderDeckWidget
-        private set
-    lateinit var statusEffectDisplay: StatusEffectDisplay
-        private set
-    lateinit var tutorialInfoActor: TutorialInfoActor
-        private set
-
-    @Inject
-    lateinit var shootButton: CustomFlexBox
         private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
@@ -210,17 +200,10 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
         gameRenderPipeline = GameRenderPipeline(screen)
         FortyFiveLogger.title("game starting")
 
-        warningParent = screen.namedActorOrError(warningParentName) as? CustomWarningParent
-            ?: throw RuntimeException("actor named $warningParentName must be of type CustomWarningParent")
-        statusEffectDisplay = screen.namedActorOrError(statusEffectDisplayName) as? StatusEffectDisplay
-            ?: throw RuntimeException("actor named $statusEffectDisplayName must be of type StatusEffectDisplay")
-        tutorialInfoActor = screen.namedActorOrError(tutorialInfoActorName) as? TutorialInfoActor
-            ?: throw RuntimeException("actor named $tutorialInfoActorName must be of type TutorialInfoActor")
-
         gameDirector.init()
 
         initCards()
-        initCardHand()
+        cardHand.init(this)
         initRevolver()
         initPutCardsUnderDeckWidget()
         // enemy area is initialised by the GameDirector
@@ -414,65 +397,37 @@ class GameController(val screen: OnjScreen, onj: OnjNamedObject) : ScreenControl
         curGameAnims.add(anim)
     }
 
-    private fun initCardHand() {
-        val curScreen = this.screen
-        val cardHandName = cardHandOnj.get<String>("actorName")
-        val cardHand = curScreen.namedActorOrError(cardHandName)
-        if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
-        cardHand.init(this)
-        this.cardHand = cardHand
-    }
-
     private fun initRevolver() {
-        val revolverName = revolverOnj.get<String>("actorName")
-        val revolver = this.screen.namedActorOrError(revolverName)
-        if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
         val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
         revolver.initDragAndDrop(cardDragAndDrop to dropOnj)
-        this.revolver = revolver
     }
 
     private fun initPutCardsUnderDeckWidget() {
-        val name = putCardsUnderDeckWidgetOnj.get<String>("actorName")
-        val actor = this.screen.namedActorOrError(name) as? PutCardsUnderDeckWidget
-            ?: throw RuntimeException("actor named $name must be of type PutCardsUnderDeckWidget")
         val dropOnj = putCardsUnderDeckWidgetOnj.get<OnjNamedObject>("dropBehaviour")
-        actor.initDragAndDrop(cardDragAndDrop, dropOnj)
-        this.putCardsUnderDeckWidget = actor
+        putCardsUnderDeckWidget.initDragAndDrop(cardDragAndDrop, dropOnj)
     }
 
     fun initEnemyArea(enemies: List<Enemy>) {
-        val curScreen = this.screen
-
-        val enemyAreaName = enemyAreaOnj.get<String>("actorName")
-        val enemyArea = curScreen.namedActorOrError(enemyAreaName)
-        if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
-
         enemies.forEach { enemy ->
             enemyArea.addEnemy(enemy)
             enemy.actor.onClick { enemyArea.selectEnemy(enemy) }
         }
-
         if (enemies.isEmpty()) throw RuntimeException("enemyArea must have at least one enemy")
-
-        this.enemyArea = enemyArea
     }
 
     fun addEncounterModifier(modifier: EncounterModifier) {
-        _encounterModifiers.add(null to modifier)
-        val parent = (this.screen.namedActorOrError(encounterModifierParentName) as? FlexBox
-                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"))
-        this.screen.screenBuilder.generateFromTemplate(
-            encounterModifierDisplayTemplateName,
-            mapOf(
-                "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
-                "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
-                "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
-            ),
-            parent,
-            this.screen
-        )!!
-        parent.invalidateHierarchy()
+        TODO()
+//        _encounterModifiers.add(null to modifier)
+//        this.screen.screenBuilder.generateFromTemplate(
+//            encounterModifierDisplayTemplateName,
+//            mapOf(
+//                "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+//                "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+//                "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+//            ),
+//            encounterModifierParent,
+//            this.screen
+//        )!!
     }
 
     fun addTemporaryEncounterModifier(modifier: EncounterModifier, validityChecker: (GameController) -> Boolean) {
