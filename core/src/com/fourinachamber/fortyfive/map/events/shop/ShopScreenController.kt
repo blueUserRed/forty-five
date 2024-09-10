@@ -99,7 +99,7 @@ class ShopScreenController(
         context.selectedCards.clear()
         context.seed = Random(context.seed).nextLong()
         screen.removeAllStyleManagersOfChildren(cardsParentWidget)
-        cardsParentWidget.clear()
+        cardsParentWidget.children.filterIsInstance<CustomBox>().toMutableList().forEach { screen.removeActorFromScreen(it) }
         cardWidgets.clear()
         labels.clear()
         addCards(context.types)
@@ -137,9 +137,11 @@ class ShopScreenController(
             updateStateOfCard(cardActor.card, setBought = true, label = label)
         }
         TemplateString.updateGlobalParam("shop.currentRerollPrice", context.currentRerollPrice)
-        if (context.currentRerollPrice>SaveState.playerMoney){
+        if (context.currentRerollPrice > SaveState.playerMoney) {
             val customLabel = screen.namedActorOrNull(rerollWidgetName) as CustomLabel
             customLabel.isDisabled = true
+            customLabel.setFocusableTo(false, customLabel)
+            customLabel.backgroundHandle = "common_button_disabled"
         }
 
         cardsParentWidget.invalidate()

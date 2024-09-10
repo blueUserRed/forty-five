@@ -22,6 +22,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
+import ktx.actors.alpha
 import onj.value.OnjArray
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -278,23 +279,19 @@ abstract class ScreenCreator : ResourceBorrower {
         isSelectable = true
         styles(
             normal = {
-                backgroundHandle = if (this !is DisableActor || !isDisabled)
-                    "common_button_default"
-                else
-                    "common_button_disabled"
+                if (this is DisableActor && isDisabled)
+                    backgroundHandle = "common_button_disabled"
+                else backgroundHandle = "common_button_default"
             },
             focused = {
-                backgroundHandle = if (this !is DisableActor || !isDisabled)
-                    "common_button_hover"
-                else
-                    "common_button_disabled"
+                backgroundHandle = "common_button_hover"
             },
             selectedAndFocused = {
-                backgroundHandle = if (this !is DisableActor || !isDisabled)
-                    "common_button_hover"
-                else
-                    "common_button_disabled"
-
+                backgroundHandle = "common_button_hover"
+//                backgroundHandle = if (this !is DisableActor || !isDisabled)
+//                    "common_button_hover"
+//                else
+//                    "common_button_disabled"
             }
         )
         onSelect { screen.changeSelectionFor(this) }

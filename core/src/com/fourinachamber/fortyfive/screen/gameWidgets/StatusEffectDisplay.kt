@@ -40,7 +40,7 @@ interface StatusEffectDisplay : StyledActor {
         effect.icon.scaleX *= iconScale
         effect.icon.scaleY *= iconScale
 
-        effect.icon.detailWidget = DetailWidget.SimpleDetailActor(
+        effect.icon.detailWidget = DetailWidget.SimpleBigDetailActor(
             screen,
             DetailDescriptionHandler.allTextEffects.value.map {
                 AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)}){

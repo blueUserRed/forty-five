@@ -41,7 +41,7 @@ open class AdvancedTextWidget(
     override var paddingLeft: Float = 0F
     override var paddingRight: Float = 0F
 
-    var fitContent: Boolean = false
+    var fitContentHeight: Boolean = false
 
     open var advancedText: AdvancedText = AdvancedText.EMPTY
         set(value) {
@@ -111,13 +111,12 @@ open class AdvancedTextWidget(
                 curX = paddingLeft
                 curY += height
             }
-        if (fitContent) {
-            width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        if (fitContentHeight) {
             height = curY + paddingTop
         } else {
-            layoutPrefWidth = lines.maxOf { it.last().x + it.last().width } + paddingRight
             layoutPrefHeight = curY + paddingTop
         }
+        if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
     }
 
     private fun initText(value: AdvancedText) {
@@ -313,7 +312,7 @@ class TextAdvancedTextPart(
 class IconAdvancedTextPart(
     private val resourceHandle: ResourceHandle,
     private val font: String,
-    override val screen: OnjScreen,
+    screen: OnjScreen,
     private val dialogFontScale: Float,
     override val breakLine: Boolean
 ) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart, ResourceBorrower {

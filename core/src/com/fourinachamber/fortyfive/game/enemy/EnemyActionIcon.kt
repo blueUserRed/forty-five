@@ -19,7 +19,7 @@ class EnemyActionIcon(
         }
 
         is NextEnemyAction.HiddenEnemyAction -> {
-            detailWidget = DetailWidget.SimpleDetailActor(screen){
+            detailWidget = DetailWidget.SimpleBigDetailActor(screen){
                 "The enemy is going to perform an unknown action"
             }
 
@@ -28,7 +28,7 @@ class EnemyActionIcon(
 
         is NextEnemyAction.ShownEnemyAction -> {
 
-            detailWidget = DetailWidget.SimpleDetailActor(screen){
+            detailWidget = DetailWidget.SimpleBigDetailActor(screen){
                 TemplateString(
                     action.action.prototype.descriptionTemplate,
                     action.action.descriptionParams

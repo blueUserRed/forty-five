@@ -112,6 +112,8 @@ open class OnjScreen(
         }
     }
 
+    private var selectableDirty: Boolean = true
+
     private fun deselectActor(actor: Actor) {
         val oldList = _selectedActors.toList()
         if (_selectedActors.remove(actor))
@@ -237,6 +239,13 @@ open class OnjScreen(
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
+        addEarlyRenderTask {
+            if (selectableDirty) {
+                println("now resetting focusable actors")
+                curSelectionParent.updateFocusableActors(this)
+                selectableDirty = false
+            }
+        }
         inputMultiplexer.addProcessor(screenInputProcessor)
         inputMultiplexer.addProcessor(stage)
     }
@@ -355,7 +364,7 @@ open class OnjScreen(
     @MainThreadOnly //I am not sure if it is only main thread, but this is the safer way I guess
     fun removeActorFromScreen(actor: Actor) {
         if (actor is Group) {
-            actor.children.forEach { removeActorFromScreen(it) }
+            actor.children.toMutableList().forEach { removeActorFromScreen(it) }
         }
         if (actor is StyledActor) {
             actor.styleManager?.let { styleManager ->
@@ -368,6 +377,7 @@ open class OnjScreen(
         }
         actor.remove()
         _dragAndDrop.values.forEach { it.removeAllListenersWithActor(actor) }
+        if (actor is FocusableActor && actor.group != null) selectableDirty = true
         //TODO remove from behaviour and so on
     }
 
@@ -398,6 +408,7 @@ open class OnjScreen(
         if (detailWidget.isShown) return
         val detailActor = detailWidget.generateDetailActor()
         detailWidget.detailActor = detailActor
+//        detailWidget.stage=stage
 
         detailWidget.updateBounds(actor)
         actor.fire(DetailDisplayStateChange(true)) //this may be never needed, but its nice to have if we do
@@ -580,9 +591,6 @@ open class OnjScreen(
         lifetime.die()
     }
 
-    fun updateSelectable() {
-        curSelectionParent.updateFocusableActors(this)
-    }
 
     companion object {
 

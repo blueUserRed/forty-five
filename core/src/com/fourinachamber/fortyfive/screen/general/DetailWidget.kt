@@ -2,8 +2,10 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fortyfive.utils.*
+import ktx.actors.stage
 
 sealed class DetailWidget(protected val screen: OnjScreen) {
 
@@ -37,7 +39,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         )
     }
 
-    class SimpleDetailActor(
+    class SimpleBigDetailActor(
         screen: OnjScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
@@ -47,7 +49,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
         override fun generateDetailActor(): Actor {
             val actor = AdvancedTextWidget(
-                Triple("red_wing", Color.FortyWhite, 1f),
+                Triple("red_wing", Color.FortyWhite, 0.7f),
                 screen, true
             )
             actor.backgroundHandle = defBackground
@@ -60,6 +62,32 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         }
     }
 
+    class KomplexBigDetailActor(
+        screen: OnjScreen,
+        effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
+        useDefaultEffects: Boolean = true,
+        private val text: () -> String,
+        private val subtexts: () -> List<String>,
+    ) : AdvancedTextDetailWidget(screen,effects,useDefaultEffects) {
+
+        override fun generateDetailActor(): Actor {
+            val actor = AdvancedTextWidget(
+                Triple("red_wing", Color.FortyWhite, 0.8f),
+                screen, true
+            )
+            actor.backgroundHandle = defBackground
+            actor.width = 300F
+            actor.height = 100F
+            actor.setRawText(text.invoke(), effects)
+            actor.setPadding(20F)
+            actor.validate() //this is needed, or it flashed on the first frame
+            return actor
+        }
+
+//        fun getDetailExtra(text:String) : Actor{
+//
+//        }
+    }
 
     abstract class AdvancedTextDetailWidget(
         screen: OnjScreen,
@@ -94,6 +122,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     companion object {
         const val logTag: String = "DetailWidget"
 
-        const val defBackground: String = "nav_bar_background" //TODO replace this with the correct one
+        const val defBackground: String = "detail_widget_background_big" //TODO replace assets once markus exported them
+        const val defBackgroundSmall: String = "detail_widget_background_small"
     }
 }

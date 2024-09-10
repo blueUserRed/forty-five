@@ -372,7 +372,7 @@ class FromOnjScreenBuilder(
             },
             isDistanceField = widgetOnj.getOr("isDistanceFiled", true),
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
-            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
+            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -442,7 +442,7 @@ class FromOnjScreenBuilder(
                 widgetOnj.get<Color>("color")
             ),
             isDistanceField = widgetOnj.getOr("isDistanceField", true),
-            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
+            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())

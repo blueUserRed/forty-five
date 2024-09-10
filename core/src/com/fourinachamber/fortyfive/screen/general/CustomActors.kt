@@ -235,7 +235,7 @@ open class TemplateStringLabel(
  */
 open class CustomImageActor(
     drawableHandle: ResourceHandle?,
-    _screen: OnjScreen,
+    override val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
     KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailActor, HasOnjScreen,
@@ -249,8 +249,6 @@ open class CustomImageActor(
     override var marginLeft: Float = 0f
     override var marginRight: Float = 0f
     override var positionType: PositionType = PositionType.RELATIV
-
-    override val screen: OnjScreen = _screen
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -273,7 +271,7 @@ open class CustomImageActor(
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, _screen)
+    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     override var isSelected: Boolean = false
@@ -317,7 +315,7 @@ open class CustomImageActor(
 
     init {
         bindDefaultListeners(this, screen)
-        registerOnFocusDetailActor(this, _screen)
+        registerOnFocusDetailActor(this, screen)
     }
 
 //    override fun generateDetailActor(): Actor? = mutableMapOf<String, OnjValue>(

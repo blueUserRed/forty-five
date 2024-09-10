@@ -705,7 +705,7 @@ class CardActor(
 
     override var inAnimation: Boolean = false
 
-    override var detailWidget: DetailWidget? = DetailWidget.SimpleDetailActor(screen) { "stead fgT qyöü #äast stead fgT qyöü #äasts tead fgT qyöü #ä aststead fgT qyöü #äast " }
+    override var detailWidget: DetailWidget? = DetailWidget.SimpleBigDetailActor(screen, effects = cardDetailEffects()) { card.shortDescription }
 
     override var fixedZIndex: Int = 0
 
@@ -1044,4 +1044,8 @@ class CardActor(
         addActorStyles(screen)
     }
 
+    companion object{
+        fun cardDetailEffects() = DetailDescriptionHandler.allTextEffects.value.map {
+            AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)}
+    }
 }
