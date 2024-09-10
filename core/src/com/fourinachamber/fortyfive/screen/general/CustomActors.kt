@@ -1323,17 +1323,15 @@ open class CustomGroup(
         batch ?: return
         this.x += drawOffsetX
         this.y += drawOffsetY
-        if (color != batch.color) {
+        if (batch.color!=color || parentAlpha != 1f){
             val batchColor = batch.color.cpy()
-            batch.color = color
-            background?.let {
-                dropShadow?.doDropShadow(batch, screen, it,this)
-                it.draw(batch, x, y, width, height)
-            }
+            batch.setColor(color.r, color.g, color.b, color.a * parentAlpha)
+            drawBackground(batch)
             batch.color = batchColor
-        } else {
-            background?.draw(batch, x, y, width, height)
+        }else{
+            drawBackground(batch)
         }
+
         if (sortedChildrenDirty) {
             resortZIndices()
             sortedChildrenDirty = false
@@ -1341,6 +1339,13 @@ open class CustomGroup(
         super.draw(batch, parentAlpha)
         this.x -= drawOffsetX
         this.y -= drawOffsetY
+    }
+
+    private fun drawBackground(batch: Batch?) {
+        background?.let {
+            dropShadow?.doDropShadow(batch, screen, it, this)
+            it.draw(batch, x, y, width, height)
+        }
     }
 
     override fun onLayout(callback: () -> Unit) {

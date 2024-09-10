@@ -1,11 +1,12 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
-import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
+import com.fourinachamber.fortyfive.screen.general.customActor.PropertyAction
 import com.fourinachamber.fortyfive.utils.*
 
 sealed class DetailWidget(protected val screen: OnjScreen) {
@@ -13,12 +14,28 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     var detailActor: Actor? = null
 
     val isShown: Boolean = detailActor != null
-    abstract fun generateDetailActor(): Actor
+
+    var shownAlpha = 1F
+        set(value) {
+            field = value
+        }
+
+    abstract fun generateDetailActor(addFadeInAction: Boolean): Actor
+
     open fun drawDetailActor(batch: Batch) {
-        detailActor?.draw(batch, 1f)
+        detailActor?.draw(batch, shownAlpha)
+    }
+
+    open fun addFadeInAction(singleTextParent: Actor) {
+        shownAlpha = 0f
+        val propertyAction = PropertyAction(this, this::shownAlpha, 1f)
+        propertyAction.duration = 0.2F
+        propertyAction.interpolation = Interpolation.linear
+        singleTextParent.addAction(propertyAction)
     }
 
     open fun updateBounds(original: Actor) {
+        //TODO the limits (at the border) of this method need to be tested once backpack and fight are working
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val width = if (detailActor.prefWidth == 0f) detailActor.width else detailActor.prefWidth
@@ -26,18 +43,22 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
         val (x, y) = original.localToStageCoordinates(Vector2(0, 0))
         val yCoordinate =
-            if (y + original.height + height > original.stage.viewport.worldHeight) {
+            if (y + original.height + height > screen.stage.viewport.worldHeight) {
                 y - height //if it would be too high up, it will be lower
             } else {
                 y + original.height
             }
-        val xCoordinate = (x + original.width / 2 - width / 2).between(0F, original.stage.viewport.worldWidth - width)
+        val xCoordinate = (x + original.width / 2 - width / 2).between(0F, screen.stage.viewport.worldWidth - width)
         detailActor.setBounds(
             xCoordinate,
             yCoordinate,
             width,
             height
         )
+    }
+
+    open fun hide() {
+        detailActor = null
     }
 
     class SimpleBigDetailActor(
@@ -48,17 +69,17 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     ) : AdvancedTextDetailWidget(screen, effects, useDefaultEffects) {
 
 
-        override fun generateDetailActor(): Actor {
+        override fun generateDetailActor(addFadeInAction: Boolean): Actor {
             val actor = AdvancedTextWidget(
-                Triple("red_wing", Color.FortyWhite, 0.7f),
+                Triple("red_wing", Color.FortyWhite, 0.6f),
                 screen, true
             )
             actor.backgroundHandle = defBackground
             actor.width = 300F
             actor.height = 100F
             actor.setRawText(text.invoke(), effects)
-            actor.setPadding(20F)
-            actor.validate() //this is needed, or it flashed on the first frame
+            actor.setPadding(15F)
+            if (addFadeInAction) addFadeInAction(actor)
             return actor
         }
     }
@@ -71,20 +92,24 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         private val subtexts: () -> List<String> = { listOf() },
     ) : AdvancedTextDetailWidget(screen, effects, useDefaultEffects) {
 
-        private val subtextActors: MutableList<Actor> = mutableListOf()
-        override fun generateDetailActor(): Actor {
+        private var subtextParent: CustomBox? = null
+        private val distanceBetweenMainAndSub: Float = 10F
+        override fun generateDetailActor(addFadeInAction: Boolean): Actor {
             val texts = text.invoke().filter { it.isNotEmpty() }
-            //TODO subtexts here
-            if (texts.size <= 1) return getSingleTextParent(texts)
+            val width = 300F
+            generateSubtexts(width * 3 / 5)
+
+            if (texts.size <= 1) {
+                val singleTextParent = getSingleTextParent(texts, width)
+                if (addFadeInAction) addFadeInAction(singleTextParent)
+                return singleTextParent
+            }
 
             val parent = CustomBox(screen)
             parent.verticalAlign = CustomAlign.SPACE_AROUND
-            parent.setPadding(13F)
-            parent.width = 300F
-            parent.height = 200f
-            parent.onLayout {
-                parent.height = parent.prefHeight
-            }
+            parent.setPadding(15F)
+            parent.width = width
+            parent.fitContentInFlexDirection = true
             parent.minVerticalDistBetweenElements = 5f
             parent.backgroundHandle = defBackground
             parent.debug = true
@@ -107,31 +132,78 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                 actor.fitContentHeight = true
                 parent.addActor(actor)
             }
-
-//            parent.validate() //this is needed, or it flashed on the first frame
+            if (addFadeInAction) addFadeInAction(parent)
             return parent
         }
 
-        private fun getSingleTextParent(text: List<String>): Actor {
+        @Suppress("SameParameterValue")
+        private fun generateSubtexts(width: Float) {
+            val texts = subtexts.invoke().filter { it.isNotBlank() }
+            if (texts.isEmpty()) {
+                subtextParent = null
+                return
+            }
+            val parent = CustomBox(screen)
+            parent.width = width
+            parent.minVerticalDistBetweenElements = 10F
+
+            texts.forEach {
+                val actor = AdvancedTextWidget(
+                    Triple("roadgeek_bmp", Color.FortyWhite, 0.6f), screen, true
+                )
+                actor.backgroundHandle = defBackgroundSmall
+                actor.width = width
+                actor.setRawText(it, effects)
+                actor.setPadding(13F)
+                parent.addActor(actor)
+                actor.fitContentHeight = true
+            }
+            parent.fitContentInFlexDirection = true
+            subtextParent = parent
+        }
+
+        @Suppress("SameParameterValue")
+        private fun getSingleTextParent(text: List<String>, width: Float): Actor {
             val actor = AdvancedTextWidget(
                 Triple("roadgeek_bmp", Color.FortyWhite, 0.6f), screen, true
             )
             actor.backgroundHandle = defBackground
-            actor.width = 300F
+            actor.width = width
             actor.height = 100F
             actor.setRawText(if (text.isEmpty()) " ".repeat(20) else text[0], effects) //this if needs to be tested
-            actor.setPadding(13F)
+            actor.setPadding(15F)
             return actor
         }
 
         override fun drawDetailActor(batch: Batch) {
-            super.drawDetailActor(batch)
-            subtextActors.forEach { it.draw(batch, 1f) }
+            val shownAlpha1 = shownAlpha
+            detailActor?.draw(batch, shownAlpha1)
+            subtextParent?.draw(batch, shownAlpha1)
         }
 
-//        fun getDetailExtra(text:String) : Actor{
-//
-//        }
+        override fun updateBounds(original: Actor) {
+            super.updateBounds(original)
+            val sub = subtextParent ?: return
+            val main = detailActor ?: return
+            val worldWidth = screen.stage.viewport.worldWidth
+            val x = if (main.x + main.width + sub.width + distanceBetweenMainAndSub >= worldWidth) {
+                main.x - sub.width - distanceBetweenMainAndSub
+            } else {
+                main.x + main.width + distanceBetweenMainAndSub
+            }
+            val y = (main.y + main.height - sub.prefHeight).between(0F, screen.stage.viewport.worldHeight)
+            sub.setBounds(
+                x,
+                y,
+                sub.width,
+                sub.prefHeight
+            )
+        }
+
+        override fun hide() {
+            super.hide()
+            subtextParent = null
+        }
     }
 
     abstract class AdvancedTextDetailWidget(

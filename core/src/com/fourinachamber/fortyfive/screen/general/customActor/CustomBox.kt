@@ -58,12 +58,13 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var paddingLeft: Float = 0F
     override var paddingRight: Float = 0F
 
-
     override var isDraggable: Boolean = false
     override var targetGroups: List<String> = listOf()
     override var resetCondition: ((Actor?) -> Boolean)? = null
     override var inDragPreview: Boolean = false
     override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
+
+    var fitContentInFlexDirection: Boolean = false
 
     /**
      * only calculate it once per Layout call, not multiple times
@@ -79,6 +80,10 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
         super.layout()
         val children = childrenAsBoxes()
         checkSize(children)
+        if (fitContentInFlexDirection) {
+            if (flexDirection.isColumn) height = prefHeight
+            else width = prefWidth
+        }
         val prefWidth = (if (width == 0F) getPrefWidth() else width) - paddingLeft - paddingRight
         val prefHeight = (if (height == 0F) getPrefHeight() else height) - paddingTop - paddingBottom
 
@@ -313,7 +318,7 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
         var cachedChildren1 = cachedChildren
         if (cachedChildren1 != null) return cachedChildren1
         val lists =
-        originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+            originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
         cachedChildren1 = lists.first.map {
             var w = it.width
             var h = it.height
@@ -717,7 +722,11 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
 
 
     companion object {
-        fun isInsideScrollableParents(actor: Actor, x: Float, y: Float): Boolean { //TODO check if this is actually correct
+        fun isInsideScrollableParents(
+            actor: Actor,
+            x: Float,
+            y: Float
+        ): Boolean { //TODO check if this is actually correct
             var cur: Actor? = actor
             while (cur != null) {
                 cur = cur.parent

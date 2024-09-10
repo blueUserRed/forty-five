@@ -489,7 +489,7 @@ class Card(
         currentHoverTexts = currentEffects
         val detailActor = actor.detailWidget?.detailActor ?: return
         detailActor as StyledActor
-        actor.updateDetailStates(detailActor)
+//        actor.updateDetailStates(detailActor)
     }
 
     private fun updateTexture(controller: GameController) =
@@ -705,7 +705,12 @@ class CardActor(
 
     override var inAnimation: Boolean = false
 
-    override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(screen, effects = cardDetailEffects(), text =  {listOf(card.shortDescription, card.flavourText)})
+    override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
+        screen,
+        effects = cardDetailEffects(),
+        text = { listOf(card.shortDescription, card.flavourText) },
+        subtexts = getEffectTexts()
+    )
 
     override var fixedZIndex: Int = 0
 
@@ -764,7 +769,7 @@ class CardActor(
     private var texture: Texture? = null
 
     init {
-        bindDefaultListeners(this,screen)
+        bindDefaultListeners(this, screen)
         registerOnFocusDetailActor(this, screen)
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
@@ -782,27 +787,24 @@ class CardActor(
             if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
             FortyFive.currentGame?.cardRightClicked(card)
         }
-        onDetailDisplayStateChange {
-            if (it) onDetailDisplayStarted()
-        }
     }
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
-    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
-        val allKeys = card.getKeyWordsForDescriptions()
-        DetailDescriptionHandler
-            .descriptions
-            .filter { it.key in allKeys }
-            .forEach {
-                addHoverItemToParent(it.value.second, descriptionParent)
-            }
-        if (FortyFive.currentGame == null) return
-        card
-            .getAdditionalHoverDescriptions()
-            .filter { it.isNotBlank() }
-            .forEach { addHoverItemToParent(it, descriptionParent) }
-    }
+//    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
+//        val allKeys = card.getKeyWordsForDescriptions()
+//        DetailDescriptionHandler
+//            .descriptions
+//            .filter { it.key in allKeys }
+//            .forEach {
+//                addHoverItemToParent(it.value.second, descriptionParent)
+//            }
+//        if (FortyFive.currentGame == null) return
+//        card
+//            .getAdditionalHoverDescriptions()
+//            .filter { it.isNotBlank() }
+//            .forEach { addHoverItemToParent(it, descriptionParent) }
+//    }
 
     override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
         // This is a fix for the ChooseCardScreen, where for some reason the CardDragAndDrop sets the position first,
@@ -984,68 +986,30 @@ class CardActor(
         detailWidget?.updateBounds(this)
     }
 
-    fun onDetailDisplayStarted() {
-//        val detailActor = detailWidget?.detailActor ?: return
-//        detailActor as StyledActor
-//        updateDetailStates(detailActor)
-//        val tempInfoParent = getParentsForExtras(detailActor).second
-//        card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
-//        showExtraDescriptions(getParentsForExtras(detailActor).first)
+    private fun getEffectTexts(): () -> List<String> = {
+        val allKeys = card.getKeyWordsForDescriptions()
+        val texts: MutableList<String> = mutableListOf()
+
+        texts.addAll(DetailDescriptionHandler
+            .descriptions
+            .filter { it.key in allKeys }.map { it.value.second })
+
+        if (FortyFive.currentGame != null)
+            texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+        texts
     }
 
-    private fun addHoverItemToParent(
-        desc: String,
-        tempInfoParent: CustomFlexBox
-    ) {
-        screen.screenBuilder.generateFromTemplate( //TODO hardcoded value as name
-            "card_hover_detail_extra_description",
-            mapOf(
-                "description" to desc,
-                "effects" to DetailDescriptionHandler.allTextEffects
-            ),
-            tempInfoParent,
-            screen
-        )
-    }
 
-    /**
-     * the first actor is for the explanations, the second one is for the temporary changes
-     */
-    private fun getParentsForExtras(it: Actor): Pair<CustomFlexBox, CustomFlexBox> { //TODO hardcoded value as name
-        val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft") as CustomFlexBox
-        val right = screen.namedActorOrError("cardHoverDetailExtraParentRight") as CustomFlexBox
-        val top = screen.namedActorOrError("cardHoverDetailExtraParentTop") as CustomFlexBox
-        val directionsToUse =
-            if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
-                left to top
-            } else {
-                right to top
-            }
-        return directionsToUse
-    }
 
-    fun <T> updateDetailStates(hoverActor: T) where T : Actor, T : StyledActor {
-        if (card.flavourText.isBlank() || card.shortDescription.isBlank()) {
-            screen.leaveState("hoverDetailHasFlavorText")
-        } else {
-            screen.enterState("hoverDetailHasFlavorText")
-        }
 
-        if (card.getKeyWordsForDescriptions()
-                .isEmpty() && (FortyFive.currentGame == null || card.getAdditionalHoverDescriptions().isEmpty())
-        ) {
-            screen.leaveState("hoverDetailHasMoreInfo")
-        } else {
-            screen.enterState("hoverDetailHasMoreInfo")
-        }
-    }
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
 
-    companion object{
+    companion object {
         fun cardDetailEffects() = DetailDescriptionHandler.allTextEffects.value.map {
-            AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)}
+            AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
+        }
     }
 }

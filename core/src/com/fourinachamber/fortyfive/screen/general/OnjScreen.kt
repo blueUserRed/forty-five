@@ -135,6 +135,7 @@ open class OnjScreen(
                 field?.let { it.fire(FocusChangeEvent(it, null)) }
             } else {
                 if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(value)) return
+                if (field==value) return
                 field?.let { it.fire(FocusChangeEvent(it, value)) }
                 value.let { it.fire(FocusChangeEvent(field, it)) }
             }
@@ -382,12 +383,11 @@ open class OnjScreen(
     }
 
     fun <T> addOnFocusDetailActor(actor: T) where T : Actor, T : DisplayDetailActor {
-        val showFocusDetailLambda = { showFocusDetail(actor) }
         if (actor is FocusableActor) {
             actor.onFocusChange { _, new ->
                 if (actor.isFocused) {
                     if (draggedActor == null) {
-                        Gdx.app.postRunnable(showFocusDetailLambda)
+                        showFocusDetail(actor)
                     }
                 } else {
                     hideHoverDetail(actor)
@@ -395,7 +395,7 @@ open class OnjScreen(
             }
         } else {
             actor.onEnter {
-                Gdx.app.postRunnable(showFocusDetailLambda)
+                showFocusDetail(actor)
             }
             actor.onExit {
                 hideHoverDetail(actor)
@@ -406,7 +406,7 @@ open class OnjScreen(
     private fun <T> showFocusDetail(actor: T) where T : Actor, T : DisplayDetailActor {
         val detailWidget = actor.detailWidget ?: return
         if (detailWidget.isShown) return
-        val detailActor = detailWidget.generateDetailActor()
+        val detailActor = detailWidget.generateDetailActor(addFadeInAction = true)
         detailWidget.detailActor = detailActor
         detailWidget.updateBounds(actor)
         actor.fire(DetailDisplayStateChange(true)) //this may be never needed, but its nice to have if we do
@@ -414,7 +414,7 @@ open class OnjScreen(
 
     private fun <T> hideHoverDetail(sourceActor: T) where T : Actor, T : DisplayDetailActor {
         sourceActor.fire(DetailDisplayStateChange(false))
-        sourceActor.detailWidget?.detailActor = null
+        sourceActor.detailWidget?.hide()
     }
 
     fun removeAllStyleManagers(actor: StyledActor) {
@@ -514,7 +514,7 @@ open class OnjScreen(
             .forEach(StyleManager::update) //all added items get updated too
 
         stage.batch.begin()
-        programmedDetailSources.forEach { it.detailWidget?.drawDetailActor(stage.batch) }
+        programmedDetailSources.forEach { it.detailWidget?.drawDetailActor(stage.batch)}
         stage.batch.end()
         val draggedActorLocal = draggedActor
         if (draggedActorLocal == null) {
