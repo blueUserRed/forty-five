@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -46,10 +47,10 @@ class AddMaxHPScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("addMaxHP_accept")
+                    groups = listOf("addMaxHP_accept", navbarFocusGroup)
                 ),
             ),
-            startGroup = "addMaxHP_accept",
+            startGroups = listOf("addMaxHP_accept", navbarFocusGroup),
         )
     }
 

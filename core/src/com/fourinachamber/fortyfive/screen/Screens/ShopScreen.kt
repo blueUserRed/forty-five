@@ -14,6 +14,7 @@ import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -60,14 +61,14 @@ class ShopScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("shop_leave", "shop_cards", "shop_reroll")
+                    groups = listOf("shop_leave", "shop_cards", "shop_reroll", navbarFocusGroup)
                 ),
                 SelectionTransition(
                     TransitionType.Prioritized,
                     groups = listOf("shop_cards")
                 )
             ),
-            startGroup = "shop_cards",
+            startGroups = listOf("shop_cards", navbarFocusGroup),
         )
     }
 

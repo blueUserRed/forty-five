@@ -14,6 +14,7 @@ import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -50,15 +51,15 @@ class HealOrMaxHPScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("healOrMaxHP_selection")
+                    groups = listOf("healOrMaxHP_selection", navbarFocusGroup)
                 ),
                 SelectionTransition(
-                    TransitionType.Seamless,
+                    TransitionType.LastResort,
                     condition = SelectionTransitionCondition.Screenstate("healOrMaxHP_optionSelected"),
                     groups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept")
                 ),
             ),
-            startGroup = "healOrMaxHP_selection",
+            startGroups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept", navbarFocusGroup),
         )
     }
 
