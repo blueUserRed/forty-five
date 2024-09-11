@@ -11,7 +11,7 @@ typealias SelectionGroup = String
 class FocusableParent(
     private val transitions: List<SelectionTransition>,
     var onLeave: () -> Unit = {},
-    private val startGroup: SelectionGroup? = null,
+    private val startGroups: List<String> = listOf(),
     groups: List<SelectionGroup> = listOf(),
     var onSelection: (List<Actor>) -> Unit = {},
     var maxSelectionMembers: Int = 1,
@@ -68,10 +68,11 @@ class FocusableParent(
         val oldFocusedActor = screen.focusedActor
 
         if (oldFocusedActor !is FocusableActor || !hasActor(oldFocusedActor)) {
-            return if (startGroup == null || focusableActors[startGroup]?.isNotEmpty() != true) {
+            val firstValidWithStartGroup = firstValidWithStartGroup()
+            return if (firstValidWithStartGroup == null) {
                 getFirstFocused(focusableActors.values.flatten()) as FocusableActor?
             } else {
-                getFirstFocused(focusableActors[startGroup]!!) as FocusableActor?
+                getFirstFocused(firstValidWithStartGroup) as FocusableActor?
             }
         }
         if (direction == null) return focusNext(screen)
@@ -142,11 +143,17 @@ class FocusableParent(
         if (oldFocusedActor != null && oldFocusedActor is Actor) {
             return getPreviousTabFocused(focusableActors.values.flatten(), oldFocusedActor) as FocusableActor?
         }
-        return if (startGroup == null || focusableActors[startGroup]?.isNotEmpty() != true) {
+        val firstValidWithStartGroup = firstValidWithStartGroup()
+        return if (firstValidWithStartGroup == null) {
             getLastFocused(focusableActors.values.flatten()) as FocusableActor?
         } else {
-            getLastFocused(focusableActors[startGroup]!!) as FocusableActor?
+            getLastFocused(firstValidWithStartGroup) as FocusableActor?
         }
+    }
+
+    private fun firstValidWithStartGroup(): List<FocusableActor>? {
+        val s = startGroups.firstOrNull() { focusableActors[it] != null } ?: return null
+        return focusableActors[s]!!
     }
 
     private fun getFirstFocused(actors: List<FocusableActor>): Actor? {
@@ -223,6 +230,11 @@ class FocusableParent(
 
     fun hasActor(actor: Actor): Boolean {
         return actor in focusableActors.values.flatten().filterIsInstance<Actor>()
+    }
+
+    fun hasActorPrimary(actor: Actor?): Boolean {
+        if (actor == null) return false
+        return startGroups.any { focusableActors[it]?.filterIsInstance<Actor>()?.contains(actor) == true }
     }
 }
 

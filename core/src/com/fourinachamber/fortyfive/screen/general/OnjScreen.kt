@@ -177,11 +177,12 @@ open class OnjScreen(
             curSelectionParent.updateFocusableActors(this)
         }
         if (focusedActor == null && !fromMouse) {
-            focusedActor = if (oldFocusedActor == previousFocusedActor){
-                curSelectionParent.focusNext(null, this) as Actor?
-            }else{
+            focusedActor = if (curSelectionParent.hasActorPrimary(previousFocusedActor)){
                 previousFocusedActor
+            }else{
+                curSelectionParent.focusNext(null, this) as Actor?
             }
+//           focusedActor = previousFocusedActor ?: curSelectionParent.focusNext(null, this) as Actor?
         }
     }
 

@@ -122,7 +122,7 @@ class MapScreen : ScreenCreator() {
                     groups = listOf("Map_startEvent", navbarFocusGroup),
                 ),
             ),
-            startGroup = navbarFocusGroup,
+            startGroups = listOf(navbarFocusGroup),
         )
     )
 
