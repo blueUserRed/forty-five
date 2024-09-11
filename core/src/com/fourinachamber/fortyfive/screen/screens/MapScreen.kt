@@ -1,6 +1,9 @@
 package com.fourinachamber.fortyfive.screen.screens
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Action
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
@@ -9,15 +12,13 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
+import com.fourinachamber.fortyfive.keyInput.*
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
-import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
-import com.fourinachamber.fortyfive.map.detailMap.MapNode
-import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
+import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
@@ -28,6 +29,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.Vector2
 
 class MapScreen : ScreenCreator() {
 
@@ -81,8 +83,32 @@ class MapScreen : ScreenCreator() {
     }
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(),screen)
+        KeyInputMap.createFromKotlin(listOf(getMapInputMap()), screen)
     )
+
+    private fun getMapInputMap(): KeyInputMapEntry = KeyInputMapEntry(
+        100,
+        KeyInputCondition.Not(KeyInputCondition.ScreenState("notMapFocused")),
+        listOf(
+            KeyInputMapKeyEntry(Input.Keys.W),
+            KeyInputMapKeyEntry(Input.Keys.A),
+            KeyInputMapKeyEntry(Input.Keys.S),
+            KeyInputMapKeyEntry(Input.Keys.D),
+        )
+    ) { _, code ->
+        val vec= when(code){
+            Input.Keys.W-> Direction.UP
+            Input.Keys.A-> Direction.LEFT
+            Input.Keys.S-> Direction.DOWN
+            else -> Direction.RIGHT // Keys.D
+        }
+        //this method might need some rework as to how it works (with angles especially when doing controller support)
+        val targetNode = MapManager.currentMapNode.getEdge(vec)
+        targetNode ?: return@KeyInputMapEntry true
+        mapWidget.moveToNextNode(targetNode)
+        true
+    }
+
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         MapScreenController(screen)
@@ -93,10 +119,10 @@ class MapScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("Map_startEvent", navbarFocusGroup)
+                    groups = listOf("Map_startEvent", navbarFocusGroup),
                 ),
             ),
-            startGroup = "Map_startEvent",
+            startGroup = navbarFocusGroup,
         )
     )
 
@@ -120,9 +146,21 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val settingsLeft = NavbarCreator.NavBarObject("Settings Left", settingsObject.openTimelineCreator,settingsObject.closeTimelineCreator)
-        val settingsMiddle = NavbarCreator.NavBarObject("Settings Middle", settingsObject.openTimelineCreator,settingsObject.closeTimelineCreator)
-        val settingsRight = NavbarCreator.NavBarObject("Settings Right", settingsObject.openTimelineCreator,settingsObject.closeTimelineCreator)
+        val settingsLeft = NavbarCreator.NavBarObject(
+            "Settings Left",
+            settingsObject.openTimelineCreator,
+            settingsObject.closeTimelineCreator
+        )
+        val settingsMiddle = NavbarCreator.NavBarObject(
+            "Settings Middle",
+            settingsObject.openTimelineCreator,
+            settingsObject.closeTimelineCreator
+        )
+        val settingsRight = NavbarCreator.NavBarObject(
+            "Settings Right",
+            settingsObject.openTimelineCreator,
+            settingsObject.closeTimelineCreator
+        )
         actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsLeft, settingsMiddle, settingsRight), screen)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
@@ -230,10 +268,15 @@ class MapScreen : ScreenCreator() {
             setAlignment(Align.center)
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
-            setFocusableTo(true,this)
+            setFocusableTo(true, this)
             isSelectable = true
             group = "Map_startEvent"
-            onSelect { fire(ButtonClickEvent()) }
+            onSelect {
+                if (mapWidget.playerNode.event?.canBeStarted == true) {
+                    mapWidget.onStartButtonClicked(this@label)
+                    isDisabled = true
+                }
+            }
 
             syncHeight()
             dropShadow = DropShadow(
@@ -256,14 +299,15 @@ class MapScreen : ScreenCreator() {
                     dropShadow?.maxOpacity = 0.4f
                 }
             )
-            onButtonClick {
-                if (mapWidget.playerNode.event?.canBeStarted==true){
-                    mapWidget.onStartButtonClicked(this@label)
-                    isDisabled = true
-                }
+
+            onFocusChange { _, _ ->
+                if (isFocused) screen.leaveState("notMapFocused")
+                else screen.enterState("notMapFocused")
+            }
+           Gdx.app.postRunnable { //needs to happen, after the screen is finished initializing
+                screen.focusedActor = this
             }
         }
-
         verticalSpacer(40f)
     }
 

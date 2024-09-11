@@ -63,14 +63,16 @@ class KeyInputMap(
                     .forEach { keyEntry ->
                         if (bestCandidatePriority < entryList.priority ||
                             (bestCandidatePriority == entryList.priority &&
-                                    (bestCandidateModifiers?.size?: 0) < keyEntry.modifierKeys.size)
+                                    (bestCandidateModifiers?.size?: -1) < keyEntry.modifierKeys.size)
                         ) {
                             bestCandidate = keyEntry.action ?: entryList.defaultAction
                             bestCandidatePriority = entryList.priority
                             bestCandidateModifiers = keyEntry.modifierKeys
                         } else {
-                            FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority and modifier length!")
-                            return false
+                            if (bestCandidatePriority == entryList.priority && (bestCandidateModifiers?.size?: -1) == keyEntry.modifierKeys.size){
+                                FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority and modifier length!")
+                                return false
+                            }
                         }
                     }
             }

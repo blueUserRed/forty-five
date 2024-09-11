@@ -12,8 +12,9 @@ import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondit
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -163,10 +164,12 @@ class HealOrMaxHPScreen : ScreenCreator() {
             }
         }
 
-        actor(getSharedNavBar(worldWidth)) {
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
+        actor(settings)
     }
 
 
@@ -219,7 +222,6 @@ class HealOrMaxHPScreen : ScreenCreator() {
         dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
         onSelectChange { _, new ->
             if (isSelected) {
-                screen.deselectAllExcept(this)
                 screen.enterState("healOrMaxHP_optionSelected")
             }
             if (new.isEmpty()) {

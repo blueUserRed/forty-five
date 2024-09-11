@@ -134,6 +134,7 @@ open class OnjScreen(
                 .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
     }
 
+    private var previousFocusedActor: Actor? = null
     var focusedActor: Actor? = null
         set(value) {
             if (value == null) {
@@ -144,6 +145,7 @@ open class OnjScreen(
                 field?.let { it.fire(FocusChangeEvent(it, value)) }
                 value.let { it.fire(FocusChangeEvent(field, it)) }
             }
+            previousFocusedActor = field
             field = value
         }
     private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
@@ -166,12 +168,20 @@ open class OnjScreen(
 
     fun escapeSelectionHierarchy(fromMouse: Boolean = true, deselectActors: Boolean = true) {
         if (!fromMouse && draggedActor != null) return
+        val oldFocusedActor = focusedActor
         focusedActor = selectedActors.lastOrNull()
         if (deselectActors) deselectAllExcept()
         if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
             val s = selectionHierarchy.removeLast()
             s.onLeave()
             curSelectionParent.updateFocusableActors(this)
+        }
+        if (focusedActor == null && !fromMouse) {
+            focusedActor = if (oldFocusedActor == previousFocusedActor){
+                curSelectionParent.focusNext(null, this) as Actor?
+            }else{
+                previousFocusedActor
+            }
         }
     }
 

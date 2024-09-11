@@ -10,7 +10,8 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -149,9 +150,11 @@ class AddMaxHPScreen : ScreenCreator() {
             }
         }
 
-        actor(getSharedNavBar(worldWidth)) {
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
+        actor(settings)
     }
 }
