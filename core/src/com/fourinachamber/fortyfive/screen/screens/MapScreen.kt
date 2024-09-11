@@ -19,7 +19,9 @@ import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.MapNode
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -91,7 +93,7 @@ class MapScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("Map_startEvent")
+                    groups = listOf("Map_startEvent", navbarFocusGroup)
                 ),
             ),
             startGroup = "Map_startEvent",
@@ -118,7 +120,10 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
+        val settingsLeft = NavbarCreator.NavBarObject("Settings Left", settingsObject.openTimelineCreator,settingsObject.closeTimelineCreator)
+        val settingsMiddle = NavbarCreator.NavBarObject("Settings Middle", settingsObject.openTimelineCreator,settingsObject.closeTimelineCreator)
+        val settingsRight = NavbarCreator.NavBarObject("Settings Right", settingsObject.openTimelineCreator,settingsObject.closeTimelineCreator)
+        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsLeft, settingsMiddle, settingsRight), screen)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }

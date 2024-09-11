@@ -9,10 +9,8 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
-import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
-import com.fourinachamber.fortyfive.screen.general.customActor.PropertyAction
+import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.screen.general.onSelectChange
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -20,12 +18,21 @@ import ktx.actors.onClick
 
 object NavbarCreator {
 
-    fun ScreenCreator.getSharedNavBar(worldWidth: Float, worldHeight: Float, objects: List<NavBarObject>, screen: OnjScreen) = newGroup {
+    const val navbarZIndex = 1000
+    const val navbarFocusGroup = "navbar_selectors"
+
+    fun ScreenCreator.getSharedNavBar(
+        worldWidth: Float,
+        worldHeight: Float,
+        objects: List<NavBarObject>,
+        screen: OnjScreen
+    ) = newGroup {
         x = 0f
         y = 0f
         width = worldWidth
         height = worldHeight
         touchable = Touchable.childrenOnly
+        fixedZIndex = navbarZIndex
 
         val navBarEvents = EventPipeline()
         val navBarTimeline = Timeline()
@@ -43,6 +50,7 @@ object NavbarCreator {
             isVisible = false
             onClick {
                 if (!isVisible) return@onClick
+                println("clicked on kill")
                 navBarEvents.fire(CloseNavBarButtons)
                 isVisible = false
             }
@@ -150,25 +158,27 @@ object NavbarCreator {
         obj: NavBarObject,
         timeline: Timeline,
     ) = with(creator) {
-        var isOpened = false
-        group {
+        box {
             height = parent.parent.height * 0.7f
             width = 250f
             backgroundHandle = "statusbar_option"
             logicalOffsetY = 30f
-            touchable = Touchable.enabled
+            setFocusableTo(true, this)
+            group = navbarFocusGroup
+            isSelectable = true
 
             label("red_wing", obj.name) {
                 centerX()
                 y = 15f
                 setAlignment(Align.center)
+                positionType = PositionType.ABSOLUTE
                 fontColor = ScreenCreator.fortyWhite
                 setFontScale(0.7f)
             }
 
             fun createAction(end: Float): PropertyAction = PropertyAction(
-                this@group,
-                this@group::logicalOffsetY,
+                this@box,
+                this@box::logicalOffsetY,
                 end,
                 invalidateHierarchyOf = this
             ).also {
@@ -176,26 +186,37 @@ object NavbarCreator {
                 it.interpolation = Interpolation.pow2In
             }
 
+            styles(
+                normal = {
+                    addAction(createAction(30f))
+                },
+                focused = {
+                    addAction(createAction(25f))
+                },
+                selected = {
+                    addAction(createAction(21f))
+                },
+                selectedAndFocused = {
+                    addAction(createAction(16f))
+                }
+            )
+
+            var isOpen = false
             events.watchFor<CloseNavBarButtons> {
-                if (!isOpened) return@watchFor
-                this@group.addAction(createAction(30f))
-                isOpened = false
+                if (!isOpen) return@watchFor
+                isOpen = false
                 timeline.appendAction(obj.closeTimelineCreator().asAction())
+                screen.escapeSelectionHierarchy(deselectActors = false)
             }
 
-            onClick {
-                if (isOpened) {
-                    this@group.addAction(createAction(30f))
-                    isOpened = false
-                    events.fire(ChangeBlackBackground(false))
-                    timeline.appendAction(obj.closeTimelineCreator().asAction())
-                } else {
-                    events.fire(CloseNavBarButtons)
-                    val action = createAction(16f)
-                    this@group.addAction(action)
-                    isOpened = true
+            onSelectChange { _, _ ->
+                if (isSelected) {
                     events.fire(ChangeBlackBackground(true))
                     timeline.appendAction(obj.openTimelineCreator().asAction())
+                    isOpen = true
+                } else {
+                    events.fire(CloseNavBarButtons)
+                    events.fire(ChangeBlackBackground(false))
                 }
             }
         }
@@ -211,7 +232,7 @@ object NavbarCreator {
             }
         } else {
             val enterMap = (map.startNode.event as? EnterMapMapEvent)?.targetMap
-            val exitMap  = (map.endNode.event as? EnterMapMapEvent)?.targetMap
+            val exitMap = (map.endNode.event as? EnterMapMapEvent)?.targetMap
             if (enterMap == null || exitMap == null) {
                 label("red_wing", "You are on a road", color = Color.WHITE)
             } else {
@@ -223,7 +244,7 @@ object NavbarCreator {
                     backgroundHandle = nameTextureForMap(enterMap)
                     setupDimensionsForAreaName(this@locationIndicator)
                 }
-                label("red_wing", "and", color = Color.WHITE) { setFontScale(0.8f)}
+                label("red_wing", "and", color = Color.WHITE) { setFontScale(0.8f) }
                 image {
                     backgroundHandle = nameTextureForMap(exitMap)
                     setupDimensionsForAreaName(this@locationIndicator)
@@ -247,7 +268,8 @@ object NavbarCreator {
             parent.invalidateChildren()
         }
 
-        loadedDrawable?.let { setup(it) } ?: loadedDrawableResourceGetter.onResourceChange { drawable -> setup(drawable) }
+        loadedDrawable?.let { setup(it) }
+            ?: loadedDrawableResourceGetter.onResourceChange { drawable -> setup(drawable) }
     }
 
     private data object CloseNavBarButtons
@@ -258,5 +280,4 @@ object NavbarCreator {
         val openTimelineCreator: () -> Timeline,
         val closeTimelineCreator: () -> Timeline,
     )
-
 }

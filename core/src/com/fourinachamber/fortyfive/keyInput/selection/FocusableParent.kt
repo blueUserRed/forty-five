@@ -14,6 +14,7 @@ class FocusableParent(
     private val startGroup: SelectionGroup? = null,
     groups: List<SelectionGroup> = listOf(),
     var onSelection: (List<Actor>) -> Unit = {},
+    var maxSelectionMembers: Int = 1,
 ) {
     val groups: Set<SelectionGroup>
 
@@ -113,7 +114,7 @@ class FocusableParent(
         TransitionType.entries().forEach {
             if ((actor as FocusableActor) in (prios[it] ?: listOf())) {
                 if (v.y < it.barrier) curMin = min(curMin, it.multiplier)
-                else curMin = min(curMin, ((1 + v.y-it.barrier).pow(it.exponent) * it.multiplier))
+                else curMin = min(curMin, ((1 + v.y - it.barrier).pow(it.exponent) * it.multiplier))
             }
         }
         return curMin
@@ -150,7 +151,7 @@ class FocusableParent(
 
     private fun getFirstFocused(actors: List<FocusableActor>): Actor? {
         var curBest: Actor? = null
-        var curBestPos:Float = Float.POSITIVE_INFINITY
+        var curBestPos: Float = Float.POSITIVE_INFINITY
         actors.filter { it.isFocusable }.filterIsInstance<Actor>().forEach {
             val newPos = getDistFromStart(it)
             if (curBestPos > newPos) {
@@ -206,7 +207,7 @@ class FocusableParent(
 
     private fun getDistFromStart(actor: Actor): Float {
         val pos = actor.centerPos()
-        if (pos.x+actor.width/2 < 0 || pos.y + actor.height/2 < 0) return Float.MAX_VALUE
+        if (pos.x + actor.width / 2 < 0 || pos.y + actor.height / 2 < 0) return Float.MAX_VALUE
         return ((pos.x * 3) + (pos.y))
     }
 
@@ -246,7 +247,7 @@ sealed class TransitionType(val exponent: Float, val barrier: Float, val multipl
 
     data object LastResort : TransitionType(7F, 0F, 7F)
     companion object {
-        fun entries () = listOf(Prioritized, Seamless, LastResort)
+        fun entries() = listOf(Prioritized, Seamless, LastResort)
     }
 }
 

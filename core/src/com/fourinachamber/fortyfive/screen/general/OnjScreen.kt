@@ -104,11 +104,16 @@ open class OnjScreen(
         if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(actor)) return
         if (actor is FocusableActor && !actor.isSelectable) return
         if (_selectedActors.add(actor)) {
-            val newList =
-                _selectedActors.toList() // reversed, so that deselectAllExcept makes sense to use on the newest element
-            newList.reversed()
-                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList(), fromMouse)) }
-            curSelectionParent.onSelection(newList)
+            val maxNbrOfMembers = curSelectionParent.maxSelectionMembers
+            if (maxNbrOfMembers > 0 && _selectedActors.size > maxNbrOfMembers) {
+                val o = _selectedActors.toList()
+                _selectedActors.removeAll(o.subList(0, selectedActors.size - maxNbrOfMembers).toSet())
+                o.forEach { it.fire(SelectChangeEvent(oldList, selectedActors, fromMouse)) }
+            } else {
+                val n = _selectedActors.toList().reversed()
+                n.forEach { it.fire(SelectChangeEvent(oldList, selectedActors, fromMouse)) }
+                curSelectionParent.onSelection(n)
+            }
         }
     }
 
@@ -135,7 +140,7 @@ open class OnjScreen(
                 field?.let { it.fire(FocusChangeEvent(it, null)) }
             } else {
                 if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(value)) return
-                if (field==value) return
+                if (field == value) return
                 field?.let { it.fire(FocusChangeEvent(it, value)) }
                 value.let { it.fire(FocusChangeEvent(field, it)) }
             }
@@ -153,12 +158,16 @@ open class OnjScreen(
     fun addToSelectionHierarchy(child: FocusableParent) {
         selectionHierarchy.add(child)
         curSelectionParent.updateFocusableActors(this)
+        val focusedActor1 = focusedActor
+        if (focusedActor1 != null && !curSelectionParent.hasActor(focusedActor1)) {
+            focusedActor = null
+        }
     }
 
-    fun escapeSelectionHierarchy(fromMouse: Boolean = true) {
+    fun escapeSelectionHierarchy(fromMouse: Boolean = true, deselectActors: Boolean = true) {
         if (!fromMouse && draggedActor != null) return
         focusedActor = selectedActors.lastOrNull()
-        deselectAllExcept()
+        if (deselectActors) deselectAllExcept()
         if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
             val s = selectionHierarchy.removeLast()
             s.onLeave()
@@ -514,7 +523,7 @@ open class OnjScreen(
             .forEach(StyleManager::update) //all added items get updated too
 
         stage.batch.begin()
-        programmedDetailSources.forEach { it.detailWidget?.drawDetailActor(stage.batch)}
+        programmedDetailSources.forEach { it.detailWidget?.drawDetailActor(stage.batch) }
         stage.batch.end()
         val draggedActorLocal = draggedActor
         if (draggedActorLocal == null) {
