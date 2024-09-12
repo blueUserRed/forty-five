@@ -92,7 +92,7 @@ class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
 }
 
 class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
+    DropBehaviour(dragAndDrop, actor) {
 
     private val isToDeck: Boolean = onj.get<Boolean>("isToDeck")
 

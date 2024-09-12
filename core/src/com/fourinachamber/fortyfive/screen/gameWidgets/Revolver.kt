@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameController.*
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -20,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
+import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
@@ -40,7 +42,7 @@ class Revolver(
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, StyledActor, ResourceBorrower {
+) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower {
 
 
     override var styleManager: StyleManager? = null
@@ -88,6 +90,8 @@ class Revolver(
     private val iceShader: Promise<BetterShader> by lazy {
         ResourceManager.request(this, screen, "ice_shader")
     }
+
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     init {
         bindHoverStateListeners(this)
@@ -163,6 +167,19 @@ class Revolver(
      */
     fun isBulletLoaded(): Boolean = slots.any { it.card != null }
 
+    fun initDragAndDrop(dragAndDrop: DragAndDrop) {
+        slots = Array(5) {
+            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
+            slot.reportDimensionsWithScaling = true
+            slot.ignoreScalingWhenDrawing = true
+            addActor(slot)
+            screen.addNamedActor("revolverSlot-$it", slot)
+            val dropBehaviour = RevolverDropTarget(dragAndDrop, slot)
+            dragAndDrop.addTarget(dropBehaviour)
+            slot
+        }
+    }
+
     fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
@@ -189,7 +206,8 @@ class Revolver(
         background.getOrNull()?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
         // This is really ugly but I won't bother with a better solution
-        if (EncounterModifier.Frost in FortyFive.currentGame!!.encounterModifiers && iceShader.isResolved) {
+        val currentGame = FortyFive.currentGame
+        if (currentGame != null && EncounterModifier.Frost in currentGame.encounterModifiers && iceShader.isResolved) {
             val iceShader = iceShader.getOrError()
             batch.flush()
             batch.shader = iceShader.shader
@@ -206,6 +224,7 @@ class Revolver(
 
     override fun layout() {
         updateSlotsAndCards()
+        onLayout.forEach { it() }
         super.layout()
     }
 
@@ -294,6 +313,10 @@ class Revolver(
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
+    }
+
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
     }
 
     companion object {

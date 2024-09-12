@@ -72,7 +72,7 @@ class CardDropTarget(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor) {
 
 
     private val card: Card
@@ -109,8 +109,7 @@ class CardDropTarget(
 class RevolverDropTarget(
     dragAndDrop: DragAndDrop,
     actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor) {
 
     private val revolverSlot: RevolverSlot
 
@@ -145,7 +144,7 @@ class PutCardsUnderDeckDropTarget(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor) {
 
     private val putCardsUnderDeckWidget: PutCardsUnderDeckWidget
 

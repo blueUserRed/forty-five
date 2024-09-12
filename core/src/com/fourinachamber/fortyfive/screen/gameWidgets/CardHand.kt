@@ -6,6 +6,7 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
@@ -26,7 +27,7 @@ class CardHand(
     private val opacityIfNotPlayable: Float,
     private val centerGap: Float,
     private val screen: OnjScreen,
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, OnLayoutActor, StyledActor {
 
     override var fixedZIndex: Int = 0
 
@@ -34,6 +35,8 @@ class CardHand(
 
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean=false
+
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     /**
      * scaling applied to the card when hovered over
@@ -103,6 +106,11 @@ class CardHand(
         screen.removeNamedActor("card-${card.name}")
         card.actor.playSoundsOnHover = false
         invalidateHierarchy()
+    }
+
+    override fun layout() {
+        onLayout.forEach { it() }
+        super.layout()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -226,6 +234,10 @@ class CardHand(
 
     override fun getPrefWidth(): Float {
         return targetWidth
+    }
+
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
     }
 
 }

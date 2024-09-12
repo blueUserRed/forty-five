@@ -78,6 +78,8 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
+        changeToScreen(ConfigFileManager.screenBuilderFor("gameScreen"))
+        return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
