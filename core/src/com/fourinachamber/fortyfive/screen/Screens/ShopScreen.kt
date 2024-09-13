@@ -22,12 +22,10 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.percent
-
 class ShopScreen : ScreenCreator() {
 
-    //TODO logic addToBackpack extends when needed finish, add Cards to shop
-
     //TODO  children in CustomFocusableBox autoscroll + bar drag and drop
+    //TODO check reroll
 
     override val name: String = "shopScreen"
 
@@ -61,14 +59,14 @@ class ShopScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("shop_leave", "shop_cards", "shop_reroll", navbarFocusGroup)
+                    groups = listOf("shop_leave", "shop_cards", "shop_cards_first", "shop_reroll", navbarFocusGroup)
                 ),
                 SelectionTransition(
-                    TransitionType.Prioritized,
-                    groups = listOf("shop_cards")
+                    TransitionType.InScrollableBox,
+                    groups = listOf("shop_cards_first","shop_cards")
                 )
             ),
-            startGroups = listOf("shop_cards", navbarFocusGroup),
+            startGroups = listOf("shop_cards_first","shop_cards", navbarFocusGroup),
         )
     }
 
@@ -136,8 +134,9 @@ class ShopScreen : ScreenCreator() {
                 paddingLeft = 30f
                 paddingTop = 15f
                 paddingBottom = 30f
-//                addRandomChildren()
-                addScrollbarFromDefaults(CustomDirection.RIGHT, "backpack_scrollbar", "backpack_scrollbar_background")
+//                addTestChildren()
+//                scrollDirectionStart = CustomDirection.BOTTOM
+                addScrollbarFromDefaults(CustomDirection.LEFT, "backpack_scrollbar", "backpack_scrollbar_background")
             }
 
             label(
@@ -160,7 +159,6 @@ class ShopScreen : ScreenCreator() {
                 width = 200F
                 setAlignment(Align.center)
                 positionType = PositionType.ABSOLUTE
-
                 onSelect { screen.findController<ShopScreenController>()?.rerollShop() }
                 group = "shop_reroll"
                 onLayoutAndNow {
@@ -191,7 +189,7 @@ class ShopScreen : ScreenCreator() {
         actor(settings)
     }
 
-    private fun Group.addRandomChildren() {
+    private fun Group.addTestChildren() {
         fun CustomBox.addBasicStyles() {
             val size = 150f
             val listOf = listOf("shop_targets")
@@ -210,12 +208,15 @@ class ShopScreen : ScreenCreator() {
             )
             bindDragging(this, screen)
             resetCondition = { true }
+            onFocus { if (!it) ( parent as CustomScrollableBox).scrollTo(this) }
         }
 
-        box {
-            backgroundHandle = "card%%leadersBullet"
-            name("leadersBullet")
-            addBasicStyles()
+        for (i in 0..20){
+            box {
+                backgroundHandle = "card%%bullet"
+                name("bullet_$i")
+                addBasicStyles()
+            }
         }
     }
 
@@ -298,7 +299,7 @@ class ShopScreen : ScreenCreator() {
         makeDraggable(this)
         isDraggable = false
         group = "shop_targets"
-        bindDroppable(this, screen, listOf("shop_cards"))
+        bindDroppable(this, screen, listOf("shop_cards", "shop_cards_first"))
         val distanceNotSelected = -20F
         styles(
             focused = { addAction(getAction(0F, y)) },
@@ -308,6 +309,7 @@ class ShopScreen : ScreenCreator() {
             }
         )
         onDragAndDrop.add { source, target ->
+            screen.escapeSelectionHierarchy()
             val controller = screen.findController<ShopScreenController>() ?: return@add
             controller.buyCard(source, target.name == addToDeckWidgetName)
         }

@@ -234,7 +234,9 @@ object NavbarCreator {
             val enterMap = (map.startNode.event as? EnterMapMapEvent)?.targetMap
             val exitMap = (map.endNode.event as? EnterMapMapEvent)?.targetMap
             if (enterMap == null || exitMap == null) {
-                label("red_wing", "You are on a road", color = Color.WHITE)
+                label("red_wing", "You are on a road", color = Color.WHITE){
+                    positionType=PositionType.ABSOLUTE
+                }
             } else {
                 label("red_wing", "Road between", color = Color.WHITE) {
                     setFontScale(0.8f)

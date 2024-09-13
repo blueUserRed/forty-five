@@ -707,7 +707,7 @@ class CardActor(
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,
-        effects = cardDetailEffects(),
+        effects = cardDetailEffects,
         text = { listOf(card.shortDescription, card.flavourText) },
         subtexts = getEffectTexts()
     )
@@ -1000,16 +1000,15 @@ class CardActor(
     }
 
 
-
-
-
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
 
     companion object {
-        fun cardDetailEffects() = DetailDescriptionHandler.allTextEffects.value.map {
-            AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
+        val cardDetailEffects by lazy {
+            DetailDescriptionHandler.allTextEffects.value.map {
+                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
+            }
         }
     }
 }

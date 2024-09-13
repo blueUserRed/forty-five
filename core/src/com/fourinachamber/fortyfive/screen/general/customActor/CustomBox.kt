@@ -437,7 +437,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
     var scrollDirectionStart: CustomDirection = CustomDirection.TOP
         set(value) {
             field = value
-            checkFlexDirection(field)
+            checkFlexDirection(value)
             invalidate()
         }
 
@@ -480,7 +480,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
     }
 
 
-    var overflowHidden = true //TODO change back to true
+    var overflowHidden = true
 
     fun scrolledBy(amount: Float) {
         //it just feels wrong if it starts at the bottom to scroll like that, for everything else it is okay
@@ -501,7 +501,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         if (!fromDefaults) defaultsForScrollLayout = null
         this.scrollBarBackground = barBackground
         this.scrollBar = bar
-        invalidate() //maybe call layout instead of invalidate OR JUST DO IT BETTER (but idk how)
+        invalidate()
     }
 
     init {
@@ -633,7 +633,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         if (wrap == CustomWrap.WRAP_REVERSE) scrolledPart = -scrolledDistance
 
         if (scrollDirectionStart.isHorizontal) {
-            children.filterIsInstance<OffSettable>().forEach { it.logicalOffsetX = scrolledPart }
+            children.filterIsInstance<OffSettable>().forEach { it.logicalOffsetX = -scrolledPart }
         } else children.filterIsInstance<OffSettable>().forEach { it.logicalOffsetY = scrolledPart }
     }
 
@@ -682,15 +682,6 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
             scrollBar?.draw(batch, alpha)
             if (isTransform) resetTransform(batch)
         }
-//        val curChild = this.currentlyDraggedChild //TODO maybe this, this needs to be checked if it is nessessary
-//        if (curChild != null) {
-//            val coordinates = curChild.parent.localToStageCoordinates(Vector2())
-//            curChild.x += coordinates.x
-//            curChild.y += coordinates.y
-//            curChild.draw(batch, alpha)
-//            curChild.x -= coordinates.x
-//            curChild.y -= coordinates.y
-//        }
     }
 
     private fun drawItemsWithScissor(
@@ -711,32 +702,54 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         )
         batch.flush()
         if (!ScissorStack.pushScissors(scissor)) return true
-//        currentlyDraggedChild?.isVisible = false
         super.draw(batch, parentAlpha)
-//        currentlyDraggedChild?.isVisible = true
         batch.flush()
         ScissorStack.popScissors()
         batch.flush()
         return false
     }
 
-
-    companion object {
-        fun isInsideScrollableParents(
-            actor: Actor,
-            x: Float,
-            y: Float
-        ): Boolean { //TODO check if this is actually correct
-            var cur: Actor? = actor
-            while (cur != null) {
-                cur = cur.parent
-                if (cur is CustomScrollableBox && cur.maxScrollableDistanceInDirection != 0F) {
-                    val coordinates = actor.localToActorCoordinates(cur, Vector2(x, y))
-                    if (coordinates.x < 0 || coordinates.y < 0 || coordinates.x > cur.width || coordinates.y > cur.height)
-                        return false
-                }
+    fun scrollTo(actor: Actor) {
+        if (maxScrollableDistanceInDirection == 0F) return
+        val coords = actor.localToActorCoordinates(this, Vector2(0F, 0F))
+        //TODO this for the other directions
+        when(scrollDirectionStart){
+            CustomDirection.BOTTOM -> {
+                if (coords.y - paddingBottom < 0)
+                    scrolledDistance += coords.y - paddingBottom
+                if (coords.y + actor.height > height - paddingTop)
+                    scrolledDistance += (coords.y + actor.height) - (height - paddingTop)
             }
-            return true
+            CustomDirection.TOP -> {
+                if (coords.y - paddingBottom < 0F)
+                    scrolledDistance -= coords.y - paddingBottom
+                if (coords.y + actor.height > height - paddingTop)
+                    scrolledDistance -= (coords.y + actor.height) - (height - paddingTop)
+            }
+            CustomDirection.LEFT -> {
+                if (coords.x - paddingLeft < 0)
+                    scrolledDistance += coords.x - paddingLeft
+                if (coords.x + actor.width > width - paddingRight)
+                    scrolledDistance += (coords.x + actor.width) - (width - paddingRight)
+            }
+            CustomDirection.RIGHT -> {
+                if (coords.x - paddingLeft < 0)
+                    scrolledDistance -= coords.x - paddingLeft
+                if (coords.x + actor.width > width - paddingRight)
+                    scrolledDistance -= (coords.x + actor.width) - (width - paddingRight)
+            }
         }
+    }
+
+    override fun hit(
+        x: Float,
+        y: Float,
+        touchable: Boolean
+    ): Actor? {
+        val a = scrollBarBackground
+        if ((x >= paddingLeft && y >= paddingBottom && x < width - paddingRight && y < height - paddingTop) ||
+            (a != null && a.x <= x && a.y <= y && a.x + a.width >= x && a.y + a.height >= y))
+            return super.hit(x, y, touchable)
+        return null
     }
 }

@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.config.ConfigFileManager
@@ -21,7 +20,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.TemplateString
-import dev.lyze.flexbox.FlexBox
 import ktx.actors.alpha
 import onj.value.*
 import kotlin.random.Random
@@ -127,7 +125,7 @@ class ShopScreenController(
         cardsToAdd.forEach { cardProto ->
             val card = cardProto.create(screen)
             screen.addDisposable(card)
-            addCard(card)
+            addCard(card, cardProto==cardsToAdd.first())
             if (cardProto !in availableCards) updateStateOfCard(card, setSoldOut = true)
             availableCards.remove(cardProto)
         }
@@ -147,7 +145,7 @@ class ShopScreenController(
         cardsParentWidget.invalidate()
     }
 
-    private fun addCard(card: Card) {
+    private fun addCard(card: Card, isFirst: Boolean) {
 
         val curParent = CustomBox(screen)
         cardsParentWidget.addActor(curParent)
@@ -163,16 +161,18 @@ class ShopScreenController(
         screen.addNamedActor("cardsWidgetParent", curParent)
 
         curParent.addActor(card.actor)
-        screen.addNamedActor("Card_${curParent.children.size}", card.actor)
+        screen.addNamedActor("Card_${cardsParentWidget.children.size}", card.actor)
         curParent.onLayout {
             val fl = card.actor.parent.height * 0.8f
             card.actor.setSize(fl, fl)
         }
         card.actor.targetGroups = listOf("shop_targets")
         card.actor.makeDraggable(card.actor)
-        card.actor.group = "shop_cards"
+
+        card.actor.group = if (isFirst) "shop_cards_first" else "shop_cards"
         card.actor.resetCondition = { true }
         card.actor.bindDragging(card.actor, screen)
+        card.actor.onFocus { if (!it) cardsParentWidget.scrollTo(curParent) }
 
         val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
         val label =
@@ -239,7 +239,6 @@ class ShopScreenController(
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
-        println("this works definitly too i hope${this.context}")
         actor as CardActor
         SaveState.payMoney(actor.card.price)
         SaveState.buyCard(actor.card.name)

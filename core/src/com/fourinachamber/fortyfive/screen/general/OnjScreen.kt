@@ -32,6 +32,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import kotlinx.coroutines.flow.StateFlow
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
@@ -109,10 +110,11 @@ open class OnjScreen(
                 val o = _selectedActors.toList()
                 _selectedActors.removeAll(o.subList(0, selectedActors.size - maxNbrOfMembers).toSet())
                 o.forEach { it.fire(SelectChangeEvent(oldList, selectedActors, fromMouse)) }
+                curSelectionParent.onSelection(selectedActors, fromMouse)
             } else {
-                val n = _selectedActors.toList().reversed()
+                val n = selectedActors.reversed().toList()
                 n.forEach { it.fire(SelectChangeEvent(oldList, selectedActors, fromMouse)) }
-                curSelectionParent.onSelection(n)
+                curSelectionParent.onSelection(selectedActors, fromMouse)
             }
         }
     }
@@ -131,23 +133,26 @@ open class OnjScreen(
         _selectedActors.removeIf { it != actor }
         if (oldList.size != _selectedActors.size)
             oldList.reversed()
-                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
+                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toList())) }
     }
 
     private var previousFocusedActor: Actor? = null
     var focusedActor: Actor? = null
         set(value) {
             if (value == null) {
-                field?.let { it.fire(FocusChangeEvent(it, null)) }
+                field?.let { it.fire(FocusChangeEvent(it, null, nextFocusActorSetFromMouse)) }
             } else {
-                if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(value)) return
+//                if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(value)) return
                 if (field == value) return
-                field?.let { it.fire(FocusChangeEvent(it, value)) }
-                value.let { it.fire(FocusChangeEvent(field, it)) }
+                field?.let { it.fire(FocusChangeEvent(it, value, nextFocusActorSetFromMouse)) }
+                value.let { it.fire(FocusChangeEvent(field, it, nextFocusActorSetFromMouse)) }
             }
             previousFocusedActor = field
             field = value
+            nextFocusActorSetFromMouse = true
         }
+
+    private var nextFocusActorSetFromMouse: Boolean = true
     private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
     val curSelectionParent: FocusableParent get() = selectionHierarchy.last()
 
@@ -168,7 +173,7 @@ open class OnjScreen(
 
     fun escapeSelectionHierarchy(fromMouse: Boolean = true, deselectActors: Boolean = true) {
         if (!fromMouse && draggedActor != null) return
-        val oldFocusedActor = focusedActor
+        nextFocusActorSetFromMouse = fromMouse
         focusedActor = selectedActors.lastOrNull()
         if (deselectActors) deselectAllExcept()
         if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
@@ -177,12 +182,12 @@ open class OnjScreen(
             curSelectionParent.updateFocusableActors(this)
         }
         if (focusedActor == null && !fromMouse) {
-            focusedActor = if (curSelectionParent.hasActorPrimary(previousFocusedActor)){
+            nextFocusActorSetFromMouse = false
+            focusedActor = if (curSelectionParent.hasActorPrimary(previousFocusedActor)) {
                 previousFocusedActor
-            }else{
+            } else {
                 curSelectionParent.focusNext(null, this) as Actor?
             }
-//           focusedActor = previousFocusedActor ?: curSelectionParent.focusNext(null, this) as Actor?
         }
     }
 
@@ -204,12 +209,14 @@ open class OnjScreen(
     fun focusNext(direction: Vector2? = null) {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = curSelectionParent.focusNext(direction, this)
+        nextFocusActorSetFromMouse = false
         this.focusedActor = focusableElement as Actor
     }
 
     fun focusPrevious() {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = curSelectionParent.focusPrevious(this)
+        nextFocusActorSetFromMouse = false
         this.focusedActor = focusableElement as Actor
     }
 
@@ -262,7 +269,6 @@ open class OnjScreen(
         }
         addEarlyRenderTask {
             if (selectableDirty) {
-                println("now resetting focusable actors")
                 curSelectionParent.updateFocusableActors(this)
                 selectableDirty = false
             }

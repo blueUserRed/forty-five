@@ -89,7 +89,7 @@ class QuitGameEvent : Event()
 class AbandonRunEvent : Event()
 class ResetGameEvent : Event()
 
-class FocusChangeEvent(val old: Actor?, val new: Actor?) : Event()
+class FocusChangeEvent(val old: Actor?, val new: Actor?, val fromMouse: Boolean = true) : Event()
 class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>, val fromMouse: Boolean = true) : Event()
 
 class DetailDisplayStateChange(val displayStarted: Boolean = true) : Event()
@@ -144,14 +144,14 @@ inline fun Actor.onFocusChange(crossinline block: (Actor?, Actor?) -> Unit) {
         true
     }
 }
-inline fun Actor.onFocus(crossinline block: () -> Unit) {
+inline fun Actor.onFocus(crossinline block: (Boolean) -> Unit) {
     this.addListener { event ->
         if (event !is FocusChangeEvent) return@addListener false
         if (this is KotlinStyledActor) {
             if (!this.isFocusable) throw RuntimeException("You tried to focus an unfocusable Element") // this should never happen
             isFocused = this == event.new
         }
-        block()
+        block(event.fromMouse)
         true
     }
 }

@@ -42,7 +42,6 @@ class HealOrMaxHPScreen : ScreenCreator() {
     )
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-
         getHealOrMaxHPFocusableParent()
     )
 

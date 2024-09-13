@@ -112,7 +112,6 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
             parent.fitContentInFlexDirection = true
             parent.minVerticalDistBetweenElements = 5f
             parent.backgroundHandle = defBackground
-            parent.debug = true
 
 
             val innerWidth = parent.width - parent.paddingLeft - parent.paddingRight

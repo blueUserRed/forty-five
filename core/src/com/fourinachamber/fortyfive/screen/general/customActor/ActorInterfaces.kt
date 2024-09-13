@@ -202,7 +202,9 @@ interface FocusableActor : HoverStateActor {
         bindHoverStateListeners(actor)
         bindSelectableListener(actor, screen)
         actor.onHoverEnter {
-            if (isFocusable) screen.focusedActor = actor
+            if (!isFocusable) return@onHoverEnter
+
+            screen.focusedActor = actor
         }
         actor.onHoverLeave {
             if (screen.focusedActor == actor) screen.focusedActor = null
@@ -219,7 +221,7 @@ interface FocusableActor : HoverStateActor {
     }
 
     fun setFocusableTo(newVal: Boolean, actor: Actor) {
-        if (actor !is FocusableActor ) throw RuntimeException("tried to make non Focusable Element focusbale")
+        if (actor !is FocusableActor) throw RuntimeException("tried to make non Focusable Element focusbale")
         if (actor.isFocused && !newVal && actor is HasOnjScreen) actor.screen.focusedActor = null
         if (newVal) actor.touchable = Touchable.enabled
         actor.isFocusable = newVal
@@ -349,11 +351,10 @@ interface KotlinStyledActor : FocusableActor {
 
     private fun Actor.customClickable() {
         onClickEvent { _, x, y ->
-            if (CustomScrollableBox.isInsideScrollableParents(this, x, y)) {
-                if (this is DragAndDroppableActor && inDragPreview) return@onClickEvent
-                fire(ButtonClickEvent())
-            }
+            if (this is DragAndDroppableActor && inDragPreview) return@onClickEvent
+            fire(ButtonClickEvent())
         }
+//        }
     }
 }
 
@@ -403,13 +404,13 @@ interface DragAndDroppableActor : FocusableActor {
         dragAndDrop.addSource(CustomCenteredDragSource(dragAndDrop, actor, screen))
 
         actor.onSelectChange { _, new, fromMouse ->
-            if (!isDraggable) return@onSelectChange
-            if ("draggingAnElement" in screen.screenState) return@onSelectChange
             if (isSelected) {
+                if (!isDraggable) return@onSelectChange
+                if (dragAndDropStateName in screen.screenState) return@onSelectChange
                 if (!fromMouse) //current possibilty for dragAndDrop
                     actorDragStarted(actor, screen, false)
             } else {
-                if (fromMouse) screen.escapeSelectionHierarchy()
+//                if (fromMouse) screen.escapeSelectionHierarchy() //idk what this did tbh
                 screen.focusedActor = actor
             }
         }
@@ -423,19 +424,19 @@ interface DragAndDroppableActor : FocusableActor {
         }
         screen.addToSelectionHierarchy(
             FocusableParent(
-                onSelection = { it2 ->
+                onSelection = { it2, fromMouse2 ->
                     val target = it2.last()
-                    val source = screen.draggedActor ?: it2.first()
-                    if (source != target) {
-                        onDragAndDrop.forEach { it.invoke(source, target) }
-                        if (target is DragAndDroppableActor)
-                            target.onDragAndDrop.forEach { it.invoke(source, target) }
-                    }
+                    val source = screen.draggedActor ?: if (it2.size>=2) it2[it2.size - 2] else return@FocusableParent
+                    if (source == target) return@FocusableParent
+                    onDragAndDrop.forEach { it.invoke(source, target) }
+                    if (target is DragAndDroppableActor)
+                        target.onDragAndDrop.forEach { it.invoke(source, target) }
                 },
                 transitions = listOf(SelectionTransition(groups = targetGroups)),
                 onLeave = {
                     screen.leaveState(dragAndDropStateName)
-                }
+                },
+                maxSelectionMembers = -1
             )
         )
         if ((actor !is FocusableActor || actor.group !in targetGroups) && !fromMouse)
@@ -456,6 +457,7 @@ interface DragAndDroppableActor : FocusableActor {
             val dragAndDrop = dragAndDrops.getOrPut(it) { DragAndDrop() }
             dragAndDrop.addTarget(CustomDropTarget(actor, screen))
         }
+        onDragAndDrop
     }
 
     companion object {
