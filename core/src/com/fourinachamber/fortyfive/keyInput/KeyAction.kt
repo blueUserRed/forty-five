@@ -3,11 +3,9 @@ package com.fourinachamber.fortyfive.keyInput
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
-import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
@@ -50,28 +48,6 @@ object KeyActionFactory {
         "PreviousDebugMenuPage" to {
             { _, _ ->
                 FortyFive.currentRenderPipeline?.previousDebugPage()
-                true
-            }
-        },
-
-        "SelectCardInHand" to { obj ->
-            val num = obj.get<Long>("num").toInt() - 1 // covert from one-indexed to 0-indexed
-            lambda@{ screen, _ ->
-                val game = FortyFive.currentGame ?: return@lambda false
-                val card = game.cardHand.cards.getOrElse(num) { return@lambda false }
-//                screen.selectedActor = card.actor
-                true
-            }
-        },
-
-        "SelectRevolverSlot" to { obj ->
-            var num = obj.get<Long>("num").toInt()
-            num = if (num == 5) 5 else 5 - num
-            num--
-            lambda@{ screen, _ ->
-                val game = FortyFive.currentGame ?: return@lambda false
-                val slot = game.revolver.slots.getOrElse(num) { return@lambda false }
-//                screen.selectedActor = slot
                 true
             }
         },

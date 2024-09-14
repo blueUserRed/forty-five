@@ -1,14 +1,11 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Event
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.StatsScreenController
-import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
+import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenController
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
-import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
-import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
-import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
 import com.fourinachamber.fortyfive.map.statusbar.CardCollectionScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.*
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
@@ -18,7 +15,7 @@ import onj.value.OnjNamedObject
 object ScreenControllerFactory {
 
     private val controllers: MutableMap<String, (OnjNamedObject, OnjScreen) -> ScreenController> = mutableMapOf(
-        "GameScreenController" to { onj, screen -> GameController(screen, onj) },
+        "GameScreenController" to { onj, screen -> OldGameController(screen, onj) },
         "IntroScreenController" to { onj, screen -> IntroScreenController(screen, onj) },
         "DialogScreenController" to { onj, screen -> DialogScreenController(screen, onj) },
 //        "ShopScreenController" to { onj, screen -> ShopScreenController(screen, onj.get<String>("messageWidgetName"), onj.get<String>("cardsParentName"), onj.get<String>("addToDeckWidgetName"), onj.get<String>("addToBackpackWidgetName"))},

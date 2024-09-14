@@ -8,6 +8,8 @@ import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
+import com.fourinachamber.fortyfive.game.controller.EncounterContext
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
@@ -62,7 +64,7 @@ object FortyFive : Game() {
 
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
-    private val tutorialEncounterContext = object : GameController.EncounterContext {
+    private val tutorialEncounterContext = object : EncounterContext {
 
         override val encounterIndex: Int = 0 // = first tutorial encounter
 

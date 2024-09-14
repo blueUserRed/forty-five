@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.value.OnjArray
@@ -20,7 +21,7 @@ fun interface GamePredicate {
         } }
 
         val aliveEnemyCountIn = { range: IntRange -> GamePredicate { controller ->
-            controller.enemyArea.enemies.filter { !it.isDefeated }.size in range
+            controller.activeEnemies.size in range
         } }
 
         val anyEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
@@ -40,28 +41,28 @@ fun interface GamePredicate {
         } }
 
         val targetedEnemyShieldIsAtLeast = { value: Int -> GamePredicate { controller ->
-            controller.enemyArea.getTargetedEnemy().currentCover >= value
+            controller.targetedEnemy().currentCover >= value
         } }
 
         val targetedEnemyHasAnyStatusEffect = GamePredicate { controller ->
-            controller.enemyArea.getTargetedEnemy().statusEffects.isNotEmpty()
+            controller.targetedEnemy().statusEffects.isNotEmpty()
         }
 
-        val gameInFreePhase = GamePredicate { controller -> controller.inFreePhase }
+        val gameInFreePhase = GamePredicate { controller -> !controller.isUIFrozen }
 
         val playerHasRunOutOfReserves = GamePredicate { controller -> controller.curReserves == 0 }
 
         // I know this is oddly specific, but I need it for the tutorial text
         val playerHasPlayedSilverBulletAndDrawnCards = GamePredicate { controller ->
-            controller.revolver.slots.mapNotNull { it.card?.name }.contains("silverBullet") && controller.inFreePhase
+            controller.revolver.slots.mapNotNull { it.card?.name }.contains("silverBullet") && !controller.isUIFrozen
         }
 
         val targetedEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
-            statusEffect in controller.enemyArea.getTargetedEnemy().statusEffects
+            statusEffect in controller.targetedEnemy().statusEffects
         } }
 
         val targetedEnemyHealthAbovePercent = { percent: Float -> GamePredicate { controller ->
-            val enemy = controller.enemyArea.getTargetedEnemy()
+            val enemy = controller.targetedEnemy()
             (enemy.currentHealth.toFloat() / enemy.health.toFloat()) > percent
         } }
 

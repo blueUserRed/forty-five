@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.*
 
@@ -67,12 +69,9 @@ abstract class Effect(val trigger: Trigger) {
 
             is BulletSelector.ByPredicate -> action {
                 val cards = controller
-                    .revolver
-                    .slots
-                    .mapIndexed { index, revolverSlot -> index to revolverSlot }
-                    .filter { it.second.card != null }
-                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index, triggerInformation) }
-                    .map { it.second.card!! }
+                    .cardsInRevolverIndexed()
+                    .filter { (index, card) -> bulletSelector.lambda(self, card, index, triggerInformation) }
+                    .map { it.second }
                 cardsAffected(cards)
                 store("selectedCards", cards)
             }
@@ -277,7 +276,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(GraphicsConfig.bufferTime)
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            include(controller.drawCardPopupTimeline(amount))
+            include(controller.drawCardsTimeline(amount))
         }
 
         override fun blocks(controller: GameController) = false
@@ -307,7 +306,7 @@ abstract class Effect(val trigger: Trigger) {
             triggerInformation
                 .targetedEnemies
                 .map {
-                    controller.tryApplyStatusEffectToEnemy(statusEffectCreator(
+                    controller.tryApplyStatusEffectToEnemyTimeline(statusEffectCreator(
                         controller,
                         card,
                         triggerInformation.isOnShot
@@ -422,7 +421,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             val damage = damage(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            val enemies = if (isSpray) controller.enemyArea.enemies else triggerInformation.targetedEnemies
+            val enemies = if (isSpray) controller.allEnemies else triggerInformation.targetedEnemies
             enemies
                 .map { it.damage(damage) }
                 .collectTimeline()
@@ -478,7 +477,7 @@ abstract class Effect(val trigger: Trigger) {
             includeLater(
                 {
                     get<List<Card>>("selectedCards")
-                        .map { controller.bounceBullet(it) }
+                        .map { controller.bounceBulletTimeline(it) }
                         .collectTimeline()
                 },
                 { true }
@@ -500,13 +499,13 @@ abstract class Effect(val trigger: Trigger) {
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            action {
-                controller.applyStatusEffectToPlayer(statusEffectCreator(
+            include(
+                controller.tryApplyStatusEffectToPlayerTimeline(statusEffectCreator(
                     controller,
                     card,
                     triggerInformation.isOnShot
                 ))
-            }
+            )
         }
 
         override fun blocks(controller: GameController): Boolean = false
@@ -520,11 +519,11 @@ abstract class Effect(val trigger: Trigger) {
 
     class TurnRevolver(
         trigger: Trigger,
-        val rotation: GameController.RevolverRotation
+        val rotation: RevolverRotation
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(controller.rotateRevolver(rotation))
+            include(controller.rotateRevolverTimeline(rotation))
         }
 
         override fun blocks(controller: GameController): Boolean = false
@@ -546,9 +545,7 @@ abstract class Effect(val trigger: Trigger) {
             val card = this@DestroyTargetOrDestroySelf.card
             action {
                 destroySelf = controller
-                    .revolver
-                    .slots
-                    .mapNotNull { it.card }
+                    .cardsInRevolver()
                     .size < 2
             }
             includeLater(
@@ -641,7 +638,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(GraphicsConfig.bufferTime)
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            include(controller.drawCardPopupTimeline(amount, fromBottom = true))
+            include(controller.drawCardsTimeline(amount, fromBottom = true))
         }
 
         override fun blocks(controller: GameController) = false
@@ -714,10 +711,7 @@ sealed class BulletSelector {
 
         override fun blocks(controller: GameController, self: Card): Boolean {
             if (optional) return false
-            val bulletsInRevolver = controller
-                .revolver
-                .slots
-                .mapNotNull { it.card }
+            val bulletsInRevolver = controller.cardsInRevolver()
             if (bulletsInRevolver.size >= 2) return false
             if (bulletsInRevolver.isEmpty()) return true
             if (!includeSelf && bulletsInRevolver[0] === self) return true
@@ -762,7 +756,7 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
 data class TriggerInformation(
     val multiplier: Int? = null,
     val controller: GameController,
-    val targetedEnemies: List<Enemy> = listOf(controller.enemyArea.getTargetedEnemy()),
+    val targetedEnemies: List<Enemy> = listOf(controller.targetedEnemy()),
     val isOnShot: Boolean = false,
     val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null,

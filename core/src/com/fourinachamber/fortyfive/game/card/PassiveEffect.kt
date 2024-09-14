@@ -1,6 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.GamePredicate
 
 data class PassiveEffectPrototype(

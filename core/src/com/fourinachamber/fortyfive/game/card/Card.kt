@@ -15,7 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
+import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.onjNamespaces.OnjPassiveEffect
@@ -158,7 +159,7 @@ class Card(
         private set
 
     fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
-            (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
+            (isEverlasting && !controller.isEverlastingDisabled) ||
                     protectingModifiers.isNotEmpty()
             )
 
@@ -330,11 +331,11 @@ class Card(
      * called when this card was destroyed by the destroy effect
      */
     fun onDestroy() {
-        if (isUndead) {
-            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
-            FortyFive.currentGame!!.cardHand.addCard(this)
-        }
-        leaveGame()
+//        if (isUndead) {
+//            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
+//            FortyFive.currentGame!!.cardHand.addCard(this)
+//        }
+//        leaveGame()
     }
 
     /**
@@ -377,7 +378,7 @@ class Card(
      */
     fun onEnter(controller: GameController) {
         inGame = true
-        enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
+        enteredInSlot = controller.slotOfCard(this)!!
         enteredOnTurn = controller.turnCounter
         if (isRotten) addRottenModifier(controller)
     }
@@ -389,7 +390,7 @@ class Card(
         rotationCounter += rotation.amount
     }
 
-    fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
+    fun inHand(controller: GameController): Boolean = this in controller.cardsInHand
 
     /**
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
@@ -520,9 +521,7 @@ class Card(
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
                     val mostExpensive = FortyFive.currentGame!!
-                        .revolver
-                        .slots
-                        .mapNotNull { it.card }
+                        .cardsInRevolver()
                         .maxOfOrNull { it.lastCostValue }
                         ?: 0
                     "most expensive bullet costs $mostExpensive"
@@ -789,7 +788,7 @@ class CardActor(
         onClick {
             if (!inSelectionMode) return@onClick
             // UGGGGGLLLLLLYYYYY
-            FortyFive.currentGame!!.selectCard(card)
+//            FortyFive.currentGame!!.selectCard(card)
         }
         onHoverEnter {
             if (!playSoundsOnHover) return@onHoverEnter
@@ -797,7 +796,7 @@ class CardActor(
         }
         onTouchEvent { event, _, _ ->
             if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
-            FortyFive.currentGame?.cardRightClicked(card)
+//            FortyFive.currentGame?.cardRightClicked(card)
         }
     }
 

@@ -93,12 +93,14 @@ class GameScreen : ScreenCreator() {
         backgroundHandle = "player_bar"
 
         actor(revolver) {
+            name("revolver")
             centerX()
             y = -30f
             syncDimensions()
         }
 
         actor(cardHand) {
+            name("cardHand")
             centerX()
             y = 0f
             centerX()

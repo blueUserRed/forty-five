@@ -13,6 +13,8 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter
@@ -173,7 +175,7 @@ class Enemy(
         .mapNotNull { it.executeAfterDamage(damage, StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
-    fun executeStatusEffectsAfterRevolverRotation(rotation: GameController.RevolverRotation): Timeline = _statusEffects
+    fun executeStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline = _statusEffects
         .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 

@@ -1,6 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 
 fun interface CardPredicate {
 
