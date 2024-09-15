@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
@@ -20,8 +21,6 @@ import ktx.actors.alpha
 import kotlin.math.max
 
 //TODO (optional):
-// widthFitContent and heightFitContent (including and/or exluding posType.absolute)
-// positionTop ... for PosType.absolute
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
 open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor,
     DragAndDroppableActor, HasPaddingActor {
@@ -353,7 +352,6 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
 sealed class CustomAlign {
     data object START : CustomAlign() {
         override fun getAlignedPos(sizes: List<Float>, totalSize: Float): List<Float> {
-//            if (cur.get() > totalSize) throw RuntimeException("too many objects for Alignment without wrap")
             return sizes.dropLast(1).scan(0F) { acc, fl -> acc + fl }
         }
     }
@@ -429,8 +427,6 @@ enum class PositionType {
 
 
 class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
-    // TODO focusable actors within scroll stuff important (especially the focus next part of it)
-    // TODO drag and drop of the bar on the side
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */
@@ -441,6 +437,47 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
             invalidate()
         }
 
+    private val dragListener = object : DragListener() {
+        init {
+            tapSquareSize = -1F
+        }
+
+        var startPosFromBar: Vector2? = null
+        var startScrolledDistance: Float = 0F
+
+        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            startPosFromBar = scrollBar?.localToActorCoordinates(scrollBarBackground, Vector2(x, y)) ?: return
+            startScrolledDistance = scrolledDistance
+        }
+
+        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            val bar = scrollBar ?: return
+            val barBack = scrollBarBackground ?: return
+            val start = startPosFromBar ?: return
+            val cur = bar.localToActorCoordinates(barBack, Vector2(x, y)) ?: return
+            if (scrollDirectionStart.isHorizontal) {
+                val curX = cur.x - start.x
+                val maxX = barBack.width - bar.width
+                if (scrollDirectionStart == CustomDirection.LEFT)
+                    scrolledDistance = startScrolledDistance + (curX / maxX) * maxScrollableDistanceInDirection
+                else{
+                    scrolledDistance = startScrolledDistance - (curX / maxX) * maxScrollableDistanceInDirection
+                }
+            } else {
+                val curY = cur.y - start.y
+                val maxY = barBack.height - bar.height
+                if (scrollDirectionStart == CustomDirection.TOP)
+                    scrolledDistance = startScrolledDistance - (curY / maxY) * maxScrollableDistanceInDirection
+                else{
+                    scrolledDistance = startScrolledDistance + (curY / maxY) * maxScrollableDistanceInDirection
+                }
+            }
+        }
+
+        override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            startPosFromBar = null
+        }
+    }
 
     var scrollDistancePerScroll: Float = 30F
     private var scrollBar: Actor? = null
@@ -448,6 +485,7 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
             if (field != null) removeActor(field)
             field = value
             field?.let { addActor(it) }
+            field?.addListener(dragListener)
         }
     private var scrollBarBackground: Actor? = null
         set(value) {
@@ -457,7 +495,9 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         }
     private var scrolledDistance = 0F
         set(value) {
-            field = value.between(0F, maxScrollableDistanceInDirection)
+            val newField = value.between(0F, maxScrollableDistanceInDirection)
+            if (field == newField) return
+            field = newField
             invalidate()
         }
     private var maxScrollableDistanceInDirection = 0F
@@ -508,7 +548,6 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         addListener(scrollListener)
         touchable = Touchable.enabled
         checkFlexDirection(scrollDirectionStart)
-        //draglistener for bar
     }
 
     // -------------------------------------------------------------------------------------------actual code from here
@@ -713,25 +752,28 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         if (maxScrollableDistanceInDirection == 0F) return
         val coords = actor.localToActorCoordinates(this, Vector2(0F, 0F))
         //TODO this for the other directions
-        when(scrollDirectionStart){
+        when (scrollDirectionStart) {
             CustomDirection.BOTTOM -> {
                 if (coords.y - paddingBottom < 0)
                     scrolledDistance += coords.y - paddingBottom
                 if (coords.y + actor.height > height - paddingTop)
                     scrolledDistance += (coords.y + actor.height) - (height - paddingTop)
             }
+
             CustomDirection.TOP -> {
                 if (coords.y - paddingBottom < 0F)
                     scrolledDistance -= coords.y - paddingBottom
                 if (coords.y + actor.height > height - paddingTop)
                     scrolledDistance -= (coords.y + actor.height) - (height - paddingTop)
             }
+
             CustomDirection.LEFT -> {
                 if (coords.x - paddingLeft < 0)
                     scrolledDistance += coords.x - paddingLeft
                 if (coords.x + actor.width > width - paddingRight)
                     scrolledDistance += (coords.x + actor.width) - (width - paddingRight)
             }
+
             CustomDirection.RIGHT -> {
                 if (coords.x - paddingLeft < 0)
                     scrolledDistance -= coords.x - paddingLeft
@@ -748,7 +790,8 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
     ): Actor? {
         val a = scrollBarBackground
         if ((x >= paddingLeft && y >= paddingBottom && x < width - paddingRight && y < height - paddingTop) ||
-            (a != null && a.x <= x && a.y <= y && a.x + a.width >= x && a.y + a.height >= y))
+            (a != null && a.x <= x && a.y <= y && a.x + a.width >= x && a.y + a.height >= y)
+        )
             return super.hit(x, y, touchable)
         return null
     }

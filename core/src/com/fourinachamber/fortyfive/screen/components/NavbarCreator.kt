@@ -20,6 +20,7 @@ object NavbarCreator {
 
     const val navbarZIndex = 1000
     const val navbarFocusGroup = "navbar_selectors"
+    const val navbarOpenScreenState = "navbarIsOpen"
 
     fun ScreenCreator.getSharedNavBar(
         worldWidth: Float,
@@ -207,12 +208,14 @@ object NavbarCreator {
                 isOpen = false
                 timeline.appendAction(obj.closeTimelineCreator().asAction())
                 screen.escapeSelectionHierarchy(deselectActors = false)
+                timeline.appendAction(Timeline.timeline { screen.leaveState(navbarOpenScreenState) }.asAction())
             }
 
             onSelectChange { _, _ ->
                 if (isSelected) {
                     events.fire(ChangeBlackBackground(true))
                     timeline.appendAction(obj.openTimelineCreator().asAction())
+                    timeline.appendAction(Timeline.timeline { screen.enterState(navbarOpenScreenState) }.asAction())
                     isOpen = true
                 } else {
                     events.fire(CloseNavBarButtons)
