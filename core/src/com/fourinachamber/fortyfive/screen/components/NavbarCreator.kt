@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
@@ -49,11 +50,13 @@ object NavbarCreator {
                 isVisible = show
             }
             isVisible = false
-//            touchable = Touchable.enabled //TODO this
+            touchable = Touchable.enabled
             onClick {
                 if (!isVisible) return@onClick
-                navBarEvents.fire(CloseNavBarButtons)
                 isVisible = false
+                val box = screen.namedActorOrError("navbar_buttonParent") as CustomBox
+                val c =  box.children.filterIsInstance<FocusableActor>().firstOrNull { it.isSelected } ?: return@onClick
+                screen.changeSelectionFor(c as Actor)
             }
         }
 
@@ -140,6 +143,7 @@ object NavbarCreator {
         }
 
         box {
+            name("navbar_buttonParent")
             fixedZIndex = -1
             relativeWidth(100f)
             relativeHeight(50f)
