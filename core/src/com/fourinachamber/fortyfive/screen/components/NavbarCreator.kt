@@ -49,9 +49,9 @@ object NavbarCreator {
                 isVisible = show
             }
             isVisible = false
+//            touchable = Touchable.enabled //TODO this
             onClick {
                 if (!isVisible) return@onClick
-                println("clicked on kill")
                 navBarEvents.fire(CloseNavBarButtons)
                 isVisible = false
             }
@@ -237,8 +237,8 @@ object NavbarCreator {
             val enterMap = (map.startNode.event as? EnterMapMapEvent)?.targetMap
             val exitMap = (map.endNode.event as? EnterMapMapEvent)?.targetMap
             if (enterMap == null || exitMap == null) {
-                label("red_wing", "You are on a road", color = Color.WHITE){
-                    positionType=PositionType.ABSOLUTE
+                label("red_wing", "You are on a road", color = Color.WHITE) {
+                    positionType = PositionType.ABSOLUTE
                 }
             } else {
                 label("red_wing", "Road between", color = Color.WHITE) {
