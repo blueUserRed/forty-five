@@ -8,7 +8,6 @@ import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import kotlin.math.max
 
 /**
  * an entry for the [KeyInputMap]
@@ -64,14 +63,16 @@ class KeyInputMap(
                     .forEach { keyEntry ->
                         if (bestCandidatePriority < entryList.priority ||
                             (bestCandidatePriority == entryList.priority &&
-                                    (bestCandidateModifiers?.size?: 0) < keyEntry.modifierKeys.size)
+                                    (bestCandidateModifiers?.size?: -1) < keyEntry.modifierKeys.size)
                         ) {
                             bestCandidate = keyEntry.action ?: entryList.defaultAction
                             bestCandidatePriority = entryList.priority
                             bestCandidateModifiers = keyEntry.modifierKeys
                         } else {
-                            FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority and modifier length!")
-                            return false
+                            if (bestCandidatePriority == entryList.priority && (bestCandidateModifiers?.size?: -1) == keyEntry.modifierKeys.size){
+                                FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority and modifier length!")
+                                return false
+                            }
                         }
                     }
             }
@@ -183,10 +184,11 @@ class KeyInputMap(
         private fun getDefaultList(): List<KeyInputMapEntry> {
             val entries = mutableListOf<KeyInputMapEntry>()
             val maxPriority = (1 shl 30)
-            val defaultPriority = maxPriority - 1
+            val defaultHighPriority = maxPriority - 1
+            val defaultLowPriority = 10
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultHighPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.F),
@@ -197,7 +199,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultLowPriority,
                     KeyInputCondition.Always,
                     listOf(KeyInputMapKeyEntry(Keys.TAB)),
                     KeyActionFactory.getAction("FocusNext")
@@ -205,7 +207,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultLowPriority,
                     KeyInputCondition.Always,
                     listOf(KeyInputMapKeyEntry(Keys.TAB, modifierKeys = listOf(Keys.SHIFT_LEFT))),
                     KeyActionFactory.getAction("FocusPrevious")
@@ -213,7 +215,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultLowPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.W),
@@ -226,7 +228,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultLowPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.SPACE),
@@ -238,7 +240,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultHighPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.T),
@@ -248,7 +250,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultHighPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.LEFT),
@@ -258,7 +260,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultHighPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.RIGHT),
@@ -268,7 +270,7 @@ class KeyInputMap(
             )
             entries.add(
                 KeyInputMapEntry(
-                    priority = defaultPriority,
+                    priority = defaultLowPriority,
                     KeyInputCondition.Always,
                     listOf(
                         KeyInputMapKeyEntry(Keys.E),

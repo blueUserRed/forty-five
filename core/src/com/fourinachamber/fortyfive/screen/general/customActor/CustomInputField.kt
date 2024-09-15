@@ -39,7 +39,7 @@ open class CustomInputField(
     defText: String,
     val labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
-) : CustomLabel(screen, defText, labelStyle, true, partOfHierarchy) {
+) : CustomLabel(screen, defText, labelStyle, true, partOfHierarchy=partOfHierarchy) {
     //TODO ctrl+Z
     //TODO fix if leaved / unfocused
     //TODO add on

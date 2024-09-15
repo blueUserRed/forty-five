@@ -207,10 +207,7 @@ class DetailMapWidget(
             val screenDragged = screenDragged
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
-            if (movePlayerTo != null) {
-                finishMovement()
-                return
-            }
+
             pointToNode?.let { goToNode(it) }
         }
     }
@@ -319,6 +316,10 @@ class DetailMapWidget(
     }
 
     private fun goToNode(node: MapNode) {
+        if (movePlayerTo != null) {
+            finishMovement()
+            return
+        }
         val lastMapNode = MapManager.lastMapNode
         if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
             FortyFiveLogger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
@@ -544,6 +545,23 @@ class DetailMapWidget(
         playerPos = scaledNodePos(playerNode) + playerOffset
     }
 
+
+    fun goToDirFromKeys(vec: Vector2) {
+        var bestMatch: MapNode? = null
+        var bestMatchValue = -1f
+        val playerNodePosition = scaledNodePos(playerNode)
+        playerNode.edgesTo.forEach { node ->
+            val nodeDirection = (scaledNodePos(node) - playerNodePosition).unit
+            val result =  nodeDirection.angleRad(vec)
+            if (result > bestMatchValue) {
+                bestMatch = node
+                bestMatchValue = result
+            }
+        }
+
+        bestMatch?.let { goToNode(it) }
+    }
+
     private fun finishMovement() {
         val movePlayerTo = movePlayerTo ?: return
         val playerNode = playerNode
@@ -672,6 +690,7 @@ class DetailMapWidget(
         addActorStyles(screen)
         addMapStyles(screen)
     }
+
 
     data class PlayerChangedNodeEvent(
         val newNode: MapNode

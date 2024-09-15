@@ -1,11 +1,7 @@
 package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Action
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
-import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import onj.builder.buildOnjObject
 import onj.value.OnjNamedObject
@@ -167,10 +163,10 @@ class AdvancedTextParser(
         fun asOnjObject(): OnjObject
 
         companion object {
-            fun getFromOnj(screen: OnjScreen, onj: OnjNamedObject): AdvancedTextEffect {
+            fun getFromOnj(onj: OnjNamedObject): AdvancedTextEffect {
                 return when (onj.name) {
                     "Color" -> AdvancedColorTextEffect(onj)
-                    "Font" -> AdvancedFontTextEffect(screen, onj)
+                    "Font" -> AdvancedFontTextEffect(onj)
                     "FontScale" -> AdvancedFontScaleTextEffect(onj)
                     "Action" -> AdvancedActionTextEffect(onj)
                     else -> throw Exception("Unknown Text Effect: ${onj.name}")
@@ -203,15 +199,13 @@ class AdvancedTextParser(
         }
 
         class AdvancedFontTextEffect(
-            private val screen: OnjScreen,
             override val indicator: String,
             private val fontName: String
         ) : AdvancedTextEffect {
 
             override val overridesOthers: Boolean = true
 
-            constructor(screen: OnjScreen, data: OnjObject) : this(
-                screen,
+            constructor(data: OnjObject) : this(
                 data.get<String>("indicator"),
                 data.get<String>("font")
             )

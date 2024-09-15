@@ -12,8 +12,10 @@ import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondit
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -40,7 +42,6 @@ class HealOrMaxHPScreen : ScreenCreator() {
     )
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-
         getHealOrMaxHPFocusableParent()
     )
 
@@ -49,15 +50,15 @@ class HealOrMaxHPScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("healOrMaxHP_selection")
+                    groups = listOf("healOrMaxHP_selection", navbarFocusGroup)
                 ),
                 SelectionTransition(
-                    TransitionType.Seamless,
+                    TransitionType.LastResort,
                     condition = SelectionTransitionCondition.Screenstate("healOrMaxHP_optionSelected"),
                     groups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept")
                 ),
             ),
-            startGroup = "healOrMaxHP_selection",
+            startGroups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept", navbarFocusGroup),
         )
     }
 
@@ -135,12 +136,12 @@ class HealOrMaxHPScreen : ScreenCreator() {
                     if (state == "healOrMaxHP_optionSelected") {
                         if (entered) {
                             backgroundHandle = "heal_or_max_accept"
-                            isFocusable = true
+                            setFocusableTo(true,this)
                             isDisabled = false
                             isSelectable = true
                         } else {
                             isDisabled = true
-                            isFocusable = false
+                            setFocusableTo(false,this)
                             isSelectable = false
                             backgroundHandle = "heal_or_max_accept_invalid"
                         }
@@ -163,10 +164,12 @@ class HealOrMaxHPScreen : ScreenCreator() {
             }
         }
 
-        actor(getSharedNavBar(worldWidth)) {
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
+        actor(settings)
     }
 
 
@@ -212,14 +215,13 @@ class HealOrMaxHPScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.CENTER
         backgroundHandle = "heal_or_max_selector_background"
         touchable = Touchable.enabled
-        isFocusable = true
+        setFocusableTo(true,this)
         isSelectable = true
         group = "healOrMaxHP_selection"
 
         dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
         onSelectChange { _, new ->
             if (isSelected) {
-                screen.deselectAllExcept(this)
                 screen.enterState("healOrMaxHP_optionSelected")
             }
             if (new.isEmpty()) {

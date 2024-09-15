@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
+import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import kotlin.reflect.KClass
@@ -88,8 +89,10 @@ class QuitGameEvent : Event()
 class AbandonRunEvent : Event()
 class ResetGameEvent : Event()
 
-class FocusChangeEvent(val old: Actor?, val new: Actor?) : Event()
+class FocusChangeEvent(val old: Actor?, val new: Actor?, val fromMouse: Boolean = true) : Event()
 class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>, val fromMouse: Boolean = true) : Event()
+
+class DetailDisplayStateChange(val displayStarted: Boolean = true) : Event()
 
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
@@ -141,6 +144,17 @@ inline fun Actor.onFocusChange(crossinline block: (Actor?, Actor?) -> Unit) {
         true
     }
 }
+inline fun Actor.onFocus(crossinline block: (Boolean) -> Unit) {
+    this.addListener { event ->
+        if (event !is FocusChangeEvent) return@addListener false
+        if (this is KotlinStyledActor) {
+            if (!this.isFocusable) throw RuntimeException("You tried to focus an unfocusable Element") // this should never happen
+            isFocused = this == event.new
+        }
+        block(event.fromMouse)
+        true
+    }
+}
 
 inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>) -> Unit) {
     this.addListener { event ->
@@ -154,6 +168,7 @@ inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>,
         true
     }
 }
+
 inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>, Boolean) -> Unit) {
     this.addListener { event ->
         if (event !is SelectChangeEvent) return@addListener false
@@ -180,5 +195,13 @@ inline fun Actor.onSelect(crossinline block: @MainThreadOnly () -> Unit) {
             }
         }
         false
+    }
+}
+
+inline fun <T> T.onDetailDisplayStateChange(crossinline block: @MainThreadOnly (Boolean) -> Unit) where T : DisplayDetailActor, T : Actor {
+    this.addListener { event ->
+        if (event !is DetailDisplayStateChange) return@addListener false
+        block(event.displayStarted)
+        true
     }
 }

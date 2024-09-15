@@ -14,21 +14,20 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
-import com.fourinachamber.fortyfive.screen.DropShadow
-import com.fourinachamber.fortyfive.screen.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
-import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
 
 class ShopScreen : ScreenCreator() {
 
-    //TODO logic addToBackpack extends when needed finish, add Cards to shop
-
     //TODO  children in CustomFocusableBox autoscroll + bar drag and drop
+    //TODO check reroll
 
     override val name: String = "shopScreen"
 
@@ -50,6 +49,7 @@ class ShopScreen : ScreenCreator() {
     private val addToDeckWidgetName: String = "shop_addToDeck"
     private val addToBackpackWidgetName: String = "shop_addToBackpack"
     private val shopPersonWidgetName: String = "shop_personWidget"
+    private val rerollWidgetName: String = "shop_rerollWidget"
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
 
@@ -61,14 +61,14 @@ class ShopScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("shop_leave", "shop_cards")
+                    groups = listOf("shop_leave", "shop_cards", "shop_cards_first", "shop_reroll", navbarFocusGroup)
                 ),
                 SelectionTransition(
-                    TransitionType.Prioritized,
-                    groups = listOf("shop_cards")
+                    TransitionType.InScrollableBox,
+                    groups = listOf("shop_cards_first", "shop_cards")
                 )
             ),
-            startGroup = "shop_cards",
+            startGroups = listOf("shop_cards_first", "shop_cards", navbarFocusGroup),
         )
     }
 
@@ -83,7 +83,8 @@ class ShopScreen : ScreenCreator() {
             cardsParentName,
             addToDeckWidgetName,
             addToBackpackWidgetName,
-            shopPersonWidgetName
+            shopPersonWidgetName,
+            rerollWidgetName,
         ),
         BiomeBackgroundScreenController(screen, true)
     )
@@ -135,6 +136,7 @@ class ShopScreen : ScreenCreator() {
                 paddingLeft = 30f
                 paddingTop = 15f
                 paddingBottom = 30f
+//                addTestChildren()
                 addScrollbarFromDefaults(CustomDirection.RIGHT, "backpack_scrollbar", "backpack_scrollbar_background")
             }
 
@@ -146,12 +148,33 @@ class ShopScreen : ScreenCreator() {
                 setFontScale(0.7f)
                 syncWidth()
             }
+
+            label(
+                "red_wing",
+                "reroll Shop: {shop.currentRerollPrice}\$",
+                isTemplate = true,
+                color = Color.FortyWhite
+            ) {
+                name(rerollWidgetName)
+                setFontScale(0.7f)
+                width = 200F
+                setAlignment(Align.center)
+                positionType = PositionType.ABSOLUTE
+                onSelect { screen.findController<ShopScreenController>()?.rerollShop() }
+                group = "shop_reroll"
+                onLayoutAndNow {
+                    x = (parent.width - width) / 2
+                    y = 70F
+                }
+                addButtonDefaults()
+            }
         }
 
         image {
             this.name(shopPersonWidgetName)
             reportDimensionsWithScaling = true
             fixedZIndex = 100
+            touchable = Touchable.disabled
             onLayout {
                 val loadedDrawable1 = loadedDrawable ?: return@onLayout
                 width = loadedDrawable1.minWidth * scaleX
@@ -160,48 +183,50 @@ class ShopScreen : ScreenCreator() {
         }
 
 
-        actor(getSharedNavBar(worldWidth)) {
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        actor(
+            getSharedNavBar(
+                worldWidth,
+                worldHeight,
+                listOf(settingsObject, settingsObject, settingsObject),
+                screen
+            )
+        ) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
+        actor(settings)
     }
 
-       private fun Group.addRandomChildren() {
+    private fun Group.addTestChildren() {
         fun CustomBox.addBasicStyles() {
             val size = 150f
             val listOf = listOf("shop_targets")
             width = size
             height = size
             targetGroups = listOf
-            isDraggable = true
+            makeDraggable(this)
             group = "shop_cards"
-            dropShadow = DropShadow(Color.Green, showDropShadow = false)
             styles(
                 normal = {
-                    dropShadow?.showDropShadow = false
+                    debug = isFocused
                 },
                 focused = {
-                    dropShadow?.color = Color.Red
-                    dropShadow?.showDropShadow = true
-                },
-                selected = {
-                    dropShadow?.color = Color.Yellow
-                    dropShadow?.showDropShadow = true
-                },
-                selectedAndFocused = {
-                    dropShadow?.color = Color.Yellow.interpolate(Color.Red)
-                    dropShadow?.showDropShadow = true
+                    debug = isFocused
                 }
             )
             bindDragging(this, screen)
             resetCondition = { true }
+            onFocus { if (!it) (parent as CustomScrollableBox).scrollTo(this) }
         }
 
-//        box {
-//            backgroundHandle = "card%%leadersBullet"
-//            name("leadersBullet")
-//            addBasicStyles()
-//        }
+        for (i in 0..20) {
+            box {
+                backgroundHandle = "card%%bullet"
+                name("bullet_$i")
+                addBasicStyles()
+            }
+        }
     }
 
     private fun Group.textsAtTheTop(childrenSize: Float) = box {
@@ -235,10 +260,11 @@ class ShopScreen : ScreenCreator() {
             }
 
             box {// leave
+                name("shop_back_button_name")
                 backgroundHandle = "shop_back_button"
                 width = 200F
-                isFocusable = true
                 isSelectable = true
+                setFocusableTo(true, this)
                 group = "shop_leave"
                 relativeHeight(70F)
                 onFocusChange { _, _ ->
@@ -246,6 +272,7 @@ class ShopScreen : ScreenCreator() {
                 }
                 onSelect { FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen")) }
             }
+
         }
 
         image { //line between
@@ -264,11 +291,13 @@ class ShopScreen : ScreenCreator() {
             name(messageWidgetName)
             relativeWidth(100f)
             syncHeight()
+            fitContentHeight = true
         }
     }
 
 
     private fun Group.dropTarget(yStart: Float, textureName: String, actorName: String) = image {
+
         name(actorName)
         relativeHeight(40F)
         relativeWidth(30F)
@@ -276,11 +305,10 @@ class ShopScreen : ScreenCreator() {
         x = -width
         backgroundHandle = textureName
         fixedZIndex = 200
-        touchable = Touchable.enabled
-        isSelectable = true
-        isFocusable = true
+        makeDraggable(this)
+        isDraggable = false
         group = "shop_targets"
-        bindDroppable(this, screen, listOf("shop_cards"))
+        bindDroppable(this, screen, listOf("shop_cards", "shop_cards_first"))
         val distanceNotSelected = -20F
         styles(
             focused = { addAction(getAction(0F, y)) },
@@ -290,7 +318,8 @@ class ShopScreen : ScreenCreator() {
             }
         )
         onDragAndDrop.add { source, target ->
-            val controller = getScreenControllers().filterIsInstance<ShopScreenController>().first()
+            screen.escapeSelectionHierarchy()
+            val controller = screen.findController<ShopScreenController>() ?: return@add
             controller.buyCard(source, target.name == addToDeckWidgetName)
         }
         screen.addOnScreenStateChangedListener { entered, state ->

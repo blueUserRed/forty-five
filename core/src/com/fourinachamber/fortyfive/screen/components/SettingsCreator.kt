@@ -2,6 +2,9 @@ package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
+import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -21,6 +24,7 @@ object SettingsCreator {
             forcedPrefHeight = worldHeight
             syncDimensions()
             backgroundHandle = "settings_background"
+            fixedZIndex = NavbarCreator.navbarZIndex + 1
 
             onLayout { x = parent.width / 2 - width / 2 }
             y = -height
@@ -33,7 +37,7 @@ object SettingsCreator {
             }
 
             fun getAction(to: Float) = MoveToAction().also {
-                it.duration = 0.4f
+                it.duration = 0.2f
                 it.interpolation = Interpolation.pow2In
                 it.y = to
                 it.x = x
@@ -44,6 +48,12 @@ object SettingsCreator {
                 Timeline.timeline {
                     action {
                         addAction(action)
+                        screen.addToSelectionHierarchy(
+                            FocusableParent(
+                                listOf(SelectionTransition(groups = listOf(NavbarCreator.navbarFocusGroup)))
+                                //TODO add groups for settings
+                            )
+                        )
                     }
                     delayUntil { action.isComplete }
                 }
