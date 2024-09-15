@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -22,6 +23,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.percent
+
 class ShopScreen : ScreenCreator() {
 
     //TODO  children in CustomFocusableBox autoscroll + bar drag and drop
@@ -63,10 +65,10 @@ class ShopScreen : ScreenCreator() {
                 ),
                 SelectionTransition(
                     TransitionType.InScrollableBox,
-                    groups = listOf("shop_cards_first","shop_cards")
+                    groups = listOf("shop_cards_first", "shop_cards")
                 )
             ),
-            startGroups = listOf("shop_cards_first","shop_cards", navbarFocusGroup),
+            startGroups = listOf("shop_cards_first", "shop_cards", navbarFocusGroup),
         )
     }
 
@@ -135,8 +137,7 @@ class ShopScreen : ScreenCreator() {
                 paddingTop = 15f
                 paddingBottom = 30f
 //                addTestChildren()
-//                scrollDirectionStart = CustomDirection.BOTTOM
-                addScrollbarFromDefaults(CustomDirection.LEFT, "backpack_scrollbar", "backpack_scrollbar_background")
+                addScrollbarFromDefaults(CustomDirection.RIGHT, "backpack_scrollbar", "backpack_scrollbar_background")
             }
 
             label(
@@ -173,6 +174,7 @@ class ShopScreen : ScreenCreator() {
             this.name(shopPersonWidgetName)
             reportDimensionsWithScaling = true
             fixedZIndex = 100
+            touchable = Touchable.disabled
             onLayout {
                 val loadedDrawable1 = loadedDrawable ?: return@onLayout
                 width = loadedDrawable1.minWidth * scaleX
@@ -182,7 +184,14 @@ class ShopScreen : ScreenCreator() {
 
 
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsObject, settingsObject, settingsObject), screen)) {
+        actor(
+            getSharedNavBar(
+                worldWidth,
+                worldHeight,
+                listOf(settingsObject, settingsObject, settingsObject),
+                screen
+            )
+        ) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
@@ -208,10 +217,10 @@ class ShopScreen : ScreenCreator() {
             )
             bindDragging(this, screen)
             resetCondition = { true }
-            onFocus { if (!it) ( parent as CustomScrollableBox).scrollTo(this) }
+            onFocus { if (!it) (parent as CustomScrollableBox).scrollTo(this) }
         }
 
-        for (i in 0..20){
+        for (i in 0..20) {
             box {
                 backgroundHandle = "card%%bullet"
                 name("bullet_$i")
