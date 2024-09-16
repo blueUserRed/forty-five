@@ -1174,7 +1174,8 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  */
 open class CustomHorizontalGroup(
     override val screen: OnjScreen
-) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor {
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
+    KotlinStyledActor {
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
@@ -1182,6 +1183,19 @@ open class CustomHorizontalGroup(
     override var logicalOffsetY: Float = 0F
 
     override var fixedZIndex: Int = 0
+
+    override var marginTop: Float = 0F
+    override var marginBottom: Float = 0F
+    override var marginLeft: Float = 0F
+    override var marginRight: Float = 0F
+    override var positionType: PositionType = PositionType.RELATIV
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false
+    override var isFocused: Boolean = false
+    override var isSelectable: Boolean = false
+    override var isSelected: Boolean = false
+    override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean = false
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -1225,7 +1239,6 @@ open class CustomHorizontalGroup(
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
     override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
-
 }
 
 /**
@@ -1323,12 +1336,12 @@ open class CustomGroup(
         batch ?: return
         this.x += drawOffsetX
         this.y += drawOffsetY
-        if (batch.color!=color || parentAlpha != 1f){
+        if (batch.color != color || parentAlpha != 1f) {
             val batchColor = batch.color.cpy()
             batch.setColor(color.r, color.g, color.b, color.a * parentAlpha)
             drawBackground(batch)
             batch.color = batchColor
-        }else{
+        } else {
             drawBackground(batch)
         }
 

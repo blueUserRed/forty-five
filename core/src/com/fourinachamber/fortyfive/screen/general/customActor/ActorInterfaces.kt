@@ -221,7 +221,7 @@ interface FocusableActor : HoverStateActor {
     }
 
     fun setFocusableTo(newVal: Boolean, actor: Actor) {
-        if (actor !is FocusableActor) throw RuntimeException("tried to make non Focusable Element focusbale")
+        if (actor !is FocusableActor) throw RuntimeException("tried to set focusbale of non Focusable Element: ${actor.javaClass.name}")
         if (actor.isFocused && !newVal && actor is HasOnjScreen) actor.screen.focusedActor = null
         if (newVal) actor.touchable = Touchable.enabled
         actor.isFocusable = newVal

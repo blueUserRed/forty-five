@@ -111,7 +111,7 @@ class Selector(
         (bindTarget.setter as (Any) -> Unit)(options[curOptionIndex].second)
     }
 
-    private fun onClick(x: Float): Unit = when {
+    fun onClick(x: Float): Unit = when {
         x > width / 2 -> switch(1)
         else -> switch(-1)
     }
