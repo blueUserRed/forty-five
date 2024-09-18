@@ -372,8 +372,7 @@ class FromOnjScreenBuilder(
             },
             isDistanceField = widgetOnj.getOr("isDistanceFiled", true),
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
-            hasHoverDetail = widgetOnj.getOr("hasHoverDetail", false),
-            hoverText = widgetOnj.getOr("hoverText", ""),
+            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -443,8 +442,7 @@ class FromOnjScreenBuilder(
                 widgetOnj.get<Color>("color")
             ),
             isDistanceField = widgetOnj.getOr("isDistanceField", true),
-            hasHoverDetail = widgetOnj.getOr("hasHoverDetail", false),
-            hoverText = widgetOnj.getOr("hoverText", ""),
+            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
@@ -484,7 +482,6 @@ class FromOnjScreenBuilder(
                 widgetOnj.get<String>("rawText"),
                 widgetOnj.get<OnjArray?>("effects")?.value?.map {
                     AdvancedTextParser.AdvancedTextEffect.getFromOnj(
-                        screen,
                         it as OnjNamedObject
                     )
                 } ?: listOf())
@@ -692,8 +689,8 @@ class FromOnjScreenBuilder(
         }
 
         widgetOnj.ifHas<String>("hoverDetailActor") { name ->
-            actor as DisplayDetailsOnHoverActor
-            actor.actorTemplate = name
+            actor as DisplayDetailActor
+            throw RuntimeException("hover Details are only implemented in the kotlin ScreenCreator")
         }
 
         widgetOnj.ifHas<Long>("zIndex") {

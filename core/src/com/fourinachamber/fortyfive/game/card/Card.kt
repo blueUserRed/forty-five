@@ -488,9 +488,9 @@ class Card(
         }
 
         currentHoverTexts = currentEffects
-        val detailActor = actor.detailActor ?: return
+        val detailActor = actor.detailWidget?.detailActor ?: return
         detailActor as StyledActor
-        actor.updateDetailStates(detailActor)
+//        actor.updateDetailStates(detailActor)
     }
 
     private fun updateTexture(controller: GameController) =
@@ -698,17 +698,18 @@ class CardActor(
     val isDark: Boolean,
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
-) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
+) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailActor, HoverStateActor, HasOnjScreen, StyledActor,
     OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DragAndDroppableActor {
 
-    override val actor: Actor = this
-
-    override var actorTemplate: String = "card_hover_detail" // TODO: fix
-    override var detailActor: Actor? = null
 
     override var inAnimation: Boolean = false
 
-    override var mainHoverDetailActor: String? = "cardHoverDetailMain"
+    override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
+        screen,
+        effects = cardDetailEffects,
+        text = { listOf(card.shortDescription, card.flavourText) },
+        subtexts = getEffectTexts()
+    )
 
     override var fixedZIndex: Int = 0
 
@@ -729,14 +730,9 @@ class CardActor(
     override var isSelectable: Boolean = false
     override var isSelected: Boolean = false
     override var isDraggable: Boolean = false
-        set(value) {
-            field = value
-            isFocusable = true
-            isSelectable = true
-        }
     override var inDragPreview: Boolean = false
     override var targetGroups: List<String> = listOf()
-    override val resetCondition: ((Actor?) -> Boolean)? = null
+    override var resetCondition: ((Actor?) -> Boolean)? = null
     override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
 
     override var isHoveredOver: Boolean = false
@@ -760,14 +756,6 @@ class CardActor(
     private val markedSymbol: Promise<TransformDrawable> =
         ResourceManager.request(this, this, "card_symbol_marked")
 
-    override var isHoverDetailActive: Boolean
-        get() = (card.shortDescription.isNotBlank() ||
-                card.flavourText.isNotBlank() ||
-                card.getKeyWordsForDescriptions().isNotEmpty() ||
-                card.getAdditionalHoverDescriptions().isNotEmpty())
-                && enableHoverDetails
-        set(value) {}
-
     private var prevPosition: Vector2? = null
 
     private var inSelectionMode: Boolean = false
@@ -780,7 +768,7 @@ class CardActor(
     private var texture: Texture? = null
 
     init {
-        bindHoverStateListeners(this)
+        bindDefaultListeners(this, screen)
         registerOnFocusDetailActor(this, screen)
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
@@ -802,20 +790,20 @@ class CardActor(
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
-    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
-        val allKeys = card.getKeyWordsForDescriptions()
-        DetailDescriptionHandler
-            .descriptions
-            .filter { it.key in allKeys }
-            .forEach {
-                addHoverItemToParent(it.value.second, descriptionParent)
-            }
-        if (FortyFive.currentGame == null) return
-        card
-            .getAdditionalHoverDescriptions()
-            .filter { it.isNotBlank() }
-            .forEach { addHoverItemToParent(it, descriptionParent) }
-    }
+//    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
+//        val allKeys = card.getKeyWordsForDescriptions()
+//        DetailDescriptionHandler
+//            .descriptions
+//            .filter { it.key in allKeys }
+//            .forEach {
+//                addHoverItemToParent(it.value.second, descriptionParent)
+//            }
+//        if (FortyFive.currentGame == null) return
+//        card
+//            .getAdditionalHoverDescriptions()
+//            .filter { it.isNotBlank() }
+//            .forEach { addHoverItemToParent(it, descriptionParent) }
+//    }
 
     override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
         // This is a fix for the ChooseCardScreen, where for some reason the CardDragAndDrop sets the position first,
@@ -833,7 +821,7 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        setBoundsOfFocusDetailActor(screen)
+        detailWidget?.updateBounds(this)
         batch ?: return
         if (cardTexturePromise?.isResolved == true) {
             texture?.let { FortyFive.cardTextureManager.giveTextureBack(card) }
@@ -986,85 +974,40 @@ class CardActor(
         playSoundsOnHover = false
     }
 
-    override fun getFocusDetailData(): Map<String, OnjValue> = mapOf(
-        "description" to OnjString(
-            card.shortDescription.ifBlank { card.flavourText }
-        ),
-        "flavorText" to OnjString(
-            if (card.shortDescription.isBlank()) "" else card.flavourText
-        ),
-        "effects" to DetailDescriptionHandler.allTextEffects,
-//        "rotation" to OnjFloat(rotation.toDouble()),
-    )
 
     override fun positionChanged() {
         super.positionChanged()
-        setBoundsOfFocusDetailActor(screen)
+        detailWidget?.updateBounds(this)
     }
 
     override fun sizeChanged() {
         super.sizeChanged()
-        setBoundsOfFocusDetailActor(screen)
+        detailWidget?.updateBounds(this)
     }
 
-    override fun onDetailDisplayStarted() {
-        val detailActor = detailActor ?: return
-        detailActor as StyledActor
-        updateDetailStates(detailActor)
-        val tempInfoParent = getParentsForExtras(detailActor).second
-        card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
-        showExtraDescriptions(getParentsForExtras(detailActor).first)
+    private fun getEffectTexts(): () -> List<String> = {
+        val allKeys = card.getKeyWordsForDescriptions()
+        val texts: MutableList<String> = mutableListOf()
+
+        texts.addAll(DetailDescriptionHandler
+            .descriptions
+            .filter { it.key in allKeys }.map { it.value.second })
+
+        if (FortyFive.currentGame != null)
+            texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+        texts
     }
 
-    private fun addHoverItemToParent(
-        desc: String,
-        tempInfoParent: CustomFlexBox
-    ) {
-        screen.screenBuilder.generateFromTemplate( //TODO hardcoded value as name
-            "card_hover_detail_extra_description",
-            mapOf(
-                "description" to desc,
-                "effects" to DetailDescriptionHandler.allTextEffects
-            ),
-            tempInfoParent,
-            screen
-        )
-    }
-
-    /**
-     * the first actor is for the explanations, the second one is for the temporary changes
-     */
-    private fun getParentsForExtras(it: Actor): Pair<CustomFlexBox, CustomFlexBox> { //TODO hardcoded value as name
-        val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft") as CustomFlexBox
-        val right = screen.namedActorOrError("cardHoverDetailExtraParentRight") as CustomFlexBox
-        val top = screen.namedActorOrError("cardHoverDetailExtraParentTop") as CustomFlexBox
-        val directionsToUse =
-            if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
-                left to top
-            } else {
-                right to top
-            }
-        return directionsToUse
-    }
-
-    fun <T> updateDetailStates(hoverActor: T) where T : Actor, T : StyledActor {
-        if (card.flavourText.isBlank() || card.shortDescription.isBlank()) {
-            screen.leaveState("hoverDetailHasFlavorText")
-        } else {
-            screen.enterState("hoverDetailHasFlavorText")
-        }
-
-        if (card.getKeyWordsForDescriptions()
-                .isEmpty() && (FortyFive.currentGame == null || card.getAdditionalHoverDescriptions().isEmpty())
-        ) {
-            screen.leaveState("hoverDetailHasMoreInfo")
-        } else {
-            screen.enterState("hoverDetailHasMoreInfo")
-        }
-    }
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
 
+    companion object {
+        val cardDetailEffects by lazy {
+            DetailDescriptionHandler.allTextEffects.value.map {
+                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
+            }
+        }
+    }
 }

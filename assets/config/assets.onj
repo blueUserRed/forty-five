@@ -911,24 +911,16 @@ textures: [
         file: "blobs/common/button/disabled.png"
     },
     {
-        name: "hover_detail_big_background",
-        file: "blobs/cards/hover_detail/hover_detail_background.png"
+        name: "detail_widget_background_big",
+        file: "blobs/cards/detail_widget/detailwidget_big.png"
     },
     {
-        name: "hover_detail_small_background",
-        file: "blobs/cards/hover_detail/hover_detail_effect_background.png"
+        name: "detail_widget_background_small",
+        file: "blobs/cards/detail_widget/detailwidget_small.png"
     },
     {
-        name: "hover_detail_more_info",
-        file: "blobs/cards/hover_detail/hover_detail_more_info.png"
-    },
-    {
-        name: "hover_detail_big_background_glow",
-        file: "blobs/cards/hover_detail/hover_detail_big_glow.png"
-    },
-    {
-        name: "hover_detail_small_background_glow",
-        file: "blobs/cards/hover_detail/hover_detail_small_glow.png"
+        name: "detail_widget_more_info",
+        file: "blobs/cards/detail_widget/detailwidget_more_info.png"
     },
     {
         name: "loose_screen_background",
@@ -1360,12 +1352,6 @@ shaders: [
     {
         name: "other_drop_shadow_shader",
         file: "shaders/other_drop_shadow.glsl",
-        constantArgs: {
-        }
-    },
-    {
-        name: "better_drop_shadow_shader",
-        file: "shaders/better_drop_shadow.glsl",
         constantArgs: {
         }
     },

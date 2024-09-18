@@ -41,8 +41,8 @@ void main() {
     float multi = (1.0 + u_multiplier * 2.0);
     for (int i=-depthPerDist;i<=depthPerDist;i++){
         for (int j=-depthPerDist;j<=depthPerDist;j++){
-            vec2 calcPos = (v_texCoords.xy + vec2(float(i) * stepDist, float(j) * stepDist)) *multi  - u_multiplier;
-            if (!(calcPos.x <= 0 || calcPos.y <= 0 || calcPos.x > 1.0 || calcPos.y > 1.0)) alpha += texture2D(u_texture, calcPos).a;
+            vec2 calcPos = (v_texCoords.xy + vec2(float(i) * stepDist, float(j) * stepDist)) * multi  - u_multiplier;
+            if (calcPos.x >= 0.0 && calcPos.y >= 0.0 && calcPos.x <= 1.0 && calcPos.y <= 1.0) alpha += texture2D(u_texture, calcPos).a;
         }
     }
     float totalSum = float((depthPerDist * 2) * (depthPerDist * 2));

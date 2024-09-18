@@ -11,7 +11,6 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -21,7 +20,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.TemplateString
-import dev.lyze.flexbox.FlexBox
 import ktx.actors.alpha
 import onj.value.*
 import kotlin.random.Random
@@ -33,6 +31,7 @@ class ShopScreenController(
     private val addToDeckWidgetName: String,
     private val addToBackpackWidgetName: String,
     private val shopPersonWidgetName: String,
+    private val rerollWidgetName: String,
 ) : ScreenController() {
 
     private lateinit var context: ShopMapEvent
@@ -50,7 +49,6 @@ class ShopScreenController(
     private lateinit var random: Random
 
     override fun init(context: Any?) {
-//        //TODO comment back in before push
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
@@ -84,15 +82,13 @@ class ShopScreenController(
             textToShow.get<String>("rawText"),
             textToShow.get<OnjArray?>("effects")?.value?.map {
                 AdvancedTextParser.AdvancedTextEffect.getFromOnj(
-                    screen,
                     it as OnjNamedObject
                 )
             } ?: listOf()
         )
     }
 
-    @EventHandler
-    fun rerollShop(event: ButtonClickEvent, actor: CustomLabel) {
+    fun rerollShop() {
         val rerollPrice = context.currentRerollPrice
         if (SaveState.playerMoney < rerollPrice) return
         SaveState.payMoney(rerollPrice)
@@ -101,9 +97,8 @@ class ShopScreenController(
         context.selectedCards.clear()
         context.seed = Random(context.seed).nextLong()
         screen.removeAllStyleManagersOfChildren(cardsParentWidget)
-        cardsParentWidget.clear()
+        cardsParentWidget.children.filterIsInstance<CustomBox>().toMutableList().forEach { screen.removeActorFromScreen(it) }
         cardWidgets.clear()
-        labels.forEach { (it.parent as FlexBox).remove(it.styleManager!!.node) }
         labels.clear()
         addCards(context.types)
     }
@@ -130,7 +125,7 @@ class ShopScreenController(
         cardsToAdd.forEach { cardProto ->
             val card = cardProto.create(screen)
             screen.addDisposable(card)
-            addCard(card)
+            addCard(card, cardProto==cardsToAdd.first())
             if (cardProto !in availableCards) updateStateOfCard(card, setSoldOut = true)
             availableCards.remove(cardProto)
         }
@@ -140,51 +135,59 @@ class ShopScreenController(
             updateStateOfCard(cardActor.card, setBought = true, label = label)
         }
         TemplateString.updateGlobalParam("shop.currentRerollPrice", context.currentRerollPrice)
+        if (context.currentRerollPrice > SaveState.playerMoney) {
+            val customLabel = screen.namedActorOrNull(rerollWidgetName) as CustomLabel
+            customLabel.isDisabled = true
+            customLabel.setFocusableTo(false, customLabel)
+            customLabel.backgroundHandle = "common_button_disabled"
+        }
 
         cardsParentWidget.invalidate()
     }
 
-    private fun addCard(card: Card) {
+    private fun addCard(card: Card, isFirst: Boolean) {
 
         val curParent = CustomBox(screen)
         cardsParentWidget.addActor(curParent)
         curParent.width = curParent.parent.width * 0.21f
-        curParent.height = curParent.parent.height * 0.445f
+        curParent.height = curParent.parent.height * 0.42f
         curParent.onLayout {
             curParent.width = curParent.parent.width * 0.21f
-            curParent.height = curParent.parent.height * 0.445f
+            curParent.height = curParent.parent.height * 0.42f
         }
         curParent.flexDirection = FlexDirection.COLUMN
         curParent.minVerticalDistBetweenElements = 2f
         curParent.horizontalAlign = CustomAlign.CENTER
         screen.addNamedActor("cardsWidgetParent", curParent)
 
-
         curParent.addActor(card.actor)
-        screen.addNamedActor("Card_${curParent.children.size}", card.actor)
+        screen.addNamedActor("Card_${cardsParentWidget.children.size}", card.actor)
         curParent.onLayout {
-            card.actor.width = card.actor.parent.width
-            card.actor.height = card.actor.parent.height * 0.75f
+            val fl = card.actor.parent.height * 0.8f
+            card.actor.setSize(fl, fl)
         }
         card.actor.targetGroups = listOf("shop_targets")
-        card.actor.isDraggable = true
-        card.actor.group = "shop_cards"
-        card.actor.onFocusChange { _, _ -> card.actor.debug = card.actor.isFocused }
+        card.actor.makeDraggable(card.actor)
 
+        card.actor.group = if (isFirst) "shop_cards_first" else "shop_cards"
+        card.actor.resetCondition = { true }
+        card.actor.bindDragging(card.actor, screen)
+        card.actor.onFocus { if (!it) cardsParentWidget.scrollTo(curParent) }
 
         val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
-        val label = CustomLabel( screen,"${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
+        val label =
+            CustomLabel(screen, "${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
         curParent.addActor(label)
         label.setFontScale(0.8f)
         label.setAlignment(Align.center)
         screen.addNamedActor("CardLabel" + cardsParentWidget.children.size, label)
         cardWidgets.add(card.actor)
         labels.add(label)
+        updateStateOfCard(card, label = label)
     }
 
     private fun updateStatesOfUnboughtCards() {
-        cardWidgets.forEachIndexed { index, cardActor -> //TODO this and everything else once hoverdetails work fine
-            if (cardActor.inActorState("unbuyable")) return@forEachIndexed
+        cardWidgets.forEachIndexed { index, cardActor ->
             updateStateOfCard(cardActor.card, label = labels[index])
         }
     }
@@ -195,21 +198,26 @@ class ShopScreenController(
         setSoldOut: Boolean = false,
         label: CustomLabel = labels[cardWidgets.indexOf(card.actor)]
     ) {
-        label.alpha = 0.6f
+        fun CardActor.unavailable() {
+            this.alpha = 0.5f
+            this.isSelectable = false
+            this.isDraggable = false
+        }
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
+            if (label.alpha != 1f) return
             label.alpha = 0.6f
-            card.actor.alpha = 0.5f
+            card.actor.unavailable()
             return
         }
         if (setBought) {
             label.alpha = 0.9f
             label.setText("bought")
-            card.actor.alpha=0.5f
-
+            card.actor.unavailable()
         }
         if (setSoldOut) {
+            label.alpha = 0.9f
             label.setText("sold out")
-            card.actor.alpha = 0.5f
+            card.actor.unavailable()
         }
     }
 
@@ -230,20 +238,8 @@ class ShopScreenController(
         this.cardsParentWidget = cardsParentWidget
     }
 
-    private fun highestFlexParent(actor: Actor): CustomBox? {
-        var curActor = actor
-        val ladder = mutableListOf<Actor>()
-        while (curActor.parent != null) {
-            curActor = curActor.parent
-            ladder.add(curActor)
-        }
-        return ladder.last { it is CustomBox } as CustomBox?
-    }
-
     fun buyCard(actor: Actor, addToDeck: Boolean) {
         actor as CardActor
-        if (actor.inActorState("unbuyable")) return
-        if (actor.card.price > SaveState.playerMoney) return
         SaveState.payMoney(actor.card.price)
         SaveState.buyCard(actor.card.name)
         context.boughtIndices.add(cardWidgets.indexOf(actor))
@@ -251,16 +247,4 @@ class ShopScreenController(
         updateStateOfCard(actor.card, setBought = true)
         updateStatesOfUnboughtCards()
     }
-
-    fun displayBuyPopups() {
-        val curDeck = SaveState.curDeck
-        if (curDeck.canAddCards()) addToDeckWidget.enterActorState("display")
-        if (curDeck.hasEnoughCards()) addToBackpackWidget.enterActorState("display")
-    }
-
-    fun closeBuyPopups() {
-        addToDeckWidget.leaveActorState("display")
-        addToBackpackWidget.leaveActorState("display")
-    }
-
 }

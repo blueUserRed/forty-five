@@ -11,9 +11,10 @@ typealias SelectionGroup = String
 class FocusableParent(
     private val transitions: List<SelectionTransition>,
     var onLeave: () -> Unit = {},
-    private val startGroup: SelectionGroup? = null,
+    private val startGroups: List<String> = listOf(),
     groups: List<SelectionGroup> = listOf(),
-    var onSelection: (List<Actor>) -> Unit = {},
+    var onSelection: (List<Actor>, Boolean) -> Unit = {_,_->},
+    var maxSelectionMembers: Int = 1,
 ) {
     val groups: Set<SelectionGroup>
 
@@ -67,17 +68,18 @@ class FocusableParent(
         val oldFocusedActor = screen.focusedActor
 
         if (oldFocusedActor !is FocusableActor || !hasActor(oldFocusedActor)) {
-            return if (startGroup == null || focusableActors[startGroup]?.isNotEmpty() != true) {
+            val firstValidWithStartGroup = firstValidWithStartGroup()
+            return if (firstValidWithStartGroup == null) {
                 getFirstFocused(focusableActors.values.flatten()) as FocusableActor?
             } else {
-                getFirstFocused(focusableActors[startGroup]!!) as FocusableActor?
+                getFirstFocused(firstValidWithStartGroup) as FocusableActor?
             }
         }
         if (direction == null) return focusNext(screen)
         val oldPos = oldFocusedActor.centerPos()
         val polarDir = toPolarCoords(direction)
         val prios = getFocusablePrioritised(oldFocusedActor, screen)
-        val newActor = focusableActors
+        val data = focusableActors
             .values
             .flatten()
             .filter { it.isFocusable && it != oldFocusedActor }
@@ -92,12 +94,18 @@ class FocusableParent(
                         abs(curPolar.y - 2 * PI.toFloat() - polarDir.y)
                     )
                 )
-                val distMulti = distanceSpreadMultiplier(curPolar, it, prios)
+                val (distMulti, prio) = distanceSpreadMultiplier(curPolar, it, prios)
                 curPolar.x = (if (distMulti == Float.MAX_VALUE) distMulti else curPolar.x * distMulti)
-                curPolar to it
+                Triple(curPolar, it, prio)
             }
-        val res = newActor.filter { it.first.x < Float.MAX_VALUE }
-            .minWithOrNull(Comparator.comparingDouble<Pair<Vector2, Actor>?> { it.first.x.toDouble() }
+        val newInBox = data
+            .filter { it.third == TransitionType.InScrollableBox }
+            .filter { it.first.y < it.third.barrier }
+
+        val act= if (newInBox.isNotEmpty()) newInBox else data
+
+        val res = act.filter { it.first.x < Float.MAX_VALUE }
+            .minWithOrNull(Comparator.comparingDouble<Triple<Vector2, Actor, TransitionType>?> { it.first.x.toDouble() }
                 .thenComparingDouble { it.first.y.toDouble() })?.second
 
         return (res ?: screen.focusedActor) as FocusableActor?
@@ -107,16 +115,21 @@ class FocusableParent(
         v: Vector2,
         actor: Actor,
         prios: Map<TransitionType, List<FocusableActor>>
-    ): Float {
-        if (v.y > PI / 2) return Float.MAX_VALUE
+    ): Pair<Float, TransitionType> {
+        if (v.y > PI / 2) return Float.MAX_VALUE to TransitionType.Seamless
         var curMin: Float = Float.MAX_VALUE
+        var curType: TransitionType = TransitionType.Seamless
         TransitionType.entries().forEach {
             if ((actor as FocusableActor) in (prios[it] ?: listOf())) {
-                if (v.y < it.barrier) curMin = min(curMin, it.multiplier)
-                else curMin = min(curMin, ((1 + v.y-it.barrier).pow(it.exponent) * it.multiplier))
+                val newVal = if (v.y < it.barrier) it.multiplier
+                else ((1 + v.y - it.barrier).pow(it.exponent) * it.multiplier)
+                if (newVal < curMin) {
+                    curType = it
+                    curMin = newVal
+                }
             }
         }
-        return curMin
+        return curMin to curType
     }
 
     private fun toPolarCoords(v: Vector2): Vector2 {
@@ -141,16 +154,22 @@ class FocusableParent(
         if (oldFocusedActor != null && oldFocusedActor is Actor) {
             return getPreviousTabFocused(focusableActors.values.flatten(), oldFocusedActor) as FocusableActor?
         }
-        return if (startGroup == null || focusableActors[startGroup]?.isNotEmpty() != true) {
+        val firstValidWithStartGroup = firstValidWithStartGroup()
+        return if (firstValidWithStartGroup == null) {
             getLastFocused(focusableActors.values.flatten()) as FocusableActor?
         } else {
-            getLastFocused(focusableActors[startGroup]!!) as FocusableActor?
+            getLastFocused(firstValidWithStartGroup) as FocusableActor?
         }
+    }
+
+    private fun firstValidWithStartGroup(): List<FocusableActor>? {
+        val s = startGroups.firstOrNull() { focusableActors[it] != null } ?: return null
+        return focusableActors[s]!!
     }
 
     private fun getFirstFocused(actors: List<FocusableActor>): Actor? {
         var curBest: Actor? = null
-        var curBestPos:Float = Float.POSITIVE_INFINITY
+        var curBestPos: Float = Float.POSITIVE_INFINITY
         actors.filter { it.isFocusable }.filterIsInstance<Actor>().forEach {
             val newPos = getDistFromStart(it)
             if (curBestPos > newPos) {
@@ -206,13 +225,13 @@ class FocusableParent(
 
     private fun getDistFromStart(actor: Actor): Float {
         val pos = actor.centerPos()
-        if (pos.x+actor.width/2 < 0 || pos.y + actor.height/2 < 0) return Float.MAX_VALUE
+        if (pos.x + actor.width / 2 < 0 || pos.y + actor.height / 2 < 0) return Float.MAX_VALUE
         return ((pos.x * 3) + (pos.y))
     }
 
     private fun Actor.centerPos(): Vector2 {
-        val pos = Vector2(this.width / 2, -this.height / 2)
-        return localToScreenCoordinates(pos) //screen coords start on top left, that's why the Minus in front of height
+        val pos = Vector2(this.width / 2, this.height / 2)
+        return localToScreenCoordinates(pos) //screen coords start on top left
     }
 
     private fun getRelativePositionFromTarget(actor: Actor, target: Vector2): Vector2 {
@@ -222,6 +241,11 @@ class FocusableParent(
 
     fun hasActor(actor: Actor): Boolean {
         return actor in focusableActors.values.flatten().filterIsInstance<Actor>()
+    }
+
+    fun hasActorPrimary(actor: Actor?): Boolean {
+        if (actor == null) return false
+        return startGroups.any { focusableActors[it]?.filterIsInstance<Actor>()?.contains(actor) == true }
     }
 }
 
@@ -240,13 +264,13 @@ data class SelectionTransition(
 sealed class TransitionType(val exponent: Float, val barrier: Float, val multiplier: Float) {
 
     //this barrier is so big, that it is never the exponent and always just a multiplier 
-    data object Prioritized : TransitionType(3F, (PI / 4).toFloat(), 1 / 2F)
+    data object InScrollableBox : TransitionType(3F, (PI / 4).toFloat(), 1f)
 
     data object Seamless : TransitionType(4.5F, (PI / 4).toFloat(), 1F)
 
     data object LastResort : TransitionType(7F, 0F, 7F)
     companion object {
-        fun entries () = listOf(Prioritized, Seamless, LastResort)
+        fun entries() = listOf(InScrollableBox, Seamless, LastResort)
     }
 }
 

@@ -98,7 +98,7 @@ class ResourceDebugMenuPage : DebugMenuPage("Resources") {
 
 class MapDebugMenuPage : DebugMenuPage("Map") {
 
-    val walkEverywhere = debugButton("walk everywhere", Keys.E, false)
+    val walkEverywhere = debugButton("walk everywhere", Keys.R, false)
 
     override fun getText(screen: OnjScreen): String = """
         $walkEverywhere
