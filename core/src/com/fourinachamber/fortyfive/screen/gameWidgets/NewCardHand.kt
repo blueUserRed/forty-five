@@ -26,7 +26,10 @@ class NewCardHand(
         addActor(card.actor)
         invalidate()
         card.actor.group = cardFocusGroupName
-        card.actor.onFocusChange { _, _ -> println(card.name) }
+        card.actor.isFocusable = true
+        card.actor.isSelectable = true
+        card.actor.onFocusChange { _, _ -> println("focus: ${card.name}") }
+        card.actor.onSelectChange { _, _ -> println("select: ${card.name}") }
     }
 
     fun removeCard(card: Card) {
