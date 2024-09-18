@@ -119,7 +119,7 @@ class CardHand(
     }
 
     private fun updateCards() {
-        if (_cards.size == 0) return
+        if (_cards.isEmpty()) return
         val cardsLeft = _cards.size / 2
         val spacePerSide = (width - centerGap) / 2f
         val zIndexChanged =

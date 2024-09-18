@@ -80,7 +80,12 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-        changeToScreen(ConfigFileManager.screenBuilderFor("gameScreen"))
+        changeToScreen(ConfigFileManager.screenBuilderFor("gameScreen"), object : EncounterContext {
+            override val encounterIndex: Int = GameDirector.encounters.size - 5
+            override val forwardToScreen: String = "mapScreen"
+            override fun completed() {
+            }
+        })
         return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))

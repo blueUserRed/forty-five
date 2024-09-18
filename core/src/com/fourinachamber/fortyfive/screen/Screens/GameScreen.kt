@@ -4,10 +4,14 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
+import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.CardHand
+import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -50,19 +54,12 @@ class GameScreen : ScreenCreator() {
     }
 
     private val cardHand by lazy {
-        CardHand(
-            worldWidth * 0.6f,
-            596f * 0.22f,
-            0.5f,
+        NewCardHand(
+            screen,
             300f,
-            screen
-        ).apply {
-            hoveredCardScale = 1.3f
-            maxCardSpacing = 100f
-            startCardZIndicesAt = 100
-            hoveredCardZIndex = 101
-            draggedCardZIndex = 100
-        }
+            596f * 0.22f,
+            70f
+        )
     }
 
     override fun getRoot(): Group = newGroup {
@@ -103,16 +100,27 @@ class GameScreen : ScreenCreator() {
             name("cardHand")
             centerX()
             y = 0f
-            centerX()
-            syncDimensions()
+            width = worldWidth
         }
 
     }
 
 
-    override fun getScreenControllers(): List<ScreenController> = listOf(BiomeBackgroundScreenController(screen, false))
+    override fun getScreenControllers(): List<ScreenController> = listOf(
+        BiomeBackgroundScreenController(screen, false),
+        NewGameController(screen)
+    )
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(), screen))
 
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf()
+    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
+        FocusableParent(
+            listOf(
+                SelectionTransition(
+                    TransitionType.Seamless,
+                    groups = listOf(NewCardHand.cardFocusGroupName)
+                )
+            )
+        )
+    )
 }

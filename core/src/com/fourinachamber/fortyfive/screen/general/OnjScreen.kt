@@ -178,13 +178,13 @@ open class OnjScreen(
     fun focusNext(direction: Vector2? = null) {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = curSelectionParent.focusNext(direction, this)
-        this.focusedActor = focusableElement as Actor
+        this.focusedActor = focusableElement as Actor?
     }
 
     fun focusPrevious() {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = curSelectionParent.focusPrevious(this)
-        this.focusedActor = focusableElement as Actor
+        this.focusedActor = focusableElement as Actor?
     }
 
     private var awaitingConfirmationClick: Boolean = false

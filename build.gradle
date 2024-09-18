@@ -49,7 +49,6 @@ project(":desktop") {
         jcenter()
     }
 
-
     launch4j {
         mainClassName = 'com.fourinachamber.fortyfive.DesktopLauncher'
         icon = "${projectDir}/icons/myApp.ico"
@@ -73,6 +72,12 @@ project(":onj") {
 
 project(":core") {
     apply plugin: "kotlin"
+
+    kotlin {
+        sourceSets.all {
+            languageSettings.enableLanguageFeature("ExplicitBackingFields")
+        }
+    }
 
     dependencies {
         implementation project(":onj")
