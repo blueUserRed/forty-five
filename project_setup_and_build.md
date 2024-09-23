@@ -4,14 +4,21 @@
 
 ## Project Setup
 
-- Clone this repository to your machine
-- Open the repository as a project in IntelliJ
-- IntelliJ will set up Gradle, create Indices, etc. which will take a while
-- open a terminal, cd into the onj directory, and clone the following repository: https://github.com/blueUserRed/Onj.git
-- create the ``assets/textures/packed`` directory
-- execute the texturePacker gradle task
-- download the current release of .Forty-Five and copy the contents of the ``large_assets`` directory to `assets/large_assets`
+- execute the following code on your machine
+  ```shell
+  cd ~
+  git clone https://github.com/blueUserRed/forty-five.git
+  cd ./onj
+  git clone https://github.com/blueUserRed/Onj.git
+- copy the files from the [share](https://drive.google.com/drive/folders/1BAB1r4_ptZkCL3BoCwP0T3ynZVvJWGS_?usp=sharing) into assets (f.e. assets/blobs/animations/...)
+- Open the repository as a project in [Intellij](https://www.jetbrains.com/idea/download/) (scroll down for Community Version, it is free and has everything you need)
+- IntelliJ will set up Gradle, create Indices, etc. which will take a while (a few minutes)
 - start the game
+  - In Intellij in the project, on the right side, open gradle (the elephant)
+  - Go to forty-five => desktop => Tasks => other => run
+  - Double Click "run"
+
+# The Rest in this file might be outdated and could not work
 
 ## Project Build (automatically using build script)
 
