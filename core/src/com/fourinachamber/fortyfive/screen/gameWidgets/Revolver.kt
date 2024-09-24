@@ -10,10 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
-import com.fourinachamber.fortyfive.game.controller.GameController.*
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
-import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -54,7 +52,7 @@ class Revolver(
 
     override var fixedZIndex: Int = 0
 
-    var slotScale: Float? = null
+    var slotSize: Float? = null
 
     var cardZIndex: Int = 0
 
@@ -171,7 +169,7 @@ class Revolver(
 
     fun initDragAndDrop(dragAndDrop: DragAndDrop) {
         slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
+            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, animationDuration)
             slot.reportDimensionsWithScaling = true
             slot.ignoreScalingWhenDrawing = true
             addActor(slot)
@@ -184,7 +182,7 @@ class Revolver(
 
     fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
         slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
+            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, animationDuration)
             slot.reportDimensionsWithScaling = true
             slot.ignoreScalingWhenDrawing = true
             addActor(slot)
@@ -231,9 +229,7 @@ class Revolver(
     }
 
     private fun updateSlotsAndCards() {
-        val drawable = slots[0].drawable ?: return
-        val slotSize = drawable.minWidth * slotScale!!
-        val size = 2 * radius + slotSize + radiusExtension
+        val size = 2 * radius + radiusExtension
         prefWidth = size
         prefHeight = size
 //        width = prefWidth
@@ -243,8 +239,8 @@ class Revolver(
             val slot = slots[i]
             val angle = angleForIndex(i)
             slot.position(basePos, radius, angle)
-            slot.width = slotSize
-            slot.height = slotSize
+            slot.width = slotSize!!
+            slot.height = slotSize!!
         }
     }
 
@@ -337,7 +333,7 @@ class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
     drawableHandle: ResourceHandle,
-    scale: Float,
+    size: Float,
     screen: OnjScreen,
     private val animationDuration: Float
 ) : CustomImageActor(drawableHandle, screen), AnimationActor, KeySelectableActor {
@@ -356,9 +352,16 @@ class RevolverSlot(
     private var curAngle: Double = 0.0
 
     init {
-        setScale(scale)
+        width = size
+        height = size
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
+        isFocusable = true
+        makeDraggable(this)
+        group = revolverSlotFocusGroupName
+        bindDroppable(this, screen, listOf(NewCardHand.cardFocusGroupName))
+        onFocusChange { _, _ -> debug = isFocused }
+//        onSelectChange { _, _, selected -> println("selected $selected") }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -379,7 +382,7 @@ class RevolverSlot(
      */
     fun position(base: Vector2, r: Float, angle: Double) {
         drawable ?: return
-        val slotSize = drawable.minWidth * scaleX
+        val slotSize = width
         val dx = cos(angle) * r
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
@@ -462,6 +465,10 @@ class RevolverSlot(
             slot.position(base, radius, newAngle)
         }
 
+    }
+
+    companion object {
+        const val revolverSlotFocusGroupName: String = "revolverSlot"
     }
 
 }

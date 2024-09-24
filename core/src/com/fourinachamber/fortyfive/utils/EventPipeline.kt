@@ -6,10 +6,24 @@ import kotlin.reflect.cast
 class EventPipeline {
 
     private val watchers: MutableList<Pair<(Any) -> Unit, KClass<*>>> = mutableListOf()
+    private val linkedTo: MutableList<EventPipeline> = mutableListOf()
 
     fun fire(event: Any) {
         watchers.forEach { (callback, clazz) ->
             if (clazz.isInstance(event)) callback(clazz.cast(event))
+        }
+        linkedTo.forEach { it.fireFromLinked(event, mutableListOf(this)) }
+    }
+
+    private fun fireFromLinked(event: Any, previous: MutableList<EventPipeline>) {
+        watchers.forEach { (callback, clazz) ->
+            if (clazz.isInstance(event)) callback(clazz.cast(event))
+        }
+        linkedTo.forEach {
+            if (it in previous) return@forEach
+            previous.add(it)
+            it.fireFromLinked(event, previous)
+            previous.remove(it)
         }
     }
 
@@ -20,6 +34,11 @@ class EventPipeline {
 
     inline fun <reified T : Any> watchFor(noinline callback: (T) -> Unit) {
         watchFor(callback, T::class)
+    }
+
+    fun link(other: EventPipeline) {
+        linkedTo.add(other)
+        other.linkedTo.add(this)
     }
 
 }

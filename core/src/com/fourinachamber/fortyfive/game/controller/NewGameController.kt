@@ -19,11 +19,15 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.value.OnjArray
 
-class NewGameController(override val screen: OnjScreen) : ScreenController(), GameController {
+class NewGameController(
+    override val screen: OnjScreen,
+    val gameEvents: EventPipeline
+) : ScreenController(), GameController {
 
     private val gameDirector = GameDirector(this)
 
@@ -98,9 +102,10 @@ class NewGameController(override val screen: OnjScreen) : ScreenController(), Ga
 
         gameDirector.init()
 
+        gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent>(::cardDraggedOntoSlot)
+
         initCards()
         _cardStack.forEach { cardHand.addCard(it) }
-
     }
 
     override fun onShow() {
@@ -143,6 +148,11 @@ class NewGameController(override val screen: OnjScreen) : ScreenController(), Ga
         defaultBullet = cardPrototypes
             .firstOrNull { it.name == defaultBulletName }
             ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
+    }
+
+    private fun cardDraggedOntoSlot(cardDraggedOntoSlotEvent: NewCardHand.CardDraggedOntoSlotEvent) {
+        val (card, slot) = cardDraggedOntoSlotEvent
+        println("${card.name} ${slot.num}")
     }
 
     override fun cardSelectionPopupTimeline(

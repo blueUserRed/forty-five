@@ -156,6 +156,18 @@ inline fun Actor.onFocus(crossinline block: (Boolean) -> Unit) {
     }
 }
 
+inline fun Actor.onFocusEnter(crossinline block: () -> Unit) {
+    onFocusChange { old, new ->
+        if (new === this@onFocusEnter) block()
+    }
+}
+
+inline fun Actor.onFocusExit(crossinline block: () -> Unit) {
+    onFocusChange { old, new ->
+        if (old === this@onFocusExit) block()
+    }
+}
+
 inline fun Actor.onSelectChange(crossinline block: @MainThreadOnly (List<Actor>, List<Actor>) -> Unit) {
     this.addListener { event ->
         if (event !is SelectChangeEvent) return@addListener false

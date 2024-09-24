@@ -1,13 +1,19 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.FocusableActor
 import com.fourinachamber.fortyfive.screen.general.onFocusChange
+import com.fourinachamber.fortyfive.screen.general.onFocusEnter
+import com.fourinachamber.fortyfive.screen.general.onFocusExit
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.general.onSelectChange
+import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.between
 import kotlin.math.pow
 
 class NewCardHand(
@@ -20,16 +26,50 @@ class NewCardHand(
     private val leftSide: MutableList<Card> = mutableListOf()
     private val rightSide: MutableList<Card> = mutableListOf()
 
+    val events: EventPipeline = EventPipeline()
+
     fun addCard(card: Card) {
         if (leftSide.size < rightSide.size) leftSide.add(card)
         else rightSide.add(card)
-        addActor(card.actor)
+        val actor = card.actor
+        addActor(actor)
         invalidate()
-        card.actor.group = cardFocusGroupName
-        card.actor.isFocusable = true
-        card.actor.isSelectable = true
-        card.actor.onFocusChange { _, _ -> println("focus: ${card.name}") }
-        card.actor.onSelectChange { _, _ -> println("select: ${card.name}") }
+        actor.group = cardFocusGroupName
+        actor.isFocusable = true
+        actor.isSelectable = true
+        actor.fixedZIndex = zIndexFor(card)
+        resortZIndices()
+        actor.targetGroups = listOf(RevolverSlot.revolverSlotFocusGroupName)
+        actor.bindDragging(actor, screen)
+        actor.makeDraggable(actor)
+        actor.resetCondition = { true }
+        actor.onDragAndDrop.add { _, target ->
+            target as? RevolverSlot ?: return@add
+            events.fire(CardDraggedOntoSlotEvent(card, target))
+        }
+
+        actor.onFocusEnter {
+            actor.rotation = 0f
+            actor.y = actor.y.coerceIn(0f, height)
+            actor.width = cardSize * 1.4f
+            actor.height = cardSize * 1.4f
+            actor.fixedZIndex = 100
+            resortZIndices()
+        }
+        actor.onFocusExit {
+            actor.y = cardHeightFunc(actor.x)
+            actor.rotation = cardHeightFuncDerivative(actor.x) * 50f
+            actor.width = cardSize
+            actor.height = cardSize
+            actor.fixedZIndex = zIndexFor(card)
+            resortZIndices()
+        }
+    }
+
+    private fun zIndexFor(card: Card): Int {
+        var zIndex = leftSide.indexOf(card)
+        if (zIndex == -1) zIndex = 50 - rightSide.indexOf(card)
+        return zIndex
     }
 
     fun removeCard(card: Card) {
@@ -47,6 +87,10 @@ class NewCardHand(
 
     private fun evenOutCards() {
 
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        super.draw(batch, parentAlpha)
     }
 
     override fun layout() {
@@ -77,6 +121,9 @@ class NewCardHand(
     private fun cardHeightFuncDerivative(x: Float): Float = 0.16f - 0.0002f * x
 
     private fun cardHeightFunc(x: Float): Float = -(0.008f * (x - 800f)).pow(2)
+
+
+    data class CardDraggedOntoSlotEvent(val card: Card, val slot: RevolverSlot)
 
     companion object {
         const val cardFocusGroupName = "cardInCardHand"
