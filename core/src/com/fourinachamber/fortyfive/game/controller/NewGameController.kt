@@ -1,19 +1,22 @@
 package com.fourinachamber.fortyfive.game.controller
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameAnimation
 import com.fourinachamber.fortyfive.game.GameDirector
+import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
+import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
-import com.fourinachamber.fortyfive.screen.gameWidgets.CardHand
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
@@ -22,6 +25,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.plus
 import onj.value.OnjArray
 
 class NewGameController(
@@ -37,8 +41,7 @@ class NewGameController(
     override val playerLost: Boolean
         get() = TODO("Not yet implemented")
 
-    override val curReserves: Int
-        get() = TODO("Not yet implemented")
+    override var curReserves: Int = Config.baseReserves
 
     override val isUIFrozen: Boolean
         get() = TODO("Not yet implemented")
@@ -91,6 +94,9 @@ class NewGameController(
 
     private lateinit var defaultBullet: CardPrototype
 
+    private val mainTimeline: Timeline = Timeline().also { it.startTimeline() }
+    private val animTimelines: MutableList<Timeline> = mutableListOf()
+
     private val tutorialText: MutableList<GameDirector.GameTutorialTextPart> = mutableListOf()
 
     override fun init(context: Any?) {
@@ -102,10 +108,17 @@ class NewGameController(
 
         gameDirector.init()
 
-        gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent>(::cardDraggedOntoSlot)
+        gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletInRevolver(it.card, it.slot.num) }
 
         initCards()
         _cardStack.forEach { cardHand.addCard(it) }
+        updateReserves(Config.baseReserves)
+    }
+
+    private fun updateReserves(newReserves: Int, sourceActor: Actor? = null) {
+        val prevReserves = curReserves
+        curReserves = newReserves
+        gameEvents.fire(Events.ReservesChanged(prevReserves, newReserves, sourceActor, this))
     }
 
     override fun onShow() {
@@ -113,7 +126,7 @@ class NewGameController(
     }
 
     override fun update() {
-        super.update()
+        animTimelines.forEach(Timeline::updateTimeline)
     }
 
     private fun initCards() {
@@ -148,11 +161,6 @@ class NewGameController(
         defaultBullet = cardPrototypes
             .firstOrNull { it.name == defaultBulletName }
             ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
-    }
-
-    private fun cardDraggedOntoSlot(cardDraggedOntoSlotEvent: NewCardHand.CardDraggedOntoSlotEvent) {
-        val (card, slot) = cardDraggedOntoSlotEvent
-        println("${card.name} ${slot.num}")
     }
 
     override fun cardSelectionPopupTimeline(
@@ -245,8 +253,12 @@ class NewGameController(
         TODO("Not yet implemented")
     }
 
-    override fun cost(cost: Int, animTarget: Actor?): Boolean {
-        TODO("Not yet implemented")
+    override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
+        if (cost > curReserves) return false
+        SaveState.usedReserves += cost
+        FortyFiveLogger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
+        updateReserves(curReserves - cost, sourceActor = animTarget)
+        return true
     }
 
     override fun addTemporaryEncounterModifier(
@@ -276,7 +288,7 @@ class NewGameController(
     }
 
     override fun loadBulletInRevolver(card: Card, slot: Int) {
-        TODO("Not yet implemented")
+
     }
 
     override fun appendMainTimeline(timeline: Timeline) {
@@ -284,7 +296,8 @@ class NewGameController(
     }
 
     override fun dispatchAnimTimeline(timeline: Timeline) {
-        TODO("Not yet implemented")
+        animTimelines.add(timeline)
+        timeline.startTimeline()
     }
 
     override fun cardsInRevolver(): List<Card> {
@@ -303,11 +316,27 @@ class NewGameController(
         TODO("Not yet implemented")
     }
 
-    override fun titleOfCard(cardName: String): String {
-        TODO("Not yet implemented")
-    }
+    override fun titleOfCard(cardName: String): String = cardPrototypes.find { it.name == cardName }?.title
+        ?: throw RuntimeException("No card with name $cardName")
 
     override fun end() {
         super.end()
+    }
+
+    enum class Zone {
+        DECK, HAND, REVOLVER, AFTERLIVE
+    }
+
+    object Config {
+        const val baseReserves = 4
+    }
+
+    object Events {
+        data class ReservesChanged(
+            val old: Int,
+            val new: Int,
+            val sourceActor: Actor? = null,
+            val controller: GameController
+        )
     }
 }

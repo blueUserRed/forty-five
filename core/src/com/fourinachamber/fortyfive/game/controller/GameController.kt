@@ -69,7 +69,7 @@ interface GameController {
 
     fun gainReserves(amount: Int, source: Actor? = null)
 
-    fun cost(cost: Int, animTarget: Actor? = null): Boolean
+    fun tryPay(cost: Int, animTarget: Actor? = null): Boolean
 
     fun addTemporaryEncounterModifier(modifier: EncounterModifier, validityChecker: (GameController) -> Boolean)
 

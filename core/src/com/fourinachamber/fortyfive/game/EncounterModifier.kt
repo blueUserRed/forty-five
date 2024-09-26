@@ -152,7 +152,7 @@ sealed class EncounterModifier {
         }
 
         override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
-            controller.cost(1, controller.shootButton)
+            controller.tryPay(1, controller.shootButton)
         }
     }
 

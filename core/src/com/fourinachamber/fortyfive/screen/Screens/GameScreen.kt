@@ -1,21 +1,31 @@
 package com.fourinachamber.fortyfive.screen.screens
 
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
-import com.fourinachamber.fortyfive.screen.gameWidgets.CardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
+import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.plus
 
 class GameScreen : ScreenCreator() {
 
@@ -36,14 +46,18 @@ class GameScreen : ScreenCreator() {
 
     private val cardDragAndDrop = DragAndDrop()
 
+    val gameEvents: EventPipeline = EventPipeline()
+
+    private lateinit var reservesAnimationTarget: Actor
+
     private val revolver by lazy {
         Revolver(
             "revolver_drum",
             "revolver_slot_texture",
-            60f,
+            200f,
             screen
         ).apply {
-            slotScale = 0.22f
+            slotSize = 110f
             cardScale = 0.9f
             animationDuration = 0.2f
             radius = 140f
@@ -60,6 +74,10 @@ class GameScreen : ScreenCreator() {
             596f * 0.22f,
             70f
         )
+    }
+
+    init {
+        bindEventHandlers()
     }
 
     override fun getRoot(): Group = newGroup {
@@ -101,6 +119,49 @@ class GameScreen : ScreenCreator() {
             centerX()
             y = 0f
             width = worldWidth
+            gameEvents.link(events)
+        }
+
+        group {
+            backgroundHandle = "wood_box"
+            x = 70f
+            y = 180f
+            width = 120f
+            height = 120f
+            reservesAnimationTarget = this
+
+            image {
+                backgroundHandle = "reserves_texture"
+                width = 60f
+                height = 60f
+                x = 30f
+                y = 90f
+            }
+
+            label("red_wing", "0/0", Color.White) {
+                setFontScale(1.1f)
+                centerX()
+                centerY()
+                gameEvents.watchFor<NewGameController.Events.ReservesChanged> { (_, new) ->
+                    setText("${new}/${NewGameController.Config.baseReserves}")
+                }
+            }
+        }
+
+        group {
+            backgroundHandle = "wood_box"
+            x = worldWidth - 70f - 120f
+            y = 180f
+            width = 120f
+            height = 120f
+
+            image {
+                backgroundHandle = "deck_icon"
+                width = 60f
+                height = 60f
+                centerX()
+                centerY()
+            }
         }
 
     }
@@ -108,7 +169,7 @@ class GameScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
-        NewGameController(screen)
+        NewGameController(screen, gameEvents)
     )
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(), screen))
@@ -118,9 +179,56 @@ class GameScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf(NewCardHand.cardFocusGroupName)
+                    groups = listOf(NewCardHand.cardFocusGroupName, RevolverSlot.revolverSlotFocusGroupName)
+                ),
+                SelectionTransition(
+                    TransitionType.LastResort,
+                    groups = listOf(RevolverSlot.revolverSlotFocusGroupName),
                 )
             )
         )
     )
+
+    private fun orbAnimationTimeline(source: Actor, target: Actor, amount: Int): Timeline = Timeline.timeline {
+        val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
+        repeat(amount) {
+            action {
+                SoundPlayer.situation("orb_anim_playing", screen)
+                renderPipeline.addOrbAnimation(
+                    GraphicsConfig.orbAnimation(
+                        source.localToStageCoordinates(Vector2(0f, 0f)) +
+                                Vector2(source.width / 2, source.height / 2),
+                        target.localToStageCoordinates(Vector2(0f, 0f)) +
+                                Vector2(target.width / 2, target.height / 2),
+                        true,
+                        renderPipeline
+                    ))
+            }
+            delay(50)
+        }
+    }
+
+    private fun reservesPaidAnim(amount: Int, animTarget: Actor): Timeline =
+        orbAnimationTimeline(reservesAnimationTarget, animTarget, amount = amount)
+
+    private fun reservesGainedAnim(amount: Int, animSource: Actor): Timeline =
+        orbAnimationTimeline(animSource, reservesAnimationTarget, amount = amount)
+
+
+    private fun bindEventHandlers() {
+        gameEvents.watchFor<NewGameController.Events.ReservesChanged>(::reservesChangedAnim)
+    }
+
+    private fun reservesChangedAnim(event: NewGameController.Events.ReservesChanged) {
+        val (old, new, source, controller) = event
+        source ?: return
+        val amount = new - old
+        val anim = when {
+            amount > 0 -> reservesGainedAnim(amount, source)
+            amount < 0 -> reservesPaidAnim(amount, source)
+            else -> null
+        }
+        anim?.let { controller.dispatchAnimTimeline(it) }
+    }
+
 }
