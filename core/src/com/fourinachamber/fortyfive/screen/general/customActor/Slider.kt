@@ -38,7 +38,8 @@ class Slider(
     var forcedPrefHeight: Float? = null
     var forcedPrefWidth: Float? = null
 
-    private var cursorPos: Float = 0.5f
+    var cursorPos: Float = 0.5f
+        private set
 
     private val shapeRenderer: ShapeRenderer by lazy {
         val renderer = ShapeRenderer()
@@ -100,7 +101,7 @@ class Slider(
         batch.begin()
     }
 
-    private fun updatePos(mouseX: Float) {
+    fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
         bindTarget?.let { it.setter(min + cursorPos * (max - min)) }
     }

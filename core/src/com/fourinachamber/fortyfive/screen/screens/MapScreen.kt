@@ -15,7 +15,6 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.*
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
@@ -24,6 +23,7 @@ import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.settingsKeyMap
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -82,24 +82,19 @@ class MapScreen : ScreenCreator() {
         )
     }
 
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(getMapInputMap()), screen)
-    )
+    override fun getInputMaps(): List<KeyInputMap> {
+        return listOf(KeyInputMap.createFromKotlin(listOf(getMapInputMap()) + settingsKeyMap, screen))
+    }
 
     private fun getMapInputMap(): KeyInputMapEntry = KeyInputMapEntry(
         100,
         KeyInputCondition.Not(KeyInputCondition.ScreenState("notMapFocused")),
-        listOf(
-            KeyInputMapKeyEntry(Input.Keys.W),
-            KeyInputMapKeyEntry(Input.Keys.A),
-            KeyInputMapKeyEntry(Input.Keys.S),
-            KeyInputMapKeyEntry(Input.Keys.D),
-        )
+        KeyPreset.LEFT.keys + KeyPreset.RIGHT.keys + KeyPreset.UP.keys + KeyPreset.DOWN.keys,
     ) { _, code ->
-        val vec= when(code){
-            Input.Keys.W-> Direction.UP
-            Input.Keys.A-> Direction.LEFT
-            Input.Keys.S-> Direction.DOWN
+        val vec= when(KeyPreset.fromKeyCode(code)){
+            KeyPreset.UP-> Direction.UP
+            KeyPreset.LEFT-> Direction.LEFT
+            KeyPreset.DOWN-> Direction.DOWN
             else -> Direction.RIGHT // Keys.D
         }
         //this method might need some rework as to how it works (with angles especially when doing controller support)
@@ -161,7 +156,8 @@ class MapScreen : ScreenCreator() {
             settingsObject.openTimelineCreator,
             settingsObject.closeTimelineCreator
         )
-        actor(getSharedNavBar(worldWidth, worldHeight, listOf(settingsLeft, settingsMiddle, settingsRight), screen)) {
+        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(settingsLeft, settingsMiddle, settingsRight), screen)
+        actor(navbar) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
