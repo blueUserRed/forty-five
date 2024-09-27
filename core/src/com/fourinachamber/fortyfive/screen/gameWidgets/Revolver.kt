@@ -392,12 +392,11 @@ class RevolverSlot(
     }
 
     fun cardPosition(): Vector2 {
-        val slotSize = drawable.minWidth * scaleX
-        val width = card?.actor?.width ?: slotSize
-        val height = card?.actor?.height ?: slotSize
+        val cardWidth = card?.actor?.width ?: 0f
+        val cardHeight = card?.actor?.height ?: 0f
         return Vector2(
-            x + slotSize / 2 - (width) / 2,
-            y + slotSize / 2 - (height) / 2,
+            x + width / 2 - cardWidth / 2,
+            y + height / 2 - cardHeight / 2,
         )
     }
 

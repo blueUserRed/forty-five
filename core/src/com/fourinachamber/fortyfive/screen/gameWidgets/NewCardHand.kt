@@ -1,19 +1,13 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.scenes.scene2d.InputListener
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.badlogic.gdx.scenes.scene2d.Event
+import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
+import com.fourinachamber.fortyfive.screen.general.FocusChangeEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.FocusableActor
-import com.fourinachamber.fortyfive.screen.general.onFocusChange
-import com.fourinachamber.fortyfive.screen.general.onFocusEnter
-import com.fourinachamber.fortyfive.screen.general.onFocusExit
-import com.fourinachamber.fortyfive.screen.general.onSelect
-import com.fourinachamber.fortyfive.screen.general.onSelectChange
 import com.fourinachamber.fortyfive.utils.EventPipeline
-import com.fourinachamber.fortyfive.utils.between
 import kotlin.math.pow
 
 class NewCardHand(
@@ -27,6 +21,36 @@ class NewCardHand(
     private val rightSide: MutableList<Card> = mutableListOf()
 
     val events: EventPipeline = EventPipeline()
+
+    private val cardFocusListener: EventListener = object : EventListener {
+
+        override fun handle(event: Event?): Boolean {
+            if (event !is FocusChangeEvent) return false
+            forAllCards { card ->
+                val actor = card.actor
+                if (actor === event.new) {
+                    actor.rotation = 0f
+                    actor.y = actor.y.coerceIn(0f, height)
+                    actor.width = cardSize * 1.4f
+                    actor.height = cardSize * 1.4f
+                    actor.fixedZIndex = 100
+                    resortZIndices()
+                } else if (actor === event.old) {
+                    actor.y = cardHeightFunc(actor.x)
+                    actor.rotation = cardHeightFuncDerivative(actor.x) * 50f
+                    actor.width = cardSize
+                    actor.height = cardSize
+                    actor.fixedZIndex = zIndexFor(card)
+                    resortZIndices()
+                }
+            }
+            return true
+        }
+    }
+
+    init {
+        addListener(cardFocusListener)
+    }
 
     fun addCard(card: Card) {
         if (leftSide.size < rightSide.size) leftSide.add(card)
@@ -46,23 +70,6 @@ class NewCardHand(
         actor.onDragAndDrop.add { _, target ->
             target as? RevolverSlot ?: return@add
             events.fire(CardDraggedOntoSlotEvent(card, target))
-        }
-
-        actor.onFocusEnter {
-            actor.rotation = 0f
-            actor.y = actor.y.coerceIn(0f, height)
-            actor.width = cardSize * 1.4f
-            actor.height = cardSize * 1.4f
-            actor.fixedZIndex = 100
-            resortZIndices()
-        }
-        actor.onFocusExit {
-            actor.y = cardHeightFunc(actor.x)
-            actor.rotation = cardHeightFuncDerivative(actor.x) * 50f
-            actor.width = cardSize
-            actor.height = cardSize
-            actor.fixedZIndex = zIndexFor(card)
-            resortZIndices()
         }
     }
 
@@ -122,6 +129,10 @@ class NewCardHand(
 
     private fun cardHeightFunc(x: Float): Float = -(0.008f * (x - 800f)).pow(2)
 
+    private inline fun forAllCards(block: (Card) -> Unit) {
+        leftSide.forEach { block(it) }
+        rightSide.forEach { block(it) }
+    }
 
     data class CardDraggedOntoSlotEvent(val card: Card, val slot: RevolverSlot)
 

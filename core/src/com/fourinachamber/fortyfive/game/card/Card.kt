@@ -805,6 +805,10 @@ class CardActor(
 //            .forEach { addHoverItemToParent(it, descriptionParent) }
 //    }
 
+    override fun setX(x: Float) {
+        super.setX(x)
+    }
+
     override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
         // This is a fix for the ChooseCardScreen, where for some reason the CardDragAndDrop sets the position first,
         // but is then overwritten by the layout code every frame (I guess something is calling invalidate each frame,

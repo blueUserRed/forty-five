@@ -83,7 +83,7 @@ interface GameController {
 
     fun playGameAnimation(anim: GameAnimation)
 
-    fun loadBulletInRevolver(card: Card, slot: Int)
+    fun loadBulletFromHandInRevolver(card: Card, slot: Int)
 
 
     fun appendMainTimeline(timeline: Timeline)

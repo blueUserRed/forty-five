@@ -1,18 +1,15 @@
 package com.fourinachamber.fortyfive.game.controller
 
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameAnimation
 import com.fourinachamber.fortyfive.game.GameDirector
-import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
-import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
@@ -25,7 +22,6 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.plus
 import onj.value.OnjArray
 
 class NewGameController(
@@ -108,7 +104,7 @@ class NewGameController(
 
         gameDirector.init()
 
-        gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletInRevolver(it.card, it.slot.num) }
+        gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
 
         initCards()
         _cardStack.forEach { cardHand.addCard(it) }
@@ -127,6 +123,7 @@ class NewGameController(
 
     override fun update() {
         animTimelines.forEach(Timeline::updateTimeline)
+        mainTimeline.updateTimeline()
     }
 
     private fun initCards() {
@@ -287,12 +284,31 @@ class NewGameController(
         TODO("Not yet implemented")
     }
 
-    override fun loadBulletInRevolver(card: Card, slot: Int) {
-
+    override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
+        val timeline = Timeline.timeline {
+            skipping { skip ->
+                action {
+                    FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
+                    val cardInSlot = revolver.getCardInSlot(slot)
+                    val shouldSkip = !card.allowsEnteringGame(this@NewGameController, slot)
+                        || cardInSlot != null
+                        || !tryPay(card.baseCost, card.actor)
+                    if (!shouldSkip) return@action
+                    SoundPlayer.situation("not_allowed", screen)
+                    skip()
+                }
+                action {
+                    cardHand.removeCard(card)
+                    revolver.setCard(slot, card)
+                    println("moved card")
+                }
+            }
+        }
+        appendMainTimeline(timeline)
     }
 
     override fun appendMainTimeline(timeline: Timeline) {
-        TODO("Not yet implemented")
+        mainTimeline.appendAction(timeline.asAction())
     }
 
     override fun dispatchAnimTimeline(timeline: Timeline) {
