@@ -1288,13 +1288,26 @@ open class CustomVerticalGroup(
 
 open class CustomGroup(
     override val screen: OnjScreen
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
-    DropShadowActor {
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
+    DropShadowActor, FocusableActor {
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
     override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
+
+    override var marginTop: Float = 0f
+    override var marginBottom: Float = 0f
+    override var marginLeft: Float = 0f
+    override var marginRight: Float = 0f
+    override var positionType: PositionType = PositionType.RELATIV
+    override var group: SelectionGroup? = null
+    override var isFocusable: Boolean = false
+    override var isFocused: Boolean = false
+    override var isSelectable: Boolean = false
+    override var isSelected: Boolean = false
+    override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean = false
 
     override var fixedZIndex: Int = 0
 

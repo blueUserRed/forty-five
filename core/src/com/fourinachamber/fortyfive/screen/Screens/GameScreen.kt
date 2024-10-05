@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.screens
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -107,6 +108,8 @@ class GameScreen : ScreenCreator() {
         height = worldWidth * (505f / 1920f)
         backgroundHandle = "player_bar"
 
+        shootButton()
+
         actor(revolver) {
             name("revolver")
             centerX()
@@ -166,6 +169,30 @@ class GameScreen : ScreenCreator() {
 
     }
 
+    private fun CustomGroup.shootButton() {
+
+        group {
+            touchable = Touchable.enabled
+            x = 350f
+            y = 55f
+            width = 250f
+            height = 250f * (543f / 655f)
+            isSelectable = true
+            isFocusable = true
+            group = "shoot_button"
+            debug()
+            styles(
+                normal = {
+                    backgroundHandle = "shoot_button_texture"
+                },
+                focused = {
+                    backgroundHandle = "shoot_button_hover_texture"
+                }
+            )
+
+        }
+
+    }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
@@ -183,7 +210,7 @@ class GameScreen : ScreenCreator() {
                 ),
                 SelectionTransition(
                     TransitionType.LastResort,
-                    groups = listOf(RevolverSlot.revolverSlotFocusGroupName),
+                    groups = listOf(RevolverSlot.revolverSlotFocusGroupName, "shoot_button"),
                 )
             )
         )

@@ -300,7 +300,6 @@ class NewGameController(
                 action {
                     cardHand.removeCard(card)
                     revolver.setCard(slot, card)
-                    println("moved card")
                 }
             }
         }
