@@ -28,8 +28,17 @@ data class KeyInputMapEntry(
     val priority: Int,
     val condition: KeyInputCondition,
     val singleKeys: List<KeyInputMapKeyEntry>,
-    val defaultAction: KeyAction?,
-)
+    val defaultActions: List<KeyAction>?,
+) {
+
+    constructor(
+        priority: Int,
+        condition: KeyInputCondition,
+        singleKeys: List<KeyInputMapKeyEntry>,
+        defaultAction: KeyAction?
+    ) : this(priority, condition, singleKeys, defaultAction?.let { listOf(it) })
+
+}
 
 typealias Keycode = Int
 
@@ -48,10 +57,10 @@ class KeyInputMap(
             modifiers.add(keycode)
             return true
         }
-        var bestCandidate: KeyAction? = null
+        var bestCandidate: List<KeyAction>? = null
         var bestCandidateModifiers: List<Keycode>? = null
         var bestCandidatePriority: Int = Int.MIN_VALUE
-        val inputRanges = InputKeyRange.values()
+        val inputRanges = InputKeyRange.entries.toTypedArray()
         entries.filter { it.condition.check(screen) }
             .forEach { entryList ->
                 entryList.singleKeys
@@ -65,7 +74,7 @@ class KeyInputMap(
                             (bestCandidatePriority == entryList.priority &&
                                     (bestCandidateModifiers?.size?: -1) < keyEntry.modifierKeys.size)
                         ) {
-                            bestCandidate = keyEntry.action ?: entryList.defaultAction
+                            bestCandidate = keyEntry.action?.let { listOf(it) } ?: entryList.defaultActions
                             bestCandidatePriority = entryList.priority
                             bestCandidateModifiers = keyEntry.modifierKeys
                         } else {
@@ -76,7 +85,9 @@ class KeyInputMap(
                         }
                     }
             }
-        return bestCandidate?.invoke(screen, keycode) ?: false
+        var toReturn = false
+        bestCandidate?.forEach { if (it.invoke(screen, keycode)) toReturn = true }
+        return toReturn
     }
 
     override fun keyTyped(character: Char): Boolean {

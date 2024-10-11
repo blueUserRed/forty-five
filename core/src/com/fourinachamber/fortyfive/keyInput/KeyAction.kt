@@ -52,84 +52,6 @@ object KeyActionFactory {
             }
         },
 
-//        "SelectAdjacent" to { obj ->
-//            val isLeft = obj.get<String>("direction") == "left"
-//            lambda@{ screen, _ ->
-//                val curSelected = screen.selectedActor ?: return@lambda false
-//                val curGame = FortyFive.currentGame ?: return@lambda false
-//                when (curSelected) {
-//                    is CardActor -> {
-//                        val index = curGame.cardHand.cards.indexOf(curSelected.card)
-//                        if (index == -1) return@lambda false
-//                        val adjacentIndex = if (isLeft) index - 1 else index + 1
-//                        val newSelected = curGame.cardHand.cards.getOrElse(adjacentIndex) { return@lambda false }
-//                        screen.selectedActor = newSelected.actor
-//                    }
-//
-//                    is RevolverSlot -> {
-//                        val index = curGame.revolver.slots.indexOfFirst { it === curSelected }
-//                        if (index == -1) return@lambda false
-//                        val adjacentIndex = if (isLeft) index - 1 else index + 1
-//                        val newSelected = curGame.revolver.slots.getOrElse(adjacentIndex) { return@lambda false }
-//                        screen.selectedActor = newSelected
-//                    }
-//
-//                    else -> {
-//                        return@lambda false
-//                    }
-//                }
-//                true
-//            }
-//        },
-
-//        "PlaceSelectedCardInRevolver" to { obj ->
-//            var num = obj.get<Long>("revolverSlot").toInt()
-//            num = if (num == 5) 5 else 5 - num
-//            lambda@{ screen, _ ->
-//                val curSelected = screen.selectedActor ?: return@lambda false
-//                if (curSelected !is CardActor) return@lambda false
-//                val game = FortyFive.currentGame ?: return@lambda false
-//                if (num !in 1..5) return@lambda false
-//                game.loadBulletInRevolver(curSelected.card, num)
-//                val slot = game.revolver.slots[num - 1]
-//                screen.selectedActor = slot
-//                true
-//            }
-//        },
-//
-//        "DeselectAll" to {
-//            { screen, _ ->
-//                screen.selectedActor = null
-//                true
-//            }
-//        },
-
-//        "NextInHierarchy" to {
-//            lambda@{ screen, _ ->
-//                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
-//                if (screen.selectedNode == null) {
-//                    screen.selectedNode = hierarchy.getFirstSelectableNodeInHierarchy()
-//                } else {
-//                    val selected = screen.selectedNode!!
-//                    screen.selectedNode = selected.getNextOrWrap()
-//                }
-//                true
-//            }
-//        },
-//
-//        "PreviousInHierarchy" to {
-//            lambda@{ screen, _ ->
-//                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
-//                if (screen.selectedNode == null) {
-//                    screen.selectedNode = hierarchy.getLastSelectableNodeInHierarchy()
-//                } else {
-//                    val selected = screen.selectedNode!!
-//                    screen.selectedNode = selected.getPreviousOrWrap()
-//                }
-//                true
-//            }
-//        },
-
         "FireClickEvent" to {
             lambda@{ screen, _ ->
                 val actor = it.get<String?>("actor")
@@ -168,7 +90,7 @@ object KeyActionFactory {
     )
 
 
-    private val kotlinActions: Map<String, (onj: Any?) -> KeyAction> = mapOf(
+    private val kotlinActions: Map<String, (data: Any?) -> KeyAction> = mapOf(
         "ToggleFullscreen" to {
             { _, _ ->
                 OnjScreen.toggleFullScreen()
@@ -224,6 +146,13 @@ object KeyActionFactory {
                 true
             }
         },
+        "FocusSpecific" to constructor@{ name ->
+            name as? String ?: throw RuntimeException("data provided to 'FocusSpecific' must be of type String")
+            return@constructor { screen, code ->
+                screen.focusSpecific(name)
+                true
+            }
+        },
         "SelectFocusedElement" to {
             lambda@{ screen, code ->
                 val actor = screen.focusedActor
@@ -242,7 +171,7 @@ object KeyActionFactory {
                 true
             }
         },
-        )
+    )
 
     /**
      * creates a KeyAction using an OnjObject

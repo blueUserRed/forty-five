@@ -353,5 +353,6 @@ class NewGameController(
             val sourceActor: Actor? = null,
             val controller: GameController
         )
+        data class ParryStateChange(val inParryMenu: Boolean)
     }
 }

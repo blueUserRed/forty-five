@@ -1330,6 +1330,9 @@ open class CustomGroup(
     protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
     override var dropShadow: DropShadow? = null
 
+    init {
+        bindDefaultListeners(this, screen)
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()

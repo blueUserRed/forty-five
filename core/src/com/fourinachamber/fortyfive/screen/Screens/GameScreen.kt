@@ -1,5 +1,8 @@
 package com.fourinachamber.fortyfive.screen.screens
 
+import com.badlogic.gdx.Input
+import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
@@ -8,10 +11,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.animation.AnimState
+import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.keyInput.KeyActionFactory
+import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
+import com.fourinachamber.fortyfive.keyInput.KeyInputMapEntry
+import com.fourinachamber.fortyfive.keyInput.KeyInputMapKeyEntry
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
@@ -109,8 +118,10 @@ class GameScreen : ScreenCreator() {
         backgroundHandle = "player_bar"
 
         shootButton()
+        holsterButton()
 
         actor(revolver) {
+            touchable = Touchable.enabled
             name("revolver")
             centerX()
             y = -30f
@@ -170,28 +181,178 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.shootButton() {
-
         group {
+            name("shoot_button")
             touchable = Touchable.enabled
-            x = 350f
-            y = 55f
+            x = 370f
+            y = 50f
+            val xAnim = propertyAnimation<CustomGroup, Float>(
+                xPositionAbstractProperty(),
+                AnimState("open", 370f, 100, Interpolation.pow2),
+                AnimState("hover", 360f, 100, Interpolation.pow2),
+                AnimState("closed", 600f, 200),
+            )
             width = 250f
             height = 250f * (543f / 655f)
             isSelectable = true
             isFocusable = true
             group = "shoot_button"
-            debug()
             styles(
                 normal = {
                     backgroundHandle = "shoot_button_texture"
+                    xAnim.state("open")
                 },
                 focused = {
                     backgroundHandle = "shoot_button_hover_texture"
-                }
+                    xAnim.state("hover")
+                },
             )
-
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+                if (inParryMenu) {
+                    xAnim.state("closed")
+                    isSelectable = false
+                    isFocusable = false
+                    touchable = Touchable.disabled
+                } else {
+                    xAnim.state("open")
+                    isSelectable = true
+                    isFocusable = true
+                    touchable = Touchable.enabled
+                }
+            }
         }
 
+        group {
+            name("pass_button")
+            var closed = true
+            touchable = Touchable.disabled
+            x = 600f
+            y = 50f
+            val xAnim = propertyAnimation<CustomGroup, Float>(
+                xPositionAbstractProperty(),
+                AnimState("open", 370f, 100, Interpolation.pow2),
+                AnimState("hover", 360f, 100, Interpolation.pow2),
+                AnimState("closed", 600f, 200),
+            )
+            width = 250f
+            height = 250f * (543f / 655f)
+            isSelectable = false
+            isFocusable = false
+            group = "pass_button"
+            styles(
+                normal = {
+                    backgroundHandle = "pass_button_texture"
+                    xAnim.state(if (closed) "closed" else "open")
+                },
+                focused = {
+                    backgroundHandle = "pass_button_hover_texture"
+                    xAnim.state("hover")
+                },
+            )
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+                if (!inParryMenu) {
+                    xAnim.state("closed")
+                    isSelectable = false
+                    isFocusable = false
+                    closed = true
+                    touchable = Touchable.disabled
+                } else {
+                    xAnim.state("open")
+                    isSelectable = true
+                    isFocusable = true
+                    closed = false
+                    touchable = Touchable.enabled
+                }
+            }
+        }
+    }
+
+    private fun CustomGroup.holsterButton() {
+        group {
+            name("holster_button")
+            touchable = Touchable.enabled
+            x = 990f
+            y = 60f
+            debug()
+            val xAnim = propertyAnimation<CustomGroup, Float>(
+                xPositionAbstractProperty(),
+                AnimState("open", 990f, 100, Interpolation.pow2),
+                AnimState("hover", 1000f, 100, Interpolation.pow2),
+                AnimState("closed", 600f, 200),
+            )
+            width = 250f
+            height = 250f * (543f / 655f)
+            isSelectable = true
+            isFocusable = true
+            group = "holster_button"
+            styles(
+                normal = {
+                    backgroundHandle = "end_turn_button_texture"
+                    xAnim.state("open")
+                },
+                focused = {
+                    backgroundHandle = "end_turn_button_hover_texture"
+                    xAnim.state("hover")
+                },
+            )
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+                if (inParryMenu) {
+                    xAnim.state("closed")
+                    isSelectable = false
+                    isFocusable = false
+                    touchable = Touchable.disabled
+                } else {
+                    xAnim.state("open")
+                    isSelectable = true
+                    isFocusable = true
+                    touchable = Touchable.enabled
+                }
+            }
+        }
+
+        group {
+            name("parry_button")
+            var closed = true
+            touchable = Touchable.disabled
+            x = 990f
+            y = 50f
+            val xAnim = propertyAnimation<CustomGroup, Float>(
+                xPositionAbstractProperty(),
+                AnimState("open", 990f, 100, Interpolation.pow2),
+                AnimState("hover", 1000f, 100, Interpolation.pow2),
+                AnimState("closed", 600f, 200),
+            )
+            width = 250f
+            height = 250f * (543f / 655f)
+            isSelectable = false
+            isFocusable = false
+            group = "parry_button"
+            styles(
+                normal = {
+                    backgroundHandle = "parry_button_texture"
+                    xAnim.state(if (closed) "closed" else "open")
+                },
+                focused = {
+                    backgroundHandle = "parry_button_hover_texture"
+                    xAnim.state("hover")
+                },
+            )
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+                if (!inParryMenu) {
+                    xAnim.state("closed")
+                    isSelectable = false
+                    isFocusable = false
+                    closed = true
+                    touchable = Touchable.disabled
+                } else {
+                    xAnim.state("open")
+                    isSelectable = true
+                    isFocusable = true
+                    closed = false
+                    touchable = Touchable.enabled
+                }
+            }
+        }
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
@@ -199,7 +360,35 @@ class GameScreen : ScreenCreator() {
         NewGameController(screen, gameEvents)
     )
 
-    override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(), screen))
+    override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(
+
+        KeyInputMapEntry(
+            priority = 20,
+            condition = KeyInputCondition.Always,
+            singleKeys = listOf(
+                KeyInputMapKeyEntry(Keys.S, modifierKeys = listOf(Keys.SHIFT_LEFT)),
+                KeyInputMapKeyEntry(Keys.S, modifierKeys = listOf(Keys.SHIFT_RIGHT)),
+            ),
+            defaultActions = listOf(
+                KeyActionFactory.getAction("FocusSpecific", "shoot_button"),
+                KeyActionFactory.getAction("FocusSpecific", "pass_button"),
+            )
+        ),
+
+        KeyInputMapEntry(
+            priority = 20,
+            condition = KeyInputCondition.Always,
+            singleKeys = listOf(
+                KeyInputMapKeyEntry(Keys.H, modifierKeys = listOf(Keys.SHIFT_LEFT)),
+                KeyInputMapKeyEntry(Keys.H, modifierKeys = listOf(Keys.SHIFT_RIGHT)),
+            ),
+            defaultActions = listOf(
+                KeyActionFactory.getAction("FocusSpecific", "holster_button"),
+                KeyActionFactory.getAction("FocusSpecific", "parry_button"),
+            )
+        ),
+
+    ), screen))
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
         FocusableParent(
@@ -210,7 +399,7 @@ class GameScreen : ScreenCreator() {
                 ),
                 SelectionTransition(
                     TransitionType.LastResort,
-                    groups = listOf(RevolverSlot.revolverSlotFocusGroupName, "shoot_button"),
+                    groups = listOf(RevolverSlot.revolverSlotFocusGroupName),
                 )
             )
         )
