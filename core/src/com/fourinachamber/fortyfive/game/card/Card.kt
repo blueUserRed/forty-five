@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -16,6 +17,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
@@ -213,6 +215,13 @@ class Card(
             )
         }
     }
+
+    fun canBeReplaced(controller: GameController, by: Card): Boolean = false
+
+    fun replaceTimeline(controller: NewGameController, replaceBy: Card): Timeline = Timeline()
+
+    ///////////////////////////////////////////
+    ///////////////////////////////////////////
 
     fun bottomCardToTopCard() {
         isAlwaysAtBottom = false

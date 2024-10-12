@@ -285,13 +285,15 @@ class NewGameController(
     }
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
+        var cardInSlot: Card? = null
         val timeline = Timeline.timeline {
             skipping { skip ->
                 action {
                     FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-                    val cardInSlot = revolver.getCardInSlot(slot)
+                    cardInSlot = revolver.getCardInSlot(slot)
+                    val blockedByCard = cardInSlot != null && !card.canBeReplaced(this@NewGameController, card)
                     val shouldSkip = !card.allowsEnteringGame(this@NewGameController, slot)
-                        || cardInSlot != null
+                        || blockedByCard
                         || !tryPay(card.baseCost, card.actor)
                     if (!shouldSkip) return@action
                     SoundPlayer.situation("not_allowed", screen)
@@ -299,7 +301,15 @@ class NewGameController(
                 }
                 action {
                     cardHand.removeCard(card)
+                    if (cardInSlot != null) revolver.preAddCard(slot, card)
+                }
+                includeLater(
+                    { cardInSlot!!.replaceTimeline(this@NewGameController, card) },
+                    { cardInSlot != null }
+                )
+                action {
                     revolver.setCard(slot, card)
+                    card.onEnter(this@NewGameController)
                 }
             }
         }
