@@ -1155,6 +1155,10 @@ textures: [
         file: "blobs/ui_elements/settings/setting_background.png",
     },
     {
+        name: "single_setting_background_focused",
+        file: "blobs/ui_elements/settings/setting_background_focused.png",
+    },
+    {
         name: "common_symbol_arrow_right",
         file: "blobs/common/symbols/arrow_right.png",
     },

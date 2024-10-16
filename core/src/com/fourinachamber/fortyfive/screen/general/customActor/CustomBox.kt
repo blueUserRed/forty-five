@@ -750,7 +750,6 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
     fun scrollTo(actor: Actor) {
         if (maxScrollableDistanceInDirection == 0F) return
         val coords = actor.localToActorCoordinates(this, Vector2(0F, 0F))
-        //TODO this for the other directions
         when (scrollDirectionStart) {
             CustomDirection.BOTTOM -> {
                 if (coords.y - paddingBottom < 0)

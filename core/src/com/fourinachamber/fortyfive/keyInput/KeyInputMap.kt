@@ -2,8 +2,9 @@ package com.fourinachamber.fortyfive.keyInput
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.keyInput.KeyPreset.*
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjNamedObject
@@ -57,37 +58,29 @@ class KeyInputMap(
             modifiers.add(keycode)
             return true
         }
-        var bestCandidate: List<KeyAction>? = null
-        var bestCandidateModifiers: List<Keycode>? = null
-        var bestCandidatePriority: Int = Int.MIN_VALUE
         val inputRanges = InputKeyRange.entries.toTypedArray()
-        entries.filter { it.condition.check(screen) }
-            .forEach { entryList ->
-                entryList.singleKeys
+        val acceptedActions: List<Triple<Int, Int, List<KeyAction>>> = entries.filter { it.condition.check(screen) }
+            .flatMap { entryList ->
+                // This variable is useless, but the compiler complains otherwise for some reason
+                // all this code is ugly anyway
+                val t = entryList.singleKeys
                     .filter {
                         it.keycode == keycode || (inputRanges.find { range -> it.keycode == range.getCode() }
                             ?.inRange(keycode) ?: false)
                     }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
-                    .forEach { keyEntry ->
-                        if (bestCandidatePriority < entryList.priority ||
-                            (bestCandidatePriority == entryList.priority &&
-                                    (bestCandidateModifiers?.size?: -1) < keyEntry.modifierKeys.size)
-                        ) {
-                            bestCandidate = keyEntry.action?.let { listOf(it) } ?: entryList.defaultActions
-                            bestCandidatePriority = entryList.priority
-                            bestCandidateModifiers = keyEntry.modifierKeys
-                        } else {
-                            if (bestCandidatePriority == entryList.priority && (bestCandidateModifiers?.size?: -1) == keyEntry.modifierKeys.size){
-                                FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority and modifier length!")
-                                return false
-                            }
-                        }
-                    }
-            }
-        var toReturn = false
-        bestCandidate?.forEach { if (it.invoke(screen, keycode)) toReturn = true }
-        return toReturn
+                    .map { Triple(entryList.priority, it.modifierKeys.size, (it.action?.let { listOf(it) } ?: listOf())) }
+                t
+            }.toList()
+        val newList = acceptedActions.sortedWith(Comparator.comparingInt<Triple<Int, Int, List<KeyAction>>> { it.first }
+            .thenComparingInt { it.second }).reversed()
+
+        newList.forEach { (_, _, actions) ->
+            var wasTrue = false
+            actions.forEach { action -> if (action(screen, keycode)) wasTrue = true }
+            if (wasTrue) return true
+        }
+        return false
     }
 
     override fun keyTyped(character: Char): Boolean {
@@ -175,7 +168,7 @@ class KeyInputMap(
                     val condition = entry.get<KeyInputCondition?>("condition") ?: KeyInputCondition.Always
                     KeyInputMapEntry(priority, condition, entries, defaultActions)
                 }
-            return KeyInputMap(entries, screen)
+            return KeyInputMap(entries.toMutableList(), screen)
         }
 
         /**
@@ -186,8 +179,8 @@ class KeyInputMap(
             screen: OnjScreen,
             widthDefaults: Boolean = true
         ): KeyInputMap {
-            if (widthDefaults) return KeyInputMap(actions + kotlinDefaultActions, screen)
-            return KeyInputMap(actions, screen)
+            if (widthDefaults) return KeyInputMap((actions + kotlinDefaultActions).toMutableList(), screen)
+            return KeyInputMap(actions.toMutableList(), screen)
         }
 
         private val kotlinDefaultActions: List<KeyInputMapEntry> = getDefaultList()
@@ -228,12 +221,7 @@ class KeyInputMap(
                 KeyInputMapEntry(
                     priority = defaultLowPriority,
                     KeyInputCondition.Always,
-                    listOf(
-                        KeyInputMapKeyEntry(Keys.W),
-                        KeyInputMapKeyEntry(Keys.A),
-                        KeyInputMapKeyEntry(Keys.S),
-                        KeyInputMapKeyEntry(Keys.D),
-                    ),
+                    LEFT.keys + RIGHT.keys + UP.keys + DOWN.keys,
                     KeyActionFactory.getAction("FocusNextDirectional")
                 )
             )
@@ -241,11 +229,7 @@ class KeyInputMap(
                 KeyInputMapEntry(
                     priority = defaultLowPriority,
                     KeyInputCondition.Always,
-                    listOf(
-                        KeyInputMapKeyEntry(Keys.SPACE),
-                        KeyInputMapKeyEntry(Keys.ENTER),
-                        KeyInputMapKeyEntry(Keys.NUMPAD_ENTER),
-                    ),
+                    ACTION.keys,
                     KeyActionFactory.getAction("SelectFocusedElement")
                 )
             )
@@ -262,20 +246,16 @@ class KeyInputMap(
             entries.add(
                 KeyInputMapEntry(
                     priority = defaultHighPriority,
-                    KeyInputCondition.Always,
-                    listOf(
-                        KeyInputMapKeyEntry(Keys.LEFT),
-                    ),
+                    KeyInputCondition.If { FortyFive.currentRenderPipeline?.showDebugMenu == true },
+                    listOf(KeyInputMapKeyEntry(Keys.LEFT)),
                     KeyActionFactory.getAction("PreviousDebugMenuPage")
                 )
             )
             entries.add(
                 KeyInputMapEntry(
                     priority = defaultHighPriority,
-                    KeyInputCondition.Always,
-                    listOf(
-                        KeyInputMapKeyEntry(Keys.RIGHT),
-                    ),
+                    KeyInputCondition.If { FortyFive.currentRenderPipeline?.showDebugMenu == true },
+                    listOf(KeyInputMapKeyEntry(Keys.RIGHT)),
                     KeyActionFactory.getAction("NextDebugMenuPage")
                 )
             )
@@ -283,10 +263,7 @@ class KeyInputMap(
                 KeyInputMapEntry(
                     priority = defaultLowPriority,
                     KeyInputCondition.Always,
-                    listOf(
-                        KeyInputMapKeyEntry(Keys.E),
-                        KeyInputMapKeyEntry(Keys.ESCAPE),
-                    ),
+                    ESCAPE.keys,
                     KeyActionFactory.getAction("EscapeInSelectionHierarchy")
                 )
             )
@@ -353,6 +330,10 @@ sealed class KeyInputCondition {
 
     class Not(val first: KeyInputCondition) : KeyInputCondition() {
         override fun check(screen: OnjScreen): Boolean = !first.check(screen)
+    }
+
+    class If(val first: () -> Boolean) : KeyInputCondition() {
+        override fun check(screen: OnjScreen): Boolean = first.invoke()
     }
 
     abstract fun check(screen: OnjScreen): Boolean

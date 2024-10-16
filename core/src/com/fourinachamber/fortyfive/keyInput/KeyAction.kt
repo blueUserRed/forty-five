@@ -13,7 +13,7 @@ import com.fourinachamber.fortyfive.utils.Vector2
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
-typealias KeyAction = @MainThreadOnly (screen: OnjScreen, event: Keycode?) -> Boolean
+typealias KeyAction = @MainThreadOnly (screen: OnjScreen, event: Keycode) -> Boolean
 
 /**
  * creates [KeyAction]s using an OnjObject
@@ -129,13 +129,14 @@ object KeyActionFactory {
         },
         "FocusNextDirectional" to {
             lambda@{ screen, code ->
-                val dir = when (code) {
-                    Keys.W -> Vector2(0, -1)
-                    Keys.A -> Vector2(-1, 0)
-                    Keys.S -> Vector2(0, 1)
-                    Keys.D -> Vector2(1, 0)
+                val dir = when (KeyPreset.fromKeyCode(code)) {
+                    KeyPreset.UP -> Vector2(0, -1)
+                    KeyPreset.LEFT -> Vector2(-1, 0)
+                    KeyPreset.DOWN -> Vector2(0, 1)
+                    KeyPreset.RIGHT -> Vector2(1, 0)
                     else -> null
                 }
+                println(dir)
                 screen.focusNext(dir)
                 true
             }
