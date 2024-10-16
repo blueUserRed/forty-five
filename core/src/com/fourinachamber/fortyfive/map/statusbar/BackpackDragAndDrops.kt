@@ -128,7 +128,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
 }
 
 class DeckSlotDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
+    DropBehaviour(dragAndDrop, actor) {
     override fun drag(
         source: DragAndDrop.Source?,
         payload: DragAndDrop.Payload?,
@@ -148,7 +148,7 @@ class DeckSlotDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedOb
 
 
 class BackpackDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
+    DropBehaviour(dragAndDrop, actor) {
     override fun drag(
         source: DragAndDrop.Source?,
         payload: DragAndDrop.Payload?,

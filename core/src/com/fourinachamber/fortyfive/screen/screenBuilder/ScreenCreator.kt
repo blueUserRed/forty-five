@@ -7,6 +7,11 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.animation.AbstractProperty
+import com.fourinachamber.fortyfive.animation.AnimState
+import com.fourinachamber.fortyfive.animation.DefaultInterpolators
+import com.fourinachamber.fortyfive.animation.Interpolator
+import com.fourinachamber.fortyfive.animation.PropertyAnimation
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
@@ -19,14 +24,12 @@ import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.Selector
 import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.general.customActor.*
-import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
-import dev.lyze.flexbox.FlexBox
-import ktx.actors.alpha
 import onj.value.OnjArray
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.reflect.KMutableProperty
 
 abstract class ScreenCreator : ResourceBorrower {
 
@@ -273,6 +276,30 @@ abstract class ScreenCreator : ResourceBorrower {
         onHoverEnter { backgroundHandle = hover }
         onHoverLeave { backgroundHandle = normal }
     }
+
+    inline fun <A, reified P> A.propertyAnimation(
+        property: KMutableProperty<P>,
+        vararg states: AnimState<P>,
+        interpolator: Interpolator<P>? = DefaultInterpolators.getDefaultInterpolator(P::class)
+    ): PropertyAnimation<P> where A : Actor, P : Any = PropertyAnimation(
+        this,
+        AbstractProperty.fromKotlin(property),
+        P::class,
+        interpolator,
+        *states
+    )
+
+    inline fun <A, reified P> A.propertyAnimation(
+        property: AbstractProperty<P>,
+        vararg states: AnimState<P>,
+        interpolator: Interpolator<P>? = DefaultInterpolators.getDefaultInterpolator(P::class)
+    ): PropertyAnimation<P> where A : Actor, P : Any = PropertyAnimation(
+        this,
+        property,
+        P::class,
+        interpolator,
+        *states
+    )
 
     fun <T> T.addButtonDefaults() where T : Actor, T : KotlinStyledActor, T : BackgroundActor {
         setFocusableTo(true, this)

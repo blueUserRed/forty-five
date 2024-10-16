@@ -72,7 +72,6 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
 
     init {
         touchable = Touchable.childrenOnly
-        bindDefaultListeners(this, screen)
     }
 
     override fun layout() {

@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
@@ -189,9 +191,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.TurnRevolver(
             triggerOrError(trigger.value),
             when (rotationDirection.value) {
-                "left" -> GameController.RevolverRotation.Left(amount.value.toInt())
-                "right" -> GameController.RevolverRotation.Right(amount.value.toInt())
-                "none" -> GameController.RevolverRotation.None
+                "left" -> RevolverRotation.Left(amount.value.toInt())
+                "right" -> RevolverRotation.Right(amount.value.toInt())
+                "none" -> RevolverRotation.None
                 else -> throw RuntimeException("unknown rotation direction: ${rotationDirection.value}")
             }
         ))
@@ -389,10 +391,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @Suppress("NAME_SHADOWING")
     private fun getStatusEffectValue(
-       effectValue: OnjEffectValue,
-       controller: GameController?,
-       card: Card?,
-       default: Int
+        effectValue: OnjEffectValue,
+        controller: GameController?,
+        card: Card?,
+        default: Int
     ) = controller?.let { controller ->
        card?.let { card ->
            effectValue.value(controller, card, null)

@@ -59,24 +59,24 @@ class HoverEnterEvent : Event()
 class HoverLeaveEvent : Event()
 
 /**
- * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when to shoot
+ * used by the [GameController][com.fourinachamber.fortyfive.game.controller.GameController] so it knows when to shoot
  */
 class ShootRevolverEvent : Event()
 
 /**
- * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player wants to
+ * used by the [GameController][com.fourinachamber.fortyfive.game.controller.GameController] so it knows when the player wants to
  * end the turn
  */
 class EndTurnEvent : Event()
 
 /**
- * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player wants to
+ * used by the [GameController][com.fourinachamber.fortyfive.game.controller.GameController] so it knows when the player wants to
  * draw a card
  */
 class DrawCardEvent : Event()
 
 /**
- * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
+ * used by the [GameController][com.fourinachamber.fortyfive.game.controller.GameController] so it knows when the player confirmed
  * a popup
  */
 class PopupConfirmationEvent : Event()
@@ -95,7 +95,7 @@ class SelectChangeEvent(val old: List<Actor>, val new: List<Actor>, val fromMous
 class DetailDisplayStateChange(val displayStarted: Boolean = true) : Event()
 
 /**
- * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
+ * used by the [GameController][com.fourinachamber.fortyfive.game.controller.GameController] so it knows when the player confirmed
  * a popup
  */
 class PopupSelectionEvent(val cardNum: Int) : Event()
@@ -153,6 +153,18 @@ inline fun Actor.onFocus(crossinline block: (Boolean) -> Unit) {
         }
         block(event.fromMouse)
         true
+    }
+}
+
+inline fun Actor.onFocusEnter(crossinline block: () -> Unit) {
+    onFocusChange { old, new ->
+        if (new === this@onFocusEnter) block()
+    }
+}
+
+inline fun Actor.onFocusExit(crossinline block: () -> Unit) {
+    onFocusChange { old, new ->
+        if (old === this@onFocusExit) block()
     }
 }
 

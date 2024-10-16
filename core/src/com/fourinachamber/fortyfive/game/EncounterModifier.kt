@@ -1,10 +1,12 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
+import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.OldGameController
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import kotlin.math.max
@@ -91,7 +93,7 @@ sealed class EncounterModifier {
 
         override fun update(controller: GameController) {
             if (baseTime == -1L) return
-            if (controller.playerLost || GameController.showWinScreen in controller.screen.screenState) {
+            if (controller.playerLost || OldGameController.showWinScreen in controller.screen.screenState) {
                 controller.screen.leaveState("steel_nerves")
                 baseTime = -1
                 return
@@ -150,7 +152,7 @@ sealed class EncounterModifier {
         }
 
         override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
-            controller.cost(1, controller.shootButton)
+            controller.tryPay(1, controller.shootButton)
         }
     }
 
@@ -171,7 +173,7 @@ sealed class EncounterModifier {
                         { true }
                     )
                 } },
-                { controller.revolver.slots.mapNotNull { it.card }.isNotEmpty() }
+                { controller.cardsInRevolver().isNotEmpty() }
             )
         }
     }
@@ -181,10 +183,10 @@ sealed class EncounterModifier {
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             var card: Card? = null
             action {
-                card = controller.revolver.slots.mapNotNull { it.card }.randomOrNull()
+                card = controller.cardsInRevolver().randomOrNull()
             }
             includeLater(
-                { controller.bounceBullet(card!!) },
+                { controller.bounceBulletTimeline(card!!) },
                 { card != null }
             )
         }
@@ -199,7 +201,7 @@ sealed class EncounterModifier {
             card: Card,
             controller: GameController
         ): Timeline = Timeline.timeline {
-            include(controller.rotateRevolver(card.rotationDirection, ignoreEncounterModifiers = true))
+            include(controller.rotateRevolverTimeline(card.rotationDirection, ignoreEncounterModifiers = true))
         }
 
         override fun disableEverlasting(): Boolean = true

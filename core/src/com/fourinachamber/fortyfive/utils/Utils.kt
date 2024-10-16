@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.GameAnimation
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CenteredDragSource

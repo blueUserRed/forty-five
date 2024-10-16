@@ -4,17 +4,15 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.map.detailMap.generation.BaseMapGenerator
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -108,7 +106,7 @@ object MapManager {
         currentDetailMap = readDetailMap(map)
     }
 
-    fun changeToEncounterScreen(context: GameController.EncounterContext, immediate: Boolean = false) {
+    fun changeToEncounterScreen(context: EncounterContext, immediate: Boolean = false) {
         val encounter = GameDirector.encounters[context.encounterIndex]
         val intermediate = encounter
             .encounterModifier

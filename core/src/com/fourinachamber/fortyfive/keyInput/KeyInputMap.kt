@@ -29,8 +29,17 @@ data class KeyInputMapEntry(
     val priority: Int,
     val condition: KeyInputCondition,
     val singleKeys: List<KeyInputMapKeyEntry>,
-    val defaultAction: KeyAction?,
-)
+    val defaultActions: List<KeyAction>?,
+) {
+
+    constructor(
+        priority: Int,
+        condition: KeyInputCondition,
+        singleKeys: List<KeyInputMapKeyEntry>,
+        defaultAction: KeyAction?
+    ) : this(priority, condition, singleKeys, defaultAction?.let { listOf(it) })
+
+}
 
 typealias Keycode = Int
 
@@ -50,23 +59,27 @@ class KeyInputMap(
             return true
         }
         val inputRanges = InputKeyRange.entries.toTypedArray()
-        val acceptedActions: List<Triple<Int, Int, KeyAction?>> = entries.filter { it.condition.check(screen) }
+        val acceptedActions: List<Triple<Int, Int, List<KeyAction>>> = entries.filter { it.condition.check(screen) }
             .flatMap { entryList ->
-                entryList.singleKeys
+                // This variable is useless, but the compiler complains otherwise for some reason
+                // all this code is ugly anyway
+                val t = entryList.singleKeys
                     .filter {
                         it.keycode == keycode || (inputRanges.find { range -> it.keycode == range.getCode() }
                             ?.inRange(keycode) ?: false)
                     }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
-                    .map { Triple(entryList.priority, it.modifierKeys.size, (it.action ?: entryList.defaultAction)) }
+                    .map { Triple(entryList.priority, it.modifierKeys.size, (it.action?.let { listOf(it) } ?: listOf())) }
+                t
             }.toList()
-        val newList = acceptedActions.sortedWith(Comparator.comparingInt<Triple<Int, Int, KeyAction?>> { it.first }
+        val newList = acceptedActions.sortedWith(Comparator.comparingInt<Triple<Int, Int, List<KeyAction>>> { it.first }
             .thenComparingInt { it.second }).reversed()
 
-        for (i in newList) {
-            if (i.third?.invoke(screen, keycode) == true) return true
+        newList.forEach { (_, _, actions) ->
+            var wasTrue = false
+            actions.forEach { action -> if (action(screen, keycode)) wasTrue = true }
+            if (wasTrue) return true
         }
-
         return false
     }
 

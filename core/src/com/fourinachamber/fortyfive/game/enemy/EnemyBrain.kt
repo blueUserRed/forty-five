@@ -1,8 +1,7 @@
 package com.fourinachamber.fortyfive.game.enemy
 
-import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.utils.*
-import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject

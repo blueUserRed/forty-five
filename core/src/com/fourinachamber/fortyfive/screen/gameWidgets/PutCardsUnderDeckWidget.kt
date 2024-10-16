@@ -87,7 +87,7 @@ class PutCardsUnderDeckWidget(
     fun addCard(card: Card) {
         if (isFinished) return
         if (card.actor in this) return
-        FortyFive.currentGame!!.cardHand.removeCard(card)
+//        FortyFive.currentGame!!.cardHand.removeCard(card)
         addActor(card.actor)
         cards.add(card)
         invalidate()

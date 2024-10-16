@@ -3,9 +3,10 @@ package com.fourinachamber.fortyfive.screen.gameWidgets
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.ColorAction
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
@@ -36,10 +37,10 @@ class DraftScreenController(private val screen: OnjScreen) : ScreenController() 
 
     private lateinit var cards: Array<CustomFlexBox>
 
-    private lateinit var context: GameController.EncounterContext
+    private lateinit var context: EncounterContext
 
     override fun init(context: Any?) {
-        this.context = context as? GameController.EncounterContext
+        this.context = context as? EncounterContext
             ?: throw RuntimeException("DraftScreenController needs a context of type EncounterContext")
         cards = arrayOf(card1, card2, card3)
         TemplateString.updateGlobalParam("draft.target", targetAmount)
@@ -111,7 +112,7 @@ class DraftScreenController(private val screen: OnjScreen) : ScreenController() 
             screen.removeAllStyleManagersOfChildren(actor)
             actor.clear()
         }
-        val context = object : GameController.EncounterContext {
+        val context = object : EncounterContext {
 
             override val encounterIndex: Int = context.encounterIndex
             override val forwardToScreen: String = context.forwardToScreen

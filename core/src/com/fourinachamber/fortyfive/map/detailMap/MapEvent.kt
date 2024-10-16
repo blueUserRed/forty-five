@@ -1,8 +1,9 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -171,7 +172,7 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), GameController.EncounterContext, ScaledByDistance, Completable {
+class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledByDistance, Completable {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true

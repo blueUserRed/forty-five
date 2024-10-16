@@ -271,6 +271,18 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             timelineActions.add(ParallelTimelineAction(actions.toList()))
         }
 
+        fun skipping(builder: TimelineBuilderDSL.(skipper: () -> Unit) -> Unit) {
+            var timeline: Timeline? = null
+            val skipper: () -> Unit = {
+                val timeline = timeline ?: throw RuntimeException("Can't skip directly in the builder; move the skip in an action")
+                timeline.stopTimeline()
+            }
+            val dsl = TimelineBuilderDSL()
+            builder(dsl, skipper)
+            timeline = dsl.build()
+            includeAction(timeline.asAction())
+        }
+
         /**
          * creates the timeline. Should only be used by [timeline]
          */

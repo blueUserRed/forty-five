@@ -2,10 +2,11 @@ package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
@@ -26,7 +27,7 @@ class CardHand(
     private val opacityIfNotPlayable: Float,
     private val centerGap: Float,
     private val screen: OnjScreen,
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, OnLayoutActor, StyledActor {
 
     override var fixedZIndex: Int = 0
 
@@ -34,6 +35,8 @@ class CardHand(
 
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean=false
+
+    private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     /**
      * scaling applied to the card when hovered over
@@ -105,13 +108,18 @@ class CardHand(
         invalidateHierarchy()
     }
 
+    override fun layout() {
+        onLayout.forEach { it() }
+        super.layout()
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         updateCards()
     }
 
     private fun updateCards() {
-        if (_cards.size == 0) return
+        if (_cards.isEmpty()) return
         val cardsLeft = _cards.size / 2
         val spacePerSide = (width - centerGap) / 2f
         val zIndexChanged =
@@ -226,6 +234,10 @@ class CardHand(
 
     override fun getPrefWidth(): Float {
         return targetWidth
+    }
+
+    override fun onLayout(callback: () -> Unit) {
+        onLayout.add(callback)
     }
 
 }

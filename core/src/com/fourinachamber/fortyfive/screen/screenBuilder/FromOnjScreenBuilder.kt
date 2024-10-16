@@ -421,7 +421,7 @@ class FromOnjScreenBuilder(
             widgetOnj.get<Double>("radiusExtension").toFloat(),
             screen
         ).apply {
-            slotScale = widgetOnj.get<Double>("slotScale").toFloat()
+            slotSize = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
             radius = widgetOnj.get<Double>("radius").toFloat()

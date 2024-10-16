@@ -84,7 +84,7 @@ class ChooseCardDragPayload(val actor: Actor) : ExecutionPayload() {
 }
 
 class ChooseCardDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
+    DropBehaviour(dragAndDrop, actor) {
 
     private val isToDeck: Boolean = onj.get<Boolean>("isToDeck")
 

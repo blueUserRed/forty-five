@@ -31,7 +31,7 @@ object DragAndDropBehaviourFactory {
             CardDragSource(dragAndDrop, actor, onj)
         }
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
-            RevolverDropTarget(dragAndDrop, actor, onj)
+            RevolverDropTarget(dragAndDrop, actor)
         }
         dropBehaviours["CardDropTarget"] = { dragAndDrop, actor, onj ->
             CardDropTarget(dragAndDrop, actor, onj)
@@ -113,7 +113,6 @@ abstract class DragBehaviour(
     protected val dragAndDrop: DragAndDrop,
 //    protected val onjScreen: OnjScreen,
     actor: Actor,
-    onj: OnjNamedObject
 ) : DragAndDrop.Source(actor)
 
 @Suppress("unused", "UNUSED_PARAMETER") // may be necessary in the future, also for symmetry with DragBehaviour
@@ -121,7 +120,6 @@ abstract class DropBehaviour(
     protected val dragAndDrop: DragAndDrop,
 //    protected val onjScreen: OnjScreen,
     actor: Actor,
-    onj: OnjNamedObject
 ) : DragAndDrop.Target(actor)
 
 /**
@@ -132,7 +130,7 @@ abstract class CenteredDragSource(
     actor: Actor,
     onj: OnjNamedObject,
     showClickHint: Boolean = false
-) : DragBehaviour(dragAndDrop, actor, onj) {
+) : DragBehaviour(dragAndDrop, actor) {
 
     val centerOnClick = OnClickToCenter(this)
 

@@ -72,7 +72,7 @@ class CardDropTarget(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor) {
 
 
     private val card: Card
@@ -109,8 +109,7 @@ class CardDropTarget(
 class RevolverDropTarget(
     dragAndDrop: DragAndDrop,
     actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor) {
 
     private val revolverSlot: RevolverSlot
 
@@ -145,7 +144,7 @@ class PutCardsUnderDeckDropTarget(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor) {
 
     private val putCardsUnderDeckWidget: PutCardsUnderDeckWidget
 
@@ -185,7 +184,7 @@ class CardDragAndDropPayload(val card: Card) : ExecutionPayload() {
      * when the drag is stopped, the card will be loaded into the revolver in [slot]
      */
     fun loadIntoRevolver(slot: Int) = tasks.add {
-        FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
+        FortyFive.currentGame!!.loadBulletFromHandInRevolver(card, slot)  //TODO ugly
         SoundPlayer.situation("card_drag_finished", card.actor.screen)
     }
 

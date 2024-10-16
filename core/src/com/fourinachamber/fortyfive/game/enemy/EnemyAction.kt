@@ -1,9 +1,10 @@
 package com.fourinachamber.fortyfive.game.enemy
 
-import com.fourinachamber.fortyfive.game.GameController
-import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.GamePredicate
 import com.fourinachamber.fortyfive.game.StatusEffectCreator
+import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
@@ -66,14 +67,14 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val cardAmount = controller.cardHand.cards.size
+            val cardAmount = controller.cardsInHand.size
             val amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
             return EnemyAction(amountToDestroy.toString(), mapOf("amount" to amountToDestroy),this) {
                 repeat(amountToDestroy) {
                     // might cause mismatches when this action is shown instead of hidden
-                    if (controller.cardHand.cards.isEmpty()) return@repeat
-                    val card = controller.cardHand.cards[(0 until controller.cardHand.cards.size).random()]
-                    controller.destroyCardInHand(card)
+                    if (controller.cardsInHand.isEmpty()) return@repeat
+                    val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random()]
+                    include(controller.destroyCardInHandTimeline(card))
                 }
             }
         }
@@ -104,7 +105,7 @@ sealed class EnemyActionPrototype(
             }
             val descriptionParams = mapOf("amount" to amount, "direction" to rotation.directionString)
             return EnemyAction(amount.toString(), descriptionParams, this) {
-                include(controller.rotateRevolver(rotation))
+                include(controller.rotateRevolverTimeline(rotation))
             }
         }
 
@@ -119,15 +120,16 @@ sealed class EnemyActionPrototype(
             controller: GameController,
             scale: Double
         ): EnemyAction = EnemyAction(null, mapOf(),this) {
+            var card: Card? = null
             action {
-                val card = controller
+                card = controller
                     .revolver
                     .slots
                     .filter { it.card != null }
                     .random()
                     .card!!
-                controller.putCardFromRevolverBackInHand(card)
             }
+            include(controller.bounceBulletTimeline(card!!))
         }
 
     }
@@ -159,9 +161,7 @@ sealed class EnemyActionPrototype(
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
             return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
-                action {
-                    controller.applyStatusEffectToPlayer(statusEffect)
-                }
+                include(controller.tryApplyStatusEffectToPlayerTimeline(statusEffect))
             }
         }
 
@@ -178,9 +178,7 @@ sealed class EnemyActionPrototype(
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
             return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
-                action {
-                    controller.tryApplyStatusEffectToEnemy(statusEffect, enemy)
-                }
+                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemy))
             }
         }
 
@@ -212,8 +210,7 @@ sealed class EnemyActionPrototype(
             return EnemyAction(null, mapOf("amount" to amount), this) {
                 action {
                     controller
-                        .cardHand
-                        .cards
+                        .cardsInHand
                         .shuffled()
                         .take(amount)
                         .forEach { it.isMarked = true }
@@ -234,10 +231,9 @@ sealed class EnemyActionPrototype(
             includeLater(
                 {
                     controller
-                        .cardHand
-                        .cards
+                        .cardsInHand
                         .filter { it.isMarked }
-                        .map { controller.putBulletFromHandBackUnderTheDeck(it) }
+                        .map { controller.putBulletFromRevolverUnderTheDeckTimeline(it) }
                         .collectTimeline()
                 },
                 { true }
@@ -272,7 +268,9 @@ sealed class EnemyActionPrototype(
                 mapOf("slot" to Utils.convertSlotRepresentation(slot)),
                 this,
             ) {
-                include(controller.putBulletFromRevolverUnderTheDeck(slot))
+                controller.revolver.getCardInSlot(slot)?.let { card ->
+                    include(controller.putBulletFromRevolverUnderTheDeckTimeline(card))
+                }
             }
         }
     }

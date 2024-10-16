@@ -1,15 +1,12 @@
 package com.fourinachamber.fortyfive.game
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -17,8 +14,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjString
