@@ -112,6 +112,7 @@ class NewGameController(
     }
 
     private fun updateReserves(newReserves: Int, sourceActor: Actor? = null) {
+        if (curReserves == newReserves) return
         val prevReserves = curReserves
         curReserves = newReserves
         gameEvents.fire(Events.ReservesChanged(prevReserves, newReserves, sourceActor, this))

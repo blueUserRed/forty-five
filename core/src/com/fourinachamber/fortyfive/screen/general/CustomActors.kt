@@ -1289,7 +1289,7 @@ open class CustomVerticalGroup(
 open class CustomGroup(
     override val screen: OnjScreen
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
-    DropShadowActor, FocusableActor {
+    DropShadowActor {
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
