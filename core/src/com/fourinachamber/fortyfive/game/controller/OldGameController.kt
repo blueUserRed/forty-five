@@ -20,7 +20,7 @@ import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.StatusEffectTarget
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
-import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.game.card.GameSituations
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
@@ -496,14 +496,14 @@ class OldGameController(
             { !skip }
         )
         val triggerInfo = TriggerInformation(sourceCard = card, controller = this@OldGameController)
-        includeLater(
-            { checkEffectsSingleCard(Trigger.ON_ENTER, card, triggerInfo) },
-            { !skip }
-        )
-        includeLater(
-            { checkEffectsActiveCards(Trigger.ON_ANY_CARD_ENTER, triggerInfo) },
-            { !skip }
-        )
+//        includeLater(
+//            { checkEffectsSingleCard(GameSituations.ON_ENTER, card, triggerInfo) },
+//            { !skip }
+//        )
+//        includeLater(
+//            { checkEffectsActiveCards(GameSituations.ON_ANY_CARD_ENTER, triggerInfo) },
+//            { !skip }
+//        )
     })
 
     fun putCardFromRevolverBackInHand(card: Card) {
@@ -613,17 +613,17 @@ class OldGameController(
         }
         val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw, controller = this@OldGameController)
         val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw, controller = this@OldGameController)
-        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
+        includeLater({ checkEffectsActiveCards(GameSituations.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
         includeLater(
-            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
+            { checkEffectsActiveCards(GameSituations.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
             { isSpecial && remainingCardsToDraw != 0 }
         )
         includeLater(
-            { checkEffectsActiveCards(Trigger.ON_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
+            { checkEffectsActiveCards(GameSituations.ON_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
             { remainingCardsToDraw != 0 }
         )
         includeLater(
-            { checkEffectsActiveCards(Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
+            { checkEffectsActiveCards(GameSituations.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
             { isSpecial && remainingCardsToDraw != 0 }
         )
     }
@@ -654,10 +654,10 @@ class OldGameController(
                     popupEvent = null
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
-                includeLater (
-                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true, controller = this@OldGameController)) },
-                    { parryCard.shouldRemoveAfterShot(this@OldGameController) }
-                )
+//                includeLater (
+//                    { checkEffectsSingleCard(GameSituations.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true, controller = this@OldGameController)) },
+//                    { parryCard.shouldRemoveAfterShot(this@OldGameController) }
+//                )
                 action {
                     this@OldGameController.screen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
@@ -812,11 +812,11 @@ class OldGameController(
             }
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true, controller = this@OldGameController)
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
-                includeLater(
-                    { checkEffectsSingleCard(Trigger.ON_LEAVE, cardToShoot, triggerInformation) },
-                    { cardToShoot.shouldRemoveAfterShot(this@OldGameController) }
-                )
+                include(checkEffectsSingleCard(GameSituations.ON_SHOT, cardToShoot, triggerInformation))
+//                includeLater(
+//                    { checkEffectsSingleCard(GameSituations.ON_LEAVE, cardToShoot, triggerInformation) },
+//                    { cardToShoot.shouldRemoveAfterShot(this@OldGameController) }
+//                )
                 action {
                     if (cardToShoot.shouldRemoveAfterShot(this@OldGameController)) {
                         if (!cardToShoot.isUndead) {
@@ -885,7 +885,7 @@ class OldGameController(
             .let { include(it) }
         if (newRotation.amount != 0) {
             val info = TriggerInformation(multiplier = newRotation.amount, controller = this@OldGameController)
-            include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
+            include(checkEffectsActiveCards(GameSituations.ON_REVOLVER_ROTATION, info))
             includeLater(
                 {
                     revolver
@@ -894,17 +894,17 @@ class OldGameController(
                         .zip { it.card }
                         .filter { it.second != null }
                         .filter { it.first.num == it.second?.enteredInSlot }
-                        .map { checkEffectsSingleCard(Trigger.ON_RETURNED_HOME, it.second!!) }
+                        .map { checkEffectsSingleCard(GameSituations.ON_RETURNED_HOME, it.second!!) }
                         .collectTimeline()
                 },
                 { true }
             )
-            includeLater(
-                {
-                    checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, revolver.getCardInSlot(5)!!)
-                },
-                { revolver.getCardInSlot(5) != null }
-            )
+//            includeLater(
+//                {
+//                    checkEffectsSingleCard(GameSituations.ON_ROTATE_IN_5, revolver.getCardInSlot(5)!!)
+//                },
+//                { revolver.getCardInSlot(5) != null }
+//            )
         }
         enemyArea
             .enemies
@@ -934,7 +934,7 @@ class OldGameController(
                     .mapNotNull { it.executeOnEndTurn() }
                     .collectTimeline()
                     .let { include(it) }
-            include(checkEffectsActiveCards(Trigger.ON_ROUND_END))
+            include(checkEffectsActiveCards(GameSituations.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
                 { cardHand.cards.size >= softMaxCards }
@@ -959,7 +959,7 @@ class OldGameController(
                     .collectTimeline()
                     .let { include(it) }
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
-            includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
+            includeLater({ checkEffectsActiveCards(GameSituations.ON_ROUND_START) }, { true })
         })
     }
 
@@ -1094,8 +1094,8 @@ class OldGameController(
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
         val triggerInformation = TriggerInformation(sourceCard = card, controller = this@OldGameController)
-        include(checkEffectsSingleCard(Trigger.ON_DESTROY, card, triggerInformation))
-        include(checkEffectsActiveCards(Trigger.ON_ANY_CARD_DESTROY, triggerInformation))
+        include(checkEffectsSingleCard(GameSituations.ON_DESTROY, card, triggerInformation))
+//        include(checkEffectsActiveCards(GameSituations.ON_ANY_CARD_DESTROY, triggerInformation))
     }
 
     override fun bounceBulletTimeline(card: Card): Timeline = Timeline.timeline {
@@ -1106,9 +1106,9 @@ class OldGameController(
             revolver.removeCard(card)
             card.leaveGame()
         }
-        include(checkEffectsSingleCard(Trigger.ON_BOUNCE, card))
-        include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card))
-        include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, card))
+//        include(checkEffectsSingleCard(GameSituations.ON_BOUNCE, card))
+        include(checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN, card))
+        include(checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, card))
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
@@ -1131,10 +1131,10 @@ class OldGameController(
         action {
             card = revolver.getCardInSlot(slot)
         }
-        includeLater(
-            { checkEffectsSingleCard(Trigger.ON_LEAVE, card!!) },
-            { card != null }
-        )
+//        includeLater(
+//            { checkEffectsSingleCard(GameSituations.ON_LEAVE, card!!) },
+//            { card != null }
+//        )
         action {
             @Suppress("NAME_SHADOWING")
             val card = card ?: return@action
@@ -1154,24 +1154,24 @@ class OldGameController(
     }
 
     fun checkEffectsSingleCard(
-        trigger: Trigger,
+        trigger: GameSituations,
         card: Card,
         triggerInformation: TriggerInformation = TriggerInformation(controller = this)
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
             include(card.checkEffects(trigger, triggerInformation, this@OldGameController))
-            trigger
-                .cascadeTriggers
-                .map { checkEffectsSingleCard(it, card, triggerInformation) }
-                .collectTimeline()
-                .let { include(it) }
+//            trigger
+//                .cascadeTriggers
+//                .map { checkEffectsSingleCard(it, card, triggerInformation) }
+//                .collectTimeline()
+//                .let { include(it) }
         }
     }
 
     @MainThreadOnly
     fun checkEffectsActiveCards(
-        trigger: Trigger,
+        trigger: GameSituations,
         triggerInformation: TriggerInformation = TriggerInformation(controller = this),
         exclude: Card? = triggerInformation.sourceCard
     ): Timeline {
@@ -1183,11 +1183,11 @@ class OldGameController(
                 .map { it.checkEffects(trigger, triggerInformation, this@OldGameController) }
                 .collectTimeline()
                 .let { include(it) }
-            trigger
-                .cascadeTriggers
-                .map { checkEffectsActiveCards(trigger, triggerInformation) }
-                .collectTimeline()
-                .let { include(it) }
+//            trigger
+//                .cascadeTriggers
+//                .map { checkEffectsActiveCards(trigger, triggerInformation) }
+//                .collectTimeline()
+//                .let { include(it) }
         }
     }
 
@@ -1232,12 +1232,12 @@ class OldGameController(
         includeLater(
             { Timeline.timeline {
                 include(checkEffectsSingleCard(
-                    Trigger.ON_SPECIAL_SELF_DRAWN,
+                    GameSituations.ON_SPECIAL_SELF_DRAWN,
                     card,
                     TriggerInformation(sourceCard = source, controller = this@OldGameController)
                 ))
                 include(checkEffectsSingleCard(
-                    Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM,
+                    GameSituations.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM,
                     card,
                     TriggerInformation(sourceCard = source, controller = this@OldGameController)
                 ))
@@ -1306,7 +1306,7 @@ class OldGameController(
         if (!card.inGame) return
         val cost = card.rightClickCost ?: return
         if (!tryPay(cost, card.actor)) return
-        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_RIGHT_CLICK, card))
+        appendMainTimeline(checkEffectsSingleCard(GameSituations.ON_RIGHT_CLICK, card))
     }
 
     /**
@@ -1324,7 +1324,7 @@ class OldGameController(
             cardsDrawn++
         }
         includeLater(
-            { checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card!!) },
+            { checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN, card!!) },
             { fromBottom }
         )
     }

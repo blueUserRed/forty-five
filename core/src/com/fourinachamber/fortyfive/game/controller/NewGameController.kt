@@ -105,6 +105,7 @@ class NewGameController(
         gameDirector.init()
 
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
+        gameEvents.watchFor<Events.Shoot> { shoot() }
 
         initCards()
         _cardStack.forEach { cardHand.addCard(it) }
@@ -312,6 +313,7 @@ class NewGameController(
                     revolver.setCard(slot, card)
                     card.onEnter(this@NewGameController)
                 }
+                gameEvents.fire(Events.CardChangedZoneEvent(card, Zone.HAND, Zone.REVOLVER, this))
             }
         }
         appendMainTimeline(timeline)
@@ -326,21 +328,18 @@ class NewGameController(
         timeline.startTimeline()
     }
 
-    override fun cardsInRevolver(): List<Card> {
-        TODO("Not yet implemented")
-    }
+    override fun cardsInRevolver(): List<Card> = revolver.slots.mapNotNull { it.card }
 
-    override fun cardsInRevolverIndexed(): List<Pair<Int, Card>> {
-        TODO("Not yet implemented")
-    }
+    override fun cardsInRevolverIndexed(): List<Pair<Int, Card>> = revolver
+        .slots
+        .filter { it.card != null }
+        .map { it.num to it.card!! }
 
     override fun targetedEnemy(): Enemy {
         TODO("Not yet implemented")
     }
 
-    override fun slotOfCard(card: Card): Int? {
-        TODO("Not yet implemented")
-    }
+    override fun slotOfCard(card: Card): Int? = revolver.slots.find { it.card === card }?.num
 
     override fun titleOfCard(cardName: String): String = cardPrototypes.find { it.name == cardName }?.title
         ?: throw RuntimeException("No card with name $cardName")
@@ -365,5 +364,20 @@ class NewGameController(
             val controller: GameController
         )
         data class ParryStateChange(val inParryMenu: Boolean)
+        data object Shoot
+
+        abstract class TimelineBuildingEvent(val dsl: Timeline.TimelineBuilderDSL) {
+            inline fun append(block: Timeline.TimelineBuilderDSL.() -> Unit) {
+                block(dsl)
+            }
+        }
+
+        class CardChangedZoneEvent(
+            val card: Card,
+            val oldZone: Zone,
+            val newZone: Zone,
+            dsl: Timeline.TimelineBuilderDSL
+        ) : TimelineBuildingEvent(dsl)
+
     }
 }

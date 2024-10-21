@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -330,11 +329,11 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(controller: GameController, slot: Int): Boolean =
-        slot !in forbiddenSlots &&
-                effects
-                    .filter { it.trigger == Trigger.ON_ENTER }
-                    .none { it.blocks(controller) }
+    fun allowsEnteringGame(controller: GameController, slot: Int): Boolean = TODO()
+//        slot !in forbiddenSlots &&
+//                effects
+//                    .filter { it.trigger == GameSituations.ON_ENTER }
+//                    .none { it.blocks(controller) }
 
     /**
      * called when this card was destroyed by the destroy effect
@@ -376,7 +375,7 @@ class Card(
             source = "disintegration effect",
             validityChecker = { inGame },
             transformers = mapOf(
-                Trigger.ON_REVOLVER_ROTATION to rotationTransformer
+                GameSituations.ON_REVOLVER_ROTATION to rotationTransformer
             )
         )
         addModifier(modifier)
@@ -407,7 +406,7 @@ class Card(
      */
     @MainThreadOnly
     fun checkEffects(
-        trigger: Trigger,
+        trigger: GameSituations,
         triggerInformation: TriggerInformation,
         controller: GameController,
     ): Timeline = Timeline.timeline {
@@ -449,7 +448,7 @@ class Card(
         }
     }
 
-    private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
+    private fun checkModifierTransformers(trigger: GameSituations, triggerInformation: TriggerInformation) {
         var modifierChanged = false
         _modifiers.replaceAll { (counter, modifier) ->
             val transformer = modifier.transformers[trigger] ?: return@replaceAll counter to modifier
@@ -692,7 +691,7 @@ class Card(
         val validityChecker: () -> Boolean = { true },
         val activeChecker: (controller: GameController) -> Boolean = { true },
         var wasActive: Boolean = true,
-        val transformers: Map<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
+        val transformers: Map<GameSituations, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
     )
 
 }

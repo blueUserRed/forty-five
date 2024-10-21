@@ -208,6 +208,8 @@ infix fun <T> ClosedFloatingPointRange<T>.intersection(
     other: ClosedFloatingPointRange<T>
 ): Boolean where T : Comparable<T> = this.start in other || other.start in this
 
+infix fun IntRange.intersection(other: IntRange): Boolean = this.start in other || other.start in this
+
 inline fun <reified T> ClosedFloatingPointRange<T>.asArray(
 ): Array<T> where T : Comparable<T> = arrayOf(this.start, this.endInclusive)
 

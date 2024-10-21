@@ -404,29 +404,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "params: [int]")
     fun cardsWithCost(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
 
-    private fun triggerOrError(trigger: String): Trigger = when (trigger) {
-        "enter" -> Trigger.ON_ENTER
-        "any card entered" -> Trigger.ON_ANY_CARD_ENTER
-        "shot" -> Trigger.ON_SHOT
-        "bounce" -> Trigger.ON_BOUNCE
-        "leave" -> Trigger.ON_LEAVE
-        "destroy" -> Trigger.ON_DESTROY
-        "round start" -> Trigger.ON_ROUND_START
-        "round end" -> Trigger.ON_ROUND_END
-        "rotation" -> Trigger.ON_REVOLVER_ROTATION
-        "card drawn" -> Trigger.ON_CARDS_DRAWN
-        "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
-        "special self drawn" -> Trigger.ON_SPECIAL_SELF_DRAWN
-        "special self drawn not from bottom" -> Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM
-        "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
-        "return home" -> Trigger.ON_RETURNED_HOME
-        "rotate in 5" -> Trigger.ON_ROTATE_IN_5
-        "one or more cards drawn" -> Trigger.ON_ONE_OR_MORE_CARDS_DRAWN
-        "special one or more cards drawn" -> Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN
-        "right clicked" -> Trigger.ON_RIGHT_CLICK
-        else -> throw RuntimeException("unknown trigger: $trigger")
-    }
-
 }
 
 /**
@@ -501,5 +478,14 @@ class OnjCardPredicate(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--card-predicate--'")
+    }
+}
+
+class OnjTrigger(
+    override val value: Trigger
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--trigger--'")
     }
 }

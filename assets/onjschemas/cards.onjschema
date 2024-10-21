@@ -21,6 +21,12 @@ $Rotation {
     $Dont { }
 }
 
+var effectDefinition = {
+    trigger: string,
+    effect: Effect,
+    inZones?: string[]
+};
+
 var card = {
     name: string,
     title: string,
@@ -36,7 +42,7 @@ var card = {
     price: int,
     dark: boolean,
     type: $CardType,
-    effects: Effect[],
+    effects: effectDefinition[],
     forceLoadCards: string[],
     tags: string[],
     additionalHoverInfos?: string[],
