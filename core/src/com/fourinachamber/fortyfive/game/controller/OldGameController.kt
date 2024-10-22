@@ -287,7 +287,6 @@ class OldGameController(
         val defaultBulletName = onj.get<String>("defaultBullet")
 
         defaultBullet = cardPrototypes
-            .filter { it.type == Card.Type.BULLET }
             .firstOrNull { it.name == defaultBulletName }
             ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
 
@@ -464,7 +463,7 @@ class OldGameController(
             FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
             cardInSlot = revolver.getCardInSlot(slot)
             if (
-                card.type != Card.Type.BULLET ||
+//                card.type != Card.Type.BULLET ||
                 !card.allowsEnteringGame(this@OldGameController, slot) ||
                 !(cardInSlot?.isReplaceable ?: true) ||
                 !tryPay(card.curCost(this@OldGameController), card.actor)
@@ -567,7 +566,7 @@ class OldGameController(
         selectedCard = card
     }
 
-    override fun drawCardsTimeline(amount: Int, isSpecial: Boolean, fromBottom: Boolean): Timeline = Timeline.timeline {
+    override fun drawCardsTimeline(amount: Int, isSpecial: Boolean, fromBottom: Boolean, sourceCard: Card?): Timeline = Timeline.timeline {
         if (amount <= 0) return@timeline
         var remainingCardsToDraw = amount
         action {
@@ -613,19 +612,19 @@ class OldGameController(
         }
         val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw, controller = this@OldGameController)
         val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw, controller = this@OldGameController)
-        includeLater({ checkEffectsActiveCards(GameSituations.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
-        includeLater(
-            { checkEffectsActiveCards(GameSituations.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
-            { isSpecial && remainingCardsToDraw != 0 }
-        )
-        includeLater(
-            { checkEffectsActiveCards(GameSituations.ON_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
-            { remainingCardsToDraw != 0 }
-        )
-        includeLater(
-            { checkEffectsActiveCards(GameSituations.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
-            { isSpecial && remainingCardsToDraw != 0 }
-        )
+//        includeLater({ checkEffectsActiveCards(GameSituations.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
+//        includeLater(
+//            { checkEffectsActiveCards(GameSituations.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
+//            { isSpecial && remainingCardsToDraw != 0 }
+//        )
+//        includeLater(
+//            { checkEffectsActiveCards(GameSituations.ON_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
+//            { remainingCardsToDraw != 0 }
+//        )
+//        includeLater(
+//            { checkEffectsActiveCards(GameSituations.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
+//            { isSpecial && remainingCardsToDraw != 0 }
+//        )
     }
 
     override fun enemyAttackTimeline(damage: Int, isPiercing: Boolean): Timeline = Timeline.timeline {
@@ -1107,9 +1106,9 @@ class OldGameController(
             card.leaveGame()
         }
 //        include(checkEffectsSingleCard(GameSituations.ON_BOUNCE, card))
-        include(checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN, card))
-        include(checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, card))
-        include(tryToPutCardsInHandTimeline(card.name))
+//        include(checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN, card))
+//        include(checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, card))
+//        include(tryToPutCardsInHandTimeline(card.name))
     }
 
     override fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline = Timeline.timeline {
@@ -1160,7 +1159,7 @@ class OldGameController(
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
-            include(card.checkEffects(trigger, triggerInformation, this@OldGameController))
+//            include(card.checkEffects(trigger, triggerInformation, this@OldGameController))
 //            trigger
 //                .cascadeTriggers
 //                .map { checkEffectsSingleCard(it, card, triggerInformation) }
@@ -1180,9 +1179,9 @@ class OldGameController(
             createdCards
                 .filter { it.inGame || it.inHand(this@OldGameController) }
                 .filter { it !== exclude }
-                .map { it.checkEffects(trigger, triggerInformation, this@OldGameController) }
-                .collectTimeline()
-                .let { include(it) }
+//                .map { it.checkEffects(trigger, triggerInformation, this@OldGameController) }
+//                .collectTimeline()
+//                .let { include(it) }
 //            trigger
 //                .cascadeTriggers
 //                .map { checkEffectsActiveCards(trigger, triggerInformation) }
@@ -1229,21 +1228,21 @@ class OldGameController(
             validateCardStack()
             cardOrbAnim(card.actor, reverse = true)
         }
-        includeLater(
-            { Timeline.timeline {
-                include(checkEffectsSingleCard(
-                    GameSituations.ON_SPECIAL_SELF_DRAWN,
-                    card,
-                    TriggerInformation(sourceCard = source, controller = this@OldGameController)
-                ))
-                include(checkEffectsSingleCard(
-                    GameSituations.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM,
-                    card,
-                    TriggerInformation(sourceCard = source, controller = this@OldGameController)
-                ))
-            } },
-            { !skip }
-        )
+//        includeLater(
+//            { Timeline.timeline {
+//                include(checkEffectsSingleCard(
+//                    GameSituations.ON_SPECIAL_SELF_DRAWN,
+//                    card,
+//                    TriggerInformation(sourceCard = source, controller = this@OldGameController)
+//                ))
+//                include(checkEffectsSingleCard(
+//                    GameSituations.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM,
+//                    card,
+//                    TriggerInformation(sourceCard = source, controller = this@OldGameController)
+//                ))
+//            } },
+//            { !skip }
+//        )
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
@@ -1323,10 +1322,10 @@ class OldGameController(
             FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
             cardsDrawn++
         }
-        includeLater(
-            { checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN, card!!) },
-            { fromBottom }
-        )
+//        includeLater(
+//            { checkEffectsSingleCard(GameSituations.ON_SPECIAL_SELF_DRAWN, card!!) },
+//            { fromBottom }
+//        )
     }
 
     fun putCardAtBottomOfStack(card: Card) {

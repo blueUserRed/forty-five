@@ -46,7 +46,7 @@ interface GameController {
 
     fun rotateRevolverTimeline(rotation: RevolverRotation, ignoreEncounterModifiers: Boolean = false): Timeline
 
-    fun drawCardsTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false): Timeline
+    fun drawCardsTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false, sourceCard: Card? = null): Timeline
 
     fun tryApplyStatusEffectToEnemyTimeline(statusEffect: StatusEffect, enemy: Enemy): Timeline
 

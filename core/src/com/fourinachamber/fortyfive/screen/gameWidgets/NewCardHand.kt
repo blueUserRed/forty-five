@@ -52,6 +52,8 @@ class NewCardHand(
         addListener(cardFocusListener)
     }
 
+    fun allCards(): List<Card> = leftSide + rightSide
+
     fun addCard(card: Card) {
         if (leftSide.size < rightSide.size) leftSide.add(card)
         else rightSide.add(card)

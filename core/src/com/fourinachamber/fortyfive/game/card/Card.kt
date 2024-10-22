@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
@@ -48,9 +49,7 @@ import kotlin.math.absoluteValue
 class CardPrototype(
     val name: String,
     val title: String,
-    val type: Card.Type,
     val tags: List<String>,
-    val forceLoadCards: List<String>,
 ) {
 
     var creator: ((screen: OnjScreen, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
@@ -72,7 +71,7 @@ class CardPrototype(
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
 
-    fun copy(): CardPrototype = CardPrototype(name, title, type, tags, forceLoadCards).apply {
+    fun copy(): CardPrototype = CardPrototype(name, title, tags).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
         this.creator = this@CardPrototype.creator
     }
@@ -97,10 +96,8 @@ class CardPrototype(
 class Card(
     val name: String,
     val title: String,
-    val drawableHandle: ResourceHandle,
     val flavourText: String,
     val shortDescription: String,
-    val type: Type,
     val baseDamage: Int,
     val baseCost: Int,
     val rightClickCost: Int?,
@@ -200,6 +197,9 @@ class Card(
 
     var lastEffectAffectedCardsCache: List<Card> = listOf()
 
+    var zone: Zone = Zone.DECK
+        private set
+
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
         // card texture while the constructor is running and actor is not yet assigned
@@ -218,6 +218,15 @@ class Card(
     fun canBeReplaced(controller: GameController, by: Card): Boolean = false
 
     fun replaceTimeline(controller: NewGameController, replaceBy: Card): Timeline = Timeline()
+
+    fun changeZone(newZone: Zone) {
+        zone = newZone
+    }
+
+    fun inZone(vararg zones: Zone): Boolean {
+        zones.forEach { if (it == zone) return true }
+        return false
+    }
 
     ///////////////////////////////////////////
     ///////////////////////////////////////////
@@ -374,8 +383,8 @@ class Card(
             damage = 0,
             source = "disintegration effect",
             validityChecker = { inGame },
-            transformers = mapOf(
-                GameSituations.ON_REVOLVER_ROTATION to rotationTransformer
+            transformers = listOf(
+                Trigger.GameSituation(GameSituations.ON_REVOLVER_ROTATION, true) to rotationTransformer
             )
         )
         addModifier(modifier)
@@ -406,7 +415,7 @@ class Card(
      */
     @MainThreadOnly
     fun checkEffects(
-        trigger: GameSituations,
+        trigger: Trigger,
         triggerInformation: TriggerInformation,
         controller: GameController,
     ): Timeline = Timeline.timeline {
@@ -414,44 +423,48 @@ class Card(
         action {
             checkModifierTransformers(trigger, triggerInformation)
         }
-        val inHand = inHand(controller)
-        val effects = effects
-            .filter { inGame || (inHand && it.triggerInHand) }
-            .filter { it.condition?.check(controller) ?: true }
-            .zip { it.checkTrigger(trigger, triggerInformation, controller) }
-            .filter { it.second != null }
-        if (effects.isEmpty()) return@timeline
-        val showAnimation = !effects.all { it.first.isHidden }
-        action {
-            actor.inAnimation = true
-        }
-        action {
-            if (isOnShot || !showAnimation || !inGame) return@action
-            controller.dispatchAnimTimeline(Timeline.timeline {
-                delay(210)
-                include(controller.gameRenderPipeline.getScreenShakeTimeline())
-            })
-        }
-        val forceNonOnShotTrigger = effects.any { it.first.useAlternateOnShotTriggerPosition() }
-        includeLater(
-            { actor.animateToTriggerPosition(controller, isOnShot && !forceNonOnShotTrigger) },
-            { inGame && showAnimation }
-        )
-        include(effects.mapNotNull { it.second }.collectTimeline())
-        includeLater(
-            { actor.animateBack(controller) },
-            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot(controller)) }
-        )
-        action {
-            actor.setScale(1f)
-            actor.inAnimation = false
+        later {
+            val effects = effects
+                .filter { it.checkConditions(controller, this@Card) }
+                .zip { it.checkTrigger(trigger, triggerInformation, controller, this@Card) }
+                .filter { it.second != null }
+            if (effects.isEmpty()) return@later
+            val showAnimation = !effects.all { it.first.data.isHidden }
+            val doAnim = inZone(Zone.REVOLVER, Zone.HAND, Zone.AFTERLIVE)
+            action {
+                actor.inAnimation = true
+            }
+            action {
+                if (isOnShot || !showAnimation || !doAnim) return@action
+                controller.dispatchAnimTimeline(Timeline.timeline {
+                    delay(210)
+                    include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                })
+            }
+            val forceNonOnShotTrigger = effects.any { it.first.useAlternateOnShotTriggerPosition() }
+            includeLater(
+                { actor.animateToTriggerPosition(controller, isOnShot && !forceNonOnShotTrigger) },
+                { doAnim && showAnimation }
+            )
+            include(effects.mapNotNull { it.second }.collectTimeline())
+            includeLater(
+                { actor.animateBack(controller) },
+                { doAnim && showAnimation && (!isOnShot || !shouldRemoveAfterShot(controller)) }
+            )
+            action {
+                actor.setScale(1f)
+                actor.inAnimation = false
+            }
         }
     }
 
-    private fun checkModifierTransformers(trigger: GameSituations, triggerInformation: TriggerInformation) {
+    private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
         var modifierChanged = false
         _modifiers.replaceAll { (counter, modifier) ->
-            val transformer = modifier.transformers[trigger] ?: return@replaceAll counter to modifier
+            val (_, transformer) = modifier
+                .transformers
+                .find { it.first.checkTrigger(trigger, triggerInformation, this) }
+                ?: return@replaceAll counter to modifier
             modifierChanged = true
             counter to transformer(modifier, triggerInformation)
         }
@@ -568,9 +581,7 @@ class Card(
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
                         onj.get<String>("title"),
-                        cardTypeOrError(onj),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
-                        onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     )
                     prototype.creator = { screen, isSaved, areHoverDetailsEnabled ->
                         getCardFrom(onj, screen, initializer, prototype, isSaved, areHoverDetailsEnabled)
@@ -593,17 +604,25 @@ class Card(
             val card = Card(
                 name = name,
                 title = onj.get<String>("title"),
-                drawableHandle = "$cardTexturePrefix$name",
                 flavourText = onj.get<String>("flavourText"),
                 shortDescription = onj.get<String>("description"),
-                type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
                 baseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
-                effects = onj.get<OnjArray>("effects")
+                effects = onj
+                    .get<OnjArray>("effects")
                     .value
-                    .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
+                    .map {
+                        it as OnjObject
+                        val effect = it.get<Effect>("effect")
+                        val data = EffectData(
+                            trigger = it.get<Trigger>("trigger"),
+                            isHidden = it.getOr("isHidden", false),
+                            cacheAffectedCards = it.getOr("cacheAffectedCards", false),
+                        )
+                        effect.copy(data)
+                    },
                 passiveEffects = onj.getOr<List<OnjPassiveEffect>>("passiveEffects", listOf())
                     .map { it.value }
                     .map { it.creator() },
@@ -629,20 +648,11 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 lockedDescription = onj.get<String?>("lockedDescription")
             )
-
-            card.effects.forEach { it.card = card }
             card.passiveEffects.forEach { it.card = card }
             applyTraitEffects(card, onj)
             initializer(card)
             return card
         }
-
-        private fun cardTypeOrError(onj: OnjObject) = when (val type = onj.get<OnjNamedObject>("type").name) {
-            "Bullet" -> Type.BULLET
-            "OneShot" -> Type.ONE_SHOT
-            else -> throw RuntimeException("unknown Card type: $type")
-        }
-
 
         private fun applyTraitEffects(card: Card, onj: OnjObject) {
             val effects = onj
@@ -664,10 +674,6 @@ class Card(
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
-        }
-
-        val cardsFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }
     }
 
@@ -691,7 +697,7 @@ class Card(
         val validityChecker: () -> Boolean = { true },
         val activeChecker: (controller: GameController) -> Boolean = { true },
         var wasActive: Boolean = true,
-        val transformers: Map<GameSituations, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
+        val transformers: List<Pair<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier>> = listOf()
     )
 
 }

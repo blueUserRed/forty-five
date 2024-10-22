@@ -10,6 +10,8 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
+import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
@@ -23,6 +25,7 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.value.OnjArray
+import kotlin.math.floor
 
 class NewGameController(
     override val screen: OnjScreen,
@@ -34,8 +37,7 @@ class NewGameController(
     override val gameRenderPipeline: GameRenderPipeline
         get() = TODO("Not yet implemented")
 
-    override val playerLost: Boolean
-        get() = TODO("Not yet implemented")
+    override val playerLost: Boolean = false
 
     override var curReserves: Int = Config.baseReserves
 
@@ -55,7 +57,7 @@ class NewGameController(
         get() = TODO("Not yet implemented")
 
     override val cardsInHand: List<Card>
-        get() = TODO("Not yet implemented")
+        get() = cardHand.allCards()
 
     private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
     override val encounterModifiers: List<EncounterModifier>
@@ -70,8 +72,8 @@ class NewGameController(
     override val allEnemies: List<Enemy>
         get() = TODO("Not yet implemented")
 
-    override val shootButton: Actor
-        get() = TODO("Not yet implemented")
+    @Inject(name = "shoot_button")
+    override lateinit var shootButton: Actor
 
     @Inject override lateinit var revolver: Revolver
 
@@ -95,6 +97,9 @@ class NewGameController(
 
     private val tutorialText: MutableList<GameDirector.GameTutorialTextPart> = mutableListOf()
 
+    var cardsDrawn: Int = 0
+        private set
+
     override fun init(context: Any?) {
         if (context !is EncounterContext) {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
@@ -106,10 +111,26 @@ class NewGameController(
 
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.Shoot> { shoot() }
+        bindCardEffects()
 
         initCards()
         _cardStack.forEach { cardHand.addCard(it) }
         updateReserves(Config.baseReserves)
+    }
+
+    private fun bindCardEffects() {
+        gameEvents.watchFor<Events.CardChangedZoneEvent> { event ->
+            event.card.changeZone(event.newZone)
+            val trigger = Trigger.ZoneChange(event.oldZone, event.newZone, false)
+            event.append {
+                action { checkTrigger(trigger, event.triggerInformation) }
+            }
+        }
+
+    }
+
+    private fun checkTrigger(trigger: Trigger, triggerInformation: TriggerInformation) {
+        createdCards.forEach { it.checkEffects(trigger, triggerInformation, this) }
     }
 
     private fun updateReserves(newReserves: Int, sourceActor: Actor? = null) {
@@ -194,10 +215,63 @@ class NewGameController(
     override fun drawCardsTimeline(
         amount: Int,
         isSpecial: Boolean,
-        fromBottom: Boolean
-    ): Timeline {
-        TODO("Not yet implemented")
+        fromBottom: Boolean,
+        sourceCard: Card?,
+    ): Timeline = Timeline.timeline { later {
+
+        var cardsToDraw = amount
+        cardsToDraw += encounterModifiers.sumOf {
+            if (isSpecial) it.additionalCardsToDrawInSpecialDraw() else it.additionalCardsToDrawInNormalDraw()
+        }
+        cardsToDraw = floor(
+            encounterModifiers
+                .fold(cardsToDraw.toFloat()) { acc, cur ->
+                    acc * (if (isSpecial) cur.cardsInSpecialDrawMultiplier() else cur.cardsInNormalDrawMultiplier())
+                }
+        ).toInt()
+        cardsToDraw = maxSpaceInHand(cardsToDraw)
+
+        repeat(cardsToDraw) {
+            include(drawCardTimeline(fromBottom, sourceCard))
+        }
+
+        skipping { skip ->
+            action { if (cardsToDraw <= 0) skip() }
+            later {
+                val info = TriggerInformation(
+                    controller = this@NewGameController,
+                    amountOfCardsDrawn = cardsToDraw,
+                    multiplier = cardsToDraw,
+                    sourceCard = sourceCard,
+                )
+                val event = Events.CardsDrawnTimeline(cardsToDraw, isSpecial, fromBottom, info)
+                gameEvents.fire(event)
+                include(event.createTimeline())
+            }
+        }
+
+    } }
+
+    private fun drawCardTimeline(fromBottom: Boolean, sourceCard: Card?): Timeline = Timeline.timeline {
+        var card: Card? = null
+        action {
+            card = when {
+                _cardStack.isEmpty() -> defaultBullet.create(screen)
+                fromBottom -> _cardStack.removeLast()
+                else -> _cardStack.removeFirst()
+            }
+            cardHand.addCard(card!!)
+        }
+        includeLater({
+            val info = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
+            val event = Events.CardChangedZoneEvent(card!!, Zone.DECK, Zone.HAND, info)
+            gameEvents.fire(event)
+            event.createTimeline()
+        })
     }
+
+    private fun maxSpaceInHand(desiredSpace: Int = Int.MAX_VALUE): Int =
+        (Config.hardMaxCards - desiredSpace).coerceAtLeast(0)
 
     override fun tryApplyStatusEffectToEnemyTimeline(
         statusEffect: StatusEffect,
@@ -313,7 +387,12 @@ class NewGameController(
                     revolver.setCard(slot, card)
                     card.onEnter(this@NewGameController)
                 }
-                gameEvents.fire(Events.CardChangedZoneEvent(card, Zone.HAND, Zone.REVOLVER, this))
+                val info = TriggerInformation(controller = this@NewGameController, sourceCard = card)
+                includeLater({
+                    val event = Events.CardChangedZoneEvent(card, Zone.HAND, Zone.REVOLVER, info)
+                    gameEvents.fire(event)
+                    event.createTimeline()
+                })
             }
         }
         appendMainTimeline(timeline)
@@ -354,6 +433,8 @@ class NewGameController(
 
     object Config {
         const val baseReserves = 4
+        const val softMaxCards = 12
+        const val hardMaxCards = 20
     }
 
     object Events {
@@ -366,18 +447,30 @@ class NewGameController(
         data class ParryStateChange(val inParryMenu: Boolean)
         data object Shoot
 
-        abstract class TimelineBuildingEvent(val dsl: Timeline.TimelineBuilderDSL) {
+        abstract class TimelineBuildingEvent {
+
+            val dsl = Timeline.TimelineBuilderDSL()
+
             inline fun append(block: Timeline.TimelineBuilderDSL.() -> Unit) {
                 block(dsl)
             }
+
+            fun createTimeline(): Timeline = dsl.build()
         }
 
         class CardChangedZoneEvent(
             val card: Card,
             val oldZone: Zone,
             val newZone: Zone,
-            dsl: Timeline.TimelineBuilderDSL
-        ) : TimelineBuildingEvent(dsl)
+            val triggerInformation: TriggerInformation,
+        ) : TimelineBuildingEvent()
+
+        class CardsDrawnTimeline(
+            val amount: Int,
+            val isSpecial: Boolean,
+            val isFromBottom: Boolean,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
 
     }
 }
