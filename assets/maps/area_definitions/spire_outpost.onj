@@ -41,7 +41,7 @@ nodes: [
         nodeTexture: "map_node_dialog",
         image: "under_construction",
         imagePos: "RIGHT",
-        event: $NPCMapEvent {
+        event: $DialogMapEvent {
             npc: "to_be_continued_npc",
             currentlyBlocks: false,
             canBeStarted: true,

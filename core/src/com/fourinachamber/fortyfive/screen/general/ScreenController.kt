@@ -17,7 +17,7 @@ object ScreenControllerFactory {
     private val controllers: MutableMap<String, (OnjNamedObject, OnjScreen) -> ScreenController> = mutableMapOf(
         "GameScreenController" to { onj, screen -> OldGameController(screen, onj) },
         "IntroScreenController" to { onj, screen -> IntroScreenController(screen, onj) },
-        "DialogScreenController" to { onj, screen -> DialogScreenController(screen, onj) },
+//        "DialogScreenController" to { onj, screen -> DialogScreenController(screen, onj.get<String>("dialogWidgetName")) },
 //        "ShopScreenController" to { onj, screen -> ShopScreenController(screen, onj.get<String>("messageWidgetName"), onj.get<String>("cardsParentName"), onj.get<String>("addToDeckWidgetName"), onj.get<String>("addToBackpackWidgetName"))},
         "ChooseCardScreenController" to { onj, screen -> ChooseCardScreenController(screen, onj) },
 //        "HealOrMaxHPScreenController" to { onj, screen -> HealOrMaxHPScreenController(screen, onj.get<String>("addLifeActorName")) },

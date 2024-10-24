@@ -11,7 +11,7 @@ npcs: [
     {
         name: "to_be_continued_npc",
         displayName: "Developers",
-        dialog: {
+        /*dialog: {
             parts: [
                 {
                     rawText: "Hey there!",
@@ -42,7 +42,7 @@ npcs: [
                 fontScale: 1.0,
                 color: color.forty_white
             },
-        },
+        },*/
         image: {
             textureName: "npc_stranger",
             scale: 0.4
@@ -53,7 +53,7 @@ npcs: [
     {
         name: "brother",
         displayName: "Your Brother",
-        dialog: {
+        /*dialog: {
             parts: [
                 {
                     rawText: "Hi.",
@@ -90,7 +90,7 @@ npcs: [
                 fontScale: 1.0,
                 color: color.forty_white
             }
-        },
+        },*/
         image: {
             textureName: "npc_stranger",
             scale: 0.4
@@ -101,7 +101,7 @@ npcs: [
     {
         name: "traveling_merchant",
         displayName: "Traveling Merchant",
-        dialog: {
+      /*  dialog: {
             parts: [
                 {
                     rawText: "Howdy, welcome in $1Aqua Balle$1, where all the scum, outlaws and gamblers of the $1Old World$1 come together to find their luck in the frontier.",
@@ -220,7 +220,7 @@ npcs: [
                 fontScale: 1.0,
                 color: color.forty_white
             }
-        },
+        },*/
         image: {
             textureName: "npc_merchant",
             scale: 0.72,
@@ -231,7 +231,7 @@ npcs: [
     {
         name: "priest_of_aqua_balle",
         displayName: "Priest of Aqua Balle",
-        dialog: {
+        /*dialog: {
             parts: [
                 {
                     rawText: "Bless you!",
@@ -274,7 +274,7 @@ npcs: [
                 fontScale: 1.0,
                 color: color.forty_white
             }
-        },
+        },*/
         image: {
             textureName: "npc_priest",
             scale: 0.5
@@ -284,7 +284,7 @@ npcs: [
     {
         name: "not_yet_implemented_npc",
         displayName: "Stranger",
-        dialog: {
+        /*dialog: {
             parts: [
                 {
                     rawText: "Hello!",
@@ -306,7 +306,7 @@ npcs: [
                 fontScale: 1.0,
                 color: color.forty_white
             }
-        },
+        },*/
         image: {
             textureName: "npc_stranger",
             scale: 0.4
@@ -316,7 +316,7 @@ npcs: [
     {
         name: "witch",
         displayName: "Witch",
-        dialog: {
+        /*dialog: {
             parts: [
                 {
                     rawText: "$4$1I'll warn you!$1$4",
@@ -428,7 +428,7 @@ npcs: [
                 fontScale: 1.2,
                 color: color.forty_white
             }
-        },
+        },*/
         image: {
             textureName: "npc_witch",
             scale: 0.9
@@ -438,7 +438,7 @@ npcs: [
     {
         name: "traveler_in_salem_npc",
         displayName: "Traveler",
-        dialog: {
+       /* dialog: {
             parts: [
                 {
                     rawText: "Mornin'. Good seein' someone who doesn't want to kill me at first sight.",
@@ -592,11 +592,36 @@ npcs: [
                 fontScale: 1.0,
                 color: color.forty_white
             }
-        },
+        },*/
         image: {
             textureName: "npc_traveler",
             scale: 0.4
         }
     },
 
-]
+],
+dialogs: [
+    {
+        name: "testing_dialog",
+        eventText: "This is a test, hihihi",
+        parts: [
+            {
+                rawText: "Hello, this is just an example text because i am awesome...",
+                next: $Continue {
+                },
+            },
+            {
+                rawText: "Bye",
+                next: $EndOfDialog {
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults:{
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    }
+
+],

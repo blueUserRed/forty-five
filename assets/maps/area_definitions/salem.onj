@@ -24,7 +24,7 @@ nodes: [
             2
         ],
         nodeTexture: "map_node_dialog",
-        event: $NPCMapEvent {
+        event: $DialogMapEvent {
             npc: "traveler_in_salem_npc",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,

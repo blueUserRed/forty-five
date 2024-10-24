@@ -40,9 +40,9 @@ configFiles: {
         file: "config/card_selection_types.onj",
         validatedBy: "onjschemas/card_selection_types.onjschema",
     },
-    npcConfig: {
-        file: "config/npcs.onj",
-        validatedBy: "onjschemas/npcs.onjschema",
+    dialogConfig: {
+        file: "config/dialogs.onj",
+        validatedBy: "onjschemas/dialogs.onjschema",
     },
     shopConfig: {
         file: "config/shops.onj",
@@ -81,10 +81,10 @@ screens: [
         name: "creditsScreen",
         file: "screens/credits_screen.onj"
     },
-    {
-        name: "dialogScreen",
-        file: "screens/dialog_screen.onj"
-    },
+//    {
+//        name: "dialogScreen",
+//        file: "screens/dialog_screen.onj"
+//    },
     {
         name: "draftScreen",
         file: "screens/draft_screen.onj"

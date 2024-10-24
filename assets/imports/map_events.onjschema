@@ -33,7 +33,7 @@ $MapEvent {
         targetMap: string,
     }
 
-    $NPCMapEvent {
+    $DialogMapEvent {
         npc: string,
         canOnlyBeStartedOnce: boolean,
         onlyIfPlayerDoesntHaveCard?: string,

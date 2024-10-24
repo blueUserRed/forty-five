@@ -487,15 +487,16 @@ class FromOnjScreenBuilder(
                 } ?: listOf())
         }
 
-        "DialogWidget" -> DialogWidget(
-            (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
-            widgetOnj.get<String>("advanceArrowDrawable"),
-            widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
-            widgetOnj.get<String>("optionsBox"),
-            widgetOnj.get<String>("speakingPersonLabel"),
-            widgetOnj.get<OnjObject>("defaults"),
-            screen
-        )
+//        "DialogWidget" -> DialogWidget(
+////            (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+////            widgetOnj.get<String>("advanceArrowDrawable"),
+////            widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
+//            widgetOnj.get<String>("optionsBox"),
+////            widgetOnj.get<String>("speakingPersonLabel"),
+////            widgetOnj.get<OnjObject>("defaults"),
+//            screen,
+//            screen
+//        )
 
         "Backpack" -> Backpack(
             screen,

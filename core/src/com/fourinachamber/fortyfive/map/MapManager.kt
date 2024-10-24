@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
@@ -90,12 +89,12 @@ object MapManager {
             .map { it as OnjObject }
             .associate { it.get<String>("name") to it.get<String>("display") }
             .toMutableMap()
-        val npcs = ConfigFileManager.getConfigFile("npcConfig")
-        npcs
-            .get<OnjArray>("npcs")
+        val dialogs = ConfigFileManager.getConfigFile("dialogConfig")
+        dialogs
+            .get<OnjArray>("dialogs")
             .value
             .map { it as OnjObject }
-            .map { it.get<String>("name") to it.get<String>("displayName") }
+            .map { it.get<String>("name") to it.get<String>("eventText") }
             .forEach {displayNames[it.first] = it.second }
         this.displayNames = displayNames
     }

@@ -31,8 +31,13 @@ $NextDialogPartSelector {
 }
 
 var dialog = {
+    name: string,
+    eventText: string,
     parts: {
         rawText: string,
+        npcLeftChangeTo?: string,
+        npcRightChangeTo?: string,
+        switchTalkingPerson?: boolean,
         effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
@@ -42,6 +47,9 @@ var dialog = {
         color: Color
     },
 };
+
+dialogs: dialog[]
+
 
 var image = {
         textureName: string,
@@ -53,6 +61,5 @@ var image = {
 npcs: {
     name: string,
     displayName: string,
-    dialog: dialog,
     image: image,
 }[]
