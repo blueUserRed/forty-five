@@ -41,17 +41,9 @@ cards: [
         flavourText: "",
         description: "",
         baseDamage: 6,
-        coverValue: 0,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
-        effects: [],
-        forceLoadCards: [],
-        dark: false,
         cost: 1,
         tags: ["pool0", "unobtainable"],
         price: 50,
-        type: $Bullet { },
     },
     {
         name: "bigBullet",
@@ -59,17 +51,9 @@ cards: [
         flavourText: "",
         description: "Don't ask me how it fits, it just does.",
         baseDamage: 16,
-        coverValue: 0,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
-        effects: [],
-        forceLoadCards: [],
-        dark: false,
         cost: 2,
         tags: ["pool0", "rarity3"],
         price: 50,
-        type: $Bullet { }
     },
     {
         name: "silverBullet",
@@ -77,26 +61,19 @@ cards: [
         flavourText: "This bullet is silver and silence is golden",
         description: "$trigger$On-Placedown:$trigger$\nDraw 1 card\n$trigger$On-Shot:$trigger$\nDraw 1 card",
         baseDamage: 7,
-        coverValue: 0,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
         effects: [
             {
-                trigger: enterZone("revolver"),
+                trigger: enterZone(zone.revolver, false),
                 effect: draw(1#val)
             },
-            {
-                trigger: trigger.shot,
-                effect: draw(1#val)
-            }
+//            {
+//                trigger: trigger.shot,
+//                effect: draw(1#val)
+//            }
         ],
-        forceLoadCards: [],
-        dark: false,
         cost: 1,
         tags: ["pool0", "rarity2"],
         price: 60,
-        type: $Bullet { }
     },
 //    {
 //        name: "workerBullet",

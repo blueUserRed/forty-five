@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.GameSituations
+import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController
@@ -71,8 +72,8 @@ sealed class EncounterModifier {
                 damage = 0,
                 source = "moist modifier",
                 validityChecker = { card.inGame },
-                transformers = mapOf(
-                    GameSituations.ON_REVOLVER_ROTATION to rotationTransformer
+                transformers = listOf(
+                    Trigger.GameSituation(GameSituations.ON_REVOLVER_ROTATION, false) to rotationTransformer
                 )
             )
             card.addModifier(modifier)

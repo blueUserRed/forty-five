@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.onjNamespaces
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
@@ -27,6 +28,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "ActiveChecker" to OnjActiveChecker::class,
         "PassiveEffect" to OnjPassiveEffect::class,
         "CardPredicate" to OnjCardPredicate::class,
+        "Zone" to OnjZone::class,
+        "Trigger" to OnjTrigger::class,
     )
 
     @OnjNamespaceVariables
@@ -47,6 +50,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             "amountOfCardsDrawn" with OnjEffectValue { _, _, triggerValue -> triggerValue!!.amountOfCardsDrawn }
             "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
                 triggerInformation!!.sourceCard!!.curDamage(controller)
+            }
+        },
+        "zone" to buildOnjObject {
+            NewGameController.Zone.entries.forEach {
+                it.name.lowercase() with OnjZone(it)
             }
         }
     )
@@ -182,6 +190,27 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             EffectData()
         )
     )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone?, Zone?, boolean]")
+    fun zoneChange(oldZone: OnjValue, newZone: OnjValue, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
+        if (oldZone.isNull()) null else (oldZone as OnjZone).value,
+        if (newZone.isNull()) null else (newZone as OnjZone).value,
+        anyCardTriggers.value
+    ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
+    fun enterZone(newZone: OnjZone, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
+        null,
+        newZone.value,
+        anyCardTriggers.value
+    ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
+    fun leaveZone(oldZone: OnjZone, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
+        oldZone.value,
+        null,
+        anyCardTriggers.value
+    ))
 
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {
@@ -431,5 +460,14 @@ class OnjTrigger(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--trigger--'")
+    }
+}
+
+class OnjZone(
+    override val value: NewGameController.Zone
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--zone--'")
     }
 }

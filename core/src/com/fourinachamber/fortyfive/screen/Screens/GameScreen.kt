@@ -58,6 +58,7 @@ class GameScreen : ScreenCreator() {
     val gameEvents: EventPipeline = EventPipeline()
 
     private lateinit var reservesAnimationTarget: Actor
+    private lateinit var deckAnimationTarget: Actor
 
     private val revolver by lazy {
         Revolver(
@@ -167,11 +168,18 @@ class GameScreen : ScreenCreator() {
             y = 180f
             width = 120f
             height = 120f
+            deckAnimationTarget = this
 
             image {
                 backgroundHandle = "deck_icon"
                 width = 60f
                 height = 60f
+                x = 30f
+                y = 90f
+            }
+
+            label("red_wing", "{game.cardsInStack}", Color.White, isTemplate = true) {
+                setFontScale(1.1f)
                 centerX()
                 centerY()
             }
@@ -405,7 +413,7 @@ class GameScreen : ScreenCreator() {
         )
     )
 
-    private fun orbAnimationTimeline(source: Actor, target: Actor, amount: Int): Timeline = Timeline.timeline {
+    private fun orbAnimationTimeline(source: Actor, target: Actor, amount: Int, isReserves: Boolean): Timeline = Timeline.timeline {
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
         repeat(amount) {
             action {
@@ -416,7 +424,7 @@ class GameScreen : ScreenCreator() {
                                 Vector2(source.width / 2, source.height / 2),
                         target.localToStageCoordinates(Vector2(0f, 0f)) +
                                 Vector2(target.width / 2, target.height / 2),
-                        true,
+                        isReserves,
                         renderPipeline
                     ))
             }
@@ -425,14 +433,17 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun reservesPaidAnim(amount: Int, animTarget: Actor): Timeline =
-        orbAnimationTimeline(reservesAnimationTarget, animTarget, amount = amount)
+        orbAnimationTimeline(reservesAnimationTarget, animTarget, amount = amount, isReserves = true)
 
     private fun reservesGainedAnim(amount: Int, animSource: Actor): Timeline =
-        orbAnimationTimeline(animSource, reservesAnimationTarget, amount = amount)
+        orbAnimationTimeline(animSource, reservesAnimationTarget, amount = amount, isReserves = true)
 
 
     private fun bindEventHandlers() {
         gameEvents.watchFor<NewGameController.Events.ReservesChanged>(::reservesChangedAnim)
+        gameEvents.watchFor<NewGameController.Events.PlayCardOrbAnimation> { event ->
+            event.orbAnimationTimeline = orbAnimationTimeline(deckAnimationTarget, event.targetActor, 1, false)
+        }
     }
 
     private fun reservesChangedAnim(event: NewGameController.Events.ReservesChanged) {

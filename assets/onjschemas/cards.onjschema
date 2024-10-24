@@ -22,9 +22,12 @@ $Rotation {
 }
 
 var effectDefinition = {
-    trigger: string,
+    trigger: Trigger,
     effect: Effect,
-    inZones?: string[]
+    inZones?: Zone[],
+    canPreventEnteringGame?: boolean,
+    isHidden?: boolean,
+    cacheAffectedCards?: boolean,
 };
 
 var card = {
@@ -33,21 +36,16 @@ var card = {
     flavourText: string,
     description: string,
     baseDamage: int,
-    coverValue: int,
-    traitEffects: string[],
-    rotation: $Rotation,
-    highlightType: string,
+    traitEffects?: string[],
+    rotation?: $Rotation,
     cost: int,
     rightClickCost?: int?,
     price: int,
-    dark: boolean,
-    type: $CardType,
-    effects: effectDefinition[],
-    forceLoadCards: string[],
+    dark?: boolean,
+    effects?: effectDefinition[],
     tags: string[],
     additionalHoverInfos?: string[],
     forbiddenSlots?: int[],
-    passiveEffects?: PassiveEffect[],
     unlockConditions?: string[], //TODO this locked system, maybe with namespaces and stuff idk, the cards don't have anything either about it
     lockedDescription?: string,
 };

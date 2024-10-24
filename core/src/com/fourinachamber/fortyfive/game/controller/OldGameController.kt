@@ -353,7 +353,7 @@ class OldGameController(
             if (cur.isFinished) iterator.remove()
         }
 
-        createdCards.flatMap { it.passiveEffects }.forEach { it.checkActive(this) }
+//        createdCards.flatMap { it.passiveEffects }.forEach { it.checkActive(this) }
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
         updateGameAnimations()

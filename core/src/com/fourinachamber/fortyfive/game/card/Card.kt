@@ -103,7 +103,6 @@ class Card(
     val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
-    val passiveEffects: List<PassiveEffect>,
     val rotationDirection: RevolverRotation,
     val tags: List<String>,
     val lockedDescription: String?,
@@ -219,8 +218,12 @@ class Card(
 
     fun replaceTimeline(controller: NewGameController, replaceBy: Card): Timeline = Timeline()
 
-    fun changeZone(newZone: Zone) {
+    fun changeZone(newZone: Zone, controller: GameController) {
         zone = newZone
+        if (newZone == Zone.REVOLVER) {
+            enteredInSlot = controller.slotOfCard(this)!!
+            enteredOnTurn = controller.turnCounter
+        }
     }
 
     fun inZone(vararg zones: Zone): Boolean {
@@ -338,16 +341,18 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(controller: GameController, slot: Int): Boolean = TODO()
-//        slot !in forbiddenSlots &&
-//                effects
-//                    .filter { it.trigger == GameSituations.ON_ENTER }
-//                    .none { it.blocks(controller) }
+    fun allowsEnteringGame(controller: GameController, slot: Int): Boolean {
+        if (slot in forbiddenSlots) return false
+        return effects
+            .filter { it.data.canPreventEnteringGame }
+            .none { it.blocks(this, controller) }
+    }
 
     /**
      * called when this card was destroyed by the destroy effect
      */
     fun onDestroy() {
+        TODO("dont use this function")
 //        if (isUndead) {
 //            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
 //            FortyFive.currentGame!!.cardHand.addCard(this)
@@ -370,6 +375,7 @@ class Card(
     }
 
     private fun addRottenModifier(controller: GameController) {
+        TODO("dont use this function")
         val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
             val newDamage = (oldModifier.damage - (triggerInformation.multiplier ?: 1))
             CardModifier(
@@ -394,10 +400,11 @@ class Card(
      * called when the card enters the game
      */
     fun onEnter(controller: GameController) {
-        inGame = true
-        enteredInSlot = controller.slotOfCard(this)!!
-        enteredOnTurn = controller.turnCounter
-        if (isRotten) addRottenModifier(controller)
+        TODO("dont use this function")
+//        inGame = true
+//        enteredInSlot = controller.slotOfCard(this)!!
+//        enteredOnTurn = controller.turnCounter
+//        if (isRotten) addRottenModifier(controller)
     }
 
     /**
@@ -610,9 +617,7 @@ class Card(
                 baseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
-                effects = onj
-                    .get<OnjArray>("effects")
-                    .value
+                effects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
                     .map {
                         it as OnjObject
                         val effect = it.get<Effect>("effect")
@@ -620,13 +625,13 @@ class Card(
                             trigger = it.get<Trigger>("trigger"),
                             isHidden = it.getOr("isHidden", false),
                             cacheAffectedCards = it.getOr("cacheAffectedCards", false),
+                            canPreventEnteringGame = it.getOr("canPreventEnteringGame", false)
                         )
                         effect.copy(data)
                     },
-                passiveEffects = onj.getOr<List<OnjPassiveEffect>>("passiveEffects", listOf())
-                    .map { it.value }
-                    .map { it.creator() },
-                rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
+                rotationDirection = onj.getOr<OnjNamedObject?>("rotation", null)
+                    ?.let { RevolverRotation.fromOnj(it) }
+                    ?: RevolverRotation.Right(1),
                 tags = onj.get<OnjArray>("tags").value.map { it.value as String },
                 forbiddenSlots = onj
                     .getOr<OnjArray?>("forbiddenSlots", null)
@@ -637,7 +642,7 @@ class Card(
                 //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(onjScreen, onjScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
-                isDark = onj.get<Boolean>("dark"),
+                isDark = onj.getOr<Boolean>("dark", false),
                 additionalHoverInfos = onj
                     .getOr<OnjArray?>("additionalHoverInfos", null)
                     ?.value
@@ -648,7 +653,6 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 lockedDescription = onj.get<String?>("lockedDescription")
             )
-            card.passiveEffects.forEach { it.card = card }
             applyTraitEffects(card, onj)
             initializer(card)
             return card
@@ -656,9 +660,8 @@ class Card(
 
         private fun applyTraitEffects(card: Card, onj: OnjObject) {
             val effects = onj
-                .get<OnjArray>("traitEffects")
-                .value
-                .map { it.value as String }
+                .getOr<List<*>>("traitEffects", listOf<String>())
+                .map { it as String }
 
             for (effect in effects) when (effect) {
 

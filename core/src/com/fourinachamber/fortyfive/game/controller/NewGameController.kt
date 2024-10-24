@@ -21,9 +21,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.utils.EventPipeline
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.math.floor
 
@@ -34,8 +32,7 @@ class NewGameController(
 
     private val gameDirector = GameDirector(this)
 
-    override val gameRenderPipeline: GameRenderPipeline
-        get() = TODO("Not yet implemented")
+    override val gameRenderPipeline: GameRenderPipeline = GameRenderPipeline(screen)
 
     override val playerLost: Boolean = false
 
@@ -47,8 +44,7 @@ class NewGameController(
     override val revolverRotationCounter: Int
         get() = TODO("Not yet implemented")
 
-    override val turnCounter: Int
-        get() = TODO("Not yet implemented")
+    override val turnCounter: Int = 0
 
     override val playerStatusEffects: List<StatusEffect>
         get() = TODO("Not yet implemented")
@@ -114,24 +110,30 @@ class NewGameController(
         bindCardEffects()
 
         initCards()
-        _cardStack.forEach { cardHand.addCard(it) }
         updateReserves(Config.baseReserves)
+        appendMainTimeline(Timeline.timeline {
+            delay(300)
+            include(drawCardsTimeline(Config.cardsToDrawInFirstRound))
+        })
+    }
+
+    override fun onShow() {
+        FortyFive.useRenderPipeline(gameRenderPipeline)
     }
 
     private fun bindCardEffects() {
         gameEvents.watchFor<Events.CardChangedZoneEvent> { event ->
-            event.card.changeZone(event.newZone)
+            event.card.changeZone(event.newZone, this)
             val trigger = Trigger.ZoneChange(event.oldZone, event.newZone, false)
             event.append {
-                action { checkTrigger(trigger, event.triggerInformation) }
+                include(checkTrigger(trigger, event.triggerInformation))
             }
         }
-
     }
 
-    private fun checkTrigger(trigger: Trigger, triggerInformation: TriggerInformation) {
-        createdCards.forEach { it.checkEffects(trigger, triggerInformation, this) }
-    }
+    private fun checkTrigger(trigger: Trigger, triggerInformation: TriggerInformation): Timeline = createdCards
+        .map { it.checkEffects(trigger, triggerInformation, this) }
+        .collectTimeline()
 
     private fun updateReserves(newReserves: Int, sourceActor: Actor? = null) {
         if (curReserves == newReserves) return
@@ -140,11 +142,8 @@ class NewGameController(
         gameEvents.fire(Events.ReservesChanged(prevReserves, newReserves, sourceActor, this))
     }
 
-    override fun onShow() {
-        FortyFive.useRenderPipeline(GameRenderPipeline(screen))
-    }
-
     override fun update() {
+        TemplateString.updateGlobalParam("game.cardsInStack", _cardStack.size)
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
     }
@@ -261,6 +260,10 @@ class NewGameController(
                 else -> _cardStack.removeFirst()
             }
             cardHand.addCard(card!!)
+            cardsDrawn++
+            val event = Events.PlayCardOrbAnimation(card!!.actor)
+            gameEvents.fire(event)
+            dispatchAnimTimeline(event.orbAnimationTimeline!!)
         }
         includeLater({
             val info = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
@@ -271,7 +274,7 @@ class NewGameController(
     }
 
     private fun maxSpaceInHand(desiredSpace: Int = Int.MAX_VALUE): Int =
-        (Config.hardMaxCards - desiredSpace).coerceAtLeast(0)
+        (Config.hardMaxCards - cardHand.amountOfCards).between(0, desiredSpace)
 
     override fun tryApplyStatusEffectToEnemyTimeline(
         statusEffect: StatusEffect,
@@ -385,7 +388,6 @@ class NewGameController(
                 )
                 action {
                     revolver.setCard(slot, card)
-                    card.onEnter(this@NewGameController)
                 }
                 val info = TriggerInformation(controller = this@NewGameController, sourceCard = card)
                 includeLater({
@@ -435,6 +437,7 @@ class NewGameController(
         const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
+        const val cardsToDrawInFirstRound = 6
     }
 
     object Events {
@@ -444,6 +447,7 @@ class NewGameController(
             val sourceActor: Actor? = null,
             val controller: GameController
         )
+        data class PlayCardOrbAnimation(val targetActor: Actor, var orbAnimationTimeline: Timeline? = null)
         data class ParryStateChange(val inParryMenu: Boolean)
         data object Shoot
 

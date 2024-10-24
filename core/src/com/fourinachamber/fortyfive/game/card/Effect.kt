@@ -716,7 +716,7 @@ enum class GameSituations {
 data class TriggerInformation(
     val multiplier: Int? = null,
     val controller: GameController,
-    val targetedEnemies: List<Enemy> = listOf(controller.targetedEnemy()),
+    val targetedEnemies: List<Enemy> = listOf(), // TODO: fix
     val isOnShot: Boolean = false,
     val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null,
@@ -727,4 +727,5 @@ data class EffectData(
     val isHidden: Boolean = false,
     val cacheAffectedCards: Boolean = false,
     val condition: GamePredicate? = null,
+    val canPreventEnteringGame: Boolean = false
 )

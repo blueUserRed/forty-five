@@ -20,6 +20,9 @@ class NewCardHand(
     private val leftSide: MutableList<Card> = mutableListOf()
     private val rightSide: MutableList<Card> = mutableListOf()
 
+    val amountOfCards: Int
+        get() = leftSide.size + rightSide.size
+
     val events: EventPipeline = EventPipeline()
 
     private val cardFocusListener: EventListener = object : EventListener {
