@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.controller.GameController
@@ -20,11 +21,8 @@ import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
-import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
-import com.fourinachamber.fortyfive.onjNamespaces.OnjPassiveEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
@@ -34,8 +32,6 @@ import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onClick
 import ktx.actors.onTouchEvent
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.math.absoluteValue
 
@@ -681,13 +677,6 @@ class Card(
     }
 
     /**
-     * a type of card
-     */
-    enum class Type {
-        BULLET, ONE_SHOT
-    }
-
-    /**
      * temporarily modifies a card. For example used by the buff damage effect to change the damage of a card
      * @param damage changes the damage of the card. Can be negative
      * @param validityChecker checks if the modifier is still valid or should be removed
@@ -764,11 +753,16 @@ class CardActor(
     var isDragged: Boolean = false
 
     private var inDestroyAnim: Boolean = false
+    private var spawnAnimStart: Long = 0L
+    private var spawnAnimDuration: Int = 0
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
     private val destroyShader: Promise<BetterShader> =
         ResourceManager.request(this, this, "dissolve_shader")
+
+    private val spawnShader: Promise<BetterShader> =
+        ResourceManager.request(this, this, "card_spawn_shader")
 
     private val markedSymbol: Promise<TransformDrawable> =
         ResourceManager.request(this, this, "card_symbol_marked")
@@ -840,6 +834,26 @@ class CardActor(
         super.setBounds(x, y, width, height)
     }
 
+    private fun setupShader(batch: Batch): Boolean {
+        val shaderPromise = when {
+            inDestroyAnim -> spawnShader
+            spawnAnimStart != 0L -> spawnShader
+            else -> return false
+        }
+        if (shaderPromise.isNotResolved) ResourceManager.forceResolve(shaderPromise)
+        val shader = shaderPromise.getOrError()
+        batch.flush()
+        shader.shader.bind()
+        shader.prepare(screen)
+        batch.shader = shader.shader
+        if (spawnAnimStart != 0L) {
+            val time = TimeUtils.millis()
+            val percent = (time - spawnAnimStart).toFloat() / spawnAnimDuration.toFloat()
+            shader.shader.setUniformf("u_progress", percent)
+        }
+        return true
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         detailWidget?.updateBounds(this)
@@ -851,17 +865,7 @@ class CardActor(
         }
         val texture = texture ?: return
         val textureRegion = TextureRegion(texture)
-        val shader = if (inDestroyAnim) {
-            destroyShader.getOrError()
-        } else {
-            null
-        }
-        shader?.let {
-            batch.flush()
-            it.shader.bind()
-            it.prepare(screen)
-            batch.shader = it.shader
-        }
+        val isShaderSetup = setupShader(batch)
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
         val width: Float
@@ -889,7 +893,7 @@ class CardActor(
         )
         batch.color = c
         batch.flush()
-        shader?.let { batch.shader = null }
+        if (isShaderSetup) batch.shader = null
         if (!isMarked) return
         markedSymbol.getOrNull()?.draw(
             batch,
@@ -920,11 +924,23 @@ class CardActor(
         action {
             SoundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
-            if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
-            destroyShader.getOrError().resetReferenceTime()
+            if (spawnShader.isResolved) ResourceManager.forceResolve(spawnShader)
+            spawnShader.getOrError().resetReferenceTime()
         }
         delay(1200)
         action { inDestroyAnim = false }
+    }
+
+    fun spawnAnimation(): Timeline = Timeline.timeline {
+        val duration = 300
+        action {
+            spawnAnimStart = TimeUtils.millis()
+            spawnAnimDuration = duration
+        }
+        delay(duration)
+        action {
+            spawnAnimStart = 0
+        }
     }
 
     fun animateToTriggerPosition(controller: GameController, isOnShotTrigger: Boolean): Timeline = Timeline.timeline {

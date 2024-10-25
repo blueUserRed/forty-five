@@ -22,6 +22,7 @@ import com.fourinachamber.fortyfive.screen.general.Inject
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.*
+import ktx.actors.alpha
 import onj.value.OnjArray
 import kotlin.math.floor
 
@@ -253,6 +254,7 @@ class NewGameController(
 
     private fun drawCardTimeline(fromBottom: Boolean, sourceCard: Card?): Timeline = Timeline.timeline {
         var card: Card? = null
+        var orbAnimationTimeline: Timeline? = null
         action {
             card = when {
                 _cardStack.isEmpty() -> defaultBullet.create(screen)
@@ -261,10 +263,17 @@ class NewGameController(
             }
             cardHand.addCard(card!!)
             cardsDrawn++
+            card!!.actor.alpha = 0f
             val event = Events.PlayCardOrbAnimation(card!!.actor)
             gameEvents.fire(event)
-            dispatchAnimTimeline(event.orbAnimationTimeline!!)
+            orbAnimationTimeline = event.orbAnimationTimeline
         }
+        includeLater({ Timeline.timeline {
+            include(orbAnimationTimeline!!)
+            delay(250)
+            action { card!!.actor.alpha = 1f }
+            include(card!!.actor.spawnAnimation())
+        } }, { orbAnimationTimeline != null })
         includeLater({
             val info = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
             val event = Events.CardChangedZoneEvent(card!!, Zone.DECK, Zone.HAND, info)

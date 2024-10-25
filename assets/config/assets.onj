@@ -1360,8 +1360,8 @@ shaders: [
         }
     },
     {
-        name: "test_shader",
-        file: "shaders/test.glsl",
+        name: "card_spawn_shader",
+        file: "shaders/card_spawn.glsl",
         constantArgs: {
         }
     },

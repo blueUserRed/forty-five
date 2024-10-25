@@ -62,7 +62,6 @@ class NewCardHand(
         else rightSide.add(card)
         val actor = card.actor
         addActor(actor)
-        invalidate()
         actor.group = cardFocusGroupName
         actor.isFocusable = true
         actor.isSelectable = true
@@ -76,21 +75,20 @@ class NewCardHand(
             target as? RevolverSlot ?: return@add
             events.fire(CardDraggedOntoSlotEvent(card, target))
         }
+        layout() // layout added card immediately to make animations work
     }
 
     private fun zIndexFor(card: Card): Int {
         var zIndex = leftSide.indexOf(card)
-        if (zIndex == -1) zIndex = 50 - rightSide.indexOf(card)
-        return zIndex
+        if (zIndex == -1) zIndex = rightSide.indexOf(card)
+        return 50 - zIndex
     }
 
     fun removeCard(card: Card) {
-        if (card in leftSide) {
-            leftSide.remove(card)
-        } else if (card in rightSide) {
-            rightSide.remove(card)
-        } else {
-            throw RuntimeException("card $card can't be removed because it is not the cardHand")
+        when (card) {
+            in leftSide -> leftSide.remove(card)
+            in rightSide -> rightSide.remove(card)
+            else -> throw RuntimeException("card $card can't be removed because it is not the cardHand")
         }
         removeActor(card.actor)
         evenOutCards()
@@ -112,12 +110,13 @@ class NewCardHand(
         var x = 0f
 
         val cardDistLeftSide = (widthPerSide / leftSide.size).coerceAtMost(maxDistanceBetweenCards)
-        x = width / 2 - centerGap / 2 - leftSide.size * cardDistLeftSide - (cardSize - cardDistLeftSide)
+        x = width / 2 - centerGap / 2 - 2 * (cardSize - cardDistLeftSide)
         leftSide.forEach { card ->
             val actor = card.actor
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
             actor.rotation = cardHeightFuncDerivative(x) * 50f
-            x += cardDistLeftSide
+            card.actor.fixedZIndex = zIndexFor(card)
+            x -= cardDistLeftSide
         }
 
         val cardDistRightSide = (widthPerSide / rightSide.size).coerceAtMost(maxDistanceBetweenCards)
@@ -126,8 +125,11 @@ class NewCardHand(
             val actor = card.actor
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
             actor.rotation = cardHeightFuncDerivative(x) * 50f
+            card.actor.fixedZIndex = zIndexFor(card)
             x += cardDistRightSide
         }
+        println("rightside")
+        rightSide.map { it.actor.fixedZIndex }.joinToString(separator = ", ").let { println(it) }
     }
 
     private fun cardHeightFuncDerivative(x: Float): Float = 0.16f - 0.0002f * x
