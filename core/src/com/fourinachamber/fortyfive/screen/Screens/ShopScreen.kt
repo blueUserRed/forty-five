@@ -177,8 +177,8 @@ class ShopScreen : ScreenCreator() {
             touchable = Touchable.disabled
             onLayout {
                 val loadedDrawable1 = loadedDrawable ?: return@onLayout
-                width = loadedDrawable1.minWidth * scaleX
-                height = loadedDrawable1.minHeight * scaleY
+                width = loadedDrawable1.minWidth * scaleX * 0.35f
+                height = loadedDrawable1.minHeight * scaleY * 0.35f
             }
         }
 

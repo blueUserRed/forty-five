@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.screen.screens
 
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -15,12 +14,15 @@ import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNav
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
+import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.TemplateStringLabel
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
+import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 
@@ -40,7 +42,8 @@ class DialogScreen : ScreenCreator() {
     private val continueWidgetName = "continue_widget"
 
 
-    val dialogFocusGroup = "dialog_selection_group" //maybe add to companion object
+    val dialogFocusGroup = "dialog_element" //maybe add to companion object
+    val dialogOptionFocusGroup = "dialog_option" //maybe add to companion object
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -51,6 +54,7 @@ class DialogScreen : ScreenCreator() {
         npcImageWidgets(name = npcLeftImageWidgetName, offset = 130F)
         npcImageWidgets(name = npcRightImageWidgetName, offset = 980F)
         dialogWidget()
+        dialogOptionsParent()
 
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
         actor(
@@ -74,10 +78,35 @@ class DialogScreen : ScreenCreator() {
             continueWidgetName,
             npcLeftImageWidgetName,
             npcRightImageWidgetName,
-            optionsParentName,
-        ),
+            optionsParentName
+        ) { addOption() },
         BiomeBackgroundScreenController(screen, true)
     )
+
+    private fun addOption(): AdvancedTextWidget =
+        (screen.namedActorOrError(optionsParentName) as CustomBox).advancedText(
+            "roadgeek",
+            Color.FortyWhite,
+            1.0f
+        ) {
+            relativeWidth(100F)
+            fitContentHeight = true
+            group = dialogOptionFocusGroup
+            setPadding(20F)
+            setFocusableTo(true, this)
+            isSelectable = true
+            styles(
+                normal = {
+                    backgroundHandle = "dialog_answer_option"
+                },
+                focused = {
+                    backgroundHandle = "dialog_answer_option_hover"
+                },
+                selectedAndFocused = {
+                    backgroundHandle = "dialog_answer_option_hover"
+                },
+            )
+        }
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(
         KeyInputMap.createFromKotlin(listOf(), screen)
@@ -88,10 +117,10 @@ class DialogScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf(dialogFocusGroup, navbarFocusGroup)
+                    groups = listOf(dialogFocusGroup, dialogOptionFocusGroup, navbarFocusGroup)
                 ),
             ),
-            startGroups = listOf(navbarFocusGroup),
+            startGroups = listOf(dialogFocusGroup),
         )
     )
 
@@ -126,6 +155,18 @@ class DialogScreen : ScreenCreator() {
             y = 300F
             x = 200F
         }
+    }
+
+    private fun CustomGroup.dialogOptionsParent() = box {
+        verticalAlign = CustomAlign.END
+        horizontalAlign = CustomAlign.CENTER
+//        flexDirection = FlexDirection.COLUMN_REVERSE
+        minVerticalDistBetweenElements = 20F
+        x = worldWidth - 500
+        y = worldHeight * 0.32F
+        width = 400F
+        fitContentInFlexDirection = true
+        name(optionsParentName)
     }
 
     private fun CustomGroup.dialogWidget() =

@@ -6,11 +6,13 @@ import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DialogMapEvent
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.onSelect
-import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.screen.general.onSelectChange
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import ktx.actors.alpha
@@ -24,6 +26,7 @@ class DialogScreenController(
     private val npcLeftImageWidgetName: String,
     private val npcRightImageWidgetName: String,
     private val optionsParentName: String,
+    private val addOption: () -> AdvancedTextWidget,
 ) : ScreenController() {
 
     private lateinit var context: DialogMapEvent
@@ -121,9 +124,15 @@ class DialogScreenController(
         }
         val actor = screen.namedActorOrError(continueWidgetName)
         actor.isVisible = false
+        waitingToContinue = false
 
         updatePeople(part)
         dialogWidget.advancedText = part.text
+
+        val optionParent = screen.namedActorOrError(optionsParentName) as CustomBox
+        while (optionParent.children.size > 0) {
+            screen.removeActorFromScreen(optionParent.children[0])
+        }
     }
 
     override fun end() {
@@ -138,6 +147,14 @@ class DialogScreenController(
             waitingToContinue = true
             return
         }
+        selector.choices.forEach { s, i ->
+            val o = addOption.invoke()
+            o.setRawText(s, null)
+            o.onSelect {
+                startPart(i)
+            }
+        }
+        screen.curSelectionParent.updateFocusableActors(screen)
     }
 
 
@@ -158,17 +175,17 @@ class DialogScreenController(
 
     fun setPerson(name: String?, widgetName: String, index: Int) {
         shownNPCs[index] = name
-        val templateText = if (index==0) "map.cur_event.person_left.displayName"
+        val templateText = if (index == 0) "map.cur_event.person_left.displayName"
         else "map.cur_event.person_right.displayName"
 
         if (name == null) {
-            TemplateString.updateGlobalParam(templateText,null)
+            TemplateString.updateGlobalParam(templateText, null)
             return
         }
         val actor = screen.namedActorOrError(widgetName) as CustomImageActor
         actor.isVisible = name.isNotBlank()
         if (!actor.isVisible) {
-            TemplateString.updateGlobalParam(templateText,null)
+            TemplateString.updateGlobalParam(templateText, null)
             return
         }
 
@@ -187,7 +204,7 @@ class DialogScreenController(
             .filter { it.get<String>("name") in npcNames }
             .map {
                 val img = it.get<OnjObject>("image")
-                println( img.getOr<Double>("offsetY", 0.0).toFloat())
+                println(img.getOr<Double>("offsetY", 0.0).toFloat())
                 DialogNPC(
                     it.get<String>("name"),
                     it.get<String>("displayName"),

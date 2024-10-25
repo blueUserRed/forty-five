@@ -18,7 +18,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
-import com.fourinachamber.fortyfive.map.events.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
@@ -486,17 +485,6 @@ class FromOnjScreenBuilder(
                     )
                 } ?: listOf())
         }
-
-//        "DialogWidget" -> DialogWidget(
-////            (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
-////            widgetOnj.get<String>("advanceArrowDrawable"),
-////            widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
-//            widgetOnj.get<String>("optionsBox"),
-////            widgetOnj.get<String>("speakingPersonLabel"),
-////            widgetOnj.get<OnjObject>("defaults"),
-//            screen,
-//            screen
-//        )
 
         "Backpack" -> Backpack(
             screen,
