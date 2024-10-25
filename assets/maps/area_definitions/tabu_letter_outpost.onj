@@ -48,7 +48,7 @@ nodes: [
         image: "under_construction",
         imagePos: "LEFT",
         event: $DialogMapEvent {
-            npc: "testing_dialog",
+            dialog: "not_yet_implemented_dialog",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             canBeStarted: true,
@@ -80,7 +80,7 @@ nodes: [
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            npc: "witch",
+            dialog: "witch_dialog",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             canBeStarted: true,

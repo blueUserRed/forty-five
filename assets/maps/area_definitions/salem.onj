@@ -25,7 +25,7 @@ nodes: [
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            npc: "traveler_in_salem_npc",
+            dialog: "traveler_in_salem_dialog",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             canBeStarted: true,

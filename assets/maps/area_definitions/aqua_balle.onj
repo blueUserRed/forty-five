@@ -24,7 +24,7 @@ nodes: [
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            npc: "traveling_merchant",
+            dialog: "tavelling_merchant_welcome",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             canBeStarted: true,
@@ -48,7 +48,7 @@ nodes: [
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            npc: "priest_of_aqua_balle",
+            dialog: "priest_of_aqua_balle_warning",
             canOnlyBeStartedOnce: true,
             onlyIfPlayerDoesntHaveCard: "guardianAngelBullet",
             currentlyBlocks: false,

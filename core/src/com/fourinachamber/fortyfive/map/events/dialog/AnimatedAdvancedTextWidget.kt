@@ -13,7 +13,7 @@ class AnimatedAdvancedTextWidget(
     isDistanceField: Boolean,
 ) : AdvancedTextWidget(defaults, screen, isDistanceField) {
 
-    var progressTimeMs: Int = 100
+    var progressTimeMs: Int = 10
 
     var lastProgressTime: Long = Long.MIN_VALUE
     var isFinished: Boolean = true
@@ -36,8 +36,9 @@ class AnimatedAdvancedTextWidget(
         if (curTime < lastProgressTime + progressTimeMs) return
         isFinished = advancedText.progress()
         if (isFinished) {
-            onNextFinish.forEach { it.invoke() }
-            onNextFinish.clear()
+            val oldOnNextFinish = onNextFinish.toMutableList().toList()
+            this.onNextFinish.clear()
+            oldOnNextFinish.forEach { it.invoke() }
         }
         lastProgressTime = curTime
     }

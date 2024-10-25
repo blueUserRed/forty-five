@@ -37,7 +37,7 @@ var dialog = {
         rawText: string,
         npcLeftChangeTo?: string,
         npcRightChangeTo?: string,
-        switchTalkingPerson?: boolean,
+        talkingNpc: string, //on purpose, if you want it to be null, you have to specifically set it
         effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
@@ -55,6 +55,7 @@ var image = {
         textureName: string,
         offsetX?: float,
         offsetY?: float,
+        flipOnRightSide?: boolean,
         scale: float,
 };
 

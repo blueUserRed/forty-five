@@ -157,7 +157,7 @@ nodes: [
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            npc: "brother",
+            dialog: "talk_with_brother",
             canOnlyBeStartedOnce: true,
             currentlyBlocks: true,
             canBeStarted: true,

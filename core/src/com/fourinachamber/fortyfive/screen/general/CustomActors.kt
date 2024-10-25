@@ -256,7 +256,7 @@ open class CustomImageActor(
     override var maskScaleY: Float = 1f
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
-    var tintColor: Color? = null
+    var tintColor: com.badlogic.gdx.graphics.Color? = null
 
     override var drawOffsetX: Float = 0F
     override var drawOffsetY: Float = 0F

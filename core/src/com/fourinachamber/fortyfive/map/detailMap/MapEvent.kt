@@ -272,7 +272,7 @@ class DialogMapEvent(onj: OnjObject) : MapEvent() {
     private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
     private val onlyIfPlayerDoesntHaveCard: String? = onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null)
 
-    val dialog: String = onj.get<String>("npc")
+    val dialog: String = onj.get<String>("dialog")
 
     override val descriptionText: String = ""
     override val displayName: String = MapManager.displayName(dialog)

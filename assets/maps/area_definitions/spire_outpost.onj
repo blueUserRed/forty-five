@@ -42,7 +42,7 @@ nodes: [
         image: "under_construction",
         imagePos: "RIGHT",
         event: $DialogMapEvent {
-            npc: "to_be_continued_npc",
+            dialog: "to_be_continued_dialog",
             currentlyBlocks: false,
             canBeStarted: true,
             canOnlyBeStartedOnce: false,

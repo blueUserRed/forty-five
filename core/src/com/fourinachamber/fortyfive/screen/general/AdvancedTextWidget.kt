@@ -15,7 +15,9 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
+import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
+import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
@@ -80,6 +82,7 @@ open class AdvancedTextWidget(
         children
             .filterIsInstance<Layout>()
             .onEach(Layout::validate)
+            .filter { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
             .forEach { child ->
                 child as Actor
                 child.width = child.prefWidth
@@ -139,7 +142,7 @@ open class AdvancedTextWidget(
         val diff = height - totalHeight
         when (verticalTextAlign) {
             CustomAlign.START -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff) } }
-            CustomAlign.CENTER -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff/2) } }
+            CustomAlign.CENTER -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff / 2) } }
             CustomAlign.END -> {} //this is default, so no changes
             CustomAlign.SPACE_AROUND -> TODO()
             CustomAlign.SPACE_BETWEEN -> TODO()
