@@ -427,7 +427,7 @@ cards: [
         name: "bossBullet",
         title: "Boss Bullet",
         flavourText: "boss Bullet",
-        description: "As long as this bullet is in the revolver, when a new round starts: create 1 card of type ‘worker Bullet' in your hand",
+        description: "As long as this bullet is in the revolver, when a new round starts: create 1 card of type 'worker Bullet' in your hand",
         baseDamage: 10,
         coverValue: 0,
         traitEffects: [],
