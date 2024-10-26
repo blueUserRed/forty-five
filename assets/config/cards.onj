@@ -466,7 +466,7 @@ cards: [
     {
         name: "purgeBullet",
         title: "Purge Bullet",
-        flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I should’t have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
+        flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I shouldn't have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
         description: "$trigger$On-Placedown:$trigger$\nDestroy both bullets next to this.",
         baseDamage: 15,
         coverValue: 0,
@@ -1193,7 +1193,7 @@ cards: [
     {
         name: "vengeanceBullet",
         title: "Vengeance Bullet",
-        flavourText: "\"When I get my hands on you Jake… You’ll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
+        flavourText: "\"When I get my hands on you Jake… You'll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
         description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nDeal x dmg to the enemy, where x is the dmg value of the destroyed bullet times 2",
         baseDamage: 10,
         coverValue: 0,
@@ -1397,7 +1397,7 @@ cards: [
     {
         name: "longLostBullet",
         title: "Long Lost Bullet",
-        flavourText: "I guess we should rename it now since the name dosen’t really fit anymore. Finally Found Bullet or something like that.",
+        flavourText: "I guess we should rename it now since the name dosen't really fit anymore. Finally Found Bullet or something like that.",
         description: "$trigger$While in Revolver:$trigger$\nAs long as the enemy has the Statuseffekt $status$POISON$status$:\n$trigger$On-Turn-Begin:$trigger$\nYou gain 1 reserve and draw 1 card",
         baseDamage: 3,
         coverValue: 0,

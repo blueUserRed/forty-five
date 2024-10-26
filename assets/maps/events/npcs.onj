@@ -209,7 +209,7 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "But I travel the frontier with my stock most of the time, so we’ll probably see each other anyway. Until then, take care.",
+                    rawText: "But I travel the frontier with my stock most of the time, so we'll probably see each other anyway. Until then, take care.",
                     next: $EndOfDialog {
                         changeToScreen: "screens/map_screen.onj"
                     }
@@ -237,7 +237,7 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "It’s $1$3dangerous$3$1 out there, you should turn back. However, you probably won’t listen to me, nobody does.",
+                    rawText: "It's $1$3dangerous$3$1 out there, you should turn back. However, you probably won't listen to me, nobody does.",
                     effects: [
                         $Color {
                             indicator: "$1",
