@@ -52,7 +52,6 @@ class KeyInputMap(
 ) : InputProcessor {
 
     private val modifiers: MutableSet<Keycode> = mutableSetOf()
-
     override fun keyDown(keycode: Keycode): Boolean {
         if (keycode in modifierKeys) {
             modifiers.add(keycode)
@@ -69,7 +68,7 @@ class KeyInputMap(
                             ?.inRange(keycode) ?: false)
                     }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
-                    .map { Triple(entryList.priority, it.modifierKeys.size, (it.action?.let { listOf(it) } ?: listOf())) }
+                    .map { Triple(entryList.priority, it.modifierKeys.size, (it.action?.let { listOf(it) } ?: (entryList.defaultActions ?: listOf()))) }
                 t
             }.toList()
         val newList = acceptedActions.sortedWith(Comparator.comparingInt<Triple<Int, Int, List<KeyAction>>> { it.first }

@@ -204,7 +204,6 @@ class DialogScreenController(
             .filter { it.get<String>("name") in npcNames }
             .map {
                 val img = it.get<OnjObject>("image")
-                println(img.getOr<Double>("offsetY", 0.0).toFloat())
                 DialogNPC(
                     it.get<String>("name"),
                     it.get<String>("displayName"),
