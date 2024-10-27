@@ -12,7 +12,6 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.onSelect
-import com.fourinachamber.fortyfive.screen.general.onSelectChange
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import ktx.actors.alpha
@@ -63,7 +62,7 @@ class DialogScreenController(
 
         npcs = toNPCArray(configFile.get<OnjArray>("npcs"), npcNames)
         dialog = Dialog.readFromOnj(dialogOnj, screen)
-        startPart(0)
+        startPart(0, true)
     }
 
     private fun addListener() {
@@ -107,7 +106,7 @@ class DialogScreenController(
         }
     }
 
-    private fun startPart(index: Int) {
+    private fun startPart(index: Int, isInit: Boolean = false) {
         dialogIndex =
             if (index < dialog.parts.size)
                 index
@@ -133,6 +132,13 @@ class DialogScreenController(
         while (optionParent.children.size > 0) {
             screen.removeActorFromScreen(optionParent.children[0])
         }
+        dialogWidget.isFocusable = true
+        if (!isInit) {
+            screen.curSelectionParent.updateFocusableActors(screen)
+            screen.focusSpecific(dialogWidget)
+        }else{
+            screen.afterMs(10){ screen.focusSpecific(dialogWidget) }
+        }
     }
 
     override fun end() {
@@ -154,7 +160,9 @@ class DialogScreenController(
                 startPart(i)
             }
         }
+        dialogWidget.isFocusable = false
         screen.curSelectionParent.updateFocusableActors(screen)
+        screen.focusSpecific((screen.namedActorOrError(optionsParentName) as CustomBox).children[0])
     }
 
 

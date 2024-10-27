@@ -59,25 +59,21 @@ class KeyInputMap(
         }
         val inputRanges = InputKeyRange.entries.toTypedArray()
         val acceptedActions: List<Triple<Int, Int, List<KeyAction>>> = entries.filter { it.condition.check(screen) }
-            .flatMap { entryList ->
-                // This variable is useless, but the compiler complains otherwise for some reason
-                // all this code is ugly anyway
-                val t = entryList.singleKeys
+            .flatMap { entryList -> entryList.singleKeys
                     .filter {
                         it.keycode == keycode || (inputRanges.find { range -> it.keycode == range.getCode() }
                             ?.inRange(keycode) ?: false)
                     }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
                     .map { Triple(entryList.priority, it.modifierKeys.size, (it.action?.let { listOf(it) } ?: (entryList.defaultActions ?: listOf()))) }
-                t
-            }.toList()
-        val newList = acceptedActions.sortedWith(Comparator.comparingInt<Triple<Int, Int, List<KeyAction>>> { it.first }
-            .thenComparingInt { it.second }).reversed()
+            }
+        val newList = acceptedActions
+            .sortedWith(Comparator.comparingInt<Triple<Int, Int, List<KeyAction>>> { it.first }
+            .thenComparingInt { it.second })
+            .reversed()
 
         newList.forEach { (_, _, actions) ->
-            var wasTrue = false
-            actions.forEach { action -> if (action(screen, keycode)) wasTrue = true }
-            if (wasTrue) return true
+            actions.forEach { action -> if (action(screen, keycode)) return@keyDown true }
         }
         return false
     }

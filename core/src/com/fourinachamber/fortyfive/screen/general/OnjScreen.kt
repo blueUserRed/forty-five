@@ -223,11 +223,16 @@ open class OnjScreen(
     fun focusSpecific(name: String) {
         if (selectionHierarchy.isEmpty()) return
         val focusableElement = namedActorOrError(name)
-        focusableElement as? FocusableActor
-            ?: throw RuntimeException("cannot focus $name because it doesn't implement FocusableActor")
-        if (!focusableElement.isFocusable) return
+        focusSpecific(focusableElement)
+    }
+
+    fun focusSpecific(actor: Actor) {
+        actor as? FocusableActor
+            ?: throw RuntimeException("cannot focus ${actor.name ?: if (actor.toString().length > 40) actor.javaClass.simpleName else actor.toString()} because it doesn't implement FocusableActor")
+        if (selectionHierarchy.isEmpty()) return
+        if (!actor.isFocusable) return
         nextFocusActorSetFromMouse = false
-        this.focusedActor = focusableElement
+        this.focusedActor = actor as Actor
     }
 
     private var awaitingConfirmationClick: Boolean = false
