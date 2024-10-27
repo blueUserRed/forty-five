@@ -41,9 +41,8 @@ class DialogScreen : ScreenCreator() {
     private val npcRightImageWidgetName = "npc_right"
     private val continueWidgetName = "continue_widget"
 
-
-    val dialogFocusGroup = "dialog_element" //maybe add to companion object
-    val dialogOptionFocusGroup = "dialog_option" //maybe add to companion object
+    val dialogFocusGroup = "dialog_element"
+    val dialogOptionFocusGroup = "dialog_option"
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -120,7 +119,7 @@ class DialogScreen : ScreenCreator() {
                     groups = listOf(dialogFocusGroup, dialogOptionFocusGroup, navbarFocusGroup)
                 ),
             ),
-            startGroups = listOf(dialogFocusGroup),
+            startGroups = listOf(dialogFocusGroup, dialogOptionFocusGroup),
         )
     )
 
