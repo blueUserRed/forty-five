@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.screens.DialogScreen
 import com.fourinachamber.fortyfive.screen.screens.GameScreen
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
+import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -122,6 +123,7 @@ object ConfigFileManager {
             "healOrMaxHPScreen" to { FromKotlinScreenBuilder(HealOrMaxHPScreen()) },
 //            "healOrMaxHPScreen" to { FromKotlinScreenBuilder(CustomBoxPlaygroundScreen()) },
             "addMaxHPScreen" to { FromKotlinScreenBuilder(AddMaxHPScreen()) },
+            "titleScreen" to { FromKotlinScreenBuilder(TitleScreen()) },
             "shopScreen" to { FromKotlinScreenBuilder(ShopScreen()) },
             "dialogScreen" to { FromKotlinScreenBuilder(DialogScreen()) },
             "gameScreen" to { FromKotlinScreenBuilder(GameScreen()) }

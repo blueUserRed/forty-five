@@ -113,8 +113,8 @@ screens: [
         name: "statsScreen",
         file: "screens/stats_screen.onj"
     },
-    {
-        name: "titleScreen",
-        file: "screens/title_screen.onj"
-    },
+//    {
+//        name: "titleScreen",
+//        file: "screens/title_screen.onj"
+//    },
 ]

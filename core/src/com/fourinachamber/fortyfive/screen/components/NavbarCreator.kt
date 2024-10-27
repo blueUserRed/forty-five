@@ -6,7 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapEntry
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -218,11 +217,13 @@ object NavbarCreator {
 
             onSelectChange { _, _ ->
                 if (isSelected) {
+                    println("now opening")
                     events.fire(ChangeBlackBackground(true))
                     timeline.appendAction(obj.openTimelineCreator().asAction())
                     timeline.appendAction(Timeline.timeline { screen.enterState(navbarOpenScreenState) }.asAction())
                     isOpen = true
                 } else {
+                    println("now closing")
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))
                 }

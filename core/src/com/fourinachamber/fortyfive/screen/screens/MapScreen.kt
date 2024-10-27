@@ -23,13 +23,13 @@ import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.settingsKeyMap
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
-import com.fourinachamber.fortyfive.utils.Vector2
 
 class MapScreen : ScreenCreator() {
 
@@ -141,11 +141,6 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val settingsLeft = NavbarCreator.NavBarObject(
-            "Settings Left",
-            settingsObject.openTimelineCreator,
-            settingsObject.closeTimelineCreator
-        )
         val settingsMiddle = NavbarCreator.NavBarObject(
             "Settings Middle",
             settingsObject.openTimelineCreator,
@@ -156,7 +151,7 @@ class MapScreen : ScreenCreator() {
             settingsObject.openTimelineCreator,
             settingsObject.closeTimelineCreator
         )
-        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(settingsLeft, settingsMiddle, settingsRight), screen)
+        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(getSharedTitleScreen(), settingsMiddle, settingsRight), screen)
         actor(navbar) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
