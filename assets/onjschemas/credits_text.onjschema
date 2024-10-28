@@ -1,0 +1,32 @@
+import "imports/advanced_text_effect.onjschema" as _;
+
+use Common;
+
+
+defaults: {
+    font: string,
+    fontScale: float,
+    color: Color,
+},
+
+effects: $AdvancedTextEffect[],
+
+$TextPart{
+    $Text {
+        rawText: string,
+    }
+
+    $Split {
+        left: $TextPart[],
+        right: $TextPart[],
+        relativWidth: float,
+    }
+
+    $Image {
+        path: string,
+        relativWidth: float,
+        offsetX?: float,
+    }
+}
+
+texts: $TextPart[]

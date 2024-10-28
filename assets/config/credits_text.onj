@@ -1,0 +1,62 @@
+use Common;
+import "imports/colors.onj" as color;
+
+defaults: {
+    font: "roadgeek",
+    fontScale: 1.6,
+    color: color.forty_white,
+},
+
+effects: [
+    $Color {
+        indicator: "$name",
+        color: color.red,
+    },
+    $FontScale {
+        indicator: "$name",
+        fontScale: 0.7,
+    },
+    $Font {
+        indicator: "$name",
+        font: "red_wing_bmp",
+    },
+    $Color {
+        indicator: "$title",
+        color: color.red,
+    },
+    $FontScale {
+        indicator: "$title",
+        fontScale: 1.1,
+    },
+    $Color {
+        indicator: "$red$",
+        color: color.red,
+    },
+],
+
+texts: [
+    $Image {
+        path: "logo_red",
+        relativWidth: 80.0,
+        offsetX: -50.0,
+    },
+    $Split {
+        relativWidth: 90.0,
+        left: [
+            $Text {
+                rawText: "$namePhilip Jankovic",
+            },
+        ],
+        right: [
+            $Text {
+                rawText: "Lead Game Designer",
+            },
+            $Text {
+                rawText: "Lead Visual Artist",
+            },
+            $Text {
+                rawText: "Product Owner",
+            },
+        ]
+    },
+],

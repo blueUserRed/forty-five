@@ -59,6 +59,10 @@ configFiles: {
     inputMaps: {
         file: "screens/input_maps.onj",
         validatedBy: null,
+    },
+    creditsText: {
+        file: "config/credits_text.onj",
+        validatedBy: "onjschemas/credits_text.onjschema",
     }
 },
 
@@ -77,10 +81,10 @@ screens: [
         name: "chooseCardScreen",
         file: "screens/choose_card_screen.onj"
     },
-    {
-        name: "creditsScreen",
-        file: "screens/credits_screen.onj"
-    },
+//    {
+//        name: "creditsScreen",
+//        file: "screens/credits_screen.onj"
+//    },
 //    {
 //        name: "dialogScreen",
 //        file: "screens/dialog_screen.onj"
