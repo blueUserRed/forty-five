@@ -46,6 +46,10 @@ open class AdvancedTextWidget(
     // Space Around and space between not implemented
     var verticalTextAlign: CustomAlign = CustomAlign.END
 
+    //TODO expand functionality of this
+    // Space Around and space between not implemented
+    var horizontalTextAlign: CustomAlign = CustomAlign.START
+
     var fitContentHeight: Boolean = false
 
     open var advancedText: AdvancedText = AdvancedText.EMPTY
@@ -118,7 +122,7 @@ open class AdvancedTextWidget(
                 curY += height
             }
 
-        alignTextAfterLayout(lines, curY + paddingTop)
+        alignVerticalTextAfterLayout(lines, curY + paddingTop)
 
 
         if (fitContentHeight) {
@@ -135,9 +139,23 @@ open class AdvancedTextWidget(
 
         }
         if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        alignHorizontalTextAfterLayout(lines)
     }
 
-    private fun alignTextAfterLayout(lines: List<List<Actor>>, totalHeight: Float) {
+    private fun alignHorizontalTextAfterLayout(lines: List<List<Actor>>) {
+        lines.forEach {
+            val diff = width - it.maxOf { it.x + it.width }
+            when (horizontalTextAlign) {
+                CustomAlign.START -> {} //this is default, so no changes
+                CustomAlign.CENTER -> it.forEach { it.setPosition(it.x + diff / 2, it.y) }
+                CustomAlign.END -> it.forEach { it.setPosition(it.x + diff, it.y) }
+                CustomAlign.SPACE_AROUND -> TODO()
+                CustomAlign.SPACE_BETWEEN -> TODO()
+            }
+        }
+    }
+
+    private fun alignVerticalTextAfterLayout(lines: List<List<Actor>>, totalHeight: Float) {
         if (fitContentHeight) return
         val diff = height - totalHeight
         when (verticalTextAlign) {

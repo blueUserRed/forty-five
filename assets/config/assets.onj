@@ -970,6 +970,11 @@ textures: [
         useMipMaps: true
     },
     {
+        name: "logo_htl3r_white_background",
+        file: "blobs/htl3r_white_background.png",
+        useMipMaps: true
+    },
+    {
         name: "map_extraction_background",
         file: "blobs/map/extraction/background.png"
     },
