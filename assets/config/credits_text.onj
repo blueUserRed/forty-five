@@ -178,8 +178,8 @@ texts: [
             },
         ],
     },
-    $Text{
-        rawText: "$nameThank you for playing!",
-    },
+//    $Text{
+//        rawText: "$nameThank you for playing!",
+//    },
 
 ],

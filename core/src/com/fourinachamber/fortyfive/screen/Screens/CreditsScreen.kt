@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.screens
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.config.ConfigFileManager
@@ -9,6 +10,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
@@ -17,6 +19,8 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.collections.map
+import kotlin.math.max
+import kotlin.math.min
 
 class CreditsScreen : ScreenCreator() {
 
@@ -34,8 +38,10 @@ class CreditsScreen : ScreenCreator() {
     override val playAmbientSounds: Boolean = false
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 800
+        "*" to 0
     )
+
+    private val scrollSpeed = 5f
 
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
         FocusableParent(
@@ -77,14 +83,48 @@ class CreditsScreen : ScreenCreator() {
             onjDef.get<Color>("color"),
             onjDef.get<Double>("fontScale").toFloat(),
         )
-        box {
-            debug = true
+        val elem = object : CustomBox(screen) {
+            var timeSinceFirstStart = 0L
+            override fun act(delta: Float) {
+                if (timeSinceFirstStart == 0L) {
+                    timeSinceFirstStart = System.currentTimeMillis()
+                    drawOffsetY = height - worldHeight * 0.9f
+                }
+                if (timeSinceFirstStart + 500L < System.currentTimeMillis()) {
+                    this.drawOffsetY = min(drawOffsetY + scrollSpeed, height - worldHeight * 1.15f)
+                }
+                super.act(delta)
+            }
+        }
+        actor(elem) {
             relativeWidth(80f)
-            y = worldHeight * 0.8f
+            fitContentInFlexDirection = true
             horizontalAlign = CustomAlign.CENTER
-            onLayoutAndNow { x = worldWidth * 0.1f }
-            minVerticalDistBetweenElements = 200f
+            onLayoutAndNow {
+                x = worldWidth * 0.1f
+                y = worldHeight * 1.6f - height
+            }
+            minVerticalDistBetweenElements = 300f
             addTexts(file.get<OnjArray>("texts"), defaults, effects)
+        }
+
+
+
+        label("red_wing", "Back") {
+            addButtonDefaults()
+            group = backButtonFocusGroup
+            setFocusableTo(true, this)
+            isSelectable = true
+            onSelect {
+                MapManager.changeToTitleScreen()
+            }
+            x = 20f
+            y = 20f
+            setAlignment(Align.center)
+            width = 100f
+            onLayoutAndNow {
+                height = prefHeight*1.2f
+            }
         }
     }
 
@@ -114,16 +154,21 @@ class CreditsScreen : ScreenCreator() {
                         relativeWidth(it.get<Double>("relativWidth").toFloat())
                         horizontalAlign = CustomAlign.SPACE_BETWEEN
                         verticalAlign = CustomAlign.CENTER
+                        marginBottom = 100f
                         box {
                             syncHeight()
                             width = parent.width / 2f
                             fitContentInFlexDirection = true
+                            horizontalAlign = CustomAlign.CENTER
+                            minVerticalDistBetweenElements = 4f
                             addTexts(it.get<OnjArray>("left"), defaults, effects)
                         }
                         box {
                             syncHeight()
                             width = parent.width / 2f
                             fitContentInFlexDirection = true
+                            horizontalAlign = CustomAlign.CENTER
+                            minVerticalDistBetweenElements=4f
                             addTexts(it.get<OnjArray>("right"), defaults, effects)
                         }
                         syncHeight()
@@ -134,6 +179,7 @@ class CreditsScreen : ScreenCreator() {
                     advancedText(defaults) {
                         width = parent.width
                         this.fitContentHeight = true
+                        this.horizontalTextAlign = CustomAlign.CENTER
                         setRawText(it.get<String>("rawText"), effects)
                     }
                 }

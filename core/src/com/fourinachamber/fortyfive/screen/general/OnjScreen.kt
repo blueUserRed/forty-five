@@ -172,6 +172,7 @@ open class OnjScreen(
     }
 
     fun escapeSelectionHierarchy(fromMouse: Boolean = true, deselectActors: Boolean = true) {
+        println("hiiii")
         if (!fromMouse && draggedActor != null) return
         nextFocusActorSetFromMouse = fromMouse
         focusedActor = selectedActors.lastOrNull()
