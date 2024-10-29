@@ -136,7 +136,6 @@ object KeyActionFactory {
                     KeyPreset.RIGHT -> Vector2(1, 0)
                     else -> null
                 }
-                println(dir)
                 screen.focusNext(dir)
                 true
             }

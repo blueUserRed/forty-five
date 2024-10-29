@@ -7,8 +7,11 @@ import com.fourinachamber.fortyfive.screen.screens.ShopScreen
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromOnjScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screens.CreditsScreen
+import com.fourinachamber.fortyfive.screen.screens.DialogScreen
 import com.fourinachamber.fortyfive.screen.screens.GameScreen
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
+import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -121,7 +124,10 @@ object ConfigFileManager {
             "healOrMaxHPScreen" to { FromKotlinScreenBuilder(HealOrMaxHPScreen()) },
 //            "healOrMaxHPScreen" to { FromKotlinScreenBuilder(CustomBoxPlaygroundScreen()) },
             "addMaxHPScreen" to { FromKotlinScreenBuilder(AddMaxHPScreen()) },
+            "titleScreen" to { FromKotlinScreenBuilder(TitleScreen()) },
+            "creditsScreen" to { FromKotlinScreenBuilder(CreditsScreen()) },
             "shopScreen" to { FromKotlinScreenBuilder(ShopScreen()) },
+            "dialogScreen" to { FromKotlinScreenBuilder(DialogScreen()) },
             "gameScreen" to { FromKotlinScreenBuilder(GameScreen()) }
         )
         data.forEach { addScreen(it.first,it.second) }

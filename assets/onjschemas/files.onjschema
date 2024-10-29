@@ -15,11 +15,12 @@ configFiles: {
     soundConfig: fileConfig,
     logConfig: fileConfig,
     cardSelectionTypeConfig: fileConfig,
-    npcConfig: fileConfig,
+    dialogConfig: fileConfig,
     shopConfig: fileConfig,
     backpackConfig: fileConfig,
     mapConfig: fileConfig,
     inputMaps: fileConfig,
+    creditsText: fileConfig,
 },
 
 screenSchema: string,

@@ -214,10 +214,10 @@ object SettingsCreator {
     val settingsKeyMap = listOf<KeyInputMapEntry>(
         KeyInputMapEntry(
             100,
-            KeyInputCondition.And(
-                KeyInputCondition.ScreenState(NavbarCreator.navbarOpenScreenState),
-                KeyInputCondition.ScreenState(settingsOpenScreenState)
-            ),
+//            KeyInputCondition.And(
+//                KeyInputCondition.ScreenState(NavbarCreator.navbarOpenScreenState),
+                KeyInputCondition.ScreenState(settingsOpenScreenState),
+//            ),
             singleKeys = KeyPreset.LEFT.keys + KeyPreset.RIGHT.keys,
             { screen, keycode ->
                 val par = screen.focusedActor ?: return@KeyInputMapEntry false

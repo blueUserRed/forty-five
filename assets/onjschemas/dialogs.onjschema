@@ -31,8 +31,13 @@ $NextDialogPartSelector {
 }
 
 var dialog = {
+    name: string,
+    eventText: string,
     parts: {
         rawText: string,
+        npcLeftChangeTo?: string,
+        npcRightChangeTo?: string,
+        talkingNpc: string, //on purpose, if you want it to be null, you have to specifically set it
         effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
@@ -43,16 +48,19 @@ var dialog = {
     },
 };
 
+dialogs: dialog[]
+
+
 var image = {
         textureName: string,
         offsetX?: float,
         offsetY?: float,
+        flipOnRightSide?: boolean,
         scale: float,
 };
 
 npcs: {
     name: string,
     displayName: string,
-    dialog: dialog,
     image: image,
 }[]
