@@ -89,7 +89,7 @@ object SettingsCreator {
                 val action = getAction(-height)
                 Timeline.timeline {
                     action {
-                        screen.leaveState("settingsOpenScreenState")
+                        screen.leaveState(settingsOpenScreenState)
                         addAction(action)
                     }
                     delayUntil { action.isComplete }

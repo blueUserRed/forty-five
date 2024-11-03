@@ -181,7 +181,7 @@ object NavbarCreator {
                 setFontScale(0.7f)
             }
 
-            fun createAction(end: Float): PropertyAction = PropertyAction(
+            fun createAction(end: Float): PropertyAction<Float> = PropertyAction<Float>(
                 this@box,
                 this@box::logicalOffsetY,
                 end,
@@ -217,13 +217,11 @@ object NavbarCreator {
 
             onSelectChange { _, _ ->
                 if (isSelected) {
-                    println("now opening")
                     events.fire(ChangeBlackBackground(true))
                     timeline.appendAction(obj.openTimelineCreator().asAction())
                     timeline.appendAction(Timeline.timeline { screen.enterState(navbarOpenScreenState) }.asAction())
                     isOpen = true
                 } else {
-                    println("now closing")
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))
                 }

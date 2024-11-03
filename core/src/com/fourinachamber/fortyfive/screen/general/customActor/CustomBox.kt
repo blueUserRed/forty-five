@@ -316,7 +316,7 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
         var cachedChildren1 = cachedChildren
         if (cachedChildren1 != null) return cachedChildren1
         val lists =
-            originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+            _originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
         cachedChildren1 = lists.first.map {
             var w = it.width
             var h = it.height

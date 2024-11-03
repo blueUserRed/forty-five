@@ -4,7 +4,10 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Lifetime
 import com.fourinachamber.fortyfive.utils.Promise
@@ -33,13 +36,21 @@ data class DropShadow(
 
     fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) {
         if (!showDropShadow) return
-        val scaleX2 = scaleX * (1 + multiplier)
-        val scaleY2 = scaleY * (1 + multiplier)
-        val x = actor.x - actor.width * (scaleX2 - 1) / 2 + offX
-        val y = actor.y - actor.height * (scaleY2 - 1) / 2 + offY
+        val scaleX2 = getScale(scaleX)
+        val scaleY2 = getScale(scaleY)
+        val (x, y) = getXY(actor, scaleX2, scaleY2)
+        val (sWidth, sHeight) = getWidthHeight(actor, scaleX2, scaleY2)
+        doDropShadow(batch, screen, drawer = { drawable.draw(batch, x, y, sWidth, sHeight) })
+    }
+
+    private fun getWidthHeight(
+        actor: Actor,
+        scaleX2: Float,
+        scaleY2: Float
+    ): Pair<Float, Float> {
         val sWidth = actor.width * scaleX2
         val sHeight = actor.height * scaleY2
-        doDropShadow(batch, screen, drawer = { drawable.draw(batch, x, y, sWidth, sHeight) })
+        return Pair(sWidth, sHeight)
     }
 
     private inline fun doDropShadow(batch: Batch?, screen: OnjScreen, drawer: () -> Unit) {
@@ -54,6 +65,32 @@ data class DropShadow(
         batch.flush()
         batch.shader = null
     }
+
+    /**
+     * this is untested and might not work
+     */
+    fun doDropShadowRotated(batch: Batch, screen: OnjScreen, drawable: TransformDrawable, actor: CustomImageActor) {
+        if (!showDropShadow) return
+        val scaleX2 = getScale(scaleX)
+        val scaleY2 = getScale(scaleY)
+        val (x, y) = getXY(actor, scaleX2, scaleY2)
+        val (sWidth, sHeight) = getWidthHeight(actor, scaleX2, scaleY2)
+        doDropShadow(batch, screen, drawer = {
+            drawable.draw(batch, x, y, sWidth / 2, sHeight / 2, sWidth, sHeight, 1f, 1f, actor.rotation)
+        })
+    }
+
+    private fun getXY(
+        actor: Actor,
+        scaleX2: Float,
+        scaleY2: Float
+    ): Pair<Float, Float> {
+        val x = actor.x - actor.width * (scaleX2 - 1) / 2 + offX
+        val y = actor.y - actor.height * (scaleY2 - 1) / 2 + offY
+        return Pair(x, y)
+    }
+
+    private fun getScale(scaleX: Float): Float = scaleX * (1 + multiplier)
 
     companion object : ResourceBorrower {
 
