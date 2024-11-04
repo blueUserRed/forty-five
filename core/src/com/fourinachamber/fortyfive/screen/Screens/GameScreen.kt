@@ -303,6 +303,7 @@ class GameScreen : ScreenCreator() {
                     xAnim.state("hover")
                 },
             )
+            onSelect { gameEvents.fire(NewGameController.Events.Holster) }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")

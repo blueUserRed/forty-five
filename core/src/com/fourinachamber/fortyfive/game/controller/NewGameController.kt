@@ -108,6 +108,7 @@ class NewGameController(
 
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.Shoot> { shoot() }
+        gameEvents.watchFor<Events.Holster> { endTurn() }
         bindCardEffects()
 
         initCards()
@@ -409,6 +410,10 @@ class NewGameController(
         appendMainTimeline(timeline)
     }
 
+    private fun endTurn() {
+
+    }
+
     override fun appendMainTimeline(timeline: Timeline) {
         mainTimeline.appendAction(timeline.asAction())
     }
@@ -459,6 +464,7 @@ class NewGameController(
         data class PlayCardOrbAnimation(val targetActor: Actor, var orbAnimationTimeline: Timeline? = null)
         data class ParryStateChange(val inParryMenu: Boolean)
         data object Shoot
+        data object Holster
 
         abstract class TimelineBuildingEvent {
 
