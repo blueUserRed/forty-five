@@ -1,4 +1,4 @@
-
+assets/textures
 assets/textures/packed/
 assets/cards/generated/
 assets/saves/savefile.onj
@@ -13,6 +13,7 @@ assets/large_assets/*
 assets/error_logs/*
 website/out/*
 website/assets/*
+*.png
 
 ## Java
 

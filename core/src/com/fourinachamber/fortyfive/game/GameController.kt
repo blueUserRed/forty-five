@@ -955,6 +955,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return cur
     }
 
+    fun uniqueCardsInStack(): Int {
+        val names = _cardStack.map { it.name }
+        var unique = 0
+        names.forEach { name ->
+            if (names.count { it == name } == 1) unique++
+        }
+        return unique
+    }
+
     @MainThreadOnly
     fun endTurn() {
         if (hasWon) {

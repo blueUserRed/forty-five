@@ -1515,6 +1515,26 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
+    {
+        name: "excaliBullet",
+        title: "Excalibullet",
+        flavourText: "For the king!",
+        description: "$trigger$On-Placedown:$trigger$\nThe bullet in Slot 3" + slot.3 + " gets plus x, where x is the number of unique bullets with no duplicates currently in your stack",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("enter", bSelects.threeButNotSelf, value.uniqueCardsInStack)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
 
 ],
 

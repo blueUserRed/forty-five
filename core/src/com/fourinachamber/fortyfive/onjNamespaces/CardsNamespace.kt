@@ -45,6 +45,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
                 triggerInformation!!.sourceCard!!.curDamage(controller)
             }
+            "uniqueCardsInStack" with OnjEffectValue { controller, _, _ ->
+                controller.uniqueCardsInStack()
+            }
         }
     )
 
