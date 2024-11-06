@@ -964,6 +964,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return unique
     }
 
+    fun swapBulletsInRevolverTimeline(first: Card, second: Card): Timeline = Timeline.timeline {
+        action {
+            val firstSlot = revolver.slots.find { first === it.card }?.num
+                ?: throw RuntimeException("cant swap card ($first) that isn't in the revolver")
+            val secondSlot = revolver.slots.find { second === it.card }?.num
+                ?: throw RuntimeException("cant swap card ($second) that isn't in the revolver")
+            revolver.removeCard(first)
+            revolver.removeCard(second)
+            revolver.setCard(firstSlot, second)
+            revolver.setCard(secondSlot, first)
+        }
+    }
+
     @MainThreadOnly
     fun endTurn() {
         if (hasWon) {

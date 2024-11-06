@@ -185,6 +185,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             encounterModifierName.value
         ))
     }
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun swapWith(trigger: OnjString, other: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.SwapWith(
+            triggerOrError(trigger.value),
+            other.value
+        ))
+    }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")
     fun turnRevolver(trigger: OnjString, rotationDirection: OnjString, amount: OnjInt): OnjEffect {

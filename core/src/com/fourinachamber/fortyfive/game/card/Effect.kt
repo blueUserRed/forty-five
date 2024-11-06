@@ -689,6 +689,34 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    class SwapWith(
+        trigger: Trigger,
+        private val other: BulletSelector
+    ) : Effect(trigger) {
+
+        override fun onTrigger(
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            include(getSelectedBullets(other, controller, card, triggerInformation))
+            includeLater(
+                {
+                    val swapWith = get<List<Card>>("selectedCards").firstOrNull()
+                    swapWith?.let { controller.swapBulletsInRevolverTimeline(card, it) } ?: Timeline()
+                },
+                { true }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(): Effect = SwapWith(trigger, other).also {
+            copyStandardConfig(it)
+        }
+    }
+
 }
 
 /**
