@@ -1,20 +1,16 @@
 package com.fourinachamber.fortyfive.game.controller
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.game.EncounterModifier
-import com.fourinachamber.fortyfive.game.GameAnimation
-import com.fourinachamber.fortyfive.game.GameDirector
-import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.game.StatusEffect
-import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.CardPrototype
-import com.fourinachamber.fortyfive.game.card.Trigger
-import com.fourinachamber.fortyfive.game.card.TriggerInformation
+import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
@@ -29,7 +25,7 @@ import kotlin.math.floor
 class NewGameController(
     override val screen: OnjScreen,
     val gameEvents: EventPipeline
-) : ScreenController(), GameController {
+) : ScreenController(), GameController, ResourceBorrower {
 
     private val gameDirector = GameDirector(this)
 
@@ -45,7 +41,8 @@ class NewGameController(
     override val revolverRotationCounter: Int
         get() = TODO("Not yet implemented")
 
-    override val turnCounter: Int = 0
+    override var turnCounter: Int = 0
+        private set
 
     override val playerStatusEffects: List<StatusEffect>
         get() = TODO("Not yet implemented")
@@ -97,6 +94,12 @@ class NewGameController(
     var cardsDrawn: Int = 0
         private set
 
+    private val enemyBannerPromise: Promise<Drawable> =
+        ResourceManager.request(this, this.screen, "enemy_turn_banner")
+
+    private val playerBannerPromise: Promise<Drawable> =
+        ResourceManager.request(this, this.screen, "player_turn_banner")
+
     override fun init(context: Any?) {
         if (context !is EncounterContext) {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
@@ -109,13 +112,19 @@ class NewGameController(
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.Shoot> { shoot() }
         gameEvents.watchFor<Events.Holster> { endTurn() }
-        bindCardEffects()
+        bindGameEventListeners()
 
         initCards()
         updateReserves(Config.baseReserves)
         appendMainTimeline(Timeline.timeline {
             delay(300)
-            include(drawCardsTimeline(Config.cardsToDrawInFirstRound))
+            includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
+            later {
+                val startTriggerInformation = TriggerInformation(controller = this@NewGameController)
+                val startEvent = Events.TurnBeginEvent(startTriggerInformation)
+                gameEvents.fire(startEvent)
+                include(startEvent.createTimeline())
+            }
         })
     }
 
@@ -123,12 +132,38 @@ class NewGameController(
         FortyFive.useRenderPipeline(gameRenderPipeline)
     }
 
-    private fun bindCardEffects() {
+    private fun bindGameEventListeners() {
         gameEvents.watchFor<Events.CardChangedZoneEvent> { event ->
             event.card.changeZone(event.newZone, this)
             val trigger = Trigger.ZoneChange(event.oldZone, event.newZone, false)
             event.append {
                 include(checkTrigger(trigger, event.triggerInformation))
+            }
+        }
+        gameEvents.watchFor<Events.CardsDrawnTimeline> { event ->
+            val trigger = Trigger.CardsDrawn(event.amount..event.amount, event.isSpecial, event.isFromBottom)
+            event.append {
+                include(checkTrigger(trigger, event.triggerInformation))
+            }
+        }
+        gameEvents.watchFor<Events.EndTurnEvent> { event ->
+            val trigger = Trigger.GameSituation(GameSituations.ON_ROUND_END, false)
+            event.append {
+                include(checkTrigger(trigger, event.triggerInformation))
+                encounterModifiers
+                    .mapNotNull { it.executeOnEndTurn() }
+                    .collectTimeline()
+                    .let { include(it) }
+            }
+        }
+        gameEvents.watchFor<Events.TurnBeginEvent> { event ->
+            val trigger = Trigger.GameSituation(GameSituations.ON_ROUND_END, false)
+            event.append {
+                include(checkTrigger(trigger, event.triggerInformation))
+                encounterModifiers
+                    .mapNotNull { it.executeOnPlayerTurnStart(this@NewGameController) }
+                    .collectTimeline()
+                    .let { include(it) }
             }
         }
     }
@@ -410,8 +445,52 @@ class NewGameController(
         appendMainTimeline(timeline)
     }
 
-    private fun endTurn() {
+    private fun bannerAnimationTimeline(isPlayer: Boolean): Timeline =
+        (if (isPlayer) playerBannerPromise else enemyBannerPromise).getOrNull()?.let { banner ->
+            BannerAnimation(
+                banner,
+                this.screen,
+                1_500,
+                500,
+                1.4f,
+                1.1f
+            ).asTimeline(this)
+        } ?: Timeline()
 
+    private fun endTurn() {
+        appendMainTimeline(Timeline.timeline {
+            // TODO: check player win
+            action { SoundPlayer.situation("end_turn", screen) }
+            later {
+                val triggerInfo = TriggerInformation(controller = this@NewGameController)
+                val event = Events.EndTurnEvent(triggerInfo)
+                gameEvents.fire(event)
+                include(event.createTimeline())
+            }
+            // TODO: put cards under stack
+            action {
+                turnCounter++
+            }
+
+            include(bannerAnimationTimeline(false))
+            // TODO: enemy turn
+            include(bannerAnimationTimeline(true))
+
+            action {
+                SoundPlayer.situation("turn_begin", screen)
+                updateReserves(Config.baseReserves, revolver)
+            }
+
+            includeLater({ drawCardsTimeline(Config.cardsToDraw) })
+
+            later {
+                val triggerInfo = TriggerInformation(controller = this@NewGameController)
+                val event = Events.TurnBeginEvent(triggerInfo)
+                gameEvents.fire(event)
+                include(event.createTimeline())
+            }
+
+        })
     }
 
     override fun appendMainTimeline(timeline: Timeline) {
@@ -452,6 +531,7 @@ class NewGameController(
         const val softMaxCards = 12
         const val hardMaxCards = 20
         const val cardsToDrawInFirstRound = 6
+        const val cardsToDraw = 2
     }
 
     object Events {
@@ -488,6 +568,14 @@ class NewGameController(
             val amount: Int,
             val isSpecial: Boolean,
             val isFromBottom: Boolean,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        class EndTurnEvent(
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        class TurnBeginEvent(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
