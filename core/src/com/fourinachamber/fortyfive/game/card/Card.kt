@@ -97,8 +97,8 @@ class Card(
     val flavourText: String,
     val shortDescription: String,
     val type: Type,
-    val baseDamage: Int,
-    val cost: Int,
+    var baseDamage: Int,
+    var cost: Int,
     val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
@@ -140,6 +140,8 @@ class Card(
     var isUndead: Boolean = false
         private set
     var isRotten: Boolean = false
+        private set
+    var isRandom: Boolean = false
         private set
     var isReplaceable: Boolean = false
         private set
@@ -479,13 +481,13 @@ class Card(
     }
 
     fun getAdditionalHoverDescriptions(): List<String> {
-        return additionalHoverInfos.map { info ->
+        return additionalHoverInfos.mapNotNull { info ->
             when (info) {
                 "home" -> enteredInSlot?.let {
                     val slot = Utils.convertSlotRepresentation(it)
                     val slotIcon = GraphicsConfig.revolverSlotIcon(slot)
                     "entered in slot $slot§§$slotIcon§§"
-                } ?: ""
+                }
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
                     val mostExpensive = (actor.screen.screenController as GameController)
@@ -495,6 +497,10 @@ class Card(
                         .maxOfOrNull { it.cost }
                         ?: 0
                     "most expensive bullet costs $mostExpensive"
+                }
+                "uniqueCardsInStack" -> {
+                    val uniqueCards = (actor.screen.screenController as? GameController)?.uniqueCardsInStack()
+                    uniqueCards?.let { "there are $it unique cards in the stack" }
                 }
                 else -> throw RuntimeException("unknown additional hover info $info")
             }
@@ -619,6 +625,11 @@ class Card(
                 "reinforced" -> card.isReinforced = true
                 "shotProtected" -> card.isShotProtected = true
                 "rotten" -> card.isRotten = true
+                "random" -> {
+                    card.baseDamage = (0..20).random()
+                    card.cost = (0..5).random()
+                    card.isRandom = true
+                }
                 "alwaysAtBottom" -> card.isAlwaysAtBottom = true
                 "alwaysAtTop" -> card.isAlwaysAtTop = true
 
