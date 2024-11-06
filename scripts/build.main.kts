@@ -80,8 +80,8 @@ fun cleanupAssets(tmpDir: File) {
 
     debug("removing error logs")
     (tmpDir / "error_logs")
-        .listFiles()!!
-        .forEach { it.delete() }
+        .listFiles()
+        ?.forEach { it.delete() }
 
     debug("removing raw animation frames")
     (tmpDir / "large_assets")
