@@ -24,6 +24,7 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -421,6 +422,7 @@ open class OnjScreen @MainThreadOnly constructor(
     fun centeredStageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
         actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
     }
+
 
     @MainThreadOnly
     override fun render(delta: Float) = try {

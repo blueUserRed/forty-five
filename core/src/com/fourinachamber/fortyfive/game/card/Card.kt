@@ -153,6 +153,8 @@ class Card(
         private set
     var isAlwaysAtTop: Boolean = false
         private set
+    var isWardenOfTime: Boolean = false
+        private set
 
     fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
         (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
@@ -255,6 +257,59 @@ class Card(
         }
     }
 
+    private var wardenOfTimeRotationCounter: Int = -1
+
+    fun updateInLimbo(controller: GameController): Timeline? {
+        if (!isWardenOfTime || wardenOfTimeRotationCounter == -1) return null
+        if (wardenOfTimeRotationCounter + 4 > controller.revolverRotationCounter) return null
+        wardenOfTimeRotationCounter = -1
+        val growAction = ScaleToAction()
+        growAction.duration = 0.3f
+        growAction.setScale(3f)
+        growAction.interpolation = Interpolation.pow5In
+        val shrinkAction = ScaleToAction()
+        shrinkAction.duration = 0.5f
+        shrinkAction.setScale(1f)
+        shrinkAction.interpolation = Interpolation.smoother
+
+        return Timeline.timeline {
+            action {
+                controller.removeFromLimbo(this@Card)
+            }
+            includeLater(
+                { controller.destroyCardTimeline(controller.revolver.getCardInSlot(5)!!) },
+                { controller.revolver.getCardInSlot(5) != null }
+            )
+            parallelActions(
+                Timeline.timeline {
+                    delay(800)
+                    parallelActions(
+                        controller.placeBulletInRevolverDirect(this@Card, 5).asAction(),
+                        controller.gameRenderPipeline.liftActor(1000, actor).asAction(),
+                        Timeline.timeline {
+                            action {
+                                actor.setScale(0.3f)
+                                actor.addAction(growAction)
+                            }
+                            delayUntil { growAction.isComplete }
+                            action {
+                                actor.removeAction(growAction)
+                                actor.addAction(shrinkAction)
+                            }
+                            delayUntil { shrinkAction.isComplete }
+                            action { actor.removeAction(shrinkAction) }
+                        }.asAction(),
+                        Timeline.timeline {
+                            delay(250)
+                            include(controller.gameRenderPipeline.getScreenShakePopoutTimeline())
+                        }.asAction()
+                    )
+                }.asAction(),
+                controller.gameRenderPipeline.getTimeWarpTimeline().asAction()
+            )
+        }
+    }
+
     fun activeModifiers(controller: GameController): List<CardModifier> =
         modifiers.filter { it.activeChecker(controller) }
 
@@ -268,6 +323,7 @@ class Card(
      * called by gameScreenController when the card was shot
      */
     fun afterShot(controller: GameController) {
+        wardenOfTimeRotationCounter = controller.revolverRotationCounter
         if (shouldRemoveAfterShot(controller)) leaveGame()
         if (protectingModifiers.isNotEmpty()) {
             val effect = protectingModifiers.first()
@@ -621,6 +677,7 @@ class Card(
                 "rotten" -> card.isRotten = true
                 "alwaysAtBottom" -> card.isAlwaysAtBottom = true
                 "alwaysAtTop" -> card.isAlwaysAtTop = true
+                "wardenOfTime" -> card.isWardenOfTime = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
@@ -666,12 +723,15 @@ class CardActor(
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable, AnimationActor {
+    OffSettable, AnimationActor, LiftableActor {
 
     override val actor: Actor = this
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
+
+    override var inLift: Boolean = false
+    override var inLiftRender: Boolean = false
 
     override var inAnimation: Boolean = false
 
@@ -781,6 +841,7 @@ class CardActor(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (!shouldRender) return
         validate()
         if (drawPixmapMessage?.isFinished ?: false) {
             finishPixmapDrawing()

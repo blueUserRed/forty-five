@@ -1515,6 +1515,25 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
+    {
+        name: "wardenOfTimeBullet",
+        title: "Warden Of Time Bullet",
+        flavourText: "",
+        description: "3 revolver rotations after that this gets shot: destroy the bullet in slot 5 " + slot.5 + " and this bullet gets put there instead. If there is no bullet, nothing gets destroyed and this Bullet just appears.",
+        baseDamage: 4,
+        coverValue: 0,
+        traitEffects: [ "wardenOfTime" ],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+        ],
+        forceLoadCards: [],
+        dark: true,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
 
 ],
 
