@@ -714,6 +714,11 @@ textures: [
         file: "blobs/events/dialog/name_field.png"
     },
     {
+        name: "enemy_status_bar_main_bar",
+        file: "blobs/game_screen/status_bar/main_bar.png",
+        useMipMaps: true,
+    },
+    {
         name: "enemy_action_burning",
         file: "blobs/enemies/action_symbols/burning.png",
         useMipMaps: true
@@ -1345,6 +1350,14 @@ shaders: [
         constantArgs: {
             firstColor: color("474340"),
             secondColor: color("2d2c2a")
+        }
+    },
+    {
+        name: "enemy_status_bar_shader",
+        file: "shaders/hp_bar.glsl",
+        constantArgs: {
+            firstColor: color("eb2c2c"),
+            secondColor: color("3C0C02")
         }
     },
     {

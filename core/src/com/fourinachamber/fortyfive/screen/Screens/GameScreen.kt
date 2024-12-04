@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.game.enemy.StatusBar
 import com.fourinachamber.fortyfive.keyInput.KeyActionFactory
 import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
@@ -162,6 +163,12 @@ class GameScreen : ScreenCreator() {
                 debug()
                 relativeWidth(100f)
                 height = enemyHeight * 0.2f
+                val statusBar = StatusBar(screen, enemy)
+                actor(statusBar) {
+                    debug()
+                    relativeWidth(100f)
+                    relativeHeight(100f)
+                }
             }
 
         }
