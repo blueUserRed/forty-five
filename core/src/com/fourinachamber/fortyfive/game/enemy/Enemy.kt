@@ -71,13 +71,6 @@ class Enemy(
 
     private var brain: EnemyBrain = NoOpEnemyBrain
 
-    /**
-     * the actor that represents this enemy on the screen
-     */
-    // it's a bit hacky but actor needs to be initialised after currentLives, so the text of actor is correct
-    @Suppress("JoinDeclarationAndAssignment")
-    val actor: EnemyActor
-
     private val gameController = FortyFive.currentGame!!
 
     /**
@@ -90,7 +83,6 @@ class Enemy(
             field = max(value, -300)
             if (oldValue > 0 && value <= 0) {
                 gameController.enemyDefeated(this)
-                actor.defeated()
             }
         }
 
@@ -101,7 +93,6 @@ class Enemy(
         private set(value) {
             field = value
             FortyFiveLogger.debug(logTag, "enemy cover updated: new cover = $field")
-            actor.updateText()
         }
 
     private val _statusEffects: MutableList<StatusEffect> = mutableListOf()
@@ -113,10 +104,6 @@ class Enemy(
         private set
     var additionDamageEffect: StatusEffect? = null
         private set
-
-    init {
-        actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
-    }
 
     fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
         additionalDamage = 0
@@ -148,9 +135,9 @@ class Enemy(
     }
 
     fun onDefeat() {
-        _statusEffects.forEach { actor.removeStatusEffect(it) }
+//        _statusEffects.forEach { actor.removeStatusEffect(it) }
         _statusEffects.clear()
-        actor.setupForAction(NextEnemyAction.None)
+//        actor.setupForAction(NextEnemyAction.None)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -164,7 +151,7 @@ class Enemy(
         effect.start(gameController)
         effect.initIcon(gameController)
         _statusEffects.add(effect)
-        actor.displayStatusEffect(effect)
+//        actor.displayStatusEffect(effect)
     }
 
     fun executeStatusEffectsAfterTurn(): Timeline = _statusEffects
@@ -183,16 +170,16 @@ class Enemy(
         _statusEffects
             .filter { !it.isStillValid() }
             .forEach {
-                actor.removeStatusEffect(it)
+//                actor.removeStatusEffect(it)
             }
         _statusEffects.removeIf { !it.isStillValid() }
     }
 
     @MainThreadOnly
     fun damagePlayerDirectly(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
-        val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
-        include(chargeTimeline)
-        delay(GraphicsConfig.bufferTime)
+//        val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
+//        include(chargeTimeline)
+//        delay(GraphicsConfig.bufferTime)
         includeLater(
             { getPlayerDamagedTimeline(damage, gameController) },
             { true }
@@ -210,7 +197,7 @@ class Enemy(
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
         action {
             currentCover += amount
-            actor.startCoverChangeAnimation(amount)
+//            actor.startCoverChangeAnimation(amount)
         }
     }
 
@@ -232,10 +219,10 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-                    actor.startCoverChangeAnimation(-damage.coerceAtMost(currentCover))
+//                    actor.startCoverChangeAnimation(-damage.coerceAtMost(currentCover))
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
-                    actor.updateText()
+//                    actor.updateText()
                 }
             } },
             { currentCover != 0 }
@@ -245,8 +232,8 @@ class Enemy(
             { Timeline.timeline {
                 action {
                     currentHealth -= remaining
-                    actor.updateText()
-                    actor.startHealthChangeAnimation(-remaining)
+//                    actor.updateText()
+//                    actor.startHealthChangeAnimation(-remaining)
                 }
             } },
             { remaining != 0 }
@@ -310,276 +297,129 @@ class Enemy(
 
 }
 
-/**
- * used for representing an enemy on the screen
- */
-class EnemyActor(
-    val enemy: Enemy,
-    textEmitterConfig: OnjArray,
-    private val hiddenActionIconHandle: ResourceHandle,
-    val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, ResourceBorrower {
-
-    private val fontColor = if (GraphicsConfig.isEncounterBackgroundDark(MapManager.currentDetailMap.biome)) {
-        enemy.detailFontColorDark
-    } else {
-        enemy.detailFontColor
-    }
-
-    override var fixedZIndex: Int = 0
-    private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
-    val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
-    private val attackIndicator = CustomHorizontalGroup(screen)
-    private val attackIcon = EnemyActionIcon(screen, hiddenActionIconHandle)
-
-    private val attackLabel = AdvancedTextWidget(
-        Triple(enemy.detailFontHandle, fontColor, enemy.detailFontScale * 1.5f),
-        screen,
-        true
-    )
-
-    private val coverInfoBox = CustomVerticalGroup(screen)
-    private val statsBox = CustomVerticalGroup(screen)
-
-    private val statusEffectDisplay = VerticalStatusEffectDisplay(
-        screen,
-        enemy.detailFont,
-        fontColor,
-        enemy.detailFontScale
-    )
-
-    private val enemyDrawable: Promise<Drawable> = ResourceManager.request(this, screen, enemy.drawableHandle)
-
-    private val defeatedDrawable: Promise<Drawable> = GraphicsConfig.defeatedEnemyDrawable(this, screen)
-
-    val healthLabel: CustomLabel = CustomLabel(
-        screen,
-        "",
-        Label.LabelStyle(enemy.detailFont, fontColor),
-        true,
-    )
-
-    private val attackIndicatorAnimTimeOffset: Int = (0..10_000).random()
-
-    private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
-    private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
-
-    private val animationLifetime: EndableLifetime = EndableLifetime()
-
-    // animations are hardcoded, deal with it
-    private val animation: AnimationDrawable? = when {
-
-        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime.shorter(screen)) {
-            val anim = deferredAnimation("outlaw_animation")
-            order {
-                loop(anim, frameOffset = (0..50).random())
-            }
-        }
-
-        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime.shorter(screen)) {
-            val anim = deferredAnimation("pyro_animation")
-            order {
-                loop(anim, frameOffset = (0..50).random())
-            }
-        }
-
-        else -> null
-
-    }
-
-    init {
-        val emitterConfig = TextEffectEmitter.configsFromOnj(textEmitterConfig, screen)
-        val healthTextEmitter = TextEffectEmitter(emitterConfig, screen)
-        val coverTextEmitter = TextEffectEmitter(emitterConfig, screen)
-        healthLabel.addAnimationSpawner(healthTextEmitter)
-        coverText.addAnimationSpawner(coverTextEmitter)
-        healthLabel.setFontScale(enemy.detailFontScale)
-        coverText.setFontScale(enemy.detailFontScale)
-
-        // When multiple enemies are in an encounter, the last attackIndicator will override the previous ones,
-        // but because the name is only used for the tutorial, this should not be an issue
-        screen.addNamedActor("attackIndicator", attackIcon)
-
-        coverIcon.setScale(enemy.coverIconScale)
-        attackIcon.setScale(enemy.indicatorIconScale) // TODO: fix
-        coverIcon.reportDimensionsWithScaling = true
-        coverIcon.ignoreScalingWhenDrawing = true
-        attackIcon.reportDimensionsWithScaling = true
-        attackIcon.ignoreScalingWhenDrawing = true
-
-        attackIndicator.addActor(attackIcon)
-        attackIndicator.addActor(attackLabel)
-//        attackIndicator.isVisible = false
-
-        coverInfoBox.addActor(coverIcon)
-        coverInfoBox.addActor(coverText)
-
-        statsBox.addActor(healthLabel)
-        statsBox.addActor(statusEffectDisplay)
-
-        addActor(attackIndicator)
-        addActor(statsBox)
-        addActor(coverInfoBox)
-        updateText()
-        touchable = Touchable.enabled
-        animation?.start()
-    }
-
-    override fun act(delta: Float) {
-        super.act(delta)
-        animation?.update()
-    }
-
-    override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
-        if (touchable && this.touchable != Touchable.enabled) return null
-        if (!isVisible) return null
-        val childHit = super.hit(x, y, touchable)
-        if (childHit != null) return childHit
-        return if (x >= 0 && x < width && y >= 0 && y < height) this else null
-    }
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        validate()
-        coverInfoBox.setBounds(
-            0f, enemy.enemyHeight / 2 - coverInfoBox.prefHeight / 2,
-            coverInfoBox.prefWidth, coverInfoBox.prefHeight
-        )
-
-        if (enemy.isDefeated) {
-            val scale = GraphicsConfig.defeatedEnemyDrawableScale()
-            defeatedDrawable.getOrNull()?.let { drawable ->
-                drawable.draw(
-                    batch,
-                    x + coverInfoBox.width, y + healthLabel.prefHeight,
-                    drawable.minWidth * scale, drawable.minWidth * scale
-                )
-            }
-        } else {
-            (animation ?: enemyDrawable.getOrNull())?.draw(
-                batch,
-                x + coverInfoBox.width, y + healthLabel.prefHeight,
-                enemy.enemyWidth, enemy.enemyHeight
-            )
-        }
-
-        statsBox.width = statsBox.prefWidth
-        statsBox.height = statsBox.prefHeight
-        statsBox.setPosition(enemy.enemyWidth / 2 - statsBox.width / 2,  -statsBox.height)
-        attackLabel.width = enemy.enemyWidth
-        attackLabel.y = attackLabel.height / 2f
-        attackIndicator.setBounds(
-            enemy.enemyWidth / 2 - attackIndicator.prefWidth / 2 + enemy.headOffset,
-            enemy.enemyHeight + 20f,
-            attackIndicator.prefWidth, attackIndicator.prefHeight
-        )
-        attackIndicator.drawOffsetY = sin(
-            (TimeUtils.millis().toDouble() + attackIndicatorAnimTimeOffset) * 0.0015
-        ).toFloat() * 1.5f
-        super.draw(batch, parentAlpha)
-    }
-
-    fun startHealthChangeAnimation(change: Int) {
-       val emitter = healthLabel.findAnimationSpawner<TextEffectEmitter>() ?: return
-        emitter.playNumberChangeAnimation(change)
-    }
-
-    fun startCoverChangeAnimation(change: Int) {
-        val emitter = coverText.findAnimationSpawner<TextEffectEmitter>() ?: return
-        emitter.playNumberChangeAnimation(change)
-    }
-
-    fun enemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = if (action.prototype.hasSpecialAnimation) {
-        specialEnemyActionAnimationTimeline(action, controller)
-    } else {
-        Timeline()
-    }
-
-    private fun specialEnemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = Timeline.timeline {
-        val actionDescription =
-            TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
-        val data = mapOf<String, OnjValue>(
-            "commonPanel1" to action.prototype.commonPanel1.onjString(),
-            "commonPanel2" to action.prototype.commonPanel2.onjString(),
-            "commonPanel3" to action.prototype.commonPanel3.onjString(),
-            "actionPanel" to action.prototype.specialPanel.onjString(),
-            "actionName" to action.prototype.title.onjString(),
-            "actionDescription" to actionDescription,
-            "actionIcon" to action.prototype.iconHandle.onjString(),
-        )
-        val parent = screen.namedActorOrError(enemyActionAnimationParentName) as? FlexBox
-            ?: throw RuntimeException("actor named $enemyActionAnimationParentName must be a FlexBox")
-        var animActor: CustomFlexBox? = null
-        action {
-            animActor = screen.screenBuilder.generateFromTemplate(
-                enemyActionAnimationTemplateName,
-                data,
-                parent,
-                screen
-            ) as? CustomFlexBox
-                ?: throw RuntimeException("template named $enemyActionAnimationTemplateName must be a FlexBox")
-        }
-        delay(10)
-        action {
-            screen.enterState("enemy_action_anim")
-            controller.dispatchAnimTimeline(Timeline.timeline {
-                repeat(4) {
-                    action {
-                        SoundPlayer.situation("enemy_action_anim", screen)
-                    }
-                    delay(200)
-                }
-            })
-        }
-        awaitConfirmationInput(screen, maxTime = 10_000)
-//        awaitConfirmationInput(screen, maxTime = 5_000)
-        action {
-            screen.leaveState("enemy_action_anim")
-            parent.remove(animActor!!.styleManager!!.node)
-            screen.removeAllStyleManagers(animActor!!)
-        }
-    }
-
-    fun setupForAction(action: NextEnemyAction) = when (action) {
-
-        is NextEnemyAction.None -> {
-            attackLabel.advancedText = AdvancedText.EMPTY
-        }
-
-        is NextEnemyAction.ShownEnemyAction -> {
-            var text = action.action.indicatorText ?: ""
-            val effects = mutableListOf<AdvancedTextParser.AdvancedTextEffect>()
-            if (enemy.additionalDamage != 0) {
-                val iconHandle = enemy.additionDamageEffect!!.icon.backgroundHandle ?: ""
-                val effect = AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect(
-                    "%1%", enemy.additionDamageEffect!!.additionalDamageColor()
-                )
-                effects.add(effect)
-                text += "%1% + ${enemy.additionalDamage}%1% §§$iconHandle§§"
-            }
-            attackLabel.setRawText(text, effects)
-        }
-
-        is NextEnemyAction.HiddenEnemyAction -> {
-            attackLabel.advancedText = AdvancedText.EMPTY
-        }
-
-    }.also {
-        attackIcon.setupForAction(action)
-    }
-
-    fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
-    fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
-
-    fun defeated() {
-        animationLifetime.die()
-    }
-
-    /**
-     * updates the description text of the actor
-     */
-    fun updateText() {
-        coverText.setText("${enemy.currentCover}")
-        healthLabel.setText("${enemy.currentHealth}/${enemy.health}")
-    }
-
-}
+///**
+// * used for representing an enemy on the screen
+// */
+//class EnemyActor(
+//    val enemy: Enemy,
+//    textEmitterConfig: OnjArray,
+//    private val hiddenActionIconHandle: ResourceHandle,
+//    val screen: OnjScreen
+//) : ResourceBorrower {
+//
+//    private val fontColor = if (GraphicsConfig.isEncounterBackgroundDark(MapManager.currentDetailMap.biome)) {
+//        enemy.detailFontColorDark
+//    } else {
+//        enemy.detailFontColor
+//    }
+//
+//    private val enemyDrawable: Promise<Drawable> = ResourceManager.request(this, screen, enemy.drawableHandle)
+//
+//    private val defeatedDrawable: Promise<Drawable> = GraphicsConfig.defeatedEnemyDrawable(this, screen)
+//
+//
+//    private val attackIndicatorAnimTimeOffset: Int = (0..10_000).random()
+//
+//    private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
+//    private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
+//
+//    private val animationLifetime: EndableLifetime = EndableLifetime()
+//
+//    // animations are hardcoded, deal with it
+//    private val animation: AnimationDrawable? = when {
+//
+//        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime.shorter(screen)) {
+//            val anim = deferredAnimation("outlaw_animation")
+//            order {
+//                loop(anim, frameOffset = (0..50).random())
+//            }
+//        }
+//
+//        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime.shorter(screen)) {
+//            val anim = deferredAnimation("pyro_animation")
+//            order {
+//                loop(anim, frameOffset = (0..50).random())
+//            }
+//        }
+//
+//        else -> null
+//
+//    }
+//
+//    init {
+//        val emitterConfig = TextEffectEmitter.configsFromOnj(textEmitterConfig, screen)
+//        val healthTextEmitter = TextEffectEmitter(emitterConfig, screen)
+//        val coverTextEmitter = TextEffectEmitter(emitterConfig, screen)
+//
+//        animation?.start()
+//    }
+//
+//    fun enemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = if (action.prototype.hasSpecialAnimation) {
+//        specialEnemyActionAnimationTimeline(action, controller)
+//    } else {
+//        Timeline()
+//    }
+//
+//    private fun specialEnemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = Timeline.timeline {
+//        val actionDescription =
+//            TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
+//        val data = mapOf<String, OnjValue>(
+//            "commonPanel1" to action.prototype.commonPanel1.onjString(),
+//            "commonPanel2" to action.prototype.commonPanel2.onjString(),
+//            "commonPanel3" to action.prototype.commonPanel3.onjString(),
+//            "actionPanel" to action.prototype.specialPanel.onjString(),
+//            "actionName" to action.prototype.title.onjString(),
+//            "actionDescription" to actionDescription,
+//            "actionIcon" to action.prototype.iconHandle.onjString(),
+//        )
+//        val parent = screen.namedActorOrError(enemyActionAnimationParentName) as? FlexBox
+//            ?: throw RuntimeException("actor named $enemyActionAnimationParentName must be a FlexBox")
+//        var animActor: CustomFlexBox? = null
+//        action {
+//            animActor = screen.screenBuilder.generateFromTemplate(
+//                enemyActionAnimationTemplateName,
+//                data,
+//                parent,
+//                screen
+//            ) as? CustomFlexBox
+//                ?: throw RuntimeException("template named $enemyActionAnimationTemplateName must be a FlexBox")
+//        }
+//        delay(10)
+//        action {
+//            screen.enterState("enemy_action_anim")
+//            controller.dispatchAnimTimeline(Timeline.timeline {
+//                repeat(4) {
+//                    action {
+//                        SoundPlayer.situation("enemy_action_anim", screen)
+//                    }
+//                    delay(200)
+//                }
+//            })
+//        }
+//        awaitConfirmationInput(screen, maxTime = 10_000)
+////        awaitConfirmationInput(screen, maxTime = 5_000)
+//        action {
+//            screen.leaveState("enemy_action_anim")
+//            parent.remove(animActor!!.styleManager!!.node)
+//            screen.removeAllStyleManagers(animActor!!)
+//        }
+//    }
+//
+//    fun setupForAction(action: NextEnemyAction) {
+//
+//    }
+//
+//    fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
+//    fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
+//
+//    fun defeated() {
+//        animationLifetime.die()
+//    }
+//
+//    /**
+//     * updates the description text of the actor
+//     */
+//    fun updateText() {
+//    }
+//
+//}

@@ -14,6 +14,7 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.keyInput.KeyActionFactory
 import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
@@ -29,6 +30,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
@@ -59,6 +61,8 @@ class GameScreen : ScreenCreator() {
 
     private lateinit var reservesAnimationTarget: Actor
     private lateinit var deckAnimationTarget: Actor
+
+    private lateinit var enemyParent: CustomGroup
 
     private val revolver by lazy {
         Revolver(
@@ -105,8 +109,62 @@ class GameScreen : ScreenCreator() {
             width = (1305f / 1512f) * worldHeight
         }
 
+        group {
+            enemyParent = this@group
+            x = 800f
+            y = 250f
+            width = 800f
+            height = 600f
+            debug()
+        }
+
         playerBar()
 
+    }
+
+    private fun createEnemy(x: Float, y: Float, enemy: Enemy) = with(enemyParent) {
+
+//        val enemyHeight = 300f
+        val enemyHeight = 400f
+
+        box {
+            debug()
+            flexDirection = FlexDirection.COLUMN
+            this.x = x
+            this.y = y
+            width = enemyHeight * 0.6f
+            height = enemyHeight
+
+            group {
+                debug()
+                relativeWidth(100f)
+                height = enemyHeight * 0.15f
+            }
+
+            group {
+                debug()
+                relativeWidth(100f)
+
+                image {
+                    backgroundHandle = enemy.drawableHandle
+                    relativeHeight(100f)
+                    centerX()
+                    centerY()
+                    onLayout {
+                        val drawable = drawable ?: return@onLayout
+                        width = height * (drawable.minWidth / drawable.minHeight)
+                    }
+                }
+                height = enemyHeight * 0.65f
+            }
+
+            group {
+                debug()
+                relativeWidth(100f)
+                height = enemyHeight * 0.2f
+            }
+
+        }
     }
 
     private fun CustomGroup.playerBar() = group {
@@ -281,7 +339,6 @@ class GameScreen : ScreenCreator() {
             touchable = Touchable.enabled
             x = 990f
             y = 60f
-            debug()
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
                 AnimState("open", 990f, 100, Interpolation.pow2),
@@ -444,6 +501,17 @@ class GameScreen : ScreenCreator() {
         gameEvents.watchFor<NewGameController.Events.ReservesChanged>(::reservesChangedAnim)
         gameEvents.watchFor<NewGameController.Events.PlayCardOrbAnimation> { event ->
             event.orbAnimationTimeline = orbAnimationTimeline(deckAnimationTarget, event.targetActor, 1, false)
+        }
+        gameEvents.watchFor<NewGameController.Events.SetupEnemies>(::setupEnemies)
+    }
+
+    private fun setupEnemies(event: NewGameController.Events.SetupEnemies) {
+        var x = 20f
+        val y = 200f
+        event.enemies.forEach { enemy ->
+            x += 130
+            createEnemy(x, y, enemy)
+            return // TODO: remove
         }
     }
 

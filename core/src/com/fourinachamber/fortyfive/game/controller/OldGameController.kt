@@ -428,7 +428,7 @@ class OldGameController(
     override fun initEnemyArea(enemies: List<Enemy>) {
         enemies.forEach { enemy ->
             enemyArea.addEnemy(enemy)
-            enemy.actor.onClick { enemyArea.selectEnemy(enemy) }
+//            enemy.actor.onClick { enemyArea.selectEnemy(enemy) }
         }
         if (enemies.isEmpty()) throw RuntimeException("enemyArea must have at least one enemy")
     }

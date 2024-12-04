@@ -61,10 +61,10 @@ class NewGameController(
         get() = TODO("Not yet implemented")
 
     override val activeEnemies: List<Enemy>
-        get() = TODO("Not yet implemented")
+        get() = allEnemies.filter { !it.isDefeated }
 
-    override val allEnemies: List<Enemy>
-        get() = TODO("Not yet implemented")
+    override lateinit var allEnemies: List<Enemy>
+        private set
 
     @Inject(name = "shoot_button")
     override lateinit var shootButton: Actor
@@ -75,6 +75,8 @@ class NewGameController(
 
     override lateinit var encounterContext: EncounterContext
         private set
+
+    private lateinit var encounter: GameDirector.Encounter
 
     private var cardPrototypes: List<CardPrototype> = listOf()
 
@@ -107,7 +109,10 @@ class NewGameController(
         encounterContext = context
         FortyFive.currentGame = this
 
-        gameDirector.init()
+        encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
+            ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
+        allEnemies = encounter.createdEnemies
+        gameEvents.fire(Events.SetupEnemies(allEnemies))
 
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.Shoot> { shoot() }
@@ -188,7 +193,7 @@ class NewGameController(
     private fun initCards() {
         val onj = ConfigFileManager.getConfigFile("cards")
 
-        val cards = gameDirector.encounter.forceCards
+        val cards = encounter.forceCards
             ?: encounterContext.forceCards
             ?: SaveState.curDeck.cards
 
@@ -208,7 +213,7 @@ class NewGameController(
             _cardStack.add(card.create(this.screen))
         }
 
-        if (gameDirector.encounter.shuffleCards) _cardStack.shuffle()
+        if (encounter.shuffleCards) _cardStack.shuffle()
 
         FortyFiveLogger.debug(logTag, "card stack: $_cardStack")
 
@@ -543,6 +548,7 @@ class NewGameController(
         )
         data class PlayCardOrbAnimation(val targetActor: Actor, var orbAnimationTimeline: Timeline? = null)
         data class ParryStateChange(val inParryMenu: Boolean)
+        data class SetupEnemies(val enemies: List<Enemy>)
         data object Shoot
         data object Holster
 

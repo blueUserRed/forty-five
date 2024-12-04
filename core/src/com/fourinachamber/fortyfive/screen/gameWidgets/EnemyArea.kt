@@ -54,7 +54,7 @@ class EnemyArea(
      */
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
-        addActor(enemy.actor)
+//        addActor(enemy.actor)
         if (canSelectEnemy) selectEnemy(_enemies.first { !it.isDefeated })
         invalidate()
     }
@@ -85,25 +85,25 @@ class EnemyArea(
         val enemy = selectedEnemy ?: return
         val selectionWidth = 30f
         val enemySelectionDrawable = this.enemySelectionDrawable.getOrNull() ?: return
-        enemySelectionDrawable.draw(
-            batch,
-            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,
-            y + enemy.actor.y + enemy.actor.height + 20f,
-            selectionWidth,
-            selectionWidth * (enemySelectionDrawable.minHeight / enemySelectionDrawable.minWidth)
-        )
+//        enemySelectionDrawable.draw(
+//            batch,
+//            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,
+//            y + enemy.actor.y + enemy.actor.height + 20f,
+//            selectionWidth,
+//            selectionWidth * (enemySelectionDrawable.minHeight / enemySelectionDrawable.minWidth)
+//        )
     }
 
     override fun layout() {
         super.layout()
-        val neededWidth = enemies.sumOf { it.actor.width.toDouble() * 1.3 }.toFloat()
-        var curX = width / 2 - neededWidth / 2
-        enemies
-            .map { it.actor }
-            .forEach { enemy ->
-                enemy.setBounds(curX, height / 2, enemy.prefWidth, enemy.prefHeight)
-                curX += enemy.width * 1.3f
-            }
+//        val neededWidth = enemies.sumOf { it.actor.width.toDouble() * 1.3 }.toFloat()
+//        var curX = width / 2 - neededWidth / 2
+//        enemies
+//            .map { it.actor }
+//            .forEach { enemy ->
+//                enemy.setBounds(curX, height / 2, enemy.prefWidth, enemy.prefHeight)
+//                curX += enemy.width * 1.3f
+//            }
     }
 
     override fun resortZIndices() {
