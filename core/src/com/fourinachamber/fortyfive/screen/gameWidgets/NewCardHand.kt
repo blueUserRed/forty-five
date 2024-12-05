@@ -128,8 +128,6 @@ class NewCardHand(
             card.actor.fixedZIndex = zIndexFor(card)
             x += cardDistRightSide
         }
-        println("rightside")
-        rightSide.map { it.actor.fixedZIndex }.joinToString(separator = ", ").let { println(it) }
     }
 
     private fun cardHeightFuncDerivative(x: Float): Float = 0.16f - 0.0002f * x

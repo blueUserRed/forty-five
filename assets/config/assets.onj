@@ -719,6 +719,11 @@ textures: [
         useMipMaps: true,
     },
     {
+        name: "enemy_status_bar_hp_label",
+        file: "blobs/game_screen/status_bar/hp_label.png",
+        useMipMaps: true,
+    },
+    {
         name: "enemy_action_burning",
         file: "blobs/enemies/action_symbols/burning.png",
         useMipMaps: true
