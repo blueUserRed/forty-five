@@ -44,7 +44,11 @@ interface GameController {
 
     fun bounceBulletTimeline(card: Card): Timeline
 
-    fun rotateRevolverTimeline(rotation: RevolverRotation, ignoreEncounterModifiers: Boolean = false): Timeline
+    fun rotateRevolverTimeline(
+        rotation: RevolverRotation,
+        ignoreEncounterModifiers: Boolean = false,
+        sourceCard: Card? = null
+    ): Timeline
 
     fun drawCardsTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false, sourceCard: Card? = null): Timeline
 

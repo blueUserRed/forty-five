@@ -45,7 +45,6 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     init {
         screen.onEnd { polygonBatch.dispose() }
         hpChanged()
-        screen.afterMs(2_000) { targetPercent = 0.5f }
     }
 
     fun hpChanged() {

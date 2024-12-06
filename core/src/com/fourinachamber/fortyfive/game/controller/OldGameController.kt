@@ -862,7 +862,8 @@ class OldGameController(
 
     override fun rotateRevolverTimeline(
         rotation: RevolverRotation,
-        ignoreEncounterModifiers: Boolean
+        ignoreEncounterModifiers: Boolean,
+        sourceCard: Card?
     ): Timeline = Timeline.timeline {
         var newRotation = if (ignoreEncounterModifiers) {
             rotation

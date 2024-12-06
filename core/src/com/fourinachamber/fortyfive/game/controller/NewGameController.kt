@@ -6,6 +6,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
@@ -20,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import onj.value.OnjArray
+import kotlin.collections.map
 import kotlin.math.floor
 
 class NewGameController(
@@ -38,8 +40,8 @@ class NewGameController(
     override val isUIFrozen: Boolean
         get() = TODO("Not yet implemented")
 
-    override val revolverRotationCounter: Int
-        get() = TODO("Not yet implemented")
+    override var revolverRotationCounter: Int = 0
+        private set
 
     override var turnCounter: Int = 0
         private set
@@ -65,6 +67,8 @@ class NewGameController(
 
     override lateinit var allEnemies: List<Enemy>
         private set
+
+    private lateinit var targetedEnemy: Enemy
 
     @Inject(name = "shoot_button")
     override lateinit var shootButton: Actor
@@ -138,6 +142,9 @@ class NewGameController(
     }
 
     private fun bindGameEventListeners() {
+        gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
+            targetedEnemy = enemy
+        }
         gameEvents.watchFor<Events.CardChangedZoneEvent> { event ->
             event.card.changeZone(event.newZone, this)
             val trigger = Trigger.ZoneChange(event.oldZone, event.newZone, false)
@@ -145,7 +152,7 @@ class NewGameController(
                 include(checkTrigger(trigger, event.triggerInformation))
             }
         }
-        gameEvents.watchFor<Events.CardsDrawnTimeline> { event ->
+        gameEvents.watchFor<Events.CardsDrawnEvent> { event ->
             val trigger = Trigger.CardsDrawn(event.amount..event.amount, event.isSpecial, event.isFromBottom)
             event.append {
                 include(checkTrigger(trigger, event.triggerInformation))
@@ -169,6 +176,24 @@ class NewGameController(
                     .mapNotNull { it.executeOnPlayerTurnStart(this@NewGameController) }
                     .collectTimeline()
                     .let { include(it) }
+            }
+        }
+        gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
+            val rotationTrigger = Trigger.GameSituation(GameSituations.ON_REVOLVER_ROTATION, false)
+            event.append {
+                include(checkTrigger(rotationTrigger, event.triggerInformation))
+                revolver
+                    .slots
+                    .filter { it.card != null }
+                    .map { Trigger.CardRotatedInSlot(it.num, false) }
+                    .map { checkTrigger(it, event.triggerInformation) }
+                    .collectTimeline()
+                    .let { include(it) }
+                activeEnemies
+                    .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
+                    .collectTimeline()
+                    .let { include(it) }
+
             }
         }
     }
@@ -248,10 +273,32 @@ class NewGameController(
 
     override fun rotateRevolverTimeline(
         rotation: RevolverRotation,
-        ignoreEncounterModifiers: Boolean
-    ): Timeline {
-        TODO("Not yet implemented")
-    }
+        ignoreEncounterModifiers: Boolean,
+        sourceCard: Card?
+    ): Timeline = Timeline.timeline { later {
+        var newRotation = if (ignoreEncounterModifiers) {
+            rotation
+        } else {
+            _encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
+        }
+        playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
+        include(revolver.rotate(newRotation))
+        action {
+            revolverRotationCounter += newRotation.amount
+            cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
+        }
+        if (newRotation.amount == 0) return@later
+        later {
+            val info = TriggerInformation(
+                controller = this@NewGameController,
+                multiplier = newRotation.amount,
+                sourceCard = sourceCard,
+            )
+            val event = Events.RevolverRotatedEvent(rotation, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
+    } }
 
     override fun drawCardsTimeline(
         amount: Int,
@@ -285,7 +332,7 @@ class NewGameController(
                     multiplier = cardsToDraw,
                     sourceCard = sourceCard,
                 )
-                val event = Events.CardsDrawnTimeline(cardsToDraw, isSpecial, fromBottom, info)
+                val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, info)
                 gameEvents.fire(event)
                 include(event.createTimeline())
             }
@@ -372,7 +419,37 @@ class NewGameController(
     }
 
     override fun shoot() {
-        TODO("Not yet implemented")
+        if (_encounterModifiers.any { !it.canShootRevolver(this) }) return
+        val cardToShoot = revolver.getCardInSlot(5)
+        val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
+
+        FortyFiveLogger.debug(logTag,
+            "revolver is shooting;" +
+                    "cardToShoot = $cardToShoot"
+        )
+
+        if (cardToShoot?.canBeShot(this)?.not() ?: false) {
+            FortyFiveLogger.debug(logTag, "Card can't be shot because it blocks")
+            return
+        }
+
+        val targetedEnemies = if (cardToShoot?.isSpray ?: false) allEnemies else listOf(targetedEnemy())
+
+        val timeline = Timeline.timeline {
+            action {
+                SoundPlayer.situation("revolver_shot", screen)
+            }
+            cardToShoot?.let {
+                action { SaveState.bulletsShot++ }
+                targetedEnemies
+                    .map { it.damage(cardToShoot.curDamage(this@NewGameController)) }
+                    .collectTimeline()
+                    .let { include(it) }
+            }
+            if (cardToShoot != null) later {
+
+            }
+        }
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -514,9 +591,7 @@ class NewGameController(
         .filter { it.card != null }
         .map { it.num to it.card!! }
 
-    override fun targetedEnemy(): Enemy {
-        TODO("Not yet implemented")
-    }
+    override fun targetedEnemy(): Enemy = targetedEnemy
 
     override fun slotOfCard(card: Card): Int? = revolver.slots.find { it.card === card }?.num
 
@@ -549,6 +624,7 @@ class NewGameController(
         data class PlayCardOrbAnimation(val targetActor: Actor, var orbAnimationTimeline: Timeline? = null)
         data class ParryStateChange(val inParryMenu: Boolean)
         data class SetupEnemies(val enemies: List<Enemy>)
+        data class EnemySelected(val selected: Enemy)
         data object Shoot
         data object Holster
 
@@ -570,10 +646,20 @@ class NewGameController(
             val triggerInformation: TriggerInformation,
         ) : TimelineBuildingEvent()
 
-        class CardsDrawnTimeline(
+        class CardsDrawnEvent(
             val amount: Int,
             val isSpecial: Boolean,
             val isFromBottom: Boolean,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        class RevolverRotatedEvent(
+            val rotation: RevolverRotation,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        class BulletShotEvent(
+            val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 

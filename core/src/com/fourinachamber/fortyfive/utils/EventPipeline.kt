@@ -1,15 +1,16 @@
 package com.fourinachamber.fortyfive.utils
 
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
 class EventPipeline {
 
-    private val watchers: MutableList<Pair<(Any) -> Unit, KClass<*>>> = mutableListOf()
+    private val watchers: CopyOnWriteArrayList<Pair<(Any) -> Unit, KClass<*>>> = CopyOnWriteArrayList()
     private val linkedTo: MutableList<EventPipeline> = mutableListOf()
 
     fun fire(event: Any) {
-        watchers.forEach { (callback, clazz) ->
+        watchers.forEach { (callback, clazz) ->2
             if (clazz.isInstance(event)) callback(clazz.cast(event))
         }
         linkedTo.forEach { it.fireFromLinked(event, mutableListOf(this)) }

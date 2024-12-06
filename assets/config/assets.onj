@@ -103,10 +103,6 @@ textures: [
         file: "blobs/game_screen/card_orb.png"
     },
     {
-        name: "enemy_texture",
-        file: "blobs/game_screen/enemy.png"
-    },
-    {
         name: "normal_bullet",
         file: "blobs/game_screen/normal_bullet.png"
     },

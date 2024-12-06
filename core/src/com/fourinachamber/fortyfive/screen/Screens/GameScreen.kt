@@ -32,6 +32,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
+import com.fourinachamber.fortyfive.screen.general.onFocus
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
@@ -116,35 +117,42 @@ class GameScreen : ScreenCreator() {
             y = 250f
             width = 800f
             height = 600f
-            debug()
         }
 
         playerBar()
 
     }
 
-    private fun createEnemy(x: Float, y: Float, enemy: Enemy) = with(enemyParent) {
+    private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {
 
-//        val enemyHeight = 300f
         val enemyHeight = 400f
+        val enemyWidth = enemyHeight * 0.6f
+
+        var enemySelected = false
 
         box {
-            debug()
             flexDirection = FlexDirection.COLUMN
             this.x = x
             this.y = y
-            width = enemyHeight * 0.6f
+            width = enemyWidth
             height = enemyHeight
 
+            group = "enemies"
+            setFocusableTo(true, this)
+            isSelectable = true
+            onSelect {
+                if (enemySelected) return@onSelect
+                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
+            }
+
             group {
-                debug()
                 relativeWidth(100f)
                 height = enemyHeight * 0.15f
             }
 
             group {
-                debug()
                 relativeWidth(100f)
+                height = enemyHeight * 0.65f
 
                 image {
                     backgroundHandle = enemy.drawableHandle
@@ -156,22 +164,32 @@ class GameScreen : ScreenCreator() {
                         width = height * (drawable.minWidth / drawable.minHeight)
                     }
                 }
-                height = enemyHeight * 0.65f
+
+                image {
+                    backgroundHandle = "card_symbol_marked"
+                    centerX()
+                    centerY()
+                    relativeWidth(60f)
+                    onLayoutAndNow { height = width }
+                    gameEvents.watchFor<NewGameController.Events.EnemySelected> { (e) ->
+                        enemySelected = e === enemy
+                        isVisible = enemySelected
+                    }
+                }
             }
 
             group {
-                debug()
                 relativeWidth(100f)
                 height = enemyHeight * 0.2f
                 val statusBar = StatusBar(screen, enemy)
                 actor(statusBar) {
-                    debug()
                     relativeWidth(100f)
                     relativeHeight(100f)
                 }
             }
 
         }
+        return enemyWidth
     }
 
     private fun CustomGroup.playerBar() = group {
@@ -468,7 +486,7 @@ class GameScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf(NewCardHand.cardFocusGroupName, RevolverSlot.revolverSlotFocusGroupName)
+                    groups = listOf(NewCardHand.cardFocusGroupName, RevolverSlot.revolverSlotFocusGroupName, "enemies")
                 ),
                 SelectionTransition(
                     TransitionType.LastResort,
@@ -513,13 +531,14 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun setupEnemies(event: NewGameController.Events.SetupEnemies) {
-        var x = 20f
-        val y = 200f
+        var x = 10f
+        var y = 160f
         event.enemies.forEach { enemy ->
-            x += 130
-            createEnemy(x, y, enemy)
-            return // TODO: remove
+            val neededWidth = createEnemy(x, y, enemy)
+            x += neededWidth
+            y -= 30f
         }
+        gameEvents.fire(NewGameController.Events.EnemySelected(event.enemies.first()))
     }
 
     private fun reservesChangedAnim(event: NewGameController.Events.ReservesChanged) {
