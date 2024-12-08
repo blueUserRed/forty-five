@@ -37,12 +37,12 @@ abstract class Effect(val data: EffectData) {
      */
     @MainThreadOnly
     fun checkTrigger(
-        triggerToCheck: Trigger,
+        situation: GameSituation,
         triggerInformation: TriggerInformation,
         controller: GameController,
         onCard: Card
     ): Timeline? {
-        if (data.trigger.checkTrigger(triggerToCheck, triggerInformation, onCard)) {
+        if (data.trigger.check(situation, onCard, triggerInformation, controller)) {
             FortyFiveLogger.debug("Effect", "effect $this triggered")
             return onTrigger(onCard, triggerInformation, controller)
         }
@@ -649,69 +649,103 @@ sealed class BulletSelector {
 typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?) -> Int
 
 
-sealed class Trigger {
+fun interface Trigger {
 
-    abstract fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean
+    fun check(
+        gameSituation: GameSituation,
+        card: Card,
+        triggerInformation: TriggerInformation,
+        controller: GameController
+    ): Boolean
 
-    data object Never : Trigger() {
-        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean = false
+    companion object {
+        val Never = Trigger { _, _, _, _ -> false }
     }
+}
 
-    class GameSituation(val situation: GameSituations, val anyCardTriggers: Boolean) : Trigger() {
-
-        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
-            if (other !is GameSituation) return false
-            if (info.sourceCard != null && !anyCardTriggers && info.sourceCard !== thisCard) return false
-            return situation == other.situation
-        }
-    }
+sealed class GameSituation {
 
     class ZoneChange(
-        val oldZone: NewGameController.Zone?,
-        val newZone: NewGameController.Zone?,
-        val anyCardTriggers: Boolean,
-    ) : Trigger() {
+        val card: Card,
+        val oldZone: NewGameController.Zone,
+        val newZone: NewGameController.Zone
+    ) : GameSituation()
 
-        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
-            if (other !is ZoneChange) return false
-            if (info.sourceCard != null && !anyCardTriggers && info.sourceCard !== thisCard) return false
-            if (oldZone != null && other.oldZone != null && oldZone != other.oldZone) return false
-            if (newZone != null && other.newZone != null && newZone != other.newZone) return false
-            return true
-        }
-    }
 
-    class CardRotatedInSlot(val slot: Int, val anyCardTriggers: Boolean) : Trigger() {
-
-        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
-            if (other !is CardRotatedInSlot) return false
-            if (info.sourceCard != null && !anyCardTriggers && info.sourceCard !== thisCard) return false
-            return other.slot == slot
-        }
-    }
-
-    class CardsDrawn(val amount: IntRange, val special: Boolean?, val fromBottom: Boolean?) : Trigger() {
-
-        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
-            if (other !is CardsDrawn) return false
-            if (!(other.amount intersection amount)) return false
-            if (special != null && special != other.special) return false
-            if (fromBottom != null && fromBottom != other.fromBottom) return false
-            return true
-        }
-    }
 
 }
 
-enum class GameSituations {
-    ON_SHOT,
-    ON_ROUND_START,
-    ON_ROUND_END,
-    ON_DESTROY,
-    ON_REVOLVER_ROTATION,
-    ON_RETURNED_HOME,
-    ON_RIGHT_CLICK,
-}
+//sealed class Trigger {
+//
+//    abstract fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean
+//
+//    data object Never : Trigger() {
+//        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean = false
+//    }
+//
+//    data object OnShot : Trigger() {
+//        override fun checkTrigger(
+//            other: Trigger,
+//            info: TriggerInformation,
+//            thisCard: Card
+//        ): Boolean = other is OnShot && thisCard === info.sourceCard
+//    }
+//
+//    class GameSituation(val situation: GameSituations, val anyCardTriggers: Boolean) : Trigger() {
+//
+//        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
+//            if (other !is GameSituation) return false
+//            if (info.sourceCard != null && !anyCardTriggers && info.sourceCard !== thisCard) return false
+//            return situation == other.situation
+//        }
+//    }
+//
+//    class ZoneChange(
+//        val oldZone: NewGameController.Zone?,
+//        val newZone: NewGameController.Zone?,
+//        val anyCardTriggers: Boolean,
+//    ) : Trigger() {
+//
+//        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
+//            if (other !is ZoneChange) return false
+//            if (info.sourceCard != null && !anyCardTriggers && info.sourceCard !== thisCard) return false
+//            if (oldZone != null && other.oldZone != null && oldZone != other.oldZone) return false
+//            if (newZone != null && other.newZone != null && newZone != other.newZone) return false
+//            return true
+//        }
+//    }
+//
+//    class CardRotatedInSlot(val slot: Int, val anyCardTriggers: Boolean) : Trigger() {
+//
+//        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
+//            if (other !is CardRotatedInSlot) return false
+//            if (info.sourceCard != null && !anyCardTriggers && info.sourceCard !== thisCard) return false
+//            return other.slot == slot
+//        }
+//    }
+//
+//    class CardsDrawn(val amount: IntRange, val special: Boolean?, val fromBottom: Boolean?) : Trigger() {
+//
+//        override fun checkTrigger(other: Trigger, info: TriggerInformation, thisCard: Card): Boolean {
+//            if (other !is CardsDrawn) return false
+//            if (!(other.amount intersection amount)) return false
+//            if (special != null && special != other.special) return false
+//            if (fromBottom != null && fromBottom != other.fromBottom) return false
+//            return true
+//        }
+//    }
+//
+//}
+//
+//enum class GameSituations {
+//    ON_SHOT,
+//    ON_ROUND_START,
+//    ON_ROUND_END,
+//    ON_DESTROY,
+//    ON_REVOLVER_ROTATION,
+//    ON_RETURNED_HOME,
+//    ON_RIGHT_CLICK,
+//}
 
 data class TriggerInformation(
     val multiplier: Int? = null,

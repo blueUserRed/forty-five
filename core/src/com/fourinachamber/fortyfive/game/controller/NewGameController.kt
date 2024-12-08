@@ -6,7 +6,6 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
-import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
@@ -147,9 +146,9 @@ class NewGameController(
         }
         gameEvents.watchFor<Events.CardChangedZoneEvent> { event ->
             event.card.changeZone(event.newZone, this)
-            val trigger = Trigger.ZoneChange(event.oldZone, event.newZone, false)
+            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone)
             event.append {
-                include(checkTrigger(trigger, event.triggerInformation))
+                include(checkTrigger(situation, event.triggerInformation))
             }
         }
         gameEvents.watchFor<Events.CardsDrawnEvent> { event ->
@@ -198,7 +197,7 @@ class NewGameController(
         }
     }
 
-    private fun checkTrigger(trigger: Trigger, triggerInformation: TriggerInformation): Timeline = createdCards
+    private fun checkTrigger(situation: GameSituation, triggerInformation: TriggerInformation): Timeline = createdCards
         .map { it.checkEffects(trigger, triggerInformation, this) }
         .collectTimeline()
 
@@ -349,10 +348,10 @@ class NewGameController(
                 fromBottom -> _cardStack.removeLast()
                 else -> _cardStack.removeFirst()
             }
-            cardHand.addCard(card!!)
+            cardHand.addCard(card)
             cardsDrawn++
-            card!!.actor.alpha = 0f
-            val event = Events.PlayCardOrbAnimation(card!!.actor)
+            card.actor.alpha = 0f
+            val event = Events.PlayCardOrbAnimation(card.actor)
             gameEvents.fire(event)
             orbAnimationTimeline = event.orbAnimationTimeline
         }
@@ -435,21 +434,44 @@ class NewGameController(
 
         val targetedEnemies = if (cardToShoot?.isSpray ?: false) allEnemies else listOf(targetedEnemy())
 
+        val triggerInfo = TriggerInformation(
+            controller = this@NewGameController,
+            targetedEnemies = targetedEnemies,
+            sourceCard = cardToShoot,
+            isOnShot = true,
+        )
+
         val timeline = Timeline.timeline {
             action {
                 SoundPlayer.situation("revolver_shot", screen)
             }
-            cardToShoot?.let {
+            cardToShoot?.let { card ->
                 action { SaveState.bulletsShot++ }
                 targetedEnemies
                     .map { it.damage(cardToShoot.curDamage(this@NewGameController)) }
                     .collectTimeline()
                     .let { include(it) }
+                // Not handled via event because things like encounter modifiers or
+                // status effects shouldn't hook into here
+                // Also only the shot bullet is allowed to trigger, other bullets can only trigger after
+                include(checkTrigger(Trigger.OnShot, triggerInfo))
+                action {
+                    revolver.removeCard(card)
+                }
             }
-            if (cardToShoot != null) later {
 
+            if (cardToShoot != null) later {
+                val event = Events.AfterShotEvent(cardToShoot, triggerInfo)
+                gameEvents.fire(event)
+                include(event.createTimeline())
             }
         }
+        appendMainTimeline(Timeline.timeline {
+            parallelActions(
+                timeline.asAction(),
+                gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
+            )
+        })
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -658,7 +680,7 @@ class NewGameController(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        class BulletShotEvent(
+        class AfterShotEvent(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()

@@ -191,26 +191,61 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone?, Zone?, boolean]")
-    fun zoneChange(oldZone: OnjValue, newZone: OnjValue, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
-        if (oldZone.isNull()) null else (oldZone as OnjZone).value,
-        if (newZone.isNull()) null else (newZone as OnjZone).value,
-        anyCardTriggers.value
-    ))
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean]")
+    fun zoneChange(oldZone: OnjZone, newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
+            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
+            when {
+                !triggers -> false
+                oldZone.value != gameSituation.oldZone -> false
+                newZone.value != gameSituation.newZone -> false
+                else -> true
+            }
+        }
+    )
+
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
-    fun enterZone(newZone: OnjZone, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
-        null,
-        newZone.value,
-        anyCardTriggers.value
-    ))
+    fun enterZone(newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
+            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
+            when {
+                !triggers -> false
+                newZone.value != gameSituation.newZone -> false
+                else -> true
+            }
+        }
+    )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
-    fun leaveZone(oldZone: OnjZone, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
-        oldZone.value,
-        null,
-        anyCardTriggers.value
-    ))
+//    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
+//    fun leaveZone(oldZone: OnjZone, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
+//        oldZone.value,
+//        null,
+//        anyCardTriggers.value
+//    ))
+
+    private inline fun <reified T : GameSituation> triggerForSituation(
+        noinline block: (
+            gameSituation: T,
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ) -> Boolean,
+    ): Trigger = triggerForSituation(block, T::class)
+
+    private fun <T : GameSituation> triggerForSituation(
+        block: (
+            gameSituation: T,
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ) -> Boolean,
+        situation: KClass<T>
+    ): Trigger = Trigger { gameSituation, card, triggerInformation, controller ->
+        if (!situation.isInstance(gameSituation)) return@Trigger false
+        @Suppress("UNCHECKED_CAST")
+        block(gameSituation as T, card, triggerInformation, controller)
+    }
 
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {
@@ -376,6 +411,42 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: [int]")
     fun cardsWithCost(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
+
+
+    enum class WhichCardTriggers {
+        ONLY_SELF {
+            override fun check(
+                self: Card,
+                triggered: Card
+            ): Boolean = self === triggered
+        },
+        ONLY_OTHERS {
+            override fun check(
+                self: Card,
+                triggered: Card
+            ): Boolean = self !== triggered
+        },
+        ALL_CARDS {
+            override fun check(
+                self: Card,
+                triggered: Card
+            ): Boolean = true
+        }
+
+        ;
+
+        abstract fun check(self: Card, triggered: Card): Boolean
+
+        companion object {
+
+            fun fromOnj(name: String): WhichCardTriggers = when (name) {
+                "onlySelf" -> ONLY_SELF
+                "onlyOthers" -> ONLY_OTHERS
+                "allCards" -> ALL_CARDS
+                else -> throw RuntimeException("'$name' must be one of 'onlySelf', 'onlyOthers', 'allCards'")
+            }
+        }
+    }
 
 }
 

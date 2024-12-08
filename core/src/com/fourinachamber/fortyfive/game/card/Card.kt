@@ -301,7 +301,6 @@ class Card(
      * called by gameScreenController when the card was shot
      */
     fun afterShot(controller: GameController) {
-        if (shouldRemoveAfterShot(controller)) leaveGame()
         if (protectingModifiers.isNotEmpty()) {
             val effect = protectingModifiers.first()
             val newEffect = effect.copy(second = effect.second - 1)
@@ -311,7 +310,11 @@ class Card(
                 protectingModifiers[0] = newEffect
             }
             modifiersChanged()
+//            return
         }
+//        if (!shouldRemoveAfterShot(controller)) return
+//        controller.revolver.removeCard(this)
+//
     }
 
     fun beforeShot() {
@@ -418,18 +421,18 @@ class Card(
      */
     @MainThreadOnly
     fun checkEffects(
-        trigger: Trigger,
+        situation: GameSituation,
         triggerInformation: TriggerInformation,
         controller: GameController,
     ): Timeline = Timeline.timeline {
         val isOnShot = triggerInformation.isOnShot
         action {
-            checkModifierTransformers(trigger, triggerInformation)
+            checkModifierTransformers(situation, triggerInformation, controller)
         }
         later {
             val effects = effects
                 .filter { it.checkConditions(controller, this@Card) }
-                .zip { it.checkTrigger(trigger, triggerInformation, controller, this@Card) }
+                .zip { it.checkTrigger(situation, triggerInformation, controller, this@Card) }
                 .filter { it.second != null }
             if (effects.isEmpty()) return@later
             val showAnimation = !effects.all { it.first.data.isHidden }
@@ -461,12 +464,16 @@ class Card(
         }
     }
 
-    private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
+    private fun checkModifierTransformers(
+        situation: GameSituation,
+        triggerInformation: TriggerInformation,
+        controller: GameController
+    ) {
         var modifierChanged = false
         _modifiers.replaceAll { (counter, modifier) ->
             val (_, transformer) = modifier
                 .transformers
-                .find { it.first.checkTrigger(trigger, triggerInformation, this) }
+                .find { it.first.check(situation, this, triggerInformation, controller) }
                 ?: return@replaceAll counter to modifier
             modifierChanged = true
             counter to transformer(modifier, triggerInformation)

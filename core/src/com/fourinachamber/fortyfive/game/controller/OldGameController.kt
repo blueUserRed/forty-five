@@ -20,7 +20,6 @@ import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.StatusEffectTarget
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
-import com.fourinachamber.fortyfive.game.card.GameSituations
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
@@ -811,7 +810,7 @@ class OldGameController(
             }
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true, controller = this@OldGameController)
-                include(checkEffectsSingleCard(GameSituations.ON_SHOT, cardToShoot, triggerInformation))
+//                include(checkEffectsSingleCard(GameSituations.ON_SHOT, cardToShoot, triggerInformation))
 //                includeLater(
 //                    { checkEffectsSingleCard(GameSituations.ON_LEAVE, cardToShoot, triggerInformation) },
 //                    { cardToShoot.shouldRemoveAfterShot(this@OldGameController) }
@@ -885,20 +884,20 @@ class OldGameController(
             .let { include(it) }
         if (newRotation.amount != 0) {
             val info = TriggerInformation(multiplier = newRotation.amount, controller = this@OldGameController)
-            include(checkEffectsActiveCards(GameSituations.ON_REVOLVER_ROTATION, info))
-            includeLater(
-                {
-                    revolver
-                        .slots
-                        .asList()
-                        .zip { it.card }
-                        .filter { it.second != null }
-                        .filter { it.first.num == it.second?.enteredInSlot }
-                        .map { checkEffectsSingleCard(GameSituations.ON_RETURNED_HOME, it.second!!) }
-                        .collectTimeline()
-                },
-                { true }
-            )
+//            include(checkEffectsActiveCards(GameSituations.ON_REVOLVER_ROTATION, info))
+//            includeLater(
+//                {
+//                    revolver
+//                        .slots
+//                        .asList()
+//                        .zip { it.card }
+//                        .filter { it.second != null }
+//                        .filter { it.first.num == it.second?.enteredInSlot }
+//                        .map { checkEffectsSingleCard(GameSituations.ON_RETURNED_HOME, it.second!!) }
+//                        .collectTimeline()
+//                },
+//                { true }
+//            )
 //            includeLater(
 //                {
 //                    checkEffectsSingleCard(GameSituations.ON_ROTATE_IN_5, revolver.getCardInSlot(5)!!)
@@ -934,7 +933,7 @@ class OldGameController(
                     .mapNotNull { it.executeOnEndTurn() }
                     .collectTimeline()
                     .let { include(it) }
-            include(checkEffectsActiveCards(GameSituations.ON_ROUND_END))
+//            include(checkEffectsActiveCards(GameSituations.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
                 { cardHand.cards.size >= softMaxCards }
@@ -959,7 +958,7 @@ class OldGameController(
                     .collectTimeline()
                     .let { include(it) }
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
-            includeLater({ checkEffectsActiveCards(GameSituations.ON_ROUND_START) }, { true })
+//            includeLater({ checkEffectsActiveCards(GameSituations.ON_ROUND_START) }, { true })
         })
     }
 
@@ -1094,7 +1093,7 @@ class OldGameController(
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
         val triggerInformation = TriggerInformation(sourceCard = card, controller = this@OldGameController)
-        include(checkEffectsSingleCard(GameSituations.ON_DESTROY, card, triggerInformation))
+//        include(checkEffectsSingleCard(GameSituations.ON_DESTROY, card, triggerInformation))
 //        include(checkEffectsActiveCards(GameSituations.ON_ANY_CARD_DESTROY, triggerInformation))
     }
 
@@ -1153,43 +1152,43 @@ class OldGameController(
         }
     }
 
-    fun checkEffectsSingleCard(
-        trigger: GameSituations,
-        card: Card,
-        triggerInformation: TriggerInformation = TriggerInformation(controller = this)
-    ): Timeline {
-        FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        return Timeline.timeline {
-//            include(card.checkEffects(trigger, triggerInformation, this@OldGameController))
-//            trigger
-//                .cascadeTriggers
-//                .map { checkEffectsSingleCard(it, card, triggerInformation) }
-//                .collectTimeline()
-//                .let { include(it) }
-        }
-    }
+//    fun checkEffectsSingleCard(
+//        trigger: GameSituations,
+//        card: Card,
+//        triggerInformation: TriggerInformation = TriggerInformation(controller = this)
+//    ): Timeline {
+//        FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
+//        return Timeline.timeline {
+////            include(card.checkEffects(trigger, triggerInformation, this@OldGameController))
+////            trigger
+////                .cascadeTriggers
+////                .map { checkEffectsSingleCard(it, card, triggerInformation) }
+////                .collectTimeline()
+////                .let { include(it) }
+//        }
+//    }
 
-    @MainThreadOnly
-    fun checkEffectsActiveCards(
-        trigger: GameSituations,
-        triggerInformation: TriggerInformation = TriggerInformation(controller = this),
-        exclude: Card? = triggerInformation.sourceCard
-    ): Timeline {
-        FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
-        return Timeline.timeline {
-            createdCards
-                .filter { it.inGame || it.inHand(this@OldGameController) }
-                .filter { it !== exclude }
-//                .map { it.checkEffects(trigger, triggerInformation, this@OldGameController) }
-//                .collectTimeline()
-//                .let { include(it) }
-//            trigger
-//                .cascadeTriggers
-//                .map { checkEffectsActiveCards(trigger, triggerInformation) }
-//                .collectTimeline()
-//                .let { include(it) }
-        }
-    }
+//    @MainThreadOnly
+//    fun checkEffectsActiveCards(
+//        trigger: GameSituations,
+//        triggerInformation: TriggerInformation = TriggerInformation(controller = this),
+//        exclude: Card? = triggerInformation.sourceCard
+//    ): Timeline {
+//        FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
+//        return Timeline.timeline {
+//            createdCards
+//                .filter { it.inGame || it.inHand(this@OldGameController) }
+//                .filter { it !== exclude }
+////                .map { it.checkEffects(trigger, triggerInformation, this@OldGameController) }
+////                .collectTimeline()
+////                .let { include(it) }
+////            trigger
+////                .cascadeTriggers
+////                .map { checkEffectsActiveCards(trigger, triggerInformation) }
+////                .collectTimeline()
+////                .let { include(it) }
+//        }
+//    }
 
     @MainThreadOnly
     fun checkStatusEffectsAfterTurn(): Timeline = enemyArea
@@ -1306,7 +1305,7 @@ class OldGameController(
         if (!card.inGame) return
         val cost = card.rightClickCost ?: return
         if (!tryPay(cost, card.actor)) return
-        appendMainTimeline(checkEffectsSingleCard(GameSituations.ON_RIGHT_CLICK, card))
+//        appendMainTimeline(checkEffectsSingleCard(GameSituations.ON_RIGHT_CLICK, card))
     }
 
     /**
