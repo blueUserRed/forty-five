@@ -37,23 +37,23 @@ interface StatusEffectDisplay : StyledActor {
     fun displayEffect(effect: StatusEffect) {
         val remainingLabel = CustomLabel(screen, effect.getDisplayText(), Label.LabelStyle(font, fontColor), true)
         remainingLabel.setFontScale(fontScale)
-        effect.icon.scaleX *= iconScale
-        effect.icon.scaleY *= iconScale
+//        effect.icon.scaleX *= iconScale
+//        effect.icon.scaleY *= iconScale
 
-        effect.icon.detailWidget = DetailWidget.SimpleBigDetailActor(
-            screen,
-            DetailDescriptionHandler.allTextEffects.value.map {
-                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)}){
-            DetailDescriptionHandler.descriptions[effect.name]?.second ?: run {
-                FortyFiveLogger.warn("StatusEffectDisplay", "No description for effect ${effect.name}")
-                ""
-            }
-        }
-        val group = CustomHorizontalGroup(screen)
-        group.addActor(effect.icon)
-        group.addActor(remainingLabel)
-        actor.addActor(group)
-        effects.add(Triple(effect, group, remainingLabel))
+//        effect.icon.detailWidget = DetailWidget.SimpleBigDetailActor(
+//            screen,
+//            DetailDescriptionHandler.allTextEffects.value.map {
+//                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)}){
+//            DetailDescriptionHandler.descriptions[effect.name]?.second ?: run {
+//                FortyFiveLogger.warn("StatusEffectDisplay", "No description for effect ${effect.name}")
+//                ""
+//            }
+//        }
+//        val group = CustomHorizontalGroup(screen)
+//        group.addActor(effect.icon)
+//        group.addActor(remainingLabel)
+//        actor.addActor(group)
+//        effects.add(Triple(effect, group, remainingLabel))
     }
 
     /**

@@ -14,30 +14,17 @@ import kotlin.math.floor
 import kotlin.math.min
 
 abstract class StatusEffect(
-    private val iconHandle: ResourceHandle,
+    val iconHandle: ResourceHandle,
     private val iconScale: Float
 ) {
 
     abstract val name: String
-
-    lateinit var icon: CustomImageActor
-        private set
-
-    private var isIconInitialised: Boolean = false
 
     protected lateinit var controller: GameController
 
     abstract val effectType: StatusEffectType
 
     open val blocksStatusEffects: List<StatusEffectType> = listOf()
-
-    fun initIcon(gameController: GameController) {
-        icon = CustomImageActor(iconHandle, gameController.screen)
-        icon.setScale(iconScale)
-        icon.reportDimensionsWithScaling = true
-        icon.ignoreScalingWhenDrawing = true
-        isIconInitialised = true
-    }
 
     open fun start(controller: GameController) {
         this.controller = controller

@@ -1,35 +1,18 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.animation.AnimationDrawable
-import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
-import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
-import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter
-import com.fourinachamber.fortyfive.screen.gameWidgets.VerticalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.customActor.findAnimationSpawner
 import com.fourinachamber.fortyfive.utils.*
-import dev.lyze.flexbox.FlexBox
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import onj.value.OnjValue
 import java.lang.Integer.max
-import kotlin.math.sin
 
 data class EnemyPrototype(
     val name: String,
@@ -103,32 +86,31 @@ class Enemy(
     val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
-    var additionalDamage: Int = 0
-        private set
-    var additionDamageEffect: StatusEffect? = null
-        private set
-
     fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
-        additionalDamage = 0
-        additionDamageEffect = null
         val nextAction = brain.chooseNewAction(controller, this, difficulty, otherActions)
         if (
             nextAction !is NextEnemyAction.ShownEnemyAction ||
             nextAction.action.prototype !is EnemyActionPrototype.DamagePlayer
         ) {
+            val event = EnemyActionChangedEvent(nextAction, 0, null)
+            enemyEvents.fire(event)
             return nextAction
         }
         val additionalDmgActions = controller
             .playerStatusEffects
             .zip { it.additionalEnemyDamage(nextAction.action.directDamageDealt, StatusEffectTarget.PlayerTarget) }
             .filter { it.second != 0 }
-        if (additionalDmgActions.isEmpty()) return nextAction
+        if (additionalDmgActions.isEmpty()) {
+            val event = EnemyActionChangedEvent(nextAction, 0, null)
+            enemyEvents.fire(event)
+            return nextAction
+        }
         if (additionalDmgActions.size > 1) {
             FortyFiveLogger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
         }
         val (action, additionalDamage) = additionalDmgActions.first()
-        this.additionalDamage = additionalDamage
-        this.additionDamageEffect = action
+        val event = EnemyActionChangedEvent(nextAction, additionalDamage, action.iconHandle)
+        enemyEvents.fire(event)
         return nextAction
     }
 
@@ -152,7 +134,6 @@ class Enemy(
             return
         }
         effect.start(gameController)
-        effect.initIcon(gameController)
         _statusEffects.add(effect)
 //        actor.displayStatusEffect(effect)
     }
@@ -249,6 +230,11 @@ class Enemy(
     }
 
     data object HealthChangedEvent
+    data class EnemyActionChangedEvent(
+        val nextAction: NextEnemyAction,
+        val additionalDamage: Int,
+        val additionalDamageIcon: String?
+    )
 
     companion object {
 

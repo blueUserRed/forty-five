@@ -53,8 +53,8 @@ class GameDirector(private val controller: GameController) {
             val action = enemy.resolveAction(controller, difficulty)
             action?.let {
 //                include(enemy.actor.enemyActionAnimationTimeline(it, controller))
-                val data = EnemyAction.ExecutionData(newDamage = it.directDamageDealt + enemy.additionalDamage)
-                include(it.getTimeline(data))
+//                val data = EnemyAction.ExecutionData(newDamage = it.directDamageDealt + enemy.additionalDamage)
+//                include(it.getTimeline(data))
             }
             action {
 //                enemy.actor.setupForAction(NextEnemyAction.None)

@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -30,8 +31,6 @@ class NewGameController(
     override val screen: OnjScreen,
     val gameEvents: EventPipeline
 ) : ScreenController(), GameController, ResourceBorrower {
-
-    private val gameDirector = GameDirector(this)
 
     override val gameRenderPipeline: GameRenderPipeline = GameRenderPipeline(screen)
 
@@ -133,6 +132,7 @@ class NewGameController(
         appendMainTimeline(Timeline.timeline {
             delay(300)
             updateReserves(Config.baseReserves)
+            action { chooseEnemyActions() }
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
                 val startTriggerInformation = TriggerInformation(controller = this@NewGameController)
@@ -595,7 +595,11 @@ class NewGameController(
     }
 
     override fun playGameAnimation(anim: GameAnimation) {
-        TODO("Not yet implemented")
+        dispatchAnimTimeline(Timeline.timeline {
+            action { anim.start() }
+            delayUntil { anim.update(); anim.isFinished() }
+            action { anim.end() }
+        })
     }
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
@@ -667,6 +671,7 @@ class NewGameController(
             include(bannerAnimationTimeline(true))
 
             action {
+                chooseEnemyActions()
                 SoundPlayer.situation("turn_begin", screen)
                 updateReserves(Config.baseReserves, revolver)
             }
@@ -681,6 +686,14 @@ class NewGameController(
             }
 
         })
+    }
+
+    private fun chooseEnemyActions() {
+        val otherActions = mutableListOf<NextEnemyAction>()
+        activeEnemies.forEach { enemy ->
+            val action = enemy.chooseNewAction(this, 1.0, otherActions)
+            otherActions.add(action)
+        }
     }
 
     override fun appendMainTimeline(timeline: Timeline) {

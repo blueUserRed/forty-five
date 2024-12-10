@@ -1207,7 +1207,6 @@ class OldGameController(
                     return@action
                 }
             effect.start(this@OldGameController)
-            effect.initIcon(this@OldGameController)
             _playerStatusEffects.add(effect)
             statusEffectDisplay.displayEffect(effect)
             screen.enterState(showStatusEffectsState)

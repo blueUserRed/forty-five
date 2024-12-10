@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
 import com.fourinachamber.fortyfive.keyInput.KeyActionFactory
 import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
@@ -29,12 +30,15 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenCont
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
+import com.fourinachamber.fortyfive.screen.general.AdvancedText
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
-import com.fourinachamber.fortyfive.screen.general.onFocus
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -145,9 +149,56 @@ class GameScreen : ScreenCreator() {
                 gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
             }
 
-            group {
+            box {
+
+                fun showAction(
+                    text: String,
+                    iconHandle: String,
+                    additionalDamage: String? = null,
+                    additionalDamageIcon: String? = null
+                ) {
+                    image {
+                        backgroundHandle = iconHandle
+                        width = 60f
+                        height = 60f
+                    }
+                    group {
+                        width = 60f
+                        height = 40f
+                        backgroundHandle = "wood_box"
+                        val newText = if (additionalDamageIcon != null) {
+                            "$text + ?1$additionalDamage?1 §§${additionalDamageIcon}§§"
+                        } else {
+                            text
+                        }
+                        advancedText("roadgeek", Color.FortyWhite, 0.9f) {
+                            val redEffect = AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red)
+                            relativeHeight(58f)
+                            setRawText(newText, listOf(redEffect))
+                            centerX()
+                            centerY()
+                        }
+                    }
+                }
+
                 relativeWidth(100f)
+                flexDirection = FlexDirection.ROW
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
                 height = enemyHeight * 0.15f
+                enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->
+                    this.clear()
+                    when (val nextAction = event.nextAction) {
+                        is NextEnemyAction.ShownEnemyAction -> showAction(
+                            nextAction.action.indicatorText ?: "",
+                            nextAction.action.prototype.iconHandle,
+                            event.additionalDamage.toString(),
+                            event.additionalDamageIcon
+                        )
+                        is NextEnemyAction.None -> {}
+                        is NextEnemyAction.HiddenEnemyAction -> showAction("?",  "enemy_action_unknown")
+                    }
+                }
             }
 
             group {
@@ -299,6 +350,7 @@ class GameScreen : ScreenCreator() {
             )
             onSelect {
                 screen.deselectActor(this)
+                screen.focusedActor = null
                 gameEvents.fire(NewGameController.Events.Shoot)
             }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
@@ -383,6 +435,8 @@ class GameScreen : ScreenCreator() {
             group = "holster_button"
             onSelect {
                 screen.deselectActor(this)
+                screen.focusedActor = null
+                gameEvents.fire(NewGameController.Events.Holster)
             }
             styles(
                 normal = {
@@ -394,7 +448,6 @@ class GameScreen : ScreenCreator() {
                     xAnim.state("hover")
                 },
             )
-            onSelect { gameEvents.fire(NewGameController.Events.Holster) }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
