@@ -73,6 +73,8 @@ class Enemy(
 
     private val gameController = FortyFive.currentGame!!
 
+    val enemyEvents: EventPipeline = EventPipeline()
+
     /**
      * the current lives of this enemy
      */
@@ -84,6 +86,7 @@ class Enemy(
             if (oldValue > 0 && value <= 0) {
                 gameController.enemyDefeated(this)
             }
+            enemyEvents.fire(HealthChangedEvent)
         }
 
     val isDefeated: Boolean
@@ -244,6 +247,8 @@ class Enemy(
             { remaining != 0 && !triggeredByStatusEffect }
         )
     }
+
+    data object HealthChangedEvent
 
     companion object {
 

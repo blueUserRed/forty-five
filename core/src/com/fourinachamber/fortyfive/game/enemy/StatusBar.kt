@@ -7,14 +7,12 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.PolygonRegion
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
-import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.Promise
@@ -23,7 +21,6 @@ import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
 import com.fourinachamber.fortyfive.utils.epsilonEquals
 import kotlin.math.abs
-import kotlin.math.max
 
 class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(screen), ResourceBorrower {
 
@@ -45,10 +42,11 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     init {
         screen.onEnd { polygonBatch.dispose() }
         hpChanged()
+        enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { hpChanged() }
     }
 
     fun hpChanged() {
-        val newPercent = enemy.health.toFloat() / enemy.currentHealth.toFloat()
+        val newPercent = enemy.currentHealth.toFloat() / enemy.health.toFloat()
         targetPercent = newPercent
     }
 
@@ -113,10 +111,9 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
 
     private fun updateHpBar() {
         val diff = abs(currentDisplayPercent - targetPercent)
-        val moveDist = hpBarAnimationSpeed * Gdx.graphics.deltaTime * diff * diff * diff
-        val equalRange = (currentDisplayPercent - 0.02)..(currentDisplayPercent + 0.02)
+        val moveDist = hpBarAnimationSpeed * Gdx.graphics.deltaTime * diff
         when {
-            targetPercent.epsilonEquals(currentDisplayPercent, epsilon = 0.02f) -> currentDisplayPercent = targetPercent
+            targetPercent.epsilonEquals(currentDisplayPercent, epsilon = 0.001f) -> currentDisplayPercent = targetPercent
             targetPercent < currentDisplayPercent -> currentDisplayPercent -= moveDist.toFloat()
             targetPercent > currentDisplayPercent -> currentDisplayPercent += moveDist.toFloat()
         }
@@ -140,7 +137,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     }
 
     companion object {
-        const val hpBarAnimationSpeed = 3.0
+        const val hpBarAnimationSpeed = 5.0
     }
 
 }

@@ -300,22 +300,27 @@ class Card(
     /**
      * called by gameScreenController when the card was shot
      */
-    fun afterShot(controller: GameController) {
-        if (protectingModifiers.isNotEmpty()) {
-            val effect = protectingModifiers.first()
-            val newEffect = effect.copy(second = effect.second - 1)
-            if (newEffect.second == 0) {
-                protectingModifiers.removeFirst()
-            } else {
-                protectingModifiers[0] = newEffect
+    fun afterShot(
+        controller: GameController,
+        putCardInTheHand: (Card) -> Timeline,
+        putCardInTheStack: (Card) -> Timeline
+    ): Timeline = Timeline.timeline { skipping { skip ->
+        action {
+            if (protectingModifiers.isNotEmpty()) {
+                val effect = protectingModifiers.first()
+                val newEffect = effect.copy(second = effect.second - 1)
+                if (newEffect.second == 0) {
+                    protectingModifiers.removeFirst()
+                } else {
+                    protectingModifiers[0] = newEffect
+                }
+                modifiersChanged()
+                skip()
             }
-            modifiersChanged()
-//            return
         }
-//        if (!shouldRemoveAfterShot(controller)) return
-//        controller.revolver.removeCard(this)
-//
-    }
+        if (isUndead) include(putCardInTheHand(this@Card))
+        else include(putCardInTheStack(this@Card))
+    } }
 
     fun beforeShot() {
     }
@@ -389,7 +394,9 @@ class Card(
             source = "disintegration effect",
             validityChecker = { inGame },
             transformers = listOf(
-                Trigger.GameSituation(GameSituations.ON_REVOLVER_ROTATION, true) to rotationTransformer
+                Trigger { situation, card, info, controller ->
+                    situation is GameSituation.RevolverRotation
+                } to rotationTransformer
             )
         )
         addModifier(modifier)

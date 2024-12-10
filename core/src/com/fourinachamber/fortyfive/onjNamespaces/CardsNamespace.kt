@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.card.Trigger.Companion.triggerForSituation
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
@@ -191,7 +192,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean]")
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, string]")
     fun zoneChange(oldZone: OnjZone, newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
             val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
@@ -204,8 +205,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun shot(): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.OnShot> { situation, card, info, controller -> situation.card === card }
+    )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
     fun enterZone(newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
             val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
@@ -216,36 +221,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
         }
     )
-
-//    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean]")
-//    fun leaveZone(oldZone: OnjZone, anyCardTriggers: OnjBoolean): OnjTrigger = OnjTrigger(Trigger.ZoneChange(
-//        oldZone.value,
-//        null,
-//        anyCardTriggers.value
-//    ))
-
-    private inline fun <reified T : GameSituation> triggerForSituation(
-        noinline block: (
-            gameSituation: T,
-            card: Card,
-            triggerInformation: TriggerInformation,
-            controller: GameController
-        ) -> Boolean,
-    ): Trigger = triggerForSituation(block, T::class)
-
-    private fun <T : GameSituation> triggerForSituation(
-        block: (
-            gameSituation: T,
-            card: Card,
-            triggerInformation: TriggerInformation,
-            controller: GameController
-        ) -> Boolean,
-        situation: KClass<T>
-    ): Trigger = Trigger { gameSituation, card, triggerInformation, controller ->
-        if (!situation.isInstance(gameSituation)) return@Trigger false
-        @Suppress("UNCHECKED_CAST")
-        block(gameSituation as T, card, triggerInformation, controller)
-    }
 
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {

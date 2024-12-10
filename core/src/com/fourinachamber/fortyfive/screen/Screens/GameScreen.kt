@@ -297,7 +297,10 @@ class GameScreen : ScreenCreator() {
                     xAnim.state("hover")
                 },
             )
-            onSelect { gameEvents.fire(NewGameController.Events.Shoot) }
+            onSelect {
+                screen.deselectActor(this)
+                gameEvents.fire(NewGameController.Events.Shoot)
+            }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
@@ -330,6 +333,9 @@ class GameScreen : ScreenCreator() {
             isSelectable = false
             isFocusable = false
             group = "pass_button"
+            onSelect {
+                screen.deselectActor(this)
+            }
             styles(
                 normal = {
                     backgroundHandle = "pass_button_texture"
@@ -375,6 +381,9 @@ class GameScreen : ScreenCreator() {
             isSelectable = true
             isFocusable = true
             group = "holster_button"
+            onSelect {
+                screen.deselectActor(this)
+            }
             styles(
                 normal = {
                     backgroundHandle = "end_turn_button_texture"
@@ -418,6 +427,9 @@ class GameScreen : ScreenCreator() {
             isSelectable = false
             isFocusable = false
             group = "parry_button"
+            onSelect {
+                screen.deselectActor(this)
+            }
             styles(
                 normal = {
                     backgroundHandle = "parry_button_texture"
@@ -486,6 +498,10 @@ class GameScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
+                    groups = listOf("shoot_button", "holster_button", "pass_button", "parry_button")
+                ),
+                SelectionTransition(
+                    TransitionType.Seamless,
                     groups = listOf(NewCardHand.cardFocusGroupName, RevolverSlot.revolverSlotFocusGroupName, "enemies")
                 ),
                 SelectionTransition(
@@ -538,7 +554,6 @@ class GameScreen : ScreenCreator() {
             x += neededWidth
             y -= 30f
         }
-        gameEvents.fire(NewGameController.Events.EnemySelected(event.enemies.first()))
     }
 
     private fun reservesChangedAnim(event: NewGameController.Events.ReservesChanged) {

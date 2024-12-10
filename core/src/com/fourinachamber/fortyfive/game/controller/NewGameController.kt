@@ -1,13 +1,16 @@
 package com.fourinachamber.fortyfive.game.controller
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -34,7 +37,7 @@ class NewGameController(
 
     override val playerLost: Boolean = false
 
-    override var curReserves: Int = Config.baseReserves
+    override var curReserves: Int = 0
 
     override val isUIFrozen: Boolean
         get() = TODO("Not yet implemented")
@@ -45,8 +48,9 @@ class NewGameController(
     override var turnCounter: Int = 0
         private set
 
+    private val _playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
     override val playerStatusEffects: List<StatusEffect>
-        get() = TODO("Not yet implemented")
+        get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
         get() = TODO("Not yet implemented")
@@ -58,8 +62,8 @@ class NewGameController(
     override val encounterModifiers: List<EncounterModifier>
         get() = _encounterModifiers
 
-    override val curPlayerLives: Int
-        get() = TODO("Not yet implemented")
+    override var curPlayerLives: Int = SaveState.playerLives
+        private set
 
     override val activeEnemies: List<Enemy>
         get() = allEnemies.filter { !it.isDefeated }
@@ -114,18 +118,21 @@ class NewGameController(
 
         encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
             ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
-        allEnemies = encounter.createdEnemies
-        gameEvents.fire(Events.SetupEnemies(allEnemies))
 
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.Shoot> { shoot() }
         gameEvents.watchFor<Events.Holster> { endTurn() }
         bindGameEventListeners()
 
+        allEnemies = encounter.createdEnemies
+        gameEvents.fire(Events.SetupEnemies(allEnemies))
+        gameEvents.fire(Events.EnemySelected(allEnemies.first()))
+
         initCards()
         updateReserves(Config.baseReserves)
         appendMainTimeline(Timeline.timeline {
             delay(300)
+            updateReserves(Config.baseReserves)
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
                 val startTriggerInformation = TriggerInformation(controller = this@NewGameController)
@@ -152,15 +159,15 @@ class NewGameController(
             }
         }
         gameEvents.watchFor<Events.CardsDrawnEvent> { event ->
-            val trigger = Trigger.CardsDrawn(event.amount..event.amount, event.isSpecial, event.isFromBottom)
+            val situation = GameSituation.CardsDrawn(event.amount, event.isSpecial, event.isFromBottom)
             event.append {
-                include(checkTrigger(trigger, event.triggerInformation))
+                include(checkTrigger(situation, event.triggerInformation))
             }
         }
         gameEvents.watchFor<Events.EndTurnEvent> { event ->
-            val trigger = Trigger.GameSituation(GameSituations.ON_ROUND_END, false)
+            val situation = GameSituation.TurnEnd
             event.append {
-                include(checkTrigger(trigger, event.triggerInformation))
+                include(checkTrigger(situation, event.triggerInformation))
                 encounterModifiers
                     .mapNotNull { it.executeOnEndTurn() }
                     .collectTimeline()
@@ -168,9 +175,9 @@ class NewGameController(
             }
         }
         gameEvents.watchFor<Events.TurnBeginEvent> { event ->
-            val trigger = Trigger.GameSituation(GameSituations.ON_ROUND_END, false)
+            val situation = GameSituation.TurnBegin
             event.append {
-                include(checkTrigger(trigger, event.triggerInformation))
+                include(checkTrigger(situation, event.triggerInformation))
                 encounterModifiers
                     .mapNotNull { it.executeOnPlayerTurnStart(this@NewGameController) }
                     .collectTimeline()
@@ -178,16 +185,9 @@ class NewGameController(
             }
         }
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
-            val rotationTrigger = Trigger.GameSituation(GameSituations.ON_REVOLVER_ROTATION, false)
+            val situation = GameSituation.RevolverRotation(event.rotation)
             event.append {
-                include(checkTrigger(rotationTrigger, event.triggerInformation))
-                revolver
-                    .slots
-                    .filter { it.card != null }
-                    .map { Trigger.CardRotatedInSlot(it.num, false) }
-                    .map { checkTrigger(it, event.triggerInformation) }
-                    .collectTimeline()
-                    .let { include(it) }
+                include(checkTrigger(situation, event.triggerInformation))
                 activeEnemies
                     .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
                     .collectTimeline()
@@ -198,7 +198,7 @@ class NewGameController(
     }
 
     private fun checkTrigger(situation: GameSituation, triggerInformation: TriggerInformation): Timeline = createdCards
-        .map { it.checkEffects(trigger, triggerInformation, this) }
+        .map { it.checkEffects(situation, triggerInformation, this) }
         .collectTimeline()
 
     private fun updateReserves(newReserves: Int, sourceActor: Actor? = null) {
@@ -341,15 +341,27 @@ class NewGameController(
 
     private fun drawCardTimeline(fromBottom: Boolean, sourceCard: Card?): Timeline = Timeline.timeline {
         var card: Card? = null
-        var orbAnimationTimeline: Timeline? = null
         action {
             card = when {
                 _cardStack.isEmpty() -> defaultBullet.create(screen)
                 fromBottom -> _cardStack.removeLast()
                 else -> _cardStack.removeFirst()
             }
-            cardHand.addCard(card)
             cardsDrawn++
+        }
+        later {
+            include(putCardFromStackInHandTimeline(card!!, sourceCard))
+        }
+    }
+
+    override fun putCardFromStackInHandTimeline(
+        card: Card,
+        source: Card?
+    ): Timeline = Timeline.timeline {
+        var orbAnimationTimeline: Timeline? = null
+        action {
+            _cardStack.remove(card)
+            cardHand.addCard(card)
             card.actor.alpha = 0f
             val event = Events.PlayCardOrbAnimation(card.actor)
             gameEvents.fire(event)
@@ -358,12 +370,12 @@ class NewGameController(
         includeLater({ Timeline.timeline {
             include(orbAnimationTimeline!!)
             delay(250)
-            action { card!!.actor.alpha = 1f }
-            include(card!!.actor.spawnAnimation())
+            action { card.actor.alpha = 1f }
+            include(card.actor.spawnAnimation())
         } }, { orbAnimationTimeline != null })
         includeLater({
-            val info = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
-            val event = Events.CardChangedZoneEvent(card!!, Zone.DECK, Zone.HAND, info)
+            val info = TriggerInformation(controller = this@NewGameController, sourceCard = source)
+            val event = Events.CardChangedZoneEvent(card, Zone.DECK, Zone.HAND, info)
             gameEvents.fire(event)
             event.createTimeline()
         })
@@ -383,22 +395,79 @@ class NewGameController(
         damage: Int,
         triggeredByStatusEffect: Boolean,
         isPiercing: Boolean
-    ): Timeline {
-        TODO("Not yet implemented")
+    ): Timeline = Timeline.timeline { later {
+        val newDamage = if (isPiercing) {
+            damage
+        } else {
+            _playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
+        }
+        if (newDamage != damage) include(shieldAnimationTimeline())
+        if (newDamage == 0) return@later
+        action {
+            dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
+            dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen).wrap())
+            curPlayerLives -= newDamage
+            FortyFiveLogger.debug(
+                logTag,
+                "player got damaged; damage = $newDamage; curPlayerLives = $curPlayerLives"
+            )
+        }
+        includeLater(
+            { playerDeathTimeline() },
+            { curPlayerLives <= 0 }
+        )
+        includeLater(
+            {
+                _playerStatusEffects
+                    .mapNotNull { it.executeAfterDamage(newDamage, StatusEffectTarget.PlayerTarget) }
+                    .collectTimeline()
+            },
+            { !triggeredByStatusEffect && newDamage > 0}
+        )
+    } }
+
+    private val shieldIconPromise: Promise<Drawable> =
+        ResourceManager.request(this, this.screen, "shield_icon_large")
+
+    private val shieldShaderPromise: Promise<BetterShader> =
+        ResourceManager.request(this, this.screen, "glow_shader_shield")
+
+    private fun shieldAnimationTimeline(): Timeline {
+        val shieldIcon = shieldIconPromise.getOrNull() ?: return Timeline()
+        val shieldShader = shieldShaderPromise.getOrNull() ?: return Timeline()
+        return Timeline.timeline {
+            val bannerAnim = BannerAnimation(
+                shieldIcon,
+                screen,
+                1_000,
+                150,
+                0.3f,
+                0.5f,
+                interpolation = Interpolation.pow2In,
+                customShader = shieldShader
+            ).asTimeline(this@NewGameController).asAction()
+            val postProcessorAction = Timeline.timeline {
+                delay(100)
+                include(gameRenderPipeline.getScreenShakePopoutTimeline())
+                delay(50)
+                action { SoundPlayer.situation("shield_anim", screen) }
+            }.asAction()
+            parallelActions(bannerAnim, postProcessorAction)
+        }
     }
 
-    override fun playerDeathTimeline(): Timeline {
-        TODO("Not yet implemented")
+    override fun playerDeathTimeline(): Timeline = Timeline.timeline {
+        action {
+            FortyFiveLogger.debug(logTag, "player lost")
+            animTimelines.forEach(Timeline::stopTimeline)
+        }
+        include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
+        action { mainTimeline.stopTimeline() }
+        delay(500)
+        action { FortyFive.newRun(true) }
     }
 
     override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline {
-        TODO("Not yet implemented")
-    }
-
-    override fun putCardFromStackInHandTimeline(
-        card: Card,
-        source: Card?
-    ): Timeline {
         TODO("Not yet implemented")
     }
 
@@ -418,6 +487,21 @@ class NewGameController(
     }
 
     override fun shoot() {
+
+        fun putCardBackInHand(card: Card): Timeline = Timeline.timeline {
+            action {
+                revolver.removeCard(card)
+                cardHand.addCard(card)
+            }
+        }
+
+        fun putCardInTheStack(card: Card): Timeline = Timeline.timeline {
+            action {
+                revolver.removeCard(card)
+                _cardStack.add(card)
+            }
+        }
+
         if (_encounterModifiers.any { !it.canShootRevolver(this) }) return
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
@@ -453,12 +537,14 @@ class NewGameController(
                     .let { include(it) }
                 // Not handled via event because things like encounter modifiers or
                 // status effects shouldn't hook into here
-                // Also only the shot bullet is allowed to trigger, other bullets can only trigger after
-                include(checkTrigger(Trigger.OnShot, triggerInfo))
-                action {
-                    revolver.removeCard(card)
-                }
+                include(checkTrigger(GameSituation.OnShot(card), triggerInfo))
+                include(card.afterShot(this@NewGameController, ::putCardBackInHand, ::putCardInTheStack))
             }
+            include(rotateRevolverTimeline(rotationDirection))
+            includeLater(
+                { damagePlayerTimeline(Config.shotEmptyDamage) },
+                { cardToShoot == null }
+            )
 
             if (cardToShoot != null) later {
                 val event = Events.AfterShotEvent(cardToShoot, triggerInfo)
@@ -634,6 +720,7 @@ class NewGameController(
         const val hardMaxCards = 20
         const val cardsToDrawInFirstRound = 6
         const val cardsToDraw = 2
+        const val shotEmptyDamage = 5
     }
 
     object Events {

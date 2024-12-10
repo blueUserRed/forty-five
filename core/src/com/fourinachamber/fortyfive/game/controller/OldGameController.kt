@@ -671,7 +671,7 @@ class OldGameController(
                             putCardAtBottomOfStack(parryCard)
                         }
                     }
-                    parryCard.afterShot(this@OldGameController)
+//                    parryCard.afterShot(this@OldGameController)
                 }
                 include(rotateRevolverTimeline(parryCard.rotationDirection))
                 if (remainingDamage!! > 0) {
@@ -825,7 +825,7 @@ class OldGameController(
                         revolver.removeCard(cardToShoot)
                     }
                     if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
-                    cardToShoot.afterShot(this@OldGameController)
+//                    cardToShoot.afterShot(this@OldGameController)
                 }
             }
             include(rotateRevolverTimeline(rotationDirection))

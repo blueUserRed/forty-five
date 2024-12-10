@@ -63,13 +63,13 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: enterZone(zone.revolver, false),
+                trigger: enterZone(zone.revolver, "onlySelf"),
                 effect: draw(1#val)
             },
-//            {
-//                trigger: trigger.shot,
-//                effect: draw(1#val)
-//            }
+            {
+                trigger: shot(),
+                effect: draw(1#val)
+            }
         ],
         cost: 1,
         tags: ["pool0", "rarity2"],

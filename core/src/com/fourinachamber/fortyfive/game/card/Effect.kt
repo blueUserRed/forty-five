@@ -6,6 +6,7 @@ import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.*
+import kotlin.reflect.KClass
 
 /**
  * represents an effect a card can have
@@ -660,6 +661,20 @@ fun interface Trigger {
 
     companion object {
         val Never = Trigger { _, _, _, _ -> false }
+
+        inline fun <reified T : GameSituation> triggerForSituation(
+            crossinline block: (
+                gameSituation: T,
+                card: Card,
+                triggerInformation: TriggerInformation,
+                controller: GameController
+            ) -> Boolean = { _, _, _, _, -> true },
+        ): Trigger = Trigger { gameSituation, card, triggerInformation, controller ->
+            if (!T::class.isInstance(gameSituation)) return@Trigger false
+            @Suppress("UNCHECKED_CAST")
+            block(gameSituation as T, card, triggerInformation, controller)
+        }
+
     }
 }
 
@@ -671,7 +686,16 @@ sealed class GameSituation {
         val newZone: NewGameController.Zone
     ) : GameSituation()
 
+    class RevolverRotation(
+        val rotation: com.fourinachamber.fortyfive.game.controller.RevolverRotation
+    ) : GameSituation()
 
+    class CardsDrawn(val amount: Int, val isSpecial: Boolean, val isFromBottom: Boolean) : GameSituation()
+
+    data object TurnEnd : GameSituation()
+    data object TurnBegin : GameSituation()
+
+    class OnShot(val card: Card) : GameSituation()
 
 }
 

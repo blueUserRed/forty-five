@@ -121,7 +121,7 @@ open class OnjScreen(
 
     private var selectableDirty: Boolean = true
 
-    private fun deselectActor(actor: Actor) {
+    fun deselectActor(actor: Actor) {
         val oldList = _selectedActors.toList()
         if (_selectedActors.remove(actor))
             oldList.reversed()
