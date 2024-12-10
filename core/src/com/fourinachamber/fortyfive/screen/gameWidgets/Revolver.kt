@@ -19,7 +19,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
@@ -336,12 +335,12 @@ class RevolverSlot(
     size: Float,
     screen: OnjScreen,
     private val animationDuration: Float
-) : CustomImageActor(drawableHandle, screen), AnimationActor, KeySelectableActor {
+) : CustomImageActor(drawableHandle, screen), KeySelectableActor {
 
     override var isSelected: Boolean = false
     override var isSelectable: Boolean = false
 
-    override var inAnimation: Boolean = false
+    var inAnimation: Boolean = false
 
     /**
      * if set to a card, the card will be moved along with the spin animation
@@ -387,7 +386,7 @@ class RevolverSlot(
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
-        if (card?.actor?.inAnimation ?: true) return
+//        if (card?.actor?.inAnimation ?: true) return
         card?.actor?.setPosition(cardPosition())
     }
 

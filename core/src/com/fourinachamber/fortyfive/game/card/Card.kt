@@ -445,9 +445,6 @@ class Card(
             val showAnimation = !effects.all { it.first.data.isHidden }
             val doAnim = inZone(Zone.REVOLVER, Zone.HAND, Zone.AFTERLIVE)
             action {
-                actor.inAnimation = true
-            }
-            action {
                 if (isOnShot || !showAnimation || !doAnim) return@action
                 controller.dispatchAnimTimeline(Timeline.timeline {
                     delay(210)
@@ -466,7 +463,6 @@ class Card(
             )
             action {
                 actor.setScale(1f)
-                actor.inAnimation = false
             }
         }
     }
@@ -719,10 +715,7 @@ class CardActor(
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable, AnimationActor, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DragAndDroppableActor {
-
-
-    override var inAnimation: Boolean = false
+    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DragAndDroppableActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,

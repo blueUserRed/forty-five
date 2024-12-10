@@ -33,6 +33,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.AdvancedText
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.onSelect
@@ -182,6 +183,11 @@ class GameScreen : ScreenCreator() {
                 }
 
                 relativeWidth(100f)
+                animateUpAndDownSinus(
+                    method = AnimatedActor.AnimationMethod.DRAW_OFFSET,
+                    frequency = 0.3f,
+                    amplitude = 6f
+                )
                 flexDirection = FlexDirection.ROW
                 horizontalAlign = CustomAlign.CENTER
                 verticalAlign = CustomAlign.CENTER
@@ -222,6 +228,14 @@ class GameScreen : ScreenCreator() {
                     centerY()
                     relativeWidth(60f)
                     onLayoutAndNow { height = width }
+                    animateRotationSinus(
+                        amplitude = Math.PI.toFloat() * 1.8f,
+                    )
+                    animateUpAndDownSinus(
+                        method = AnimatedActor.AnimationMethod.DRAW_OFFSET,
+                        amplitude = 14f,
+                        frequency = 0.4f
+                    )
                     gameEvents.watchFor<NewGameController.Events.EnemySelected> { (e) ->
                         enemySelected = e === enemy
                         isVisible = enemySelected
@@ -277,6 +291,9 @@ class GameScreen : ScreenCreator() {
             width = 120f
             height = 120f
             reservesAnimationTarget = this
+            animateRotationSinus(
+                frequency = 0.15f
+            )
 
             image {
                 backgroundHandle = "reserves_texture"
@@ -303,6 +320,10 @@ class GameScreen : ScreenCreator() {
             width = 120f
             height = 120f
             deckAnimationTarget = this
+
+            animateRotationSinus(
+                frequency = 0.15f
+            )
 
             image {
                 backgroundHandle = "deck_icon"

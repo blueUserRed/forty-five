@@ -2,38 +2,30 @@ package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter.TextAnimationConfig
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.AnimationSpawner
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
 
 class TextEffectEmitter(
     private val animationConfigs: Map<String, TextAnimationConfig>,
+    private val actor: Actor,
     private val screen: OnjScreen
-) : Widget(), StyledActor, AnimationSpawner {
-
-    override val actor: Actor = this
-    override var styleManager: StyleManager? = null
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
+) : AnimatedActor.NeedsUpdate {
 
     private val runningAnimations: MutableList<TextAnimation> = mutableListOf()
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
+    override fun update() {
         val now = TimeUtils.millis()
         val iterator = runningAnimations.iterator()
         while (iterator.hasNext()) {
@@ -51,10 +43,10 @@ class TextEffectEmitter(
         val config = findConfig(configName)
         val label = CustomLabel(screen, text, Label.LabelStyle(config.font, config.fontColor), true)
         label.setFontScale(config.fontScale)
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
         label.setPosition(
-            x + (-config.spawnVarianceX..config.spawnVarianceX).random(),
-            y + (-config.spawnVarianceY..config.spawnVarianceY).random()
+            x + actor.width / 2 + (-config.spawnVarianceX..config.spawnVarianceX).random(),
+            y + actor.height / 2 + (-config.spawnVarianceY..config.spawnVarianceY).random()
         )
         val animation = TextAnimation(
             text,
@@ -71,7 +63,7 @@ class TextEffectEmitter(
         val config = overrideConfig ?: when {
             num < 0 -> "number_negative"
             num > 0 -> "number_positive"
-            else -> "number"
+            else -> "number_neutral"
         }
         playAnimation(num.toString(), config)
     }
@@ -81,10 +73,6 @@ class TextEffectEmitter(
             throw RuntimeException("attempted to play animation on TextEffectEmitter with no config defined")
         }
         return name?.let { animationConfigs[it] } ?: animationConfigs["default"] ?: animationConfigs.values.first()
-    }
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
     }
 
     private data class TextAnimation(
@@ -107,6 +95,40 @@ class TextEffectEmitter(
 
     companion object {
 
+        val standardTextAnimConfigs by lazy {
+            // Ugly, but fine because fonts stay loaded all the time anyway
+            val roadgeek = ResourceManager.forceGet<BitmapFont>(object : ResourceBorrower {}, Lifetime.endless, "roadgeek")
+            mapOf(
+                "number_neutral" to TextAnimationConfig(
+                    font = roadgeek,
+                    fontColor = Color.WHITE,
+                    fontScale = 0.9f,
+                    speed = 60f..80f,
+                    spawnVarianceX = 30f,
+                    spawnVarianceY = 30f,
+                    animationDuration = 1000..1500
+                ),
+                "number_negative" to TextAnimationConfig(
+                    font = roadgeek,
+                    fontColor = Color.RED,
+                    fontScale = 0.9f,
+                    speed = -80f..-60f,
+                    spawnVarianceX = 30f,
+                    spawnVarianceY = 30f,
+                    animationDuration = 1000..1500
+                ),
+                "number_positive" to TextAnimationConfig(
+                    font = roadgeek,
+                    fontColor = Color.GREEN,
+                    fontScale = 0.9f,
+                    speed = 60f..80f,
+                    spawnVarianceX = 30f,
+                    spawnVarianceY = 30f,
+                    animationDuration = 1000..1500
+                ),
+            )
+        }
+
         fun configsFromOnj(onj: OnjArray, screen: OnjScreen): Map<String, TextAnimationConfig> = onj
             .value
             .map { it as OnjObject }
@@ -124,4 +146,10 @@ class TextEffectEmitter(
 
     }
 
+}
+
+fun AnimatedActor.textEffectEmitter(animationConfigs: Map<String, TextAnimationConfig>): TextEffectEmitter {
+    val emitter = TextEffectEmitter(animationConfigs, this as Actor, screen)
+    animationsNeedingUpdate.add(emitter)
+    return emitter
 }

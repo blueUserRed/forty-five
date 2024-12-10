@@ -12,8 +12,11 @@ import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter
+import com.fourinachamber.fortyfive.screen.gameWidgets.textEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Vector2
@@ -22,7 +25,9 @@ import com.fourinachamber.fortyfive.utils.component2
 import com.fourinachamber.fortyfive.utils.epsilonEquals
 import kotlin.math.abs
 
-class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(screen), ResourceBorrower {
+class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(screen), ResourceBorrower, AnimatedActor {
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     private val mainBar: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_main_bar")
     private val hpLabel: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_hp_label")
@@ -38,20 +43,26 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     private var currentDisplayPercent: Float = 1f
     private var targetPercent: Float = 1f
 
+    private val emitter = textEffectEmitter(TextEffectEmitter.standardTextAnimConfigs)
+
+    private var lastKnownHealth: Int = enemy.health
 
     init {
         screen.onEnd { polygonBatch.dispose() }
-        hpChanged()
         enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { hpChanged() }
     }
 
     fun hpChanged() {
         val newPercent = enemy.currentHealth.toFloat() / enemy.health.toFloat()
         targetPercent = newPercent
+        val diff = enemy.currentHealth - lastKnownHealth
+        emitter.playNumberChangeAnimation(diff)
+        lastKnownHealth = enemy.currentHealth
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         updateHpBar()
+        updateAnimations()
 
         super.draw(batch, parentAlpha)
         batch ?: return

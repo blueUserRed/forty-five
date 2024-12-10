@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
@@ -71,7 +72,7 @@ object GraphicsConfig {
     )
 
     fun chargeTimeline(actor: Actor): Timeline {
-        val moveByAction = CustomMoveByAction()
+        val moveByAction = MoveByAction()
         moveByAction.setAmount(xCharge, yCharge)
         moveByAction.duration = chargeDuration
         moveByAction.interpolation = chargeInterpolation

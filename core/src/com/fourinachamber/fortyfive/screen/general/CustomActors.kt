@@ -48,16 +48,9 @@ open class CustomLabel(
     override var detailWidget: DetailWidget? = null,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, DisplayDetailActor, KotlinStyledActor {
-
-    override val actor: Actor = this
+    StyledActor, BackgroundActor, HasOnjScreen, DisplayDetailActor, KotlinStyledActor {
 
     override var dropShadow: DropShadow? = null
-
-    private val _animationSpawners: MutableList<AnimationSpawner> = mutableListOf()
-
-    override val animationSpawners: List<AnimationSpawner>
-        get() = _animationSpawners
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -113,11 +106,6 @@ open class CustomLabel(
         return Rectangle(x, y, width, height)
     }
 
-    override fun addAnimationSpawner(spawner: AnimationSpawner) {
-        _animationSpawners.add(spawner)
-        screen.addActorToRoot(spawner.actor)
-    }
-
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
@@ -150,8 +138,6 @@ open class CustomLabel(
 
     override fun layout() {
         onLayout.forEach { it() }
-        // Dont ask me why the -width is necessary
-        layoutSpawners(x - width, y, width, height)
         super.layout()
     }
 
@@ -237,12 +223,14 @@ open class CustomImageActor(
     drawableHandle: ResourceHandle?,
     override val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
-) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
+) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor,
     KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailActor, HasOnjScreen,
     KotlinStyledActor, DragAndDroppableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     override var marginTop: Float = 0f
     override var marginBottom: Float = 0f
@@ -330,6 +318,7 @@ open class CustomImageActor(
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         val mask = mask
 
         drawable = loadedDrawable
@@ -432,12 +421,13 @@ open class CustomFlexBox(
     override val screen: OnjScreen,
     private val hasHoverDetail: Boolean = false,
     private val hoverText: String = ""
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, AnimatedActor,
     Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, DisplayDetailActor,
     InOutAnimationActor, ResourceBorrower {
 
     override var fixedZIndex: Int = 0
 
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     private val dropShadowShader: Promise<BetterShader> by lazy {
 //        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
@@ -551,6 +541,7 @@ open class CustomFlexBox(
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
+        updateAnimations()
         x += drawOffsetX
         y += drawOffsetY
         if (batch != null && background != null) {
@@ -1302,7 +1293,9 @@ open class CustomVerticalGroup(
 open class CustomGroup(
     override val screen: OnjScreen
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
-    DropShadowActor {
+    DropShadowActor, AnimatedActor {
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
@@ -1348,6 +1341,7 @@ open class CustomGroup(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         validate()
         batch ?: return
         this.x += drawOffsetX
@@ -1373,7 +1367,11 @@ open class CustomGroup(
     private fun drawBackground(batch: Batch?) {
         background?.let {
             dropShadow?.doDropShadow(batch, screen, it, this)
-            it.draw(batch, x, y, width, height)
+            if (it is TransformDrawable) {
+                it.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
+            } else {
+                it.draw(batch, x, y, width, height)
+            }
         }
     }
 

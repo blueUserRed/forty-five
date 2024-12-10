@@ -538,11 +538,6 @@ class FromOnjScreenBuilder(
             widgetOnj.getOr<Double>("iconScale", 1.0).toFloat(),
         )
 
-        "TextEffectEmitter" -> TextEffectEmitter(
-            TextEffectEmitter.configsFromOnj(widgetOnj.get<OnjArray>("config"), screen),
-            screen
-        )
-
         "TutorialInfoActor" -> TutorialInfoActor(
             widgetOnj.get<String>("background"),
             widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),

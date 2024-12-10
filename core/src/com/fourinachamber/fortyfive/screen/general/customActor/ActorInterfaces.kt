@@ -4,9 +4,13 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
@@ -14,6 +18,8 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.*
+import java.sql.Time
+import kotlin.math.sin
 
 /**
  * an object which is rendered and to which a mask can be applied
@@ -99,16 +105,6 @@ interface InOutAnimationActor {
     fun hide(): Timeline
 }
 
-/**
- * an actor that can be in an animation
- */
-interface AnimationActor {
-
-    /**
-     * true if the actor is in an animation. If so, it should be treated differently, e.g. by not setting its position
-     */
-    var inAnimation: Boolean
-}
 
 interface BoundedActor {
 
@@ -127,6 +123,98 @@ interface BoundedActor {
         val (screenSpaceWidth, screenSpaceHeight) =
             Utils.worldSpaceToScreenSpaceDimensions(worldSpaceBounds.width, worldSpaceBounds.height, screen.viewport)
         return Rectangle(screenSpaceCoords.x, screenSpaceCoords.y, screenSpaceWidth, screenSpaceHeight)
+    }
+}
+
+interface AnimatedActor : HasOnjScreen {
+    abstract val animationsNeedingUpdate: MutableList<NeedsUpdate>
+
+    fun updateAnimations() {
+        animationsNeedingUpdate.forEach { it.update() }
+    }
+
+    fun animateUpAndDownSinus(
+        method: AnimationMethod = AnimationMethod.X_AND_Y,
+        amplitude: Float = 20f,
+        frequency: Float = 0.5f,
+        phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
+        offset: Float = 0f
+    ) {
+        this as Actor
+        val initialY = y
+        val time = TimeUtils.millis()
+        val updater = NeedsUpdate {
+            val value = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase) * amplitude + offset
+            when (method) {
+                AnimationMethod.DRAW_OFFSET -> {
+                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
+                    drawOffsetY = value
+                }
+                AnimationMethod.LOGICAL_OFFSET -> {
+                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
+                    logicalOffsetY = value
+                    (this as? Layout)?.invalidateHierarchy()
+                }
+                AnimationMethod.X_AND_Y -> y = initialY + value
+            }
+        }
+        animationsNeedingUpdate.add(updater)
+    }
+
+    fun animateLeftAndRightSinus(
+        method: AnimationMethod = AnimationMethod.X_AND_Y,
+        amplitude: Float = 20f,
+        frequency: Float = 0.5f,
+        phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
+        offset: Float = 0f
+    ) {
+        this as Actor
+        val initialX = x
+        val time = TimeUtils.millis()
+        val updater = NeedsUpdate {
+            val value = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase) * amplitude + offset
+            when (method) {
+                AnimationMethod.DRAW_OFFSET -> {
+                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
+                    drawOffsetX = value
+                }
+                AnimationMethod.LOGICAL_OFFSET -> {
+                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
+                    logicalOffsetX = value
+                    (this as? Layout)?.invalidateHierarchy()
+                }
+                AnimationMethod.X_AND_Y -> x = initialX + value
+            }
+        }
+        animationsNeedingUpdate.add(updater)
+    }
+
+    fun animateRotationSinus(
+        amplitude: Float = Math.PI.toFloat() * 2,
+        frequency: Float = 1f,
+        phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
+        offset: Float = 0f
+    ) {
+        this as Actor
+        if (this is Group) {
+            isTransform = true
+        }
+        val time = TimeUtils.millis()
+        val updater = NeedsUpdate {
+            val value = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase) * amplitude + offset
+            rotation = value
+        }
+        animationsNeedingUpdate.add(updater)
+    }
+
+    fun interface NeedsUpdate {
+        fun update()
+    }
+
+    enum class AnimationMethod {
+        X_AND_Y,
+        LOGICAL_OFFSET,
+        DRAW_OFFSET
     }
 }
 
@@ -280,37 +368,10 @@ interface DisplayDetailActor {
 
 }
 
-interface AnimationSpawner {
-
-    val actor: Actor
-}
-
-interface ActorWithAnimationSpawners {
-
-    val actor: Actor
-
-    val animationSpawners: List<AnimationSpawner>
-
-    fun addAnimationSpawner(spawner: AnimationSpawner)
-
-    fun layoutSpawners(xPos: Float, yPos: Float, width: Float, height: Float) {
-        val (x, y) = actor.localToStageCoordinates(Vector2(xPos, yPos))
-        animationSpawners
-            .map { it.actor }
-            .forEach {
-                it.setBounds(x, y, width, height)
-            }
-    }
-
-}
-
 interface OnLayoutActor {
 
     fun onLayout(callback: () -> Unit)
 }
-
-inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
-    animationSpawners.find { it is T } as? T
 
 
 interface HasPaddingActor {
