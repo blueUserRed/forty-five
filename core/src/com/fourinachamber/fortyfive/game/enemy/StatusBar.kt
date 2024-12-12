@@ -9,12 +9,14 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.gameWidgets.textEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
+import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.utils.Color
@@ -31,9 +33,12 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
 
     private val mainBar: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_main_bar")
     private val hpLabel: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_hp_label")
+    private val shieldOverlay: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_shield_overlay")
+    private val effectBox: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_effect_box")
     private val whiteTexture: Promise<TextureRegion> = ResourceManager.request(this, screen, "white_texture")
     private val sliderShader: Promise<BetterShader> = ResourceManager.request(this, screen, "enemy_status_bar_shader")
 
+    // TODO: add a smaller version of roadgeek
     private val roadgeek: BitmapFont = ResourceManager.forceGet(this, screen, "roadgeek")
 
     private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Color.FortyWhite, 100f, Align.center, false)
@@ -45,11 +50,22 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
 
     private val emitter = textEffectEmitter(TextEffectEmitter.standardTextAnimConfigs)
 
+    private val statusEffectIcons: MutableMap<String, Promise<Drawable>> = mutableMapOf()
+
     private var lastKnownHealth: Int = enemy.health
 
     init {
         screen.onEnd { polygonBatch.dispose() }
         enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { hpChanged() }
+    }
+
+    fun statusEffectsChanged() {
+        enemy.statusEffects.forEach { effect ->
+            if (statusEffectIcons.containsKey(effect.name)) return@forEach
+            val iconHandle = GraphicsConfig.iconName(effect.name)
+            val promise = ResourceManager.request<Drawable>(this, screen, iconHandle)
+            statusEffectIcons[effect.name] = promise
+        }
     }
 
     fun hpChanged() {
@@ -103,7 +119,28 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         polygonBatch.end()
         batch.begin()
         mainBar.draw(batch, barX, barY, barWidth, barHeight)
+        if (enemy.currentCover > 0) drawShieldOverlay(batch, barX, barY, barWidth, barHeight)
         drawHpLabel(batch, barX, barY, barWidth)
+    }
+
+    private fun drawStatusEffects(batch: Batch, barX: Float, barY: Float, barWidth: Float, barHeight: Float) {
+        val effectBox = effectBox.getOrNull() ?: return
+
+    }
+
+    private fun drawShieldOverlay(batch: Batch, barX: Float, barY: Float, barWidth: Float, barHeight: Float) {
+        val shieldOverlay = shieldOverlay.getOrNull() ?: return
+        val shieldWidthDiff = 28f
+        val width = barWidth + shieldWidthDiff
+        val height = width * (189f / 1041f)
+        shieldOverlay.draw(batch, barX - shieldWidthDiff + 2, barY - 8f, width, height)
+        val layout = hpGlyphLayout
+        roadgeek.data.setScale(0.5f)
+        val text = enemy.currentCover.toString()
+        layout.setText(roadgeek, text, Color.Black, 0f, Align.center, false)
+        val labelX = barX - shieldWidthDiff / 2 - layout.width / 2 + 12f
+        val labelY = barY + barHeight / 2 - layout.height / 2 + 7f
+        roadgeek.draw(batch, layout, labelX, labelY)
     }
 
     private fun drawHpLabel(batch: Batch, barX: Float, barY: Float, barWidth: Float) {

@@ -265,7 +265,7 @@ open class OnjScreen(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var background: String? by backgroundHandleObserver
 
-    private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this)
+    private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this, arrayOf())
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 

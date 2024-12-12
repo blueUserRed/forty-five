@@ -63,50 +63,53 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract fun getInputMaps(): List<KeyInputMap>
     abstract fun getSelectionHierarchyStructure(): List<FocusableParent>
 
-    inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
-        val group = CustomGroup(screen)
+    inline fun newGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        val group = CustomGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
-    inline fun newBox(builder: CustomBox.() -> Unit = {}): CustomBox {
-        val box = CustomBox(screen)
+    inline fun newBox(backgroundHints: Array<String> = arrayOf(), builder: CustomBox.() -> Unit = {}): CustomBox {
+        val box = CustomBox(
+            backgroundHints = backgroundHints,
+            screen = screen
+        )
         builder(box)
         return box
     }
 
-    inline fun newHorizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
-        val group = CustomHorizontalGroup(screen)
+    inline fun newHorizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
     @OptIn(ExperimentalContracts::class)
-    inline fun newVerticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+    inline fun newVerticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
-        val group = CustomVerticalGroup(screen)
+        val group = CustomVerticalGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
-    inline fun Group.group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
-        val group = CustomGroup(screen)
+    inline fun Group.group(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        val group = CustomGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
     }
 
-    inline fun Group.horizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
-        val group = CustomHorizontalGroup(screen)
+    inline fun Group.horizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
     }
 
-    inline fun Group.verticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
-        val group = CustomVerticalGroup(screen)
+    inline fun Group.verticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        val group = CustomVerticalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
@@ -117,15 +120,19 @@ abstract class ScreenCreator : ResourceBorrower {
         this.name = name
     }
 
-    inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
-        val image = CustomImageActor(null, screen, false)
+    inline fun Group.image(backgroundHints: Array<String> = arrayOf(), builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
+        val image = CustomImageActor(null, screen, backgroundHints, false)
         this.addActor(image)
         builder(image)
         return image
     }
 
-    inline fun Group.box(isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
-        val box = if (isScrollable) CustomScrollableBox(screen) else CustomBox(screen)
+    inline fun Group.box(backgroundHints: Array<String> = arrayOf(), isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
+        val box = if (isScrollable) {
+            CustomScrollableBox(backgroundHints, screen)
+        } else {
+            CustomBox(screen, backgroundHints)
+        }
         this.addActor(box)
         builder(box)
         return box

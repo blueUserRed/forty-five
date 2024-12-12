@@ -6,7 +6,10 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
@@ -30,7 +33,6 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenCont
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
-import com.fourinachamber.fortyfive.screen.general.AdvancedText
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
@@ -38,10 +40,10 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
-import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
 
@@ -145,9 +147,36 @@ class GameScreen : ScreenCreator() {
             group = "enemies"
             setFocusableTo(true, this)
             isSelectable = true
+
             onSelect {
                 if (enemySelected) return@onSelect
                 gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
+            }
+
+            fun chargeTimeline(): Timeline = Timeline.timeline {
+                val origX = x
+                val forwardAction = MoveToAction()
+                forwardAction.x = origX - 50f
+                forwardAction.y = y
+                forwardAction.duration = 0.2f
+                forwardAction.interpolation = Interpolation.pow4
+                val backAction = MoveToAction()
+                backAction.x = origX
+                backAction.y = y
+                backAction.duration = 0.4f
+                backAction.interpolation = Interpolation.smooth
+                action { addAction(forwardAction) }
+                delayUntil { forwardAction.isComplete }
+                action {
+                    removeAction(forwardAction)
+                    addAction(backAction)
+                }
+                delayUntil { backAction.isComplete }
+                action { removeAction(backAction) }
+            }
+
+            enemy.enemyEvents.watchFor<Enemy.PlayChargeAnimationEvent> { event ->
+                event.timeline.resolve(chargeTimeline())
             }
 
             box {
@@ -265,6 +294,48 @@ class GameScreen : ScreenCreator() {
         height = worldWidth * (505f / 1920f)
         backgroundHandle = "player_bar"
 
+        box {
+            backgroundHandle = "common_popup_background_black_large"
+            width = 680f
+            height = width * (1057f / 1845f)
+            centerX()
+            y = 340f
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            verticalAlign = CustomAlign.CENTER
+            color.a = 0f
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+                val action = AlphaAction()
+                action.duration = 0.2f
+                action.alpha = if (event.inParryMenu) 1f else 0f
+                addAction(action)
+            }
+            label("red_wing", "Parry?", Color.BrightYellow, isDistanceField = true) {
+                setFontScale(1.4f)
+                setAlignment(Align.center)
+                relativeWidth(100f)
+                syncHeight()
+            }
+            label("roadgeek", "", Color.GRAY) {
+                gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, blockable) ->
+                    setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
+                }
+                setFontScale(0.7f)
+                setAlignment(Align.center)
+                relativeWidth(100f)
+                syncHeight()
+            }
+            label("roadgeek", "", Color.GRAY) {
+                gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, _) ->
+                    setText("Passing will let $damage damage through")
+                }
+                setFontScale(0.7f)
+                setAlignment(Align.center)
+                relativeWidth(100f)
+                syncHeight()
+            }
+        }
+
         shootButton()
         holsterButton()
 
@@ -343,7 +414,11 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.shootButton() {
-        group {
+        var parryPromise: Promise<Boolean>? = null
+        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+            parryPromise = event.resolutionPromise
+        }
+        group(backgroundHints = arrayOf("shoot_button_texture", "shoot_button_hover_texture")) {
             name("shoot_button")
             touchable = Touchable.enabled
             x = 370f
@@ -352,7 +427,7 @@ class GameScreen : ScreenCreator() {
                 xPositionAbstractProperty(),
                 AnimState("open", 370f, 100, Interpolation.pow2),
                 AnimState("hover", 360f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 200),
+                AnimState("closed", 600f, 400),
             )
             width = 250f
             height = 250f * (543f / 655f)
@@ -377,19 +452,15 @@ class GameScreen : ScreenCreator() {
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
-                    isSelectable = false
-                    isFocusable = false
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
-                    isSelectable = true
-                    isFocusable = true
                     touchable = Touchable.enabled
                 }
             }
         }
 
-        group {
+        group(backgroundHints = arrayOf("pass_button_texture", "pass_button_hover_texture")) {
             name("pass_button")
             var closed = true
             touchable = Touchable.disabled
@@ -399,15 +470,19 @@ class GameScreen : ScreenCreator() {
                 xPositionAbstractProperty(),
                 AnimState("open", 370f, 100, Interpolation.pow2),
                 AnimState("hover", 360f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 200),
+                AnimState("closed", 600f, 400),
             )
             width = 250f
             height = 250f * (543f / 655f)
-            isSelectable = false
-            isFocusable = false
+            isSelectable = true
+            isFocusable = true
             group = "pass_button"
             onSelect {
                 screen.deselectActor(this)
+                screen.focusedActor = null
+                parryPromise?.let {
+                    if (parryPromise.isNotResolved) parryPromise.resolve(false)
+                }
             }
             styles(
                 normal = {
@@ -422,14 +497,10 @@ class GameScreen : ScreenCreator() {
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
-                    isSelectable = false
-                    isFocusable = false
                     closed = true
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
-                    isSelectable = true
-                    isFocusable = true
                     closed = false
                     touchable = Touchable.enabled
                 }
@@ -438,7 +509,11 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.holsterButton() {
-        group {
+        var parryPromise: Promise<Boolean>? = null
+        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+            parryPromise = event.resolutionPromise
+        }
+        group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
             name("holster_button")
             touchable = Touchable.enabled
             x = 990f
@@ -447,7 +522,7 @@ class GameScreen : ScreenCreator() {
                 xPositionAbstractProperty(),
                 AnimState("open", 990f, 100, Interpolation.pow2),
                 AnimState("hover", 1000f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 200),
+                AnimState("closed", 600f, 400),
             )
             width = 250f
             height = 250f * (543f / 655f)
@@ -472,19 +547,15 @@ class GameScreen : ScreenCreator() {
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
-                    isSelectable = false
-                    isFocusable = false
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
-                    isSelectable = true
-                    isFocusable = true
                     touchable = Touchable.enabled
                 }
             }
         }
 
-        group {
+        group(backgroundHints = arrayOf("parry_button_texture", "parry_button_hover_texture")) {
             name("parry_button")
             var closed = true
             touchable = Touchable.disabled
@@ -494,15 +565,19 @@ class GameScreen : ScreenCreator() {
                 xPositionAbstractProperty(),
                 AnimState("open", 990f, 100, Interpolation.pow2),
                 AnimState("hover", 1000f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 200),
+                AnimState("closed", 600f, 400),
             )
             width = 250f
             height = 250f * (543f / 655f)
-            isSelectable = false
-            isFocusable = false
+            isSelectable = true
+            isFocusable = true
             group = "parry_button"
             onSelect {
                 screen.deselectActor(this)
+                screen.focusedActor = null
+                parryPromise?.let {
+                    if (parryPromise.isNotResolved) parryPromise.resolve(true)
+                }
             }
             styles(
                 normal = {
@@ -517,14 +592,10 @@ class GameScreen : ScreenCreator() {
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
-                    isSelectable = false
-                    isFocusable = false
                     closed = true
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
-                    isSelectable = true
-                    isFocusable = true
                     closed = false
                     touchable = Touchable.enabled
                 }
@@ -586,7 +657,13 @@ class GameScreen : ScreenCreator() {
         )
     )
 
-    private fun orbAnimationTimeline(source: Actor, target: Actor, amount: Int, isReserves: Boolean): Timeline = Timeline.timeline {
+    private fun orbAnimationTimeline(
+        source: Actor,
+        target: Actor,
+        amount: Int,
+        isReserves: Boolean,
+        duration: Int = 300
+    ): Timeline = Timeline.timeline {
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
         repeat(amount) {
             action {
@@ -598,7 +675,8 @@ class GameScreen : ScreenCreator() {
                         target.localToStageCoordinates(Vector2(0f, 0f)) +
                                 Vector2(target.width / 2, target.height / 2),
                         isReserves,
-                        renderPipeline
+                        renderPipeline,
+                        duration = duration
                     ))
             }
             delay(50)
@@ -615,7 +693,7 @@ class GameScreen : ScreenCreator() {
     private fun bindEventHandlers() {
         gameEvents.watchFor<NewGameController.Events.ReservesChanged>(::reservesChangedAnim)
         gameEvents.watchFor<NewGameController.Events.PlayCardOrbAnimation> { event ->
-            event.orbAnimationTimeline = orbAnimationTimeline(deckAnimationTarget, event.targetActor, 1, false)
+            event.orbAnimationTimeline = orbAnimationTimeline(deckAnimationTarget, event.targetActor, 1, false, duration = 200)
         }
         gameEvents.watchFor<NewGameController.Events.SetupEnemies>(::setupEnemies)
     }

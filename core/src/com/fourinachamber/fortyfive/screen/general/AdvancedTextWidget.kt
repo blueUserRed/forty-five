@@ -315,7 +315,7 @@ class IconAdvancedTextPart(
     screen: OnjScreen,
     private val dialogFontScale: Float,
     override val breakLine: Boolean
-) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart, ResourceBorrower {
+) : CustomImageActor(resourceHandle, screen), AdvancedTextPart, ResourceBorrower {
 
 
     override val actor: Actor = this

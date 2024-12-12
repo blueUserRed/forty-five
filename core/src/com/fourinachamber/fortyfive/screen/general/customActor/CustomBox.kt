@@ -22,8 +22,12 @@ import kotlin.math.max
 
 //TODO (optional):
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
-open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor,
-    DragAndDroppableActor, HasPaddingActor {
+open class CustomBox(
+    screen: OnjScreen,
+    backgroundHints: Array<String> = arrayOf()
+) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor,
+    DisableActor, DragAndDroppableActor, HasPaddingActor
+{
 
     override var positionType: PositionType = PositionType.RELATIV
     override var group: SelectionGroup? = null
@@ -425,7 +429,7 @@ enum class PositionType {
 }
 
 
-class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
+class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: OnjScreen) : CustomBox(screen, backgroundHints) {
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */

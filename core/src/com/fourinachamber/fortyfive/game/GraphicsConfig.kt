@@ -56,12 +56,13 @@ object GraphicsConfig {
         source: Vector2,
         target: Vector2,
         isReserves: Boolean,
-        renderPipeline: RenderPipeline
+        renderPipeline: RenderPipeline,
+        duration: Int = 300,
     ): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
         orbTexture = if (isReserves) "reserves_orb" else "card_orb",
         width = 10f,
         height = 10f,
-        duration = 300,
+        duration = duration,
         segments = 20,
         renderPipeline = renderPipeline,
         position = RenderPipeline.OrbAnimation.curvedPath(

@@ -86,7 +86,11 @@ class Enemy(
     val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
+    var additionalDamage: Int = 0
+        private set
+
     fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
+        additionalDamage = 0
         val nextAction = brain.chooseNewAction(controller, this, difficulty, otherActions)
         if (
             nextAction !is NextEnemyAction.ShownEnemyAction ||
@@ -109,6 +113,7 @@ class Enemy(
             FortyFiveLogger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
         }
         val (action, additionalDamage) = additionalDmgActions.first()
+        this.additionalDamage = additionalDamage
         val event = EnemyActionChangedEvent(nextAction, additionalDamage, action.iconHandle)
         enemyEvents.fire(event)
         return nextAction
@@ -230,6 +235,7 @@ class Enemy(
     }
 
     data object HealthChangedEvent
+    data class PlayChargeAnimationEvent(val timeline: Promise<Timeline> = Promise())
     data class EnemyActionChangedEvent(
         val nextAction: NextEnemyAction,
         val additionalDamage: Int,

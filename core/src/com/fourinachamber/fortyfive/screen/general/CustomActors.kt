@@ -45,6 +45,7 @@ open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
     private val isDistanceField: Boolean,
+    private val backgroundHints: Array<String> = arrayOf(),
     override var detailWidget: DetailWidget? = null,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
@@ -71,7 +72,7 @@ open class CustomLabel(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
 
     override var marginTop: Float = 0f
@@ -188,6 +189,7 @@ open class TemplateStringLabel(
     var templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
+    backgroundHints: Array<String> = arrayOf(),
     detailWidget: DetailWidget? = null,
     partOfHierarchy: Boolean = false
 ) : CustomLabel(
@@ -195,6 +197,7 @@ open class TemplateStringLabel(
     templateString.string,
     labelStyle,
     isDistanceField,
+    backgroundHints,
     detailWidget,
     partOfHierarchy
 ), BackgroundActor {
@@ -222,6 +225,7 @@ open class TemplateStringLabel(
 open class CustomImageActor(
     drawableHandle: ResourceHandle?,
     override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf(),
     override val partOfHierarchy: Boolean = false,
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor,
     KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailActor, HasOnjScreen,
@@ -259,7 +263,7 @@ open class CustomImageActor(
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     override var isSelected: Boolean = false
@@ -419,6 +423,7 @@ open class CustomImageActor(
 
 open class CustomFlexBox(
     override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf(),
     private val hasHoverDetail: Boolean = false,
     private val hoverText: String = ""
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, AnimatedActor,
@@ -451,7 +456,7 @@ open class CustomFlexBox(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     private var reattachTo: Group? = null
 
@@ -605,7 +610,8 @@ class CustomScrollableFlexBox(
     private val scrollbarBackgroundName: String?,
     private val scrollbarName: String?,
     private val scrollbarSide: String?,
-) : CustomFlexBox(screen, false) { //TODO fix bug with children with fixed size
+    backgroundHints: Array<String> = arrayOf(),
+) : CustomFlexBox(screen, backgroundHints, false) { //TODO fix bug with children with fixed size
 
     private val scrollListener = object : InputListener() {
         override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
@@ -1164,7 +1170,8 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomHorizontalGroup(
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf(),
 ) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
     KotlinStyledActor {
 
@@ -1196,7 +1203,7 @@ open class CustomHorizontalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         this.x += drawOffsetX
@@ -1236,7 +1243,8 @@ open class CustomHorizontalGroup(
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomVerticalGroup(
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf()
 ) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor, HasOnjScreen, OnLayoutActor {
 
     override var fixedZIndex: Int = 0
@@ -1252,7 +1260,7 @@ open class CustomVerticalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         background?.draw(batch, x, y, width, height)
@@ -1291,7 +1299,8 @@ open class CustomVerticalGroup(
 }
 
 open class CustomGroup(
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf()
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
     DropShadowActor, AnimatedActor {
 
@@ -1333,7 +1342,7 @@ open class CustomGroup(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
-    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
     override var dropShadow: DropShadow? = null
 
     init {

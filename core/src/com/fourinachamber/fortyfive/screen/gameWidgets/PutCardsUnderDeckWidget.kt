@@ -27,6 +27,7 @@ class PutCardsUnderDeckWidget(
     private val screen: OnjScreen,
     private val cardSize: Float,
     private val cardSpacing: Float,
+    backgroundHints: Array<String> = arrayOf(),
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
@@ -39,7 +40,7 @@ class PutCardsUnderDeckWidget(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: ResourceHandle? by backgroundHandleObserver
-    private val loadedBackground: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val loadedBackground: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     val isFinished: Boolean
         get() = cards.size >= targetSize

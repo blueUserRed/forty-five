@@ -89,7 +89,7 @@ class FromOnjScreenBuilder(
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        val root = CustomFlexBox(screen, false)
+        val root = CustomFlexBox(screen, arrayOf(), false)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -323,6 +323,7 @@ class FromOnjScreenBuilder(
         "Image" -> CustomImageActor(
             widgetOnj.getOr<String?>("textureName", null),
             screen,
+            arrayOf(),
             widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             applyImageKeys(this, widgetOnj)
@@ -330,6 +331,7 @@ class FromOnjScreenBuilder(
 
         "Box" -> CustomFlexBox(
             screen,
+            arrayOf(),
             widgetOnj.getOr("hasHoverDetail", false),
             widgetOnj.getOr("hoverText", "")
         ).apply {
