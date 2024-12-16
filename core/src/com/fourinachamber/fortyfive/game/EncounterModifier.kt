@@ -6,6 +6,8 @@ import com.fourinachamber.fortyfive.game.card.GameSituation
 import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.controller.GameController
+import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -71,7 +73,7 @@ sealed class EncounterModifier {
             val modifier = Card.CardModifier(
                 damage = 0,
                 source = "moist modifier",
-                validityChecker = { card.inGame },
+                validityChecker = { _, _, _ -> card.inZone(Zone.REVOLVER) },
                 transformers = listOf(
                     Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
                 )

@@ -244,12 +244,12 @@ class Card(
         var somethingChanged = false
         while (modifierIterator.hasNext()) {
             val (_, modifier) = modifierIterator.next()
-            if (!modifier.validityChecker()) {
+            if (!modifier.validityChecker(controller, this, modifier)) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
                 modifierIterator.remove()
                 somethingChanged = true
             }
-            val active = modifier.activeChecker(controller)
+            val active = modifier.activeChecker(controller, this, modifier)
             if (active == modifier.wasActive) continue
             modifier.wasActive = active
             somethingChanged = true
@@ -285,16 +285,16 @@ class Card(
     }
 
     fun activeModifiers(controller: GameController): List<CardModifier> =
-        modifiers.filter { it.activeChecker(controller) }
+        modifiers.filter { it.activeChecker(controller, this, it) }
 
     fun curDamage(controller: GameController): Int = _modifiers
-        .filter { (_, modifier) -> modifier.activeChecker(controller) }
+        .filter { (_, modifier) -> modifier.activeChecker(controller, this, modifier) }
         .sortedBy { it.first }
         .fold(baseDamage) { acc, (_, modifier) -> ((acc + modifier.damage) * modifier.damageMultiplier).toInt() }
         .coerceAtLeast(0)
 
     fun curCost(controller: GameController): Int = _modifiers
-        .filter { (_, modifier) -> modifier.activeChecker(controller) }
+        .filter { (_, modifier) -> modifier.activeChecker(controller, this, modifier) }
         .fold(baseCost) { acc, (_, modifier) -> acc + modifier.costChange }
         .coerceAtLeast(0)
 
@@ -393,11 +393,9 @@ class Card(
         val modifier = CardModifier(
             damage = 0,
             source = "disintegration effect",
-            validityChecker = { inGame },
+            validityChecker = { _, _, _ -> inZone(Zone.REVOLVER) },
             transformers = listOf(
-                Trigger { situation, card, info, controller ->
-                    situation is GameSituation.RevolverRotation
-                } to rotationTransformer
+                Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
             )
         )
         addModifier(modifier)
@@ -694,14 +692,17 @@ class Card(
         val damage: Int = 0,
         val damageMultiplier: Float = 1f,
         val source: String,
+        val sourceCard: Card? = null,
         val costChange: Int = 0,
-        val validityChecker: () -> Boolean = { true },
-        val activeChecker: (controller: GameController) -> Boolean = { true },
+        val validityChecker: CardModifierPredicate = { _, _, _ -> true },
+        val activeChecker: CardModifierPredicate = { _, _, _ -> true },
         var wasActive: Boolean = true,
         val transformers: List<Pair<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier>> = listOf()
     )
 
 }
+
+typealias CardModifierPredicate = (controller: GameController, card: Card, modifier: Card.CardModifier) -> Boolean
 
 /**
  * the actor representing a card on the screen

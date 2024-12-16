@@ -228,6 +228,7 @@ class NewGameController(
         TemplateString.updateGlobalParam("game.cardsInStack", _cardStack.size)
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
+        createdCards.forEach { it.update(this) }
     }
 
     private fun initCards() {

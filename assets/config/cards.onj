@@ -7,18 +7,18 @@ import "config/game_config.onj" as gameConfig;
 
 var burningPercent = 0.5;
 
-var bSelects = {
-    allExceptSelf: bNum([1, 2, 3, 4, 5]),
-    allBullets: bSelectByName("bullet"),
-    fourButNotSelf: bNum([4]),
-    threeButNotSelf: bNum([3]),
-    targetRequiredNotSelf: bSelectTarget(false, false),
-    targetOptionalNotSelf: bSelectTarget(false, true),
-    neighbors: bSelectNeighbors(),
-    self: bSelectSelf(),
-    sourceBullet: bSelectSourceBullet(),
-    cachedBullets: bSelectCachedBullets(),
-};
+//var bSelects = {
+//    allExceptSelf: bNum([1, 2, 3, 4, 5]),
+//    allBullets: bSelectByName("bullet"),
+//    fourButNotSelf: bNum([4]),
+//    threeButNotSelf: bNum([3]),
+//    targetRequiredNotSelf: bSelectTarget(false, false),
+//    targetOptionalNotSelf: bSelectTarget(false, true),
+//    neighbors: bSelectNeighbors(),
+//    self: bSelectSelf(),
+//    sourceBullet: bSelectSourceBullet(),
+//    cachedBullets: bSelectCachedBullets(),
+//};
 
 var iconPrefix = "§§";
 
@@ -108,24 +108,26 @@ cards: [
         tags: ["pool0", "rarity2"],
         price: 50,
     },
-//    {
-//        name: "leadersBullet",
-//        title: "Leaders Bullet",
-//        flavourText: "I wonder what happened, that a bullet like Leaders Bullet exists.",
-//        description: "$trigger$On-Placedown:$trigger$\nAll other bullets get +5 dmg as long as Leaders Bullet is in the revolver",
-//        baseDamage: 15,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [ buffDmg("enter", bSelects.allExceptSelf, 5#val) ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        tags: ["pool1", "rarity3"],
-//        price: 50,
-//        type: $Bullet { }
-//    },
+    {
+        name: "leadersBullet",
+        title: "Leaders Bullet",
+        flavourText: "I wonder what happened, that a bullet like Leaders Bullet exists.",
+        description: "$trigger$On-Placedown:$trigger$\nAll other bullets get +5 dmg as long as Leaders Bullet is in the revolver",
+        baseDamage: 15,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: buffDmgLimitValidity(
+                    (inZone(zone.revolver) and not(isSelf()))#bSelect,
+                    5#val,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
 //    {
 //        name: "bewitchedBullet",
 //        title: "Bewitched Bullet",

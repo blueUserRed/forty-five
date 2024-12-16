@@ -6,7 +6,6 @@ import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.*
-import kotlin.reflect.KClass
 
 /**
  * represents an effect a card can have
@@ -56,7 +55,7 @@ abstract class Effect(val data: EffectData) {
 
         when (bulletSelector) {
 
-            is BulletSelector.ByPredicate -> action {
+            is BulletSelector.RevolverCardByPredicate -> action {
                 val cards = controller
                     .cardsInRevolverIndexed()
                     .filter { (index, card) -> bulletSelector.lambda(self, card, index, triggerInformation) }
@@ -68,6 +67,7 @@ abstract class Effect(val data: EffectData) {
             is BulletSelector.ByLambda -> action {
                 val cards = bulletSelector.lambda(triggerInformation, self)
                 cardsAffected(self, cards)
+                println("selector. $cards")
                 store("selectedCards", cards)
             }
 
@@ -135,11 +135,12 @@ abstract class Effect(val data: EffectData) {
     class BuffDamage(
         val amount: EffectValue,
         private val bulletSelector: BulletSelector,
-        private val activeChecker: (controller: GameController) -> Boolean = { true },
+        private val activeChecker: CardModifierPredicate,
+        private val validityChecker: CardModifierPredicate,
         data: EffectData
     ) : Effect(data) {
 
-        override fun copy(data: EffectData): Effect = BuffDamage(amount, bulletSelector, activeChecker, data)
+        override fun copy(data: EffectData): Effect = BuffDamage(amount, bulletSelector, activeChecker, validityChecker, data)
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
@@ -148,7 +149,8 @@ abstract class Effect(val data: EffectData) {
             val modifier = Card.CardModifier(
                 damage = amount,
                 source = cardDescName(card),
-                validityChecker = { card.inGame },
+                sourceCard = card,
+                validityChecker = validityChecker,
                 activeChecker = activeChecker
             )
 
@@ -172,19 +174,21 @@ abstract class Effect(val data: EffectData) {
     class BuffDamageMultiplier(
         val multiplier: Float,
         private val bulletSelector: BulletSelector,
-        private val activeChecker: (controller: GameController) -> Boolean = { true },
+        private val validityChecker: CardModifierPredicate,
+        private val activeChecker: CardModifierPredicate,
         data: EffectData
     ) : Effect(data) {
 
         override fun copy(data: EffectData): Effect =
-            BuffDamageMultiplier(multiplier, bulletSelector, activeChecker, data)
+            BuffDamageMultiplier(multiplier, bulletSelector, validityChecker, activeChecker, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val multiplier = multiplier * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 damageMultiplier = multiplier,
                 source = cardDescName(card),
-                validityChecker = { card.inGame },
+                sourceCard = card,
+                validityChecker = validityChecker,
                 activeChecker = activeChecker
             )
 
@@ -221,6 +225,7 @@ abstract class Effect(val data: EffectData) {
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 damage = amount,
+                sourceCard = card,
                 source = cardDescName(card)
             )
             return Timeline.timeline {
@@ -584,7 +589,7 @@ abstract class Effect(val data: EffectData) {
             action {
                 timeline = controller
                     .cardStack
-                    .filter { cardPredicate.check(it, controller) }
+                    .filter { cardPredicate.check(it, controller, card) }
                     .shuffled()
                     .take(amount)
                     .also { cardsAffected(card, it) }
@@ -609,7 +614,7 @@ abstract class Effect(val data: EffectData) {
  */
 sealed class BulletSelector {
 
-    class ByPredicate(
+    class RevolverCardByPredicate(
         val lambda: (self: Card, other: Card, slot: Int, triggerInformation: TriggerInformation) -> Boolean
     ) : BulletSelector() {
 
