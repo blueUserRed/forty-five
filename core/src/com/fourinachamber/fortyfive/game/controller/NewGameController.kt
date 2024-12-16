@@ -65,8 +65,11 @@ class NewGameController(
     override val encounterModifiers: List<EncounterModifier>
         get() = _encounterModifiers
 
-    override var curPlayerLives: Int = SaveState.playerLives
-        private set
+    override var curPlayerLives: Int
+        get() = SaveState.playerLives
+        private set(value) {
+            SaveState.playerLives = value
+        }
 
     override val activeEnemies: List<Enemy>
         get() = allEnemies.filter { !it.isDefeated }
@@ -206,7 +209,6 @@ class NewGameController(
                     .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
                     .collectTimeline()
                     .let { include(it) }
-
             }
         }
     }
@@ -401,9 +403,10 @@ class NewGameController(
     override fun tryApplyStatusEffectToEnemyTimeline(
         statusEffect: StatusEffect,
         enemy: Enemy
-    ): Timeline {
-        TODO("Not yet implemented")
-    }
+    ): Timeline = Timeline.timeline { later {
+        if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
+        action { enemy.applyEffect(statusEffect) }
+    } }
 
     override fun damagePlayerTimeline(
         damage: Int,

@@ -140,6 +140,7 @@ class Enemy(
         }
         effect.start(gameController)
         _statusEffects.add(effect)
+        enemyEvents.fire(StatusEffectsChangedEvent)
 //        actor.displayStatusEffect(effect)
     }
 
@@ -156,12 +157,17 @@ class Enemy(
         .collectTimeline()
 
     fun update() {
-        _statusEffects
-            .filter { !it.isStillValid() }
-            .forEach {
-//                actor.removeStatusEffect(it)
+        var change = false
+        _statusEffects.removeIf { effect ->
+            if (!effect.isStillValid()) {
+                change = true
+                true
+            } else {
+                false
             }
-        _statusEffects.removeIf { !it.isStillValid() }
+        }
+        if (!change) return
+        enemyEvents.fire(StatusEffectsChangedEvent)
     }
 
     @MainThreadOnly
@@ -235,6 +241,7 @@ class Enemy(
     }
 
     data object HealthChangedEvent
+    data object StatusEffectsChangedEvent
     data class PlayChargeAnimationEvent(val timeline: Promise<Timeline> = Promise())
     data class EnemyActionChangedEvent(
         val nextAction: NextEnemyAction,

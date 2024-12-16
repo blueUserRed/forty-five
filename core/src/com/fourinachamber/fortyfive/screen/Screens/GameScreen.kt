@@ -122,6 +122,8 @@ class GameScreen : ScreenCreator() {
             width = (1305f / 1512f) * worldHeight
         }
 
+        playerBar()
+
         group {
             enemyParent = this@group
             x = 800f
@@ -130,7 +132,6 @@ class GameScreen : ScreenCreator() {
             height = 600f
         }
 
-        playerBar()
         winPopup()
 
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
@@ -295,7 +296,7 @@ class GameScreen : ScreenCreator() {
                 height = enemyHeight * 0.2f
                 val statusBar = StatusBar(screen, enemy)
                 actor(statusBar) {
-                    relativeWidth(100f)
+                    relativeWidth(110f)
                     relativeHeight(100f)
                 }
             }
