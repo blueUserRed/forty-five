@@ -210,6 +210,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         triggerForSituation<GameSituation.OnShot> { situation, card, info, controller -> situation.card === card }
     )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun turnBegin(): OnjTrigger = OnjTrigger(triggerForSituation<GameSituation.TurnBegin>())
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun turnEnd(): OnjTrigger = OnjTrigger(triggerForSituation<GameSituation.TurnEnd>())
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
     fun enterZone(newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->

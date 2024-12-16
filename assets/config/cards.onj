@@ -75,44 +75,39 @@ cards: [
         tags: ["pool0", "rarity2"],
         price: 60,
     },
-//    {
-//        name: "workerBullet",
-//        title: "Worker Bullet",
-//        flavourText: "There are rumors that all those cursed bullets that can be found in the frontier are the work of Witches... I wonder why they would make bullets of all things...",
-//        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nGain 1 reserve",
-//        baseDamage: 5,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [ reserveGain("round start", 1#val) ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        tags: ["pool0", "rarity3"],
-//        price: 50,
-//        type: $Bullet { }
-//    },
-//    {
-//        name: "incendiaryBullet",
-//        title: "Incendiary Bullet",
-//        flavourText: '"I\'m pretty sure this is a warcrime"',
-//        description: '$trigger$On-Shot:$trigger$\nThe enemy gets $status$BURNING$status$ (3)',
-//        baseDamage: 7,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giveStatus("shot", burning(3#val, burningPercent, false)),
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        tags: ["pool0", "rarity2"],
-//        price: 50,
-//        type: $Bullet { },
-//    },
+    {
+        name: "workerBullet",
+        title: "Worker Bullet",
+        flavourText: "There are rumors that all those cursed bullets that can be found in the frontier are the work of Witches... I wonder why they would make bullets of all things...",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nGain 1 reserve",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: reserveGain(1#val)
+            }
+        ],
+        cost: 1,
+        tags: ["pool0", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "incendiaryBullet",
+        title: "Incendiary Bullet",
+        flavourText: '"I\'m pretty sure this is a warcrime"',
+        description: '$trigger$On-Shot:$trigger$\nThe enemy gets $status$BURNING$status$ (3)',
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: shot(),
+                effect: giveStatus(burning(3#val, burningPercent, false))
+            }
+        ],
+        cost: 1,
+        tags: ["pool0", "rarity2"],
+        price: 50,
+    },
 //    {
 //        name: "leadersBullet",
 //        title: "Leaders Bullet",

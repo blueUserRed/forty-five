@@ -27,7 +27,8 @@ object NavbarCreator {
         worldWidth: Float,
         worldHeight: Float,
         objects: List<NavBarObject>,
-        screen: OnjScreen
+        screen: OnjScreen,
+        isLeft: Boolean = false,
     ) = newGroup {
         x = 0f
         y = 0f
@@ -64,7 +65,11 @@ object NavbarCreator {
 
         actor(boxWithTimeline) {
             flexDirection = FlexDirection.COLUMN
-            getNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+            if (isLeft) {
+                getSmallerLeftNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+            } else {
+                getNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+            }
         }
     }
 
@@ -73,6 +78,79 @@ object NavbarCreator {
         override fun act(delta: Float) {
             timeline.updateTimeline()
             super.act(delta)
+        }
+    }
+
+    private fun CustomBox.getSmallerLeftNavBar(
+        creator: ScreenCreator,
+        worldWidth: Float,
+        worldHeight: Float,
+        events: EventPipeline,
+        objects: List<NavBarObject>,
+        timeline: Timeline
+    ) = with(creator) {
+        x = 0f
+        y = 0f
+        width = worldWidth * 0.32f
+        height = 130f
+        onLayoutAndNow { y = worldHeight - height }
+
+        box {
+            flexDirection = FlexDirection.ROW
+            relativeWidth(100f)
+            relativeHeight(50f)
+            backgroundHandle = "statusbar_background_left"
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            verticalAlign = CustomAlign.CENTER
+            paddingLeft = 50f
+            paddingRight = 50f
+
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                syncDimensions()
+                image {
+                    name("player_health_icon")
+                    marginRight = 10f
+                    width = 30f
+                    height = 30f
+                    backgroundHandle = "statusbar_lives"
+                }
+
+                label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
+                    fontColor = ScreenCreator.fortyWhite
+                }
+            }
+
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                syncDimensions()
+                image {
+                    name("cash_symbol")
+                    marginRight = 10f
+                    backgroundHandle = "cash_symbol"
+                    width = 30f
+                    height = 30f
+                }
+
+                label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
+                    fontColor = ScreenCreator.fortyWhite
+                }
+            }
+        }
+
+        box {
+            name("navbar_buttonParent")
+            fixedZIndex = -1
+            relativeWidth(92f)
+            relativeHeight(50f)
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.START
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            objects.forEach {
+                navBarButton(creator, events, it, timeline, scale = 0.9f)
+            }
         }
     }
 
@@ -162,10 +240,11 @@ object NavbarCreator {
         events: EventPipeline,
         obj: NavBarObject,
         timeline: Timeline,
+        scale: Float = 1f,
     ) = with(creator) {
         box {
-            height = parent.parent.height * 0.7f
-            width = 250f
+            height = parent.parent.height * 0.7f * scale
+            width = 250f * scale
             backgroundHandle = "statusbar_option"
             logicalOffsetY = 30f
             setFocusableTo(true, this)
@@ -178,7 +257,7 @@ object NavbarCreator {
                 setAlignment(Align.center)
                 positionType = PositionType.ABSOLUTE
                 fontColor = ScreenCreator.fortyWhite
-                setFontScale(0.7f)
+                setFontScale(0.7f * scale)
             }
 
             fun createAction(end: Float): PropertyAction = PropertyAction(

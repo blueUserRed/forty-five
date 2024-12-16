@@ -219,20 +219,20 @@ textures: [
         file: "blobs/game_screen/player.png"
     },
     {
-        name: "win_screen_background",
-        file: "blobs/game_screen/win_screen_background.png"
+        name: "win_popup_background",
+        file: "blobs/game_screen/win_popup/background.png"
     },
     {
-        name: "win_screen_spacer",
-        file: "blobs/game_screen/win_screen_spacer.png"
+        name: "win_popup_spacer",
+        file: "blobs/game_screen/win_popup/spacer.png"
     },
     {
-        name: "win_screen_item_cash",
-        file: "blobs/game_screen/win_screen_item_cash.png"
+        name: "win_popup_item_cash",
+        file: "blobs/game_screen/win_popup/item_cash.png"
     },
     {
-        name: "win_screen_item_card",
-        file: "blobs/game_screen/win_screen_item_card.png"
+        name: "win_popup_item_card",
+        file: "blobs/game_screen/win_popup/item_card.png"
     },
     {
         name: "status_effect_background",

@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.game.controller
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
@@ -11,6 +12,8 @@ import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
+import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -24,6 +27,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import onj.value.OnjArray
+import java.sql.Time
 import kotlin.collections.map
 import kotlin.math.floor
 
@@ -101,6 +105,9 @@ class NewGameController(
 
     var cardsDrawn: Int = 0
         private set
+
+    val hasWon: Boolean
+        get() = allEnemies.all { it.isDefeated }
 
     private val enemyBannerPromise: Promise<Drawable> =
         ResourceManager.request(this, this.screen, "enemy_turn_banner")
@@ -183,6 +190,10 @@ class NewGameController(
                 include(checkTrigger(situation, event.triggerInformation))
                 encounterModifiers
                     .mapNotNull { it.executeOnPlayerTurnStart(this@NewGameController) }
+                    .collectTimeline()
+                    .let { include(it) }
+                activeEnemies
+                    .map { it.executeStatusEffectsAfterTurn() }
                     .collectTimeline()
                     .let { include(it) }
             }
@@ -590,7 +601,7 @@ class NewGameController(
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
-        TODO("Not yet implemented")
+        updateReserves(curReserves + amount, source)
     }
 
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
@@ -702,41 +713,89 @@ class NewGameController(
             }
     } }
 
+    private fun winTimeline(): Timeline = Timeline.timeline { later {
+        val money = -allEnemies.sumOf { it.currentHealth }
+        val playerGetsCard = !encounter.special && Utils.coinFlip(Config.playerGetsRewardCardChance)
+        val event = Events.ShowPlayerWonPopup(
+            gotCard = playerGetsCard,
+            cashAmount = money
+        )
+        action {
+            gameEvents.fire(event)
+            SoundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
+            SaveState.encountersWon++
+        }
+        delayUntil { event.popupPromise.isResolved }
+        if (money > 0) {
+            delay(600)
+            action { SaveState.earnMoney(money) }
+        }
+        delay(300)
+        action {
+            SaveState.write()
+
+            val chooseCardContext = object : ChooseCardScreenContext {
+                override val forwardToScreen: String = encounterContext.forwardToScreen
+                override var seed: Long = TimeUtils.millis()
+                override val nbrOfCards: Int = 3
+                override val types: List<String> = listOf()
+                override val enableRerolls: Boolean = true
+                override var amountOfRerolls: Int = 0
+                override val rerollPriceIncrease: Int = Config.rewardRerollPriceIncrease
+                override val rerollBasePrice: Int = Config.rewardRerollBasePrice
+
+                override fun completed() { }
+            }
+
+            if (playerGetsCard) {
+                MapManager.changeToChooseCardScreen(chooseCardContext)
+            } else {
+                FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(encounterContext.forwardToScreen))
+            }
+        }
+    } }
+
+    private fun endTurnTimeline(): Timeline = Timeline.timeline { later {
+        action { SoundPlayer.situation("end_turn", screen) }
+
+        if (hasWon) {
+            include(winTimeline())
+            return@later
+        }
+
+        later {
+            val triggerInfo = TriggerInformation(controller = this@NewGameController)
+            val event = Events.EndTurnEvent(triggerInfo)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
+        // TODO: put cards under stack
+        action {
+            turnCounter++
+        }
+
+        include(bannerAnimationTimeline(false))
+        include(enemyActionTimeline())
+        include(bannerAnimationTimeline(true))
+
+        action {
+            chooseEnemyActions()
+            SoundPlayer.situation("turn_begin", screen)
+            updateReserves(Config.baseReserves, revolver)
+        }
+
+        includeLater({ drawCardsTimeline(Config.cardsToDraw) })
+
+        later {
+            val triggerInfo = TriggerInformation(controller = this@NewGameController)
+            val event = Events.TurnBeginEvent(triggerInfo)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
+    } }
+
     private fun endTurn() {
-        appendMainTimeline(Timeline.timeline {
-            // TODO: check player win
-            action { SoundPlayer.situation("end_turn", screen) }
-            later {
-                val triggerInfo = TriggerInformation(controller = this@NewGameController)
-                val event = Events.EndTurnEvent(triggerInfo)
-                gameEvents.fire(event)
-                include(event.createTimeline())
-            }
-            // TODO: put cards under stack
-            action {
-                turnCounter++
-            }
-
-            include(bannerAnimationTimeline(false))
-            include(enemyActionTimeline())
-            include(bannerAnimationTimeline(true))
-
-            action {
-                chooseEnemyActions()
-                SoundPlayer.situation("turn_begin", screen)
-                updateReserves(Config.baseReserves, revolver)
-            }
-
-            includeLater({ drawCardsTimeline(Config.cardsToDraw) })
-
-            later {
-                val triggerInfo = TriggerInformation(controller = this@NewGameController)
-                val event = Events.TurnBeginEvent(triggerInfo)
-                gameEvents.fire(event)
-                include(event.createTimeline())
-            }
-
-        })
+        appendMainTimeline(endTurnTimeline())
     }
 
     private fun chooseEnemyActions() {
@@ -785,6 +844,9 @@ class NewGameController(
         const val cardsToDrawInFirstRound = 6
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
+        const val playerGetsRewardCardChance = 1f
+        const val rewardRerollPriceIncrease = 30
+        const val rewardRerollBasePrice = 30
     }
 
     object Events {
@@ -803,6 +865,11 @@ class NewGameController(
         )
         data class SetupEnemies(val enemies: List<Enemy>)
         data class EnemySelected(val selected: Enemy)
+        data class ShowPlayerWonPopup(
+            val gotCard: Boolean,
+            val cashAmount: Int,
+            val popupPromise: Promise<Unit> = Promise()
+        )
         data object Shoot
         data object Holster
 

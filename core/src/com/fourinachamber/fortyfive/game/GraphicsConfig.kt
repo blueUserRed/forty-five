@@ -58,7 +58,7 @@ object GraphicsConfig {
         isReserves: Boolean,
         renderPipeline: RenderPipeline,
         duration: Int = 300,
-    ): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
+    ) = RenderPipeline.OrbAnimation(
         orbTexture = if (isReserves) "reserves_orb" else "card_orb",
         width = 10f,
         height = 10f,
@@ -70,6 +70,20 @@ object GraphicsConfig {
             target,
             curveOffsetMultiplier = (-1.5f..1.5f).random()
         )
+    )
+
+    fun cashOrbAnimation(
+        start: Vector2,
+        end: Vector2,
+        renderPipeline: RenderPipeline
+    ) = RenderPipeline.OrbAnimation(
+        orbTexture = "cash_symbol",
+        width = 30f,
+        height = 30f,
+        duration = 600,
+        segments = 20,
+        renderPipeline = renderPipeline,
+        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
     )
 
     fun chargeTimeline(actor: Actor): Timeline {

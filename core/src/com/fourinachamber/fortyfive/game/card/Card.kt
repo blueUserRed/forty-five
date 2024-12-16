@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -420,8 +421,6 @@ class Card(
         rotationCounter += rotation.amount
     }
 
-    fun inHand(controller: GameController): Boolean = this in controller.cardsInHand
-
     /**
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
@@ -431,41 +430,36 @@ class Card(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
         controller: GameController,
-    ): Timeline = Timeline.timeline {
-        val isOnShot = triggerInformation.isOnShot
-        action {
-            checkModifierTransformers(situation, triggerInformation, controller)
+    ): Timeline = Timeline.timeline { later {
+
+        action { checkModifierTransformers(situation, triggerInformation, controller) }
+
+        val prevPosition = Vector2(actor.x, actor.y)
+        var isInTriggerPosition = false
+        effects.forEach { effect ->
+            later {
+                val shouldTrigger = effect.checkTrigger(situation, triggerInformation, controller, this@Card)
+                if (!shouldTrigger) return@later
+                if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.DECK)) {
+                    val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
+                    val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot)
+                    isInTriggerPosition = true
+                    val screenShakeTimeline = Timeline.timeline {
+                        delay(210)
+                        include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                    }
+                    action { controller.dispatchAnimTimeline(screenShakeTimeline) }
+                    include(anim)
+                }
+                include(effect.onTrigger(this@Card, triggerInformation, controller))
+            }
         }
+
         later {
-            val effects = effects
-                .filter { it.checkConditions(controller, this@Card) }
-                .zip { it.checkTrigger(situation, triggerInformation, controller, this@Card) }
-                .filter { it.second != null }
-            if (effects.isEmpty()) return@later
-            val showAnimation = !effects.all { it.first.data.isHidden }
-            val doAnim = inZone(Zone.REVOLVER, Zone.HAND, Zone.AFTERLIVE)
-            action {
-                if (isOnShot || !showAnimation || !doAnim) return@action
-                controller.dispatchAnimTimeline(Timeline.timeline {
-                    delay(210)
-                    include(controller.gameRenderPipeline.getScreenShakeTimeline())
-                })
-            }
-            val forceNonOnShotTrigger = effects.any { it.first.useAlternateOnShotTriggerPosition() }
-            includeLater(
-                { actor.animateToTriggerPosition(controller, isOnShot && !forceNonOnShotTrigger) },
-                { doAnim && showAnimation }
-            )
-            include(effects.mapNotNull { it.second }.collectTimeline())
-            includeLater(
-                { actor.animateBack(controller) },
-                { doAnim && showAnimation && (!isOnShot || !shouldRemoveAfterShot(controller)) }
-            )
-            action {
-                actor.setScale(1f)
-            }
+            if (isInTriggerPosition) include(actor.animateBack(controller, prevPosition))
+            action { actor.setScale(1f) }
         }
-    }
+    } }
 
     private fun checkModifierTransformers(
         situation: GameSituation,
@@ -631,7 +625,12 @@ class Card(
                             trigger = it.get<Trigger>("trigger"),
                             isHidden = it.getOr("isHidden", false),
                             cacheAffectedCards = it.getOr("cacheAffectedCards", false),
-                            canPreventEnteringGame = it.getOr("canPreventEnteringGame", false)
+                            canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
+                            onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
+                                arr
+                                    .value
+                                    .map { (it as OnjZone).value }
+                            }
                         )
                         effect.copy(data)
                     },
@@ -950,12 +949,21 @@ class CardActor(
         }
     }
 
-    fun animateToTriggerPosition(controller: GameController, isOnShotTrigger: Boolean): Timeline = Timeline.timeline {
+    fun animateToTriggerPosition(controller: GameController, isOnShot: Boolean): Timeline = Timeline.timeline { later {
         prevPosition = Vector2(x, y)
-        val target = if (isOnShotTrigger) {
-            controller.revolver.getCardOnShotTriggerPosition()
-        } else {
-            controller.revolver.getCardTriggerPosition()
+        val target = when (card.zone) {
+            Zone.REVOLVER -> if (isOnShot) {
+                controller.revolver.getCardOnShotTriggerPosition()
+            } else {
+                controller.revolver.getCardTriggerPosition()
+            }
+            Zone.HAND -> Vector2(
+                x, y + 300f
+            )
+            Zone.AFTERLIVE -> Vector2(
+                x, y + 300f
+            )
+            Zone.DECK -> return@later
         }
         val moveAction = MoveToAction()
         moveAction.setPosition(target.x, target.y)
@@ -978,15 +986,15 @@ class CardActor(
             removeAction(scaleAction)
         }
         delay(100)
-    }
+    } }
 
-    fun animateBack(controller: GameController): Timeline = Timeline.timeline {
+    fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {
         val target = controller
             .revolver
             .slots
             .find { it.card === card }
             ?.cardPosition()
-            ?: return@timeline
+            ?: prevCoordinates
         val moveAction = MoveToAction()
         moveAction.setPosition(target.x, target.y)
         val distance = (Vector2(x, y) - target).len().absoluteValue

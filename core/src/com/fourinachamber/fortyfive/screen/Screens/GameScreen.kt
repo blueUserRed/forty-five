@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
@@ -29,6 +30,8 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
@@ -38,6 +41,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
+import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
@@ -127,7 +131,21 @@ class GameScreen : ScreenCreator() {
         }
 
         playerBar()
+        winPopup()
 
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+        val navBar = getSharedNavBar(
+            worldWidth,
+            worldHeight,
+            listOf(settingsObject, settingsObject),
+            screen,
+            isLeft = true
+        )
+        actor(navBar) {
+            onLayoutAndNow { y = worldHeight - height }
+            x = 0f
+        }
+        actor(settings) // TODO: fix settings not popping up
     }
 
     private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {
@@ -598,6 +616,128 @@ class GameScreen : ScreenCreator() {
                     xAnim.state("open")
                     closed = false
                     touchable = Touchable.enabled
+                }
+            }
+        }
+    }
+
+    private fun CustomGroup.winPopup() {
+        var continuePromise: Promise<Unit>? = null
+        box {
+            backgroundHandle = "win_popup_background"
+            relativeHeight(120f)
+            onLayoutAndNow { width = height * (850f / 973f) }
+            centerX()
+            centerY()
+            flexDirection = FlexDirection.COLUMN
+            verticalAlign = CustomAlign.SPACE_BETWEEN
+            horizontalAlign = CustomAlign.CENTER
+            isVisible = false
+
+            gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { event ->
+                isVisible = true
+                continuePromise = event.popupPromise
+            }
+
+            box {
+                horizontalAlign = CustomAlign.CENTER
+                relativeWidth(100f)
+                // TODO: randomize text
+                label("red_wing_bmp", "You survived", Color.FortyWhite, isDistanceField = false) {
+                    setFontScale(0.5f)
+                    setAlignment(Align.center)
+                    marginTop = 150f
+                }
+
+                box {
+                    relativeWidth(62f)
+                    flexDirection = FlexDirection.ROW
+                    verticalAlign = CustomAlign.CENTER
+                    height = 70f
+                    backgroundHandle = "win_popup_item_cash"
+
+                    image {
+                        name("overkill_cash_symbol")
+                        width = 40f
+                        height = 30f
+                        backgroundHandle = "cash_symbol"
+                        marginLeft = 10f
+                        marginRight = 10f
+                    }
+
+                    gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { (_, money, _) ->
+                        isVisible = money > 0
+                    }
+
+                    label("red_wing", "", Color.FortyWhite) {
+                        gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { (_, money, _) ->
+                            setText("You get \$$money overkill cash")
+                        }
+                    }
+                }
+
+                box {
+                    relativeWidth(62f)
+                    flexDirection = FlexDirection.ROW
+                    verticalAlign = CustomAlign.CENTER
+                    height = 70f
+                    backgroundHandle = "win_popup_item_card"
+                    marginTop = 10f
+
+                    image {
+                        width = 60f
+                        height = 60f
+                        backgroundHandle = "map_node_get_card"
+                        marginLeft = 10f
+                        marginRight = 10f
+                    }
+
+                    gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { (gotCard, _, _) ->
+                        isVisible = gotCard
+                    }
+
+                    label("red_wing", "You get a card", Color.FortyWhite)
+                }
+            }
+            box {
+                width = 200f
+                height = 50f
+                isFocusable = true
+                isSelectable = true
+                touchable = Touchable.enabled
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
+                styles(
+                    normal = {
+                        backgroundHandle = "common_button_default"
+                    },
+                    focused = {
+                        backgroundHandle = "common_button_hover"
+                    }
+                )
+                label("red_wing", "Claim & Continue", Color.FortyWhite) {
+                    setFontScale(0.7f)
+                    setAlignment(Align.center)
+                }
+                marginBottom = 120f
+                onSelect {
+                    continuePromise?.resolve(Unit)
+                    SoundPlayer.situation("money_earned", screen)
+                    val navBarSymbol = screen.namedActorOrError("cash_symbol")
+                    val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
+                    val renderPipeline = FortyFive.currentRenderPipeline!!
+                    val moneyAnim = GraphicsConfig.cashOrbAnimation(
+                        winPopupSymbol.localToScreenCoordinates(Vector2(
+                            winPopupSymbol.width / 2,
+                            winPopupSymbol.height / 2
+                        )),
+                        navBarSymbol.localToScreenCoordinates(Vector2(
+                            navBarSymbol.width / 2,
+                            navBarSymbol.height / 2
+                        )),
+                        renderPipeline
+                    )
+                    renderPipeline.addOrbAnimation(moneyAnim)
                 }
             }
         }
