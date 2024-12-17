@@ -40,7 +40,7 @@ interface GameController {
 
     fun destroyCardTimeline(card: Card): Timeline
 
-    fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1): Timeline
+    fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
 
     fun bounceBulletTimeline(card: Card): Timeline
 

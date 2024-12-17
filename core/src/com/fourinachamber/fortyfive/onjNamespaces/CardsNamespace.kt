@@ -5,6 +5,7 @@ import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.card.Trigger.Companion.triggerForSituation
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
@@ -53,7 +54,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
         },
         "zone" to buildOnjObject {
-            NewGameController.Zone.entries.forEach {
+            Zone.entries.forEach {
                 it.name.lowercase() with OnjZone(it)
             }
         }
@@ -275,8 +276,17 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone[]]")
+    fun inZone(zones: OnjArray): OnjCardPredicate {
+        val zonesArr = Array(zones.value.size) { zones.value[it].value as Zone }
+        return OnjCardPredicate(CardPredicate.inZone(*zonesArr))
+    }
+
     @RegisterOnjFunction(schema = "params: []")
     fun isSelf(): OnjCardPredicate = OnjCardPredicate(CardPredicate.isSelf())
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun hasName(name: OnjString): OnjCardPredicate = OnjCardPredicate(CardPredicate.hasName(name.value))
 
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
     fun not(predicate: OnjCardPredicate): OnjCardPredicate = OnjCardPredicate(CardPredicate.not(predicate.value))
@@ -564,7 +574,7 @@ class OnjTrigger(
 }
 
 class OnjZone(
-    override val value: NewGameController.Zone
+    override val value: Zone
 ) : OnjValue() {
 
     override fun stringify(info: ToStringInformation) {

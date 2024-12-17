@@ -220,6 +220,7 @@ class Card(
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
             enteredOnTurn = controller.turnCounter
+            if (isRotten) addRottenModifier(controller)
         }
     }
 
@@ -307,6 +308,10 @@ class Card(
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
         action {
+            if (isEverlasting && !controller.isEverlastingDisabled) {
+                skip()
+                return@action
+            }
             if (protectingModifiers.isNotEmpty()) {
                 val effect = protectingModifiers.first()
                 val newEffect = effect.copy(second = effect.second - 1)
@@ -380,7 +385,6 @@ class Card(
     }
 
     private fun addRottenModifier(controller: GameController) {
-        TODO("dont use this function")
         val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
             val newDamage = (oldModifier.damage - (triggerInformation.multiplier ?: 1))
             CardModifier(
@@ -438,7 +442,7 @@ class Card(
             later {
                 val shouldTrigger = effect.checkTrigger(situation, triggerInformation, controller, this@Card)
                 if (!shouldTrigger) return@later
-                if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.DECK)) {
+                if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.DECK, Zone.LIMBO)) {
                     val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
                     val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot)
                     isInTriggerPosition = true
@@ -663,8 +667,10 @@ class Card(
 
         private fun applyTraitEffects(card: Card, onj: OnjObject) {
             val effects = onj
-                .getOr<List<*>>("traitEffects", listOf<String>())
-                .map { it as String }
+                .getOr<OnjArray?>("traitEffects", null)
+                ?.value
+                ?.map { it.value as String }
+                ?: listOf()
 
             for (effect in effects) when (effect) {
 
@@ -964,7 +970,7 @@ class CardActor(
             Zone.AFTERLIVE -> Vector2(
                 x, y + 300f
             )
-            Zone.DECK -> return@later
+            Zone.DECK, Zone.LIMBO -> return@later
         }
         val moveAction = MoveToAction()
         moveAction.setPosition(target.x, target.y)

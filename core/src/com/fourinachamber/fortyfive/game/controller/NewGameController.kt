@@ -56,7 +56,7 @@ class NewGameController(
         get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
-        get() = TODO("Not yet implemented")
+        get() = _encounterModifiers.any { it.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
@@ -278,10 +278,27 @@ class NewGameController(
 
     override fun tryToPutCardsInHandTimeline(
         cardName: String,
-        amount: Int
-    ): Timeline {
-        TODO("Not yet implemented")
-    }
+        amount: Int,
+        sourceCard: Card?
+    ): Timeline = Timeline.timeline { later {
+        val prototype = cardPrototypes.find { it.name == cardName } ?: throw RuntimeException("unknown card $cardName")
+        val newAmount = maxSpaceInHand(amount)
+        if (newAmount == 0) return@later
+        repeat(newAmount) {
+            val card = prototype.create(screen)
+            action { cardHand.addCard(card) }
+            include(card.actor.spawnAnimation())
+            later {
+                val triggerInfo = TriggerInformation(
+                    controller = this@NewGameController,
+                    sourceCard = sourceCard
+                )
+                val event = Events.CardChangedZoneEvent(card, Zone.LIMBO, Zone.HAND, triggerInfo)
+                gameEvents.fire(event)
+                include(event.createTimeline())
+            }
+        }
+    } }
 
     override fun bounceBulletTimeline(card: Card): Timeline {
         TODO("Not yet implemented")
@@ -838,7 +855,7 @@ class NewGameController(
     }
 
     enum class Zone {
-        DECK, HAND, REVOLVER, AFTERLIVE
+        DECK, HAND, REVOLVER, AFTERLIVE, LIMBO
     }
 
     object Config {

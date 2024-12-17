@@ -705,7 +705,7 @@ class OldGameController(
      * creates a new instance of the card named [name] and puts it in the hand of the player
      */
     @AllThreadsAllowed
-    override fun tryToPutCardsInHandTimeline(name: String, amount: Int): Timeline = Timeline.timeline {
+    override fun tryToPutCardsInHandTimeline(name: String, amount: Int, sourceCard: Card?): Timeline = Timeline.timeline {
         var cardsToDraw = 0
         action {
             val maxCards = hardMaxCards - cardHand.cards.size

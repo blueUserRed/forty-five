@@ -11,7 +11,9 @@ fun interface CardPredicate {
 
         fun cost(cost: Int) = CardPredicate { card, _, _ -> card.baseCost == cost }
 
-        fun inZone(zone: Zone) = CardPredicate { card, _, _ -> card.inZone(zone) }
+        fun inZone(vararg zone: Zone) = CardPredicate { card, _, _ -> card.inZone(*zone) }
+
+        fun hasName(name: String) = CardPredicate { card, _, _ -> card.name == name }
 
         fun isSelf() = CardPredicate { card, _, effectCard -> card === effectCard }
 
