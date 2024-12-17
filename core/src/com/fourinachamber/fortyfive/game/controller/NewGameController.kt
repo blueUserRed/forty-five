@@ -27,7 +27,6 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import onj.value.OnjArray
-import java.sql.Time
 import kotlin.collections.map
 import kotlin.math.floor
 
@@ -244,6 +243,9 @@ class NewGameController(
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
                 _encounterModifiers.forEach { it.initBullet(card) }
+                card.actor.isSelectable = true
+                card.actor.isFocusable = true
+                card.bindGameEvents(gameEvents, this)
             }
             .toMutableList()
 
@@ -268,8 +270,11 @@ class NewGameController(
     override fun cardSelectionPopupTimeline(
         text: String,
         exclude: Card?
-    ): Timeline {
-        TODO("Not yet implemented")
+    ): Timeline = Timeline.timeline {
+        val event = Events.TargetSelectionEvent(text, exclude)
+        action { gameEvents.fire(event) }
+        delayUntil { event.promise.isResolved }
+        action { store("selectedCard", event.promise.getOrError()) }
     }
 
     override fun destroyCardTimeline(card: Card): Timeline {
@@ -409,7 +414,7 @@ class NewGameController(
         } }, { orbAnimationTimeline != null })
         includeLater({
             val info = TriggerInformation(controller = this@NewGameController, sourceCard = source)
-            val event = Events.CardChangedZoneEvent(card, Zone.DECK, Zone.HAND, info)
+            val event = Events.CardChangedZoneEvent(card, Zone.STACK, Zone.HAND, info)
             gameEvents.fire(event)
             event.createTimeline()
         })
@@ -553,12 +558,24 @@ class NewGameController(
             revolver.removeCard(card)
             cardHand.addCard(card)
         }
+        later {
+            val triggerInformation = TriggerInformation(controller = this@NewGameController)
+            val event = Events.CardChangedZoneEvent(card, Zone.REVOLVER, Zone.HAND, triggerInformation)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
     }
 
     private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
         action {
             revolver.removeCard(card)
             _cardStack.add(card)
+        }
+        later {
+            val triggerInformation = TriggerInformation(controller = this@NewGameController)
+            val event = Events.CardChangedZoneEvent(card, Zone.REVOLVER, Zone.STACK, triggerInformation)
+            gameEvents.fire(event)
+            include(event.createTimeline())
         }
     }
 
@@ -855,7 +872,7 @@ class NewGameController(
     }
 
     enum class Zone {
-        DECK, HAND, REVOLVER, AFTERLIVE, LIMBO
+        STACK, HAND, REVOLVER, AFTERLIVE, LIMBO
     }
 
     object Config {
@@ -884,6 +901,7 @@ class NewGameController(
             val ableToBlock: Int,
             val resolutionPromise: Promise<Boolean /*= parried*/> = Promise()
         )
+        data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
         data class SetupEnemies(val enemies: List<Enemy>)
         data class EnemySelected(val selected: Enemy)
         data class ShowPlayerWonPopup(

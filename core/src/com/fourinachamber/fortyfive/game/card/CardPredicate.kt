@@ -17,6 +17,10 @@ fun interface CardPredicate {
 
         fun isSelf() = CardPredicate { card, _, effectCard -> card === effectCard }
 
+        fun inRevolverSlot(slot: Int) = CardPredicate { card, controller, _ ->
+            controller.revolver.slots.find { it.card === card }?.num == slot
+        }
+
         fun not(predicate: CardPredicate) = CardPredicate { card, controller, effectCard ->
             !predicate.check(card, controller, effectCard)
         }

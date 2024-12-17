@@ -2,11 +2,13 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardCostModifier
+import com.fourinachamber.fortyfive.game.card.CardDamageModifier
+import com.fourinachamber.fortyfive.game.card.CardModifierData
 import com.fourinachamber.fortyfive.game.card.GameSituation
 import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
@@ -64,21 +66,25 @@ sealed class EncounterModifier {
             card: Card,
             controller: GameController
         ): Timeline = Timeline.timeline {
-            val rotationTransformer = { old: Card.CardModifier, triggerInformation: TriggerInformation -> Card.CardModifier(
+            val rotationTransformer = { old: CardDamageModifier, triggerInformation: TriggerInformation -> CardDamageModifier(
                 damage = old.damage - (triggerInformation.multiplier ?: 1),
-                source = old.source,
-                validityChecker = old.validityChecker,
+                data = CardModifierData(
+                    source = old.data.source,
+                    validityChecker = old.data.validityChecker,
+                ),
                 transformers = old.transformers
             )}
-            val modifier = Card.CardModifier(
+            val modifier = CardDamageModifier(
                 damage = 0,
-                source = "moist modifier",
-                validityChecker = { _, _, _ -> card.inZone(Zone.REVOLVER) },
+                data = CardModifierData(
+                    source = "moist modifier",
+                    validityChecker = { _, _, _ -> card.inZone(Zone.REVOLVER) },
+                ),
                 transformers = listOf(
                     Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
                 )
             )
-            card.addModifier(modifier)
+            card.addDamageModifier(modifier)
         }
 
 
@@ -143,11 +149,14 @@ sealed class EncounterModifier {
     object AnOfferYouCantRefuse : EncounterModifier() {
 
         override fun initBullet(card: Card) {
-            card.addModifier(
-                Card.CardModifier(
-                source = "An offer you cant refuse",
-                costChange = -1,
-            ))
+            card.addCostModifier(
+                CardCostModifier(
+                    data = CardModifierData(
+                        source = "An offer you cant refuse",
+                    ),
+                    costChange = -1,
+                )
+            )
         }
 
         override fun canShootRevolver(controller: GameController): Boolean {

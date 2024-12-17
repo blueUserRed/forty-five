@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
+import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
@@ -139,14 +140,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 //            )
 //        )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, EffectValue]")
-    fun giftDmg(bulletSelector: OnjBulletSelector, amount: OnjEffectValue): OnjEffect = OnjEffect(
-        Effect.GiftDamage(
-            amount.value,
-            bulletSelector.value,
-            EffectData()
-        )
-    )
+//    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, EffectValue]")
+//    fun giftDmg(bulletSelector: OnjBulletSelector, amount: OnjEffectValue): OnjEffect = OnjEffect(
+//        Effect.GiftDamage(
+//            amount.value,
+//            bulletSelector.value,
+//            EffectData()
+//        )
+//    )
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun draw(amount: OnjEffectValue): OnjEffect = OnjEffect(Effect.Draw(amount.value, EffectData()))
@@ -171,13 +172,49 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         EffectData()
     ))
 
-    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int, boolean]")
-    fun protect(bulletSelector: OnjBulletSelector, shots: OnjInt, onlyValidWhileCardIsInGame: OnjBoolean): OnjEffect =
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int]")
+    fun protect(bulletSelector: OnjBulletSelector, shots: OnjInt): OnjEffect =
         OnjEffect(Effect.Protect(
             bulletSelector.value,
             shots.value.toInt(),
-            onlyValidWhileCardIsInGame.value,
-            EffectData()
+            activeChecker = { _, _, _ -> true },
+            validityChecker = { _, _, _ -> true },
+            data = EffectData()
+        ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int, CardModifierPredicate]")
+    fun protectLimitActive(bulletSelector: OnjBulletSelector, shots: OnjInt, activeChecker: OnjCardModifierPredicate): OnjEffect =
+        OnjEffect(Effect.Protect(
+            bulletSelector.value,
+            shots.value.toInt(),
+            activeChecker = activeChecker.value,
+            validityChecker = { _, _, _ -> true },
+            data = EffectData()
+        ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int, CardModifierPredicate]")
+    fun protectLimitValidity(bulletSelector: OnjBulletSelector, shots: OnjInt, validityChecker: OnjCardModifierPredicate): OnjEffect =
+        OnjEffect(Effect.Protect(
+            bulletSelector.value,
+            shots.value.toInt(),
+            activeChecker = { _, _, _ -> true },
+            validityChecker = validityChecker.value,
+            data = EffectData()
+        ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int, CardModifierPredicate, CardModifierPredicate]")
+    fun protect(
+        bulletSelector: OnjBulletSelector,
+        shots: OnjInt,
+        activeChecker: OnjCardModifierPredicate,
+        validityChecker: OnjCardModifierPredicate
+    ): OnjEffect =
+        OnjEffect(Effect.Protect(
+            bulletSelector.value,
+            shots.value.toInt(),
+            activeChecker = activeChecker.value,
+            validityChecker = validityChecker.value,
+            data = EffectData()
         ))
 
     @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector]")
@@ -237,19 +274,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, string]")
-    fun zoneChange(oldZone: OnjZone, newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
-            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
-            when {
-                !triggers -> false
-                oldZone.value != gameSituation.oldZone -> false
-                newZone.value != gameSituation.newZone -> false
-                else -> true
-            }
-        }
-    )
-
     @RegisterOnjFunction(schema = "params: []")
     fun shot(): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.OnShot> { situation, card, info, controller -> situation.card === card }
@@ -273,6 +297,18 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
+    fun leaveZone(oldZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
+            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
+            when {
+                !triggers -> false
+                oldZone.value != gameSituation.oldZone -> false
+                else -> true
+            }
+        }
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 
@@ -281,6 +317,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         val zonesArr = Array(zones.value.size) { zones.value[it].value as Zone }
         return OnjCardPredicate(CardPredicate.inZone(*zonesArr))
     }
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun inRevolverSlot(slot: OnjInt): OnjCardPredicate = OnjCardPredicate(
+        CardPredicate.inRevolverSlot(Utils.convertSlotRepresentation(slot.value.toInt()))
+    )
 
     @RegisterOnjFunction(schema = "params: []")
     fun isSelf(): OnjCardPredicate = OnjCardPredicate(CardPredicate.isSelf())
@@ -317,9 +358,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
-    @RegisterOnjFunction(schema = "params: [boolean, boolean]")
-    fun bSelectTarget(includeSelf: OnjBoolean, optional: OnjBoolean): OnjBulletSelector =
-        OnjBulletSelector(BulletSelector.ByPopup(includeSelf.value, optional.value))
+    @RegisterOnjFunction(schema = "params: [boolean, boolean, string]")
+    fun bSelectRevolverTarget(includeSelf: OnjBoolean, optional: OnjBoolean, text: OnjString): OnjBulletSelector =
+        OnjBulletSelector(BulletSelector.ByPopup(includeSelf.value, optional.value, text.value))
 
     @RegisterOnjFunction(schema = "params: []")
     fun bSelectSourceBullet(): OnjBulletSelector = OnjBulletSelector(BulletSelector.ByLambda { info, card ->

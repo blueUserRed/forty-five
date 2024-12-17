@@ -299,101 +299,74 @@ cards: [
         tags: ["pool1", "rarity3"],
         price: 50,
     },
-//    {
-//        name: "undeadBullet",
-//        title: "Undead Bullet",
-//        flavourText: "Like it was alive in the first place...",
-//        description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 4" + slot.4 + " gets +6 dmg",
-//        baseDamage: 12,
-//        traitEffects: [ "undead" ],
-//        effects: [
-//            {
-//                trigger:
-//            }
-//            giftDmg("leave", bSelects.fourButNotSelf, 6#val)
-//        ],
-//        cost: 2,
-//        tags: ["pool1", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "poisonBullet",
-//        title: "Poison Bullet",
-//        flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
-//        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (4, 3)",
-//        baseDamage: 9,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giveStatus("shot", poison(3#val, 4#val))
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        tags: ["pool1", "rarity3"],
-//        price: 50,
-//        type: $Bullet { }
-//    },
-//    {
-//        name: "enchantedBullet",
-//        title: "Enchanted Bullet",
-//        flavourText: "",
-//        description: "$trigger$On-Shot:$trigger$\nInstead of turning right, the revolver turns left twice.",
-//        baseDamage: 14,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Left { amount: 2 },
-//        highlightType: "standard",
-//        effects: [],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity3"],
-//        price: 50,
-//    },
-//    {
-//        name: "bossBullet",
-//        title: "Boss Bullet",
-//        flavourText: "boss Bullet",
-//        description: "As long as this bullet is in the revolver, when a new round starts: create 1 card of type ‘worker Bullet' in your hand",
-//        baseDamage: 10,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            putCardInHand("round start", "workerBullet", 1#val)
-//        ],
-//        forceLoadCards: [ "workerBullet" ],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["not used", "unobtainable", "not in collection"],
-//        price: 50,
-//    },
-//    {
-//        name: "protectiveBullet",
-//        title: "Protective Bullet",
-//        flavourText: "This Bullet still can't protect you from the truth: That you are bad at this game",
-//        description: "$trigger$On-Placedown:$trigger$\nTarget bullet gets $trait$PROTECTED$trait$ (4) as long as this bullet is in the revolver.",
-//        baseDamage: 6,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            protect("enter", bSelects.targetRequiredNotSelf, 4, true)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 3,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
+    {
+        name: "undeadBullet",
+        title: "Undead Bullet",
+        flavourText: "Like it was alive in the first place...",
+        description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 4" + slot.4 + " gets +6 dmg",
+        baseDamage: 12,
+        traitEffects: [ "undead" ],
+        effects: [
+            {
+                trigger: leaveZone(zone.revolver, "onlySelf"),
+                effect: buffDmg(
+                    (inZone(zone.revolver) and inRevolverSlot(4) and not(isSelf()))#bSelect,
+                    6#val
+                )
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "poisonBullet",
+        title: "Poison Bullet",
+        flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
+        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (4, 3)",
+        baseDamage: 9,
+        effects: [
+            {
+                trigger: shot(),
+                effect: giveStatus(poison(3#val, 4#val))
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "enchantedBullet",
+        title: "Enchanted Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nInstead of turning right, the revolver turns left twice.",
+        baseDamage: 14,
+        rotation: $Left { amount: 2 },
+        effects: [],
+        cost: 2,
+        tags: ["pool2", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "protectiveBullet",
+        title: "Protective Bullet",
+        flavourText: "This Bullet still can't protect you from the truth: That you are bad at this game",
+        description: "$trigger$On-Placedown:$trigger$\nTarget bullet gets $trait$PROTECTED$trait$ (4) as long as this bullet is in the revolver.",
+        baseDamage: 6,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: protectLimitValidity(
+                    bSelectRevolverTarget(true, true, "Choose Bullet to protect"),
+                    4,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 3,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
 //    {
 //        name: "purgeBullet",
 //        title: "Purge Bullet",

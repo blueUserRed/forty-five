@@ -75,7 +75,7 @@ abstract class Effect(val data: EffectData) {
                 includeLater(
                     { Timeline.timeline {
                         include(controller.cardSelectionPopupTimeline(
-                            "Select Target Bullet",
+                            bulletSelector.text,
                             if (bulletSelector.includeSelf) null else self
                         ))
                         action {
@@ -146,19 +146,21 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            val modifier = Card.CardModifier(
+            val modifier = CardDamageModifier(
                 damage = amount,
-                source = cardDescName(card),
-                sourceCard = card,
-                validityChecker = validityChecker,
-                activeChecker = activeChecker
+                data = CardModifierData(
+                    source = cardDescName(card),
+                    sourceCard = card,
+                    validityChecker = validityChecker,
+                    activeChecker = activeChecker
+                )
             )
 
             return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
-                        .forEach { it.addModifier(modifier) }
+                        .forEach { it.addDamageModifier(modifier) }
                 }
             }
         }
@@ -184,19 +186,21 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val multiplier = multiplier * (triggerInformation.multiplier ?: 1)
-            val modifier = Card.CardModifier(
+            val modifier = CardDamageModifier(
                 damageMultiplier = multiplier,
-                source = cardDescName(card),
-                sourceCard = card,
-                validityChecker = validityChecker,
-                activeChecker = activeChecker
+                data = CardModifierData(
+                    source = cardDescName(card),
+                    sourceCard = card,
+                    validityChecker = validityChecker,
+                    activeChecker = activeChecker
+                )
             )
 
             return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
-                        .forEach { it.addModifier(modifier) }
+                        .forEach { it.addDamageModifier(modifier) }
                 }
             }
         }
@@ -205,45 +209,6 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun blocks(card: Card, controller: GameController) = bulletSelector.blocks(controller, card)
-
-    }
-
-    /**
-     * gifts a card a buff (or debuff) of its damage (stays valid even after the card left the game)
-     * @param amount the amount by which the damage is changed
-     * @param bulletSelector tells this effect which bullets to apply this effect to
-     */
-    class GiftDamage(
-        val amount: EffectValue,
-        private val bulletSelector: BulletSelector,
-        data: EffectData
-    ) : Effect(data) {
-
-        override fun copy(data: EffectData): Effect = GiftDamage(amount, bulletSelector, data)
-
-        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            val modifier = Card.CardModifier(
-                damage = amount,
-                sourceCard = card,
-                source = cardDescName(card)
-            )
-            return Timeline.timeline {
-                include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
-                action {
-                    get<List<Card>>("selectedCards")
-                        .forEach { it.addModifier(modifier) }
-                }
-            }
-        }
-
-        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
-
-        override fun blocks(card: Card, controller: GameController) = bulletSelector.blocks(controller, card)
-
-        override fun toString(): String {
-            return "GiftDamage(amount=$amount)"
-        }
 
     }
 
@@ -323,23 +288,25 @@ abstract class Effect(val data: EffectData) {
     class Protect(
         val bulletSelector: BulletSelector,
         val shots: Int,
-        val onlyValidWhileCardIsInGame: Boolean,
+        val validityChecker: CardModifierPredicate,
+        val activeChecker: CardModifierPredicate,
         data: EffectData
     ) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            val protectingModifier = ProtectingModifier(
+                shots = shots,
+                data = CardModifierData(
+                    source = cardDescName(card),
+                    sourceCard = card,
+                    validityChecker = validityChecker,
+                    activeChecker = activeChecker
+                )
+            )
             action {
                 get<List<Card>>("selectedCards")
-                    .forEach { it.protect(
-                        cardDescName(card),
-                        shots,
-                        validityChecker = if (onlyValidWhileCardIsInGame) {
-                            { card.inGame }
-                        } else {
-                            { true }
-                        }
-                    )}
+                    .forEach { it.protect(protectingModifier) }
             }
         }
 
@@ -347,7 +314,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
-        override fun copy(data: EffectData): Effect = Protect(bulletSelector, shots, onlyValidWhileCardIsInGame, data)
+        override fun copy(data: EffectData): Effect = Protect(bulletSelector, shots, validityChecker, activeChecker, data)
 
         override fun toString(): String = "Protect()"
     }
@@ -628,7 +595,7 @@ sealed class BulletSelector {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
     }
 
-    class ByPopup(val includeSelf: Boolean, val optional: Boolean) : BulletSelector() {
+    class ByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean {
             if (optional) return false

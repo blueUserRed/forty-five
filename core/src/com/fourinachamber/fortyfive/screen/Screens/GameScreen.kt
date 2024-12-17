@@ -122,8 +122,6 @@ class GameScreen : ScreenCreator() {
             width = (1305f / 1512f) * worldHeight
         }
 
-        playerBar()
-
         group {
             enemyParent = this@group
             x = 800f
@@ -131,6 +129,11 @@ class GameScreen : ScreenCreator() {
             width = 800f
             height = 600f
         }
+
+        parryPopup()
+        targetSelectionPopup()
+
+        playerBar()
 
         winPopup()
 
@@ -305,6 +308,82 @@ class GameScreen : ScreenCreator() {
         return enemyWidth
     }
 
+    private fun CustomGroup.parryPopup() = box {
+        backgroundHandle = "common_popup_background_black_large"
+        width = 680f
+        height = width * (1057f / 1845f)
+        centerX()
+        y = 340f
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.SPACE_AROUND
+        verticalAlign = CustomAlign.CENTER
+        color.a = 0f
+        touchable = Touchable.disabled
+        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+            val action = AlphaAction()
+            action.duration = 0.2f
+            action.alpha = if (event.inParryMenu) 1f else 0f
+            addAction(action)
+        }
+        label("red_wing", "Parry?", Color.BrightYellow, isDistanceField = true) {
+            setFontScale(1.4f)
+            setAlignment(Align.center)
+            relativeWidth(100f)
+            syncHeight()
+        }
+        label("roadgeek", "", Color.GRAY) {
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, blockable) ->
+                setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
+            }
+            setFontScale(0.7f)
+            setAlignment(Align.center)
+            relativeWidth(100f)
+            syncHeight()
+        }
+        label("roadgeek", "", Color.GRAY) {
+            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, _) ->
+                setText("Passing will let $damage damage through")
+            }
+            setFontScale(0.7f)
+            setAlignment(Align.center)
+            relativeWidth(100f)
+            syncHeight()
+        }
+    }
+
+    private fun CustomGroup.targetSelectionPopup() = box {
+        backgroundHandle = "common_popup_background_black_large"
+        width = 680f
+        height = width * (1057f / 1845f)
+        centerX()
+        y = 340f
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.SPACE_AROUND
+        verticalAlign = CustomAlign.CENTER
+        color.a = 0f
+        touchable = Touchable.disabled
+
+        fun animateInOut(isIn: Boolean) {
+            val action = AlphaAction()
+            action.duration = 0.2f
+            action.alpha = if (isIn) 1f else 0f
+            addAction(action)
+        }
+
+        gameEvents.watchFor<NewGameController.Events.TargetSelectionEvent> { event ->
+            animateInOut(true)
+            event.promise.then { animateInOut(false) }
+        }
+        label("red_wing", "", Color.BrightYellow, isDistanceField = true) {
+            setAlignment(Align.center)
+            relativeWidth(100f)
+            syncHeight()
+            gameEvents.watchFor<NewGameController.Events.TargetSelectionEvent> { event ->
+                setText(event.text)
+            }
+        }
+    }
+
     private fun CustomGroup.playerBar() = group {
 
         x = 0f
@@ -312,48 +391,6 @@ class GameScreen : ScreenCreator() {
         width = worldWidth
         height = worldWidth * (505f / 1920f)
         backgroundHandle = "player_bar"
-
-        box {
-            backgroundHandle = "common_popup_background_black_large"
-            width = 680f
-            height = width * (1057f / 1845f)
-            centerX()
-            y = 340f
-            flexDirection = FlexDirection.COLUMN
-            horizontalAlign = CustomAlign.SPACE_AROUND
-            verticalAlign = CustomAlign.CENTER
-            color.a = 0f
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
-                val action = AlphaAction()
-                action.duration = 0.2f
-                action.alpha = if (event.inParryMenu) 1f else 0f
-                addAction(action)
-            }
-            label("red_wing", "Parry?", Color.BrightYellow, isDistanceField = true) {
-                setFontScale(1.4f)
-                setAlignment(Align.center)
-                relativeWidth(100f)
-                syncHeight()
-            }
-            label("roadgeek", "", Color.GRAY) {
-                gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, blockable) ->
-                    setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
-                }
-                setFontScale(0.7f)
-                setAlignment(Align.center)
-                relativeWidth(100f)
-                syncHeight()
-            }
-            label("roadgeek", "", Color.GRAY) {
-                gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, _) ->
-                    setText("Passing will let $damage damage through")
-                }
-                setFontScale(0.7f)
-                setAlignment(Align.center)
-                relativeWidth(100f)
-                syncHeight()
-            }
-        }
 
         shootButton()
         holsterButton()
