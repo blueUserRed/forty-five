@@ -17,7 +17,6 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.controller.NewGameController
-import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
@@ -32,6 +31,7 @@ import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
@@ -41,7 +41,6 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
-import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
@@ -75,6 +74,8 @@ class GameScreen : ScreenCreator() {
     private lateinit var reservesAnimationTarget: Actor
     private lateinit var deckAnimationTarget: Actor
 
+    private var warningParent: WarningParent? = null
+
     private lateinit var enemyParent: CustomGroup
 
     private val revolver by lazy {
@@ -105,6 +106,10 @@ class GameScreen : ScreenCreator() {
 
     init {
         bindEventHandlers()
+    }
+
+    override fun update() {
+        warningParent?.update()
     }
 
     override fun getRoot(): Group = newGroup {
@@ -150,6 +155,10 @@ class GameScreen : ScreenCreator() {
             x = 0f
         }
         actor(settings) // TODO: fix settings not popping up
+
+        val warningParent = WarningParent(this@GameScreen, screen)
+        this@GameScreen.warningParent = warningParent
+        actor(warningParent.getActor())
     }
 
     private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {

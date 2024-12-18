@@ -378,7 +378,10 @@ cards: [
 //        rotation: $Right { amount: 1 },
 //        highlightType: "standard",
 //        effects: [
-//            destroy("enter", bSelects.neighbors)
+//            {
+//                trigger: enterZone(zone.revolver, "onlySelf"),
+//                effect: destroy(bSelectNeighbors())
+//            }
 //        ],
 //        forceLoadCards: [],
 //        dark: false,

@@ -19,7 +19,6 @@ import ktx.actors.onClick
 
 object NavbarCreator {
 
-    const val navbarZIndex = 1000
     const val navbarFocusGroup = "navbar_selectors"
     const val navbarOpenScreenState = "navbarIsOpen"
 
@@ -35,7 +34,6 @@ object NavbarCreator {
         width = worldWidth
         height = worldHeight
         touchable = Touchable.childrenOnly
-        fixedZIndex = navbarZIndex
 
         val navBarEvents = EventPipeline()
         val navBarTimeline = Timeline()

@@ -37,7 +37,6 @@ object SettingsCreator {
             forcedPrefHeight = worldHeight
             syncDimensions()
             backgroundHandle = "settings_background"
-            fixedZIndex = NavbarCreator.navbarZIndex + 1
 
             onLayout { x = parent.width / 2 - width / 2 }
             y = -height

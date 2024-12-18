@@ -620,7 +620,7 @@ textures: [
     },
     {
         name: "warning_label_background_red",
-        file: "blobs/ui_elements/warning_label//background_red.png"
+        file: "blobs/ui_elements/warning_label/background_red.png"
     },
     {
         name: "warning_label_background_grey",

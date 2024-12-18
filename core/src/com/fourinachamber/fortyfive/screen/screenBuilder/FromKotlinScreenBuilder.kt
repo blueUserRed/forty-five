@@ -18,7 +18,7 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             viewport = creator.viewport,
             batch = SpriteBatch(),
             controllerContext = controllerContext,
-            earlyRenderTasks = listOf(),
+            earlyRenderTasks = listOf({ creator.update() }),
             lateRenderTasks = listOf(),
             styleManagers = listOf(),
             namedActors = namedActors,

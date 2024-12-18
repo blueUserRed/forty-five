@@ -56,6 +56,8 @@ abstract class ScreenCreator : ResourceBorrower {
         this.screen = screen
     }
 
+    open fun update() { }
+
     abstract fun getRoot(): Group
 
     abstract fun getScreenControllers(): List<ScreenController>
