@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -43,6 +44,7 @@ class WarningParent(val creator: ScreenCreator, val screen: OnjScreen) {
     private fun ScreenCreator.createActorWithReceiver() = newGroup {
         x = 0f
         y = 0f
+        touchable = Touchable.disabled
         onLayout { height = parent.height }
         width = 100f
     }
@@ -59,19 +61,24 @@ class WarningParent(val creator: ScreenCreator, val screen: OnjScreen) {
     }
 
     fun show(warning: Warning) {
+        if (warning.isActive) return
         val actor = warning.getActor()
         val parent = this.actor ?: return
+        warning.isActive = true
         parent.addActor(actor)
         displayedWarnings.add(warning)
         actor.x = -500f
         actor.y = 0f
+        warning.targetX = 0f
         updatePositionsOfWarnings()
     }
 
     fun hide(warning: Warning) {
-        if (warning !in displayedWarnings) return
-        warning.targetX = -400f
+        if (!warning.isActive) return
+        warning.isActive = false
+        warning.targetX = -500f
         screen.afterMs(400) {
+            if (warning.isActive) return@afterMs
             val removed = displayedWarnings.remove(warning)
             if (!removed) return@afterMs
             actor?.removeActor(warning.getActor())
@@ -86,6 +93,8 @@ class WarningParent(val creator: ScreenCreator, val screen: OnjScreen) {
 
         var targetX = 0f
         var targetY = 0f
+
+        var isActive: Boolean = false
 
         private var actor: CustomBox? = null
 

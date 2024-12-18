@@ -19,6 +19,7 @@ import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
@@ -32,7 +33,8 @@ import kotlin.math.floor
 
 class NewGameController(
     override val screen: OnjScreen,
-    val gameEvents: EventPipeline
+    val gameEvents: EventPipeline,
+    private val warningParent: WarningParent
 ) : ScreenController(), GameController, ResourceBorrower {
 
     override val gameRenderPipeline: GameRenderPipeline = GameRenderPipeline(screen)
@@ -116,6 +118,16 @@ class NewGameController(
 
     private val playerBannerPromise: Promise<Drawable> =
         ResourceManager.request(this, this.screen, "player_turn_banner")
+
+    private val softMaxCardsWarning = warningParent.Warning(
+        "Maximum Card Number Reached\nAfter this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
+        WarningParent.Level.MID
+    )
+
+    private val hardMaxCardsWarning = warningParent.Warning(
+        "Hard Maximum Card Number Reached\nYou cant draw any more cards this turn. After this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
+        WarningParent.Level.HIGH
+    )
 
     override fun init(context: Any?) {
         if (context !is EncounterContext) {
@@ -293,6 +305,7 @@ class NewGameController(
             val card = prototype.create(screen)
             action { cardHand.addCard(card) }
             include(card.actor.spawnAnimation())
+            action { checkCardMaximums() }
             later {
                 val triggerInfo = TriggerInformation(
                     controller = this@NewGameController,
@@ -418,6 +431,7 @@ class NewGameController(
             gameEvents.fire(event)
             event.createTimeline()
         })
+        action { checkCardMaximums() }
     }
 
     private fun maxSpaceInHand(desiredSpace: Int = Int.MAX_VALUE): Int =
@@ -650,6 +664,24 @@ class NewGameController(
         return true
     }
 
+    private fun checkCardMaximums() {
+        val cards = cardHand.amountOfCards
+        when {
+            cards < Config.softMaxCards -> {
+                if (softMaxCardsWarning.isActive) softMaxCardsWarning.hide()
+                if (hardMaxCardsWarning.isActive) hardMaxCardsWarning.hide()
+            }
+            cards < Config.hardMaxCards -> {
+                if (!softMaxCardsWarning.isActive) softMaxCardsWarning.show()
+                if (hardMaxCardsWarning.isActive) hardMaxCardsWarning.hide()
+            }
+            cards >= Config.hardMaxCards -> {
+                if (softMaxCardsWarning.isActive) softMaxCardsWarning.hide()
+                if (!hardMaxCardsWarning.isActive) hardMaxCardsWarning.show()
+            }
+        }
+    }
+
     override fun addTemporaryEncounterModifier(
         modifier: EncounterModifier,
         validityChecker: (GameController) -> Boolean
@@ -669,7 +701,6 @@ class NewGameController(
     }
 
     override fun enemyDefeated(enemy: Enemy) {
-        TODO("Not yet implemented")
     }
 
     override fun playGameAnimation(anim: GameAnimation) {
@@ -698,6 +729,7 @@ class NewGameController(
                 action {
                     cardHand.removeCard(card)
                     if (cardInSlot != null) revolver.preAddCard(slot, card)
+                    checkCardMaximums()
                 }
                 includeLater(
                     { cardInSlot!!.replaceTimeline(this@NewGameController, card) },
@@ -876,10 +908,13 @@ class NewGameController(
     }
 
     object Config {
-        const val baseReserves = 4
+        const val baseReserves = 40
+//        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-        const val cardsToDrawInFirstRound = 6
+        const val cardsToDrawInFirstRound = 20
+//        const val cardsToDrawInFirstRound = 6
+//        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
         const val playerGetsRewardCardChance = 1f

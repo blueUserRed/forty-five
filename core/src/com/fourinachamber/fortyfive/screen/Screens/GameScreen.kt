@@ -100,7 +100,7 @@ class GameScreen : ScreenCreator() {
             screen,
             300f,
             596f * 0.22f,
-            70f
+            100f
         )
     }
 
@@ -169,6 +169,7 @@ class GameScreen : ScreenCreator() {
         var enemySelected = false
 
         box {
+            debug()
             flexDirection = FlexDirection.COLUMN
             this.x = x
             this.y = y
@@ -272,13 +273,22 @@ class GameScreen : ScreenCreator() {
                 height = enemyHeight * 0.65f
 
                 image {
+                    // TODO: add anims back
+                    var heightPercent = 1f
                     backgroundHandle = enemy.drawableHandle
                     relativeHeight(100f)
                     centerX()
-                    centerY()
                     onLayout {
+                        height = parent.height * heightPercent
                         val drawable = drawable ?: return@onLayout
                         width = height * (drawable.minWidth / drawable.minHeight)
+                    }
+
+                    enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { event ->
+                        if (!enemy.isDefeated) return@watchFor
+                        backgroundHandle = "enemy_gravestone"
+                        heightPercent = 0.6f
+                        invalidate()
                     }
                 }
 
@@ -792,7 +802,7 @@ class GameScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
-        NewGameController(screen, gameEvents)
+        NewGameController(screen, gameEvents, warningParent!!)
     )
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(

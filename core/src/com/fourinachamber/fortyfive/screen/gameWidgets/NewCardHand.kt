@@ -32,15 +32,11 @@ class NewCardHand(
             forAllCards { card ->
                 val actor = card.actor
                 if (actor === event.new) {
-                    actor.rotation = 0f
-                    actor.y = actor.y.coerceIn(0f, height)
-                    actor.width = cardSize * 1.4f
-                    actor.height = cardSize * 1.4f
+                    actor.width = cardSize * 1.2f
+                    actor.height = cardSize * 1.2f
                     actor.fixedZIndex = 100
                     resortZIndices()
                 } else if (actor === event.old) {
-                    actor.y = cardHeightFunc(actor.x)
-                    actor.rotation = cardHeightFuncDerivative(actor.x) * 50f
                     actor.width = cardSize
                     actor.height = cardSize
                     actor.fixedZIndex = zIndexFor(card)
@@ -109,8 +105,8 @@ class NewCardHand(
 
         var x = 0f
 
-        val cardDistLeftSide = (widthPerSide / leftSide.size).coerceAtMost(maxDistanceBetweenCards)
-        x = width / 2 - centerGap / 2 - 2 * (cardSize - cardDistLeftSide)
+        val cardDistLeftSide = (widthPerSide / (leftSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
+        x = width / 2 - centerGap / 2 - cardSize
         leftSide.forEach { card ->
             val actor = card.actor
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
@@ -119,7 +115,7 @@ class NewCardHand(
             x -= cardDistLeftSide
         }
 
-        val cardDistRightSide = (widthPerSide / rightSide.size).coerceAtMost(maxDistanceBetweenCards)
+        val cardDistRightSide = (widthPerSide / (rightSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
         x = width / 2 + centerGap / 2
         rightSide.forEach { card ->
             val actor = card.actor
