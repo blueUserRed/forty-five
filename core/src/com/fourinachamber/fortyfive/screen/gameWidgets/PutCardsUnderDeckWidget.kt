@@ -1,68 +1,77 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
+import com.fourinachamber.fortyfive.screen.general.customActor.DragAndDroppableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addBackgroundStyles
+import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.SubscribeableObserver
 import com.fourinachamber.fortyfive.utils.automaticResourceGetter
 import com.fourinachamber.fortyfive.utils.random
+import com.fourinachamber.fortyfive.utils.templateParam
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.random.Random
 
 class PutCardsUnderDeckWidget(
-    private val screen: OnjScreen,
+    screen: OnjScreen,
     private val cardSize: Float,
     private val cardSpacing: Float,
-    backgroundHints: Array<String> = arrayOf(),
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor {
-
-    override var fixedZIndex: Int = 0
-    override var styleManager: StyleManager? = null
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
+    private val gameEvents: EventPipeline
+) : CustomGroup(screen), DragAndDroppableActor {
 
     var targetSize: Int = 0
     private val cards: MutableList<Card> = mutableListOf()
 
-    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    override var backgroundHandle: ResourceHandle? by backgroundHandleObserver
-    private val loadedBackground: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
-
     val isFinished: Boolean
         get() = cards.size >= targetSize
 
+
+    override var isDraggable: Boolean = false
+    override var inDragPreview: Boolean = false
+    override var targetGroups: List<String> = listOf()
+    override var resetCondition: ((Actor?) -> Boolean)? = null
+    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
+
+    private var currentPromise: Promise<List<Card>>? = null
+
+    private var remainingCardsForTemplate: Int by templateParam("game.remainingCardsToPutUnderStack", 0)
+
     init {
-        bindHoverStateListeners(this)
-        touchable = Touchable.enabled
+        isFocusable = true
+        makeDraggable(this)
+        group = focusGroupName
+        bindDroppable(this, screen, listOf(NewCardHand.cardFocusGroupName))
+        onDragAndDrop.add { source, _ ->
+            if (source !is CardActor) return@add
+            addCard(source.card)
+        }
+        gameEvents.watchFor<NewGameController.Events.PutCardsUnderStack> { event ->
+            targetSize = event.amount
+            remainingCardsForTemplate = targetSize
+            currentPromise = event.selectedCards
+        }
     }
 
     fun initDragAndDrop(dragAndDrop: DragAndDrop, dropConfig: OnjNamedObject) {
-        val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-            dropConfig.name,
-            dragAndDrop,
-            this,
-            dropConfig
-        )
-        dragAndDrop.addTarget(dropBehaviour)
-    }
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        loadedBackground?.draw(batch, x, y, width, height)
-        super.draw(batch, parentAlpha)
     }
 
     override fun layout() {
@@ -88,22 +97,18 @@ class PutCardsUnderDeckWidget(
     fun addCard(card: Card) {
         if (isFinished) return
         if (card.actor in this) return
-//        FortyFive.currentGame!!.cardHand.removeCard(card)
+        remainingCardsForTemplate--
         addActor(card.actor)
         cards.add(card)
         invalidate()
+        if (isFinished) complete()
     }
 
-    fun complete(): List<Card> {
+    fun complete() {
         val cards = cards.toMutableList().toList() // make copy
         this.cards.forEach { removeActor(it.actor) }
         this.cards.clear()
-        return cards
-    }
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-        addBackgroundStyles(screen)
+        currentPromise?.resolve(cards)
     }
 
     override fun resortZIndices() {
@@ -111,6 +116,10 @@ class PutCardsUnderDeckWidget(
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
                     (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
+    }
+
+    companion object {
+        const val focusGroupName = "putCardsUnderDeckFocusGroup"
     }
 
 }

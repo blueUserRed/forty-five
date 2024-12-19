@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.FocusChangeEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -63,7 +64,7 @@ class NewCardHand(
         actor.isSelectable = true
         actor.fixedZIndex = zIndexFor(card)
         resortZIndices()
-        actor.targetGroups = listOf(RevolverSlot.revolverSlotFocusGroupName)
+        actor.targetGroups = listOf(RevolverSlot.revolverSlotFocusGroupName, PutCardsUnderDeckWidget.focusGroupName)
         actor.bindDragging(actor, screen)
         actor.makeDraggable(actor)
         actor.resetCondition = { true }

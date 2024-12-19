@@ -839,7 +839,19 @@ class NewGameController(
             gameEvents.fire(event)
             include(event.createTimeline())
         }
-        // TODO: put cards under stack
+
+        later {
+            if (cardHand.amountOfCards <= Config.softMaxCards) return@later
+            val event = Events.PutCardsUnderStack(cardHand.amountOfCards - Config.softMaxCards)
+            action { gameEvents.fire(event) }
+            delayUntil { event.selectedCards.isResolved }
+            action {
+                val selectedCards = event.selectedCards.getOrError()
+                selectedCards.forEach { cardHand.removeCard(it) }
+                selectedCards.forEach { _cardStack.add(_cardStack.size, it) }
+            }
+        }
+
         action {
             turnCounter++
         }
@@ -939,6 +951,7 @@ class NewGameController(
         data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
         data class SetupEnemies(val enemies: List<Enemy>)
         data class EnemySelected(val selected: Enemy)
+        data class PutCardsUnderStack(val amount: Int, val selectedCards: Promise<List<Card>> = Promise())
         data class ShowPlayerWonPopup(
             val gotCard: Boolean,
             val cashAmount: Int,

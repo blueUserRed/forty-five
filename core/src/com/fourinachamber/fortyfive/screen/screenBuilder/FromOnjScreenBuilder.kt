@@ -526,11 +526,11 @@ class FromOnjScreenBuilder(
             return this
         }
 
-        "PutCardsUnderDeckWidget" -> PutCardsUnderDeckWidget(
-            screen,
-            widgetOnj.get<Double>("cardSize").toFloat(),
-            widgetOnj.get<Double>("cardSpacing").toFloat(),
-        )
+//        "PutCardsUnderDeckWidget" -> PutCardsUnderDeckWidget(
+//            screen,
+//            widgetOnj.get<Double>("cardSize").toFloat(),
+//            widgetOnj.get<Double>("cardSpacing").toFloat(),
+//        )
 
         "StatusEffectDisplay" -> HorizontalStatusEffectDisplay(
             screen,

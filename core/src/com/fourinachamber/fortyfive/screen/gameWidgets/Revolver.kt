@@ -360,7 +360,6 @@ class RevolverSlot(
         group = revolverSlotFocusGroupName
         bindDroppable(this, screen, listOf(NewCardHand.cardFocusGroupName))
         onFocusChange { _, _ -> debug = isFocused }
-//        onSelectChange { _, _, selected -> println("selected $selected") }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {

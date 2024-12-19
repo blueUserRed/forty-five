@@ -33,6 +33,7 @@ object SettingsCreator {
         val closeTimelineCreator: () -> Timeline
 
         val group = newVerticalGroup {
+            debug()
             forcedPrefWidth = worldWidth * 0.6f
             forcedPrefHeight = worldHeight
             syncDimensions()

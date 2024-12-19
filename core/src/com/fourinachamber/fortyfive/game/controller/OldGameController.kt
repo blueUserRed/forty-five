@@ -1021,8 +1021,8 @@ class OldGameController(
         action {
             this@OldGameController.screen.leaveState(showPutCardsUnderDeckActorScreenState)
             cardHand.reattachToOriginalParent()
-            val cards = putCardsUnderDeckWidget.complete()
-            putCardsAtBottomOfStack(cards)
+//            val cards = putCardsUnderDeckWidget.complete()
+//            putCardsAtBottomOfStack(cards)
         }
     }
 

@@ -29,11 +29,13 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
+import com.fourinachamber.fortyfive.screen.gameWidgets.PutCardsUnderDeckWidget
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
@@ -140,13 +142,15 @@ class GameScreen : ScreenCreator() {
 
         playerBar()
 
+        putCardsUnderStackPopup()
+
         winPopup()
 
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
         val navBar = getSharedNavBar(
             worldWidth,
             worldHeight,
-            listOf(settingsObject, settingsObject),
+            listOf(settingsObject),
             screen,
             isLeft = true
         )
@@ -154,11 +158,57 @@ class GameScreen : ScreenCreator() {
             onLayoutAndNow { y = worldHeight - height }
             x = 0f
         }
-        actor(settings) // TODO: fix settings not popping up
+        actor(settings)
 
         val warningParent = WarningParent(this@GameScreen, screen)
         this@GameScreen.warningParent = warningParent
         actor(warningParent.getActor())
+    }
+
+    private fun CustomGroup.putCardsUnderStackPopup() {
+        val putCardsUnderDeckPopup = PutCardsUnderDeckWidget(screen, 596f * 0.22f, 10f, gameEvents)
+        group {
+            x = 0f
+            y = 0f
+            relativeWidth(100f)
+            relativeHeight(100f)
+            touchable = Touchable.childrenOnly
+            isVisible = false
+            gameEvents.watchFor<NewGameController.Events.PutCardsUnderStack> { event ->
+                isVisible = true
+                event.selectedCards.then { isVisible = false }
+            }
+            actor(putCardsUnderDeckPopup) {
+                backgroundHandle = "under_deck_background"
+                width = worldWidth * 0.5f
+                height = worldHeight * 0.48f
+                touchable = Touchable.disabled
+                centerX()
+                centerY()
+                gameEvents.watchFor<NewGameController.Events.PutCardsUnderStack> { event ->
+                    touchable = Touchable.enabled
+                    event.selectedCards.then { touchable = Touchable.disabled }
+                }
+            }
+            label(
+                "red_wing",
+                "Put {game.remainingCardsToPutUnderStack} Cards back under your stack",
+                color = Color.FortyWhite,
+                isTemplate = true
+            ) {
+                centerX()
+                y = worldHeight * 0.63f
+            }
+            image {
+                backgroundHandle = "draw_bullet"
+                width = 300f
+                height = 300f
+                centerY()
+                onLayoutAndNow { x = parent.width / 2 - width / 2 - 500f }
+                touchable = Touchable.disabled
+                rotation = -10f
+            }
+        }
     }
 
     private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {
@@ -169,7 +219,6 @@ class GameScreen : ScreenCreator() {
         var enemySelected = false
 
         box {
-            debug()
             flexDirection = FlexDirection.COLUMN
             this.x = x
             this.y = y
@@ -838,6 +887,10 @@ class GameScreen : ScreenCreator() {
     override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
         FocusableParent(
             listOf(
+                SelectionTransition(
+                    TransitionType.Seamless,
+                    groups = listOf("enemies", NavbarCreator.navbarFocusGroup)
+                ),
                 SelectionTransition(
                     TransitionType.Seamless,
                     groups = listOf("shoot_button", "holster_button", "pass_button", "parry_button")
