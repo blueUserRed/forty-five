@@ -31,7 +31,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
-import ktx.actors.onClick
 import ktx.actors.onTouchEvent
 import onj.value.*
 import kotlin.math.absoluteValue
@@ -997,7 +996,7 @@ class CardActor(
             Zone.HAND -> Vector2(
                 x, y + 300f
             )
-            Zone.AFTERLIVE -> Vector2(
+            Zone.AFTERLIFE -> Vector2(
                 x, y + 300f
             )
             Zone.STACK, Zone.LIMBO -> return@later

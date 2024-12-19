@@ -916,7 +916,7 @@ class NewGameController(
     }
 
     enum class Zone {
-        STACK, HAND, REVOLVER, AFTERLIVE, LIMBO
+        STACK, HAND, REVOLVER, AFTERLIFE, LIMBO
     }
 
     object Config {
