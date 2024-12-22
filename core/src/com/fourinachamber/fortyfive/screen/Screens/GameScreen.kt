@@ -29,6 +29,7 @@ import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
 import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
@@ -51,6 +52,7 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
+import kotlin.times
 
 class GameScreen : ScreenCreator() {
 
@@ -79,6 +81,7 @@ class GameScreen : ScreenCreator() {
     private var warningParent: WarningParent? = null
 
     private lateinit var enemyParent: CustomGroup
+    private lateinit var afterlife: Afterlife
 
     private val revolver by lazy {
         Revolver(
@@ -141,6 +144,11 @@ class GameScreen : ScreenCreator() {
         targetSelectionPopup()
 
         playerBar()
+        val afterlife = Afterlife(screen, gameEvents)
+        this@GameScreen.afterlife = afterlife
+        actor(afterlife.getActor(this@GameScreen)) {
+            y = worldHeight * 0.4f
+        }
 
         putCardsUnderStackPopup()
 
@@ -851,7 +859,7 @@ class GameScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
-        NewGameController(screen, gameEvents, warningParent!!)
+        NewGameController(screen, gameEvents, warningParent!!, afterlife)
     )
 
     override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(
@@ -889,7 +897,7 @@ class GameScreen : ScreenCreator() {
             listOf(
                 SelectionTransition(
                     TransitionType.Seamless,
-                    groups = listOf("enemies", NavbarCreator.navbarFocusGroup)
+                    groups = listOf("enemies", NavbarCreator.navbarFocusGroup, Afterlife.openArrowFocusGroup)
                 ),
                 SelectionTransition(
                     TransitionType.Seamless,

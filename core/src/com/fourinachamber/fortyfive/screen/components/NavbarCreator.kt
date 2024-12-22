@@ -98,6 +98,7 @@ object NavbarCreator {
             relativeWidth(100f)
             relativeHeight(50f)
             backgroundHandle = "statusbar_background_left"
+            badTexture()
             horizontalAlign = CustomAlign.SPACE_BETWEEN
             verticalAlign = CustomAlign.CENTER
             paddingLeft = 50f
@@ -172,6 +173,7 @@ object NavbarCreator {
             relativeWidth(100f)
             relativeHeight(50f)
             backgroundHandle = "statusbar_background"
+            badTexture()
             horizontalAlign = CustomAlign.SPACE_BETWEEN
             verticalAlign = CustomAlign.CENTER
             paddingLeft = 50f

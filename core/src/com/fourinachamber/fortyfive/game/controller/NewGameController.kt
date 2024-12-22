@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game.controller
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
@@ -19,6 +20,7 @@ import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
@@ -34,7 +36,8 @@ import kotlin.math.floor
 class NewGameController(
     override val screen: OnjScreen,
     val gameEvents: EventPipeline,
-    private val warningParent: WarningParent
+    private val warningParent: WarningParent,
+    private val afterlife: Afterlife,
 ) : ScreenController(), GameController, ResourceBorrower {
 
     override val gameRenderPipeline: GameRenderPipeline = GameRenderPipeline(screen)
@@ -172,6 +175,15 @@ class NewGameController(
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.Shoot> { if (!isUIFrozen) shoot() }
         gameEvents.watchFor<Events.Holster> { if (!isUIFrozen) endTurn() }
+        gameEvents.watchFor<Events.AfterlifeOpenToggle> {
+            // The afterlife opening and closing is handled on the main timeline because it could be important for
+            // trigger anims, where the afterlife can open/close automatically
+            if (isUIFrozen) {
+                SoundPlayer.situation("not_allowed", screen)
+                return@watchFor
+            }
+            appendMainTimeline(afterlife.toggleTimeline())
+        }
         gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
             targetedEnemy = enemy
         }
@@ -920,12 +932,12 @@ class NewGameController(
     }
 
     object Config {
-        const val baseReserves = 40
-//        const val baseReserves = 4
+//        const val baseReserves = 40
+        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-        const val cardsToDrawInFirstRound = 20
-//        const val cardsToDrawInFirstRound = 6
+//        const val cardsToDrawInFirstRound = 20
+        const val cardsToDrawInFirstRound = 6
 //        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
@@ -959,6 +971,7 @@ class NewGameController(
         )
         data object Shoot
         data object Holster
+        data object AfterlifeOpenToggle
 
         abstract class TimelineBuildingEvent {
 

@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
@@ -32,6 +33,9 @@ import kotlin.system.measureTimeMillis
 object FortyFive : Game() {
 
     const val logTag = "forty-five"
+
+    const val debugHighlightBadTextures: Boolean = false
+    const val makeBadTextureHighlightsExtryAnnoying: Boolean = false
 
     var currentRenderPipeline: RenderPipeline? = null
         private set

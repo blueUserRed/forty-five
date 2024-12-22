@@ -273,7 +273,7 @@ cards: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
                 effect: buffDmgLimitValidity(
-                    (inZone([zone.revolver, zone.hand, zone.afterlive]) and hasName("bullet"))#bSelect,
+                    (inZone([zone.revolver, zone.hand, zone.afterlife]) and hasName("bullet"))#bSelect,
                     10#val,
                     sourceCardInZone(zone.revolver)
                 )

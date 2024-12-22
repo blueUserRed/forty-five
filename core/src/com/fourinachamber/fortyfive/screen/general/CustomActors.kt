@@ -22,7 +22,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
+import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.*
@@ -288,6 +290,8 @@ open class CustomImageActor(
 
     override var styleManager: StyleManager? = null
 
+    private var badTexture: Boolean = false
+
     /**
      * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
      * already applied
@@ -310,11 +314,23 @@ open class CustomImageActor(
         registerOnFocusDetailActor(this, screen)
     }
 
-//    override fun generateDetailActor(): Actor? = mutableMapOf<String, OnjValue>(
-//        "hoverText" to OnjString(hoverText)
-//    ).also {
-//        it.putAll(additionalHoverData)
-//    }
+    fun badTexture() {
+        if (!FortyFive.debugHighlightBadTextures) return
+        badTexture = true
+        debug()
+    }
+
+    override fun drawDebugBounds(shapes: ShapeRenderer?) {
+        val color = when {
+            badTexture && FortyFive.debugHighlightBadTextures -> Color.Red
+            debug -> stage.debugColor
+            else -> return
+        }
+        shapes ?: return
+        shapes.color = color
+        if (badTexture && FortyFive.makeBadTextureHighlightsExtryAnnoying && TimeUtils.millis() % 500 > 250) return
+        shapes.rect(x, y, originX, originY, width, height, scaleX, scaleY, rotation)
+    }
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
@@ -1345,8 +1361,28 @@ open class CustomGroup(
     protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
     override var dropShadow: DropShadow? = null
 
+    private var badTexture: Boolean = false
+
     init {
         bindDefaultListeners(this, screen)
+    }
+
+    fun badTexture() {
+        if (!FortyFive.debugHighlightBadTextures) return
+        badTexture = true
+        debug()
+    }
+
+    override fun drawDebugBounds(shapes: ShapeRenderer?) {
+        val color = when {
+            badTexture && FortyFive.debugHighlightBadTextures -> Color.Red
+            debug -> stage.debugColor
+            else -> return
+        }
+        shapes ?: return
+        shapes.color = color
+        if (badTexture && FortyFive.makeBadTextureHighlightsExtryAnnoying && TimeUtils.millis() % 500 > 250) return
+        shapes.rect(x, y, originX, originY, width, height, scaleX, scaleY, rotation)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
