@@ -10,7 +10,7 @@ class EventPipeline {
     private val linkedTo: MutableList<EventPipeline> = mutableListOf()
 
     fun fire(event: Any) {
-        watchers.forEach { (callback, clazz) ->2
+        watchers.forEach { (callback, clazz) ->
             if (clazz.isInstance(event)) callback(clazz.cast(event))
         }
         linkedTo.forEach { it.fireFromLinked(event, mutableListOf(this)) }

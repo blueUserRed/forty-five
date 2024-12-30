@@ -1085,7 +1085,7 @@ class OldGameController(
      * destroys a card in the revolver
      */
     @MainThreadOnly
-    override fun destroyCardTimeline(card: Card): Timeline = Timeline.timeline {
+    override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline {
         include(card.actor.destroyAnimation())
         action {
             revolver.removeCard(card)

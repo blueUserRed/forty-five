@@ -478,7 +478,6 @@ class Card(
 
         later {
             if (isInTriggerPosition) include(actor.animateBack(controller, prevPosition))
-            action { actor.setScale(1f) }
         }
     } }
 
@@ -878,7 +877,7 @@ class CardActor(
 
     private fun setupShader(batch: Batch): Boolean {
         val shaderPromise = when {
-            inDestroyAnim -> spawnShader
+            inDestroyAnim -> destroyShader
             spawnAnimStart != 0L -> spawnShader
             else -> return false
         }
@@ -966,8 +965,8 @@ class CardActor(
         action {
             SoundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
-            if (spawnShader.isResolved) ResourceManager.forceResolve(spawnShader)
-            spawnShader.getOrError().resetReferenceTime()
+            if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
+            destroyShader.getOrError().resetReferenceTime()
         }
         delay(1200)
         action { inDestroyAnim = false }

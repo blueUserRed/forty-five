@@ -67,7 +67,6 @@ abstract class Effect(val data: EffectData) {
             is BulletSelector.ByLambda -> action {
                 val cards = bulletSelector.lambda(triggerInformation, self)
                 cardsAffected(self, cards)
-                println("selector. $cards")
                 store("selectedCards", cards)
             }
 
@@ -223,7 +222,7 @@ abstract class Effect(val data: EffectData) {
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(GraphicsConfig.bufferTime)
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            include(controller.drawCardsTimeline(amount))
+            include(controller.drawCardsTimeline(amount, sourceCard = card))
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -275,7 +274,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            include(controller.tryToPutCardsInHandTimeline(cardName, amount))
+            include(controller.tryToPutCardsInHandTimeline(cardName, amount, sourceCard = card))
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -329,7 +328,7 @@ abstract class Effect(val data: EffectData) {
             includeLater(
                 {
                     get<List<Card>>("selectedCards")
-                        .map { controller.destroyCardTimeline(it) }
+                        .map { controller.destroyCardTimeline(it, sourceCard = card) }
                         .collectTimeline()
                 },
                 { true }
@@ -663,6 +662,7 @@ sealed class GameSituation {
     data object TurnBegin : GameSituation()
 
     class OnShot(val card: Card) : GameSituation()
+    class CardDestroyed(val card: Card) : GameSituation()
 
 }
 

@@ -377,7 +377,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                 if (thisSlot == 4) 0 else thisSlot + 1,
                 if (thisSlot == 0) 4 else thisSlot - 1
             )
-            return@RevolverCardByPredicate slot in neighbors
+            return@RevolverCardByPredicate slot - 1 in neighbors
         })
     }
 

@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.controller.NewGameController
-import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
@@ -27,10 +26,13 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
     private val afterlifeEvents: EventPipeline = EventPipeline()
 
-    private var boxes: List<CustomBox> = listOf()
+    private var slots: List<CustomBox> = listOf()
 
     var isOpen: Boolean = false
         private set
+
+    val isClosed: Boolean
+        get() = !isOpen
 
     fun getActor(creator: ScreenCreator): CustomBox {
         actor?.let { return it }
@@ -41,8 +43,9 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         }
     }
 
-    fun pushCard() {
-
+    fun pushCard(card: Card) {
+        cards.add(card)
+        afterlifeEvents.fire(Events.CardPushed)
     }
 
     fun removeFirst() {
@@ -93,9 +96,12 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
 
     private fun CustomBox.createSlots(creator: ScreenCreator) = with(creator) {
+        val slots = mutableListOf<CustomBox>()
+
         box {
+            debug()
             relativeWidth(100f)
-            relativeHeight(80f)
+            relativeHeight(100f)
             flexDirection = FlexDirection.ROW_REVERSE
             horizontalAlign = CustomAlign.END
             verticalAlign = CustomAlign.CENTER
@@ -109,24 +115,33 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                 horizontalAlign = CustomAlign.CENTER
                 marginBottom = 50f
 
-                box {
+                val card = cards.getOrNull(0)
+                val firstSlot = box {
                     width = 150f
                     height = 150f
                     backgroundHandle = "afterlife_card_slot"
                     verticalAlign = CustomAlign.CENTER
                     horizontalAlign = CustomAlign.CENTER
                     marginBottom = 10f
+                    if (card == null) return@box
+                    actor(card.actor) {
+                        width = 120f
+                        height = 120f
+                    }
                 }
+                slots.add(firstSlot)
             }
 
             box(isScrollable = true) {
                 this as CustomScrollableBox
                 flexDirection = FlexDirection.ROW_REVERSE
-                relativeHeight(100f)
+//                relativeHeight(100f)
+                height = 200f
                 width = 400f
                 horizontalAlign = CustomAlign.END
                 verticalAlign = CustomAlign.CENTER
                 wrap = CustomWrap.NONE
+                marginBottom = 60f
                 scrollDirectionStart = CustomDirection.RIGHT
                 addScrollbarFromDefaults(
                     CustomDirection.BOTTOM,
@@ -134,20 +149,27 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                     "afterlife_scrollbar_background",
                     marginOuter = 30f
                 )
-                repeat(5) {
-                    box {
+                repeat(cards.size.coerceAtLeast(4)) { index ->
+                    val card = cards.getOrNull(index + 1)
+                    val slot = box {
                         marginRight = 10f
-                        width = 150f
-                        height = 150f
+                        width = 120f
+                        height = 120f
                         backgroundHandle = "afterlife_card_slot"
                         verticalAlign = CustomAlign.CENTER
                         horizontalAlign = CustomAlign.CENTER
+                        if (card == null) return@box
+                        actor(card.actor) {
+                            width = 120f
+                            height = 120f
+                        }
                     }
+                    slots.add(slot)
                 }
             }
-
-
+            layout()
         }
+        this@Afterlife.slots = slots
     }
 
     private fun ScreenCreator.createActorWithReceiver(): CustomBox = newBox {
@@ -162,7 +184,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
         image(backgroundHints = arrayOf("afterlife_arrow_right", "afterlife_arrow_left")) {
             group = openArrowFocusGroup
-            isFocusable = true
+            setFocusableTo(true, this)
             isSelectable = true
             backgroundHandle = "afterlife_arrow_left"
             badTexture()
@@ -173,6 +195,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             width = 60f
             marginRight = 30f
             onSelect {
+                screen.deselectActor(this@image)
                 // TODO: only every second select registers
                 gameEvents.fire(NewGameController.Events.AfterlifeOpenToggle)
             }
@@ -187,13 +210,22 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                 relativeHeight(20f)
                 setAlignment(Align.center)
             }
-            createSlots(this@createActorWithReceiver)
+            box {
+                relativeWidth(100f)
+                relativeHeight(80f)
+                createSlots(this@createActorWithReceiver)
+                afterlifeEvents.watchFor<Events.CardPushed> {
+                    clearChildren()
+                    invalidate()
+                    createSlots(this@createActorWithReceiver)
+                }
+            }
         }
-
     }
 
     private object Events {
         data class ChangeArrow(val open: Boolean)
+        data object CardPushed
     }
 
     companion object {

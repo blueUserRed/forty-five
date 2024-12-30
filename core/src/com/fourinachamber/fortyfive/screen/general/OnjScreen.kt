@@ -23,6 +23,7 @@ import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.rendering.Renderable
+import com.fourinachamber.fortyfive.rendering.ScreenDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -161,6 +162,8 @@ open class OnjScreen(
      */
     var draggedPreviewActor: Actor? = null
     val draggedActor: Actor? get() = dragAndDrop.values.firstNotNullOfOrNull { it.dragActor } ?: draggedPreviewActor
+
+    private val makeLaggy: Boolean by screenDebugMenuPage.makeLaggy
 
     fun addToSelectionHierarchy(child: FocusableParent) {
         selectionHierarchy.add(child)
@@ -537,7 +540,7 @@ open class OnjScreen(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
-//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
+        if (makeLaggy) Thread.sleep(500)
         stage.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val oldStyleManagers = styleManagers.toList()
         if (stage.batch.isDrawing) stage.batch.end()
@@ -631,6 +634,9 @@ open class OnjScreen(
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
+
+        val screenDebugMenuPage = ScreenDebugMenuPage()
+
         fun toggleFullScreen(forceFullscreen: Boolean = false) {
             if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
                 UserPrefs.windowMode =

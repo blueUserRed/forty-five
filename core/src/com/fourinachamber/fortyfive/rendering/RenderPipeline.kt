@@ -20,7 +20,6 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.UserPrefs
-import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -107,7 +106,7 @@ open class RenderPipeline(
     init {
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
-        addDebugMenuPage(StandardDebugMenuPage())
+        addDebugMenuPage(OnjScreen.screenDebugMenuPage)
         addDebugMenuPage(CardTextureDebugMenuPage())
         addDebugMenuPage(ResourceDebugMenuPage())
     }

@@ -46,16 +46,20 @@ abstract class DebugMenuPage(val name: String) {
 
 }
 
-class StandardDebugMenuPage : DebugMenuPage("Performance infos") {
+class ScreenDebugMenuPage : DebugMenuPage("Performance infos") {
+
+    val makeLaggy = debugButton("make laggy", Keys.L, false)
 
     override fun getText(screen: OnjScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
+        version: ${FortyFiveLogger.versionTag}
         15s render lagSpike: ${FortyFive.renderTimes.max()}ms
         15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
         screen transition max lagSpike: ${FortyFive.screenTransitionTimes.max()}ms
         screen transition avg. lagSpike: ${FortyFive.screenTransitionTimes.average().toInt()}ms
         active style managers: ${screen.styleManagerCount()}
-        version: ${FortyFiveLogger.versionTag}
+        
+        $makeLaggy
     """.trimIndent()
 }
 

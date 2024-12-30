@@ -367,29 +367,22 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
-//    {
-//        name: "purgeBullet",
-//        title: "Purge Bullet",
-//        flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I should’t have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
-//        description: "$trigger$On-Placedown:$trigger$\nDestroy both bullets next to this.",
-//        baseDamage: 15,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            {
-//                trigger: enterZone(zone.revolver, "onlySelf"),
-//                effect: destroy(bSelectNeighbors())
-//            }
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity1"],
-//        price: 50,
-//    },
+    {
+        name: "purgeBullet",
+        title: "Purge Bullet",
+        flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I should’t have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
+        description: "$trigger$On-Placedown:$trigger$\nDestroy both bullets next to this.",
+        baseDamage: 15,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: destroy(bSelectNeighbors())
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
 //    {
 //        name: "deadBullet",
 //        title: "Dead Bullet",

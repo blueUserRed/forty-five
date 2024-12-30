@@ -34,11 +34,11 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
     }
 
     override fun onShow() {
-        FortyFive.currentRenderPipeline?.addDebugMenuPage(mapWidget.debugMenuPage)
+        FortyFive.currentRenderPipeline?.addDebugMenuPage(DetailMapWidget.debugMenuPage)
     }
 
     override fun end() {
-        FortyFive.currentRenderPipeline?.removeDebugMenuPage(mapWidget.debugMenuPage)
+        FortyFive.currentRenderPipeline?.removeDebugMenuPage(DetailMapWidget.debugMenuPage)
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {

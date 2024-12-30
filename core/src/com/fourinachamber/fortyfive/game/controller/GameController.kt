@@ -38,7 +38,7 @@ interface GameController {
 
     fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline
 
-    fun destroyCardTimeline(card: Card): Timeline
+    fun destroyCardTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
 

@@ -1386,6 +1386,9 @@ open class CustomGroup(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (userObject == "hello") {
+            println("$width $height")
+        }
         updateAnimations()
         validate()
         batch ?: return
@@ -1481,6 +1484,10 @@ open class CustomGroup(
         invalidate()
     }
 
+    override fun clearChildren() {
+        originalChildren.clear()
+        super.clearChildren()
+    }
 }
 
 class CustomParticleActor(

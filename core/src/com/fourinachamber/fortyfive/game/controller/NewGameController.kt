@@ -234,6 +234,12 @@ class NewGameController(
                     .let { include(it) }
             }
         }
+        gameEvents.watchFor<Events.CardDestroyedEvent> { event ->
+            val situation = GameSituation.CardDestroyed(event.card)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
     }
 
     private fun checkTrigger(situation: GameSituation, triggerInformation: TriggerInformation): Timeline = createdCards
@@ -301,9 +307,28 @@ class NewGameController(
         action { store("selectedCard", event.promise.getOrError()) }
     }
 
-    override fun destroyCardTimeline(card: Card): Timeline {
-        TODO("Not yet implemented")
-    }
+    override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
+        if (!card.inZone(Zone.REVOLVER)) return@later
+        include(card.actor.destroyAnimation())
+        action { card.actor.alpha = 0f }
+        if (afterlife.isClosed) include(afterlife.openTimeline())
+        action {
+            revolver.removeCard(card)
+            afterlife.pushCard(card)
+            card.actor.alpha = 1f
+        }
+        val triggerInfo = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
+        later {
+            val event = Events.CardChangedZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, triggerInfo)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
+        later {
+            val event = Events.CardDestroyedEvent(card, triggerInfo)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
+    } }
 
     override fun tryToPutCardsInHandTimeline(
         cardName: String,
@@ -932,8 +957,8 @@ class NewGameController(
     }
 
     object Config {
-//        const val baseReserves = 40
-        const val baseReserves = 4
+        const val baseReserves = 40
+//        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
 //        const val cardsToDrawInFirstRound = 20
@@ -1013,6 +1038,11 @@ class NewGameController(
         ) : TimelineBuildingEvent()
 
         class TurnBeginEvent(
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        class CardDestroyedEvent(
+            val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
