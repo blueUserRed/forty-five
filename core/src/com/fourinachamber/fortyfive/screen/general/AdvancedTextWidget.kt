@@ -12,13 +12,14 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
+import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
+import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
-import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -40,6 +41,14 @@ open class AdvancedTextWidget(
     override var paddingBottom: Float = 0F
     override var paddingLeft: Float = 0F
     override var paddingRight: Float = 0F
+
+    //TODO expand functionality of this
+    // Space Around and space between not implemented
+    var verticalTextAlign: CustomAlign = CustomAlign.END
+
+    //TODO expand functionality of this
+    // Space Around and space between not implemented
+    var horizontalTextAlign: CustomAlign = CustomAlign.START
 
     var fitContentHeight: Boolean = false
 
@@ -67,7 +76,7 @@ open class AdvancedTextWidget(
         isDistanceFiled: Boolean
     ) : this(AdvancedText.defaultsFromOnj(defaults), screen, isDistanceFiled)
 
-    fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
+    open fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
         advancedText = AdvancedTextParser(text, screen, defaults, isDistanceField, effects ?: listOf()).parse()
     }
 
@@ -77,6 +86,7 @@ open class AdvancedTextWidget(
         children
             .filterIsInstance<Layout>()
             .onEach(Layout::validate)
+            .filter { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
             .forEach { child ->
                 child as Actor
                 child.width = child.prefWidth
@@ -111,12 +121,50 @@ open class AdvancedTextWidget(
                 curX = paddingLeft
                 curY += height
             }
+
+        alignVerticalTextAfterLayout(lines, curY + paddingTop)
+
+
         if (fitContentHeight) {
             height = curY + paddingTop
         } else {
-            layoutPrefHeight = curY + paddingTop
+            layoutPrefHeight =
+                if ((verticalTextAlign == CustomAlign.SPACE_AROUND || verticalTextAlign == CustomAlign.SPACE_BETWEEN)
+                    && curY + paddingTop < height
+                ) {
+                    height
+                } else {
+                    curY + paddingTop
+                }
+
         }
         if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        alignHorizontalTextAfterLayout(lines)
+    }
+
+    private fun alignHorizontalTextAfterLayout(lines: List<List<Actor>>) {
+        lines.forEach {
+            val diff = width - it.maxOf { it.x + it.width }
+            when (horizontalTextAlign) {
+                CustomAlign.START -> {} //this is default, so no changes
+                CustomAlign.CENTER -> it.forEach { it.setPosition(it.x + diff / 2, it.y) }
+                CustomAlign.END -> it.forEach { it.setPosition(it.x + diff, it.y) }
+                CustomAlign.SPACE_AROUND -> TODO()
+                CustomAlign.SPACE_BETWEEN -> TODO()
+            }
+        }
+    }
+
+    private fun alignVerticalTextAfterLayout(lines: List<List<Actor>>, totalHeight: Float) {
+        if (fitContentHeight) return
+        val diff = height - totalHeight
+        when (verticalTextAlign) {
+            CustomAlign.START -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff) } }
+            CustomAlign.CENTER -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff / 2) } }
+            CustomAlign.END -> {} //this is default, so no changes
+            CustomAlign.SPACE_AROUND -> TODO()
+            CustomAlign.SPACE_BETWEEN -> TODO()
+        }
     }
 
     private fun initText(value: AdvancedText) {
@@ -127,23 +175,6 @@ open class AdvancedTextWidget(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (!initialisedStyleInstruction) run initStyleInstruction@{
-            val styleManager = styleManager ?: run {
-                initialisedStyleInstruction = true
-                return@initStyleInstruction
-            }
-            styleManager.addInstruction(
-                "height",
-                ObservingStyleInstruction(
-                    Integer.MAX_VALUE,
-                    StyleCondition.Always,
-                    YogaValue::class,
-                    observer = { YogaValue(height, YogaUnit.POINT) }
-                ),
-                YogaValue::class
-            )
-            initialisedStyleInstruction = true
-        }
         advancedText.update()
         super.draw(batch, parentAlpha)
     }

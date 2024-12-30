@@ -8,7 +8,8 @@ import onj.value.OnjObject
 
 
 data class Dialog(
-    val parts: List<DialogPart>
+    val parts: List<DialogPart>,
+    val name: String
 ) {
 
     companion object {
@@ -18,7 +19,7 @@ data class Dialog(
             val parts = onj.get<OnjArray>("parts")
                 .value
                 .map { readDialogPart(it as OnjObject, defaults, screen) }
-            return Dialog(parts)
+            return Dialog(parts, onj.get<String>("name"))
         }
 
         private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: OnjScreen): DialogPart {
@@ -30,6 +31,9 @@ data class Dialog(
                 defaults
             )
             val nextSelector = onj.get<OnjNamedObject>("next")
+            val leftNpcChangeTo = onj.get<String?>("npcLeftChangeTo")
+            val rightNpcChangeTo = onj.get<String?>("npcRightChangeTo")
+            val talkingNpc = onj.get<String>("talkingNpc")
             val next = when (nextSelector.name) {
 
                 "Continue" -> NextDialogPartSelector.Continue
@@ -57,16 +61,17 @@ data class Dialog(
 
                 else -> throw RuntimeException("unknown next dialog part selector: ${nextSelector.name}")
             }
-            return DialogPart(text, next)
+            return DialogPart(text, next, leftNpcChangeTo, rightNpcChangeTo, talkingNpc)
         }
-
     }
-
 }
 
 data class DialogPart(
     val text: AdvancedText,
-    val nextDialogPartSelector: NextDialogPartSelector
+    val nextDialogPartSelector: NextDialogPartSelector,
+    val leftNpcNameChangeTo: String?,
+    val rightNpcNameChangeTo: String?,
+    val talkingNpcName: String,
 )
 
 sealed class NextDialogPartSelector {

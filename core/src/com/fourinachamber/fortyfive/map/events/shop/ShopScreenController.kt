@@ -54,7 +54,7 @@ class ShopScreenController(
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
         val shopFile = ConfigFileManager.getConfigFile("shopConfig")
-        val npcsFile = ConfigFileManager.getConfigFile("npcConfig")
+        val npcsFile = ConfigFileManager.getConfigFile("dialogConfig")
         val personData = shopFile
             .get<OnjArray>("people")
             .value

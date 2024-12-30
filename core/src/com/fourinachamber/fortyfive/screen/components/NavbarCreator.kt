@@ -298,6 +298,7 @@ object NavbarCreator {
 
             onSelectChange { _, _ ->
                 if (isSelected) {
+                    println("now opening")
                     events.fire(ChangeBlackBackground(true))
                     timeline.appendAction(Timeline.timeline {
                         action { println("hi") }
@@ -306,6 +307,7 @@ object NavbarCreator {
                     }.asAction())
                     isOpen = true
                 } else {
+                    println("now closing")
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))
                 }

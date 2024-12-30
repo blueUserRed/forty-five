@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
-import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
@@ -21,7 +20,7 @@ object MapEventFactory {
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) },
-        "NPCMapEvent" to { NPCMapEvent(it) },
+        "DialogMapEvent" to { DialogMapEvent(it) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
                 onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
@@ -254,7 +253,7 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 /**
  * event that opens a dialog box and allows talking to an NPC
  */
-class NPCMapEvent(onj: OnjObject) : MapEvent() {
+class DialogMapEvent(onj: OnjObject) : MapEvent() {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -273,11 +272,10 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
     private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
     private val onlyIfPlayerDoesntHaveCard: String? = onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null)
 
-    val npc: String = onj.get<String>("npc")
-    val npcDisplayName: String = MapManager.displayName(npc)
+    val dialog: String = onj.get<String>("dialog")
 
     override val descriptionText: String = ""
-    override val displayName: String = "Talk with $npcDisplayName"
+    override val displayName: String = MapManager.displayName(dialog)
     override val buttonText: String = "Talk"
 
     init {
@@ -295,9 +293,9 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("NPCMapEvent")
+        name("DialogMapEvent")
         includeStandardConfig()
-        "npc" with npc
+        "dialog" with dialog
         "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
         onlyIfPlayerDoesntHaveCard?.let { "onlyIfPlayerDoesntHaveCard" to it }
     }
