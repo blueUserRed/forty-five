@@ -1,0 +1,185 @@
+use Common;
+import "imports/colors.onj" as color;
+
+defaults: {
+    font: "roadgeek",
+    fontScale: 1.3,
+    color: color.forty_white,
+},
+
+effects: [
+    $Color {
+        indicator: "$name",
+        color: color.red,
+    },
+    $FontScale {
+        indicator: "$name",
+        fontScale: 0.7,
+    },
+    $Font {
+        indicator: "$name",
+        font: "red_wing_bmp",
+    },
+    $Font {
+        indicator: "$title",
+        font: "red_wing_bmp",
+    },
+    $Color {
+        indicator: "$title",
+        color: color.red,
+    },
+    $FontScale {
+        indicator: "$title",
+        fontScale: 0.45,
+    },
+    $Color {
+        indicator: "$red$",
+        color: color.red,
+    },
+],
+
+texts: [
+    $Image {
+        path: "logo_red",
+        relativWidth: 80.0,
+        offsetX: -50.0,
+    },
+    $Text{
+        rawText:"",
+    },
+  $Split {
+        relativWidth: 95.0,
+        left: [
+            $Text {
+                rawText: "$namePhilip Jankovic",
+            },
+        ],
+        right: [
+            $Text {
+                rawText: "Lead Game Designer",
+            },
+            $Text {
+                rawText: "Lead Visual Artist",
+            },
+            $Text {
+                rawText: "Product Owner",
+            },
+        ]
+    },
+     $Split {
+       relativWidth: 100.0,
+       left: [
+           $Text {
+               rawText: "$nameMarvin Kurka",
+           },
+       ],
+       right: [
+           $Text {
+               rawText: "Lead Software Engineer",
+           },
+           $Text {
+               rawText: "Game Designer",
+           },
+           $Text {
+               rawText: "VFX Artist",
+           },
+       ]
+   },
+   $Split {
+       relativWidth: 100.0,
+       left: [
+           $Text {
+               rawText: "$nameMarkus Böheim",
+           },
+       ],
+       right: [
+           $Text {
+               rawText: "Visual Artist",
+           },
+           $Text {
+               rawText: "UI Designer",
+           },
+           $Text {
+               rawText: "Video Editor",
+           },
+       ]
+   },
+   $Split {
+       relativWidth: 100.0,
+       left: [
+           $Text {
+               rawText: "$nameNils Hubmann",
+           },
+       ],
+       right: [
+           $Text {
+               rawText: "Project Manager",
+           },
+           $Text {
+               rawText: "Marketing",
+           },
+           $Text {
+               rawText: "Sound Designer",
+           },
+           $Text {
+               rawText: "Animator",
+           },
+       ]
+   },
+   $Split {
+       relativWidth: 100.0,
+       left: [
+           $Text {
+               rawText: "$nameFelix Zwickelstorfer",
+           },
+       ],
+       right: [
+           $Text {
+               rawText: "Software Engineer",
+           },
+           $Text {
+               rawText: "Special-Graphics Designer",
+           },
+           $Text {
+               rawText: "VFX Artist",
+           },
+       ]
+   },
+   $Text{
+       rawText: "$titleMusik$title\nNils Jandrasits & Nils Hubmann",
+   },
+   $Text{
+       rawText: "$titlePast Team Members$title\n$red$People who left the project along the way or worked on\nprevious iterations of .Forty-Five$red$\nChristoph Allmer,\nDylan Calderon,\nDavid Angelo",
+   },
+   $Text{
+       rawText: "$titleSpecial Thanks$title\nNenad, Simon,\nGitti, Dragan, Danji,\nLena, Emmi, Pippi,\nDavid Q., Anton, Lisa,\nAna, Emma, Philipp,\nCyprian, Mario,\nProf. Doppler,\n5BI (HTL3R 2023/24),\nScoutgroup 14 Raro,\nThe osq Team,\nThe Warden of Time Team",
+   },
+   $Text{
+       rawText: "$titleThank you$title\n$red$to the professors at HTL Rennweg\n who supported the project along the way$red$\nFlorian Weiss,\nGerhard Sturm,\nVincent Nussbaumer,\nMitra Bayandor,\nRoman Jerabek",
+   },
+    $Split {
+        relativWidth: 90.0,
+        left: [
+            $Text {
+                rawText: "developed by",
+            },
+            $Image {
+                path: "microwave_studios_logo",
+                relativWidth: 80.0,
+            },
+        ],
+        right: [
+            $Text {
+                rawText: "a project at",
+            },
+            $Image {
+                path: "logo_htl3r_white_background",
+                relativWidth: 80.0 / (2030.0/528.0*675.0/1614.0), //49.75
+            },
+        ],
+    },
+//    $Text{
+//        rawText: "$nameThank you for playing!",
+//    },
+
+],

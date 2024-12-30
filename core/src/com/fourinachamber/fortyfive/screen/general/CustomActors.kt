@@ -48,7 +48,8 @@ open class CustomLabel(
     override var detailWidget: DetailWidget? = null,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, DisplayDetailActor, KotlinStyledActor {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, DisplayDetailActor, KotlinStyledActor,
+    OffSettable {
 
     override val actor: Actor = this
 
@@ -87,6 +88,10 @@ open class CustomLabel(
     override var marginRight: Float = 0f
     override var positionType: PositionType = PositionType.RELATIV
 
+    override var drawOffsetX: Float = 0f
+    override var drawOffsetY: Float = 0f
+    override var logicalOffsetX: Float = 0f
+    override var logicalOffsetY: Float = 0f
 
     private val shapeRenderer: ShapeRenderer by lazy {
         val renderer = ShapeRenderer()
@@ -131,7 +136,11 @@ open class CustomLabel(
         }
         val prevShader = batch.shader
         batch.shader = fontShader
+        x += drawOffsetX
+        y += drawOffsetY
         super.draw(batch, parentAlpha)
+        x -= drawOffsetX
+        y -= drawOffsetY
         batch.shader = prevShader
         if (underline) {
             batch.end()
@@ -140,7 +149,7 @@ open class CustomLabel(
             shapeRenderer.projectionMatrix = screen.stage.viewport.camera.combined
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
             shapeRenderer.color = style.fontColor
-            val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+            val (x, y) = localToStageCoordinates(Vector2(drawOffsetX, drawOffsetY))
             val width = glyphLayout.width
             shapeRenderer.rect(x, y - 1f, width, 3f)
             shapeRenderer.end()
@@ -256,7 +265,7 @@ open class CustomImageActor(
     override var maskScaleY: Float = 1f
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
-    var tintColor: Color? = null
+    var tintColor: com.badlogic.gdx.graphics.Color? = null
 
     override var drawOffsetX: Float = 0F
     override var drawOffsetY: Float = 0F
@@ -1301,7 +1310,8 @@ open class CustomVerticalGroup(
 
 open class CustomGroup(
     override val screen: OnjScreen
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
+    KotlinStyledActor,
     DropShadowActor {
 
     override var drawOffsetX: Float = 0f

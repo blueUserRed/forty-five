@@ -16,7 +16,7 @@ import kotlin.math.sin
 class TitleScreenController(private val screen: OnjScreen) : ScreenController() {
 
     private var transitionAwayVelocity: Float = -1f
-    private val timeline: Timeline = Timeline()
+    val timeline: Timeline = Timeline()
 
     private var isConfirmed: Boolean = false
 

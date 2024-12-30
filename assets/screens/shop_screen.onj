@@ -25,7 +25,7 @@ options: {
     screenControllers: [
         $ShopScreenController {
             shopsFile: "maps/events/shops.onj",
-            npcsFile: "maps/events/npcs.onj",
+            npcsFile: "maps/events/dialogs.onj",
             cardsFile: "config/cards.onj",
             messageWidgetName: "shopMessage",
             cardsParentName: "cardsWidget",

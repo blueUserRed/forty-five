@@ -229,6 +229,18 @@ abstract class ScreenCreator : ResourceBorrower {
         return advancedText
     }
 
+    inline fun Group.advancedText(
+        defaults: Triple<String, Color, Float>,
+        isDistanceField: Boolean = true,
+        builder: AdvancedTextWidget.() -> Unit = {}
+    ): AdvancedTextWidget {
+        val advancedText =
+            AdvancedTextWidget(defaults, screen, isDistanceField)
+        this.addActor(advancedText)
+        builder(advancedText)
+        return advancedText
+    }
+
     fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {

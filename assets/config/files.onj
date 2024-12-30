@@ -40,9 +40,9 @@ configFiles: {
         file: "config/card_selection_types.onj",
         validatedBy: "onjschemas/card_selection_types.onjschema",
     },
-    npcConfig: {
-        file: "config/npcs.onj",
-        validatedBy: "onjschemas/npcs.onjschema",
+    dialogConfig: {
+        file: "config/dialogs.onj",
+        validatedBy: "onjschemas/dialogs.onjschema",
     },
     shopConfig: {
         file: "config/shops.onj",
@@ -59,6 +59,10 @@ configFiles: {
     inputMaps: {
         file: "screens/input_maps.onj",
         validatedBy: null,
+    },
+    creditsText: {
+        file: "config/credits_text.onj",
+        validatedBy: "onjschemas/credits_text.onjschema",
     }
 },
 
@@ -77,14 +81,14 @@ screens: [
         name: "chooseCardScreen",
         file: "screens/choose_card_screen.onj"
     },
-    {
-        name: "creditsScreen",
-        file: "screens/credits_screen.onj"
-    },
-    {
-        name: "dialogScreen",
-        file: "screens/dialog_screen.onj"
-    },
+//    {
+//        name: "creditsScreen",
+//        file: "screens/credits_screen.onj"
+//    },
+//    {
+//        name: "dialogScreen",
+//        file: "screens/dialog_screen.onj"
+//    },
     {
         name: "draftScreen",
         file: "screens/draft_screen.onj"
@@ -113,8 +117,8 @@ screens: [
         name: "statsScreen",
         file: "screens/stats_screen.onj"
     },
-    {
-        name: "titleScreen",
-        file: "screens/title_screen.onj"
-    },
+//    {
+//        name: "titleScreen",
+//        file: "screens/title_screen.onj"
+//    },
 ]

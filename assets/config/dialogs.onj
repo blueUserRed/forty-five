@@ -1,0 +1,705 @@
+import "imports/colors.onj" as color;
+
+var shake = $ShakeTextAction {
+    xSpeed: 0.2,
+    xMagnitude: 1.0,
+    ySpeed: 0.1,
+    yMagnitude: 1.0,
+};
+
+npcs: [
+    {
+        name: "to_be_continued_npc",
+        displayName: "Developers",
+        image: {
+            textureName: "npc_traveler",
+            scale: 1.1,
+        },
+    },
+    {
+        name: "brother",
+        displayName: "Your Brother",
+        image: {
+            textureName: "npc_stranger",
+            scale: 1.4,
+            offsetY: -300.0,
+        }
+    },
+    {
+        name: "traveling_merchant",
+        displayName: "Traveling Merchant",
+        image: {
+            textureName: "npc_merchant",
+            scale: 1.2,
+            offsetX: -25.0,
+        }
+    },
+    {
+        name: "priest_of_aqua_balle",
+        displayName: "Priest of Aqua Balle",
+
+        image: {
+            textureName: "npc_priest",
+            scale: 1.0,
+        }
+    },
+    {
+        name: "not_yet_implemented_npc",
+        displayName: "Stranger",
+        image: {
+            textureName: "npc_stranger",
+            scale: 1.4,
+            offsetY: -300.0,
+        }
+    },
+    {
+        name: "witch",
+        displayName: "Witch",
+        image: {
+            textureName: "npc_witch",
+            scale: 1.6,
+            offsetY: -450.0,
+            offsetX: 50.0,
+        }
+    },
+    {
+        name: "traveler_in_salem_npc",
+        displayName: "Traveller",
+        image: {
+            textureName: "npc_traveler",
+            scale: 1.1,
+        }
+    },
+
+],
+
+dialogs: [
+    {
+        name: "testing_dialog",
+        eventText: "This is a test, hihihi",
+        parts: [
+            {
+                rawText: "Hello, this is just an example text because i am awesome... Hello, this is just an example text because i am awesome...Hello, this is just an example text because i am awesome...",
+                npcLeftChangeTo: "priest_of_aqua_balle",
+                talkingNpc: "priest_of_aqua_balle",
+                next: $Continue {
+                },
+            },
+            {
+                rawText: "Bye",
+                npcRightChangeTo: "brother",
+                talkingNpc: "brother",
+                next: $EndOfDialog {
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "to_be_continued_dialog",
+        eventText: "Final Talk",
+        parts: [
+            {
+                rawText: "Hey there!",
+                talkingNpc: "to_be_continued_npc",
+                npcLeftChangeTo: "to_be_continued_npc",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "We - $1the developers$1 - want to thank you for playing! We are $3definitely$3 going to continue developing this game, just wait a little. Till then, bye!",
+                talkingNpc: "to_be_continued_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Oh and also, you'll have to sit through the credits now",
+                talkingNpc: "to_be_continued_npc",
+                next: $ToCreditScreenEnd {
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        },
+    },
+    {
+        name: "talk_with_brother",
+        eventText: "Talk to your brother",
+        parts: [
+            {
+                rawText: "Hi.",
+                talkingNpc: "brother",
+                npcLeftChangeTo: "brother",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Glad I caught you before you left",
+                talkingNpc: "brother",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "I know I can't stop you from taking on this voyage, but please promise to be careful",
+                talkingNpc: "brother",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Also, there is $1something$1 I wanted to give you before you leave",
+                talkingNpc: "brother",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.blue
+                    },
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Here, this might be useful on your journey",
+                talkingNpc: "brother",
+                next: $GiftCardEnd {
+                    card: "incendiaryBullet",
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "tavelling_merchant_welcome",
+        eventText: "A strangers greeting",
+        parts: [
+            {
+                rawText: "Howdy, welcome in $1Aqua Balle$1, where all the scum, outlaws and gamblers of the $1Old World$1 come together to find their luck in the frontier.",
+                talkingNpc: "traveling_merchant",
+                npcLeftChangeTo: "traveling_merchant",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.orange
+                    },
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "You can buy some $3cursed$3 Bullets at my shop over there, coffins can be preordered.",
+                talkingNpc: "traveling_merchant",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "The frontier?",
+                            next: 2
+                        },
+                        {
+                            name: "Bullets?",
+                            next: 4
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        }
+                    ]
+                }
+            },
+            {
+                rawText: "Yes, the land that was discovered here a while ago. This town serves as the entrance to it. How did you not know this? ",
+                talkingNpc: "traveling_merchant",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "It's a lawless zone out there, although since the governor showed up here, it hasn't been the same anymore...",
+                talkingNpc: "traveling_merchant",
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "Bullets?",
+                            next: 4
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        }
+                    ]
+                }
+            },
+            {
+                rawText: "... yeah, I don't know why they are here or what they are, but they can be found all over the frontier.",
+                talkingNpc: "traveling_merchant",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "They are really powerful and also $3cursed$3, so a lot of people want them either for themselves or to turn a profit.",
+                talkingNpc: "traveling_merchant",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "That's where all those guys here come from. They hope to turn their life around and try their luck in the frontier. Good business for us here in $1Aqua Balle$1 though, so I won't complain.",
+                talkingNpc: "traveling_merchant",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.orange
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "The frontier?",
+                            next: 2
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        }
+                    ]
+                }
+            },
+            {
+                rawText: "You can come visit me at my shop over there, if you want.",
+                talkingNpc: "traveling_merchant",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "But I travel the frontier with my stock most of the time, so we’ll probably see each other anyway. Until then, take care.",
+                talkingNpc: "traveling_merchant",
+                next: $EndOfDialog {
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "priest_of_aqua_balle_warning",
+        eventText: "The priests warning",
+        parts: [
+            {
+                rawText: "Bless you!",
+                talkingNpc: "priest_of_aqua_balle",
+                npcLeftChangeTo: "priest_of_aqua_balle",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "It’s $1$3dangerous$3$1 out there, you should turn back. However, you probably won’t listen to me, nobody does.",
+                talkingNpc: "priest_of_aqua_balle",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "So, here take $1this$1 at least. It will look over you on the way.",
+                talkingNpc: "priest_of_aqua_balle",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.blue
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                ],
+                next: $GiftCardEnd {
+                    card: "guardianAngelBullet",
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "not_yet_implemented_dialog",
+        eventText: "Construction Site",
+        parts: [
+            {
+                rawText: "Hello!",
+                talkingNpc: "not_yet_implemented_npc",
+                npcLeftChangeTo: "not_yet_implemented_npc",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "This area is still under construction, so maybe check back later.",
+                talkingNpc: "not_yet_implemented_npc",
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Thanks for you patience!",
+                talkingNpc: "not_yet_implemented_npc",
+                next: $EndOfDialog {
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "witch_dialog",
+        eventText: "Talk with the witch",
+        parts: [
+            {
+                rawText: "$4$1I'll warn you!$1$4",
+                talkingNpc: "witch",
+                npcLeftChangeTo: "witch",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Font {
+                        indicator: "$4",
+                        font: "red_wing_bmp"
+                    }
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Not a $1single$1 step further or I $4swear to the $3Gods$3 I'll $1kill$1 you$4",
+                talkingNpc: "witch",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                    $FontScale {
+                        indicator: "$4",
+                        fontScale: 1.4
+                    }
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "This was $1$3$4OUR$4$3$1 home before you all came and took it.",
+                talkingNpc: "witch",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                    $FontScale {
+                        indicator: "$4",
+                        fontScale: 1.4
+                    }
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Someday, the $2Onathans$2 will return to $5Salem$5 and reclaim it. Until then, $1$4stay away$4$1 from it if you value your $3life$3.",
+                talkingNpc: "witch",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Color {
+                        indicator: "$2",
+                        color: color.grey
+                    },
+                    $Color {
+                        indicator: "$5",
+                        color: color.orange
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                    $FontScale {
+                        indicator: "$4",
+                        fontScale: 1.4
+                    }
+                ],
+                next: $Continue {
+                }
+            },
+            {
+                rawText: "Oh and and tell the $2governor$2 that his days are $1$3limited$3$1.",
+                talkingNpc: "witch",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                    $Color {
+                        indicator: "$2",
+                        color: color.grey
+                    },
+                    $Color {
+                        indicator: "$5",
+                        color: color.orange
+                    },
+                    $Action {
+                        indicator: "$3",
+                        action: shake,
+                    },
+                    $FontScale {
+                        indicator: "$4",
+                        fontScale: 1.4
+                    }
+                ],
+                next: $EndOfDialog {
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.2,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "traveler_in_salem_dialog",
+        eventText: "Talk with the Traveller",
+        parts: [
+            {
+                rawText: "Mornin'. Good seein' someone who doesn't want to kill me at first sight.",
+                talkingNpc: "traveler_in_salem_npc",
+                npcLeftChangeTo: "traveler_in_salem_npc",
+                next: $Continue {}
+            },
+            {
+                rawText: "I traveled around here a lot, so if there is any question you wanna ask feel free. I study the culture and history of the $1Onathahans$1, so i might know a few things...",
+                talkingNpc: "traveler_in_salem_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.magenta
+                    },
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "Onathahans?",
+                            next: 2
+                        },
+                        {
+                            name: "What's beyond the forest?",
+                            next: 4
+                        },
+                        {
+                            name: "Who are you?",
+                            next: 6
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        },
+                    ]
+                }
+            },
+            {
+                rawText: "Yes, the tribe of people who inhabited this land before we came here from the Old World. People often call them $1witches$1. But they are people, like you and me, no different.",
+                talkingNpc: "traveler_in_salem_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.magenta
+                    },
+                ],
+                next: $Continue {}
+            },
+            {
+                rawText: "$1$4If you even are a person. Who knows? I might have been conversing with a tree $5§§map_decoration_bewitched_forest_tree1§§$5$4 this whole time...$4$1",
+                talkingNpc: "traveler_in_salem_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.grey
+                    },
+                    $FontScale {
+                        indicator: "$4",
+                        fontScale: 0.6
+                    },
+                    $FontScale {
+                        indicator: "$5",
+                        fontScale: 1.1
+                    }
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "What's beyond the forest?",
+                            next: 4
+                        },
+                        {
+                            name: "Who are you?",
+                            next: 6
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        },
+                    ]
+                }
+            },
+            {
+                rawText: "Hm? oh yes, beyond the forest... I've read stories from the Onathahans. There is said to be a sacred place beyond the forest...",
+                talkingNpc: "traveler_in_salem_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.magenta
+                    },
+                ],
+                next: $Continue {}
+            },
+            {
+                rawText: "How did they call it? Was it ... oh yes, $1$4The Magenta Mountains$4$1. Soon, we will be able to see what the stories are about...",
+                talkingNpc: "traveler_in_salem_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.magenta
+                    },
+                    $FontScale {
+                        indicator: "$4",
+                        fontScale: 1.2
+                    }
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "Onathahans?",
+                            next: 2
+                        },
+                        {
+                            name: "Who are you?",
+                            next: 6
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        },
+                    ]
+                }
+            },
+            {
+                rawText: "Me? I'm just a traveler. I travel... learn as much as I can as long as I have time... I think the frontier is fascinating... so many stories and places to discover... ",
+                talkingNpc: "traveler_in_salem_npc",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.magenta
+                    },
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "Onathahans?",
+                            next: 2
+                        },
+                        {
+                            name: "What's beyond the forest?",
+                            next: 4
+                        },
+                        {
+                            name: "Goodbye",
+                            next: 7
+                        },
+                    ]
+                }
+            },
+            {
+                rawText: "Bye",
+                talkingNpc: "traveler_in_salem_npc",
+                next: $EndOfDialog {
+                    changeToScreen: "mapScreen"
+                }
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+],
+
