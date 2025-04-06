@@ -1394,9 +1394,6 @@ open class CustomGroup(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (userObject == "hello") {
-            println("$width $height")
-        }
         updateAnimations()
         validate()
         batch ?: return
@@ -1421,6 +1418,9 @@ open class CustomGroup(
     }
 
     private fun drawBackground(batch: Batch?) {
+        if (userObject == "hello" && y != 65f) {
+            println("$x $y")
+        }
         background?.let {
             dropShadow?.doDropShadow(batch, screen, it, this)
             if (it is TransformDrawable) {

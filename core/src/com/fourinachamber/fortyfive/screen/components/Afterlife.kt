@@ -141,13 +141,11 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                 horizontalAlign = CustomAlign.END
                 verticalAlign = CustomAlign.CENTER
                 wrap = CustomWrap.NONE
-                marginBottom = 60f
                 scrollDirectionStart = CustomDirection.RIGHT
                 addScrollbarFromDefaults(
                     CustomDirection.BOTTOM,
                     "afterlife_scrollbar",
                     "afterlife_scrollbar_background",
-                    marginOuter = 30f
                 )
                 repeat(cards.size.coerceAtLeast(4)) { index ->
                     val card = cards.getOrNull(index + 1)
