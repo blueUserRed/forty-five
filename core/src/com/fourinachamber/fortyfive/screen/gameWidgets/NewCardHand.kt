@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.FocusChangeEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -64,13 +66,20 @@ class NewCardHand(
         actor.isSelectable = true
         actor.fixedZIndex = zIndexFor(card)
         resortZIndices()
-        actor.targetGroups = listOf(RevolverSlot.revolverSlotFocusGroupName, PutCardsUnderDeckWidget.focusGroupName)
+        actor.targetGroups = listOf(RevolverSlot.revolverSlotFocusGroupName, PutCardsUnderDeckWidget.focusGroupName, cardFocusGroupName)
         actor.bindDragging(actor, screen)
         actor.makeDraggable(actor)
         actor.resetCondition = { true }
         actor.onDragAndDrop.add { _, target ->
-            target as? RevolverSlot ?: return@add
-            events.fire(CardDraggedOntoSlotEvent(card, target))
+            when (target) {
+                is RevolverSlot -> events.fire(CardDraggedOntoSlotEvent(card, target))
+                is CardActor -> {
+                    if (target.card.inZone(NewGameController.Zone.REVOLVER)) {
+                        val revolver = target.parent as Revolver
+                        events.fire(CardDraggedOntoSlotEvent(card, revolver.slots.find { it.card?.actor === target }!!))
+                    }
+                }
+            }
         }
         layout() // layout added card immediately to make animations work
     }

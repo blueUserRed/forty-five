@@ -649,7 +649,8 @@ sealed class GameSituation {
     class ZoneChange(
         val card: Card,
         val oldZone: NewGameController.Zone,
-        val newZone: NewGameController.Zone
+        val newZone: NewGameController.Zone,
+        val before: Boolean
     ) : GameSituation()
 
     class RevolverRotation(

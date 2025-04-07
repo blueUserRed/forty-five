@@ -111,7 +111,10 @@ class Revolver(
             it.rotation = 0f
             it.fixedZIndex = cardZIndex
         }
-        if (card != null && card.actor !in this) addActor(card.actor)
+        if (card != null && card.actor !in this) {
+            addActor(card.actor)
+            card.actor.bindDroppable(card.actor, screen, listOf(NewCardHand.cardFocusGroupName))
+        }
         slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
     }
 

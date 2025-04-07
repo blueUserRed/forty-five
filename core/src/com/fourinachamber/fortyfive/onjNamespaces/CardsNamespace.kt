@@ -290,6 +290,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
             val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
             when {
+                gameSituation.before -> false
                 !triggers -> false
                 newZone.value != gameSituation.newZone -> false
                 else -> true

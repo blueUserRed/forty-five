@@ -579,7 +579,7 @@ class GameScreen : ScreenCreator() {
             onSelect {
                 screen.deselectActor(this)
                 screen.focusedActor = null
-                gameEvents.fire(NewGameController.Events.Shoot)
+                gameEvents.fire(NewGameController.Events.ShootButtonPressed)
             }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
@@ -664,7 +664,7 @@ class GameScreen : ScreenCreator() {
             onSelect {
                 screen.deselectActor(this)
                 screen.focusedActor = null
-                gameEvents.fire(NewGameController.Events.Holster)
+                gameEvents.fire(NewGameController.Events.HolsterButtonPressed)
             }
             styles(
                 normal = {

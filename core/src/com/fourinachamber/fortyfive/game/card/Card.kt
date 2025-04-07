@@ -225,9 +225,11 @@ class Card(
         }
     }
 
-    fun canBeReplaced(controller: GameController, by: Card): Boolean = false
+    fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
 
-    fun replaceTimeline(controller: NewGameController, replaceBy: Card): Timeline = Timeline()
+    fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
+        include(controller.destroyCardTimeline(this@Card, replaceBy))
+    }
 
     fun changeZone(newZone: Zone, controller: GameController) {
         val oldZone = zone

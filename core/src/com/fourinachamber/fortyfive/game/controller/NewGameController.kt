@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.game.controller
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
@@ -173,8 +172,8 @@ class NewGameController(
             if (inParryMenu) gameRenderPipeline.startParryEffect() else gameRenderPipeline.stopParryEffect()
         }
         gameEvents.watchFor<NewCardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
-        gameEvents.watchFor<Events.Shoot> { if (!isUIFrozen) shoot() }
-        gameEvents.watchFor<Events.Holster> { if (!isUIFrozen) endTurn() }
+        gameEvents.watchFor<Events.ShootButtonPressed> { if (!isUIFrozen) shoot() }
+        gameEvents.watchFor<Events.HolsterButtonPressed> { if (!isUIFrozen) endTurn() }
         gameEvents.watchFor<Events.AfterlifeOpenToggle> {
             // The afterlife opening and closing is handled on the main timeline because it could be important for
             // trigger anims, where the afterlife can open/close automatically
@@ -187,9 +186,9 @@ class NewGameController(
         gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
             targetedEnemy = enemy
         }
-        gameEvents.watchFor<Events.CardChangedZoneEvent> { event ->
-            event.card.changeZone(event.newZone, this)
-            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone)
+        gameEvents.watchFor<Events.CardChangeZoneEvent> { event ->
+            if (!event.before) event.card.changeZone(event.newZone, this)
+            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
             }
@@ -309,6 +308,12 @@ class NewGameController(
 
     override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
         if (!card.inZone(Zone.REVOLVER)) return@later
+        val triggerInfo = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
+        includeLater({
+            gameEvents.fire(beforeEvent)
+            beforeEvent.createTimeline()
+        })
         include(card.actor.destroyAnimation())
         action { card.actor.alpha = 0f }
         if (afterlife.isClosed) include(afterlife.openTimeline())
@@ -317,11 +322,10 @@ class NewGameController(
             afterlife.pushCard(card)
             card.actor.alpha = 1f
         }
-        val triggerInfo = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
         later {
-            val event = Events.CardChangedZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, triggerInfo)
-            gameEvents.fire(event)
-            include(event.createTimeline())
+            val afterEvent = beforeEvent.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
         }
         later {
             val event = Events.CardDestroyedEvent(card, triggerInfo)
@@ -340,17 +344,22 @@ class NewGameController(
         if (newAmount == 0) return@later
         repeat(newAmount) {
             val card = prototype.create(screen)
+            val triggerInfo = TriggerInformation(
+                controller = this@NewGameController,
+                sourceCard = sourceCard
+            )
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.HAND, before = true, triggerInfo)
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
             action { cardHand.addCard(card) }
             include(card.actor.spawnAnimation())
             action { checkCardMaximums() }
             later {
-                val triggerInfo = TriggerInformation(
-                    controller = this@NewGameController,
-                    sourceCard = sourceCard
-                )
-                val event = Events.CardChangedZoneEvent(card, Zone.LIMBO, Zone.HAND, triggerInfo)
-                gameEvents.fire(event)
-                include(event.createTimeline())
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
             }
         }
     } }
@@ -448,6 +457,12 @@ class NewGameController(
         source: Card?
     ): Timeline = Timeline.timeline {
         var orbAnimationTimeline: Timeline? = null
+        val info = TriggerInformation(controller = this@NewGameController, sourceCard = source)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.STACK, Zone.HAND, before = true, info)
+        includeLater({
+            gameEvents.fire(beforeEvent)
+            beforeEvent.createTimeline()
+        })
         action {
             _cardStack.remove(card)
             cardHand.addCard(card)
@@ -463,10 +478,9 @@ class NewGameController(
             include(card.actor.spawnAnimation())
         } }, { orbAnimationTimeline != null })
         includeLater({
-            val info = TriggerInformation(controller = this@NewGameController, sourceCard = source)
-            val event = Events.CardChangedZoneEvent(card, Zone.STACK, Zone.HAND, info)
-            gameEvents.fire(event)
-            event.createTimeline()
+            val afterEvent = beforeEvent.copy(before = false)
+            gameEvents.fire(afterEvent)
+            afterEvent.createTimeline()
         })
         action { checkCardMaximums() }
     }
@@ -605,28 +619,38 @@ class NewGameController(
     }
 
     private fun putCardBackInHandAfterShot(card: Card): Timeline = Timeline.timeline {
+        val triggerInformation = TriggerInformation(controller = this@NewGameController)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, triggerInformation)
+        includeLater({
+            gameEvents.fire(beforeEvent)
+            beforeEvent.createTimeline()
+        })
         action {
             revolver.removeCard(card)
             cardHand.addCard(card)
         }
         later {
-            val triggerInformation = TriggerInformation(controller = this@NewGameController)
-            val event = Events.CardChangedZoneEvent(card, Zone.REVOLVER, Zone.HAND, triggerInformation)
-            gameEvents.fire(event)
-            include(event.createTimeline())
+            val afterEvent = beforeEvent.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
         }
     }
 
     private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
+        val triggerInformation = TriggerInformation(controller = this@NewGameController)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.STACK, before = true, triggerInformation)
+        includeLater({
+            gameEvents.fire(beforeEvent)
+            beforeEvent.createTimeline()
+        })
         action {
             revolver.removeCard(card)
             _cardStack.add(card)
         }
         later {
-            val triggerInformation = TriggerInformation(controller = this@NewGameController)
-            val event = Events.CardChangedZoneEvent(card, Zone.REVOLVER, Zone.STACK, triggerInformation)
-            gameEvents.fire(event)
-            include(event.createTimeline())
+            val afterEvent = beforeEvent.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
         }
     }
 
@@ -750,19 +774,26 @@ class NewGameController(
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
         var cardInSlot: Card? = null
+        val info = TriggerInformation(controller = this@NewGameController, sourceCard = card)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
         val timeline = Timeline.timeline {
             skipping { skip ->
                 action {
                     FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
                     cardInSlot = revolver.getCardInSlot(slot)
-                    val blockedByCard = cardInSlot != null && !card.canBeReplaced(this@NewGameController, card)
+                    val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(this@NewGameController, card)
                     val shouldSkip = !card.allowsEnteringGame(this@NewGameController, slot)
                         || blockedByCard
                         || !tryPay(card.baseCost, card.actor)
                     if (!shouldSkip) return@action
+                    println("skipping")
                     SoundPlayer.situation("not_allowed", screen)
                     skip()
                 }
+                includeLater({
+                    gameEvents.fire(beforeEvent)
+                    beforeEvent.createTimeline()
+                })
                 action {
                     cardHand.removeCard(card)
                     if (cardInSlot != null) revolver.preAddCard(slot, card)
@@ -775,11 +806,10 @@ class NewGameController(
                 action {
                     revolver.setCard(slot, card)
                 }
-                val info = TriggerInformation(controller = this@NewGameController, sourceCard = card)
                 includeLater({
-                    val event = Events.CardChangedZoneEvent(card, Zone.HAND, Zone.REVOLVER, info)
-                    gameEvents.fire(event)
-                    event.createTimeline()
+                    val afterEvent = beforeEvent.copy(before = false)
+                    gameEvents.fire(afterEvent)
+                    afterEvent.createTimeline()
                 })
             }
         }
@@ -994,8 +1024,8 @@ class NewGameController(
             val cashAmount: Int,
             val popupPromise: Promise<Unit> = Promise()
         )
-        data object Shoot
-        data object Holster
+        data object ShootButtonPressed
+        data object HolsterButtonPressed
         data object AfterlifeOpenToggle
 
         abstract class TimelineBuildingEvent {
@@ -1009,39 +1039,40 @@ class NewGameController(
             fun createTimeline(): Timeline = dsl.build()
         }
 
-        class CardChangedZoneEvent(
+        data class CardChangeZoneEvent(
             val card: Card,
             val oldZone: Zone,
             val newZone: Zone,
+            val before: Boolean,
             val triggerInformation: TriggerInformation,
         ) : TimelineBuildingEvent()
 
-        class CardsDrawnEvent(
+        data class CardsDrawnEvent(
             val amount: Int,
             val isSpecial: Boolean,
             val isFromBottom: Boolean,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        class RevolverRotatedEvent(
+        data class RevolverRotatedEvent(
             val rotation: RevolverRotation,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        class AfterShotEvent(
+        data class AfterShotEvent(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        class EndTurnEvent(
+        data class EndTurnEvent(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        class TurnBeginEvent(
+        data class TurnBeginEvent(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        class CardDestroyedEvent(
+        data class CardDestroyedEvent(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
