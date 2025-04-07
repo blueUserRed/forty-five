@@ -411,86 +411,74 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 40,
     },
-//    {
-//        name: "luckyLukesBullet",
-//        title: "Lucky Dukes Bullet",
-//        flavourText: "",
-//        description: "$trigger$On-Placedown:$trigger$\n: deal 6 dmg to target enemy", // TODO: desc
-//        baseDamage: 6,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            damageDirect("enter", 6#val, false)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 60,
-//    },
-//    {
-//        name: "bull_et",
-//        title: "Bull et",
-//        flavourText: "§§card_symbol_text_i_equals§§",
-//        description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
-//        baseDamage: 5,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            damageDirect("rotation", 4#val, false)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "unpleasantGradientBullet",
-//        title: "Unpleasant Gradient Bullet",
-//        flavourText: "This is definitely more than unpleasant. This is a hate crime",
-//        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 8 dmg to the target enemies",
-//        baseDamage: 5,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            damageDirect("round start", 8#val, true)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "scorchingBullet",
-//        title: "Scorching Bullet",
-//        flavourText: "§§card_symbol_text_t_equals§§",
-//        description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
-//        baseDamage: 0,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            damagePlayer("round end", 10#val)#canTriggerInHand
-//        ],
-//        forceLoadCards: [],
-//        dark: true,
-//        cost: 3,
-//        type: $Bullet { },
-//        tags: ["weight", "unobtainable", "not in collection"],
-//        price: 50,
-//    },
+    {
+        name: "luckyLukesBullet",
+        title: "Lucky Dukes Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\n deal 6 dmg to target enemy", // TODO: desc
+        baseDamage: 6,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: damageDirect(6#val, false)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 60,
+    },
+    {
+        name: "bull_et",
+        title: "Bull et",
+        flavourText: "§§card_symbol_text_i_equals§§",
+        description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: rotation(),
+                inZones: [zone.revolver],
+                effect: damageDirect(4#val, false)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "unpleasantGradientBullet",
+        title: "Unpleasant Gradient Bullet",
+        flavourText: "This is definitely more than unpleasant. This is a hate crime",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 8 dmg to the target enemies",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: damageDirect(8#val, true)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "scorchingBullet",
+        title: "Scorching Bullet",
+        flavourText: "§§card_symbol_text_t_equals§§",
+        description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: turnEnd(),
+                inZones: [zone.revolver, zone.hand],
+                effect: damagePlayer(10#val)
+            }
+        ],
+        dark: true,
+        cost: 3,
+        tags: ["weight", "unobtainable", "not in collection"],
+        price: 50,
+    },
 //    {
 //        name: "golddiggersBullet",
 //        title: "Golddiggers Bullet",

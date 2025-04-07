@@ -310,6 +310,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun rotation(): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.RevolverRotation>()
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 

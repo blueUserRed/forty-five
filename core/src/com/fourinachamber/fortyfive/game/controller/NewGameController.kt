@@ -155,7 +155,7 @@ class NewGameController(
             action { chooseEnemyActions() }
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
-                val startTriggerInformation = TriggerInformation(controller = this@NewGameController)
+                val startTriggerInformation = createTriggerInfo(null)
                 val startEvent = Events.TurnBeginEvent(startTriggerInformation)
                 gameEvents.fire(startEvent)
                 include(startEvent.createTimeline())
@@ -308,7 +308,7 @@ class NewGameController(
 
     override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
         if (!card.inZone(Zone.REVOLVER)) return@later
-        val triggerInfo = TriggerInformation(controller = this@NewGameController, sourceCard = sourceCard)
+        val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
         includeLater({
             gameEvents.fire(beforeEvent)
@@ -344,10 +344,7 @@ class NewGameController(
         if (newAmount == 0) return@later
         repeat(newAmount) {
             val card = prototype.create(screen)
-            val triggerInfo = TriggerInformation(
-                controller = this@NewGameController,
-                sourceCard = sourceCard
-            )
+            val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
             val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.HAND, before = true, triggerInfo)
             includeLater({
                 gameEvents.fire(beforeEvent)
@@ -386,11 +383,7 @@ class NewGameController(
         }
         if (newRotation.amount == 0) return@later
         later {
-            val info = TriggerInformation(
-                controller = this@NewGameController,
-                multiplier = newRotation.amount,
-                sourceCard = sourceCard,
-            )
+            val info = createTriggerInfo(null, multiplier = newRotation.amount, sourceCard = sourceCard)
             val event = Events.RevolverRotatedEvent(rotation, info)
             gameEvents.fire(event)
             include(event.createTimeline())
@@ -423,11 +416,11 @@ class NewGameController(
         skipping { skip ->
             action { if (cardsToDraw <= 0) skip() }
             later {
-                val info = TriggerInformation(
-                    controller = this@NewGameController,
+                val info = createTriggerInfo(
+                    null,
                     amountOfCardsDrawn = cardsToDraw,
                     multiplier = cardsToDraw,
-                    sourceCard = sourceCard,
+                    sourceCard = sourceCard
                 )
                 val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, info)
                 gameEvents.fire(event)
@@ -457,7 +450,7 @@ class NewGameController(
         source: Card?
     ): Timeline = Timeline.timeline {
         var orbAnimationTimeline: Timeline? = null
-        val info = TriggerInformation(controller = this@NewGameController, sourceCard = source)
+        val info = createTriggerInfo(card, sourceCard = source)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.STACK, Zone.HAND, before = true, info)
         includeLater({
             gameEvents.fire(beforeEvent)
@@ -619,7 +612,7 @@ class NewGameController(
     }
 
     private fun putCardBackInHandAfterShot(card: Card): Timeline = Timeline.timeline {
-        val triggerInformation = TriggerInformation(controller = this@NewGameController)
+        val triggerInformation = createTriggerInfo(card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, triggerInformation)
         includeLater({
             gameEvents.fire(beforeEvent)
@@ -637,7 +630,7 @@ class NewGameController(
     }
 
     private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
-        val triggerInformation = TriggerInformation(controller = this@NewGameController)
+        val triggerInformation = createTriggerInfo(card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.STACK, before = true, triggerInformation)
         includeLater({
             gameEvents.fire(beforeEvent)
@@ -774,7 +767,7 @@ class NewGameController(
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
         var cardInSlot: Card? = null
-        val info = TriggerInformation(controller = this@NewGameController, sourceCard = card)
+        val info = createTriggerInfo(card, sourceCard = card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
         val timeline = Timeline.timeline {
             skipping { skip ->
@@ -786,7 +779,6 @@ class NewGameController(
                         || blockedByCard
                         || !tryPay(card.baseCost, card.actor)
                     if (!shouldSkip) return@action
-                    println("skipping")
                     SoundPlayer.situation("not_allowed", screen)
                     skip()
                 }
@@ -901,7 +893,7 @@ class NewGameController(
         }
 
         later {
-            val triggerInfo = TriggerInformation(controller = this@NewGameController)
+            val triggerInfo = createTriggerInfo(null)
             val event = Events.EndTurnEvent(triggerInfo)
             gameEvents.fire(event)
             include(event.createTimeline())
@@ -936,7 +928,7 @@ class NewGameController(
         includeLater({ drawCardsTimeline(Config.cardsToDraw) })
 
         later {
-            val triggerInfo = TriggerInformation(controller = this@NewGameController)
+            val triggerInfo = createTriggerInfo(null)
             val event = Events.TurnBeginEvent(triggerInfo)
             gameEvents.fire(event)
             include(event.createTimeline())
@@ -981,6 +973,21 @@ class NewGameController(
     override fun end() {
         super.end()
     }
+
+    private fun createTriggerInfo(
+        card: Card?,
+        multiplier: Int? = null,
+        isOnShot: Boolean = false,
+        amountOfCardsDrawn: Int = 0,
+        sourceCard: Card? = null,
+    ): TriggerInformation = TriggerInformation(
+        controller = this,
+        targetedEnemies = if (card?.isSpray == true) allEnemies else listOf(targetedEnemy),
+        multiplier = multiplier,
+        isOnShot = isOnShot,
+        amountOfCardsDrawn = amountOfCardsDrawn,
+        sourceCard = sourceCard
+    )
 
     enum class Zone {
         STACK, HAND, REVOLVER, AFTERLIFE, LIMBO

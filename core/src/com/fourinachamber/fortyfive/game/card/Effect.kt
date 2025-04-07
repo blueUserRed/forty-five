@@ -670,7 +670,7 @@ sealed class GameSituation {
 data class TriggerInformation(
     val multiplier: Int? = null,
     val controller: GameController,
-    val targetedEnemies: List<Enemy> = listOf(), // TODO: fix
+    val targetedEnemies: List<Enemy> = listOf(),
     val isOnShot: Boolean = false,
     val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null,
