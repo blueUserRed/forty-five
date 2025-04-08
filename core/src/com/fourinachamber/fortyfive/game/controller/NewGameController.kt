@@ -8,7 +8,9 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.logTag
+import com.fourinachamber.fortyfive.game.controller.OldGameController.Companion.showStatusEffectsState
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
@@ -257,6 +259,7 @@ class NewGameController(
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
+        updateStatusEffects()
     }
 
     private fun initCards() {
@@ -361,8 +364,25 @@ class NewGameController(
         }
     } }
 
-    override fun bounceBulletTimeline(card: Card): Timeline {
-        TODO("Not yet implemented")
+    override fun bounceBulletTimeline(card: Card): Timeline = Timeline.timeline {
+        val info = createTriggerInfo(card)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, info)
+        includeLater({
+            gameEvents.fire(beforeEvent)
+            beforeEvent.createTimeline()
+        })
+        action {
+            if (card !in revolver.slots.mapNotNull { it.card }) {
+                throw RuntimeException("cant bounce card $card because it isn't in the revolver")
+            }
+            revolver.removeCard(card)
+            tryPutCardInHand(card)
+        }
+        includeLater({
+            val afterEvent = beforeEvent.copy(before = false)
+            gameEvents.fire(afterEvent)
+            afterEvent.createTimeline()
+        })
     }
 
     override fun rotateRevolverTimeline(
@@ -565,8 +585,28 @@ class NewGameController(
         action { FortyFive.newRun(true) }
     }
 
-    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline {
-        TODO("Not yet implemented")
+    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline = Timeline.timeline {
+        action {
+            FortyFiveLogger.debug(logTag, "status effect $effect applied to player")
+            _playerStatusEffects
+                .find { it.canStackWith(effect) }
+                ?.let {
+                    FortyFiveLogger.debug(logTag, "stacked with $it")
+                    it.stack(effect)
+                    return@action
+                }
+            effect.start(this@NewGameController)
+            _playerStatusEffects.add(effect)
+            gameEvents.fire(Events.AddedPlayerStatusEffect(effect))
+        }
+    }
+
+    private fun updateStatusEffects() {
+        _playerStatusEffects.iterateRemoving { effect, remover ->
+            if (effect.isStillValid()) return@iterateRemoving
+            remover()
+            gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
+        }
     }
 
     override fun destroyCardInHandTimeline(card: Card): Timeline {
@@ -587,10 +627,14 @@ class NewGameController(
         delayUntil { parryEnterEvent.resolutionPromise.isResolved }
         later {
             val parried = parryEnterEvent.resolutionPromise.getOrError()
-            include(card.afterShot(this@NewGameController, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
-            include(rotateRevolverTimeline(card.rotationDirection))
-            if (remainingDamage > 0) {
-                include(damagePlayerTimeline(remainingDamage, false, isPiercing))
+            if (parried) {
+                include(card.afterShot(this@NewGameController, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+                include(rotateRevolverTimeline(card.rotationDirection))
+                if (remainingDamage > 0) {
+                    include(damagePlayerTimeline(remainingDamage, false, isPiercing))
+                }
+            } else {
+                include(damagePlayerTimeline(damage, false, isPiercing))
             }
         }
     } }
@@ -620,13 +664,21 @@ class NewGameController(
         })
         action {
             revolver.removeCard(card)
-            cardHand.addCard(card)
+            tryPutCardInHand(card)
         }
         later {
             val afterEvent = beforeEvent.copy(before = false)
             gameEvents.fire(afterEvent)
             include(afterEvent.createTimeline())
         }
+    }
+
+    private fun tryPutCardInHand(card: Card): Boolean {
+        val spaceInHand = maxSpaceInHand(1)
+        if (spaceInHand == 0) return false
+        cardHand.addCard(card)
+        checkCardMaximums()
+        return true
     }
 
     private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
@@ -1031,6 +1083,8 @@ class NewGameController(
             val cashAmount: Int,
             val popupPromise: Promise<Unit> = Promise()
         )
+        data class AddedPlayerStatusEffect(val statusEffect: StatusEffect)
+        data class RemovedPlayerStatusEffect(val statusEffect: StatusEffect)
         data object ShootButtonPressed
         data object HolsterButtonPressed
         data object AfterlifeOpenToggle

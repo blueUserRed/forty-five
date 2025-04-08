@@ -65,6 +65,7 @@ interface StatusEffectDisplay : StyledActor {
             val (effectToTest, group) = iterator.next()
             if (effect !== effectToTest) continue
             actor.removeActor(group)
+            iterator.remove()
             break
         }
     }

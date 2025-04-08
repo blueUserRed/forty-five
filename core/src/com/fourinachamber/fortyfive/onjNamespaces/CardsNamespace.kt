@@ -4,7 +4,6 @@ import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.card.Trigger.Companion.triggerForSituation
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.Utils
@@ -315,6 +314,17 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         triggerForSituation<GameSituation.RevolverRotation>()
     )
 
+    @RegisterOnjFunction(schema = "params: [boolean, int]")
+    fun cardsDrawn(mustBeSpecial: OnjBoolean, minimum: OnjInt): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardsDrawn> { situation, _, _, _ ->
+            when {
+                mustBeSpecial.value && !situation.isSpecial -> false
+                situation.amount < minimum.value -> false
+                else -> true
+            }
+        }
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 
@@ -478,7 +488,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
-    fun activeChecker(value: OnjNamedObject): OnjCardModifierPredicate {
+    fun modifierPredicate(value: OnjNamedObject): OnjCardModifierPredicate {
         val predicate = GamePredicate.fromOnj(value)
         return OnjCardModifierPredicate { controller, _, _ -> predicate.check(controller) }
     }

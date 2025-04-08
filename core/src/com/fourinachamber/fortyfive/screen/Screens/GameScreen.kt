@@ -35,6 +35,7 @@ import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNav
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
+import com.fourinachamber.fortyfive.screen.gameWidgets.HorizontalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.PutCardsUnderDeckWidget
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
@@ -109,6 +110,10 @@ class GameScreen : ScreenCreator() {
         )
     }
 
+    private val playerStatusEffectDisplay: HorizontalStatusEffectDisplay by lazy {
+        HorizontalStatusEffectDisplay(screen, forceLoadFont("red_wing"), Color.Black, 1.4f)
+    }
+
     init {
         bindEventHandlers()
     }
@@ -148,6 +153,32 @@ class GameScreen : ScreenCreator() {
         this@GameScreen.afterlife = afterlife
         actor(afterlife.getActor(this@GameScreen)) {
             y = worldHeight * 0.4f
+        }
+
+        box {
+            badTexture()
+            backgroundHandle = "status_effect_background"
+            height = 90f
+            onLayoutAndNow { width = parent.width * 0.5f }
+            x = parent.width / 2 - 180
+            y = worldHeight - height + 10
+            isVisible = false
+
+            actor(playerStatusEffectDisplay) {
+                relativeWidth(100f)
+                relativeHeight(100f)
+                centerX()
+                centerY()
+            }
+
+            gameEvents.watchFor<NewGameController.Events.AddedPlayerStatusEffect> { event ->
+                playerStatusEffectDisplay.displayEffect(event.statusEffect)
+                isVisible = true
+            }
+            gameEvents.watchFor<NewGameController.Events.RemovedPlayerStatusEffect> { event ->
+                playerStatusEffectDisplay.removeEffect(event.statusEffect)
+                if (playerStatusEffectDisplay.effects.isEmpty()) isVisible = false
+            }
         }
 
         putCardsUnderStackPopup()

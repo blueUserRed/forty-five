@@ -396,8 +396,7 @@ abstract class Effect(val data: EffectData) {
                     get<List<Card>>("selectedCards")
                         .map { controller.bounceBulletTimeline(it) }
                         .collectTimeline()
-                },
-                { true }
+                }
             )
         }
 

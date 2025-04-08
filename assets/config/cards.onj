@@ -479,207 +479,195 @@ cards: [
         tags: ["weight", "unobtainable", "not in collection"],
         price: 50,
     },
-//    {
-//        name: "golddiggersBullet",
-//        title: "Golddiggers Bullet",
-//        flavourText: "",
-//        description: "$trigger$While in Revolver:$trigger$\nWhenever you draw one or more cards: +5 dmg\n$trigger$While in Revolver:$trigger$\nWhenever you draw two or more cards, excluding the first time in a turn:\n\nGain half as many reserves as the number of cards drawn, rounded down.",
-//        baseDamage: 0,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            buffDmg("one or more cards drawn", bSelects.self, 5#val),
-//            reserveGain("special one or more cards drawn", value.amountOfCardsDrawn * 0.5)#hide
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "finalBullet",
-//        title: "Final Bullet",
-//        flavourText: "\"He came to our land, married on of our own and then brought war. We forged bullets to defend ourselves. But this was his plan all along. An empire, built with our bullets...\" - a forgotten note",
-//        description: "$trigger$On-Leave:$trigger$\nYou lose the game\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +12 dmg",
-//        baseDamage: 20,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            killPlayer("leave"),
-//            giftDmg("round start", bSelects.allExceptSelf, 12#val)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "miniBullet",
-//        title: "Mini Bullet",
-//        flavourText: "",
-//        description: "",
-//        baseDamage: 3,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 0,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity2"],
-//        price: 40,
-//    },
-//    {
-//        name: "glassBullet",
-//        title: "Glass Bullet",
-//        flavourText: "",
-//        description: "$trigger$On-Shot:$trigger$\nDraw x cards, where x is the cost value of the card with the highest cost value in the revolver.",
-//        baseDamage: 16,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            draw("shot", value.mostExpensiveBulletInRevolver)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity2"],
-//        additionalHoverInfos: ["mostExpensiveBullet"],
-//        price: 50,
-//    },
-//    {
-//        name: "shotgunshellBullet",
-//        title: "Shotgunshell Bullet",
-//        flavourText: "",
-//        description: "$trait$SPRAY$trait$",
-//        baseDamage: 20,
-//        coverValue: 0,
-//        traitEffects: [ "spray" ],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 3,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "hollowpointBullet",
-//        title: "Hollowpoint Bullet",
-//        flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
-//        description: "If the enemy has shield:\nThis Bullet has +6 dmg",
-//        baseDamage: 10,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyShieldIsAtLeast { value: 1 }#activeChecker)#hide
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "pppBullet",
-//        title: "+P+ Bullet",
-//        flavourText: "This Bullet has \"Manufactured in New Hemingway\" engraved in it. The overpressured Tip guarantees maximal effectiveness",
-//        description: "If the enemy has at least 1 status effect: \nThis bullet gets +6 dmg",
-//        baseDamage: 8,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyHasAnyStatusEffect {}#activeChecker)#hide
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "deputiesBullet",
-//        title: "Deputies Bullet",
-//        flavourText: "",
-//        description: "This Bullet can't be placed in slot 3" + slot.3 + ".\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3" + slot.3 + " to your hand",
-//        baseDamage: 6,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            bounce("enter", bSelects.threeButNotSelf)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        forbiddenSlots: [3],
-//        tags: ["pool1", "rarity3"],
-//        price: 50,
-//    },
-//    {
-//        name: "toxicBullet",
-//        title: "Toxic Bullet",
-//        flavourText: "Still not as toxic as my ex-girlfriend",
-//        description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +8 dmg",
-//        baseDamage: 5,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            buffDmg("enter", bSelects.self, 8#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)#hide
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "fullLeadBullet",
-//        title: "Full Lead Bullet",
-//        flavourText: "",
-//        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (9, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6, 3)",
-//        baseDamage: 8,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giveStatus("shot", poison(3#val, 6#val)),
-//            givePlayerStatus("round start", poison(3#val, 9#val)),
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 60,
-//    },
+    {
+        name: "golddiggersBullet",
+        title: "Golddiggers Bullet",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\nWhenever you draw one or more cards: +5 dmg\n$trigger$While in Revolver:$trigger$\nWhenever you draw two or more cards, excluding the first time in a turn:\n\nGain half as many reserves as the number of cards drawn, rounded down.",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: cardsDrawn(false, 1),
+                effect: buffDmg(bSelectSelf(), 5#val)
+            },
+            {
+                trigger: cardsDrawn(true, 2),
+                isHidden: true,
+                effect: reserveGain(value.amountOfCardsDrawn * 0.5),
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "finalBullet",
+        title: "Final Bullet",
+        flavourText: "\"He came to our land, married on of our own and then brought war. We forged bullets to defend ourselves. But this was his plan all along. An empire, built with our bullets...\" - a forgotten note",
+        description: "$trigger$On-Leave:$trigger$\nYou lose the game\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +12 dmg",
+        baseDamage: 20,
+        effects: [
+            {
+                trigger: leaveZone(zone.revolver, "onlySelf"),
+                effect: killPlayer()
+            },
+            {
+                trigger: turnBegin(),
+                effect: buffDmg(
+                    (not(isSelf()) and inZone(zone.revolver))#bSelect,
+                    12#val
+                )
+            }
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "miniBullet",
+        title: "Mini Bullet",
+        flavourText: "",
+        description: "",
+        baseDamage: 3,
+        effects: [],
+        cost: 0,
+        tags: ["pool2", "rarity2"],
+        price: 40,
+    },
+    {
+        name: "glassBullet",
+        title: "Glass Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nDraw x cards, where x is the cost value of the card with the highest cost value in the revolver.",
+        baseDamage: 16,
+        effects: [
+            {
+                trigger: shot(),
+                effect: draw(value.mostExpensiveBulletInRevolver)
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity2"],
+        additionalHoverInfos: ["mostExpensiveBullet"],
+        price: 50,
+    },
+    {
+        name: "shotgunshellBullet",
+        title: "Shotgunshell Bullet",
+        flavourText: "",
+        description: "$trait$SPRAY$trait$",
+        baseDamage: 20,
+        traitEffects: [ "spray" ],
+        effects: [],
+        cost: 3,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "hollowpointBullet",
+        title: "Hollowpoint Bullet",
+        flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
+        description: "If the enemy has shield:\nThis Bullet has +6 dmg",
+        baseDamage: 10,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                isHidden: true,
+                effect: buffDmg(
+                    bSelectSelf(),
+                    6#val,
+                    $TargetedEnemyShieldIsAtLeast { value: 1 }#modifierPredicate,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "pppBullet",
+        title: "+P+ Bullet",
+        flavourText: "This Bullet has \"Manufactured in New Hemingway\" engraved in it. The overpressured Tip guarantees maximal effectiveness",
+        description: "If the enemy has at least 1 status effect: \nThis bullet gets +6 dmg",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                isHidden: true,
+                effect: buffDmg(
+                    bSelectSelf(),
+                    6#val,
+                    $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "deputiesBullet",
+        title: "Deputies Bullet",
+        flavourText: "",
+        description: "This Bullet can't be placed in slot 3" + slot.3 + ".\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3" + slot.3 + " to your hand",
+        baseDamage: 6,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: bounce(
+                    (inZone(zone.revolver) and not(isSelf()) and inRevolverSlot(3))#bSelect
+                )
+            }
+        ],
+        cost: 1,
+        forbiddenSlots: [3],
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "toxicBullet",
+        title: "Toxic Bullet",
+        flavourText: "Still not as toxic as my ex-girlfriend",
+        description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +8 dmg",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                isHidden: true,
+                effect: buffDmg(
+                    bSelectSelf(),
+                    8#val,
+                    $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#modifierPredicate,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "fullLeadBullet",
+        title: "Full Lead Bullet",
+        flavourText: "",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (9, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6, 3)",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: shot(),
+                effect: giveStatus(poison(3#val, 6#val))
+            },
+            {
+                trigger: turnBegin(),
+                effect: givePlayerStatus(poison(3#val, 9#val))
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 60,
+    },
 //    {
 //        name: "gasBullet",
 //        title: "Gas Bullet",
