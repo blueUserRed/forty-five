@@ -235,6 +235,12 @@ class NewGameController(
                     .let { include(it) }
             }
         }
+        gameEvents.watchFor<Events.CardReturnedHome> { event ->
+            val situation = GameSituation.CardReturnedHome(event.card)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
         gameEvents.watchFor<Events.CardDestroyedEvent> { event ->
             val situation = GameSituation.CardDestroyed(event.card)
             event.append {
@@ -402,6 +408,17 @@ class NewGameController(
             cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
         }
         if (newRotation.amount == 0) return@later
+        later {
+            revolver
+                .slots
+                .filter { it.card?.enteredInSlot == it.num }
+                .forEach {
+                    val card = it.card!!
+                    val info = createTriggerInfo(card, sourceCard = sourceCard)
+                    val event = Events.CardReturnedHome(card, info)
+                    gameEvents.fire(event)
+                }
+        }
         later {
             val info = createTriggerInfo(null, multiplier = newRotation.amount, sourceCard = sourceCard)
             val event = Events.RevolverRotatedEvent(rotation, info)
@@ -726,6 +743,8 @@ class NewGameController(
 
         action {
             SoundPlayer.situation("revolver_shot", screen)
+            val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline()
+            dispatchAnimTimeline(postProcessor)
         }
         cardToShoot?.let { card ->
             action { SaveState.bulletsShot++ }
@@ -752,10 +771,11 @@ class NewGameController(
     } }
 
     override fun shoot() {
-        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
-        appendMainTimeline(Timeline.timeline {
-            parallelActions(shootTimeline().asAction(), postProcessor)
-        })
+//        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
+//        appendMainTimeline(Timeline.timeline {
+//            parallelActions(shootTimeline().asAction(), postProcessor)
+//        })
+        appendMainTimeline(shootTimeline())
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -1134,6 +1154,11 @@ class NewGameController(
         ) : TimelineBuildingEvent()
 
         data class CardDestroyedEvent(
+            val card: Card,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class CardReturnedHome(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()

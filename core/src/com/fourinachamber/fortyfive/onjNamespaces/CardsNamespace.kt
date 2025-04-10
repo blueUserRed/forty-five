@@ -325,6 +325,33 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun cardDestroyed(whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardDestroyed> { situation, card, _, _ ->
+            WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+        }
+    )
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun cardReturnedHome(whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardReturnedHome> { situation, card, _, _ ->
+            WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+        }
+    )
+
+    @RegisterOnjFunction(schema = "params: [int, string]")
+    fun rotateIn(slot: OnjInt, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.RevolverRotation> { situation, card, _, controller ->
+            val internalSlot = Utils.convertSlotRepresentation(slot.value.toInt())
+            val cardInSlot = controller.revolver.slots.find { it.num == internalSlot }?.card
+            if (cardInSlot == null) {
+                false
+            } else {
+                WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, cardInSlot)
+            }
+        }
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 
@@ -373,6 +400,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             revolver + hand + stack
         }
     )
+
 
     @RegisterOnjFunction(schema = "params: [boolean, boolean, string]")
     fun bSelectRevolverTarget(includeSelf: OnjBoolean, optional: OnjBoolean, text: OnjString): OnjBulletSelector =

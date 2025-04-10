@@ -658,6 +658,8 @@ sealed class GameSituation {
 
     class CardsDrawn(val amount: Int, val isSpecial: Boolean, val isFromBottom: Boolean) : GameSituation()
 
+    class CardReturnedHome(val card: Card) : GameSituation()
+
     data object TurnEnd : GameSituation()
     data object TurnBegin : GameSituation()
 
