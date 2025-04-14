@@ -146,9 +146,8 @@ class Card(
         private set
     var isShotProtected: Boolean = false
         private set
-    var isAlwaysAtBottom: Boolean = false
-        private set
-    var isAlwaysAtTop: Boolean = false
+
+    var stackPosition: StackPosition = StackPosition.NORMAL
         private set
 
     fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
@@ -252,14 +251,6 @@ class Card(
         return false
     }
 
-    ///////////////////////////////////////////
-    ///////////////////////////////////////////
-
-    fun bottomCardToTopCard() {
-        isAlwaysAtBottom = false
-        isAlwaysAtTop = true
-    }
-
     inline fun <T> checkValiditySingleModifierList(
         controller: GameController,
         modifiers: MutableList<T>,
@@ -349,6 +340,11 @@ class Card(
         if (isUndead) include(putCardInTheHand(this@Card))
         else include(putCardInTheStack(this@Card))
     } }
+
+    fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
+        this.stackPosition = stackPosition
+        controller.cardStack.dirty()
+    }
 
     fun beforeShot() {
     }
@@ -472,6 +468,10 @@ class Card(
                         include(controller.gameRenderPipeline.getScreenShakeTimeline())
                     }
                     action { controller.dispatchAnimTimeline(screenShakeTimeline) }
+                    includeLater(
+                        { controller.afterlife.closeTimeline() },
+                        { controller.afterlife.isOpen }
+                    )
                     include(anim)
                 }
                 include(effect.onTrigger(this@Card, triggerInformation, controller))
@@ -655,7 +655,8 @@ class Card(
                                 arr
                                     .value
                                     .map { (it as OnjZone).value }
-                            }
+                            },
+                            condition = it.getOr<OnjNamedObject?>("condition", null)?.let { GamePredicate.fromOnj(it) }
                         )
                         effect.copy(data)
                     },
@@ -704,12 +705,16 @@ class Card(
                 "reinforced" -> card.isReinforced = true
                 "shotProtected" -> card.isShotProtected = true
                 "rotten" -> card.isRotten = true
-                "alwaysAtBottom" -> card.isAlwaysAtBottom = true
-                "alwaysAtTop" -> card.isAlwaysAtTop = true
+                "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
+                "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
         }
+    }
+
+    enum class StackPosition {
+        NORMAL, BOTTOM, TOP
     }
 
 }

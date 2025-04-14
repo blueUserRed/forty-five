@@ -25,6 +25,7 @@ var effectDefinition = {
     trigger: Trigger,
     effect: Effect,
     inZones?: Zone[],
+    condition?: { ...* },
     canPreventEnteringGame?: boolean,
     isHidden?: boolean,
     cacheAffectedCards?: boolean,

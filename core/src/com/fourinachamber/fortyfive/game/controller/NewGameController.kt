@@ -38,7 +38,7 @@ class NewGameController(
     override val screen: OnjScreen,
     val gameEvents: EventPipeline,
     private val warningParent: WarningParent,
-    private val afterlife: Afterlife,
+    override val afterlife: Afterlife,
 ) : ScreenController(), GameController, ResourceBorrower {
 
     override val gameRenderPipeline: GameRenderPipeline = GameRenderPipeline(screen)
@@ -98,9 +98,7 @@ class NewGameController(
 
     private var cardPrototypes: List<CardPrototype> = listOf()
 
-    private val _cardStack: MutableList<Card> = mutableListOf()
-    override val cardStack: List<Card>
-        get() = _cardStack
+    override val cardStack: CardStack = CardStack(mutableListOf())
 
     private val createdCards: MutableList<Card> = mutableListOf()
 
@@ -196,7 +194,7 @@ class NewGameController(
             }
         }
         gameEvents.watchFor<Events.CardsDrawnEvent> { event ->
-            val situation = GameSituation.CardsDrawn(event.amount, event.isSpecial, event.isFromBottom)
+            val situation = GameSituation.CardsDrawn(event.amount, event.isSpecial, event.isFromBottom, event.cards)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
             }
@@ -247,6 +245,12 @@ class NewGameController(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.PlayerLivesChanged> { event ->
+            val situation = GameSituation.PlayerHealthChanged(event.oldValue, event.newValue, SaveState.maxPlayerLives)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
     }
 
     private fun checkTrigger(situation: GameSituation, triggerInformation: TriggerInformation): Timeline = createdCards
@@ -261,7 +265,7 @@ class NewGameController(
     }
 
     override fun update() {
-        TemplateString.updateGlobalParam("game.cardsInStack", _cardStack.size)
+        TemplateString.updateGlobalParam("game.cardsInStack", cardStack.size())
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
@@ -277,6 +281,8 @@ class NewGameController(
 
         val cardsArray = onj.get<OnjArray>("cards")
 
+        val stack = mutableListOf<Card>()
+
         cardPrototypes = Card
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
@@ -291,12 +297,13 @@ class NewGameController(
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            _cardStack.add(card.create(this.screen))
+            stack.add(card.create(this.screen))
         }
 
-        if (encounter.shuffleCards) _cardStack.shuffle()
+        if (encounter.shuffleCards) stack.shuffle()
+        cardStack.set(stack)
 
-        FortyFiveLogger.debug(logTag, "card stack: $_cardStack")
+        FortyFiveLogger.debug(logTag, "card stack: $stack")
 
         val defaultBulletName = onj.get<String>("defaultBullet")
 
@@ -446,8 +453,9 @@ class NewGameController(
         ).toInt()
         cardsToDraw = maxSpaceInHand(cardsToDraw)
 
+        val cardAcc = mutableListOf<Card>()
         repeat(cardsToDraw) {
-            include(drawCardTimeline(fromBottom, sourceCard))
+            include(drawCardTimeline(fromBottom, sourceCard, cardAcc))
         }
 
         skipping { skip ->
@@ -459,32 +467,38 @@ class NewGameController(
                     multiplier = cardsToDraw,
                     sourceCard = sourceCard
                 )
-                val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, info)
+                val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, cardAcc, info)
                 gameEvents.fire(event)
                 include(event.createTimeline())
             }
         }
-
     } }
 
-    private fun drawCardTimeline(fromBottom: Boolean, sourceCard: Card?): Timeline = Timeline.timeline {
+    private fun drawCardTimeline(
+        fromBottom: Boolean,
+        sourceCard: Card?,
+        cardAcc: MutableList<Card>? = null
+    ): Timeline = Timeline.timeline {
         var card: Card? = null
         action {
-            card = when {
-                _cardStack.isEmpty() -> defaultBullet.create(screen)
-                fromBottom -> _cardStack.removeLast()
-                else -> _cardStack.removeFirst()
-            }
+            card = cardStack.drawCard(fromBottom)
             cardsDrawn++
+            card?.let { cardAcc?.add(it) }
         }
         later {
-            include(putCardFromStackInHandTimeline(card!!, sourceCard))
+            val card = card
+            if (card == null) {
+                include(putCardFromStackInHandTimeline(defaultBullet.create(screen), sourceCard, cardIsntActuallyInStack = true))
+            } else {
+                include(putCardFromStackInHandTimeline(card, sourceCard))
+            }
         }
     }
 
     override fun putCardFromStackInHandTimeline(
         card: Card,
-        source: Card?
+        source: Card?,
+        cardIsntActuallyInStack: Boolean, // kinda stupid, but necessary when drawing the default bullet
     ): Timeline = Timeline.timeline {
         var orbAnimationTimeline: Timeline? = null
         val info = createTriggerInfo(card, sourceCard = source)
@@ -494,7 +508,7 @@ class NewGameController(
             beforeEvent.createTimeline()
         })
         action {
-            _cardStack.remove(card)
+            if (!cardIsntActuallyInStack) cardStack.remove(card)
             cardHand.addCard(card)
             card.actor.alpha = 0f
             val event = Events.PlayCardOrbAnimation(card.actor)
@@ -538,6 +552,7 @@ class NewGameController(
         }
         if (newDamage != damage) include(shieldAnimationTimeline())
         if (newDamage == 0) return@later
+        include(updatePlayerLivesTimeline(curPlayerLives - newDamage))
         action {
             dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
             dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen).wrap())
@@ -559,6 +574,17 @@ class NewGameController(
             },
             { !triggeredByStatusEffect && newDamage > 0}
         )
+    } }
+
+    private fun updatePlayerLivesTimeline(newValue: Int, source: Card? = null): Timeline = Timeline.timeline { later {
+        val old = curPlayerLives
+        curPlayerLives = newValue
+        includeLater({
+            val info = createTriggerInfo(null)
+            val event = Events.PlayerLivesChanged(old, newValue, info)
+            gameEvents.fire(event)
+            event.createTimeline()
+        })
     } }
 
     private val shieldIconPromise: Promise<Drawable> =
@@ -707,7 +733,7 @@ class NewGameController(
         })
         action {
             revolver.removeCard(card)
-            _cardStack.add(card)
+            cardStack.addCardAtBottom(card)
         }
         later {
             val afterEvent = beforeEvent.copy(before = false)
@@ -979,7 +1005,7 @@ class NewGameController(
             action {
                 val selectedCards = event.selectedCards.getOrError()
                 selectedCards.forEach { cardHand.removeCard(it) }
-                selectedCards.forEach { _cardStack.add(_cardStack.size, it) }
+                selectedCards.forEach { cardStack.addCardAtBottom(it) }
             }
         }
 
@@ -1132,6 +1158,7 @@ class NewGameController(
             val amount: Int,
             val isSpecial: Boolean,
             val isFromBottom: Boolean,
+            val cards: List<Card>,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
@@ -1160,6 +1187,12 @@ class NewGameController(
 
         data class CardReturnedHome(
             val card: Card,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class PlayerLivesChanged(
+            val oldValue: Int,
+            val newValue: Int,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 

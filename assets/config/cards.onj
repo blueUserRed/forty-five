@@ -921,7 +921,7 @@ cards: [
         effects: [
             {
                 trigger: turnBegin(),
-                inZone: [zone.revolver],
+                inZones: [zone.revolver],
                 effect: destroyTargetOrDestroySelf(bSelectRevolverTarget(false, false, "Choose Bullet to destroy"))
             },
         ],
@@ -956,7 +956,7 @@ cards: [
         effects: [
             {
                 trigger: turnBegin(),
-                inZone: [zone.revolver],
+                inZones: [zone.revolver],
                 effect: buffDmg(
                     (inZone(zone.revolver) and not(isSelf()))#bSelect,
                     4#val
@@ -995,7 +995,6 @@ cards: [
                 effect: protect(
                     (inRevolverSlot(3) and not(isSelf()))#bSelect,
                     1,
-                    false
                 )
             }
         ],
@@ -1019,271 +1018,256 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
-//    {
-//        name: "vengeanceBullet",
-//        title: "Vengeance Bullet",
-//        flavourText: "\"When I get my hands on you Jake… You’ll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
-//        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nDeal x dmg to the enemy, where x is the dmg value of the destroyed bullet times 2",
-//        baseDamage: 10,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            damageDirect("any card destroyed", value.sourceCardDamage * 2, false)
-//        ],
-//        forceLoadCards: [],
-//        dark: true,
-//        cost: 3,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 70,
-//    },
-//    {
-//        name: "molotovBullet",
-//        title: "Molotov Bullet",
-//        flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
-//        description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
-//        baseDamage: 6,
-//        coverValue: 0,
-//        traitEffects: [ "spray" ],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giveStatus("shot", burning(1#val, burningPercent, false)),
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "wealthyBullet",
-//        title: "Wealthy Bullet",
-//        flavourText: "",
-//        description: "$trigger$While in Revolver:$trigger$\nWhenever you draw one or more cards: draw one extra card.",
-//        baseDamage: 8,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            addEncounterModifierWhileBulletIsInGame("enter", "drawonemorecard")#hide
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 3,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 80,
-//    },
-//    {
-//        name: "shovelBullet",
-//        title: "Shovel Bullet",
-//        flavourText: "",
-//        description: "$trigger$On-Placedown:$trigger$\nDraw a card from the bottom of the deck",
-//        baseDamage: 9,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            drawFromBottomOfDeck("enter", 1#val)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 40,
-//    },
-//    {
-//        name: "carnageBullet",
-//        title: "Carnage Bullet",
-//        flavourText: "",
-//        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet",
-//        baseDamage: 11,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            destroy("shot", bSelects.targetRequiredNotSelf)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "backupBullet",
-//        title: "Backup Bullet",
-//        flavourText: "Here to safe your ass",
-//        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.",
-//        baseDamage: 20,
-//        coverValue: 0,
-//        traitEffects: ["alwaysAtBottom"],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [],
-//        passiveEffects: [bottomToTopCard(
-//            $PlayerHealthLowerThan {
-//                value: (gameConfig.playerConfig.lives * 0.1)#int
-//            }
-//        )],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 0,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "bulletPointBullet",
-//        title: "Bullet Point Bullet",
-//        flavourText: "",
-//        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet enters the revolver:$trigger$\nThe bullet that entered gets +4 dmg",
-//        baseDamage: 7,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giftDmg("any card entered", bSelects.sourceBullet, 4#val)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "supportBullet",
-//        title: "Support Bullet",
-//        flavourText: "\"Support is on the way, be at ease little sister, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\" -Letter to Salem",
-//        description: "$trigger$On Enter:$trigger$\nChose a bullet in a slot.\n$trigger$While in revolver:$trigger$\nThe chosen bullet gets +10 dmg",
-//        baseDamage: 5,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            buffDmg("enter", bSelects.targetRequiredNotSelf, 10#val)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2", "unobtainable", "not used", "not in collection"],
-//        price: 50,
-//    },
-//    {
-//        name: "doodleBullet",
-//        title: "Doodle Bullet",
-//        flavourText: "A great activity when taking breaks from shooting people! Doodling!",
-//        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +7 dmg.",
-//        baseDamage: 4,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            search("enter", 1, cardsWithCost(0))#cacheAffectedCards,
-//            giftDmg("enter", bSelects.cachedBullets, 7#val)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "sheriffsBullet",
-//        title: "Sheriffs Bullet",
-//        flavourText: "",
-//        description: "$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nReturn target bullet to your hand",
-//        baseDamage: 10,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            bounce("round start", bSelects.targetRequiredNotSelf)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "longLostBullet",
-//        title: "Long Lost Bullet",
-//        flavourText: "I guess we should rename it now since the name dosen’t really fit anymore. Finally Found Bullet or something like that.",
-//        description: "$trigger$While in Revolver:$trigger$\nAs long as the enemy has the Statuseffekt $status$POISON$status$:\n$trigger$On-Turn-Begin:$trigger$\nYou gain 1 reserve and draw 1 card",
-//        baseDamage: 3,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            effectWithCondition(reserveGain("round start", 1#val), $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) }),
-//            effectWithCondition(draw("round start", 1#val), $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) }),
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
-//    {
-//        name: "heirloomBullet",
-//        title: "Heirloom Bullet",
-//        flavourText: "",
-//        description: "If this card enters your hand in any other way than drawing cards from top of your deck:\nThis Bullet gets +9",
-//        baseDamage: 5,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giftDmg("special self drawn", bSelects.self, 9#val)#canTriggerInHand
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1", "not used", "unobtainable", "not in collection"],
-//        price: 50,
-//    },
-//    {
-//        name: "watercolorBullet",
-//        title: "Watercolored Bullet",
-//        flavourText: "",
-//        description: "If this bullet enters your hand except through drawing cards:\nGain 1 reserve",
-//        baseDamage: 2,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            reserveGain("special self drawn not from bottom", 1#val)#canTriggerInHand
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 0,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity2", "not used", "unobtainable", "not in collection"],
-//        price: 50,
-//    },
+    {
+        name: "vengeanceBullet",
+        title: "Vengeance Bullet",
+        flavourText: "\"When I get my hands on you Jake… You’ll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nDeal x dmg to the enemy, where x is the dmg value of the destroyed bullet times 2",
+        baseDamage: 10,
+        effects: [
+            {
+                trigger: cardDestroyed("allCards"),
+                effect: damageDirect(value.sourceCardDamage * 2, false)
+            }
+        ],
+        cost: 3,
+        tags: ["pool2", "rarity1"],
+        price: 70,
+    },
+    {
+        name: "molotovBullet",
+        title: "Molotov Bullet",
+        flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
+        description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
+        baseDamage: 6,
+        traitEffects: [ "spray" ],
+        effects: [
+            {
+                trigger: shot(),
+                effect: giveStatus(burning(1#val, burningPercent, false))
+            }
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "wealthyBullet",
+        title: "Wealthy Bullet",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\nWhenever you draw one or more cards: draw one extra card.",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                isHidden: true,
+                effect: addEncounterModifierWhileBulletIsInRevolver("drawonemorecard")
+            }
+        ],
+        cost: 3,
+        tags: ["pool2", "rarity1"],
+        price: 80,
+    },
+    {
+        name: "shovelBullet",
+        title: "Shovel Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nDraw a card from the bottom of the deck",
+        baseDamage: 9,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: drawFromBottomOfDeck(1#val)
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity1"],
+        price: 40,
+    },
+    {
+        name: "carnageBullet",
+        title: "Carnage Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet",
+        baseDamage: 11,
+        effects: [
+            {
+                trigger: shot(),
+                effect: destroy(bSelectRevolverTarget(false, false, "Choose Bullet to destroy"))
+            }
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "backupBullet",
+        title: "Backup Bullet",
+        flavourText: "Here to safe your ass",
+        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.",
+        baseDamage: 20,
+        traitEffects: ["alwaysAtBottom"],
+        effects: [
+            {
+                trigger: playerHealthLowerThanPercent(0.1),
+                effect: toTopCard()
+            }
+        ],
+        cost: 0,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "bulletPointBullet",
+        title: "Bullet Point Bullet",
+        flavourText: "",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet enters the revolver:$trigger$\nThe bullet that entered gets +4 dmg",
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlyOthers"),
+                inZones: [zone.revolver],
+                effect: buffDmg(bSelectSourceBullet(), 4#val)
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "supportBullet",
+        title: "Support Bullet",
+        flavourText: "\"Support is on the way, be at ease little sister, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\" -Letter to Salem",
+        description: "$trigger$On Enter:$trigger$\nChose a bullet in a slot.\n$trigger$While in revolver:$trigger$\nThe chosen bullet gets +10 dmg",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: buffDmgLimitValidity(
+                    bSelectRevolverTarget(false, false, "Choose Bullet to buff"),
+                    10#val,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2", "unobtainable", "not used", "not in collection"],
+        price: 50,
+    },
+    {
+        name: "doodleBullet",
+        title: "Doodle Bullet",
+        flavourText: "A great activity when taking breaks from shooting people! Doodling!",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +7 dmg.",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: search(1, costs(0)),
+                cacheAffectedCards: true
+            },
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: buffDmg(bSelectCachedBullets(), 7#val)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "sheriffsBullet",
+        title: "Sheriffs Bullet",
+        flavourText: "",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nReturn target bullet to your hand",
+        baseDamage: 10,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: bounce(bSelectRevolverTarget(false, false, "Choose Bullet to return to your hand"))
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "longLostBullet",
+        title: "Long Lost Bullet",
+        flavourText: "I guess we should rename it now since the name dosen’t really fit anymore. Finally Found Bullet or something like that.",
+        description: "$trigger$While in Revolver:$trigger$\nAs long as the enemy has the Statuseffect $status$POISON$status$:\n$trigger$On-Turn-Begin:$trigger$\nYou gain 1 reserve and draw 1 card",
+        baseDamage: 3,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                condition: $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) },
+                effect: reserveGain(1#val)
+            },
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                condition: $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) },
+                effect: draw(1#val)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "heirloomBullet",
+        title: "Heirloom Bullet",
+        flavourText: "",
+        description: "If this card enters your hand in any other way than drawing cards from top of your deck:\nThis Bullet gets +9",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: cardsDrawn(false, true, true),
+                effect: buffDmg(bSelectSelf(), 9#val)
+            },
+            {
+                trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
+                effect: buffDmg(bSelectSelf(), 9#val)
+            },
+            {
+                trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
+                effect: buffDmg(bSelectSelf(), 9#val)
+            },
+            {
+                trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
+                effect: buffDmg(bSelectSelf(), 9#val)
+            },
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity1", "not used", "unobtainable", "not in collection"],
+        price: 50,
+    },
+    {
+        name: "watercolorBullet",
+        title: "Watercolored Bullet",
+        flavourText: "",
+        description: "If this bullet enters your hand except through drawing cards:\nGain 1 reserve",
+        baseDamage: 2,
+        effects: [
+           {
+               trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
+               effect: reserveGain(1#val)
+           },
+           {
+               trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
+               effect: reserveGain(1#val)
+           },
+           {
+               trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
+               effect: reserveGain(1#val)
+           },
+        ],
+        cost: 0,
+        tags: ["pool2", "rarity2", "not used", "unobtainable", "not in collection"],
+        price: 50,
+    },
 //    {
 //        name: "poisonDartBullet",
 //        title: "Poison Dart Bullet",
@@ -1296,6 +1280,9 @@ cards: [
 //        highlightType: "standard",
 //        rightClickCost: 1,
 //        effects: [
+//            {
+//
+//            }
 //            discharge("right clicked", 1#val)
 //        ],
 //        forceLoadCards: [],
@@ -1305,52 +1292,43 @@ cards: [
 //        tags: ["pool1", "rarity1", "not used", "unobtainable", "not in collection"],
 //        price: 50,
 //    },
-//    {
-//        name: "brokenArrow",
-//        title: "Broken Arrow",
-//        flavourText: "Maybe loading an arrow into a revolver wasn't that good of an idea after all...",
-//        description: "$trait$DISINTEGRATION$trait$\n$trait$EVERLASTING$trait$",
-//        baseDamage: 8,
-//        coverValue: 0,
-//        traitEffects: [ "rotten", "everlasting" ],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 2,
-//        type: $Bullet { },
-//        tags: ["pool2", "rarity1"],
-//        price: 50,
-//    },
-//    {
-//        name: "propellerBullet",
-//        title: "Propeller Bullet",
-//        flavourText: "Try hard enough and the damn gun might just fly away",
-//        description: "$trigger$On-Rotate:$trigger$\nEvery other bullet in the revolver gets +1 dmg",
-//        baseDamage: 4,
-//        coverValue: 0,
-//        traitEffects: [],
-//        rotation: $Right { amount: 1 },
-//        highlightType: "standard",
-//        effects: [
-//            giftDmg("rotation", bSelects.allExceptSelf, 1#val)
-//        ],
-//        forceLoadCards: [],
-//        dark: false,
-//        cost: 1,
-//        type: $Bullet { },
-//        tags: ["pool1", "rarity2"],
-//        price: 50,
-//    },
+    {
+        name: "brokenArrow",
+        title: "Broken Arrow",
+        flavourText: "Maybe loading an arrow into a revolver wasn't that good of an idea after all...",
+        description: "$trait$DISINTEGRATION$trait$\n$trait$EVERLASTING$trait$",
+        baseDamage: 8,
+        traitEffects: [ "rotten", "everlasting" ],
+        effects: [
+        ],
+        dark: false,
+        cost: 2,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "propellerBullet",
+        title: "Propeller Bullet",
+        flavourText: "Try hard enough and the damn gun might just fly away",
+        description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Rotate:$trigger$\nEvery other bullet in the revolver gets +1 dmg",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: rotation(),
+                effect: buffDmg(
+                    (inZone(zone.revolver) and not(isSelf()))#bSelect,
+                    1#val
+                )
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
 
 ],
 
 defaultBullet: "bullet",
 
 alwaysLoadCards: [
-    "bullet",
-    "scorchingBullet" // scorching bullet only needs to be loaded when the enemy is the pyro, but there is currently no
-                      // way to do that
 ]

@@ -30,6 +30,7 @@ import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.gameWidgets.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
@@ -93,6 +94,9 @@ class OldGameController(
     @Inject override lateinit var shootButton: CustomFlexBox
         private set
 
+    override val afterlife: Afterlife
+        get() = TODO("Not yet implemented")
+
     @Inject(name = "WARNING_PARENT")
     lateinit var warningParent: CustomWarningParent
         private set
@@ -101,8 +105,8 @@ class OldGameController(
     val createdCards: MutableList<Card> = mutableListOf()
 
     private var _cardStack: MutableList<Card> = mutableListOf()
-    override val cardStack: List<Card>
-        get() = _cardStack
+    override val cardStack: CardStack
+        get() = TODO()
 
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
@@ -1213,7 +1217,11 @@ class OldGameController(
         }
     }
 
-    override fun putCardFromStackInHandTimeline(card: Card, source: Card?): Timeline = Timeline.timeline {
+    override fun putCardFromStackInHandTimeline(
+        card: Card,
+        source: Card?,
+        cardIsntActuallyInStack: Boolean,
+    ): Timeline = Timeline.timeline {
         var skip = false
         action {
             if (card !in _cardStack) {
@@ -1338,26 +1346,26 @@ class OldGameController(
     }
 
     private fun validateCardStack() {
-        var index = 0
-        while (index < _cardStack.size) {
-            val card = _cardStack[index]
-            if (card.isAlwaysAtBottom) {
-                _cardStack.removeAt(index)
-                _cardStack.add(card)
-            }
-            index++
-        }
-        index = _cardStack.size - 1
-        while (index >= 0) {
-            if (_cardStack.take(index + 1).all { it.isAlwaysAtTop }) break
-            val card = _cardStack[index]
-            if (card.isAlwaysAtTop) {
-                _cardStack.removeAt(index)
-                _cardStack.add(0, card)
-                continue
-            }
-            index--
-        }
+//        var index = 0
+//        while (index < _cardStack.size) {
+//            val card = _cardStack[index]
+//            if (card.isAlwaysAtBottom) {
+//                _cardStack.removeAt(index)
+//                _cardStack.add(card)
+//            }
+//            index++
+//        }
+//        index = _cardStack.size - 1
+//        while (index >= 0) {
+//            if (_cardStack.take(index + 1).all { it.isAlwaysAtTop }) break
+//            val card = _cardStack[index]
+//            if (card.isAlwaysAtTop) {
+//                _cardStack.removeAt(index)
+//                _cardStack.add(0, card)
+//                continue
+//            }
+//            index--
+//        }
     }
 
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {

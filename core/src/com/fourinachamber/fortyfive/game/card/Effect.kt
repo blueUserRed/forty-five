@@ -502,7 +502,7 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = DischargePoison(turns, data)
     }
 
-    class AddEncounterModifierWhileBulletIsInGame(
+    class AddEncounterModifierWhileBulletIsInRevolver(
         private val encounterModifierName: String,
         data: EffectData
     ) : Effect(data) {
@@ -511,7 +511,7 @@ abstract class Effect(val data: EffectData) {
             action {
                 controller.addTemporaryEncounterModifier(
                     modifier = EncounterModifier.getFromName(encounterModifierName),
-                    validityChecker = { card.inGame }
+                    validityChecker = { card.inZone(NewGameController.Zone.REVOLVER) }
                 )
             }
         }
@@ -519,7 +519,7 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun copy(data: EffectData): Effect =
-            AddEncounterModifierWhileBulletIsInGame(encounterModifierName, data)
+            AddEncounterModifierWhileBulletIsInRevolver(encounterModifierName, data)
     }
 
     class DrawFromBottomOfDeck(val amount: EffectValue, data: EffectData) : Effect(data) {
@@ -554,6 +554,7 @@ abstract class Effect(val data: EffectData) {
             action {
                 timeline = controller
                     .cardStack
+                    .cards()
                     .filter { cardPredicate.check(it, controller, card) }
                     .shuffled()
                     .take(amount)
@@ -570,6 +571,24 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun copy(data: EffectData): Effect = Search(cardPredicate, amount, data)
+    }
+
+    class ToTopCard(
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            action { card.changeStackPosition(Card.StackPosition.TOP, controller) }
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = ToTopCard(data)
+
     }
 
 }
@@ -656,7 +675,14 @@ sealed class GameSituation {
         val rotation: com.fourinachamber.fortyfive.game.controller.RevolverRotation
     ) : GameSituation()
 
-    class CardsDrawn(val amount: Int, val isSpecial: Boolean, val isFromBottom: Boolean) : GameSituation()
+    class PlayerHealthChanged(val oldHealth: Int, val newHealth: Int, val baseHealth: Int) : GameSituation()
+
+    class CardsDrawn(
+        val amount: Int,
+        val isSpecial: Boolean,
+        val isFromBottom: Boolean,
+        val cards: List<Card>
+    ) : GameSituation()
 
     class CardReturnedHome(val card: Card) : GameSituation()
 

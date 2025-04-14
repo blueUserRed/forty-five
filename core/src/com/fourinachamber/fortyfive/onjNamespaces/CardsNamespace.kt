@@ -27,7 +27,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Effect" to OnjEffect::class,
         "EffectValue" to OnjEffectValue::class,
         "CardModifierPredicate" to OnjCardModifierPredicate::class,
-        "PassiveEffect" to OnjPassiveEffect::class,
         "CardPredicate" to OnjCardPredicate::class,
         "Zone" to OnjZone::class,
         "Trigger" to OnjTrigger::class,
@@ -247,11 +246,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun discharge(turns: OnjEffectValue): OnjEffect = OnjEffect(Effect.DischargePoison(turns.value, EffectData()))
 
     @RegisterOnjFunction(schema = "params: [string]")
-    fun addEncounterModifierWhileBulletIsInGame(encounterModifierName: OnjString): OnjEffect =
-        OnjEffect(Effect.AddEncounterModifierWhileBulletIsInGame(
+    fun addEncounterModifierWhileBulletIsInRevolver(encounterModifierName: OnjString): OnjEffect =
+        OnjEffect(Effect.AddEncounterModifierWhileBulletIsInRevolver(
             encounterModifierName.value,
             EffectData()
         ))
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun toTopCard(): OnjEffect = OnjEffect(Effect.ToTopCard(EffectData()))
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, int]")
     fun turnRevolver(rotationDirection: OnjString, amount: OnjInt): OnjEffect = OnjEffect(Effect.TurnRevolver(
@@ -283,6 +285,25 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: []")
     fun turnEnd(): OnjTrigger = OnjTrigger(triggerForSituation<GameSituation.TurnEnd>())
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean, string]")
+    fun zoneChange(
+        oldZone: OnjZone,
+        newZone: OnjZone,
+        triggerBefore: OnjBoolean,
+        whichCardTriggers: OnjString
+    ): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
+            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+            when {
+                !triggers -> false
+                situation.before != triggerBefore.value -> false
+                situation.oldZone != oldZone.value -> false
+                situation.newZone != newZone.value -> false
+                else -> true
+            }
+        }
+    )
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
     fun enterZone(newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
@@ -325,6 +346,18 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: [boolean, boolean, boolean]")
+    fun cardsDrawn(mustBeSpecial: OnjBoolean, mustBeFromBottom: OnjBoolean, mustIncludeSelf: OnjBoolean): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardsDrawn> { situation, card, _, _ ->
+            when {
+                mustBeSpecial.value && !situation.isSpecial -> false
+                mustBeFromBottom.value && !situation.isFromBottom -> false
+                mustIncludeSelf.value && !situation.cards.any { it === card } -> false
+                else -> true
+            }
+        }
+    )
+
     @RegisterOnjFunction(schema = "params: [string]")
     fun cardDestroyed(whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.CardDestroyed> { situation, card, _, _ ->
@@ -352,6 +385,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun playerHealthLowerThanPercent(percent: OnjFloat): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.PlayerHealthChanged> { situation, _, _, _ ->
+            val curPercent = situation.newHealth.toFloat() / situation.baseHealth.toFloat()
+            curPercent < percent.value
+        }
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 
@@ -371,6 +412,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun hasName(name: OnjString): OnjCardPredicate = OnjCardPredicate(CardPredicate.hasName(name.value))
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun costs(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
 
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
     fun not(predicate: OnjCardPredicate): OnjCardPredicate = OnjCardPredicate(CardPredicate.not(predicate.value))
@@ -394,7 +438,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             val hand = controller.cardsInHand.filter { cardToCheck ->
                 p.check(cardToCheck, controller, card)
             }
-            val stack = controller.cardStack.filter { cardToCheck ->
+            val stack = controller.cardStack.cards().filter { cardToCheck ->
                 p.check(cardToCheck, controller, card)
             }
             revolver + hand + stack
@@ -533,10 +577,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
        }
     } ?: default
 
-    @RegisterOnjFunction(schema = "params: [int]")
-    fun cardsWithCost(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
-
-
     enum class WhichCardTriggers {
         ONLY_SELF {
             override fun check(
@@ -628,15 +668,6 @@ class OnjCardModifierPredicate(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--active-checker--'")
-    }
-}
-
-class OnjPassiveEffect(
-    override val value: PassiveEffectPrototype
-) : OnjValue() {
-
-    override fun stringify(info: ToStringInformation) {
-        info.builder.append("'--passive-effect--'")
     }
 }
 
