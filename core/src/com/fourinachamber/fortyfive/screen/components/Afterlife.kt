@@ -12,7 +12,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomScrollableBox
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWrap
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
-import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
@@ -181,9 +180,6 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         verticalAlign = CustomAlign.CENTER
 
         image(backgroundHints = arrayOf("afterlife_arrow_right", "afterlife_arrow_left")) {
-            group = openArrowFocusGroup
-            setFocusableTo(true, this)
-            isSelectable = true
             backgroundHandle = "afterlife_arrow_left"
             badTexture()
             afterlifeEvents.watchFor<Events.ChangeArrow> { (open) ->
@@ -192,11 +188,11 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             relativeHeight(40f)
             width = 60f
             marginRight = 30f
-            onSelect {
-                screen.deselectActor(this@image)
-                // TODO: only every second select registers
-                gameEvents.fire(NewGameController.Events.AfterlifeOpenToggle)
-            }
+//            onSelect {
+//                screen.deselectActor(this@image)
+//                // TODO: only every second select registers
+//                gameEvents.fire(NewGameController.Events.AfterlifeOpenToggle)
+//            }
         }
 
         box {
@@ -224,10 +220,6 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
     private object Events {
         data class ChangeArrow(val open: Boolean)
         data object CardPushed
-    }
-
-    companion object {
-        const val openArrowFocusGroup = "afterlife_open_arrow"
     }
 
 }

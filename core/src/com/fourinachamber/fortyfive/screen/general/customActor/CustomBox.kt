@@ -13,7 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -27,20 +29,11 @@ import kotlin.math.max
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
 open class CustomBox(
     screen: OnjScreen,
-    backgroundHints: Array<String> = arrayOf()
-) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor,
-    DisableActor, DragAndDroppableActor, HasPaddingActor
+    backgroundHints: Array<String> = arrayOf(),
+) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor, DisableActor, HasPaddingActor
 {
 
     override var positionType: PositionType = PositionType.RELATIV
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-    override var isFocused: Boolean = false
-    override var isSelected: Boolean = false
-    override var isSelectable: Boolean = false
-
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
     override var isDisabled: Boolean = false
 
     var verticalAlign: CustomAlign = CustomAlign.START      // top
@@ -63,12 +56,6 @@ open class CustomBox(
     override var paddingBottom: Float = 0F
     override var paddingLeft: Float = 0F
     override var paddingRight: Float = 0F
-
-    override var isDraggable: Boolean = false
-    override var targetGroups: List<String> = listOf()
-    override var resetCondition: ((Actor?) -> Boolean)? = null
-    override var inDragPreview: Boolean = false
-    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
 
     var fitContentInFlexDirection: Boolean = false
 
@@ -737,8 +724,19 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
         batch ?: return
         batch.flush()
         val viewport = screen.stage.viewport
+
+        val oldX = x
+        val oldY = y
+        if (isDragged) {
+            x = dragX
+            y = dragY
+        }
         background?.draw(batch, x, y, width, height)
-        if (drawItemsWithScissor(viewport, batch, parentAlpha)) return
+        if (drawItemsWithScissor(viewport, batch, parentAlpha)) {
+            x = oldX
+            y = oldY
+            return
+        }
 
         if (maxScrollableDistanceInDirection != 0F) {
             if (isTransform) applyTransform(batch, computeTransform())
@@ -746,6 +744,8 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
             scrollBar?.draw(batch, alpha)
             if (isTransform) resetTransform(batch)
         }
+        x = oldX
+        y = oldY
     }
 
     private fun drawItemsWithScissor(

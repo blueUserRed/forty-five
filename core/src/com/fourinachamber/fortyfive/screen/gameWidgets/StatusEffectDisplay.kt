@@ -80,18 +80,11 @@ class HorizontalStatusEffectDisplay(
     override val iconScale: Float = 1f,
 ) : CustomHorizontalGroup(screen), StatusEffectDisplay {
 
-
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
 
     override val actor: Group = this
 
     override val effects: MutableList<Triple<StatusEffect, CustomHorizontalGroup, CustomLabel>> = mutableListOf()
-
-    init {
-        bindHoverStateListeners(this)
-    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         updateStatusEffects()
@@ -112,17 +105,11 @@ class VerticalStatusEffectDisplay(
     override val iconScale: Float = 1f,
 ) : CustomVerticalGroup(screen), StatusEffectDisplay {
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
 
     override val actor: Group = this
 
     override val effects: MutableList<Triple<StatusEffect, CustomHorizontalGroup, CustomLabel>> = mutableListOf()
-
-    init {
-        bindHoverStateListeners(this)
-    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         updateStatusEffects()

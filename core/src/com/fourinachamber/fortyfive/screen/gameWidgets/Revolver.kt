@@ -11,7 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -19,7 +18,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
@@ -45,9 +43,6 @@ class Revolver(
 
 
     override var styleManager: StyleManager? = null
-
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
 
     override var fixedZIndex: Int = 0
 
@@ -93,7 +88,6 @@ class Revolver(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     init {
-        bindHoverStateListeners(this)
         touchable = Touchable.childrenOnly
     }
 
@@ -113,7 +107,6 @@ class Revolver(
         }
         if (card != null && card.actor !in this) {
             addActor(card.actor)
-            card.actor.bindDroppable(card.actor, screen, listOf(NewCardHand.cardFocusGroupName))
         }
         slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
     }
@@ -176,8 +169,6 @@ class Revolver(
             slot.ignoreScalingWhenDrawing = true
             addActor(slot)
             screen.addNamedActor("revolverSlot-$it", slot)
-            val dropBehaviour = RevolverDropTarget(dragAndDrop, slot)
-            dragAndDrop.addTarget(dropBehaviour)
             slot
         }
     }
@@ -338,10 +329,7 @@ class RevolverSlot(
     size: Float,
     screen: OnjScreen,
     private val animationDuration: Float
-) : CustomImageActor(drawableHandle, screen), KeySelectableActor {
-
-    override var isSelected: Boolean = false
-    override var isSelectable: Boolean = false
+) : CustomImageActor(drawableHandle, screen) {
 
     var inAnimation: Boolean = false
 
@@ -358,11 +346,6 @@ class RevolverSlot(
         height = size
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
-        isFocusable = true
-        makeDraggable(this)
-        group = revolverSlotFocusGroupName
-        bindDroppable(this, screen, listOf(NewCardHand.cardFocusGroupName))
-        onFocusChange { _, _ -> debug = isFocused }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -437,15 +420,6 @@ class RevolverSlot(
 
     override fun toString(): String {
         return "revolverSlot: $num with card $card"
-    }
-
-    override fun getBounds(): Rectangle {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        return if (reportDimensionsWithScaling) {
-            Rectangle(x, y, width, height)
-        } else {
-            Rectangle(x, y, width * scaleX, height * scaleY)
-        }
     }
 
     /**

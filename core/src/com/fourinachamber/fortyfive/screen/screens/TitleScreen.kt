@@ -4,18 +4,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.settingsKeyMap
 import com.fourinachamber.fortyfive.screen.gameWidgets.TitleScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -44,22 +38,6 @@ class TitleScreen : ScreenCreator() {
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "*" to 800 //800 fits good with the animation
-    )
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf(menuFocusGroup)
-                ),
-            ),
-            startGroups = listOf(menuFocusGroup),
-        )
-    )
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(settingsKeyMap, screen)
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
@@ -131,15 +109,15 @@ class TitleScreen : ScreenCreator() {
         blackOverlay.isVisible = true
         val controller = screen.screenControllers.filterIsInstance<TitleScreenController>().first()
         controller.timeline.appendAction(settingsObject.openTimelineCreator.invoke().asAction())
-        blackOverlay.onClick {
-            screen.escapeSelectionHierarchy()
-        }
+//        blackOverlay.onClick {
+//            screen.escapeSelectionHierarchy()
+//        }
         controller.timeline.appendAction(Timeline.timeline {
             action {
-                screen.curSelectionParent.onLeave = {
-                    controller.timeline.appendAction(settingsObject.closeTimelineCreator.invoke().asAction())
-                    blackOverlay.isVisible = false
-                }
+//                screen.curSelectionParent.onLeave = {
+//                    controller.timeline.appendAction(settingsObject.closeTimelineCreator.invoke().asAction())
+//                    blackOverlay.isVisible = false
+//                }
             }
         }.asAction())
     }
@@ -181,17 +159,15 @@ class TitleScreen : ScreenCreator() {
                 val labels = mutableListOf<CustomLabel>()
                 actions.entries.forEach {
                     labels.add(label("red_wing", it.key) {
-                        addButtonDefaults()
-                        group = popupFocusGroup
-                        onSelect {
-                            it.value?.invoke()
-                            if (it.value == null) removePopup()
-                        }
+//                        onSelect {
+//                            it.value?.invoke()
+//                            if (it.value == null) removePopup()
+//                        }
                         onLayoutAndNow {
                             height = prefHeight * 1.2f
                             setAlignment(Align.center)
                         }
-                        if (it.value == null) screen.focusSpecific(this)
+//                        if (it.value == null) screen.focusSpecific(this)
                     })
                 }
 
@@ -200,19 +176,18 @@ class TitleScreen : ScreenCreator() {
             }
         }
 
-        screen.addToSelectionHierarchy(
-            FocusableParent(listOf(SelectionTransition(groups = listOf(popupFocusGroup))),
-                onLeave = {
-                    removePopup()
-                })
-        )
+//        screen.addToSelectionHierarchy(
+//            FocusableParent(listOf(SelectionTransition(groups = listOf(popupFocusGroup))),
+//                onLeave = {
+//                    removePopup()
+//                })
+//        )
     }
 
     fun removePopup() {
         val popup = screen.namedActorOrNull(popupWidgetName)
         if (popup != null) {
             screen.removeActorFromScreen(popup)
-            screen.escapeSelectionHierarchy()
         }
     }
 
@@ -221,18 +196,15 @@ class TitleScreen : ScreenCreator() {
         setFontScale(0.4f)
         syncWidth()
         syncHeight()
-        group = menuFocusGroup
-        setFocusableTo(true, this)
-        isSelectable = true
-        onSelect {
-            screen.changeSelectionFor(this)
-            action.invoke()
-        }
-        styles(
-            resetEachTime = {
-                underline = isFocused
-            }
-        )
+//        onSelect {
+//            screen.changeSelectionFor(this)
+//            action.invoke()
+//        }
+//        styles(
+//            resetEachTime = {
+//                underline = isFocused
+//            }
+//        )
     }
 
     fun Group.addBullet(name: String) = box {

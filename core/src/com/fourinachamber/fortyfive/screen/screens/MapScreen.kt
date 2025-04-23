@@ -12,19 +12,12 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.keyInput.*
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
-import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.settingsKeyMap
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -82,43 +75,8 @@ class MapScreen : ScreenCreator() {
         )
     }
 
-    override fun getInputMaps(): List<KeyInputMap> {
-        return listOf(KeyInputMap.createFromKotlin(listOf(getMapInputMap()) + settingsKeyMap, screen))
-    }
-
-    private fun getMapInputMap(): KeyInputMapEntry = KeyInputMapEntry(
-        100,
-        KeyInputCondition.Not(KeyInputCondition.ScreenState("notMapFocused")),
-        KeyPreset.LEFT.keys + KeyPreset.RIGHT.keys + KeyPreset.UP.keys + KeyPreset.DOWN.keys,
-    ) { _, code ->
-        val vec= when(KeyPreset.fromKeyCode(code)){
-            KeyPreset.UP-> Direction.UP
-            KeyPreset.LEFT-> Direction.LEFT
-            KeyPreset.DOWN-> Direction.DOWN
-            else -> Direction.RIGHT // Keys.D
-        }
-        //this method might need some rework as to how it works (with angles especially when doing controller support)
-        val targetNode = MapManager.currentMapNode.getEdge(vec)
-        targetNode ?: return@KeyInputMapEntry true
-        mapWidget.moveToNextNode(targetNode)
-        true
-    }
-
-
     override fun getScreenControllers(): List<ScreenController> = listOf(
         MapScreenController(screen)
-    )
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf("Map_startEvent", navbarFocusGroup),
-                ),
-            ),
-            startGroups = listOf(navbarFocusGroup),
-        )
     )
 
     override fun getRoot(): Group = newGroup {
@@ -259,45 +217,39 @@ class MapScreen : ScreenCreator() {
             setAlignment(Align.center)
             forcedPrefWidth = 200f * 0.8f
             forcedPrefHeight = 60f * 0.8f
-            setFocusableTo(true, this)
-            isSelectable = true
-            group = "Map_startEvent"
-            onSelect {
-                if (mapWidget.playerNode.event?.canBeStarted == true) {
-                    mapWidget.onStartButtonClicked(this@label)
-                    isDisabled = true
-                }
-            }
+//            onSelect {
+//                if (mapWidget.playerNode.event?.canBeStarted == true) {
+//                    mapWidget.onStartButtonClicked(this@label)
+//                    isDisabled = true
+//                }
+//            }
 
             syncHeight()
-            dropShadow = DropShadow(
-                Color.Red,
-                maxOpacity = 0.4f,
-                scaleX = 0.95f,
-                scaleY = 1.2f
-            )
-            styles(
-                normal = {
-                    fontColor = Color.Red
-                    backgroundHandle = "map_detail_encounter_button"
-                    dropShadow?.color = Color.White
-                    dropShadow?.maxOpacity = 0.2f
-                },
-                focused = {
-                    fontColor = Color.White
-                    backgroundHandle = "map_detail_encounter_button_hover"
-                    dropShadow?.color = Color.Red
-                    dropShadow?.maxOpacity = 0.4f
-                }
-            )
+//            dropShadow = DropShadow(
+//                Color.Red,
+//                maxOpacity = 0.4f,
+//                scaleX = 0.95f,
+//                scaleY = 1.2f
+//            )
+//            styles(
+//                normal = {
+//                    fontColor = Color.Red
+//                    backgroundHandle = "map_detail_encounter_button"
+//                    dropShadow?.color = Color.White
+//                    dropShadow?.maxOpacity = 0.2f
+//                },
+//                focused = {
+//                    fontColor = Color.White
+//                    backgroundHandle = "map_detail_encounter_button_hover"
+//                    dropShadow?.color = Color.Red
+//                    dropShadow?.maxOpacity = 0.4f
+//                }
+//            )
 
-            onFocusChange { _, _ ->
-                if (isFocused) screen.leaveState("notMapFocused")
-                else screen.enterState("notMapFocused")
-            }
-           Gdx.app.postRunnable { //needs to happen, after the screen is finished initializing
-                screen.focusedActor = this
-            }
+//            onFocusChange { _, _ ->
+//                if (isFocused) screen.leaveState("notMapFocused")
+//                else screen.enterState("notMapFocused")
+//            }
         }
         verticalSpacer(40f)
     }

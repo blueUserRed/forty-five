@@ -548,7 +548,7 @@ class OldGameController(
                 .slots
                 .mapNotNull { it.card }
                 .filter { it !== exclude }
-                .forEach { it.actor.enterSelectionMode() }
+//                .forEach { it.actor.enterSelectionMode() }
             TemplateString.updateGlobalParam("game.revolverPopupText", text)
             this@OldGameController.screen.enterState(showSelectionPopup)
             selectedCard = null
@@ -558,7 +558,7 @@ class OldGameController(
             revolver
                 .slots
                 .mapNotNull { it.card }
-                .forEach { it.actor.exitSelectionMode() }
+//                .forEach { it.actor.exitSelectionMode() }
             store("selectedCard", selectedCard!!)
             this@OldGameController.screen.leaveState(showSelectionPopup)
             selectedCard = null

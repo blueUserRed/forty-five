@@ -68,8 +68,6 @@ class DetailMapWidget(
     override var fixedZIndex: Int = 0
 
     override var styleManager: StyleManager? = null
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
 
     private val mapBounds: Rectangle by lazy {
         val nodes = map.uniqueNodes.map { scaledNodePos(it) }
@@ -216,7 +214,6 @@ class DetailMapWidget(
 
     init {
         map.decorations.forEach { it.requestDrawable(screen, this) }
-        bindHoverStateListeners(this)
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()

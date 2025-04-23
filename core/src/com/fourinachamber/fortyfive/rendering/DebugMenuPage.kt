@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.rendering
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.keyInput.Keycode
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -24,7 +23,7 @@ abstract class DebugMenuPage(val name: String) {
 
     protected fun debugButton(
         name: String,
-        key: Keycode,
+        key: Int,
         default: Boolean
     ): DebugButton = DebugButton(name, key, default).also { buttons.add(it) }
 
@@ -32,7 +31,7 @@ abstract class DebugMenuPage(val name: String) {
 
     data class DebugButton(
         val name: String,
-        val key: Keycode,
+        val key: Int,
         var set: Boolean
     ) {
         override fun toString(): String = "[${if (set) "x" else " "}] $name <${Keys.toString(key)}>"

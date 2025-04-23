@@ -16,9 +16,6 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     val isShown: Boolean = detailActor != null
 
     var shownAlpha = 1F
-        set(value) {
-            field = value
-        }
 
     abstract fun generateDetailActor(addFadeInAction: Boolean): Actor
 

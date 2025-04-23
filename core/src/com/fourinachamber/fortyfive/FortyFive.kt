@@ -17,7 +17,9 @@ import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screens.TestScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -91,6 +93,8 @@ object FortyFive : Game() {
 //            }
 //        })
 //        return
+        changeToScreen(FromKotlinScreenBuilder(TestScreen()))
+        return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
@@ -218,7 +222,6 @@ object FortyFive : Game() {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
             registerNameSpace("Style", StyleNamespace)
-            registerNameSpace("Screen", ScreenNamespace)
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()

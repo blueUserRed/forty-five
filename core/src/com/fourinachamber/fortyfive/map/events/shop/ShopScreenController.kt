@@ -138,7 +138,6 @@ class ShopScreenController(
         if (context.currentRerollPrice > SaveState.playerMoney) {
             val customLabel = screen.namedActorOrNull(rerollWidgetName) as CustomLabel
             customLabel.isDisabled = true
-            customLabel.setFocusableTo(false, customLabel)
             customLabel.backgroundHandle = "common_button_disabled"
         }
 
@@ -166,13 +165,6 @@ class ShopScreenController(
             val fl = card.actor.parent.height * 0.8f
             card.actor.setSize(fl, fl)
         }
-        card.actor.targetGroups = listOf("shop_targets")
-        card.actor.makeDraggable(card.actor)
-
-        card.actor.group = if (isFirst) "shop_cards_first" else "shop_cards"
-        card.actor.resetCondition = { true }
-        card.actor.bindDragging(card.actor, screen)
-        card.actor.onFocus { if (!it) cardsParentWidget.scrollTo(curParent) }
 
         val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
         val label =
@@ -200,8 +192,6 @@ class ShopScreenController(
     ) {
         fun CardActor.unavailable() {
             this.alpha = 0.5f
-            this.isSelectable = false
-            this.isDraggable = false
         }
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
             if (label.alpha != 1f) return

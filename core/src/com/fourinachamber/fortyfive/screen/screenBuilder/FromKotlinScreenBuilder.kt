@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.screen.screenBuilder
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import dev.lyze.flexbox.FlexBox
 
@@ -34,8 +33,6 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
         screen.background = creator.background
         namedActors.putAll(creator.namedActors)
         creator.getScreenControllers().forEach { screen.addScreenController(it) }
-        screen.inputMap = KeyInputMap.combine(creator.getInputMaps())
-        creator.getSelectionHierarchyStructure().forEach { screen.addToSelectionHierarchy(it) }
         return screen
     }
 

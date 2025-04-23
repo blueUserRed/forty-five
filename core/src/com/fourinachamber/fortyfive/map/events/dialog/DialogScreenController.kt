@@ -11,7 +11,6 @@ import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
-import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import ktx.actors.alpha
@@ -66,79 +65,79 @@ class DialogScreenController(
     }
 
     private fun addListener() {
-        val box = screen.namedActorOrError(dialogWidgetName)
-        box.onSelect {
-            screen.changeSelectionFor(box)
-            if (!waitingToContinue) return@onSelect
-            val selector = dialog.parts[dialogIndex].nextDialogPartSelector
-            when (selector) {
-                is NextDialogPartSelector.Continue -> startPart(dialogIndex + 1)
-                is NextDialogPartSelector.End -> {
-                    end()
-                    FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(selector.nextScreen))
-                }
-
-                is NextDialogPartSelector.Fixed -> startPart(selector.next)
-                is NextDialogPartSelector.GiftCardEnd -> {
-                    val context = object : ChooseCardScreenContext {
-                        override val forwardToScreen: String = selector.nextScreen
-                        override var seed: Long = -1
-                        override val nbrOfCards: Int = 1
-                        override val types: List<String> = listOf()
-                        override val enableRerolls: Boolean = false
-                        override var amountOfRerolls: Int = 0
-                        override val rerollPriceIncrease: Int = 0
-                        override val rerollBasePrice: Int = 0
-                        override val forceCards: List<String> = listOf(selector.card)
-                        override fun completed() {}
-                    }
-                    end()
-                    MapManager.changeToChooseCardScreen(context)
-                }
-
-                is NextDialogPartSelector.ToCreditScreenEnd -> {
-                    end()
-                    MapManager.changeToCreditsScreen()
-                }
-
-                else -> throw IllegalStateException("'waitingToContinue' should never be true for when choosing an option")
-            }
-        }
+//        val box = screen.namedActorOrError(dialogWidgetName)
+//        box.onSelect {
+//            screen.changeSelectionFor(box)
+//            if (!waitingToContinue) return@onSelect
+//            val selector = dialog.parts[dialogIndex].nextDialogPartSelector
+//            when (selector) {
+//                is NextDialogPartSelector.Continue -> startPart(dialogIndex + 1)
+//                is NextDialogPartSelector.End -> {
+//                    end()
+//                    FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(selector.nextScreen))
+//                }
+//
+//                is NextDialogPartSelector.Fixed -> startPart(selector.next)
+//                is NextDialogPartSelector.GiftCardEnd -> {
+//                    val context = object : ChooseCardScreenContext {
+//                        override val forwardToScreen: String = selector.nextScreen
+//                        override var seed: Long = -1
+//                        override val nbrOfCards: Int = 1
+//                        override val types: List<String> = listOf()
+//                        override val enableRerolls: Boolean = false
+//                        override var amountOfRerolls: Int = 0
+//                        override val rerollPriceIncrease: Int = 0
+//                        override val rerollBasePrice: Int = 0
+//                        override val forceCards: List<String> = listOf(selector.card)
+//                        override fun completed() {}
+//                    }
+//                    end()
+//                    MapManager.changeToChooseCardScreen(context)
+//                }
+//
+//                is NextDialogPartSelector.ToCreditScreenEnd -> {
+//                    end()
+//                    MapManager.changeToCreditsScreen()
+//                }
+//
+//                else -> throw IllegalStateException("'waitingToContinue' should never be true for when choosing an option")
+//            }
+//        }
     }
 
     private fun startPart(index: Int, isInit: Boolean = false) {
-        dialogIndex =
-            if (index < dialog.parts.size)
-                index
-            else {
-                FortyFiveLogger.warn(
-                    LOG_TAG,
-                    "Trying to access dialog '${dialog.name}' on part with index '${index}', but there are only '${dialog.parts.size}'"
-                )
-                dialog.parts.size - 1
-            }
-        val part = dialog.parts[dialogIndex]
-        dialogWidget.onNextFinish.add {
-            finishedPart(part.nextDialogPartSelector)
-        }
-        val actor = screen.namedActorOrError(continueWidgetName)
-        actor.isVisible = false
-        waitingToContinue = false
-
-        updatePeople(part)
-        dialogWidget.advancedText = part.text
-
-        val optionParent = screen.namedActorOrError(optionsParentName) as CustomBox
-        while (optionParent.children.size > 0) {
-            screen.removeActorFromScreen(optionParent.children[0])
-        }
-        dialogWidget.isFocusable = true
-        if (!isInit) {
-            screen.curSelectionParent.updateFocusableActors(screen)
-            screen.focusSpecific(dialogWidget)
-        }else{
-            screen.afterMs(10){ screen.focusSpecific(dialogWidget) }
-        }
+//        dialogIndex =
+//            if (index < dialog.parts.size)
+//                index
+//            else {
+//                FortyFiveLogger.warn(
+//                    LOG_TAG,
+//                    "Trying to access dialog '${dialog.name}' on part with index '${index}', but there are only '${dialog.parts.size}'"
+//                )
+//                dialog.parts.size - 1
+//            }
+//        val part = dialog.parts[dialogIndex]
+//        dialogWidget.onNextFinish.add {
+//            finishedPart(part.nextDialogPartSelector)
+//        }
+//        val actor = screen.namedActorOrError(continueWidgetName)
+//        actor.isVisible = false
+//        waitingToContinue = false
+//
+//        updatePeople(part)
+//        dialogWidget.advancedText = part.text
+//
+//        val optionParent = screen.namedActorOrError(optionsParentName) as CustomBox
+//        while (optionParent.children.size > 0) {
+//            screen.removeActorFromScreen(optionParent.children[0])
+//        }
+//        dialogWidget.isFocusable = true
+//        if (!isInit) {
+//            screen.curSelectionParent.updateFocusableActors(screen)
+//            screen.focusSpecific(dialogWidget)
+//        }else{
+//            screen.afterMs(10){ screen.focusSpecific(dialogWidget) }
+//        }
     }
 
     override fun end() {
@@ -147,22 +146,22 @@ class DialogScreenController(
     }
 
     private fun finishedPart(selector: NextDialogPartSelector) {
-        if (selector !is NextDialogPartSelector.Choice) {
-            val actor = screen.namedActorOrError(continueWidgetName)
-            actor.isVisible = true
-            waitingToContinue = true
-            return
-        }
-        selector.choices.forEach { s, i ->
-            val o = addOption.invoke()
-            o.setRawText(s, null)
-            o.onSelect {
-                startPart(i)
-            }
-        }
-        dialogWidget.isFocusable = false
-        screen.curSelectionParent.updateFocusableActors(screen)
-        screen.focusSpecific((screen.namedActorOrError(optionsParentName) as CustomBox).children[0])
+//        if (selector !is NextDialogPartSelector.Choice) {
+//            val actor = screen.namedActorOrError(continueWidgetName)
+//            actor.isVisible = true
+//            waitingToContinue = true
+//            return
+//        }
+//        selector.choices.forEach { s, i ->
+//            val o = addOption.invoke()
+//            o.setRawText(s, null)
+//            o.onSelect {
+//                startPart(i)
+//            }
+//        }
+//        dialogWidget.isFocusable = false
+//        screen.curSelectionParent.updateFocusableActors(screen)
+//        screen.focusSpecific((screen.namedActorOrError(optionsParentName) as CustomBox).children[0])
     }
 
 

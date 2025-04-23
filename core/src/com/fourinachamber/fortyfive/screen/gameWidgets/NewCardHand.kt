@@ -61,26 +61,19 @@ class NewCardHand(
         else rightSide.add(card)
         val actor = card.actor
         addActor(actor)
-        actor.group = cardFocusGroupName
-        actor.isFocusable = true
-        actor.isSelectable = true
         actor.fixedZIndex = zIndexFor(card)
         resortZIndices()
-        actor.targetGroups = listOf(RevolverSlot.revolverSlotFocusGroupName, PutCardsUnderDeckWidget.focusGroupName, cardFocusGroupName)
-        actor.bindDragging(actor, screen)
-        actor.makeDraggable(actor)
-        actor.resetCondition = { true }
-        actor.onDragAndDrop.add { _, target ->
-            when (target) {
-                is RevolverSlot -> events.fire(CardDraggedOntoSlotEvent(card, target))
-                is CardActor -> {
-                    if (target.card.inZone(NewGameController.Zone.REVOLVER)) {
-                        val revolver = target.parent as Revolver
-                        events.fire(CardDraggedOntoSlotEvent(card, revolver.slots.find { it.card?.actor === target }!!))
-                    }
-                }
-            }
-        }
+//        actor.onDragAndDrop.add { _, target ->
+//            when (target) {
+//                is RevolverSlot -> events.fire(CardDraggedOntoSlotEvent(card, target))
+//                is CardActor -> {
+//                    if (target.card.inZone(NewGameController.Zone.REVOLVER)) {
+//                        val revolver = target.parent as Revolver
+//                        events.fire(CardDraggedOntoSlotEvent(card, revolver.slots.find { it.card?.actor === target }!!))
+//                    }
+//                }
+//            }
+//        }
         layout() // layout added card immediately to make animations work
     }
 

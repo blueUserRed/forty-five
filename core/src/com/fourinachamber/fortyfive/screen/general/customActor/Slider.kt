@@ -32,9 +32,6 @@ class Slider(
 
     override var styleManager: StyleManager? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
-
     var forcedPrefHeight: Float? = null
     var forcedPrefWidth: Float? = null
 
@@ -67,7 +64,6 @@ class Slider(
     private var bindTarget: BindTarget<Float>? = bind?.let { BindTargetFactory.get<Float>(it) }
 
     init {
-        bindHoverStateListeners(this)
         addListener(inputListener)
     }
 

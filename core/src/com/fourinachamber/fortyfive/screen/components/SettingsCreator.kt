@@ -1,24 +1,10 @@
 package com.fourinachamber.fortyfive.screen.components
 
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapEntry
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapKeyEntry
-import com.fourinachamber.fortyfive.keyInput.KeyPreset
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
 import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
-import com.fourinachamber.fortyfive.screen.general.customActor.Selector
-import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Timeline
-import java.security.Key
-import kotlin.math.ceil
 
 object SettingsCreator {
     private const val settingsFocusGroup = "settings_singleSettingOption"
@@ -62,24 +48,6 @@ object SettingsCreator {
                     action {
                         addAction(action)
                         screen.enterState(settingsOpenScreenState)
-                        screen.addToSelectionHierarchy(
-                            FocusableParent(
-                                listOf(
-                                    SelectionTransition(
-                                        groups = listOf(
-                                            NavbarCreator.navbarFocusGroup,
-                                            settingsFocusGroup + "_first",
-                                        )
-                                    ),
-                                    SelectionTransition(
-                                        groups = listOf(
-                                            settingsFocusGroup, //this is needed, or it just jumps to the third element when coming from a side option
-                                            settingsFocusGroup + "_first",
-                                        )
-                                    )
-                                )
-                            )
-                        )
                     }
                     delayUntil { action.isComplete }
                 }
@@ -138,19 +106,17 @@ object SettingsCreator {
         isFirst: Boolean = false,
     ) = with(creator) {
         horizontalGroup {
-            group = if (isFirst) settingsFocusGroup + "_first" else settingsFocusGroup
-            setFocusableTo(true, this)
             forcedPrefWidth = parentWidth
             syncDimensions()
 
-            styles(
-                normal = {
-                    backgroundHandle = "single_setting_background"
-                },
-                focused = {
-                    backgroundHandle = "single_setting_background_focused"
-                }
-            )
+//            styles(
+//                normal = {
+//                    backgroundHandle = "single_setting_background"
+//                },
+//                focused = {
+//                    backgroundHandle = "single_setting_background_focused"
+//                }
+//            )
 
             horizontalSpacer(20f)
 
@@ -179,20 +145,17 @@ object SettingsCreator {
         isFirst: Boolean = false,
     ) = with(creator) {
         horizontalGroup {
-            group = if (isFirst) settingsFocusGroup + "_first" else settingsFocusGroup
-            setFocusableTo(true, this)
-
             forcedPrefWidth = parentWidth
             syncDimensions()
 
-            styles(
-                normal = {
-                    backgroundHandle = "single_setting_background"
-                },
-                focused = {
-                    backgroundHandle = "single_setting_background_focused"
-                }
-            )
+//            styles(
+//                normal = {
+//                    backgroundHandle = "single_setting_background"
+//                },
+//                focused = {
+//                    backgroundHandle = "single_setting_background_focused"
+//                }
+//            )
 
             horizontalSpacer(20f)
 
@@ -210,60 +173,4 @@ object SettingsCreator {
         }
         verticalSpacer(25f)
     }
-
-    val settingsKeyMap = listOf<KeyInputMapEntry>(
-        KeyInputMapEntry(
-            100,
-//            KeyInputCondition.And(
-//                KeyInputCondition.ScreenState(NavbarCreator.navbarOpenScreenState),
-                KeyInputCondition.ScreenState(settingsOpenScreenState),
-//            ),
-            singleKeys = KeyPreset.LEFT.keys + KeyPreset.RIGHT.keys,
-            { screen, keycode ->
-                val par = screen.focusedActor ?: return@KeyInputMapEntry false
-                if (par !is Layout || par !is CustomHorizontalGroup) return@KeyInputMapEntry false
-                val selectionActor = par.children.filterIsInstance<Selector>().firstOrNull()
-                val isLeft=KeyPreset.fromKeyCode(keycode) == KeyPreset.LEFT
-                if (selectionActor != null) {
-                    if (isLeft) selectionActor.onClick(0F)
-                    else selectionActor.onClick(selectionActor.width)
-                    return@KeyInputMapEntry true
-                }
-                val sliderActor = par.children.filterIsInstance<Slider>().firstOrNull()
-                if (sliderActor != null) {
-                    var oldPos = sliderActor.cursorPos
-                    if (isLeft) sliderActor.updatePos((oldPos - 0.1F) * sliderActor.width)
-                    else sliderActor.updatePos((oldPos + 0.1f) * sliderActor.width)
-                    return@KeyInputMapEntry true
-                }
-                return@KeyInputMapEntry false
-            }
-        ),
-        KeyInputMapEntry(
-            100,
-            KeyInputCondition.And(
-                KeyInputCondition.ScreenState(NavbarCreator.navbarOpenScreenState),
-                KeyInputCondition.ScreenState(settingsOpenScreenState)
-            ),
-            singleKeys = KeyPreset.ACTION.keys,
-            { screen, keycode ->
-                val par = screen.focusedActor ?: return@KeyInputMapEntry false
-                if (par !is Layout || par !is CustomHorizontalGroup) return@KeyInputMapEntry false
-                val selectionActor = par.children.filterIsInstance<Selector>().firstOrNull()
-                if (selectionActor != null) {
-                    selectionActor.onClick(selectionActor.width)
-                    return@KeyInputMapEntry true
-                }
-                val sliderActor = par.children.filterIsInstance<Slider>().firstOrNull()
-                if (sliderActor != null) {
-                    if (sliderActor.cursorPos == 1F) sliderActor.updatePos(0F)
-                    else {
-                        sliderActor.updatePos(ceil((sliderActor.cursorPos + 0.01f) * 4) / 4F * sliderActor.width)
-                    }
-                    return@KeyInputMapEntry true
-                }
-                return@KeyInputMapEntry false
-            }
-        ),
-    )
 }

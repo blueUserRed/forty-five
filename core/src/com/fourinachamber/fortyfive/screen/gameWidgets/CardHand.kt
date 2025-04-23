@@ -33,9 +33,6 @@ class CardHand(
 
     override var styleManager: StyleManager? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
-
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     /**
@@ -75,10 +72,6 @@ class CardHand(
     private lateinit var controller: GameController
 
     private var originalParent: CustomFlexBox? = null
-
-    init {
-        bindHoverStateListeners(this)
-    }
 
     fun init(controller: GameController) {
         this.controller = controller
@@ -149,19 +142,19 @@ class CardHand(
         ) {
             val card = _cards[i]
 
-            if (card.actor.isDragged) {
-                doZIndexFor(card, draggedCardZIndex)
-                if (reverseDirection) {
-                    x -= spacePerCard
-                    i--
-                } else {
-                    x += spacePerCard
-                    i++
-                }
-                continue
-            }
+//            if (card.actor.isDragged) {
+//                doZIndexFor(card, draggedCardZIndex)
+//                if (reverseDirection) {
+//                    x -= spacePerCard
+//                    i--
+//                } else {
+//                    x += spacePerCard
+//                    i++
+//                }
+//                continue
+//            }
 
-            val hoveredOver = card.actor.isHoveredOver
+            val hoveredOver = false
             doZIndexFor(
                 card,
                 if (hoveredOver) {

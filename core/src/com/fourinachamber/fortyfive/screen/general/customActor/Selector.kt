@@ -32,9 +32,6 @@ class Selector(
     var forcedPrefHeight: Float? = null
     var forcedPrefWidth: Float? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
-
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
@@ -55,7 +52,6 @@ class Selector(
     private var lastValue: Any = Unit
 
     init {
-        bindHoverStateListeners(this)
         addListener(clickListener)
         options = bindTarget
             .mappings

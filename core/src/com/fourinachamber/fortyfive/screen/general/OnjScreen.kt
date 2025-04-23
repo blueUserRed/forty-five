@@ -1,10 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input.Keys
-import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.InputMultiplexer
-import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.GL20
@@ -20,8 +17,8 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.UserPrefs
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.rendering.ScreenDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -33,9 +30,6 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import kotlinx.coroutines.flow.StateFlow
-import ktx.actors.onEnter
-import ktx.actors.onExit
 
 
 /**
@@ -92,182 +86,7 @@ open class OnjScreen(
     val screenControllers: List<ScreenController>
         get() = _screenControllers
 
-    private val _selectedActors: MutableSet<Actor> = mutableSetOf()
-
-    val selectedActors: List<Actor> get() = _selectedActors.toList()
-
-    fun changeSelectionFor(actor: Actor, fromMouse: Boolean = true) {
-        if (actor in _selectedActors) deselectActor(actor)
-        else selectActor(actor, fromMouse)
-    }
-
-    private fun selectActor(actor: Actor, fromMouse: Boolean = true) {
-        val oldList = _selectedActors.toList()
-        if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(actor)) return
-        if (actor is FocusableActor && !actor.isSelectable) return
-        if (_selectedActors.add(actor)) {
-            val maxNbrOfMembers = curSelectionParent.maxSelectionMembers
-            if (maxNbrOfMembers > 0 && _selectedActors.size > maxNbrOfMembers) {
-                val o = _selectedActors.toList()
-                _selectedActors.removeAll(o.subList(0, selectedActors.size - maxNbrOfMembers).toSet())
-                o.forEach { it.fire(SelectChangeEvent(oldList, selectedActors, fromMouse)) }
-                curSelectionParent.onSelection(selectedActors, fromMouse)
-            } else {
-                val n = selectedActors.reversed().toList()
-                n.forEach { it.fire(SelectChangeEvent(oldList, selectedActors, fromMouse)) }
-                curSelectionParent.onSelection(selectedActors, fromMouse)
-            }
-        }
-    }
-
-    private var selectableDirty: Boolean = true
-
-    fun deselectActor(actor: Actor) {
-        val oldList = _selectedActors.toList()
-        if (_selectedActors.remove(actor))
-            oldList.reversed()
-                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toMutableList().toList())) }
-    }
-
-    fun deselectAllExcept(actor: Actor? = null) {
-        val oldList = _selectedActors.toList()
-        _selectedActors.removeIf { it != actor }
-        if (oldList.size != _selectedActors.size)
-            oldList.reversed()
-                .forEach { it.fire(SelectChangeEvent(oldList, _selectedActors.toList())) }
-    }
-
-    private var previousFocusedActor: Actor? = null
-    var focusedActor: Actor? = null
-        set(value) {
-            if (value == null) {
-                field?.let { it.fire(FocusChangeEvent(it, null, nextFocusActorSetFromMouse)) }
-            } else {
-//                if (selectionHierarchy.isEmpty() || !curSelectionParent.hasActor(value)) return
-                if (field == value) return
-                field?.let { it.fire(FocusChangeEvent(it, value, nextFocusActorSetFromMouse)) }
-                value.let { it.fire(FocusChangeEvent(field, it, nextFocusActorSetFromMouse)) }
-            }
-            previousFocusedActor = field
-            field = value
-            nextFocusActorSetFromMouse = true
-        }
-
-    private var nextFocusActorSetFromMouse: Boolean = true
-    private val selectionHierarchy: ArrayDeque<FocusableParent> = ArrayDeque()
-    val curSelectionParent: FocusableParent get() = selectionHierarchy.last()
-
-    /**
-     * the actor, that jumps to the center of the cursor when holding the click bevor drag and dropping
-     */
-    var draggedPreviewActor: Actor? = null
-    val draggedActor: Actor? get() = dragAndDrop.values.firstNotNullOfOrNull { it.dragActor } ?: draggedPreviewActor
-
     private val makeLaggy: Boolean by screenDebugMenuPage.makeLaggy
-
-    fun addToSelectionHierarchy(child: FocusableParent) {
-        selectionHierarchy.add(child)
-        curSelectionParent.updateFocusableActors(this)
-        val focusedActor1 = focusedActor
-        if (focusedActor1 != null && !curSelectionParent.hasActor(focusedActor1)) {
-            focusedActor = null
-        }
-    }
-
-    fun escapeSelectionHierarchy(fromMouse: Boolean = true, deselectActors: Boolean = true) {
-        println("hiiii")
-        if (!fromMouse && draggedActor != null) return
-        nextFocusActorSetFromMouse = fromMouse
-        focusedActor = selectedActors.lastOrNull()
-        if (deselectActors) deselectAllExcept()
-        if (selectionHierarchy.size >= 2) { //there has to be always at least one selectionGroup for it to work
-            val s = selectionHierarchy.removeLast()
-            s.onLeave()
-            curSelectionParent.updateFocusableActors(this)
-        }
-        if (focusedActor == null && !fromMouse) {
-            nextFocusActorSetFromMouse = false
-            focusedActor = if (curSelectionParent.hasActorPrimary(previousFocusedActor)) {
-                previousFocusedActor
-            } else {
-                curSelectionParent.focusNext(null, this) as Actor?
-            }
-        }
-    }
-
-    fun getFocusableActors(): MutableList<FocusableActor> {
-        return getFocusableActors(stage.root)
-    }
-
-    private fun getFocusableActors(root: Group): MutableList<FocusableActor> {
-        val selectableActors = mutableListOf<FocusableActor>()
-        for (child in root.children) {
-            if (child is FocusableActor) {
-                if (child.group != null) selectableActors.add(child)
-            }
-            if (child is Group) selectableActors.addAll(getFocusableActors(child))
-        }
-        return selectableActors
-    }
-
-    fun focusNext(direction: Vector2? = null) {
-        if (selectionHierarchy.isEmpty()) return
-        val focusableElement = curSelectionParent.focusNext(direction, this)
-        nextFocusActorSetFromMouse = false
-        this.focusedActor = focusableElement as Actor?
-    }
-
-    fun focusPrevious() {
-        if (selectionHierarchy.isEmpty()) return
-        val focusableElement = curSelectionParent.focusPrevious(this)
-        nextFocusActorSetFromMouse = false
-        this.focusedActor = focusableElement as Actor?
-    }
-
-    fun focusSpecific(name: String) {
-        if (selectionHierarchy.isEmpty()) return
-        val focusableElement = namedActorOrError(name)
-        focusSpecific(focusableElement)
-    }
-
-    fun focusSpecific(actor: Actor) {
-        actor as? FocusableActor
-            ?: throw RuntimeException("cannot focus ${actor.name ?: if (actor.toString().length > 40) actor.javaClass.simpleName else actor.toString()} because it doesn't implement FocusableActor")
-        if (selectionHierarchy.isEmpty()) return
-        if (!actor.isFocusable) return
-        nextFocusActorSetFromMouse = false
-        this.focusedActor = actor as Actor
-    }
-
-    private var awaitingConfirmationClick: Boolean = false
-
-    private var screenInputProcessor: InputProcessor = object : InputAdapter() {
-
-        override fun keyDown(keycode: Int): Boolean {
-            if (!awaitingConfirmationClick) return false
-            if (keycode in arrayOf(Keys.ENTER, Keys.NUMPAD_ENTER)) {
-                awaitingConfirmationClick = false
-                return true
-            }
-            return false
-        }
-
-        override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-            if (!awaitingConfirmationClick) return false
-            awaitingConfirmationClick = false
-            return true
-        }
-
-    }
-
-    var inputMap: KeyInputMap? = null
-        @AllThreadsAllowed set(value) {
-            field = value
-            inputMultiplexer.clear()
-            inputMultiplexer.addProcessor(screenInputProcessor)
-            value?.let { inputMultiplexer.addProcessor(it) }
-            inputMultiplexer.addProcessor(stage)
-        }
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
@@ -276,23 +95,17 @@ open class OnjScreen(
 
     private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this, arrayOf())
 
+    private val actorsWithActiveHoverDetails: MutableList<InputActor> = mutableListOf()
+
+    val inputManager = InputManager(this)
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
-
-
-    val programmedDetailSources: MutableList<DisplayDetailActor> = mutableListOf()
 
     init {
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
-        addEarlyRenderTask {
-            if (selectableDirty) {
-                curSelectionParent.updateFocusableActors(this)
-                selectableDirty = false
-            }
-        }
-        inputMultiplexer.addProcessor(screenInputProcessor)
+        inputMultiplexer.addProcessor(inputManager)
         inputMultiplexer.addProcessor(stage)
     }
 
@@ -423,43 +236,22 @@ open class OnjScreen(
         }
         actor.remove()
         _dragAndDrop.values.forEach { it.removeAllListenersWithActor(actor) }
-        if (actor is FocusableActor && actor.group != null) selectableDirty = true
         //TODO remove from behaviour and so on
     }
 
-    fun <T> addOnFocusDetailActor(actor: T) where T : Actor, T : DisplayDetailActor {
-        if (actor is FocusableActor) {
-            actor.onFocusChange { _, new ->
-                if (actor.isFocused) {
-                    if (draggedActor == null) {
-                        showFocusDetail(actor)
-                    }
-                } else {
-                    hideHoverDetail(actor)
-                }
-            }
-        } else {
-            actor.onEnter {
-                showFocusDetail(actor)
-            }
-            actor.onExit {
-                hideHoverDetail(actor)
-            }
-        }
-    }
 
-    private fun <T> showFocusDetail(actor: T) where T : Actor, T : DisplayDetailActor {
+    fun showHoverDetail(actor: InputActor) {
         val detailWidget = actor.detailWidget ?: return
         if (detailWidget.isShown) return
         val detailActor = detailWidget.generateDetailActor(addFadeInAction = true)
         detailWidget.detailActor = detailActor
-        detailWidget.updateBounds(actor)
-        actor.fire(DetailDisplayStateChange(true)) //this may be never needed, but its nice to have if we do
+        detailWidget.updateBounds(actor.actor)
+        actorsWithActiveHoverDetails.add(actor)
     }
 
-    private fun <T> hideHoverDetail(sourceActor: T) where T : Actor, T : DisplayDetailActor {
-        sourceActor.fire(DetailDisplayStateChange(false))
+    fun hideHoverDetail(sourceActor: InputActor) {
         sourceActor.detailWidget?.hide()
+        actorsWithActiveHoverDetails.remove(sourceActor)
     }
 
     fun removeAllStyleManagers(actor: StyledActor) {
@@ -536,8 +328,10 @@ open class OnjScreen(
         if (!isEarly) screenControllers.forEach(ScreenController::update)
         updateCallbacks()
         stage.act(Gdx.graphics.deltaTime)
-        val focusedActor1 = focusedActor
-        if (focusedActor1 is DisplayDetailActor) focusedActor1.detailWidget?.detailActor?.act(delta)
+        actorsWithActiveHoverDetails.forEach {
+            it.detailWidget?.detailActor?.act(Gdx.graphics.deltaTime)
+            it.detailWidget?.updateBounds(it.actor)
+        }
     }
 
     fun centeredStageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
@@ -547,40 +341,22 @@ open class OnjScreen(
     @MainThreadOnly
     override fun render(delta: Float) = try {
         if (makeLaggy) Thread.sleep(500)
-        stage.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        val batch = stage.batch
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val oldStyleManagers = styleManagers.toList()
-        if (stage.batch.isDrawing) stage.batch.end()
+        if (batch.isDrawing) batch.end()
         stage.viewport.apply()
         doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
         stage.draw()
+        batch.begin()
+        actorsWithActiveHoverDetails.forEach {
+            it.detailWidget?.drawDetailActor(batch)
+        }
+        batch.end()
         doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
         styleManagers
             .filter { it !in oldStyleManagers }
             .forEach(StyleManager::update) //all added items get updated too
-
-        stage.batch.begin()
-        programmedDetailSources.forEach { it.detailWidget?.drawDetailActor(stage.batch) }
-        stage.batch.end()
-        val draggedActorLocal = draggedActor
-        if (draggedActorLocal == null) {
-            stage.batch.begin()
-            val focusedActor1 = focusedActor
-            if (focusedActor1 is DisplayDetailActor) focusedActor1.detailWidget?.drawDetailActor(stage.batch)
-            stage.batch.end()
-        } else {
-            stage.batch.begin()
-            if (draggedActorLocal == draggedPreviewActor && draggedActorLocal is OffSettable) {//current possibilty for dragAndDrop
-                val pos = draggedActorLocal.parent.localToStageCoordinates(Vector2(0F, 0F))
-                draggedActorLocal.drawOffsetX += pos.x //current possibilty for dragAndDrop
-                draggedActorLocal.drawOffsetY += pos.y//TODO ugly VERY UGLY (the part in the if at least, the else is okay)
-                draggedActorLocal.draw(stage.batch, 1f)
-                draggedActorLocal.drawOffsetX -= pos.x
-                draggedActorLocal.drawOffsetY -= pos.y
-            } else {
-                draggedActorLocal.draw(stage.batch, 1f)
-            }
-            stage.batch.end()
-        }
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
@@ -599,31 +375,31 @@ open class OnjScreen(
         stage.viewport.update(width, height, true)
     }
 
-    fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction =
-        object : Timeline.TimelineAction() {
-
-            private var finishAt: Long? = null
-
-            override fun start(timeline: Timeline) {
-                super.start(timeline)
-                maxTime?.let {
-                    finishAt = TimeUtils.millis() + it
-                }
-                awaitingConfirmationClick = true
-            }
-
-            override fun isFinished(timeline: Timeline): Boolean {
-                if (!awaitingConfirmationClick) return true
-                finishAt?.let {
-                    if (TimeUtils.millis() >= it) return true
-                }
-                return false
-            }
-
-            override fun end(timeline: Timeline) {
-                awaitingConfirmationClick = false
-            }
-        }
+    fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction = TODO()
+//        object : Timeline.TimelineAction() {
+//
+//            private var finishAt: Long? = null
+//
+//            override fun start(timeline: Timeline) {
+//                super.start(timeline)
+//                maxTime?.let {
+//                    finishAt = TimeUtils.millis() + it
+//                }
+//                awaitingConfirmationClick = true
+//            }
+//
+//            override fun isFinished(timeline: Timeline): Boolean {
+//                if (!awaitingConfirmationClick) return true
+//                finishAt?.let {
+//                    if (TimeUtils.millis() >= it) return true
+//                }
+//                return false
+//            }
+//
+//            override fun end(timeline: Timeline) {
+//                awaitingConfirmationClick = false
+//            }
+//        }
 
     @MainThreadOnly
     override fun dispose() {

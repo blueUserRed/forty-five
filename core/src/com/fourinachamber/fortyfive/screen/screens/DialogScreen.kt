@@ -4,10 +4,6 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.dialog.AnimatedAdvancedTextWidget
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
@@ -89,38 +85,8 @@ class DialogScreen : ScreenCreator() {
         ) {
             relativeWidth(100F)
             fitContentHeight = true
-            group = dialogOptionFocusGroup
             setPadding(20F)
-            setFocusableTo(true, this)
-            isSelectable = true
-            styles(
-                normal = {
-                    backgroundHandle = "dialog_answer_option"
-                },
-                focused = {
-                    backgroundHandle = "dialog_answer_option_hover"
-                },
-                selectedAndFocused = {
-                    backgroundHandle = "dialog_answer_option_hover"
-                },
-            )
         }
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(), screen)
-    )
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf(dialogFocusGroup, dialogOptionFocusGroup, navbarFocusGroup)
-                ),
-            ),
-            startGroups = listOf(dialogFocusGroup, dialogOptionFocusGroup),
-        )
-    )
 
     private fun CustomGroup.npcImageWidgets(name: String, offset: Float) {
         box {
@@ -180,9 +146,6 @@ class DialogScreen : ScreenCreator() {
             paddingRight = 150F
             verticalTextAlign = CustomAlign.CENTER
             backgroundHandle = "dialog_background"
-            setFocusableTo(true, this@actor)
-            isSelectable = true
-            group = dialogFocusGroup
 
             box {
                 positionType = PositionType.ABSOLUTE

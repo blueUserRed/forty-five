@@ -287,8 +287,6 @@ class NewGameController(
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
                 _encounterModifiers.forEach { it.initBullet(card) }
-                card.actor.isSelectable = true
-                card.actor.isFocusable = true
                 card.bindGameEvents(gameEvents, this)
             }
             .toMutableList()

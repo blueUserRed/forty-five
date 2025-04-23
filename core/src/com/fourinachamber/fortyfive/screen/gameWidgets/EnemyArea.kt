@@ -24,8 +24,6 @@ class EnemyArea(
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, ResourceBorrower {
 
     override var styleManager: StyleManager? = null
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
 
     override var fixedZIndex: Int = 0
 
@@ -45,9 +43,6 @@ class EnemyArea(
     private val canSelectEnemy: Boolean
         get() = _enemies.filter { !it.isDefeated }.size >= 2
 
-    init {
-        bindHoverStateListeners(this)
-    }
 
     /**
      * adds a new enemy to this area

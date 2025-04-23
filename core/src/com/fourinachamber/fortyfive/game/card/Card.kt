@@ -20,7 +20,8 @@ import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
 import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -214,13 +215,10 @@ class Card(
         gameEvents.watchFor<NewGameController.Events.TargetSelectionEvent> { event ->
             if (!inZone(Zone.REVOLVER)) return@watchFor
             if (this === event.exclude) return@watchFor
-            actor.enterSelectionMode()
-            event.promise.then { actor.exitSelectionMode() }
+            TODO()
+//            actor.enterSelectionMode()
+//            event.promise.then { actor.exitSelectionMode() }
             currentTargetSelection = event.promise
-        }
-        actor.onSelect {
-            if (!actor.inSelectionMode) return@onSelect
-            currentTargetSelection?.resolve(this@Card)
         }
     }
 
@@ -239,10 +237,12 @@ class Card(
             if (isRotten) addRottenModifier(controller)
         }
         if (newZone == Zone.HAND) {
-            actor.isDraggable = true
+            TODO()
+//            actor.isDraggable = true
         }
         if (oldZone == Zone.HAND) {
-            actor.isDraggable = false
+            TODO()
+//            actor.isDraggable = false
         }
     }
 
@@ -760,8 +760,8 @@ class CardActor(
     val isDark: Boolean,
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean
-) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DragAndDroppableActor {
+) : Widget(), ZIndexActor, InputActor by InputActorImpl(), HasOnjScreen, StyledActor,
+    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,
@@ -783,27 +783,6 @@ class CardActor(
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
     override var positionType: PositionType = PositionType.RELATIV
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-    override var isFocused: Boolean = false
-    override var isSelectable: Boolean = false
-    override var isSelected: Boolean = false
-    override var isDraggable: Boolean = false
-    override var inDragPreview: Boolean = false
-    override var targetGroups: List<String> = listOf()
-    override var resetCondition: ((Actor?) -> Boolean)? = null
-    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
-
-    override var isHoveredOver: Boolean = false
-
-    //    override var isSelected: Boolean = false
-    override var partOfHierarchy: Boolean = true
-    override var isClicked: Boolean = false
-
-    /**
-     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fortyfive.game.card.CardDragSource]
-     */
-    var isDragged: Boolean = false
 
     private var inDestroyAnim: Boolean = false
     private var spawnAnimStart: Long = 0L
@@ -832,16 +811,16 @@ class CardActor(
     private var texture: Texture? = null
 
     init {
-        bindDefaultListeners(this, screen)
-        registerOnFocusDetailActor(this, screen)
-
+        initInput(this, screen)
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
         onHoverEnter {
+            TODO()
             if (!playSoundsOnHover) return@onHoverEnter
             SoundPlayer.situation("card_hover", screen)
         }
         onTouchEvent { event, _, _ ->
+            TODO()
             if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
 //            FortyFive.currentGame?.cardRightClicked(card)
         }
@@ -849,37 +828,8 @@ class CardActor(
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
-//    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
-//        val allKeys = card.getKeyWordsForDescriptions()
-//        DetailDescriptionHandler
-//            .descriptions
-//            .filter { it.key in allKeys }
-//            .forEach {
-//                addHoverItemToParent(it.value.second, descriptionParent)
-//            }
-//        if (FortyFive.currentGame == null) return
-//        card
-//            .getAdditionalHoverDescriptions()
-//            .filter { it.isNotBlank() }
-//            .forEach { addHoverItemToParent(it, descriptionParent) }
-//    }
-
     override fun setX(x: Float) {
         super.setX(x)
-    }
-
-    override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
-        // This is a fix for the ChooseCardScreen, where for some reason the CardDragAndDrop sets the position first,
-        // but is then overwritten by the layout code every frame (I guess something is calling invalidate each frame,
-        // but I dont know what)
-        // I also dont know why the LibGDX drag and drop system is implemented like this, because it inherently relies
-        // on the order in which the DragAndDrop/Layout/Draw code is executed, which breaks really easily
-        // This is a really bad fix, but a good fix would probably involve completely rewriting the DragAndDrop-System
-        // and this issue has been haunting me for too long
-
-        // block the layout code from setting the position when the actor is dragged (and hope that the DragAndDrop-Code doesnt use the setBounds function)
-        if (isDragged) return
-        super.setBounds(x, y, width, height)
     }
 
     private fun setupShader(batch: Batch): Boolean {
@@ -920,17 +870,10 @@ class CardActor(
         val height: Float
         val x: Float
         val y: Float
-        if (isHoveredOver && inSelectionMode) {
-            width = this.width * 1.2f
-            height = this.height * 1.2f
-            x = this.x - (width - this.width) / 2f
-            y = this.y - (height - this.height) / 2f
-        } else {
-            width = this.width
-            height = this.height
-            x = this.x
-            y = this.y
-        }
+        width = this.width
+        height = this.height
+        x = this.x
+        y = this.y
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,
@@ -960,11 +903,6 @@ class CardActor(
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue)
-    }
-
-    override fun getBounds(): Rectangle {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        return Rectangle(x, y, width, height)
     }
 
     // TODO: came up with system for animations
@@ -1057,17 +995,6 @@ class CardActor(
             removeAction(scaleAction)
         }
     }
-
-    fun enterSelectionMode() {
-        inSelectionMode = true
-        playSoundsOnHover = true
-    }
-
-    fun exitSelectionMode() {
-        inSelectionMode = false
-        playSoundsOnHover = false
-    }
-
 
     override fun positionChanged() {
         super.positionChanged()

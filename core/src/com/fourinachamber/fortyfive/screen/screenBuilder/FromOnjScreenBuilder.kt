@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.statusbar.Backpack
@@ -84,11 +83,7 @@ class FromOnjScreenBuilder(
         )
         screen.background = background
 
-        onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
-            screen.inputMap = KeyInputMap.readFromOnj(it, screen)
-        }
-
-        val root = CustomFlexBox(screen, arrayOf(), false)
+        val root = CustomFlexBox(screen, arrayOf())
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -323,19 +318,18 @@ class FromOnjScreenBuilder(
             widgetOnj.getOr<String?>("textureName", null),
             screen,
             arrayOf(),
-            widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             applyImageKeys(this, widgetOnj)
         }
 
-        "Box" -> CustomFlexBox(
-            screen,
-            arrayOf(),
-            widgetOnj.getOr("hasHoverDetail", false),
-            widgetOnj.getOr("hoverText", "")
-        ).apply {
-            initFlexBox(this, widgetOnj, screen)
-        }
+//        "Box" -> CustomFlexBox(
+//            screen,
+//            arrayOf(),
+//            widgetOnj.getOr("hasHoverDetail", false),
+//            widgetOnj.getOr("hoverText", "")
+//        ).apply {
+//            initFlexBox(this, widgetOnj, screen)
+//        }
 
         "ScrollBox" -> CustomScrollableFlexBox(
             screen,
@@ -372,8 +366,6 @@ class FromOnjScreenBuilder(
                 }
             },
             isDistanceField = widgetOnj.getOr("isDistanceFiled", true),
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
-            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -393,7 +385,6 @@ class FromOnjScreenBuilder(
                     fontColor = widgetOnj.get<Color>("color")
                 }
             },
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -443,8 +434,6 @@ class FromOnjScreenBuilder(
                 widgetOnj.get<Color>("color")
             ),
             isDistanceField = widgetOnj.getOr("isDistanceField", true),
-            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
@@ -674,10 +663,10 @@ class FromOnjScreenBuilder(
             }
         }
 
-        widgetOnj.ifHas<String>("hoverDetailActor") { name ->
-            actor as DisplayDetailActor
-            throw RuntimeException("hover Details are only implemented in the kotlin ScreenCreator")
-        }
+//        widgetOnj.ifHas<String>("hoverDetailActor") { name ->
+//            actor as DisplayDetailActor
+//            throw RuntimeException("hover Details are only implemented in the kotlin ScreenCreator")
+//        }
 
         widgetOnj.ifHas<Long>("zIndex") {
             if (this !is ZIndexActor) throw RuntimeException("can only apply z-index to ZIndexActors")

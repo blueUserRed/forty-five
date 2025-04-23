@@ -20,14 +20,6 @@ import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
-import com.fourinachamber.fortyfive.keyInput.KeyActionFactory
-import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapEntry
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapKeyEntry
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
@@ -45,7 +37,6 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
-import com.fourinachamber.fortyfive.screen.general.onSelect
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
 import com.fourinachamber.fortyfive.utils.Color
@@ -264,14 +255,10 @@ class GameScreen : ScreenCreator() {
             width = enemyWidth
             height = enemyHeight
 
-            group = "enemies"
-            setFocusableTo(true, this)
-            isSelectable = true
-
-            onSelect {
-                if (enemySelected) return@onSelect
-                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
-            }
+//            onSelect {
+//                if (enemySelected) return@onSelect
+//                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
+//            }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
                 val origX = x
@@ -594,24 +581,21 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-            isSelectable = true
-            isFocusable = true
-            group = "shoot_button"
-            styles(
-                normal = {
-                    backgroundHandle = "shoot_button_texture"
-                    xAnim.state("open")
-                },
-                focused = {
-                    backgroundHandle = "shoot_button_hover_texture"
-                    xAnim.state("hover")
-                },
-            )
-            onSelect {
-                screen.deselectActor(this)
-                screen.focusedActor = null
-                gameEvents.fire(NewGameController.Events.ShootButtonPressed)
-            }
+//            styles(
+//                normal = {
+//                    backgroundHandle = "shoot_button_texture"
+//                    xAnim.state("open")
+//                },
+//                focused = {
+//                    backgroundHandle = "shoot_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//            )
+//            onSelect {
+//                screen.deselectActor(this)
+//                screen.focusedActor = null
+//                gameEvents.fire(NewGameController.Events.ShootButtonPressed)
+//            }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
@@ -637,26 +621,21 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-            isSelectable = true
-            isFocusable = true
-            group = "pass_button"
-            onSelect {
-                screen.deselectActor(this)
-                screen.focusedActor = null
-                parryPromise?.let {
-                    if (parryPromise.isNotResolved) parryPromise.resolve(false)
-                }
-            }
-            styles(
-                normal = {
-                    backgroundHandle = "pass_button_texture"
-                    xAnim.state(if (closed) "closed" else "open")
-                },
-                focused = {
-                    backgroundHandle = "pass_button_hover_texture"
-                    xAnim.state("hover")
-                },
-            )
+//            onSelect {
+//                parryPromise?.let {
+//                    if (parryPromise.isNotResolved) parryPromise.resolve(false)
+//                }
+//            }
+//            styles(
+//                normal = {
+//                    backgroundHandle = "pass_button_texture"
+//                    xAnim.state(if (closed) "closed" else "open")
+//                },
+//                focused = {
+//                    backgroundHandle = "pass_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//            )
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
@@ -689,24 +668,19 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-            isSelectable = true
-            isFocusable = true
-            group = "holster_button"
-            onSelect {
-                screen.deselectActor(this)
-                screen.focusedActor = null
-                gameEvents.fire(NewGameController.Events.HolsterButtonPressed)
-            }
-            styles(
-                normal = {
-                    backgroundHandle = "end_turn_button_texture"
-                    xAnim.state("open")
-                },
-                focused = {
-                    backgroundHandle = "end_turn_button_hover_texture"
-                    xAnim.state("hover")
-                },
-            )
+//            onSelect {
+//                gameEvents.fire(NewGameController.Events.HolsterButtonPressed)
+//            }
+//            styles(
+//                normal = {
+//                    backgroundHandle = "end_turn_button_texture"
+//                    xAnim.state("open")
+//                },
+//                focused = {
+//                    backgroundHandle = "end_turn_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//            )
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
@@ -732,26 +706,21 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-            isSelectable = true
-            isFocusable = true
-            group = "parry_button"
-            onSelect {
-                screen.deselectActor(this)
-                screen.focusedActor = null
-                parryPromise?.let {
-                    if (parryPromise.isNotResolved) parryPromise.resolve(true)
-                }
-            }
-            styles(
-                normal = {
-                    backgroundHandle = "parry_button_texture"
-                    xAnim.state(if (closed) "closed" else "open")
-                },
-                focused = {
-                    backgroundHandle = "parry_button_hover_texture"
-                    xAnim.state("hover")
-                },
-            )
+//            onSelect {
+//                parryPromise?.let {
+//                    if (parryPromise.isNotResolved) parryPromise.resolve(true)
+//                }
+//            }
+//            styles(
+//                normal = {
+//                    backgroundHandle = "parry_button_texture"
+//                    xAnim.state(if (closed) "closed" else "open")
+//                },
+//                focused = {
+//                    backgroundHandle = "parry_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//            )
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
@@ -847,43 +816,41 @@ class GameScreen : ScreenCreator() {
             box {
                 width = 200f
                 height = 50f
-                isFocusable = true
-                isSelectable = true
                 touchable = Touchable.enabled
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
-                styles(
-                    normal = {
-                        backgroundHandle = "common_button_default"
-                    },
-                    focused = {
-                        backgroundHandle = "common_button_hover"
-                    }
-                )
+//                styles(
+//                    normal = {
+//                        backgroundHandle = "common_button_default"
+//                    },
+//                    focused = {
+//                        backgroundHandle = "common_button_hover"
+//                    }
+//                )
                 label("red_wing", "Claim & Continue", Color.FortyWhite) {
                     setFontScale(0.7f)
                     setAlignment(Align.center)
                 }
                 marginBottom = 120f
-                onSelect {
-                    continuePromise?.resolve(Unit)
-                    SoundPlayer.situation("money_earned", screen)
-                    val navBarSymbol = screen.namedActorOrError("cash_symbol")
-                    val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
-                    val renderPipeline = FortyFive.currentRenderPipeline!!
-                    val moneyAnim = GraphicsConfig.cashOrbAnimation(
-                        winPopupSymbol.localToScreenCoordinates(Vector2(
-                            winPopupSymbol.width / 2,
-                            winPopupSymbol.height / 2
-                        )),
-                        navBarSymbol.localToScreenCoordinates(Vector2(
-                            navBarSymbol.width / 2,
-                            navBarSymbol.height / 2
-                        )),
-                        renderPipeline
-                    )
-                    renderPipeline.addOrbAnimation(moneyAnim)
-                }
+//                onSelect {
+//                    continuePromise?.resolve(Unit)
+//                    SoundPlayer.situation("money_earned", screen)
+//                    val navBarSymbol = screen.namedActorOrError("cash_symbol")
+//                    val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
+//                    val renderPipeline = FortyFive.currentRenderPipeline!!
+//                    val moneyAnim = GraphicsConfig.cashOrbAnimation(
+//                        winPopupSymbol.localToScreenCoordinates(Vector2(
+//                            winPopupSymbol.width / 2,
+//                            winPopupSymbol.height / 2
+//                        )),
+//                        navBarSymbol.localToScreenCoordinates(Vector2(
+//                            navBarSymbol.width / 2,
+//                            navBarSymbol.height / 2
+//                        )),
+//                        renderPipeline
+//                    )
+//                    renderPipeline.addOrbAnimation(moneyAnim)
+//                }
             }
         }
     }
@@ -891,59 +858,6 @@ class GameScreen : ScreenCreator() {
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
         NewGameController(screen, gameEvents, warningParent!!, afterlife)
-    )
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(KeyInputMap.createFromKotlin(listOf(
-
-        KeyInputMapEntry(
-            priority = 20,
-            condition = KeyInputCondition.Always,
-            singleKeys = listOf(
-                KeyInputMapKeyEntry(Keys.S, modifierKeys = listOf(Keys.SHIFT_LEFT)),
-                KeyInputMapKeyEntry(Keys.S, modifierKeys = listOf(Keys.SHIFT_RIGHT)),
-            ),
-            defaultActions = listOf(
-                KeyActionFactory.getAction("FocusSpecific", "shoot_button"),
-                KeyActionFactory.getAction("FocusSpecific", "pass_button"),
-            )
-        ),
-
-        KeyInputMapEntry(
-            priority = 20,
-            condition = KeyInputCondition.Always,
-            singleKeys = listOf(
-                KeyInputMapKeyEntry(Keys.H, modifierKeys = listOf(Keys.SHIFT_LEFT)),
-                KeyInputMapKeyEntry(Keys.H, modifierKeys = listOf(Keys.SHIFT_RIGHT)),
-            ),
-            defaultActions = listOf(
-                KeyActionFactory.getAction("FocusSpecific", "holster_button"),
-                KeyActionFactory.getAction("FocusSpecific", "parry_button"),
-            )
-        ),
-
-    ), screen))
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf("enemies", NavbarCreator.navbarFocusGroup, Afterlife.openArrowFocusGroup)
-                ),
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf("shoot_button", "holster_button", "pass_button", "parry_button")
-                ),
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf(NewCardHand.cardFocusGroupName, RevolverSlot.revolverSlotFocusGroupName, "enemies")
-                ),
-                SelectionTransition(
-                    TransitionType.LastResort,
-                    groups = listOf(RevolverSlot.revolverSlotFocusGroupName),
-                )
-            )
-        )
     )
 
     private fun orbAnimationTimeline(

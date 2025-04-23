@@ -12,9 +12,6 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.DefaultInterpolators
 import com.fourinachamber.fortyfive.animation.Interpolator
 import com.fourinachamber.fortyfive.animation.PropertyAnimation
-import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -25,7 +22,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.Selector
 import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.TemplateString
-import onj.value.OnjArray
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -61,9 +57,6 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract fun getRoot(): Group
 
     abstract fun getScreenControllers(): List<ScreenController>
-
-    abstract fun getInputMaps(): List<KeyInputMap>
-    abstract fun getSelectionHierarchyStructure(): List<FocusableParent>
 
     inline fun newGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
         val group = CustomGroup(screen, backgroundHints = backgroundHints)
@@ -123,7 +116,7 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.image(backgroundHints: Array<String> = arrayOf(), builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
-        val image = CustomImageActor(null, screen, backgroundHints, false)
+        val image = CustomImageActor(null, screen, backgroundHints)
         this.addActor(image)
         builder(image)
         return image
@@ -322,70 +315,11 @@ abstract class ScreenCreator : ResourceBorrower {
         *states
     )
 
-    fun <T> T.addButtonDefaults() where T : Actor, T : KotlinStyledActor, T : BackgroundActor {
-        setFocusableTo(true, this)
-        isSelectable = true
-        styles(
-            normal = {
-                if (this is DisableActor && isDisabled)
-                    backgroundHandle = "common_button_disabled"
-                else backgroundHandle = "common_button_default"
-            },
-            focused = {
-                backgroundHandle = "common_button_hover"
-            },
-            selectedAndFocused = {
-                backgroundHandle = "common_button_hover"
-//                backgroundHandle = if (this !is DisableActor || !isDisabled)
-//                    "common_button_hover"
-//                else
-//                    "common_button_disabled"
-            }
-        )
-        onSelect { screen.changeSelectionFor(this) }
-    }
-
-    inline fun <T> T.styles(
-        crossinline normal: () -> Unit = {},
-        crossinline focused: () -> Unit = {},
-        crossinline selected: () -> Unit = {},
-        crossinline selectedAndFocused: () -> Unit = {},
-        crossinline resetEachTime: () -> Unit = {},
-    ) where T : Actor, T : KotlinStyledActor {
-        onFocusChange { _, _ ->
-            resetEachTime()
-            if (isSelected) {
-                if (isFocused) selectedAndFocused()
-                else selected()
-            } else if (isFocused) focused()
-            else normal()
-        }
-        onSelectChange { _, _ ->
-            resetEachTime()
-            if (isSelected) {
-                if (isFocused) selectedAndFocused()
-                else selected()
-            } else if (isFocused) focused()
-            else normal()
-        }
-        resetEachTime()
-        if (isSelected) {
-            if (isFocused) selectedAndFocused()
-            else selected()
-        } else if (isFocused) focused()
-        else normal()
-    }
-
     var Label.fontColor: Color
         get() = style.fontColor
         set(value) {
             style.fontColor = value
         }
-
-    fun loadInputMap(name: String, screen: OnjScreen): KeyInputMap {
-        val file = ConfigFileManager.getConfigFile("inputMaps")
-        return KeyInputMap.readFromOnj(file.get<OnjArray>(name), screen)
-    }
 
     companion object {
         val fortyWhite: Color = Color.valueOf("F0EADD")

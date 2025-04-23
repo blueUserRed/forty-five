@@ -11,7 +11,6 @@ import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.*
-import com.fourinachamber.fortyfive.screen.general.onSelectChange
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -51,11 +50,9 @@ object NavbarCreator {
             isVisible = false
             touchable = Touchable.enabled
             onClick {
+                TODO()
                 if (!isVisible) return@onClick
                 isVisible = false
-                val box = screen.namedActorOrError("navbar_buttonParent") as CustomBox
-                val c = box.children.filterIsInstance<FocusableActor>().firstOrNull { it.isSelected } ?: return@onClick
-                screen.changeSelectionFor(c as Actor)
             }
         }
 
@@ -246,10 +243,6 @@ object NavbarCreator {
             height = parent.parent.height * 0.7f * scale
             width = 250f * scale
             backgroundHandle = "statusbar_option"
-            logicalOffsetY = 30f
-            setFocusableTo(true, this)
-            group = navbarFocusGroup
-            isSelectable = true
 
             label("red_wing", obj.name) {
                 centerX()
@@ -270,48 +263,44 @@ object NavbarCreator {
                 it.interpolation = Interpolation.pow2In
             }
 
-            styles(
-                normal = {
-                    addAction(createAction(30f))
-                },
-                focused = {
-                    addAction(createAction(25f))
-                },
-                selected = {
-                    addAction(createAction(21f))
-                },
-                selectedAndFocused = {
-                    addAction(createAction(16f))
-                }
-            )
+//            styles(
+//                normal = {
+//                    addAction(createAction(30f))
+//                },
+//                focused = {
+//                    addAction(createAction(25f))
+//                },
+//                selected = {
+//                    addAction(createAction(21f))
+//                },
+//                selectedAndFocused = {
+//                    addAction(createAction(16f))
+//                }
+//            )
 
             var isOpen = false
             events.watchFor<CloseNavBarButtons> {
                 if (!isOpen) return@watchFor
                 isOpen = false
                 timeline.appendAction(obj.closeTimelineCreator().asAction())
-                screen.escapeSelectionHierarchy(deselectActors = false)
                 timeline.appendAction(Timeline.timeline {
                     action { screen.leaveState(navbarOpenScreenState) }
                 }.asAction())
             }
 
-            onSelectChange { _, _ ->
-                if (isSelected) {
-                    println("now opening")
-                    events.fire(ChangeBlackBackground(true))
-                    timeline.appendAction(Timeline.timeline {
-                        action { println("hi") }
-                        include(obj.openTimelineCreator())
-                        action { screen.enterState(navbarOpenScreenState) }
-                    }.asAction())
-                    isOpen = true
-                } else {
-                    println("now closing")
-                    events.fire(CloseNavBarButtons)
-                    events.fire(ChangeBlackBackground(false))
-                }
-            }
+//            onSelectChange { _, _ ->
+//                if (isSelected) {
+//                    events.fire(ChangeBlackBackground(true))
+//                    timeline.appendAction(Timeline.timeline {
+//                        include(obj.openTimelineCreator())
+//                        action { screen.enterState(navbarOpenScreenState) }
+//                    }.asAction())
+//                    isOpen = true
+//                } else {
+//                    events.fire(CloseNavBarButtons)
+//                    events.fire(ChangeBlackBackground(false))
+//                }
+//            }
         }
     }
 
