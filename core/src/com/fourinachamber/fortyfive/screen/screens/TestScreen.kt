@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -54,6 +55,7 @@ class TestScreen : ScreenCreator() {
                     backgroundHandle = "white_texture"
                     isDropTarget = true
                     touchable = Touchable.enabled
+                    keyboardFocusable = KeyboardFocusable.LEAF
                     joinGroup("test-drop")
                     onDrop { backgroundHandle = "black_texture" }
                     observeInputState(
@@ -70,6 +72,7 @@ class TestScreen : ScreenCreator() {
                     backgroundHandle = "white_texture"
                     isDropTarget = true
                     touchable = Touchable.enabled
+                    keyboardFocusable = KeyboardFocusable.LEAF
                     joinGroup("test-drop")
                     onDrop { backgroundHandle = "black_texture" }
                     observeInputState(
@@ -86,6 +89,7 @@ class TestScreen : ScreenCreator() {
                     backgroundHandle = "white_texture"
                     isDropTarget = true
                     touchable = Touchable.enabled
+                    keyboardFocusable = KeyboardFocusable.LEAF
                     joinGroup("test-drop")
                     onDrop { backgroundHandle = "black_texture" }
                     observeInputState(
@@ -116,6 +120,7 @@ class TestScreen : ScreenCreator() {
                     isDraggable = true
                     joinGroup("test-drag")
                     keyboardFocusable = KeyboardFocusable.LEAF
+                    startDragAndDropOn(GameInputs.initDragAndDrop)
                     observeInputState(
                         GameInputs.States.focused,
                         { debug = true },
@@ -132,6 +137,7 @@ class TestScreen : ScreenCreator() {
                     isDraggable = true
                     joinGroup("test-drag")
                     keyboardFocusable = KeyboardFocusable.LEAF
+                    startDragAndDropOn(GameInputs.initDragAndDrop)
                     observeInputState(
                         GameInputs.States.focused,
                         { debug = true },
@@ -148,6 +154,7 @@ class TestScreen : ScreenCreator() {
                     isDraggable = true
                     joinGroup("test-drag")
                     keyboardFocusable = KeyboardFocusable.LEAF
+                    startDragAndDropOn(GameInputs.initDragAndDrop)
                     observeInputState(
                         GameInputs.States.focused,
                         { debug = true },

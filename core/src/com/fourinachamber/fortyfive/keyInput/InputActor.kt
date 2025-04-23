@@ -53,6 +53,8 @@ interface InputActor {
 
     fun leaveInputStateManually(state: InputState)
 
+    fun startDragAndDropOn(input: Input)
+
 }
 
 enum class KeyboardFocusable {
@@ -61,6 +63,7 @@ enum class KeyboardFocusable {
 
 class InputActorImpl : InputActor {
 
+    private val _callbacks: MutableMap<Input, MutableList<() -> Unit>> = mutableMapOf()
     override val inputCallbacks: Map<Input, List<() -> Unit>>
         get() = _callbacks
 
@@ -73,7 +76,15 @@ class InputActorImpl : InputActor {
     private var detailState: InputState? = null
 
     override var isDraggable: Boolean = false
+
     override var isDropTarget: Boolean = false
+        set(value) {
+            // make sure the actors listens to the confirmDragAndDrop Input when it is droppable, or else
+            // it wouldn't react when the user selects this as the drop target
+            _callbacks.putIfAbsent(GameInputs.confirmDragAndDrop, mutableListOf())
+            addToInputManagerIfNecessary()
+            field = value
+        }
 
     private val _groups: MutableList<String> = mutableListOf()
     override val groups: List<String>
@@ -86,8 +97,6 @@ class InputActorImpl : InputActor {
     override var keyboardFocusable: KeyboardFocusable = KeyboardFocusable.NONE
 
     private val _observedStates: MutableSet<InputState> = mutableSetOf()
-
-    private val _callbacks: MutableMap<Input, MutableList<() -> Unit>> = mutableMapOf()
 
     override val actor: Actor
         get() = _actor
@@ -110,10 +119,13 @@ class InputActorImpl : InputActor {
     override fun onInput(input: Input, callback: () -> Unit) {
         _callbacks.putIfAbsent(input, mutableListOf())
         _callbacks[input]!!.add(callback)
-        if (!wasAdded) {
-            screen.inputManager.addActor(this)
-            wasAdded = true
-        }
+        addToInputManagerIfNecessary()
+    }
+
+    private fun addToInputManagerIfNecessary() {
+        if (wasAdded) return
+        screen.inputManager.addActor(this)
+        wasAdded = true
     }
 
     override fun observeInputState(inputState: InputState) {
@@ -205,6 +217,10 @@ class InputActorImpl : InputActor {
             throw RuntimeException("only InputStates without causes can be handled manually")
         }
         notifyInputStateChanged(state, false)
+    }
+
+    override fun startDragAndDropOn(input: Input) {
+        onInput(input) { screen.inputManager.startKeyboardDragAndDrop(this) }
     }
 
     override fun isInInputState(state: InputState): Boolean = state in currentInputStates

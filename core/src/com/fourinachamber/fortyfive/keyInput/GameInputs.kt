@@ -8,7 +8,7 @@ object GameInputs {
         Input.Cause.Mouse(MouseButton.LEFT),
         Input.Cause.Keyboard(
             Keys.ENTER,
-            requireStates = arrayOf(States.focused)
+            requireStates = arrayOf(States.trueFocused)
         )
     ))
 
@@ -19,6 +19,18 @@ object GameInputs {
     val focusPrevious = Input(
         arrayOf(Input.Cause.Keyboard(Keys.TAB, arrayOf(ModifierKey.SHIFT)))
     )
+
+    val cancel = Input(
+        arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))
+    )
+
+    val initDragAndDrop = Input(arrayOf(
+        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused))
+    ))
+
+    val confirmDragAndDrop = Input(arrayOf(
+        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused))
+    ))
 
     object States {
 
