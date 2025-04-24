@@ -5,9 +5,8 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.*
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
@@ -20,8 +19,10 @@ import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
+import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -237,12 +238,10 @@ class Card(
             if (isRotten) addRottenModifier(controller)
         }
         if (newZone == Zone.HAND) {
-            TODO()
-//            actor.isDraggable = true
+            actor.isDraggable = true
         }
         if (oldZone == Zone.HAND) {
-            TODO()
-//            actor.isDraggable = false
+            actor.isDraggable = false
         }
     }
 
@@ -812,16 +811,17 @@ class CardActor(
 
     init {
         initInput(this, screen)
+        bindDetailToInputState(GameInputs.States.focused)
+        keyboardFocusable = KeyboardFocusable.LEAF
+
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
-        onHoverEnter {
-            TODO()
-            if (!playSoundsOnHover) return@onHoverEnter
+        onEnterInputState(GameInputs.States.focused) {
+            if (!playSoundsOnHover) return@onEnterInputState
             SoundPlayer.situation("card_hover", screen)
         }
-        onTouchEvent { event, _, _ ->
+        onInput(GameInputs.triggerCard) {
             TODO()
-            if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
 //            FortyFive.currentGame?.cardRightClicked(card)
         }
     }

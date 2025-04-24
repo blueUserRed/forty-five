@@ -2,7 +2,9 @@ package com.fourinachamber.fortyfive.keyInput
 
 import com.badlogic.gdx.Input
 
-class Input(val causes: Array<Cause>) {
+class Input(val name: String, val causes: Array<Cause>) {
+
+    override fun toString(): String = "Input($name)"
 
     sealed class Cause {
 
@@ -17,7 +19,10 @@ class Input(val causes: Array<Cause>) {
 
 }
 
-class InputState(val causedByStates: Array<InputState>)
+class InputState(val name: String, val causedByStates: Array<InputState>) {
+
+    override fun toString(): String = "InputState($name)"
+}
 
 enum class MouseButton(val code: Int) {
     LEFT(0), RIGHT(1), MIDDLE(2), BACK(3), FORWARD(4)

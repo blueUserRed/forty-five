@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSh
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 
@@ -76,7 +77,7 @@ class MapScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        MapScreenController(screen)
+//        MapScreenController(screen)
     )
 
     override fun getRoot(): Group = newGroup {
@@ -123,17 +124,26 @@ class MapScreen : ScreenCreator() {
             height = worldHeight
             isVisible = false
         }
-        val tutorialText = label("red_wing", "") {
+        val tutorialText = advancedText("red_wing", Color.FortyWhite, 1f) {
             name("tutorial_info_text")
-            wrap = true
-            fontColor = Color.White
-            setAlignment(Align.center)
+            horizontalTextAlign = CustomAlign.CENTER
             centerX()
             onLayout { y = worldHeight - prefHeight }
             syncHeight()
             relativeWidth(40f)
             isVisible = false
         }
+//        val tutorialText = label("red_wing", "") {
+//            name("tutorial_info_text")
+//            wrap = true
+//            fontColor = Color.White
+//            setAlignment(Align.center)
+//            centerX()
+//            onLayout { y = worldHeight - prefHeight }
+//            syncHeight()
+//            relativeWidth(40f)
+//            isVisible = false
+//        }
         screen.listenToScreenState(MapScreenController.showTutorialActorScreenState) { entered ->
             tutorial.isVisible = entered
             tutorialText.isVisible = entered

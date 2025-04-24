@@ -1,12 +1,14 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
+import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.FocusChangeEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -27,6 +29,11 @@ class NewCardHand(
         get() = leftSide.size + rightSide.size
 
     val events: EventPipeline = EventPipeline()
+
+    private val addedListenersToCards: MutableList<Card> = mutableListOf()
+
+    private var orderedChildrenDirty: Boolean = true
+    private var childrenInCorrectOrderCache: MutableList<Actor> = mutableListOf()
 
     private val cardFocusListener: EventListener = object : EventListener {
 
@@ -50,19 +57,34 @@ class NewCardHand(
         }
     }
 
-    init {
-        addListener(cardFocusListener)
-    }
-
     fun allCards(): List<Card> = leftSide + rightSide
 
     fun addCard(card: Card) {
+        orderedChildrenDirty = true
         if (leftSide.size < rightSide.size) leftSide.add(card)
         else rightSide.add(card)
         val actor = card.actor
         addActor(actor)
         actor.fixedZIndex = zIndexFor(card)
         resortZIndices()
+        if (card !in addedListenersToCards) {
+            card.actor.observeInputState(
+                GameInputs.States.focused,
+                {
+                    actor.width = cardSize * 1.2f
+                    actor.height = cardSize * 1.2f
+                    actor.fixedZIndex = 100
+                    resortZIndices()
+                },
+                {
+                    actor.width = cardSize
+                    actor.height = cardSize
+                    actor.fixedZIndex = zIndexFor(card)
+                    resortZIndices()
+                }
+            )
+            addedListenersToCards.add(card)
+        }
 //        actor.onDragAndDrop.add { _, target ->
 //            when (target) {
 //                is RevolverSlot -> events.fire(CardDraggedOntoSlotEvent(card, target))
@@ -77,6 +99,20 @@ class NewCardHand(
         layout() // layout added card immediately to make animations work
     }
 
+    override fun childrenInCorrectOrder(): List<Actor>? {
+        if (!orderedChildrenDirty) return childrenInCorrectOrderCache
+        val new = mutableListOf<Actor>()
+        var i = leftSide.size - 1
+        while (i >= 0) {
+            new.add(leftSide[i].actor)
+            i--
+        }
+        new.addAll(rightSide.map { it.actor })
+        childrenInCorrectOrderCache = new
+        orderedChildrenDirty = false
+        return new
+    }
+
     private fun zIndexFor(card: Card): Int {
         var zIndex = leftSide.indexOf(card)
         if (zIndex == -1) zIndex = rightSide.indexOf(card)
@@ -84,6 +120,7 @@ class NewCardHand(
     }
 
     fun removeCard(card: Card) {
+        orderedChildrenDirty = true
         when (card) {
             in leftSide -> leftSide.remove(card)
             in rightSide -> rightSide.remove(card)

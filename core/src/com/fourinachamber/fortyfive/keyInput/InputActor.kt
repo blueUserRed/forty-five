@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.keyInput
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.screen.general.DetailWidget
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -23,7 +24,7 @@ interface InputActor {
 
     var keyboardFocusable: KeyboardFocusable
 
-    fun initInput(actor: Actor, screen: OnjScreen)
+    fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor
 
     fun onInput(input: Input, callback: () -> Unit)
 
@@ -54,6 +55,10 @@ interface InputActor {
     fun leaveInputStateManually(state: InputState)
 
     fun startDragAndDropOn(input: Input)
+
+    fun childrenInCorrectOrder(): List<Actor>? = null
+
+    fun childrenInCorrectOrderOrOriginal(): Iterable<Actor>
 
 }
 
@@ -111,7 +116,7 @@ class InputActorImpl : InputActor {
 
     private val currentInputStates: MutableSet<InputState> = mutableSetOf()
 
-    override fun initInput(actor: Actor, screen: OnjScreen) {
+    override fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor {
         this._actor = actor
         this.screen = screen
     }
@@ -124,7 +129,7 @@ class InputActorImpl : InputActor {
 
     private fun addToInputManagerIfNecessary() {
         if (wasAdded) return
-        screen.inputManager.addActor(this)
+        screen.inputManager.addActor(actor as InputActor)
         wasAdded = true
     }
 
@@ -167,11 +172,11 @@ class InputActorImpl : InputActor {
         if (entered) {
             val added = currentInputStates.add(state)
             if (!added) return
-            if (detailState == state) screen.showHoverDetail(this)
+            if (detailState == state) screen.showHoverDetail(actor as InputActor)
         } else {
             val removed = currentInputStates.remove(state)
             if (!removed) return
-            if (detailState == state) screen.hideHoverDetail(this)
+            if (detailState == state) screen.hideHoverDetail(actor as InputActor)
         }
         val listeners = inputStateListeners[state]
         if (listeners != null) {
@@ -191,7 +196,7 @@ class InputActorImpl : InputActor {
     }
 
     override fun joinGroup(group: String) {
-        screen.inputManager.addActorToGroup(this, group)
+        screen.inputManager.addActorToGroup(actor as InputActor, group)
         _groups.add(group)
     }
 
@@ -220,12 +225,19 @@ class InputActorImpl : InputActor {
     }
 
     override fun startDragAndDropOn(input: Input) {
-        onInput(input) { screen.inputManager.startKeyboardDragAndDrop(this) }
+        onInput(input) { screen.inputManager.startKeyboardDragAndDrop(actor as InputActor) }
     }
 
     override fun isInInputState(state: InputState): Boolean = state in currentInputStates
 
     override fun bindDetailToInputState(state: InputState?) {
+        state?.let { observeInputState(it) }
         detailState = state
+    }
+
+    override fun childrenInCorrectOrderOrOriginal(): Iterable<Actor> {
+        val group = actor as? Group
+            ?: throw RuntimeException("childrenInCorrectOrderOrOriginal can only be called on a group")
+        return (actor as InputActor).childrenInCorrectOrder() ?: group.children
     }
 }

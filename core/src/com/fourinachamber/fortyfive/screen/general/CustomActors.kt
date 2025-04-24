@@ -90,6 +90,10 @@ open class CustomLabel(
     var forcedPrefHeight: Float? = null
     var forcedPrefWidth: Float? = null
 
+    init {
+        initInput(this, screen)
+    }
+
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
     }
@@ -270,6 +274,10 @@ open class CustomImageActor(
     var ignoreScalingWhenDrawing: Boolean = false
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
+
+    init {
+        initInput(this, screen)
+    }
 
     fun badTexture() {
         if (!FortyFive.debugHighlightBadTextures) return

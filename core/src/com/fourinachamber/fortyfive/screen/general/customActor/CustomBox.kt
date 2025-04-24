@@ -348,6 +348,7 @@ open class CustomBox(
 
     data class Box(val x: Float, val y: Float, val w: Float, val h: Float)
 
+    override fun childrenInCorrectOrder(): List<Actor>? = originalChildren
 
     override fun invalidate() {
         invalidSize = true

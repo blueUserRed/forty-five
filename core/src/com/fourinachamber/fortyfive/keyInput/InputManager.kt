@@ -172,7 +172,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val actor = inputActor.actor
         if (inputActor.keyboardFocusable == KeyboardFocusable.GROUP) {
             actor as? Group ?: throw RuntimeException("keyboardFocusable.Group should only be set on groups")
-            val children = if (forward) actor.children else actor.children.reversed()
+            val orderedChildren = inputActor.childrenInCorrectOrderOrOriginal()
+            val children = if (forward) orderedChildren else orderedChildren.reversed()
             val searchAfterIndex = children.indexOf(searchAfter?.actor)
             children.forEachIndexed { index, child ->
                 if (searchAfter != null && searchAfterIndex != -1 && index <= searchAfterIndex) return@forEachIndexed
@@ -353,8 +354,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     object BaseStates {
 
-        val mouseHover = InputState(arrayOf())
-        val keyboardFocus = InputState(arrayOf())
+        val mouseHover = InputState("mouseHover", arrayOf())
+        val keyboardFocus = InputState("keyboardFocus", arrayOf())
     }
 
     class FocusFilter(val groups: List<String>, private val screen: OnjScreen) {
