@@ -124,13 +124,6 @@ class Card(
      */
     val actor: CardActor
 
-    //TODO: isDraggable and inAnimation should be in the actor class
-
-    /**
-     * true when the card can be dragged
-     */
-    var isDraggable: Boolean = true
-
     var inGame: Boolean = false
         private set
 
@@ -242,6 +235,12 @@ class Card(
         }
         if (oldZone == Zone.HAND) {
             actor.isDraggable = false
+        }
+        if (newZone == Zone.REVOLVER) {
+            actor.touchable = Touchable.disabled
+        }
+        if (oldZone == Zone.REVOLVER) {
+            actor.touchable = Touchable.enabled
         }
     }
 
@@ -816,6 +815,8 @@ class CardActor(
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
+        joinGroup(cardGroup)
+        startDragAndDropOn(GameInputs.interact)
         onEnterInputState(GameInputs.States.focused) {
             if (!playSoundsOnHover) return@onEnterInputState
             SoundPlayer.situation("card_hover", screen)
@@ -872,8 +873,13 @@ class CardActor(
         val y: Float
         width = this.width
         height = this.height
-        x = this.x
-        y = this.y
+        if (isDragged) {
+            x = dragX
+            y = dragY
+        } else {
+            x = this.x
+            y = this.y
+        }
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,
@@ -1014,8 +1020,9 @@ class CardActor(
             .descriptions
             .filter { it.key in allKeys }.map { it.value.second })
 
-        if (FortyFive.currentGame != null)
+        if (FortyFive.currentGame != null){
             texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+        }
         texts
     }
 
@@ -1025,10 +1032,13 @@ class CardActor(
     }
 
     companion object {
+
         val cardDetailEffects by lazy {
             DetailDescriptionHandler.allTextEffects.value.map {
                 AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
             }
         }
+
+        val cardGroup: String = "card-group"
     }
 }

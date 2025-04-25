@@ -71,12 +71,14 @@ class NewCardHand(
             card.actor.observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (!card.inZone(NewGameController.Zone.HAND)) return@observeInputState
                     actor.width = cardSize * 1.2f
                     actor.height = cardSize * 1.2f
                     actor.fixedZIndex = 100
                     resortZIndices()
                 },
                 {
+                    if (!card.inZone(NewGameController.Zone.HAND)) return@observeInputState
                     actor.width = cardSize
                     actor.height = cardSize
                     actor.fixedZIndex = zIndexFor(card)

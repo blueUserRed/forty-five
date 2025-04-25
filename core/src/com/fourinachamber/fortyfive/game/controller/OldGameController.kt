@@ -420,7 +420,7 @@ class OldGameController(
 
     private fun initRevolver() {
         val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
-        revolver.initDragAndDrop(cardDragAndDrop to dropOnj)
+//        revolver.initDragAndDrop(cardDragAndDrop to dropOnj)
     }
 
     private fun initPutCardsUnderDeckWidget() {

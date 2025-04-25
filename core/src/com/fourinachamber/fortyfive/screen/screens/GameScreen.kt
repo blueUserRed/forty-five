@@ -16,6 +16,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
@@ -82,15 +83,15 @@ class GameScreen : ScreenCreator() {
             "revolver_drum",
             "revolver_slot_texture",
             200f,
+            110f,
+            gameEvents,
             screen
         ).apply {
-            slotSize = 110f
             cardScale = 0.9f
             animationDuration = 0.2f
             radius = 140f
             rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
-            cardZIndex = 100
-            initDragAndDrop(cardDragAndDrop)
+//            cardZIndex = 100
         }
     }
 
@@ -502,6 +503,8 @@ class GameScreen : ScreenCreator() {
 
         shootButton()
         holsterButton()
+
+        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
 
         actor(revolver) {
             touchable = Touchable.enabled

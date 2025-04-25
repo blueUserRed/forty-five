@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
@@ -45,6 +47,8 @@ class Revolver(
     private val backgroundHandle: ResourceHandle,
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
+    private val slotSize: Float,
+    private val events: EventPipeline,
     private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
@@ -52,8 +56,6 @@ class Revolver(
     override var styleManager: StyleManager? = null
 
     override var fixedZIndex: Int = 0
-
-    var slotSize: Float? = null
 
     var cardZIndex: Int = 0
 
@@ -83,8 +85,14 @@ class Revolver(
     /**
      * the slots of the revolver
      */
-    lateinit var slots: Array<RevolverSlot>
-        private set
+    val slots: Array<RevolverSlot> = Array(5) {
+        val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, events, animationDuration)
+        slot.reportDimensionsWithScaling = true
+        slot.ignoreScalingWhenDrawing = true
+        addActor(slot)
+        screen.addNamedActor("revolverSlot-$it", slot)
+        slot
+    }
 
     private val orderedChildren: List<Actor> by lazy {
         listOf(slots[4], slots[0], slots[1], slots[2], slots[3])
@@ -110,7 +118,6 @@ class Revolver(
      */
     fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
-        card?.isDraggable = false
         slots[slot - 1].card = card
         card?.actor?.let {
             it.width = slots[0].width * cardScale
@@ -126,7 +133,6 @@ class Revolver(
 
     fun preAddCard(slot: Int, card: Card) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
-        card.isDraggable = false
         val revolverSlot = slots[slot - 1]
         if (card.actor !in this) addActor(card.actor)
         card.actor.let {
@@ -157,6 +163,7 @@ class Revolver(
         for (slot in slots) if (slot.card === card) {
             if (card.actor in screen.stage.root) screen.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
+            card.actor.leaveInputStateManually(GameInputs.States.manuallyFocused)
             removeActor(card.actor)
             return
         }
@@ -174,37 +181,6 @@ class Revolver(
      * true when at least one bullet is loaded into the revolver
      */
     fun isBulletLoaded(): Boolean = slots.any { it.card != null }
-
-    fun initDragAndDrop(dragAndDrop: DragAndDrop) {
-        slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, animationDuration)
-            slot.reportDimensionsWithScaling = true
-            slot.ignoreScalingWhenDrawing = true
-            addActor(slot)
-            screen.addNamedActor("revolverSlot-$it", slot)
-            slot
-        }
-    }
-
-    fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
-        slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, animationDuration)
-            slot.reportDimensionsWithScaling = true
-            slot.ignoreScalingWhenDrawing = true
-            addActor(slot)
-            screen.addNamedActor("revolverSlot-$it", slot)
-            val (dragAndDrop, dropOnj) = config
-            val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-                dropOnj.name,
-                dragAndDrop,
-                slot,
-                dropOnj
-            )
-            dragAndDrop.addTarget(dropBehaviour)
-            slot
-        }
-        invalidateHierarchy()
-    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
@@ -245,8 +221,8 @@ class Revolver(
             val slot = slots[i]
             val angle = angleForIndex(i)
             slot.position(basePos, radius, angle)
-            slot.width = slotSize!!
-            slot.height = slotSize!!
+            slot.width = slotSize
+            slot.height = slotSize
         }
     }
 
@@ -344,6 +320,7 @@ class RevolverSlot(
     drawableHandle: ResourceHandle,
     size: Float,
     screen: OnjScreen,
+    private val events: EventPipeline,
     private val animationDuration: Float
 ) : CustomImageActor(drawableHandle, screen) {
 
@@ -365,6 +342,7 @@ class RevolverSlot(
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
         keyboardFocusable = KeyboardFocusable.LEAF
+        joinGroup(revolverSlotGroup)
         val dropShadow = DropShadow(
             color = Color.Black,
             scale = 1.1f,
@@ -375,9 +353,20 @@ class RevolverSlot(
         this.dropShadow = dropShadow
         observeInputState(
             GameInputs.States.focused,
-            { dropShadow.showDropShadow = true },
-            { dropShadow.showDropShadow = false }
+            {
+                dropShadow.showDropShadow = true
+                card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused)
+            },
+            {
+                dropShadow.showDropShadow = false
+                card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused)
+            }
         )
+        isDropTarget = true
+        onDrop { actor ->
+            if (actor !is CardActor) return@onDrop
+            events.fire(NewCardHand.CardDraggedOntoSlotEvent(actor.card, this))
+        }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -474,7 +463,8 @@ class RevolverSlot(
     }
 
     companion object {
-        const val revolverSlotFocusGroupName: String = "revolverSlot"
+
+        const val revolverSlotGroup: String = "revolverSlot"
     }
 
 }

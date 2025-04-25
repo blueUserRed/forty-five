@@ -133,6 +133,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     fun startKeyboardDragAndDrop(actor: InputActor) {
         if (currentDragAndDropModal != null || currentlyDraggedActor != null) return
+        if (!actor.isDraggable) return
         val targets = dragAndDrops.mapNotNull {
             if (actor.inGroup(it.first)) it.second else null
         }
@@ -146,16 +147,20 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (!actor.isDropTarget) return
         val dragged = currentKeyboardDragAndDropActor ?: return
         actor.notifyDropped(dragged)
-        cancelKeyboardDragAndDrop()
+        cancelKeyboardDragAndDrop(false)
     }
 
-    fun cancelKeyboardDragAndDrop() {
+    fun cancelKeyboardDragAndDrop(focusPrevious: Boolean = true) {
         val modal = currentDragAndDropModal
         if (modal == null) return
         if (activeModal() !== modal) return
         popModal(modal)
+        val actor = currentKeyboardDragAndDropActor
         currentKeyboardDragAndDropActor = null
         currentDragAndDropModal = null
+        if (focusPrevious) {
+            changeKeyboardFocusedActor(actor)
+        }
     }
 
     private fun findInputActorRoot(): InputActor {

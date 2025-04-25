@@ -407,19 +407,20 @@ class FromOnjScreenBuilder(
             draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
         }
 
-        "Revolver" -> Revolver(
-            widgetOnj.get<String>("background"),
-            widgetOnj.get<String>("slotTexture"),
-            widgetOnj.get<Double>("radiusExtension").toFloat(),
-            screen
-        ).apply {
-            slotSize = widgetOnj.get<Double>("slotScale").toFloat()
-            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
-            animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
-            radius = widgetOnj.get<Double>("radius").toFloat()
-            rotationOff = widgetOnj.get<Double>("rotationOff")
-            cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
-        }
+//        "Revolver" -> Revolver(
+//            widgetOnj.get<String>("background"),
+//            widgetOnj.get<String>("slotTexture"),
+//            widgetOnj.get<Double>("radiusExtension").toFloat(),
+//            EventPipeline(),
+//            screen
+//        ).apply {
+//            slotSize = widgetOnj.get<Double>("slotScale").toFloat()
+//            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+//            animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
+//            radius = widgetOnj.get<Double>("radius").toFloat()
+//            rotationOff = widgetOnj.get<Double>("rotationOff")
+//            cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
+//        }
 
         "EnemyArea" -> EnemyArea(
             widgetOnj.get<String>("enemySelectionDrawable"),
