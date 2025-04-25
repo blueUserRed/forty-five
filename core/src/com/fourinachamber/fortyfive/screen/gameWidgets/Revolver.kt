@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.gameWidgets
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
@@ -12,7 +13,13 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -39,7 +46,7 @@ class Revolver(
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower {
+) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
 
     override var styleManager: StyleManager? = null
@@ -79,6 +86,10 @@ class Revolver(
     lateinit var slots: Array<RevolverSlot>
         private set
 
+    private val orderedChildren: List<Actor> by lazy {
+        listOf(slots[4], slots[0], slots[1], slots[2], slots[3])
+    }
+
     private val background: Promise<Drawable> = ResourceManager.request(this, screen, backgroundHandle)
 
     private val iceShader: Promise<BetterShader> by lazy {
@@ -88,6 +99,8 @@ class Revolver(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     init {
+        initInput(this, screen)
+        keyboardFocusable = KeyboardFocusable.GROUP
         touchable = Touchable.childrenOnly
     }
 
@@ -302,6 +315,9 @@ class Revolver(
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
 
+
+    override fun childrenInCorrectOrder(): List<Actor>? = orderedChildren
+
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
@@ -331,6 +347,8 @@ class RevolverSlot(
     private val animationDuration: Float
 ) : CustomImageActor(drawableHandle, screen) {
 
+    override var dropShadow: DropShadow? = null
+
     var inAnimation: Boolean = false
 
     /**
@@ -346,6 +364,20 @@ class RevolverSlot(
         height = size
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
+        keyboardFocusable = KeyboardFocusable.LEAF
+        val dropShadow = DropShadow(
+            color = Color.Black,
+            scale = 1.1f,
+            offX = 3f,
+            offY = -3f
+        )
+        dropShadow.showDropShadow = false
+        this.dropShadow = dropShadow
+        observeInputState(
+            GameInputs.States.focused,
+            { dropShadow.showDropShadow = true },
+            { dropShadow.showDropShadow = false }
+        )
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {

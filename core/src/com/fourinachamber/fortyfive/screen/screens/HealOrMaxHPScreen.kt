@@ -171,7 +171,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
         backgroundHandle = "heal_or_max_selector_background"
         touchable = Touchable.enabled
 
-        dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
+        dropShadow = DropShadow(Color.Yellow, scale = 1f, showDropShadow = false)
 //        onSelectChange { _, new ->
 //            if (isSelected) {
 //                screen.enterState("healOrMaxHP_optionSelected")

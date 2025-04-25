@@ -218,11 +218,13 @@ open class CustomImageActor(
     override val screen: OnjScreen,
     private val backgroundHints: Array<String> = arrayOf(),
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor, StyledActor, BackgroundActor,
-    OffSettable, InputActor by InputActorImpl(), HasOnjScreen,
+    OffSettable, InputActor by InputActorImpl(), HasOnjScreen, DropShadowActor,
     KotlinStyledActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
+
+    override var dropShadow: DropShadow? = null
 
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
@@ -319,8 +321,8 @@ open class CustomImageActor(
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
         if (mask == null) {
-            val c = batch.color.cpy()
-            batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
+//            val c = batch.color.cpy()
+//            batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
             if (rotation != 0f) {
                 val drawable = drawable
                 if (drawable !is TransformDrawable) throw RuntimeException(
@@ -329,9 +331,10 @@ open class CustomImageActor(
                 )
                 drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
+                dropShadow?.doDropShadow(batch, screen, drawable, this)
                 drawable.draw(batch, x, y, width, height)
             }
-            batch.color = c
+//            batch.color = c
 
             x -= drawOffsetX
             y -= drawOffsetY

@@ -60,6 +60,8 @@ interface InputActor {
 
     fun childrenInCorrectOrderOrOriginal(): Iterable<Actor>
 
+    fun childWasKeyboardFocused(child: InputActor) {}
+
 }
 
 enum class KeyboardFocusable {

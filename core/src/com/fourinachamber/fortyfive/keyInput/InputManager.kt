@@ -126,6 +126,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         keyboardFocused = this.keyboardFocused
         if (keyboardFocused != null) {
             keyboardFocused.enterInputStateManually(BaseStates.keyboardFocus)
+            val parent = keyboardFocused.actor.parent
+            if (parent is InputActor) parent.childWasKeyboardFocused(keyboardFocused)
         }
     }
 

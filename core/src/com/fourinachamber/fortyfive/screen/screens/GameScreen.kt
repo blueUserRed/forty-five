@@ -20,6 +20,8 @@ import com.fourinachamber.fortyfive.game.controller.NewGameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
@@ -259,6 +261,18 @@ class GameScreen : ScreenCreator() {
 //                if (enemySelected) return@onSelect
 //                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
 //            }
+
+            keyboardFocusable = KeyboardFocusable.LEAF
+            observeInputState(
+                GameInputs.States.focused,
+                { debug = true },
+                { debug = false },
+            )
+
+            onInput(GameInputs.interact) {
+                if (enemySelected) return@onInput
+                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
+            }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
                 val origX = x

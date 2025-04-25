@@ -4,6 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -21,7 +24,7 @@ import com.fourinachamber.fortyfive.utils.Promise
 class EnemyArea(
     private val enemySelectionDrawableHandle: ResourceHandle,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, ResourceBorrower {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var styleManager: StyleManager? = null
 
@@ -43,6 +46,11 @@ class EnemyArea(
     private val canSelectEnemy: Boolean
         get() = _enemies.filter { !it.isDefeated }.size >= 2
 
+
+    init {
+        initInput(this, screen)
+        keyboardFocusable = KeyboardFocusable.GROUP
+    }
 
     /**
      * adds a new enemy to this area

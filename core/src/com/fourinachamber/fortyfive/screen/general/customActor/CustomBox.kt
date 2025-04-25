@@ -774,6 +774,10 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
         return false
     }
 
+    override fun childWasKeyboardFocused(child: InputActor) {
+        scrollTo(child.actor)
+    }
+
     fun scrollTo(actor: Actor) {
         if (maxScrollableDistanceInDirection == 0F) return
         val coords = actor.localToActorCoordinates(this, Vector2(0F, 0F))

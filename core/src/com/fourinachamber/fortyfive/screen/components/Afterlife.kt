@@ -5,6 +5,9 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
@@ -32,6 +35,12 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
     val isClosed: Boolean
         get() = !isOpen
+
+    private val openFilter = InputManager.FocusFilter(listOf(afterliveSlotGroup), screen)
+
+    init {
+        openFilter.start()
+    }
 
     fun getActor(creator: ScreenCreator): CustomBox {
         actor?.let { return it }
@@ -65,6 +74,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         later {
             if (isOpen) return@later
             isOpen = true
+            openFilter.end()
             action {
                 afterlifeEvents.fire(Events.ChangeArrow(true))
                 actor.addAction(action)
@@ -84,6 +94,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         later {
             if (!isOpen) return@later
             isOpen = false
+            openFilter.start()
             action {
                 afterlifeEvents.fire(Events.ChangeArrow(false))
                 actor.addAction(action)
@@ -98,7 +109,6 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         val slots = mutableListOf<CustomBox>()
 
         box {
-            debug()
             relativeWidth(100f)
             relativeHeight(100f)
             flexDirection = FlexDirection.ROW_REVERSE
@@ -122,6 +132,13 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                     verticalAlign = CustomAlign.CENTER
                     horizontalAlign = CustomAlign.CENTER
                     marginBottom = 10f
+                    joinGroup(afterliveSlotGroup)
+                    keyboardFocusable = KeyboardFocusable.LEAF
+                    observeInputState(
+                        GameInputs.States.focused,
+                        { debug = true },
+                        { debug = false }
+                    )
                     if (card == null) return@box
                     actor(card.actor) {
                         width = 120f
@@ -155,6 +172,13 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                         backgroundHandle = "afterlife_card_slot"
                         verticalAlign = CustomAlign.CENTER
                         horizontalAlign = CustomAlign.CENTER
+                        joinGroup(afterliveSlotGroup)
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        observeInputState(
+                            GameInputs.States.focused,
+                            { debug = true },
+                            { debug = false }
+                        )
                         if (card == null) return@box
                         actor(card.actor) {
                             width = 120f
@@ -188,11 +212,15 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             relativeHeight(40f)
             width = 60f
             marginRight = 30f
-//            onSelect {
-//                screen.deselectActor(this@image)
-//                // TODO: only every second select registers
-//                gameEvents.fire(NewGameController.Events.AfterlifeOpenToggle)
-//            }
+            keyboardFocusable = KeyboardFocusable.LEAF
+            observeInputState(
+                GameInputs.States.focused,
+                { debug = true },
+                { debug = false }
+            )
+            onInput(GameInputs.interact) {
+                gameEvents.fire(NewGameController.Events.AfterlifeOpenToggle)
+            }
         }
 
         box {
@@ -215,6 +243,10 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                 }
             }
         }
+    }
+
+    companion object {
+        const val afterliveSlotGroup: String = "afterlive-slot"
     }
 
     private object Events {
