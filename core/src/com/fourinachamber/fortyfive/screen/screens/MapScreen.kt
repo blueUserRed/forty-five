@@ -138,8 +138,6 @@ class MapScreen : ScreenCreator() {
 
     private fun Group.getInfoPopup() = box {
 
-        debug()
-
         backgroundHandle = "map_detail_background"
         width = worldWidth * 0.23f
         height = worldHeight * 0.8f
@@ -177,9 +175,9 @@ class MapScreen : ScreenCreator() {
             relativeWidth(100f)
             horizontalAlign = CustomAlign.CENTER
             marginTop = 20f
+            height = 500f
 
             eventName = label("red_wing", "") {
-                debug()
                 wrap = true
                 fontColor = Color.White
                 setFontScale(1.3f)
@@ -196,6 +194,8 @@ class MapScreen : ScreenCreator() {
                 relativeWidth(90f)
                 syncHeight()
             }
+
+            encounterModifiers()
         }
 
         fun updateDescription(node: MapNode) {
@@ -212,7 +212,6 @@ class MapScreen : ScreenCreator() {
             updateDescription(node)
         }
 
-//        actor(encounterModifiers())
         label("red_wing", "Start") {
             name("StartButton")
             setAlignment(Align.center)
@@ -254,44 +253,42 @@ class MapScreen : ScreenCreator() {
         }
     }
 
-    private fun Group.encounterModifiers() = verticalGroup {
+    private fun Group.encounterModifiers() = box {
         backgroundHandle = "map_detail_encounter_modifier_background"
-        forcedPrefWidth = 320f
-        forcedPrefHeight = 340f
-        syncDimensions()
-        centerX()
+        width = 320f
+        height = 320f
+        flexDirection = FlexDirection.COLUMN
+        verticalAlign = CustomAlign.CENTER
+        horizontalAlign = CustomAlign.SPACE_AROUND
 
-        fun encounterModifierDisplay(modifier: EncounterModifier) = horizontalGroup {
+        fun encounterModifierDisplay(modifier: EncounterModifier) = box {
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.SPACE_AROUND
             val icon = GraphicsConfig.encounterModifierIcon(modifier)
             val name = GraphicsConfig.encounterModifierDisplayName(modifier)
             val description = GraphicsConfig.encounterModifierDescription(modifier)
 
             relativeWidth(100f)
-            align(Align.topLeft)
-
-            horizontalSpacer(40f)
+            syncHeight()
 
             val iconImage = image {
                 backgroundHandle = icon
-                forcedPrefWidth = 30f
-                forcedPrefHeight = 30f
-                syncDimensions()
+                width = 30f
+                height = 30f
             }
 
-            horizontalSpacer(10f)
+            box {
 
-            verticalGroup {
-
-                forcedPrefWidth = parent.width - iconImage.width
-                syncDimensions()
-                align(Align.left)
+                flexDirection = FlexDirection.COLUMN
+                width = parent.width - iconImage.width - 40f
+                syncHeight()
 
                 label("red_wing", name) {
                     fontColor = Color.Red
                     setAlignment(Align.left)
                     setFontScale(0.6f)
                     relativeWidth(100f)
-                    onLayout { forcedPrefWidth = width }
                     syncHeight()
                 }
 
@@ -301,7 +298,6 @@ class MapScreen : ScreenCreator() {
                     setAlignment(Align.left)
                     setFontScale(0.5f)
                     relativeWidth(100f)
-                    onLayout { forcedPrefWidth = width }
                     syncHeight()
                 }
 
@@ -316,9 +312,7 @@ class MapScreen : ScreenCreator() {
             val modifiers = encounter.encounterModifier
             if (modifiers.isEmpty()) return@watchFor
             isVisible = true
-            verticalSpacer(20f)
             modifiers.forEach { modifier ->
-                verticalSpacer(20f)
                 encounterModifierDisplay(modifier)
             }
         }

@@ -114,7 +114,7 @@ object ConfigFileManager {
             "creditsScreen" to { FromKotlinScreenBuilder(CreditsScreen()) },
             "shopScreen" to { FromKotlinScreenBuilder(ShopScreen()) },
             "dialogScreen" to { FromKotlinScreenBuilder(DialogScreen()) },
-            "gameScreen" to { FromKotlinScreenBuilder(GameScreen()) }
+            "encounterScreen" to { FromKotlinScreenBuilder(GameScreen()) }
         )
         data.forEach { addScreen(it.first,it.second) }
     }
