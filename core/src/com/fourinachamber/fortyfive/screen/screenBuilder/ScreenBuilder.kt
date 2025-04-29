@@ -9,7 +9,7 @@ interface ScreenBuilder {
 
     val name: String
 
-    fun build(controllerContext: Any? = null): OnjScreen
+    fun build(controllerContext: Any? = null, previousScreen: OnjScreen?): OnjScreen
 
     fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: Group?, screen: OnjScreen): Actor?
 

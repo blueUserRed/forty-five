@@ -101,7 +101,7 @@ class Selector(
         glyphLayout.setText(font, options[curOptionIndex].first)
     }
 
-    private fun switch(amount: Int) {
+    fun switch(amount: Int) {
         curOptionIndex = (options.size + curOptionIndex + amount) % options.size
         @Suppress("UNCHECKED_CAST") // I hate generics
         (bindTarget.setter as (Any) -> Unit)(options[curOptionIndex].second)

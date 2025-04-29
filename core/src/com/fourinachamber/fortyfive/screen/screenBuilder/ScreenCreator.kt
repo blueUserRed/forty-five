@@ -27,6 +27,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KMutableProperty
 
+@OptIn(ExperimentalContracts::class)
 abstract class ScreenCreator : ResourceBorrower {
 
     abstract val name: String
@@ -58,13 +59,21 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract fun getScreenControllers(): List<ScreenController>
 
+    open fun debugMenuPages(): List<String> = emptyList()
+
     inline fun newGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val group = CustomGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
     inline fun newBox(backgroundHints: Array<String> = arrayOf(), builder: CustomBox.() -> Unit = {}): CustomBox {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val box = CustomBox(
             backgroundHints = backgroundHints,
             screen = screen
@@ -74,12 +83,14 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun newHorizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
-    @OptIn(ExperimentalContracts::class)
     inline fun newVerticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
@@ -90,6 +101,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.group(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val group = CustomGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
@@ -97,6 +111,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.horizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
@@ -104,6 +121,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.verticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val group = CustomVerticalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
@@ -116,6 +136,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.image(backgroundHints: Array<String> = arrayOf(), builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val image = CustomImageActor(null, screen, backgroundHints)
         this.addActor(image)
         builder(image)
@@ -123,6 +146,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.box(backgroundHints: Array<String> = arrayOf(), isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val box = if (isScrollable) {
             CustomScrollableBox(backgroundHints, screen)
         } else {
@@ -133,11 +159,20 @@ abstract class ScreenCreator : ResourceBorrower {
         return box
     }
 
-    inline fun Group.selector(font: String, bindTarget: String, builder: Selector.() -> Unit = {}): Selector {
+    inline fun Group.selector(
+        font: String,
+        bindTarget: String,
+        fontScale: Float = 1f,
+        builder: Selector.() -> Unit = {}
+    ): Selector {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val selector = Selector(
             forceLoadFont(font),
             arrowTextureHandle = "common_symbol_arrow_right",
             bind = bindTarget,
+            fontScale = fontScale,
             screen = screen
         )
         this.addActor(selector)
@@ -146,6 +181,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.slider(min: Float, max: Float, bindTarget: String, builder: Slider.() -> Unit = {}): Slider {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val slider = Slider(
             sliderBackground = "common_slider_background",
             handleRadius = 7f,
@@ -162,6 +200,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(definedWidth = width)
         this.addActor(spacer)
         builder(spacer)
@@ -169,6 +210,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(definedHeight = height)
         this.addActor(spacer)
         builder(spacer)
@@ -176,6 +220,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(growProportionHeight = proportion)
         this.addActor(spacer)
         builder(spacer)
@@ -183,6 +230,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.horizontalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(growProportionWidth = proportion)
         this.addActor(spacer)
         builder(spacer)
@@ -197,6 +247,9 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: CustomLabel.() -> Unit = {}
     ): CustomLabel {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val label = if (isTemplate) {
             TemplateStringLabel(
                 screen,
@@ -224,6 +277,9 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val advancedText =
             AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
         this.addActor(advancedText)
@@ -236,6 +292,9 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val advancedText =
             AdvancedTextWidget(defaults, screen, isDistanceField)
         this.addActor(advancedText)

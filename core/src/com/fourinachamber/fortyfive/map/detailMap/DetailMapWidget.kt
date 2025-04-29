@@ -210,6 +210,8 @@ class DetailMapWidget(
         }
     }
 
+    private val debugMenuPage: MapDebugMenuPage = screen.findDebugMenuPage<MapDebugMenuPage>()!!
+
     private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
 
     init {
@@ -697,9 +699,6 @@ class DetailMapWidget(
         const val eventCanBeStartedScreenState: String = "canStartEvent"
         const val noEncounterModifierScreenState: String = "noEncounterModifier"
         const val logTag = "Map"
-
-        val debugMenuPage = MapDebugMenuPage()
-
     }
 
 }

@@ -36,14 +36,6 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
     }
 
-    override fun onShow() {
-        FortyFive.currentRenderPipeline?.addDebugMenuPage(DetailMapWidget.debugMenuPage)
-    }
-
-    override fun end() {
-        FortyFive.currentRenderPipeline?.removeDebugMenuPage(DetailMapWidget.debugMenuPage)
-    }
-
     override fun onUnhandledEvent(event: Event) = when (event) {
         is TutorialConfirmedEvent -> hideTutorialPopupActor()
         else -> {}

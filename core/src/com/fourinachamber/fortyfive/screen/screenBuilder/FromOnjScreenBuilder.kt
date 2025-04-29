@@ -56,7 +56,7 @@ class FromOnjScreenBuilder(
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
     @MainThreadOnly
-    override fun build(controllerContext: Any?): OnjScreen {
+    override fun build(controllerContext: Any?, previousScreen: OnjScreen?): OnjScreen {
 
         earlyRenderTasks.clear()
         lateRenderTasks.clear()
@@ -519,14 +519,14 @@ class FromOnjScreenBuilder(
             widgetOnj.getOr<Double>("iconScale", 1.0).toFloat(),
         )
 
-        "TutorialInfoActor" -> TutorialInfoActor(
-            widgetOnj.get<String>("background"),
-            widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),
-            widgetOnj.get<Double>("circleRadiusExtension").toFloat(),
-            screen
-        ).apply {
-            initFlexBox(this, widgetOnj, screen)
-        }
+//        "TutorialInfoActor" -> TutorialInfoActor(
+//            widgetOnj.get<String>("background"),
+//            widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),
+//            widgetOnj.get<Double>("circleRadiusExtension").toFloat(),
+//            screen
+//        ).apply {
+//            initFlexBox(this, widgetOnj, screen)
+//        }
 
         "Slider" -> Slider(
             widgetOnj.get<String>("sliderBackground"),

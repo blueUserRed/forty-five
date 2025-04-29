@@ -9,6 +9,74 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import kotlin.reflect.KProperty
 
+class DebugMenu(val pages: List<DebugMenuPage>) {
+
+    private var pageIndex: Int = 0
+    var show: Boolean = false
+
+    fun toggle() {
+        show = !show
+    }
+
+    fun nextDebugPage() {
+        pageIndex++
+        if (pageIndex >= pages.size) pageIndex = 0
+    }
+
+    fun previousDebugPage() {
+        pageIndex--
+        if (pageIndex < 0) pageIndex = pages.size - 1
+    }
+
+    fun currentPage(): DebugMenuPage = pages[pageIndex]
+
+    fun currentPageNumber(): Int = pageIndex + 1
+
+    fun amountOfPages(): Int = pages.size
+
+    fun update() {
+        pages.forEach { it.update() }
+    }
+
+    inline fun <reified T : DebugMenuPage> findPage(): T? = pages.find { it is T } as T?
+
+    fun newMenuWithPages(pageNames: List<String>): DebugMenu {
+        val newPages = pageNames.map { name ->
+            pages.find { it.name == name }
+                ?: knownDebugMenuPages[name]?.invoke()
+                ?: throw RuntimeException("unknown debug menu page $name")
+        }
+        val newMenu = DebugMenu(newPages)
+        newMenu.show = show
+        return newMenu
+    }
+
+    companion object {
+
+        private val knownDebugMenuPages: MutableMap<String, () -> DebugMenuPage> = mutableMapOf()
+
+        init {
+            registerDebugMenuPage("Performance infos") { ScreenDebugMenuPage() }
+            registerDebugMenuPage("Card Textures") { CardTextureDebugMenuPage() }
+            registerDebugMenuPage("Resources") { ResourceDebugMenuPage() }
+            registerDebugMenuPage("Map") { MapDebugMenuPage() }
+        }
+
+        fun registerDebugMenuPage(name: String, creator: () -> DebugMenuPage) {
+            knownDebugMenuPages[name] = creator
+        }
+
+        fun fromNames(names: List<String>): DebugMenu {
+            val menuPages = names.map { name ->
+                knownDebugMenuPages[name]?.invoke()
+                    ?: throw RuntimeException("unknown debug menu page $name")
+            }
+            return DebugMenu(menuPages)
+        }
+
+    }
+}
+
 abstract class DebugMenuPage(val name: String) {
 
     private val buttons: MutableList<DebugButton> = mutableListOf()

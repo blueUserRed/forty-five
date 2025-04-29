@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.screenBuilder
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.fourinachamber.fortyfive.rendering.DebugMenu
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import dev.lyze.flexbox.FlexBox
 
@@ -12,7 +13,9 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
 
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
-    override fun build(controllerContext: Any?): OnjScreen {
+    private val commonDebugMenuPages: List<String> = listOf("Performance infos", "Card Textures", "Resources")
+
+    override fun build(controllerContext: Any?, previousScreen: OnjScreen?): OnjScreen {
         val screen = OnjScreen(
             viewport = creator.viewport,
             batch = SpriteBatch(),
@@ -27,6 +30,14 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             music = null,
             playAmbientSounds = creator.playAmbientSounds
         )
+        val debugMenuPages = commonDebugMenuPages + creator.debugMenuPages()
+        val previousMenu = previousScreen?.debugMenu
+        val debugMenu = if (previousMenu == null) {
+            DebugMenu.fromNames(debugMenuPages)
+        } else {
+            previousMenu.newMenuWithPages(debugMenuPages)
+        }
+        screen.debugMenu = debugMenu
         creator.start(screen)
         val root = creator.getRoot()
         screen.stage.root = root

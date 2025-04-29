@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -48,6 +49,7 @@ class Revolver(
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val slotSize: Float,
+    private val animationDuration: Float,
     private val events: EventPipeline,
     private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
@@ -63,11 +65,6 @@ class Revolver(
      * the scale of a card placed into the revolver
      */
     var cardScale: Float = 1f
-
-    /**
-     * the duration of the revolver spin animation
-     */
-    var animationDuration: Float = 1f
 
     /**
      * the radius of the circle in which the slots are laid out
@@ -434,6 +431,7 @@ class RevolverSlot(
         val action = RevolverSlotRotationAction(base, radius, this, from, to)
         action.isReverse = false
         action.duration = animationDuration
+        action.interpolation = Interpolation.pow2
         addAction(action)
         inAnimation = true
         this.action = action

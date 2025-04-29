@@ -17,8 +17,11 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.UserPrefs
+import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputManager
+import com.fourinachamber.fortyfive.rendering.DebugMenu
+import com.fourinachamber.fortyfive.rendering.DebugMenuPage
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.rendering.ScreenDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -86,7 +89,8 @@ open class OnjScreen(
     val screenControllers: List<ScreenController>
         get() = _screenControllers
 
-    private val makeLaggy: Boolean by screenDebugMenuPage.makeLaggy
+    private val makeLaggy: Boolean
+        get() = findDebugMenuPage<ScreenDebugMenuPage>()?.makeLaggy?.getValue(this, this::makeLaggy) ?: false
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
@@ -96,6 +100,8 @@ open class OnjScreen(
     private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this, arrayOf())
 
     private val actorsWithActiveHoverDetails: MutableList<InputActor> = mutableListOf()
+
+    var debugMenu: DebugMenu? = null
 
     val inputManager = InputManager(this)
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
@@ -107,6 +113,9 @@ open class OnjScreen(
         }
         inputMultiplexer.addProcessor(inputManager)
         inputMultiplexer.addProcessor(stage)
+        inputManager.onInput(GameInputs.toggleDebugMenu) { debugMenu?.toggle() }
+        inputManager.onInput(GameInputs.nextDebugMenuPage) { debugMenu?.nextDebugPage() }
+        inputManager.onInput(GameInputs.previousDebugMenuPage) { debugMenu?.previousDebugPage() }
     }
 
     fun addScreenController(controller: ScreenController) {
@@ -115,6 +124,8 @@ open class OnjScreen(
         controller.init(controllerContext)
         if (isVisible) controller.onShow()
     }
+
+    inline fun <reified T : DebugMenuPage> findDebugMenuPage(): T? = debugMenu?.findPage<T>()
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
 
@@ -416,8 +427,6 @@ open class OnjScreen(
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
-
-        val screenDebugMenuPage = ScreenDebugMenuPage()
 
         fun toggleFullScreen(forceFullscreen: Boolean = false) {
             if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {

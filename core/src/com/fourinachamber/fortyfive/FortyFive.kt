@@ -87,12 +87,13 @@ object FortyFive : Game() {
 //        MapManager.changeToMapScreen()
 //        resetAll()
 //        newRun(false)
-        changeToScreen(ConfigFileManager.screenBuilderFor("gameScreen"), object : EncounterContext {
-            override val encounterIndex: Int = GameDirector.encounters.size - 5
-            override val forwardToScreen: String = "mapScreen"
-            override fun completed() {
-            }
-        })
+        MapManager.changeToMapScreen()
+//        changeToScreen(ConfigFileManager.screenBuilderFor("gameScreen"), object : EncounterContext {
+//            override val encounterIndex: Int = GameDirector.encounters.size - 5
+//            override val forwardToScreen: String = "mapScreen"
+//            override fun completed() {
+//            }
+//        })
 //        return
 //        changeToScreen(FromKotlinScreenBuilder(TestScreen()))
 //        return
@@ -151,7 +152,7 @@ object FortyFive : Game() {
         inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
-        val screen = screenBuilder.build(controllerContext)
+        val screen = screenBuilder.build(controllerContext, currentScreen)
         nextScreen = screen
 
         fun onScreenChange() {
@@ -161,9 +162,7 @@ object FortyFive : Game() {
             this.currentScreen = screen
             nextScreen = null
             currentRenderPipeline?.dispose()
-            currentRenderPipeline = RenderPipeline(screen, screen).also {
-                it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
-            }
+            currentRenderPipeline = RenderPipeline(screen, screen)
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
@@ -189,9 +188,6 @@ object FortyFive : Game() {
     @AllThreadsAllowed
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
-        currentRenderPipeline = renderPipeline.also {
-            it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
-        }
     }
 
     fun newRun(forwardToLooseScreen: Boolean) {

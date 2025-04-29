@@ -99,7 +99,12 @@ class Slider(
 
     fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
-        bindTarget?.let { it.setter(min + cursorPos * (max - min)) }
+        bindTarget?.setter(min + cursorPos * (max - min))
+    }
+
+    fun move(by: Float) {
+        cursorPos = (cursorPos + by).between(0f, 1f)
+        bindTarget?.setter(min + cursorPos * (max - min))
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()

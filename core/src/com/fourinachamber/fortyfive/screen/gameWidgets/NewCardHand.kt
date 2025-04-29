@@ -87,17 +87,6 @@ class NewCardHand(
             )
             addedListenersToCards.add(card)
         }
-//        actor.onDragAndDrop.add { _, target ->
-//            when (target) {
-//                is RevolverSlot -> events.fire(CardDraggedOntoSlotEvent(card, target))
-//                is CardActor -> {
-//                    if (target.card.inZone(NewGameController.Zone.REVOLVER)) {
-//                        val revolver = target.parent as Revolver
-//                        events.fire(CardDraggedOntoSlotEvent(card, revolver.slots.find { it.card?.actor === target }!!))
-//                    }
-//                }
-//            }
-//        }
         layout() // layout added card immediately to make animations work
     }
 

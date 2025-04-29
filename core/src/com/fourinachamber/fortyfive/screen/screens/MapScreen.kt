@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Action
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -12,8 +13,11 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
+import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
@@ -22,6 +26,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
+import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 
@@ -100,22 +105,14 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val settingsMiddle = NavbarCreator.NavBarObject(
-            "Settings Middle",
-            settingsObject.openTimelineCreator,
-            settingsObject.closeTimelineCreator
-        )
-        val settingsRight = NavbarCreator.NavBarObject(
-            "Settings Right",
-            settingsObject.openTimelineCreator,
-            settingsObject.closeTimelineCreator
-        )
-        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(getSharedTitleScreen(), settingsMiddle, settingsRight), screen)
+        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(getSharedTitleScreen(), settingsObject), screen)
         actor(navbar) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
-        actor(settings)
+        actor(settings) {
+            onLayout { x = parent.width / 2 - width / 2 }
+        }
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
             x = 0f
@@ -133,24 +130,15 @@ class MapScreen : ScreenCreator() {
             relativeWidth(40f)
             isVisible = false
         }
-//        val tutorialText = label("red_wing", "") {
-//            name("tutorial_info_text")
-//            wrap = true
-//            fontColor = Color.White
-//            setAlignment(Align.center)
-//            centerX()
-//            onLayout { y = worldHeight - prefHeight }
-//            syncHeight()
-//            relativeWidth(40f)
-//            isVisible = false
-//        }
         screen.listenToScreenState(MapScreenController.showTutorialActorScreenState) { entered ->
             tutorial.isVisible = entered
             tutorialText.isVisible = entered
         }
     }
 
-    private fun Group.getInfoPopup() = verticalGroup {
+    private fun Group.getInfoPopup() = box {
+
+        debug()
 
         backgroundHandle = "map_detail_background"
         width = worldWidth * 0.23f
@@ -159,6 +147,10 @@ class MapScreen : ScreenCreator() {
         val normalX = worldWidth - width + 10f
         val closedX = normalX + 300f
         x = normalX
+
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.CENTER
+        verticalAlign = CustomAlign.SPACE_BETWEEN
 
         fun getAction(to: Float) = MoveToAction().also {
             it.x = to
@@ -177,26 +169,33 @@ class MapScreen : ScreenCreator() {
             addAction(action)
         }
 
-        verticalSpacer(60f)
+        val eventName: CustomLabel
+        val eventDescription: CustomLabel
 
-        val eventName = label("red_wing", "") {
-            wrap = true
-            fontColor = Color.White
-            setAlignment(Align.center)
-            relativeWidth(90f)
-            centerX()
-            syncHeight()
-        }
+        box {
+            flexDirection = FlexDirection.COLUMN
+            relativeWidth(100f)
+            horizontalAlign = CustomAlign.CENTER
+            marginTop = 20f
 
-        val eventDescription = label("red_wing", "") {
-            height = 30f
-            wrap = true
-            setFontScale(0.5f)
-            setAlignment(Align.center)
-            fontColor = Color.White
-            relativeWidth(90f)
-            centerX()
-            syncHeight()
+            eventName = label("red_wing", "") {
+                debug()
+                wrap = true
+                fontColor = Color.White
+                setFontScale(1.3f)
+                setAlignment(Align.center)
+                relativeWidth(90f)
+                syncHeight()
+            }
+
+            eventDescription = label("red_wing", "") {
+                wrap = true
+                setFontScale(0.7f)
+                setAlignment(Align.center)
+                fontColor = Color.White
+                relativeWidth(90f)
+                syncHeight()
+            }
         }
 
         fun updateDescription(node: MapNode) {
@@ -204,7 +203,6 @@ class MapScreen : ScreenCreator() {
             if (!event.displayDescription) return
             eventName.setText(event.displayName)
             eventDescription.setText(event.descriptionText)
-            invalidateChildren() // make sure spacers are invalidated
         }
 
         updateDescription(mapWidget.playerNode)
@@ -214,54 +212,46 @@ class MapScreen : ScreenCreator() {
             updateDescription(node)
         }
 
-        verticalSpacer(10f)
-
-        actor(encounterModifiers())
-
-        verticalSpacer(10f)
-
-        verticalGrowingSpacer(1f)
-
+//        actor(encounterModifiers())
         label("red_wing", "Start") {
             name("StartButton")
             setAlignment(Align.center)
-            forcedPrefWidth = 200f * 0.8f
-            forcedPrefHeight = 60f * 0.8f
-//            onSelect {
-//                if (mapWidget.playerNode.event?.canBeStarted == true) {
-//                    mapWidget.onStartButtonClicked(this@label)
-//                    isDisabled = true
-//                }
-//            }
+            width = 200f * 0.8f
+            height = 60f
+            fontColor = Color.Red
+            backgroundHandle = "map_detail_encounter_button"
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            marginBottom = 27f
+            onInput(GameInputs.interact) {
+                if (mapWidget.playerNode.event?.canBeStarted == true) {
+                    mapWidget.onStartButtonClicked(this@label)
+                    isDisabled = true
+                }
+            }
 
-            syncHeight()
-//            dropShadow = DropShadow(
-//                Color.Red,
-//                maxOpacity = 0.4f,
-//                scaleX = 0.95f,
-//                scaleY = 1.2f
-//            )
-//            styles(
-//                normal = {
-//                    fontColor = Color.Red
-//                    backgroundHandle = "map_detail_encounter_button"
-//                    dropShadow?.color = Color.White
-//                    dropShadow?.maxOpacity = 0.2f
-//                },
-//                focused = {
-//                    fontColor = Color.White
-//                    backgroundHandle = "map_detail_encounter_button_hover"
-//                    dropShadow?.color = Color.Red
-//                    dropShadow?.maxOpacity = 0.4f
-//                }
-//            )
+            val dropShadow = DropShadow(
+                Color.Red,
+                scale = 1.3f,
+                blurFactor = 0.8f
+            )
+            dropShadow.showDropShadow = false
+            this.dropShadow = dropShadow
 
-//            onFocusChange { _, _ ->
-//                if (isFocused) screen.leaveState("notMapFocused")
-//                else screen.enterState("notMapFocused")
-//            }
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    backgroundHandle = "map_detail_encounter_button_hover"
+                    fontColor = Color.White
+                    dropShadow.showDropShadow = true
+                },
+                {
+                    backgroundHandle = "map_detail_encounter_button"
+                    fontColor = Color.Red
+                    dropShadow.showDropShadow = false
+                },
+            )
         }
-        verticalSpacer(40f)
     }
 
     private fun Group.encounterModifiers() = verticalGroup {
@@ -334,4 +324,5 @@ class MapScreen : ScreenCreator() {
         }
     }
 
+    override fun debugMenuPages(): List<String> = listOf("Map")
 }

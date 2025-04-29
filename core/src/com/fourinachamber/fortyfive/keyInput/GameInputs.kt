@@ -27,6 +27,43 @@ object GameInputs {
         arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))
     )
 
+    val switchSelectorToLeft = Input(
+        "switchToLeft",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.LEFT, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.Keyboard(Keys.A, requireStates = arrayOf(States.trueFocused)),
+        )
+    )
+
+    val switchSelectorToRight = Input(
+        "switchToRight",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.RIGHT, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.Keyboard(Keys.D, requireStates = arrayOf(States.trueFocused)),
+        )
+    )
+
+    val toggleDebugMenu = Input(
+        "toggleDebugMenu",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.D, modifierKeys = arrayOf(ModifierKey.ALT))
+        )
+    )
+
+    val nextDebugMenuPage = Input(
+        "nextDebugMenuPage",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.RIGHT)
+        )
+    )
+
+    val previousDebugMenuPage = Input(
+        "previousDebugMenuPage",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.LEFT)
+        )
+    )
+
     val initDragAndDrop = Input("initDragAndDrop", arrayOf(
         Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused))
     ))

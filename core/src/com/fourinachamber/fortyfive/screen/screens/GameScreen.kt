@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.screen.screens
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
@@ -22,6 +23,7 @@ import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
 import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
@@ -84,11 +86,11 @@ class GameScreen : ScreenCreator() {
             "revolver_slot_texture",
             200f,
             110f,
+            0.2f,
             gameEvents,
             screen
         ).apply {
             cardScale = 0.9f
-            animationDuration = 0.2f
             radius = 140f
             rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
 //            cardZIndex = 100
@@ -501,6 +503,12 @@ class GameScreen : ScreenCreator() {
         height = worldWidth * (505f / 1920f)
         backgroundHandle = "player_bar"
 
+        val modal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
+
+        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+            if (event.inParryMenu) modal.push() else modal.finished()
+        }
+
         shootButton()
         holsterButton()
 
@@ -587,6 +595,8 @@ class GameScreen : ScreenCreator() {
         }
         group(backgroundHints = arrayOf("shoot_button_texture", "shoot_button_hover_texture")) {
             name("shoot_button")
+            joinGroup("shoot-button")
+            val filter = InputManager.FocusFilter(listOf("shoot-button"), screen)
             touchable = Touchable.enabled
             x = 370f
             y = 50f
@@ -598,27 +608,31 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-//            styles(
-//                normal = {
-//                    backgroundHandle = "shoot_button_texture"
-//                    xAnim.state("open")
-//                },
-//                focused = {
-//                    backgroundHandle = "shoot_button_hover_texture"
-//                    xAnim.state("hover")
-//                },
-//            )
-//            onSelect {
-//                screen.deselectActor(this)
-//                screen.focusedActor = null
-//                gameEvents.fire(NewGameController.Events.ShootButtonPressed)
-//            }
+            keyboardFocusable = KeyboardFocusable.LEAF
+            backgroundHandle = "shoot_button_texture"
+            xAnim.state("open")
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    backgroundHandle = "shoot_button_hover_texture"
+                    xAnim.state("hover")
+                },
+                {
+                    backgroundHandle = "shoot_button_texture"
+                    xAnim.state("open")
+                }
+            )
+            onInput(GameInputs.interact){
+                gameEvents.fire(NewGameController.Events.ShootButtonPressed)
+            }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
+                    filter.start()
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
+                    filter.end()
                     touchable = Touchable.enabled
                 }
             }
@@ -626,6 +640,9 @@ class GameScreen : ScreenCreator() {
 
         group(backgroundHints = arrayOf("pass_button_texture", "pass_button_hover_texture")) {
             name("pass_button")
+            joinGroup("pass-button")
+            val filter = InputManager.FocusFilter(listOf("pass-button"), screen)
+            filter.start()
             var closed = true
             touchable = Touchable.disabled
             x = 600f
@@ -638,28 +655,34 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-//            onSelect {
-//                parryPromise?.let {
-//                    if (parryPromise.isNotResolved) parryPromise.resolve(false)
-//                }
-//            }
-//            styles(
-//                normal = {
-//                    backgroundHandle = "pass_button_texture"
-//                    xAnim.state(if (closed) "closed" else "open")
-//                },
-//                focused = {
-//                    backgroundHandle = "pass_button_hover_texture"
-//                    xAnim.state("hover")
-//                },
-//            )
+            keyboardFocusable = KeyboardFocusable.LEAF
+            backgroundHandle = "pass_button_texture"
+            xAnim.state(if (closed) "closed" else "open")
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    backgroundHandle = "pass_button_hover_texture"
+                    xAnim.state("hover")
+                },
+                {
+                    backgroundHandle = "pass_button_texture"
+                    xAnim.state(if (closed) "closed" else "open")
+                }
+            )
+            onInput(GameInputs.interact){
+                parryPromise?.let {
+                    if (parryPromise.isNotResolved) parryPromise.resolve(false)
+                }
+            }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
+                    filter.start()
                     closed = true
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
+                    filter.end()
                     closed = false
                     touchable = Touchable.enabled
                 }
@@ -674,7 +697,10 @@ class GameScreen : ScreenCreator() {
         }
         group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
             name("holster_button")
+            joinGroup("holster-button")
+            val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
             touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
             x = 990f
             y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(
@@ -685,25 +711,31 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-//            onSelect {
-//                gameEvents.fire(NewGameController.Events.HolsterButtonPressed)
-//            }
-//            styles(
-//                normal = {
-//                    backgroundHandle = "end_turn_button_texture"
-//                    xAnim.state("open")
-//                },
-//                focused = {
-//                    backgroundHandle = "end_turn_button_hover_texture"
-//                    xAnim.state("hover")
-//                },
-//            )
+
+            onInput(GameInputs.interact) {
+                gameEvents.fire(NewGameController.Events.HolsterButtonPressed)
+            }
+            backgroundHandle = "end_turn_button_texture"
+            xAnim.state("open")
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    backgroundHandle = "end_turn_button_hover_texture"
+                    xAnim.state("hover")
+                },
+                {
+                    backgroundHandle = "end_turn_button_texture"
+                    xAnim.state("open")
+                }
+            )
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
+                    filter.start()
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
+                    filter.end()
                     touchable = Touchable.enabled
                 }
             }
@@ -711,7 +743,11 @@ class GameScreen : ScreenCreator() {
 
         group(backgroundHints = arrayOf("parry_button_texture", "parry_button_hover_texture")) {
             name("parry_button")
+            joinGroup("parry-button")
+            val filter = InputManager.FocusFilter(listOf("parry-button"), screen)
+            filter.start()
             var closed = true
+            keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.disabled
             x = 990f
             y = 50f
@@ -723,28 +759,34 @@ class GameScreen : ScreenCreator() {
             )
             width = 250f
             height = 250f * (543f / 655f)
-//            onSelect {
-//                parryPromise?.let {
-//                    if (parryPromise.isNotResolved) parryPromise.resolve(true)
-//                }
-//            }
-//            styles(
-//                normal = {
-//                    backgroundHandle = "parry_button_texture"
-//                    xAnim.state(if (closed) "closed" else "open")
-//                },
-//                focused = {
-//                    backgroundHandle = "parry_button_hover_texture"
-//                    xAnim.state("hover")
-//                },
-//            )
+
+            onInput(GameInputs.interact) {
+                parryPromise?.let {
+                    if (parryPromise.isNotResolved) parryPromise.resolve(true)
+                }
+            }
+            backgroundHandle = "parry_button_texture"
+            xAnim.state(if (closed) "closed" else "open")
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    backgroundHandle = "parry_button_hover_texture"
+                    xAnim.state("hover")
+                },
+                {
+                    backgroundHandle = "parry_button_texture"
+                    xAnim.state(if (closed) "closed" else "open")
+                }
+            )
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
+                    filter.start()
                     closed = true
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
+                    filter.end()
                     closed = false
                     touchable = Touchable.enabled
                 }

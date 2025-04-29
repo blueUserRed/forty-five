@@ -6,8 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
+import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -18,7 +21,6 @@ import ktx.actors.onClick
 
 object NavbarCreator {
 
-    const val navbarFocusGroup = "navbar_selectors"
     const val navbarOpenScreenState = "navbarIsOpen"
 
     fun ScreenCreator.getSharedNavBar(
@@ -49,10 +51,15 @@ object NavbarCreator {
             }
             isVisible = false
             touchable = Touchable.enabled
-            onClick {
-                TODO()
-                if (!isVisible) return@onClick
+            onInput(GameInputs.interact) {
+                if (!isVisible) return@onInput
                 isVisible = false
+                navBarEvents.fire(CloseNavBarButtons)
+            }
+            onInput(GameInputs.cancel) { // Global input, works even when this actor isn't focused
+                if (!isVisible) return@onInput
+                isVisible = false
+                navBarEvents.fire(CloseNavBarButtons)
             }
         }
 
@@ -104,7 +111,6 @@ object NavbarCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
-                syncDimensions()
                 image {
                     name("player_health_icon")
                     marginRight = 10f
@@ -121,7 +127,6 @@ object NavbarCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
-                syncDimensions()
                 image {
                     name("cash_symbol")
                     marginRight = 10f
@@ -179,7 +184,6 @@ object NavbarCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
-                syncDimensions()
                 image {
                     name("player_health_icon")
                     marginRight = 10f
@@ -194,7 +198,6 @@ object NavbarCreator {
             }
 
             box {
-                syncDimensions()
                 flexDirection = FlexDirection.ROW
                 locationIndicator(creator)
             }
@@ -202,7 +205,6 @@ object NavbarCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
-                syncDimensions()
                 image {
                     name("cash_symbol")
                     marginRight = 10f
@@ -243,6 +245,8 @@ object NavbarCreator {
             height = parent.parent.height * 0.7f * scale
             width = 250f * scale
             backgroundHandle = "statusbar_option"
+            joinGroup(navbarButtonGroup)
+            touchable = Touchable.enabled
 
             label("red_wing", obj.name) {
                 centerX()
@@ -263,22 +267,28 @@ object NavbarCreator {
                 it.interpolation = Interpolation.pow2In
             }
 
-//            styles(
-//                normal = {
-//                    addAction(createAction(30f))
-//                },
-//                focused = {
-//                    addAction(createAction(25f))
-//                },
-//                selected = {
-//                    addAction(createAction(21f))
-//                },
-//                selectedAndFocused = {
-//                    addAction(createAction(16f))
-//                }
-//            )
-
             var isOpen = false
+
+            keyboardFocusable = KeyboardFocusable.LEAF
+            logicalOffsetY = 25f
+
+            val dropShadow = DropShadow(
+                Color.BLACK, 2f, -2f, 1.1f, blurFactor = 0.5f, showDropShadow = false
+            )
+            this.dropShadow = dropShadow
+
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    if (isOpen) addAction(createAction(27f)) else addAction(createAction(25f))
+                    dropShadow.showDropShadow = true
+                },
+                {
+                    if (isOpen) addAction(createAction(32f)) else addAction(createAction(30f))
+                    dropShadow.showDropShadow = false
+                }
+            )
+
             events.watchFor<CloseNavBarButtons> {
                 if (!isOpen) return@watchFor
                 isOpen = false
@@ -286,21 +296,25 @@ object NavbarCreator {
                 timeline.appendAction(Timeline.timeline {
                     action { screen.leaveState(navbarOpenScreenState) }
                 }.asAction())
+                addAction(createAction(25f))
             }
 
-//            onSelectChange { _, _ ->
-//                if (isSelected) {
-//                    events.fire(ChangeBlackBackground(true))
-//                    timeline.appendAction(Timeline.timeline {
-//                        include(obj.openTimelineCreator())
-//                        action { screen.enterState(navbarOpenScreenState) }
-//                    }.asAction())
-//                    isOpen = true
-//                } else {
-//                    events.fire(CloseNavBarButtons)
-//                    events.fire(ChangeBlackBackground(false))
-//                }
-//            }
+            onInput(GameInputs.interact) {
+                if (isOpen) {
+                    events.fire(CloseNavBarButtons)
+                    events.fire(ChangeBlackBackground(false))
+                    addAction(createAction(30f))
+                } else {
+                    events.fire(CloseNavBarButtons)
+                    events.fire(ChangeBlackBackground(true))
+                    timeline.appendAction(Timeline.timeline {
+                        include(obj.openTimelineCreator())
+                        action { screen.enterState(navbarOpenScreenState) }
+                    }.asAction())
+                    isOpen = true
+                    addAction(createAction(32f))
+                }
+            }
         }
     }
 
@@ -364,4 +378,6 @@ object NavbarCreator {
         val openTimelineCreator: () -> Timeline,
         val closeTimelineCreator: () -> Timeline,
     )
+
+    const val navbarButtonGroup: String = "navbar-button"
 }

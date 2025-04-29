@@ -92,6 +92,7 @@ open class CustomLabel(
 
     init {
         initInput(this, screen)
+        touchable = Touchable.disabled
     }
 
     override fun onLayout(callback: () -> Unit) {
@@ -279,6 +280,7 @@ open class CustomImageActor(
 
     init {
         initInput(this, screen)
+        touchable = Touchable.disabled
     }
 
     fun badTexture() {
@@ -446,6 +448,10 @@ open class CustomFlexBox(
                 this@CustomFlexBox.isVisible = false;
             }
         }
+    }
+
+    init {
+        throw RuntimeException()
     }
 
     @Suppress("UNCHECKED_CAST")

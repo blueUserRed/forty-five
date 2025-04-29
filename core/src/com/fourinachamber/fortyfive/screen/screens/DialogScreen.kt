@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.map.events.dialog.AnimatedAdvancedTextWidget
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
