@@ -133,7 +133,11 @@ open class AdvancedTextWidget(
                 }
 
         }
-        if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        if (lines.isNotEmpty()) {
+            if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        } else {
+            paddingRight
+        }
         alignHorizontalTextAfterLayout(lines)
     }
 

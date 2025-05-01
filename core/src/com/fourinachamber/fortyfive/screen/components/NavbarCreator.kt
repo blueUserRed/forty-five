@@ -111,6 +111,7 @@ object NavbarCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
+                syncDimensions()
                 image {
                     name("player_health_icon")
                     marginRight = 10f
@@ -121,12 +122,14 @@ object NavbarCreator {
 
                 label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
                 }
             }
 
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
+                syncDimensions()
                 image {
                     name("cash_symbol")
                     marginRight = 10f
@@ -137,6 +140,7 @@ object NavbarCreator {
 
                 label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
                 }
             }
         }
@@ -184,6 +188,7 @@ object NavbarCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
+                syncDimensions()
                 image {
                     name("player_health_icon")
                     marginRight = 10f
@@ -194,17 +199,20 @@ object NavbarCreator {
 
                 label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
                 }
             }
 
             box {
                 flexDirection = FlexDirection.ROW
                 locationIndicator(creator)
+                syncDimensions()
             }
 
             box {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
+                syncDimensions()
                 image {
                     name("cash_symbol")
                     marginRight = 10f
@@ -215,6 +223,7 @@ object NavbarCreator {
 
                 label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
                 }
             }
         }

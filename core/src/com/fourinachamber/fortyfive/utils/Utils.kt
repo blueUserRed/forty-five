@@ -320,6 +320,7 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
 }
 
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
+    if (isEmpty()) return ""
     return substring(max(start, 0), min(max(end, 0), length - 1))
 }
 

@@ -140,7 +140,7 @@ object FortyFive : Game() {
                 mainThreadTasks.remove(task)
             }
             currentScreen?.update(Gdx.graphics.deltaTime)
-            nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+//            nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
             currentRenderPipeline?.render(Gdx.graphics.deltaTime)
         }
         renderTimes[(renderCounter % renderTimes.size).toInt()] = renderTime.toInt()
@@ -158,7 +158,7 @@ object FortyFive : Game() {
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
             currentScreen?.dispose()
-            screen.update(Gdx.graphics.deltaTime, isEarly = true)
+//            screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen
             nextScreen = null
             currentRenderPipeline?.dispose()
@@ -188,6 +188,7 @@ object FortyFive : Game() {
     @AllThreadsAllowed
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
+        currentRenderPipeline = renderPipeline
     }
 
     fun newRun(forwardToLooseScreen: Boolean) {

@@ -199,6 +199,27 @@ abstract class ScreenCreator : ResourceBorrower {
         return slider
     }
 
+    inline fun Group.inputField(
+        font: String,
+        fontColor: Color,
+        defaultText: String = "",
+        backgroundHints: Array<String> = arrayOf(),
+        builder: CustomInputField.() -> Unit = {}
+    ): CustomInputField {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val inputField = CustomInputField(
+            screen,
+            defaultText,
+            Label.LabelStyle(forceLoadFont(font), color),
+            backgroundHints
+        )
+        this.addActor(inputField)
+        builder(inputField)
+        return inputField
+    }
+
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)

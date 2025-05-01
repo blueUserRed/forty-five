@@ -1296,6 +1296,8 @@ open class CustomGroup(
 
     private var badTexture: Boolean = false
 
+    var manualBackground: Drawable? = null
+
     init {
         initInput(this, screen)
     }
@@ -1349,9 +1351,7 @@ open class CustomGroup(
     }
 
     private fun drawBackground(batch: Batch?) {
-        if (userObject == "hello" && y != 65f) {
-            println("$x $y")
-        }
+        val background = manualBackground ?: background
         background?.let {
             dropShadow?.doDropShadow(batch, screen, it, this)
             if (it is TransformDrawable) {

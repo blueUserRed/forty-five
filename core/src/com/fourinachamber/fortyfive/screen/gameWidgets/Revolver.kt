@@ -338,6 +338,7 @@ class RevolverSlot(
         height = size
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
+        touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
         joinGroup(revolverSlotGroup)
         val dropShadow = DropShadow(

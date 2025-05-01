@@ -18,6 +18,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
@@ -105,11 +106,19 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(getSharedTitleScreen(), settingsObject), screen)
+        val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight)
+
+        val navbar = getSharedNavBar(
+            worldWidth, worldHeight,
+            listOf(getSharedTitleScreen(), settingsObject, backpackObject),
+            screen
+        )
+
         actor(navbar) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
+        actor(backpack)
         actor(settings) {
             onLayout { x = parent.width / 2 - width / 2 }
         }

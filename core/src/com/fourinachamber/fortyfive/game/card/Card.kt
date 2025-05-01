@@ -827,6 +827,8 @@ class CardActor(
         }
     }
 
+    fun currentTexturePromise(): Promise<Texture>? = cardTexturePromise
+
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     override fun setX(x: Float) {

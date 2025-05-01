@@ -552,6 +552,7 @@ class NewGameController(
         if (newDamage == 0) return@later
         include(updatePlayerLivesTimeline(curPlayerLives - newDamage))
         action {
+            SoundPlayer.situation("enemy_attack", this@NewGameController.screen)
             dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
             dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen).wrap())
             curPlayerLives -= newDamage
@@ -659,6 +660,7 @@ class NewGameController(
         isPiercing: Boolean,
         card: Card
     ): Timeline = Timeline.timeline { later {
+        SoundPlayer.situation("enter_parry", this@NewGameController.screen)
         val damageOfCard = card.curDamage(this@NewGameController)
         val remainingDamage = if (card.isReinforced) 0 else (damage - damageOfCard).coerceAtLeast(0)
         val parryEnterEvent = Events.ParryStateChange(true, damage, damageOfCard)
@@ -953,7 +955,10 @@ class NewGameController(
         delayUntil { event.popupPromise.isResolved }
         if (money > 0) {
             delay(600)
-            action { SaveState.earnMoney(money) }
+            action {
+                SoundPlayer.situation("money_earned", this@NewGameController.screen)
+                SaveState.earnMoney(money)
+            }
         }
         delay(300)
         action {
