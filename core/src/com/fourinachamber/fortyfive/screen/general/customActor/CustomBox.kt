@@ -535,6 +535,8 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
 
     var overflowHidden = true
 
+    var liftChild: Actor? = null
+
     fun scrolledBy(amount: Float) {
         //it just feels wrong if it starts at the bottom to scroll like that, for everything else it is okay
         //TODO ask phillip which is better, let him test it a few times
@@ -733,16 +735,24 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
             y = dragY
         }
         background?.draw(batch, x, y, width, height)
+        val liftChild = if (liftChild?.isVisible ?: false) liftChild else null
+        liftChild?.isVisible = false
         if (drawItemsWithScissor(viewport, batch, parentAlpha)) {
             x = oldX
             y = oldY
             return
         }
+        liftChild?.isVisible = true
 
-        if (maxScrollableDistanceInDirection != 0F) {
+        if (maxScrollableDistanceInDirection != 0F || liftChild != null) {
             if (isTransform) applyTransform(batch, computeTransform())
-            scrollBarBackground?.draw(batch, parentAlpha)
-            scrollBar?.draw(batch, alpha)
+            if (maxScrollableDistanceInDirection != 0F) {
+                scrollBarBackground?.draw(batch, parentAlpha)
+                scrollBar?.draw(batch, alpha)
+            }
+            if (liftChild != null) {
+                liftChild.draw(batch, parentAlpha)
+            }
             if (isTransform) resetTransform(batch)
         }
         x = oldX

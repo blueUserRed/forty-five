@@ -323,8 +323,8 @@ open class CustomImageActor(
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
         if (mask == null) {
-//            val c = batch.color.cpy()
-//            batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
+            val c = batch.color.cpy()
+            batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
             if (rotation != 0f) {
                 val drawable = drawable
                 if (drawable !is TransformDrawable) throw RuntimeException(
@@ -336,7 +336,7 @@ open class CustomImageActor(
                 dropShadow?.doDropShadow(batch, screen, drawable, this)
                 drawable.draw(batch, x, y, width, height)
             }
-//            batch.color = c
+            batch.color = c
 
             x -= drawOffsetX
             y -= drawOffsetY

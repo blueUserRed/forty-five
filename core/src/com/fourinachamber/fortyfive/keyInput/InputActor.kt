@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.keyInput
 
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.screen.general.DetailWidget
@@ -61,6 +62,8 @@ interface InputActor {
     fun childrenInCorrectOrderOrOriginal(): Iterable<Actor>
 
     fun childWasKeyboardFocused(child: InputActor) {}
+
+    fun drawInDrag(batch: Batch)
 
 }
 
@@ -216,14 +219,14 @@ class InputActorImpl : InputActor {
         if (state.causedByStates.isNotEmpty()) {
             throw RuntimeException("only InputStates without causes can be handled manually")
         }
-        notifyInputStateChanged(state, true)
+        (actor as InputActor).notifyInputStateChanged(state, true)
     }
 
     override fun leaveInputStateManually(state: InputState) {
         if (state.causedByStates.isNotEmpty()) {
             throw RuntimeException("only InputStates without causes can be handled manually")
         }
-        notifyInputStateChanged(state, false)
+        (actor as InputActor).notifyInputStateChanged(state, false)
     }
 
     override fun startDragAndDropOn(input: Input) {
@@ -241,5 +244,9 @@ class InputActorImpl : InputActor {
         val group = actor as? Group
             ?: throw RuntimeException("childrenInCorrectOrderOrOriginal can only be called on a group")
         return (actor as InputActor).childrenInCorrectOrder() ?: group.children
+    }
+
+    override fun drawInDrag(batch: Batch) {
+        actor.draw(batch, 1f)
     }
 }

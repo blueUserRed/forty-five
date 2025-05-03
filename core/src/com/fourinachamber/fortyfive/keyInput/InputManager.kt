@@ -140,6 +140,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val modal = Modal(targets, screen)
         currentDragAndDropModal = modal
         currentKeyboardDragAndDropActor = actor
+        actor.enterInputStateManually(BaseStates.keyboardDrag)
         pushModal(modal)
     }
 
@@ -156,6 +157,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (activeModal() !== modal) return
         popModal(modal)
         val actor = currentKeyboardDragAndDropActor
+        currentKeyboardDragAndDropActor?.leaveInputStateManually(BaseStates.keyboardFocus)
         currentKeyboardDragAndDropActor = null
         currentDragAndDropModal = null
         if (focusPrevious) {
@@ -315,11 +317,14 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             if (hit !is InputActor) return false
             if (!hit.isDraggable) return false
             hit.isDragged = true
+            hit.enterInputStateManually(BaseStates.mouseDrag)
+            screen.mouseDraggedActor = hit
             currentlyDraggedActor = hit
         }
         val actor = currentlyDraggedActor!!
         val worldSpace = screen.viewport.unproject(Vector2(screenX, screenY))
-        val transformed = actor.actor.parent.stageToLocalCoordinates(worldSpace)
+        val transformed = worldSpace
+//        val transformed = actor.actor.parent.stageToLocalCoordinates(worldSpace)
         actor.dragX = transformed.x - actor.actor.width / 2
         actor.dragY = transformed.y - actor.actor.height / 2
         return false
@@ -327,8 +332,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     private fun finishDrag(screenX: Int, screenY: Int, hitResult: Actor?) {
         val actor = currentlyDraggedActor ?: return
+        screen.mouseDraggedActor = null
         currentlyDraggedActor = null
         actor.isDragged = false
+        actor.leaveInputStateManually(BaseStates.mouseDrag)
         if (hitResult !is InputActor) return
         if (!hitResult.isDropTarget) return
         val dragAndDrop =
@@ -363,6 +370,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
         val mouseHover = InputState("mouseHover", arrayOf())
         val keyboardFocus = InputState("keyboardFocus", arrayOf())
+        val mouseDrag = InputState("mouseDrag", arrayOf())
+        val keyboardDrag = InputState("keyboardDrag", arrayOf())
     }
 
     class FocusFilter(val groups: List<String>, private val screen: OnjScreen) {

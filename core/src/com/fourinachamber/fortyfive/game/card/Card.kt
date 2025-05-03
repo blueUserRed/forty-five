@@ -855,7 +855,16 @@ class CardActor(
         return true
     }
 
+    override fun drawInDrag(batch: Batch) {
+        doDraw(batch, 1f)
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (isDragged) return
+        doDraw(batch, parentAlpha)
+    }
+
+    private fun doDraw(batch: Batch?, parentAlpha: Float) {
         validate()
         detailWidget?.updateBounds(this)
         batch ?: return
@@ -871,17 +880,17 @@ class CardActor(
         batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
         val width: Float
         val height: Float
-        val x: Float
-        val y: Float
+        val x: Float = x
+        val y: Float = y
         width = this.width
         height = this.height
-        if (isDragged) {
-            x = dragX
-            y = dragY
-        } else {
-            x = this.x
-            y = this.y
-        }
+//        if (isDragged) {
+//            x = dragX
+//            y = dragY
+//        } else {
+//            x = this.x
+//            y = this.y
+//        }
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,

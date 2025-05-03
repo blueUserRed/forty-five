@@ -103,6 +103,8 @@ open class OnjScreen(
 
     var debugMenu: DebugMenu? = null
 
+    var mouseDraggedActor: InputActor? = null
+
     val inputManager = InputManager(this)
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
@@ -362,6 +364,16 @@ open class OnjScreen(
         batch.begin()
         actorsWithActiveHoverDetails.forEach {
             it.detailWidget?.drawDetailActor(batch)
+        }
+        mouseDraggedActor?.let { dragged ->
+            val actor = dragged.actor
+            val oX = actor.x
+            val oY = actor.y
+            actor.x = dragged.dragX
+            actor.y = dragged.dragY
+            dragged.drawInDrag(batch)
+            actor.x = oX
+            actor.y = oY
         }
         batch.end()
         doRenderTasks(lateRenderTasks, additionalLateRenderTasks)

@@ -1,15 +1,13 @@
 package com.fourinachamber.fortyfive.screen.components
 
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.SaveState.Deck
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -22,10 +20,8 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
-import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.value.OnjArray
-import java.lang.RuntimeException
 
 object BackpackCreator {
 
@@ -42,7 +38,7 @@ object BackpackCreator {
         val state = BackpackState(
             SaveState.curDeck,
             cardPrototypes,
-            mutableMapOf(),
+            mutableListOf(),
             EventPipeline()
         )
 
@@ -54,14 +50,7 @@ object BackpackCreator {
 
             deckSide(state, this@getSharedBackpack)
 
-            box {
-                backgroundHandle = "backpack_backpack_background"
-                width = 730f
-                height = 770f
-                x = worldWidth - width - 30f
-                y = 0f
-            }
-
+            backpackSide(state, worldWidth, this@getSharedBackpack)
         }
 
         state.events.fire(DeckChangedEvent)
@@ -79,6 +68,90 @@ object BackpackCreator {
         return backpack to navbarObject
     }
 
+    private fun switchToDeck(num: Int, state: BackpackState) {
+        SaveState.curDeckNbr = num
+        val deck = SaveState.curDeck
+        state.currentDeck = deck
+        state.events.fire(GiveCardsBackEvent)
+        state.events.fire(DeckChangedEvent)
+    }
+
+    private fun CustomGroup.backpackSide(
+        state: BackpackState,
+        worldWidth: Float,
+        creator: ScreenCreator
+    ) = with(creator) {
+        box {
+            backgroundHandle = "backpack_backpack_background"
+            width = 730f
+            height = 770f
+            x = worldWidth - width - 40f
+            y = 0f
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.CENTER
+
+            verticalSpacer(25f)
+
+            box {
+                flexDirection = FlexDirection.ROW
+                horizontalAlign = CustomAlign.SPACE_AROUND
+                relativeWidth(100f)
+                syncHeight()
+
+                label("red_wing", "Backpack", Color.White) {
+                    width = 200f
+                    syncHeight()
+                }
+
+                box {
+                    backgroundHandle = "backpack_sort_background"
+                    width = 300f
+                    height = 50f
+                }
+            }
+            collection(state, creator)
+        }
+    }
+
+    private fun CustomBox.collection(state: BackpackState, creator: ScreenCreator) = with(creator) {
+        val cardsPerRow = 4
+
+        box(isScrollable = true) scrollableBox@{
+            this as CustomScrollableBox
+            relativeWidth(88f)
+            height = 680f
+            x = 20f
+            scrollDirectionStart = CustomDirection.TOP
+            horizontalAlign = CustomAlign.START
+            wrap = CustomWrap.WRAP
+            addScrollbarFromDefaults(
+                CustomDirection.RIGHT,
+                "backpack_scrollbar",
+                "backpack_scrollbar_background",
+            )
+            flexDirection = FlexDirection.ROW
+            paddingTop = 20f
+
+            val cards = cardsToDisplayInBackpack(state)
+
+            cards.forEachIndexed { i, card ->
+                box {
+                    width = 160f
+                    height = 160f
+                    cardSlot(card, 140f, i, true, this@scrollableBox, state, creator)
+                }
+            }
+        }
+    }
+
+    private fun cardsToDisplayInBackpack(state: BackpackState): List<String> {
+        val allCards = SaveState.cards
+        val result = allCards.toMutableList()
+        val cardsInDeck = state.currentDeck.cards
+        cardsInDeck.forEach { result.remove(it) }
+        return result
+    }
+
     private fun CustomGroup.deckSide(state: BackpackState, creator: ScreenCreator) = with(creator) {
         box {
             backgroundHandle = "backpack_deck_background"
@@ -89,7 +162,7 @@ object BackpackCreator {
             x = 40f
             y = 0f
             debug()
-            verticalSpacer(18f)
+            verticalSpacer(25f)
             topBar(state, creator)
             verticalSpacer(10f)
             box {
@@ -110,7 +183,7 @@ object BackpackCreator {
         var rowsNeeded = cardSlotsPerDeck / cardsPerRow
         val lastRow = cardSlotsPerDeck % cardsPerRow
         if (lastRow != 0) rowsNeeded++
-        box(isScrollable = true) {
+        box(isScrollable = true) scrollableBox@{
             this as CustomScrollableBox
             scrollDirectionStart = CustomDirection.TOP
             horizontalAlign = CustomAlign.CENTER
@@ -133,9 +206,9 @@ object BackpackCreator {
                     val amountCards = if (row + 1 == rowsNeeded && lastRow != 0) lastRow else cardsPerRow
                     repeat(amountCards) {
                         horizontalSpacer(20f)
-                        slot++
                         val card = state.currentDeck.cardPositions[slot]
-                        cardSlot(card, cardSize, state, creator)
+                        cardSlot(card, cardSize, slot, false, this@scrollableBox, state, creator)
+                        slot++
                     }
                 }
                 verticalSpacer(20f)
@@ -143,33 +216,29 @@ object BackpackCreator {
         }
     }
 
-    private fun CustomBox.cardSlot(card: String?, cardSize: Float, state: BackpackState, creator: ScreenCreator) = with(creator) {
-        val slot = if (card != null) box {
-            val texturePromise = texturePromiseForCard(card, screen, state)
-            texturePromise?.then { texture ->
-                manualBackground = TextureRegionDrawable(texture)
+    private fun CustomBox.cardSlot(
+        cardName: String?,
+        cardSize: Float,
+        num: Int,
+        isBackpack: Boolean,
+        parentBox: CustomScrollableBox,
+        state: BackpackState,
+        creator: ScreenCreator
+    ) = with(creator) {
+        if (cardName != null)  {
+            val card = state.getCardInstance(cardName, screen)
+            actor(card.actor) {
+                height = cardSize
+                width = cardSize
+                isDraggable = true
+                touchable = Touchable.enabled
             }
-            height = cardSize
-            width = cardSize
+            state.events.watchFor<GiveCardsBackEvent> { state.giveCardInstanceBack(card) }
         } else box {
             height = cardSize
             width = cardSize
             backgroundHandle = "backpack_empty_deck_slot"
         }
-    }
-
-    private fun texturePromiseForCard(name: String, screen: OnjScreen, state: BackpackState): Promise<Texture>? {
-        val created = state.createdCards[name]
-        val card = if (created == null) {
-            val prototype = state.cardPrototypes.find { it.name == name }
-                ?: throw RuntimeException("unknown card in backpack $name")
-            val new = prototype.create(screen)
-            state.createdCards[name] = new
-            new
-        } else {
-            created
-        }
-        return card.actor.currentTexturePromise()
     }
 
     private fun CustomBox.topBar(state: BackpackState, creator: ScreenCreator) = with(creator) {
@@ -220,6 +289,9 @@ object BackpackCreator {
                             { backgroundHandle = "backpack_${n}_hover" },
                             { backgroundHandle = "backpack_$n" }
                         )
+                        onInput(GameInputs.interact) {
+                            switchToDeck(n, state)
+                        }
                     }
                 }
             }
@@ -229,10 +301,29 @@ object BackpackCreator {
     private data class BackpackState(
         var currentDeck: Deck,
         val cardPrototypes: List<CardPrototype>,
-        val createdCards: MutableMap<String, Card>,
+        val createdCards: MutableList<Card>,
         val events: EventPipeline
-    )
+    ) {
+
+        fun getCardInstance(name: String, screen: OnjScreen): Card {
+            val created = createdCards.find { it.name == name }
+            if (created != null) {
+                createdCards.remove(created)
+                return created
+            }
+            val proto = cardPrototypes.find { it.name == name }
+                ?: throw RuntimeException("unknown card $name in Backpack")
+            return proto.create(screen)
+        }
+
+        fun giveCardInstanceBack(card: Card) {
+            createdCards.add(card)
+        }
+    }
 
     private data object DeckChangedEvent
+    private data object GiveCardsBackEvent
+
+    private data class SlotChangedEvent(val backpack: Boolean, val slot: Int)
 
 }
