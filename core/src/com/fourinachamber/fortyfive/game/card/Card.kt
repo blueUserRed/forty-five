@@ -890,7 +890,7 @@ class CardActor(
 //        } else {
 //            x = this.x
 //            y = this.y
-//        }
+
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,

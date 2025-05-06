@@ -25,6 +25,8 @@ interface InputActor {
 
     var keyboardFocusable: KeyboardFocusable
 
+    var infoObject: Any?
+
     fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor
 
     fun onInput(input: Input, callback: () -> Unit)
@@ -48,6 +50,8 @@ interface InputActor {
     fun inGroup(group: String): Boolean
 
     fun onDrop(callback: (InputActor) -> Unit)
+
+    fun removeOnDropListener(callback: (InputActor) -> Unit)
 
     fun notifyDropped(actor: InputActor)
 
@@ -81,6 +85,8 @@ class InputActorImpl : InputActor {
         get() = _observedStates
 
     private val dropCallbacks: MutableList<(InputActor) -> Unit> = mutableListOf()
+
+    private val dropCallbacksBuffer: MutableList<Pair<Boolean, (InputActor) -> Unit>> = mutableListOf()
 
     override var detailWidget: DetailWidget? = null
     private var detailState: InputState? = null
@@ -120,6 +126,8 @@ class InputActorImpl : InputActor {
         mutableMapOf()
 
     private val currentInputStates: MutableSet<InputState> = mutableSetOf()
+
+    override var infoObject: Any? = null
 
     override fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor {
         this._actor = actor
@@ -208,10 +216,22 @@ class InputActorImpl : InputActor {
     override fun inGroup(group: String): Boolean = group in _groups
 
     override fun onDrop(callback: (InputActor) -> Unit) {
-        dropCallbacks.add(callback)
+        dropCallbacksBuffer.add(true to callback)
+    }
+
+    override fun removeOnDropListener(callback: (InputActor) -> Unit) {
+        dropCallbacksBuffer.add(false to callback)
     }
 
     override fun notifyDropped(actor: InputActor) {
+        dropCallbacksBuffer.forEach { (add, callback) ->
+            if (add) {
+                dropCallbacks.add(callback)
+            } else {
+                dropCallbacks.remove(callback)
+            }
+        }
+        dropCallbacksBuffer.clear()
         dropCallbacks.forEach { it(actor) }
     }
 

@@ -6,6 +6,7 @@ import kotlin.reflect.cast
 
 class EventPipeline {
 
+    // TODO: CopyOnWriteArrayList is stupid here
     private val watchers: CopyOnWriteArrayList<Pair<(Any) -> Unit, KClass<*>>> = CopyOnWriteArrayList()
     private val linkedTo: MutableList<EventPipeline> = mutableListOf()
 

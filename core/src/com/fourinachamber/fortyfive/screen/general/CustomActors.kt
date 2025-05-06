@@ -1386,12 +1386,14 @@ open class CustomGroup(
     override fun addActor(actor: Actor) {
         sortedChildrenDirty = true
         originalChildren.add(actor)
+        invalidate()
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
         sortedChildrenDirty = true
         originalChildren.add(index, actor)
+        invalidate()
         super.addActorAt(index, actor)
     }
 
@@ -1400,17 +1402,20 @@ open class CustomGroup(
         val index = children.indexOf(actor, true)
         if (index == -1) return false
         removeActorAt(originalChildren.indexOf(actor), unfocus)
+        invalidate()
         return true
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
         sortedChildrenDirty = true
         val actor = originalChildren.removeAt(index)
+        invalidate()
         return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
     override fun clearChildren(unfocus: Boolean) {
         sortedChildrenDirty = true
+        invalidate()
         super.clearChildren(unfocus)
     }
 
@@ -1425,6 +1430,7 @@ open class CustomGroup(
 
     override fun clearChildren() {
         originalChildren.clear()
+        invalidate()
         super.clearChildren()
     }
 }
