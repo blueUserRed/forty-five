@@ -9,7 +9,13 @@ import java.util.Stack
 
 class InputManager(val screen: OnjScreen) : InputProcessor {
 
+    private val actorBuffer: MutableList<InputActor> = mutableListOf()
     private val actors: MutableSet<InputActor> = mutableSetOf()
+        get() {
+            field.addAll(actorBuffer)
+            actorBuffer.clear()
+            return field
+        }
 
     private val groups: MutableMap<String, MutableList<InputActor>> = mutableMapOf()
 
@@ -82,12 +88,17 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     }
 
     fun addActor(actor: InputActor) {
-        actors.add(actor)
+        actorBuffer.add(actor)
     }
 
     fun addActorToGroup(actor: InputActor, group: String) {
         groups.putIfAbsent(group, mutableListOf())
         groups[group]!!.add(actor)
+    }
+
+    fun removeActorFromGroup(actor: InputActor, group: String) {
+        val group = groups[group] ?: return
+        group.remove(actor)
     }
 
     fun enableDragAndDrop(source: String, target: String) {

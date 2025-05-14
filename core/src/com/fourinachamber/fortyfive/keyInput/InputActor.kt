@@ -47,6 +47,10 @@ interface InputActor {
 
     fun joinGroup(group: String)
 
+    fun leaveGroup(group: String)
+
+    fun leaveAllGroups()
+
     fun inGroup(group: String): Boolean
 
     fun onDrop(callback: (InputActor) -> Unit)
@@ -211,6 +215,18 @@ class InputActorImpl : InputActor {
     override fun joinGroup(group: String) {
         screen.inputManager.addActorToGroup(actor as InputActor, group)
         _groups.add(group)
+    }
+
+    override fun leaveGroup(group: String) {
+        screen.inputManager.removeActorFromGroup(actor as InputActor, group)
+        _groups.remove(group)
+    }
+
+    override fun leaveAllGroups() {
+        _groups.forEach { group ->
+            screen.inputManager.removeActorFromGroup(actor as InputActor, group)
+        }
+        _groups.clear()
     }
 
     override fun inGroup(group: String): Boolean = group in _groups

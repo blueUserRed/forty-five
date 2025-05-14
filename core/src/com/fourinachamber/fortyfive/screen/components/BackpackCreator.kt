@@ -30,6 +30,7 @@ object BackpackCreator {
     const val backpackCardInDeckGroup: String = "backpack-card-in-deck"
     const val backpackSlotInDeckGroup: String = "backpack-slot-in-deck"
     const val backpackCardInCollectionGroup: String = "backpack-card-in-collection"
+    const val backpackCollectionBackgroundGroup: String = "backpack-collection-background"
 
     fun ScreenCreator.getSharedBackpack(
         worldWidth: Float,
@@ -46,7 +47,7 @@ object BackpackCreator {
             listOf(),
             EventPipeline()
         )
-        state.cardsInCollection = cardsToDisplayInBackpack(state)
+        updateCardsInCollection(state)
 
         val backpack = newGroup {
             x = 0f
@@ -60,10 +61,14 @@ object BackpackCreator {
         }
 
         state.events.fire(DeckChangedEvent)
-        screen.inputManager.enableDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
-        screen.inputManager.enableDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
-        screen.inputManager.enableDragAndDrop(backpackCardInDeckGroup, backpackCardInCollectionGroup)
-        screen.inputManager.enableDragAndDrop(backpackCardInCollectionGroup, backpackCardInDeckGroup)
+        with(screen.inputManager) {
+            enableDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
+            enableDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
+            enableDragAndDrop(backpackCardInDeckGroup, backpackCardInCollectionGroup)
+            enableDragAndDrop(backpackCardInCollectionGroup, backpackCardInDeckGroup)
+            enableDragAndDrop(backpackCardInCollectionGroup, backpackSlotInDeckGroup)
+            enableDragAndDrop(backpackCardInDeckGroup, backpackCollectionBackgroundGroup)
+        }
 
         val navbarObject = NavbarCreator.NavBarObject(
             "Backpack",
@@ -79,11 +84,16 @@ object BackpackCreator {
     }
 
     private fun switchToDeck(num: Int, state: BackpackState) {
-//        SaveState.curDeckNbr = num
-//        val deck = SaveState.curDeck
-//        state.currentDeck = deck
-//        state.events.fire(GiveCardsBackEvent)
-//        state.events.fire(DeckChangedEvent)
+        SaveState.curDeckNbr = num
+        val deck = SaveState.curDeck
+        state.currentDeck = deck
+        updateCardsInCollection(state)
+        with(state.events) {
+            fire(GiveCardBackEvent(-1, false))
+            fire(SlotChangedEvent(-1, false))
+            fire(CollectionChangedEvent)
+            fire(DeckChangedEvent)
+        }
     }
 
     private fun swapCardsInDeck(firstNum: Int, secondNum: Int, state: BackpackState) {
@@ -96,13 +106,43 @@ object BackpackCreator {
         }
     }
 
-    private fun putCardFromDeckInEmptySlot(card: Card, slot: Int) {
+    private fun putCardFromDeckInEmptySlot(firstNum: Int, secondNum: Int, state: BackpackState) {
+        state.currentDeck.swapCards(firstNum, secondNum)
+        with(state.events) {
+            fire(GiveCardBackEvent(firstNum, false))
+            fire(SlotChangedEvent(firstNum, false))
+            fire(SlotChangedEvent(secondNum, false))
+        }
     }
 
-    private fun putCardFromBackpackInDeck(card: Card, slot: Int) {
+    private fun putCardFromBackpackInDeck(card: Card, slot: Int, state: BackpackState) {
+        state.currentDeck.addToDeck(slot, card.name)
+        updateCardsInCollection(state)
+        with(state.events) {
+            fire(CollectionChangedEvent)
+            fire(SlotChangedEvent(slot, false))
+        }
     }
 
-    private fun swapBackpackWithDeckCard(backpackCard: Card, deckCard: Card) {
+    private fun putCardFromDeckInBackpack(slot: Int, state: BackpackState) {
+        state.currentDeck.removeFromDeck(slot)
+        updateCardsInCollection(state)
+        with(state.events) {
+            fire(GiveCardBackEvent(slot, false))
+            fire(SlotChangedEvent(slot, false))
+            fire(CollectionChangedEvent)
+        }
+    }
+
+    private fun swapBackpackWithDeckCard(backpackCard: Card, deckSlot: Int, state: BackpackState) {
+        state.currentDeck.removeFromDeck(deckSlot)
+        state.currentDeck.addToDeck(deckSlot, backpackCard.name)
+        updateCardsInCollection(state)
+        with(state.events) {
+            fire(GiveCardBackEvent(deckSlot, false))
+            fire(SlotChangedEvent(deckSlot, false))
+            fire(CollectionChangedEvent)
+        }
     }
 
     private fun CustomGroup.backpackSide(
@@ -158,27 +198,56 @@ object BackpackCreator {
                 "backpack_scrollbar",
                 "backpack_scrollbar_background",
             )
+            joinGroup(backpackCollectionBackgroundGroup)
+            isDropTarget = true
             flexDirection = FlexDirection.ROW
             paddingTop = 20f
 
-            val cards = cardsToDisplayInBackpack(state)
+            var slotsCreated = 0
 
-            cards.forEachIndexed { i, card ->
-                box {
-                    width = 160f
-                    height = 160f
-                    cardSlot(140f, i, true, state, creator)
+            onDrop { actor ->
+                if (actor !is CardActor) return@onDrop
+                val info = actor.infoObject
+                if (info !is CardInfoObject) return@onDrop
+
+                if (info.isBackpack) return@onDrop
+                putCardFromDeckInBackpack(info.slot, state)
+            }
+
+            state.events.watchFor<CollectionChangedEvent> {
+                val cards = state.cardsInCollection
+
+                cards.forEachIndexed { i, card ->
+                    if (i >= slotsCreated) {
+                        box {
+                            width = 160f
+                            height = 160f
+                            cardSlot(140f, i, true, state, creator)
+                        }
+                        slotsCreated++
+                    } else {
+                        state.events.fire(GiveCardBackEvent(i, true))
+                        state.events.fire(SlotChangedEvent(i, true))
+                    }
+                }
+                val size = cards.size
+                val unaccountedSlots = slotsCreated - size + 1
+                if (unaccountedSlots < 0) return@watchFor
+                repeat(unaccountedSlots) { i ->
+                    state.events.fire(GiveCardBackEvent(size + i, true))
+                    state.events.fire(SlotChangedEvent(size + i, true))
                 }
             }
+            state.events.fire(CollectionChangedEvent)
         }
     }
 
-    private fun cardsToDisplayInBackpack(state: BackpackState): List<String> {
+    private fun updateCardsInCollection(state: BackpackState) {
         val allCards = SaveState.cards
         val result = allCards.toMutableList()
         val cardsInDeck = state.currentDeck.cards
         cardsInDeck.forEach { result.remove(it) }
-        return result
+        state.cardsInCollection = result
     }
 
     private fun CustomGroup.deckSide(state: BackpackState, creator: ScreenCreator) = with(creator) {
@@ -190,7 +259,6 @@ object BackpackCreator {
             height = 770f
             x = 40f
             y = 0f
-            debug()
             verticalSpacer(25f)
             topBar(state, creator)
             verticalSpacer(10f)
@@ -255,11 +323,14 @@ object BackpackCreator {
 
         val parent = box {
             debug()
+            if (!isBackpack) {
+                backgroundHandle = "backpack_empty_deck_slot"
+            }
             syncDimensions()
         }
 
         state.events.watchFor<SlotChangedEvent> { event ->
-            if (event.backpack != isBackpack || event.slot != num) return@watchFor
+            if (event.backpack != isBackpack || (event.slot != num && event.slot != -1)) return@watchFor
 
             val cardName = if (event.backpack) {
                 state.cardsInCollection.getOrNull(num)
@@ -297,6 +368,7 @@ object BackpackCreator {
                 isDropTarget = true
                 keyboardFocusable = KeyboardFocusable.LEAF
                 infoObject = CardInfoObject(isBackpack, num)
+                leaveAllGroups()
                 joinGroup(backpackElementsGroup)
                 joinGroup(if (isBackpack) backpackCardInCollectionGroup else backpackCardInDeckGroup )
             }
@@ -308,7 +380,6 @@ object BackpackCreator {
             touchable = Touchable.enabled
             isDropTarget = true
             keyboardFocusable = KeyboardFocusable.LEAF
-            backgroundHandle = "backpack_empty_deck_slot"
             joinGroup(backpackElementsGroup)
             joinGroup(backpackSlotInDeckGroup)
 
@@ -317,10 +388,15 @@ object BackpackCreator {
                 val info = actor.infoObject
                 if (info !is CardInfoObject) return@onDrop
 
+                if (isBackpack) {
+                    if (!info.isBackpack) putCardFromDeckInBackpack(info.slot, state)
+                    return@onDrop
+                }
+
                 if (info.isBackpack) {
-                    putCardFromBackpackInDeck(actor.card, num)
+                    putCardFromBackpackInDeck(actor.card, num, state)
                 } else {
-                    putCardFromDeckInEmptySlot(actor.card, num)
+                    putCardFromDeckInEmptySlot(info.slot, num, state)
                 }
             }
         }
@@ -364,18 +440,25 @@ object BackpackCreator {
                 repeat(5) { num ->
                     val n = num + 1
                     box(backgroundHints = arrayOf("backpack_$n", "backpack_${n}_hover")) {
-                        backgroundHandle = "backpack_$n"
                         width = 65f
                         height = 50f
                         joinGroup(backpackElementsGroup)
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
-                        observeInputState(
-                            GameInputs.States.focused,
-                            { backgroundHandle = "backpack_${n}_hover" },
-                            { backgroundHandle = "backpack_$n" }
-                        )
+                        backgroundHandle = if (state.currentDeck.id == n) {
+                            "backpack_${n}_hover"
+                        } else {
+                            "backpack_$n"
+                        }
+                        state.events.watchFor<DeckChangedEvent> {
+                            backgroundHandle = if (state.currentDeck.id == n) {
+                                "backpack_${n}_hover"
+                            } else {
+                                "backpack_$n"
+                            }
+                        }
                         onInput(GameInputs.interact) {
+                            if (state.currentDeck.id == n) return@onInput
                             switchToDeck(n, state)
                         }
                     }
@@ -415,14 +498,15 @@ object BackpackCreator {
                 if (!otherInfo.isBackpack) {
                     swapCardsInDeck(thisInfo.slot, otherInfo.slot, state)
                 } else {
-                    swapBackpackWithDeckCard(actor.card, card)
+                    swapBackpackWithDeckCard(actor.card, thisInfo.slot, state)
                 }
             }
 
             state.events.watchFor<GiveCardBackEvent> { event ->
                 val info = card.actor.infoObject
                 if (info !is CardInfoObject) return@watchFor
-                if (event.backpack != info.isBackpack || info.slot != event.slot) return@watchFor
+                if (event.backpack != info.isBackpack || (info.slot != event.slot && info.slot != -1)) return@watchFor
+                card.actor.infoObject = null
                 state.giveCardInstanceBack(card)
             }
 
@@ -437,6 +521,7 @@ object BackpackCreator {
     private data class CardInfoObject(val isBackpack: Boolean, val slot: Int)
 
     private data object DeckChangedEvent
+    private data object CollectionChangedEvent
 
     private data class GiveCardBackEvent(val slot: Int, val backpack: Boolean)
     private data class SlotChangedEvent(val slot: Int, val backpack: Boolean)
