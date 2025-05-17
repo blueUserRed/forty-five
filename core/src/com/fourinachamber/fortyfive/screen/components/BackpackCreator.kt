@@ -35,17 +35,23 @@ object BackpackCreator {
     fun ScreenCreator.getSharedBackpack(
         worldWidth: Float,
         worldHeight: Float,
+        warningEvents: EventPipeline,
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
 
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
-        val cardPrototypes = Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) })
+        val cardPrototypes = Card
+            .getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) })
+            .associate { it.name to it }
 
         val state = BackpackState(
             SaveState.curDeck,
             cardPrototypes,
             mutableListOf(),
             listOf(),
-            EventPipeline()
+            EventPipeline(),
+            warningEvents,
+            SortingMode.DAMAGE,
+            false
         )
         updateCardsInCollection(state)
 
@@ -116,6 +122,11 @@ object BackpackCreator {
     }
 
     private fun putCardFromBackpackInDeck(card: Card, slot: Int, state: BackpackState) {
+        if (!state.currentDeck.canAddCards()) {
+            val warningEvent = WarningParent.ShowWarningEvent(WarningParent.Level.MID, "Deck already is at maximum size!")
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.addToDeck(slot, card.name)
         updateCardsInCollection(state)
         with(state.events) {
@@ -125,6 +136,11 @@ object BackpackCreator {
     }
 
     private fun putCardFromDeckInBackpack(slot: Int, state: BackpackState) {
+        if (!state.currentDeck.canRemoveCards()) {
+            val warningEvent = WarningParent.ShowWarningEvent(WarningParent.Level.MID, "Deck already is at minimum size!")
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.removeFromDeck(slot)
         updateCardsInCollection(state)
         with(state.events) {
@@ -132,6 +148,11 @@ object BackpackCreator {
             fire(SlotChangedEvent(slot, false))
             fire(CollectionChangedEvent)
         }
+    }
+
+    private fun sortingModeChanged(state: BackpackState) {
+        updateCardsInCollection(state)
+        state.events.fire(CollectionChangedEvent)
     }
 
     private fun swapBackpackWithDeckCard(backpackCard: Card, deckSlot: Int, state: BackpackState) {
@@ -164,10 +185,12 @@ object BackpackCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 horizontalAlign = CustomAlign.SPACE_AROUND
+                verticalAlign = CustomAlign.CENTER
                 relativeWidth(100f)
                 syncHeight()
 
                 label("red_wing", "Backpack", Color.White) {
+                    debug()
                     width = 200f
                     syncHeight()
                 }
@@ -176,6 +199,65 @@ object BackpackCreator {
                     backgroundHandle = "backpack_sort_background"
                     width = 300f
                     height = 50f
+                    horizontalAlign = CustomAlign.SPACE_AROUND
+                    verticalAlign = CustomAlign.CENTER
+                    flexDirection = FlexDirection.ROW
+                    paddingLeft = 10f
+                    paddingRight = 10f
+
+                    label("red_wing", "Sort by: ", Color.FortyWhite) {
+                        syncHeight()
+                        relativeWidth(22f)
+                    }
+
+                    label("red_wing", state.sortingMode.displayName, Color.Red) {
+                        syncHeight()
+                        relativeWidth(40f)
+                        val modes = SortingMode.entries
+                        var currentMode = 0
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        onInput(GameInputs.interact) {
+                            currentMode++
+                            currentMode %= modes.size
+                            val newMode = modes[currentMode]
+                            state.sortingMode = newMode
+                            setText(newMode.displayName)
+                            sortingModeChanged(state)
+                        }
+                    }
+
+                    box {
+                        width = 1f
+                        relativeHeight(80f)
+                        backgroundHandle = "white_texture"
+                    }
+
+                    box(backgroundHints = arrayOf("backpack_direction_arrow", "backpack_direction_hover")) {
+                        var isReverse = false
+                        relativeWidth(10f)
+                        onLayoutAndNow { height = width }
+                        backgroundHandle = "backpack_direction_arrow"
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        joinGroup(backpackElementsGroup)
+//                        observeInputState(
+//                            GameInputs.States.focused,
+//                            { backgroundHandle = "backpack_direction_hover" },
+//                            { backgroundHandle = "backpack_direction_arrow" }
+//                        )
+                        onLayoutAndNow {
+                            originX = width / 2f
+                            originY = height / 2f
+                        }
+                        isTransform = true
+                        onInput(GameInputs.interact) {
+                            isReverse = !isReverse
+                            rotation = if (isReverse) 180f else 0f
+                            state.isSortingReverse = isReverse
+                            sortingModeChanged(state)
+                        }
+                    }
                 }
             }
             collection(state, creator)
@@ -247,6 +329,19 @@ object BackpackCreator {
         val result = allCards.toMutableList()
         val cardsInDeck = state.currentDeck.cards
         cardsInDeck.forEach { result.remove(it) }
+
+        val protos = state.cardPrototypes
+        when (state.sortingMode) {
+            SortingMode.COST -> result.sortByDescending {
+                (protos[it] ?: throw RuntimeException("unknown card in backpack: $it")).baseCost
+            }
+            SortingMode.DAMAGE -> result.sortByDescending {
+                (protos[it] ?: throw RuntimeException("unknown card in backpack: $it")).baseDamage
+            }
+            SortingMode.NAME -> result.sortBy { it }
+        }
+        if (state.isSortingReverse) result.reverse()
+
         state.cardsInCollection = result
     }
 
@@ -469,10 +564,13 @@ object BackpackCreator {
 
     private data class BackpackState(
         var currentDeck: Deck,
-        val cardPrototypes: List<CardPrototype>,
+        val cardPrototypes: Map<String, CardPrototype>,
         val createdCards: MutableList<Card>,
         var cardsInCollection: List<String>,
-        val events: EventPipeline
+        val events: EventPipeline,
+        val warningEvents: EventPipeline,
+        var sortingMode: SortingMode,
+        var isSortingReverse: Boolean
     ) {
 
         fun getCardInstance(name: String, screen: OnjScreen, state: BackpackState): Card {
@@ -481,7 +579,7 @@ object BackpackCreator {
                 createdCards.remove(created)
                 return created
             }
-            val proto = cardPrototypes.find { it.name == name }
+            val proto = cardPrototypes[name]
                 ?: throw RuntimeException("unknown card $name in Backpack")
             val card = proto.create(screen)
 
@@ -516,6 +614,12 @@ object BackpackCreator {
         fun giveCardInstanceBack(card: Card) {
             createdCards.add(card)
         }
+    }
+
+    enum class SortingMode(val displayName: String) {
+        COST("cost"),
+        NAME("name"),
+        DAMAGE("damage"),
     }
 
     private data class CardInfoObject(val isBackpack: Boolean, val slot: Int)

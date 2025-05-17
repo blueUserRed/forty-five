@@ -9,15 +9,26 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.epsilonEquals
 import com.fourinachamber.fortyfive.utils.minMagnitude
 import kotlin.math.abs
 
-class WarningParent(val creator: ScreenCreator, val screen: OnjScreen) {
+class WarningParent(
+    val creator: ScreenCreator,
+    val screen: OnjScreen,
+    private val events: EventPipeline? = null
+) {
 
     private var actor: CustomGroup? = null
 
     private val displayedWarnings: MutableList<Warning> = mutableListOf()
+
+    init {
+        events?.watchFor<ShowWarningEvent> { event ->
+            showTemporaryWarning(Warning(event.text, event.level), event.displayTime)
+        }
+    }
 
     fun getActor(): CustomGroup {
         actor?.let { return it }
@@ -183,6 +194,8 @@ class WarningParent(val creator: ScreenCreator, val screen: OnjScreen) {
         const val movementSpeed = 5_000f
         const val defaultDisplayTime = 8_000
     }
+
+    class ShowWarningEvent(val level: Level, val text: String, val displayTime: Int = defaultDisplayTime)
 
     enum class Level(val symbol: String, val background: String, val fontColor: com.badlogic.gdx.graphics.Color) {
 

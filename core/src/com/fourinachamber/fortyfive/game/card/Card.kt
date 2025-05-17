@@ -47,6 +47,8 @@ import kotlin.math.absoluteValue
 class CardPrototype(
     val name: String,
     val title: String,
+    val baseCost: Int,
+    val baseDamage: Int,
     val tags: List<String>,
 ) {
 
@@ -69,7 +71,7 @@ class CardPrototype(
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
 
-    fun copy(): CardPrototype = CardPrototype(name, title, tags).apply {
+    fun copy(): CardPrototype = CardPrototype(name, title, baseCost, baseDamage, tags).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
         this.creator = this@CardPrototype.creator
     }
@@ -611,6 +613,8 @@ class Card(
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
                         onj.get<String>("title"),
+                        onj.get<Long>("cost").toInt(),
+                        onj.get<Long>("baseDamage").toInt(),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
                     prototype.creator = { screen, isSaved, areHoverDetailsEnabled ->

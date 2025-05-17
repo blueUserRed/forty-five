@@ -23,6 +23,7 @@ import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
+import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -30,6 +31,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
 
 class MapScreen : ScreenCreator() {
 
@@ -43,6 +45,10 @@ class MapScreen : ScreenCreator() {
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
 
     override val playAmbientSounds: Boolean = false
+
+    private var warningParent: WarningParent? = null
+
+    private val warningEvents: EventPipeline = EventPipeline()
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "mapScreen" to 0,
@@ -86,6 +92,10 @@ class MapScreen : ScreenCreator() {
 //        MapScreenController(screen)
     )
 
+    override fun update() {
+        warningParent?.update()
+    }
+
     override fun getRoot(): Group = newGroup {
         x = 0f
         y = 0f
@@ -106,7 +116,7 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight)
+        val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, warningEvents)
 
         val navbar = getSharedNavBar(
             worldWidth, worldHeight,
@@ -143,6 +153,9 @@ class MapScreen : ScreenCreator() {
             tutorial.isVisible = entered
             tutorialText.isVisible = entered
         }
+        val warningParent = WarningParent(this@MapScreen, screen, warningEvents)
+        this@MapScreen.warningParent = warningParent
+        actor(warningParent.getActor())
     }
 
     private fun Group.getInfoPopup() = box {
