@@ -17,7 +17,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
-import ktx.actors.onClick
 
 object NavbarCreator {
 
@@ -102,7 +101,7 @@ object NavbarCreator {
             relativeWidth(100f)
             relativeHeight(50f)
             backgroundHandle = "statusbar_background_left"
-            badTexture()
+            badTexture("navbar small", lowRes = true)
             horizontalAlign = CustomAlign.SPACE_BETWEEN
             verticalAlign = CustomAlign.CENTER
             paddingLeft = 50f
@@ -179,7 +178,7 @@ object NavbarCreator {
             relativeWidth(100f)
             relativeHeight(50f)
             backgroundHandle = "statusbar_background"
-            badTexture()
+            badTexture("navbar", lowRes = true)
             horizontalAlign = CustomAlign.SPACE_BETWEEN
             verticalAlign = CustomAlign.CENTER
             paddingLeft = 50f

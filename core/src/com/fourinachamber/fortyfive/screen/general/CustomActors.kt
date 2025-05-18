@@ -220,7 +220,7 @@ open class CustomImageActor(
     private val backgroundHints: Array<String> = arrayOf(),
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor, StyledActor, BackgroundActor,
     OffSettable, InputActor by InputActorImpl(), HasOnjScreen, DropShadowActor,
-    KotlinStyledActor {
+    KotlinStyledActor, DebugBoundsActor by DebugBoundsActorImpl() {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -280,25 +280,12 @@ open class CustomImageActor(
 
     init {
         initInput(this, screen)
+        initDebugBounds(this)
         touchable = Touchable.disabled
     }
 
-    fun badTexture() {
-        if (!FortyFive.debugHighlightBadTextures) return
-        badTexture = true
-        debug()
-    }
-
     override fun drawDebugBounds(shapes: ShapeRenderer?) {
-        val color = when {
-            badTexture && FortyFive.debugHighlightBadTextures -> Color.Red
-            debug -> stage.debugColor
-            else -> return
-        }
-        shapes ?: return
-        shapes.color = color
-        if (badTexture && FortyFive.makeBadTextureHighlightsExtryAnnoying && TimeUtils.millis() % 500 > 250) return
-        shapes.rect(x, y, originX, originY, width, height, scaleX, scaleY, rotation)
+        drawCustomDebugBounds(shapes)
     }
 
     override fun onLayout(callback: () -> Unit) {
@@ -1256,7 +1243,7 @@ open class CustomGroup(
     override val screen: OnjScreen,
     private val backgroundHints: Array<String> = arrayOf()
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
-    DropShadowActor, AnimatedActor, InputActor by InputActorImpl() {
+    DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugBoundsActor by DebugBoundsActorImpl() {
 
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
@@ -1294,30 +1281,15 @@ open class CustomGroup(
     protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
     override var dropShadow: DropShadow? = null
 
-    private var badTexture: Boolean = false
-
     var manualBackground: Drawable? = null
 
     init {
         initInput(this, screen)
-    }
-
-    fun badTexture() {
-        if (!FortyFive.debugHighlightBadTextures) return
-        badTexture = true
-        debug()
+        initDebugBounds(this)
     }
 
     override fun drawDebugBounds(shapes: ShapeRenderer?) {
-        val color = when {
-            badTexture && FortyFive.debugHighlightBadTextures -> Color.Red
-            debug -> stage.debugColor
-            else -> return
-        }
-        shapes ?: return
-        shapes.color = color
-        if (badTexture && FortyFive.makeBadTextureHighlightsExtryAnnoying && TimeUtils.millis() % 500 > 250) return
-        shapes.rect(x, y, originX, originY, width, height, scaleX, scaleY, rotation)
+        drawCustomDebugBounds(shapes)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {

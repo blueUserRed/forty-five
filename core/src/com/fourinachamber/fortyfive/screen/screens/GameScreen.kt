@@ -152,7 +152,7 @@ class GameScreen : ScreenCreator() {
         }
 
         box {
-            badTexture()
+            badTexture("status effect background", comment = "??????")
             backgroundHandle = "status_effect_background"
             height = 90f
             onLayoutAndNow { width = parent.width * 0.5f }

@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.screen.components
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
@@ -18,6 +19,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomScrollableBox
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWrap
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
+import com.fourinachamber.fortyfive.screen.general.customActor.PropertyAction
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
@@ -51,7 +53,8 @@ object BackpackCreator {
             EventPipeline(),
             warningEvents,
             SortingMode.DAMAGE,
-            false
+            false,
+            null, null
         )
         updateCardsInCollection(state)
 
@@ -60,12 +63,14 @@ object BackpackCreator {
             y = 0f
             width = worldWidth
             height = worldHeight
+            touchable = Touchable.disabled
 
             deckSide(state, this@getSharedBackpack)
 
             backpackSide(state, worldWidth, this@getSharedBackpack)
         }
 
+        state.currentDeck.checkDeck()
         state.events.fire(DeckChangedEvent)
         with(screen.inputManager) {
             enableDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
@@ -76,13 +81,69 @@ object BackpackCreator {
             enableDragAndDrop(backpackCardInDeckGroup, backpackCollectionBackgroundGroup)
         }
 
+        val deckSide = state.deckParent!!
+        val collectionSide = state.collectionParent!!
+
+        deckSide.drawOffsetX = -800f
+        collectionSide.drawOffsetX = 800f
+        deckSide.isVisible = false
+        collectionSide.isVisible = false
+        deckSide.touchable = Touchable.disabled
+        collectionSide.touchable = Touchable.disabled
+
         val navbarObject = NavbarCreator.NavBarObject(
             "Backpack",
             { Timeline.timeline {
 
+                action {
+                    deckSide.drawOffsetX = -800f
+                    collectionSide.drawOffsetX = 800f
+                    deckSide.isVisible = true
+                    collectionSide.isVisible = true
+                    deckSide.touchable = Touchable.enabled
+                    collectionSide.touchable = Touchable.enabled
+                }
+
+                val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, 0f)
+                val collectionAction = PropertyAction(deckSide, collectionSide::drawOffsetX, 0f)
+                deckAction.duration = 0.2f
+                collectionAction.duration = 0.2f
+                deckAction.interpolation = Interpolation.exp10Out
+                collectionAction.interpolation = Interpolation.exp10Out
+
+                action {
+                    deckSide.addAction(deckAction)
+                    collectionSide.addAction(collectionAction)
+                }
+                delayUntil { deckAction.isComplete && collectionAction.isComplete }
+
             } },
             { Timeline.timeline {
 
+                action {
+                    deckSide.drawOffsetX = 0f
+                    collectionSide.drawOffsetX = 0f
+                    deckSide.touchable = Touchable.disabled
+                    collectionSide.touchable = Touchable.disabled
+                }
+
+                val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, -800f)
+                val collectionAction = PropertyAction(deckSide, collectionSide::drawOffsetX, 800f)
+                deckAction.duration = 0.2f
+                collectionAction.duration = 0.2f
+                deckAction.interpolation = Interpolation.exp10Out
+                collectionAction.interpolation = Interpolation.exp10Out
+
+                action {
+                    deckSide.addAction(deckAction)
+                    collectionSide.addAction(collectionAction)
+                }
+                delayUntil { deckAction.isComplete && collectionAction.isComplete }
+
+                action {
+                    deckSide.isVisible = false
+                    collectionSide.isVisible = false
+                }
             } },
         )
 
@@ -92,6 +153,7 @@ object BackpackCreator {
     private fun switchToDeck(num: Int, state: BackpackState) {
         SaveState.curDeckNbr = num
         val deck = SaveState.curDeck
+        deck.checkDeck()
         state.currentDeck = deck
         updateCardsInCollection(state)
         with(state.events) {
@@ -171,7 +233,7 @@ object BackpackCreator {
         worldWidth: Float,
         creator: ScreenCreator
     ) = with(creator) {
-        box {
+        val parent = box {
             backgroundHandle = "backpack_backpack_background"
             width = 730f
             height = 770f
@@ -241,6 +303,7 @@ object BackpackCreator {
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
                         joinGroup(backpackElementsGroup)
+                        badTexture("backpack sorting arrow", missingFocusTexture = true)
 //                        observeInputState(
 //                            GameInputs.States.focused,
 //                            { backgroundHandle = "backpack_direction_hover" },
@@ -262,6 +325,7 @@ object BackpackCreator {
             }
             collection(state, creator)
         }
+        state.collectionParent = parent
     }
 
     private fun CustomBox.collection(state: BackpackState, creator: ScreenCreator) = with(creator) {
@@ -346,7 +410,7 @@ object BackpackCreator {
     }
 
     private fun CustomGroup.deckSide(state: BackpackState, creator: ScreenCreator) = with(creator) {
-        box {
+        val parent = box {
             backgroundHandle = "backpack_deck_background"
             flexDirection = FlexDirection.COLUMN
             horizontalAlign = CustomAlign.SPACE_BETWEEN
@@ -360,12 +424,13 @@ object BackpackCreator {
             box {
                 relativeWidth(100f)
                 height = 680f
-                state.events.watchFor<DeckChangedEvent> { t ->
+                state.events.watchFor<DeckChangedEvent> {
                     clearChildren()
                     deck(state, creator)
                 }
             }
         }
+        state.deckParent = parent
     }
 
     private fun CustomBox.deck(state: BackpackState, creator: ScreenCreator) = with(creator) {
@@ -570,7 +635,9 @@ object BackpackCreator {
         val events: EventPipeline,
         val warningEvents: EventPipeline,
         var sortingMode: SortingMode,
-        var isSortingReverse: Boolean
+        var isSortingReverse: Boolean,
+        var deckParent: CustomBox?,
+        var collectionParent: CustomBox?
     ) {
 
         fun getCardInstance(name: String, screen: OnjScreen, state: BackpackState): Card {

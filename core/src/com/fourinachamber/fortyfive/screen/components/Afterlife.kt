@@ -195,7 +195,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
     private fun ScreenCreator.createActorWithReceiver(): CustomBox = newBox {
         backgroundHandle = "afterlife_background"
-        badTexture()
+        badTexture("afterlife background", lowRes = true)
         height = 300f
         width = height * (898f / 210f)
         x = -1150f
@@ -205,7 +205,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
         image(backgroundHints = arrayOf("afterlife_arrow_right", "afterlife_arrow_left")) {
             backgroundHandle = "afterlife_arrow_left"
-            badTexture()
+            badTexture("afterlife arrow", lowRes = true)
             afterlifeEvents.watchFor<Events.ChangeArrow> { (open) ->
                 backgroundHandle = if (open) "afterlife_arrow_right" else "afterlife_arrow_left"
             }

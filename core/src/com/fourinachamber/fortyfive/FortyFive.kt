@@ -17,6 +17,8 @@ import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActor
+import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActorImpl
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.screens.TestScreen
@@ -35,9 +37,6 @@ import kotlin.system.measureTimeMillis
 object FortyFive : Game() {
 
     const val logTag = "forty-five"
-
-    const val debugHighlightBadTextures: Boolean = false
-    const val makeBadTextureHighlightsExtryAnnoying: Boolean = false
 
     var currentRenderPipeline: RenderPipeline? = null
         private set
@@ -277,6 +276,7 @@ object FortyFive : Game() {
 
     override fun dispose() {
         FortyFiveLogger.debug(logTag, "game closing")
+        DebugBoundsActorImpl.dumpActorsWithBadTextures()
         MapManager.write()
         PermaSaveState.write()
         SaveState.write()
