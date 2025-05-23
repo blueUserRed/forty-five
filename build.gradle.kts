@@ -1,9 +1,8 @@
-
 plugins {
     id("eclipse")
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.0.20" // apply false
-    id ("edu.sc.seis.launch4j") version "2.5.4" //apply false
+    id("edu.sc.seis.launch4j") version "2.5.4" //apply false
 }
 
 
@@ -29,7 +28,7 @@ buildscript {
 allprojects {
     apply(plugin = "eclipse")
 
-    extra.apply{
+    extra.apply {
         set("appName", "Forty-Five")
         set("roboVMVersion", "2.3.16")
         set("box2DLightsVersion", "1.5")
