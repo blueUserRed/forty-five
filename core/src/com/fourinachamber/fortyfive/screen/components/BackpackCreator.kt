@@ -10,7 +10,9 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
+import com.fourinachamber.fortyfive.screen.components.BackpackCreator.deck
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -54,6 +56,8 @@ object BackpackCreator {
             warningEvents,
             SortingMode.DAMAGE,
             false,
+            InputManager.FocusGrid(),
+            InputManager.FocusGrid(),
             null, null
         )
         updateCardsInCollection(state)
@@ -63,7 +67,7 @@ object BackpackCreator {
             y = 0f
             width = worldWidth
             height = worldHeight
-            touchable = Touchable.disabled
+//            touchable = Touchable.disabled
 
             deckSide(state, this@getSharedBackpack)
 
@@ -88,8 +92,7 @@ object BackpackCreator {
         collectionSide.drawOffsetX = 800f
         deckSide.isVisible = false
         collectionSide.isVisible = false
-        deckSide.touchable = Touchable.disabled
-        collectionSide.touchable = Touchable.disabled
+        backpack.touchable = Touchable.disabled
 
         val navbarObject = NavbarCreator.NavBarObject(
             "Backpack",
@@ -100,8 +103,7 @@ object BackpackCreator {
                     collectionSide.drawOffsetX = 800f
                     deckSide.isVisible = true
                     collectionSide.isVisible = true
-                    deckSide.touchable = Touchable.enabled
-                    collectionSide.touchable = Touchable.enabled
+                    backpack.touchable = Touchable.childrenOnly
                 }
 
                 val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, 0f)
@@ -123,8 +125,7 @@ object BackpackCreator {
                 action {
                     deckSide.drawOffsetX = 0f
                     collectionSide.drawOffsetX = 0f
-                    deckSide.touchable = Touchable.disabled
-                    collectionSide.touchable = Touchable.disabled
+                    backpack.touchable = Touchable.disabled
                 }
 
                 val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, -800f)
@@ -252,7 +253,6 @@ object BackpackCreator {
                 syncHeight()
 
                 label("red_wing", "Backpack", Color.White) {
-                    debug()
                     width = 200f
                     syncHeight()
                 }
@@ -329,8 +329,6 @@ object BackpackCreator {
     }
 
     private fun CustomBox.collection(state: BackpackState, creator: ScreenCreator) = with(creator) {
-        val cardsPerRow = 4
-
         box(isScrollable = true) scrollableBox@{
             this as CustomScrollableBox
             relativeWidth(88f)
@@ -363,17 +361,24 @@ object BackpackCreator {
             state.events.watchFor<CollectionChangedEvent> {
                 val cards = state.cardsInCollection
 
-                cards.forEachIndexed { i, card ->
+                var row = 0
+                var column = 0
+                cards.forEachIndexed { i, _ ->
                     if (i >= slotsCreated) {
                         box {
                             width = 160f
                             height = 160f
-                            cardSlot(140f, i, true, state, creator)
+                            cardSlot(140f, i, true, row, column, state, creator)
                         }
                         slotsCreated++
                     } else {
                         state.events.fire(GiveCardBackEvent(i, true))
                         state.events.fire(SlotChangedEvent(i, true))
+                    }
+                    column++
+                    if (column > 3) {
+                        column = 0
+                        row++
                     }
                 }
                 val size = cards.size
@@ -461,10 +466,9 @@ object BackpackCreator {
                     relativeWidth(90f)
                     height = cardSize
                     val amountCards = if (row + 1 == rowsNeeded && lastRow != 0) lastRow else cardsPerRow
-                    repeat(amountCards) {
+                    repeat(amountCards) { column ->
                         horizontalSpacer(20f)
-                        val card = state.currentDeck.cardPositions[slot]
-                        cardSlot(cardSize, slot, false, state, creator)
+                        cardSlot(cardSize, slot, false, row, column, state, creator)
                         slot++
                     }
                 }
@@ -477,12 +481,13 @@ object BackpackCreator {
         cardSize: Float,
         num: Int,
         isBackpack: Boolean,
+        row: Int,
+        column: Int,
         state: BackpackState,
         creator: ScreenCreator
     ) = with(creator) {
 
         val parent = box {
-            debug()
             if (!isBackpack) {
                 backgroundHandle = "backpack_empty_deck_slot"
             }
@@ -498,11 +503,16 @@ object BackpackCreator {
                 state.currentDeck.cardPositions[num]
             }
 
-            parent.clearChildren()
+            val grid = if (isBackpack) state.backpackFocusGrid else state.deckFocusGrid
 
-            with(parent) {
+            parent.clearChildren()
+            grid.remove(column, row)
+
+            val (_, actor) = with(parent) {
                 cardActorOrEmptySlot(cardName, cardSize, isBackpack, num, state, creator)
             }
+
+            grid.set(column, row, actor)
         }
 
         state.events.fire(SlotChangedEvent(num, isBackpack))
@@ -520,7 +530,6 @@ object BackpackCreator {
         val actor: InputActor = if (cardName != null)  {
             card = state.getCardInstance(cardName, screen, state)
             val actor = actor(card.actor) {
-                debug()
                 height = cardSize
                 width = cardSize
                 isDraggable = true
@@ -534,7 +543,6 @@ object BackpackCreator {
             }
             actor
         } else box {
-            debug()
             height = cardSize
             width = cardSize
             touchable = Touchable.enabled
@@ -636,6 +644,8 @@ object BackpackCreator {
         val warningEvents: EventPipeline,
         var sortingMode: SortingMode,
         var isSortingReverse: Boolean,
+        var deckFocusGrid: InputManager.FocusGrid,
+        var backpackFocusGrid: InputManager.FocusGrid,
         var deckParent: CustomBox?,
         var collectionParent: CustomBox?
     ) {

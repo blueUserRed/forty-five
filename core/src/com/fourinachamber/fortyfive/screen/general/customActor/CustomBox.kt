@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.keyInput.FocusAlignment
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputActorImpl
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
@@ -45,6 +46,15 @@ open class CustomBox(
     private var invalidSize: Boolean = true
 
     var flexDirection = FlexDirection.COLUMN
+        set(value) {
+            field = value
+            childrenFocusAlignment = if (flexDirection.isColumn) {
+                FocusAlignment.VERTICAL
+            } else {
+                FocusAlignment.HORIZONTAL
+            }
+        }
+
     var wrap = CustomWrap.NONE
 
     override var marginTop: Float = 0F

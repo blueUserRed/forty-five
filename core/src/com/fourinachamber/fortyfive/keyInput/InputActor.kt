@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.keyInput
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
@@ -26,6 +27,12 @@ interface InputActor {
     var keyboardFocusable: KeyboardFocusable
 
     var infoObject: Any?
+
+    var childrenFocusAlignment: FocusAlignment
+
+    var partOfFocusGrid: InputManager.FocusGrid?
+    var focusGridX: Int
+    var focusGridY: Int
 
     fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor
 
@@ -77,6 +84,10 @@ interface InputActor {
 
 enum class KeyboardFocusable {
     LEAF, GROUP, NONE
+}
+
+enum class FocusAlignment {
+    VERTICAL, HORIZONTAL, UNORDERED
 }
 
 class InputActorImpl : InputActor {
@@ -133,9 +144,20 @@ class InputActorImpl : InputActor {
 
     override var infoObject: Any? = null
 
+    override var childrenFocusAlignment: FocusAlignment = FocusAlignment.UNORDERED
+
+    override var partOfFocusGrid: InputManager.FocusGrid? = null
+    override var focusGridX: Int = 0
+    override var focusGridY: Int = 0
+
     override fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor {
         this._actor = actor
         this.screen = screen
+        observeInputState(
+            GameInputs.States.focused,
+            { actor.debug = true },
+            { actor.debug = false },
+        )
     }
 
     override fun onInput(input: Input, callback: () -> Unit) {

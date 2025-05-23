@@ -22,6 +22,26 @@ object GameInputs {
         arrayOf(Input.Cause.Keyboard(Keys.TAB, arrayOf(ModifierKey.SHIFT)))
     )
 
+    val focusUp = Input(
+        "focusUp",
+        arrayOf(Input.Cause.Keyboard(Keys.UP))
+    )
+
+    val focusDown = Input(
+        "focusDown",
+        arrayOf(Input.Cause.Keyboard(Keys.DOWN))
+    )
+
+    val focusLeft = Input(
+        "focusLeft",
+        arrayOf(Input.Cause.Keyboard(Keys.LEFT))
+    )
+
+    val focusRight = Input(
+        "focusRight",
+        arrayOf(Input.Cause.Keyboard(Keys.RIGHT))
+    )
+
     val cancel = Input(
         "cancel",
         arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))

@@ -4,7 +4,9 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Vector2
+import com.fourinachamber.fortyfive.utils.between
 import java.util.Stack
 
 class InputManager(val screen: OnjScreen) : InputProcessor {
@@ -37,16 +39,19 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     private var currentKeyboardDragAndDropActor: InputActor? = null
 
     init {
-        onInput(GameInputs.focusNext) { focusNext(false) }
-        onInput(GameInputs.focusPrevious) { focusNext(true) }
+        onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
+        onInput(GameInputs.focusPrevious) { focusNext(FocusChangeDirection.PREVIOUS) }
+        onInput(GameInputs.focusUp) { focusNext(FocusChangeDirection.UP) }
+        onInput(GameInputs.focusDown) { focusNext(FocusChangeDirection.DOWN) }
+        onInput(GameInputs.focusLeft) { focusNext(FocusChangeDirection.LEFT) }
+        onInput(GameInputs.focusRight) { focusNext(FocusChangeDirection.RIGHT) }
         onInput(GameInputs.cancel) { cancelKeyboardDragAndDrop() }
     }
 
     fun recheckFocused() {
-        val keyboardFocused = keyboardFocused
-        if (keyboardFocused == null) return
+        val keyboardFocused = keyboardFocused ?: return
         if (canBeFocused(keyboardFocused)) return
-        focusNext(false)
+        focusNext(FocusChangeDirection.NEXT)
     }
 
     fun pushModal(modal: Modal) {
@@ -109,13 +114,120 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         dragAndDrops.removeIf { it.first == source && it.second == target }
     }
 
-    fun focusNext(reverse: Boolean) {
+    fun focusNext(direction: FocusChangeDirection) {
         val root = findInputActorRoot()
-        var new = findNextFocusable(keyboardFocused ?: root, null, !reverse)
+        var new = findNextFocusable(keyboardFocused ?: root, null, direction)
         if (keyboardFocused != null && new == null) {
-            new = findNextFocusable(root, null, !reverse) // wrap around when end is reached
+            new = findNextFocusable(root, null, direction) // wrap around when end is reached
         }
-        this@InputManager.changeKeyboardFocusedActor(new, false)
+        changeKeyboardFocusedActor(new, false)
+    }
+
+    private fun findNextFocusable(
+        inputActor: InputActor,
+        searchAfter: InputActor?,
+        direction: FocusChangeDirection,
+        searchUpwards: Boolean = true,
+        canBeSelf: Boolean = false,
+        strictVerticalHorizontal: Boolean = true,
+        cantBeInGrid: FocusGrid? = null
+    ): InputActor? {
+        val actor = inputActor.actor
+        var newCantBeInGrid = cantBeInGrid
+        if (
+            newCantBeInGrid == null &&
+            !canBeSelf &&
+            (direction == FocusChangeDirection.NEXT || direction == FocusChangeDirection.PREVIOUS)
+        ) {
+            newCantBeInGrid = inputActor.partOfFocusGrid
+        }
+        if (
+            inputActor.partOfFocusGrid != null &&
+            direction != FocusChangeDirection.NEXT &&
+            direction != FocusChangeDirection.PREVIOUS
+        ) {
+            if (canBeSelf && canBeFocused(inputActor, enforceLeaf = false)) return inputActor
+            val next = inputActor.partOfFocusGrid?.move(inputActor, direction)
+            if (next != null && canBeFocused(next, enforceLeaf = false)) return next
+        }
+        if (inputActor.keyboardFocusable == KeyboardFocusable.GROUP) {
+            actor as? Group ?: throw RuntimeException("keyboardFocusable.Group should only be set on groups")
+            val orderedChildren = inputActor.childrenInCorrectOrderOrOriginal()
+            val alignment = inputActor.childrenFocusAlignment
+            val children: Iterable<Actor>
+            when (direction) {
+                FocusChangeDirection.DOWN -> {
+                    children = if (alignment == FocusAlignment.HORIZONTAL && strictVerticalHorizontal) {
+                        listOf()
+                    } else {
+                        orderedChildren
+                    }
+                }
+                FocusChangeDirection.RIGHT -> {
+                    children = if (alignment == FocusAlignment.VERTICAL && strictVerticalHorizontal) {
+                        listOf()
+                    } else {
+                        orderedChildren
+                    }
+                }
+                FocusChangeDirection.UP -> {
+                    children = if (alignment == FocusAlignment.HORIZONTAL && strictVerticalHorizontal) {
+                        listOf()
+                    } else {
+                        orderedChildren.reversed()
+                    }
+                }
+                FocusChangeDirection.LEFT -> {
+                    children = if (alignment == FocusAlignment.VERTICAL && strictVerticalHorizontal) {
+                        listOf()
+                    } else {
+                        orderedChildren.reversed()
+                    }
+                }
+                FocusChangeDirection.NEXT -> {
+                    children = orderedChildren
+                }
+                FocusChangeDirection.PREVIOUS -> {
+                    children = orderedChildren.reversed()
+                }
+                else -> {
+                    children = orderedChildren
+                }
+            }
+            val searchAfterIndex = children.indexOf(searchAfter?.actor)
+            children.forEachIndexed { index, child ->
+                if (searchAfter != null && searchAfterIndex != -1 && index <= searchAfterIndex) return@forEachIndexed
+                if (child !is InputActor) return@forEachIndexed
+                val next = findNextFocusable(
+                    child,
+                    null,
+                    direction,
+                    searchUpwards = false,
+                    canBeSelf = true,
+                    strictVerticalHorizontal = false,
+                    cantBeInGrid = newCantBeInGrid
+                )
+                if (next != null) return next
+            }
+        }
+        if (
+            canBeSelf &&
+            canBeFocused(inputActor) &&
+            (inputActor.partOfFocusGrid == null || inputActor.partOfFocusGrid != newCantBeInGrid)
+        ) {
+            return inputActor
+        }
+        if (!searchUpwards) return null
+        val parent = actor.parent
+        if (parent !is InputActor) return null
+        return findNextFocusable(
+            parent,
+            inputActor,
+            direction,
+            canBeSelf = true,
+            strictVerticalHorizontal = strictVerticalHorizontal,
+            cantBeInGrid = newCantBeInGrid
+        )
     }
 
     fun changeKeyboardFocusedActor(to: InputActor?) {
@@ -130,9 +242,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             this.lastHovered = null
         }
         var keyboardFocused = keyboardFocused
-        if (keyboardFocused != null) {
-            keyboardFocused.leaveInputStateManually(BaseStates.keyboardFocus)
-        }
+        keyboardFocused?.leaveInputStateManually(BaseStates.keyboardFocus)
         this.keyboardFocused = to
         keyboardFocused = this.keyboardFocused
         if (keyboardFocused != null) {
@@ -180,33 +290,6 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val root = screen.stage.root
         if (root is InputActor) return root
         throw RuntimeException("Stage root does not implement InputActor")
-    }
-
-    private fun findNextFocusable(
-        inputActor: InputActor,
-        searchAfter: InputActor?,
-        forward: Boolean,
-        searchUpwards: Boolean = true,
-        canBeSelf: Boolean = false
-    ): InputActor? {
-        val actor = inputActor.actor
-        if (inputActor.keyboardFocusable == KeyboardFocusable.GROUP) {
-            actor as? Group ?: throw RuntimeException("keyboardFocusable.Group should only be set on groups")
-            val orderedChildren = inputActor.childrenInCorrectOrderOrOriginal()
-            val children = if (forward) orderedChildren else orderedChildren.reversed()
-            val searchAfterIndex = children.indexOf(searchAfter?.actor)
-            children.forEachIndexed { index, child ->
-                if (searchAfter != null && searchAfterIndex != -1 && index <= searchAfterIndex) return@forEachIndexed
-                if (child !is InputActor) return@forEachIndexed
-                val next = findNextFocusable(child, null, forward, searchUpwards = false, canBeSelf = true)
-                if (next != null) return next
-            }
-        }
-        if (canBeSelf && canBeFocused(inputActor)) return inputActor
-        if (!searchUpwards) return null
-        val parent = actor.parent
-        if (parent !is InputActor) return null
-        return findNextFocusable(parent, inputActor, forward, canBeSelf = true)
     }
 
     private fun hit(x: Int, y: Int): Actor? {
@@ -405,6 +488,76 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         fun finished() {
             screen.inputManager.popModal(this)
         }
+    }
+
+    class FocusGrid {
+
+        private val columns: MutableList<MutableList<InputActor?>> = mutableListOf()
+
+        fun set(x: Int, y: Int, element: InputActor?) {
+            val width = columns.size
+            val additionalColumnsNeeded = x - width + 1
+            if (additionalColumnsNeeded > 0) {
+                repeat(additionalColumnsNeeded) { columns.add(mutableListOf()) }
+            }
+            val column = columns[x]
+            val height = column.size
+            val additionalElementsNeeded = y - height + 1
+            if (additionalElementsNeeded > 0) {
+                repeat(additionalElementsNeeded) { column.add(null) }
+            }
+            val previous = column[y]
+            if (previous != null) remove(x, y)
+            column[y] = element
+            element?.let {
+                it.partOfFocusGrid = this
+                it.focusGridX = x
+                it.focusGridY = y
+            }
+        }
+
+        fun remove(x: Int, y: Int) {
+            val column = columns.getOrNull(x) ?: return
+            if (y >= column.size) return
+            val element = column[y]
+            column[y] = null
+            element?.partOfFocusGrid = null
+        }
+
+        fun get(x: Int, y: Int): InputActor? = columns.getOrNull(x)?.getOrNull(y)
+
+        fun move(start: InputActor, direction: FocusChangeDirection): InputActor? {
+            if (start.partOfFocusGrid !== this) {
+                throw RuntimeException("FocusGrid.move called with actor that isn't part of the grid")
+            }
+            var x = start.focusGridX
+            var y = start.focusGridY
+            when (direction) {
+                FocusChangeDirection.UP -> y--
+                FocusChangeDirection.DOWN -> y++
+                FocusChangeDirection.RIGHT -> x++
+                FocusChangeDirection.LEFT -> x--
+                else -> {}
+            }
+            x = x.between(0, columns.size - 1)
+            val column = columns[x]
+            y = y.between(0, column.size - 1)
+            return get(x, y)
+        }
+
+        operator fun contains(actor: InputActor): Boolean {
+            columns.forEach { row ->
+                row.forEach { a ->
+                    if (a == actor) return true
+                }
+            }
+            return false
+        }
+
+    }
+
+    enum class FocusChangeDirection {
+        LEFT, RIGHT, UP, DOWN, NEXT, PREVIOUS
     }
 
 }
