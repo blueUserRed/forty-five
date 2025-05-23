@@ -94,6 +94,10 @@ object BackpackCreator {
         collectionSide.isVisible = false
         backpack.touchable = Touchable.disabled
 
+        val modal = InputManager.Modal(listOf(backpackElementsGroup, NavbarCreator.navbarButtonGroup), screen)
+        val filter = InputManager.FocusFilter(listOf(backpackElementsGroup), screen)
+        filter.start()
+
         val navbarObject = NavbarCreator.NavBarObject(
             "Backpack",
             { Timeline.timeline {
@@ -118,7 +122,10 @@ object BackpackCreator {
                     collectionSide.addAction(collectionAction)
                 }
                 delayUntil { deckAction.isComplete && collectionAction.isComplete }
-
+                action {
+                    filter.end()
+                    modal.push()
+                }
             } },
             { Timeline.timeline {
 
@@ -126,6 +133,8 @@ object BackpackCreator {
                     deckSide.drawOffsetX = 0f
                     collectionSide.drawOffsetX = 0f
                     backpack.touchable = Touchable.disabled
+                    modal.finished()
+                    filter.start()
                 }
 
                 val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, -800f)

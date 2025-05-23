@@ -247,8 +247,11 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         keyboardFocused = this.keyboardFocused
         if (keyboardFocused != null) {
             keyboardFocused.enterInputStateManually(BaseStates.keyboardFocus)
-            val parent = keyboardFocused.actor.parent
-            if (parent is InputActor) parent.childWasKeyboardFocused(keyboardFocused)
+            var parent = keyboardFocused.actor.parent
+            while (parent is InputActor) {
+                parent.childWasKeyboardFocused(keyboardFocused)
+                parent = parent.parent
+            }
         }
     }
 
@@ -336,7 +339,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         var highestPriority = -1
         var winnerCallbacks: List<() -> Unit>? = null
         actors.forEach { actor ->
-            actor.inputCallbacks.forEach { input, callbacks ->
+            actor.inputCallbacks.forEach { (input, callbacks) ->
                 val priority = checkInput(actor, input)
                 if (inDragAndDrop) {
                     if (priority > -1 && input == GameInputs.confirmDragAndDrop) finishKeyboardDragAndDrop(actor)
@@ -348,9 +351,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             }
         }
         winnerCallbacks?.forEach { it() }
+        if (winnerCallbacks != null && winnerCallbacks!!.isNotEmpty()) return false
         highestPriority = -1
         winnerCallbacks = null
-        inputCallbacks.forEach { input, callbacks ->
+        inputCallbacks.forEach { (input, callbacks) ->
             val priority = checkInput(null, input)
             if (priority == -1 || priority <= highestPriority) return@forEach
             highestPriority = priority
