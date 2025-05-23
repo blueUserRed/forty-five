@@ -50,11 +50,11 @@ class DebugBoundsActorImpl : DebugBoundsActor {
             commentBuilder.append("No focus texture")
         }
         if (lowRes) {
-            if (!commentBuilder.isEmpty()) commentBuilder.append("; ")
+            if (commentBuilder.isNotEmpty()) commentBuilder.append("; ")
             commentBuilder.append("Is low res")
         }
         if (comment != null) {
-            if (!commentBuilder.isEmpty()) commentBuilder.append("; ")
+            if (commentBuilder.isNotEmpty()) commentBuilder.append("; ")
             commentBuilder.append(comment)
         }
         if (commentBuilder.isEmpty()) commentBuilder.append("no or wrong texture")
@@ -96,7 +96,6 @@ class DebugBoundsActorImpl : DebugBoundsActor {
         val actorsWithBadTextures: MutableMap<String, String> = mutableMapOf()
 
         fun dumpActorsWithBadTextures() {
-            println(actorsWithBadTextures)
             if (actorsWithBadTextures.isEmpty()) return
             val builder = StringBuilder()
             actorsWithBadTextures.forEach { name, comment ->

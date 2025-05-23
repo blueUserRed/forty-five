@@ -114,6 +114,14 @@ object GameInputs {
             trueFocused,
             manuallyFocused
         ))
+
+        val awaitingDrop = InputState(
+            "awaitingDrop",
+            arrayOf(
+                InputManager.BaseStates.awaitingDropFromMouse,
+                InputManager.BaseStates.awaitingDropFromKeyboard
+            )
+        )
     }
 
 }

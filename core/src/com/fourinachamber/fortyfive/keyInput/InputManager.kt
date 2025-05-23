@@ -4,7 +4,6 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Vector2
 import com.fourinachamber.fortyfive.utils.between
 import java.util.Stack
@@ -37,6 +36,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     private var currentDragAndDropModal: Modal? = null
     private var currentKeyboardDragAndDropActor: InputActor? = null
+    private var awaitingDrop: List<InputActor>? = null
 
     init {
         onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
@@ -265,6 +265,15 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         currentDragAndDropModal = modal
         currentKeyboardDragAndDropActor = actor
         actor.enterInputStateManually(BaseStates.keyboardDrag)
+        val awaitingDrop = mutableListOf<InputActor>()
+        groups.forEach { (name, actors) ->
+            if (name !in targets) return@forEach
+            actors.forEach {
+                it.enterInputStateManually(BaseStates.awaitingDropFromKeyboard)
+                awaitingDrop.add(it)
+            }
+        }
+        this.awaitingDrop = awaitingDrop
         pushModal(modal)
     }
 
@@ -284,6 +293,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         currentKeyboardDragAndDropActor?.leaveInputStateManually(BaseStates.keyboardFocus)
         currentKeyboardDragAndDropActor = null
         currentDragAndDropModal = null
+        awaitingDrop?.forEach { it.leaveInputStateManually(BaseStates.awaitingDropFromKeyboard) }
+        awaitingDrop = null
         if (focusPrevious) {
             changeKeyboardFocusedActor(actor)
         }
@@ -418,6 +429,15 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             hit.enterInputStateManually(BaseStates.mouseDrag)
             screen.mouseDraggedActor = hit
             currentlyDraggedActor = hit
+            val awaitingDrop = mutableListOf<InputActor>()
+            dragAndDrops.forEach { (drag, drop) ->
+                if (!hit.inGroup(drag)) return@forEach
+                groups.forEach { (name, actors) ->
+                    if (name == drop) awaitingDrop.addAll(actors)
+                }
+            }
+            awaitingDrop.forEach { it.enterInputStateManually(BaseStates.awaitingDropFromMouse) }
+            this.awaitingDrop = awaitingDrop
         }
         val actor = currentlyDraggedActor!!
         val worldSpace = screen.viewport.unproject(Vector2(screenX, screenY))
@@ -434,6 +454,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         currentlyDraggedActor = null
         actor.isDragged = false
         actor.leaveInputStateManually(BaseStates.mouseDrag)
+        awaitingDrop?.forEach { it.leaveInputStateManually(BaseStates.awaitingDropFromMouse) }
+        awaitingDrop = null
         if (hitResult !is InputActor) return
         if (!hitResult.isDropTarget) return
         val dragAndDrop =
@@ -470,6 +492,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val keyboardFocus = InputState("keyboardFocus", arrayOf())
         val mouseDrag = InputState("mouseDrag", arrayOf())
         val keyboardDrag = InputState("keyboardDrag", arrayOf())
+        val awaitingDropFromKeyboard = InputState("awaitingDropFromKeyboard", arrayOf())
+        val awaitingDropFromMouse = InputState("awaitingDropFromMouse", arrayOf())
     }
 
     class FocusFilter(val groups: List<String>, private val screen: OnjScreen) {

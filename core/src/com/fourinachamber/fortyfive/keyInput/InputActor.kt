@@ -154,7 +154,7 @@ class InputActorImpl : InputActor {
         this._actor = actor
         this.screen = screen
         observeInputState(
-            GameInputs.States.focused,
+            InputManager.BaseStates.keyboardFocus,
             { actor.debug = true },
             { actor.debug = false },
         )
