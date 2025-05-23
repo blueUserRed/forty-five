@@ -12,10 +12,4 @@ pluginManagement {
 
 rootProject.name = "forty-five"
 
-dependencyResolutionManagement {
-    repositories {
-        mavenCentral()
-    }
-}
-
 include("desktop", "core", "onj")
