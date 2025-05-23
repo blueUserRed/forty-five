@@ -146,7 +146,7 @@ data class BuildConfig(
 fun isInCorrectDirectory(): Boolean =
     File("LICENSE").exists() &&
     File("readme.md").exists() &&
-    File("build.gradle").exists()
+    File("build.gradle.kts").exists()
 
 fun shellCommand(vararg command: String) = command("powershell.exe", *command)
 
