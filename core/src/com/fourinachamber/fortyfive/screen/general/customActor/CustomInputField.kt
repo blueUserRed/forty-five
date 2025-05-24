@@ -39,7 +39,7 @@ open class CustomInputField(
     defText: String,
     val labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
-) : CustomLabel(screen, defText, labelStyle, true, partOfHierarchy=partOfHierarchy) {
+) : CustomLabel(screen, defText, labelStyle, true, partOfHierarchy = partOfHierarchy) {
     //TODO ctrl+Z
     //TODO fix if leaved / unfocused
     //TODO add on
@@ -88,6 +88,7 @@ open class CustomInputField(
         }
 
     init {
+        wrap = true
         setText(text)
         setSize(prefWidth, prefHeight)
         inputListener = InputFieldClickListener(this)
@@ -691,12 +692,6 @@ open class CustomInputField(
 
 
     override fun layout() {
-        if ((styleManager!!.styleProperties
-                .find { it is WidthStyleProperty }!!
-                .get(styleManager!!.node)
-                    != YogaValue.parse("auto")) && !wrap
-        ) wrap = true
-
         super.layout()
         updateDisplayText()
         if (glyphLayout.runs.size > 1) { //has multiple lines /wrap //kinda trash solution, but IDK any better, I tried for a bit but nothing worked
@@ -795,13 +790,6 @@ open class CustomInputField(
     interface CustomMaxReachedListener {
         fun maxReached(field: CustomInputField, wrong: String)
     }
-
-    override fun initStyles(screen: OnjScreen) {
-        addTextInputStyles(screen)
-        addBackgroundStyles(screen)
-        addDisableStyles(screen)
-    }
-
 
     companion object {
         const val SPECIAL_SCREEN_STATE = "inInputField"

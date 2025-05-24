@@ -248,7 +248,7 @@ open class CustomImageActor(
     override val partOfHierarchy: Boolean = false,
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
     KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailActor, HasOnjScreen,
-    KotlinStyledActor, DragAndDroppableActor {
+    KotlinStyledActor, DragAndDroppableActor, DropShadowActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -300,6 +300,8 @@ open class CustomImageActor(
         }
     override var isFocused: Boolean = false
     override var isClicked: Boolean = false
+
+    override var dropShadow: DropShadow? = null
 
     override var isHoveredOver: Boolean = false
 
@@ -362,8 +364,10 @@ open class CustomImageActor(
                     "attempted to rotate an image, but the " +
                             "drawable does not implement TransformDrawable"
                 )
+                dropShadow?.doDropShadowRotated(batch, screen, drawable, this)
                 drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
+                dropShadow?.doDropShadow(batch, screen, drawable, this)
                 drawable.draw(batch, x, y, width, height)
             }
             batch.color = c
@@ -421,6 +425,7 @@ open class CustomImageActor(
     override fun toString(): String {
         return "CustomImageActor($backgroundHandle)"
     }
+
 
     companion object {
 
@@ -1337,7 +1342,8 @@ open class CustomGroup(
     /**
      * the children in the original order as they were added
      */
-    protected val originalChildren: MutableList<Actor> = mutableListOf()
+    protected val _originalChildren: MutableList<Actor> = mutableListOf()
+    val originalChildren: List<Actor> get() = _originalChildren
     private var sortedChildrenDirty: Boolean = false
 
     var forcedPrefWidth: Float? = null
@@ -1410,13 +1416,13 @@ open class CustomGroup(
 
     override fun addActor(actor: Actor) {
         sortedChildrenDirty = true
-        originalChildren.add(actor)
+        _originalChildren.add(actor)
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
         sortedChildrenDirty = true
-        originalChildren.add(index, actor)
+        _originalChildren.add(index, actor)
         super.addActorAt(index, actor)
     }
 
@@ -1424,13 +1430,13 @@ open class CustomGroup(
         sortedChildrenDirty = true
         val index = children.indexOf(actor, true)
         if (index == -1) return false
-        removeActorAt(originalChildren.indexOf(actor), unfocus)
+        removeActorAt(_originalChildren.indexOf(actor), unfocus)
         return true
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
         sortedChildrenDirty = true
-        val actor = originalChildren.removeAt(index)
+        val actor = _originalChildren.removeAt(index)
         return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
@@ -1443,7 +1449,7 @@ open class CustomGroup(
     override fun getPrefHeight(): Float = forcedPrefHeight ?: layoutPrefHeight
 
     override fun clear() {
-        originalChildren.clear()
+        _originalChildren.clear()
         super.clear()
         invalidate()
     }

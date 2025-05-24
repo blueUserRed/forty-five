@@ -19,6 +19,7 @@ import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
@@ -141,22 +142,14 @@ class MapScreen : ScreenCreator() {
         }
         getInfoPopup()
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val settingsMiddle = NavbarCreator.NavBarObject(
-            "Settings Middle",
-            settingsObject.openTimelineCreator,
-            settingsObject.closeTimelineCreator
-        )
-        val settingsRight = NavbarCreator.NavBarObject(
-            "Settings Right",
-            settingsObject.openTimelineCreator,
-            settingsObject.closeTimelineCreator
-        )
-        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(getSharedTitleScreen(), settingsMiddle, settingsRight), screen)
+        val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight)
+        val navbar = getSharedNavBar(worldWidth, worldHeight, listOf(getSharedTitleScreen(), backpackObject, settingsObject), screen)
         actor(navbar) {
             onLayoutAndNow { y = worldHeight - height }
             centerX()
         }
         actor(settings)
+        actor(backpack)
         val tutorial = actor(tutorialInfoActor) {
             name("tutorialInfoActor")
             x = 0f

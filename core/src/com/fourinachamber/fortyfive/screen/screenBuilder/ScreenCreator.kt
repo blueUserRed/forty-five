@@ -69,6 +69,7 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
+    @OptIn(ExperimentalContracts::class)
     inline fun newBox(builder: CustomBox.() -> Unit = {}): CustomBox {
         val box = CustomBox(screen)
         builder(box)
