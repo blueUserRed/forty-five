@@ -146,9 +146,9 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             direction != FocusChangeDirection.NEXT &&
             direction != FocusChangeDirection.PREVIOUS
         ) {
-            if (canBeSelf && canBeFocused(inputActor, enforceLeaf = false)) return inputActor
+            if (canBeSelf && canBeFocused(inputActor)) return inputActor
             val next = inputActor.partOfFocusGrid?.move(inputActor, direction)
-            if (next != null && canBeFocused(next, enforceLeaf = false)) return next
+            if (next != null && canBeFocused(next)) return next
         }
         if (inputActor.keyboardFocusable == KeyboardFocusable.GROUP) {
             actor as? Group ?: throw RuntimeException("keyboardFocusable.Group should only be set on groups")
@@ -189,9 +189,6 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
                 }
                 FocusChangeDirection.PREVIOUS -> {
                     children = orderedChildren.reversed()
-                }
-                else -> {
-                    children = orderedChildren
                 }
             }
             val searchAfterIndex = children.indexOf(searchAfter?.actor)
@@ -541,6 +538,14 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
                 it.partOfFocusGrid = this
                 it.focusGridX = x
                 it.focusGridY = y
+            }
+        }
+
+        fun clear() {
+            columns.indices.forEach { x ->
+                columns[x].indices.forEach { y ->
+                    remove(x, y)
+                }
             }
         }
 

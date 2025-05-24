@@ -193,6 +193,8 @@ class ShopScreenController(
         fun CardActor.unavailable() {
             this.alpha = 0.5f
         }
+        card.actor.leaveGroup(availableCardGroup)
+        card.actor.isDraggable = false
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
             if (label.alpha != 1f) return
             label.alpha = 0.6f
@@ -203,12 +205,16 @@ class ShopScreenController(
             label.alpha = 0.9f
             label.setText("bought")
             card.actor.unavailable()
+            return
         }
         if (setSoldOut) {
             label.alpha = 0.9f
             label.setText("sold out")
             card.actor.unavailable()
+            return
         }
+        card.actor.isDraggable = true
+        card.actor.joinGroup(availableCardGroup)
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
@@ -236,5 +242,9 @@ class ShopScreenController(
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), actor.card.name)
         updateStateOfCard(actor.card, setBought = true)
         updateStatesOfUnboughtCards()
+    }
+
+    companion object {
+        const val availableCardGroup = "shop-card-available"
     }
 }

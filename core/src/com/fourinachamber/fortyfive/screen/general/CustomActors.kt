@@ -51,7 +51,8 @@ open class CustomLabel(
     private val isDistanceField: Boolean,
     private val backgroundHints: Array<String> = arrayOf(),
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, HasOnjScreen, InputActor by InputActorImpl(), KotlinStyledActor, OffSettable {
+    DebugBoundsActor by DebugBoundsActorImpl(), StyledActor, BackgroundActor, HasOnjScreen,
+    InputActor by InputActorImpl(), KotlinStyledActor, OffSettable {
 
     override var dropShadow: DropShadow? = null
 
@@ -92,11 +93,19 @@ open class CustomLabel(
 
     init {
         initInput(this, screen)
+        initDebugBounds(this)
         touchable = Touchable.disabled
     }
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
+    }
+
+    override fun setFontScale(fontScale: Float) {
+        super.setFontScale(fontScale)
+        if (fontScale !in (0.7f..1.3f)) {
+            badTexture(name ?: text.toString(), comment = "font scale is $fontScale; Choose different font instead")
+        }
     }
 
     @MainThreadOnly
@@ -1404,6 +1413,13 @@ open class CustomGroup(
         originalChildren.clear()
         invalidate()
         super.clearChildren()
+    }
+
+    fun walk(): Sequence<Actor> = sequence {
+        childrenInCorrectOrderOrOriginal().forEach { child ->
+            yield(child)
+            if (child is CustomGroup) yieldAll(child.walk())
+        }
     }
 }
 

@@ -86,13 +86,13 @@ object FortyFive : Game() {
 //        MapManager.changeToMapScreen()
 //        resetAll()
 //        newRun(false)
-//        MapManager.changeToMapScreen()
-        changeToScreen(ConfigFileManager.screenBuilderFor("encounterScreen"), object : EncounterContext {
-            override val encounterIndex: Int = GameDirector.encounters.size - 5
-            override val forwardToScreen: String = "mapScreen"
-            override fun completed() {
-            }
-        })
+        MapManager.changeToMapScreen()
+//        changeToScreen(ConfigFileManager.screenBuilderFor("encounterScreen"), object : EncounterContext {
+//            override val encounterIndex: Int = GameDirector.encounters.size - 5
+//            override val forwardToScreen: String = "mapScreen"
+//            override fun completed() {
+//            }
+//        })
 //        return
 //        changeToScreen(FromKotlinScreenBuilder(TestScreen()))
 //        return
