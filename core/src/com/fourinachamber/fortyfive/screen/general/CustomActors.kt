@@ -327,6 +327,7 @@ open class CustomImageActor(
                     "attempted to rotate an image, but the " +
                             "drawable does not implement TransformDrawable"
                 )
+                dropShadow?.doDropShadowRotated(batch, screen, drawable, this)
                 drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
                 dropShadow?.doDropShadow(batch, screen, drawable, this)
@@ -378,6 +379,7 @@ open class CustomImageActor(
     override fun toString(): String {
         return "CustomImageActor($backgroundHandle)"
     }
+
 
     companion object {
 
@@ -1274,7 +1276,8 @@ open class CustomGroup(
     /**
      * the children in the original order as they were added
      */
-    protected val originalChildren: MutableList<Actor> = mutableListOf()
+    protected val _originalChildren: MutableList<Actor> = mutableListOf()
+    val originalChildren: List<Actor> get() = _originalChildren
     private var sortedChildrenDirty: Boolean = false
 
     var forcedPrefWidth: Float? = null
@@ -1366,14 +1369,14 @@ open class CustomGroup(
 
     override fun addActor(actor: Actor) {
         sortedChildrenDirty = true
-        originalChildren.add(actor)
+        _originalChildren.add(actor)
         invalidate()
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
         sortedChildrenDirty = true
-        originalChildren.add(index, actor)
+        _originalChildren.add(index, actor)
         invalidate()
         super.addActorAt(index, actor)
     }
@@ -1382,14 +1385,14 @@ open class CustomGroup(
         sortedChildrenDirty = true
         val index = children.indexOf(actor, true)
         if (index == -1) return false
-        removeActorAt(originalChildren.indexOf(actor), unfocus)
         invalidate()
+        removeActorAt(_originalChildren.indexOf(actor), unfocus)
         return true
     }
 
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
         sortedChildrenDirty = true
-        val actor = originalChildren.removeAt(index)
+        val actor = _originalChildren.removeAt(index)
         invalidate()
         return super.removeActorAt(children.indexOf(actor), unfocus)
     }
@@ -1404,13 +1407,13 @@ open class CustomGroup(
     override fun getPrefHeight(): Float = forcedPrefHeight ?: layoutPrefHeight
 
     override fun clear() {
-        originalChildren.clear()
+        _originalChildren.clear()
         super.clear()
         invalidate()
     }
 
     override fun clearChildren() {
-        originalChildren.clear()
+        _originalChildren.clear()
         invalidate()
         super.clearChildren()
     }

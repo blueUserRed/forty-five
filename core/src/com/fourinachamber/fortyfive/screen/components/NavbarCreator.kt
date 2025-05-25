@@ -265,7 +265,7 @@ object NavbarCreator {
                 setFontScale(0.7f * scale)
             }
 
-            fun createAction(end: Float): PropertyAction = PropertyAction(
+            fun createAction(end: Float): PropertyAction<Float> = PropertyAction<Float>(
                 this@box,
                 this@box::logicalOffsetY,
                 end,

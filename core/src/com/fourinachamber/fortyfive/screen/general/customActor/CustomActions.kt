@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.plus
 import com.fourinachamber.fortyfive.utils.times
 import kotlin.reflect.KMutableProperty
@@ -98,14 +99,14 @@ class BounceOutAction(
 
 }
 
-class PropertyAction(
+class PropertyAction<T>(
     val obj: Any,
-    val property: KMutableProperty<Float>,
-    val end: Float,
+    val property: KMutableProperty<T>,
+    val end: T,
     val invalidateHierarchyOf: Layout? = null
-) : TemporalAction() {
+): TemporalAction() where T: Float?{
 
-    private var initialValue: Float = 0f
+    private var initialValue: T? = null
 
     override fun begin() {
         initialValue = property.getter.call()
@@ -113,7 +114,7 @@ class PropertyAction(
     }
 
     override fun update(percent: Float) {
-        property.setter.call(initialValue + (end - initialValue) * percent)
+        property.setter.call(initialValue!! + (end!! - initialValue!!) * percent)
         invalidateHierarchyOf?.invalidateHierarchy()
     }
 
