@@ -19,7 +19,6 @@ import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.io.File
-import kotlin.math.min
 import kotlin.reflect.KClass
 import kotlin.system.exitProcess
 
@@ -257,6 +256,7 @@ object ResourceManager {
 
         this.resources = resources
         createDropShadows(dropShadowsToDraw)
+        if (FortyFive.createDropShadows) exitProcess(0)
     }
 
     fun createDropShadows(dropShadowsToDraw: List<Pair<String, Color>>) {
@@ -311,7 +311,6 @@ object ResourceManager {
         }
         batch.end()
         giveBack(borrower, "drop_shadow_shader")
-        exitProcess(0)
     }
 
 

@@ -377,6 +377,7 @@ textures: [
     {
         name: "map_detail_encounter_button_hover",
         file: "blobs/map/detail/encounter_button_hover.png",
+        dropShadowColor: color.red,
     },
     {
         name: "map_detail_encounter_button_disabled",

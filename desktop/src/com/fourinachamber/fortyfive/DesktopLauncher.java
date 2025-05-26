@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger;
-import kotlin.collections.ArraysKt;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +23,7 @@ public class DesktopLauncher {
         config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "blobs/icon.png");
         Exception exception = null;
 
-        if (ArraysKt.asList(arg).contains("createDropShadows")) {
+        if (arg.length > 0 && arg[0].equals("createDropShadows")) {
             FortyFive.INSTANCE.setCreateDropShadows(true);
             config.setWindowedMode(10000, 10000);
         }else{
