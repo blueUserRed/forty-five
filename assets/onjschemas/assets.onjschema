@@ -10,6 +10,7 @@ textures: {
     name: string,
     file: string,
     tileable?: boolean,
+    dropShadowColor?: Color,
     tileScale?: float,
     useMipMaps?: boolean,
     ...resourceSharedKeys

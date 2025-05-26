@@ -30,8 +30,8 @@ out vec4 outColor;
 //}
 
 void main() {
-    int depthPerDist = 20;
-    int maxSum = int(float(depthPerDist)*1.6);
+    int depthPerDist = 200;
+    int maxSum = int(float(depthPerDist) * 1.6);
 
     float distancePerDirection = u_multiplier/(u_multiplier * 2.0 + 1.0);
     float stepDist = distancePerDirection/float(depthPerDist);

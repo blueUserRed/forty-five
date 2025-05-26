@@ -37,6 +37,8 @@ object FortyFive : Game() {
         private set
 
     val cardTextureManager: CardTextureManager = CardTextureManager()
+    var createDropShadows = false
+
 
     private var currentScreen: OnjScreen? = null
     private var nextScreen: OnjScreen? = null
@@ -222,7 +224,8 @@ object FortyFive : Game() {
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()
-        UserPrefs.read()
+        if (!createDropShadows)
+            UserPrefs.read()
         SoundPlayer.init()
         GameDirector.init()
         MapManager.init()

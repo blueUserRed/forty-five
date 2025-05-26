@@ -34,10 +34,26 @@ tasks.register<JavaExec>("run") {
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         // Required to run on macOS
-        val list = mutableListOf<String>("-XstartOnFirstThread")
+        val list = mutableListOf<String>()
         list.addAll(jvmArgs as Collection<String>)
+        list.add("-XstartOnFirstThread")
         jvmArgs = list
     }
+}
+
+val ffArgs: String by project
+
+
+tasks.register<JavaExec>("createDropShadows") {
+    dependsOn("classes")
+    mainClass.set(mainClassName)
+    classpath = sourceSets["main"].runtimeClasspath
+    standardInput = System.`in`
+    workingDir = assetsDir
+    isIgnoreExitValue = true
+
+    args = mutableListOf("createDropShadows")
+    delete("../assets/drop_shadows")
 }
 
 
