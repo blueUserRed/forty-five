@@ -471,7 +471,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (lastHovered is InputActor) {
             lastHovered.leaveInputStateManually(BaseStates.mouseHover)
         }
-        if (hit is InputActor) {
+        if (hit is InputActor && canBeFocused(hit)) {
             this@InputManager.changeKeyboardFocusedActor(null, true)
             hit.enterInputStateManually(BaseStates.mouseHover)
         }

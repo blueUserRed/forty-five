@@ -1,7 +1,5 @@
 package com.fourinachamber.fortyfive.screen.screens
 
-import com.badlogic.gdx.Game
-import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -27,7 +25,6 @@ import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.components.WarningParent
@@ -49,7 +46,6 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
-import kotlin.times
 
 class GameScreen : ScreenCreator() {
 
@@ -671,7 +667,7 @@ class GameScreen : ScreenCreator() {
             )
             onInput(GameInputs.interact){
                 parryPromise?.let {
-                    if (parryPromise.isNotResolved) parryPromise.resolve(false)
+                    if (it.isNotResolved) it.resolve(false)
                 }
             }
             gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
@@ -762,7 +758,7 @@ class GameScreen : ScreenCreator() {
 
             onInput(GameInputs.interact) {
                 parryPromise?.let {
-                    if (parryPromise.isNotResolved) parryPromise.resolve(true)
+                    if (it.isNotResolved) it.resolve(true)
                 }
             }
             backgroundHandle = "parry_button_texture"
@@ -795,6 +791,13 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.winPopup() {
+
+        val winPopupGroup = "encounter-screen-win-popup"
+        val modal = InputManager.Modal(listOf(winPopupGroup), screen)
+        val filter = InputManager.FocusFilter(listOf(winPopupGroup), screen)
+
+        filter.start()
+
         var continuePromise: Promise<Unit>? = null
         box {
             backgroundHandle = "win_popup_background"
@@ -810,6 +813,8 @@ class GameScreen : ScreenCreator() {
             gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { event ->
                 isVisible = true
                 continuePromise = event.popupPromise
+                filter.end()
+                modal.push()
             }
 
             box {
@@ -872,44 +877,47 @@ class GameScreen : ScreenCreator() {
                     label("red_wing", "You get a card", Color.FortyWhite)
                 }
             }
-            box {
+
+            box(backgroundHints = arrayOf("common_button_default", "common_button_hover")) {
                 width = 200f
                 height = 50f
                 touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                joinGroup(winPopupGroup)
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
-//                styles(
-//                    normal = {
-//                        backgroundHandle = "common_button_default"
-//                    },
-//                    focused = {
-//                        backgroundHandle = "common_button_hover"
-//                    }
-//                )
+                backgroundHandle = "common_button_default"
+                observeInputState(
+                    GameInputs.States.focused,
+                    { backgroundHandle = "common_button_hover" },
+                    { backgroundHandle = "common_button_default" }
+                )
                 label("red_wing", "Claim & Continue", Color.FortyWhite) {
                     setFontScale(0.7f)
                     setAlignment(Align.center)
                 }
                 marginBottom = 120f
-//                onSelect {
-//                    continuePromise?.resolve(Unit)
-//                    SoundPlayer.situation("money_earned", screen)
-//                    val navBarSymbol = screen.namedActorOrError("cash_symbol")
-//                    val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
-//                    val renderPipeline = FortyFive.currentRenderPipeline!!
-//                    val moneyAnim = GraphicsConfig.cashOrbAnimation(
-//                        winPopupSymbol.localToScreenCoordinates(Vector2(
-//                            winPopupSymbol.width / 2,
-//                            winPopupSymbol.height / 2
-//                        )),
-//                        navBarSymbol.localToScreenCoordinates(Vector2(
-//                            navBarSymbol.width / 2,
-//                            navBarSymbol.height / 2
-//                        )),
-//                        renderPipeline
-//                    )
-//                    renderPipeline.addOrbAnimation(moneyAnim)
-//                }
+                onInput(GameInputs.interact) {
+                    filter.start()
+                    modal.finished()
+                    continuePromise?.resolve(Unit)
+                    SoundPlayer.situation("money_earned", screen)
+                    val navBarSymbol = screen.namedActorOrError("cash_symbol")
+                    val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
+                    val renderPipeline = FortyFive.currentRenderPipeline!!
+                    val moneyAnim = GraphicsConfig.cashOrbAnimation(
+                        winPopupSymbol.localToStageCoordinates(Vector2(
+                            winPopupSymbol.width / 2,
+                            winPopupSymbol.height / 2
+                        )),
+                        navBarSymbol.localToStageCoordinates(Vector2(
+                            navBarSymbol.width / 2,
+                            navBarSymbol.height / 2
+                        )),
+                        renderPipeline
+                    )
+                    renderPipeline.addOrbAnimation(moneyAnim)
+                }
             }
         }
     }
