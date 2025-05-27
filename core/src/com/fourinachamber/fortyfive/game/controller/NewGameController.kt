@@ -962,6 +962,7 @@ class NewGameController(
         }
         delay(300)
         action {
+            encounterContext.completed()
             SaveState.write()
 
             val chooseCardContext = object : ChooseCardScreenContext {

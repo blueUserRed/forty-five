@@ -24,22 +24,34 @@ object GameInputs {
 
     val focusUp = Input(
         "focusUp",
-        arrayOf(Input.Cause.Keyboard(Keys.UP))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.UP),
+            Input.Cause.Keyboard(Keys.W)
+        )
     )
 
     val focusDown = Input(
         "focusDown",
-        arrayOf(Input.Cause.Keyboard(Keys.DOWN))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.DOWN),
+            Input.Cause.Keyboard(Keys.S)
+        )
     )
 
     val focusLeft = Input(
         "focusLeft",
-        arrayOf(Input.Cause.Keyboard(Keys.LEFT))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.LEFT),
+            Input.Cause.Keyboard(Keys.A)
+        )
     )
 
     val focusRight = Input(
         "focusRight",
-        arrayOf(Input.Cause.Keyboard(Keys.RIGHT))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.RIGHT),
+            Input.Cause.Keyboard(Keys.D)
+        )
     )
 
     val cancel = Input(
@@ -73,14 +85,14 @@ object GameInputs {
     val nextDebugMenuPage = Input(
         "nextDebugMenuPage",
         arrayOf(
-            Input.Cause.Keyboard(Keys.RIGHT)
+            Input.Cause.Keyboard(Keys.J)
         )
     )
 
     val previousDebugMenuPage = Input(
         "previousDebugMenuPage",
         arrayOf(
-            Input.Cause.Keyboard(Keys.LEFT)
+            Input.Cause.Keyboard(Keys.K)
         )
     )
 

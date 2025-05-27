@@ -276,8 +276,8 @@ open class RenderPipeline(
         val pageText = page.getText(screen)
         var text = ""
         text += "* ---${page.name}---\n"
-        text += "* Press 't' to toggle the debug menu.\n"
-        text += "* Use the arrow keys to change page\n"
+        text += "* Press alt + d to toggle the debug menu.\n"
+        text += "* Use j/k to change page\n"
         text += "* page: ${menu.currentPageNumber()}/${menu.amountOfPages()}\n\n"
         text += pageText
 
