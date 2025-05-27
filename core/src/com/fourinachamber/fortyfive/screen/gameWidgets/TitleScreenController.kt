@@ -26,79 +26,10 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
             "title_screen.startButtonText",
             if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start your Journey"
         )
-        if (!PermaSaveState.hasSeenInDevPopup) timeline.appendAction(Timeline.timeline {
-            action {
-                screen.enterState(showInDevelopmentReminder)
-            }
-            delayUntil { isConfirmed }
-            action {
-                screen.leaveState(showInDevelopmentReminder)
-                PermaSaveState.hasSeenInDevPopup = true
-            }
-        }.asAction())
     }
 
     override fun onShow() {
         SoundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
-    }
-
-    override fun onUnhandledEvent(event: Event) = when (event) {
-
-        is QuitGameEvent -> timeline.appendAction(Timeline.timeline {
-            action {
-                screen.enterState(showConfirmationPopupScreenState)
-                TemplateString.updateGlobalParam("title_screen.popupTitle", "Quit?")
-                TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to quit?")
-            }
-            delayUntil { isConfirmed || showConfirmationPopupScreenState !in screen.screenState }
-            action {
-                if (isConfirmed) Gdx.app.exit()
-            }
-
-        }.asAction())
-
-        is AbandonRunEvent -> timeline.appendAction(Timeline.timeline {
-            action {
-                screen.enterState(showConfirmationPopupScreenState)
-                TemplateString.updateGlobalParam("title_screen.popupTitle", "Abandon Run?")
-                TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to abandon" +
-                        " your run? You will loose all the progress you made and all bullets that haven't been saved yet.")
-            }
-            delayUntil { isConfirmed || showConfirmationPopupScreenState !in screen.screenState }
-            action {
-                if (isConfirmed) FortyFive.newRun(false)
-                isConfirmed = false
-                screen.leaveState(showConfirmationPopupScreenState)
-            }
-
-        }.asAction())
-
-        is ResetGameEvent -> timeline.appendAction(Timeline.timeline {
-            action {
-                screen.enterState(showConfirmationPopupScreenState)
-                TemplateString.updateGlobalParam("title_screen.popupTitle", "Reset game?")
-                TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to reset" +
-                        " the game? The game will behave as if it were freshly installed.")
-            }
-            delayUntil { isConfirmed || showConfirmationPopupScreenState !in screen.screenState }
-            action {
-                if (isConfirmed) FortyFive.resetAll()
-                TemplateString.updateGlobalParam(
-                    "title_screen.startButtonText",
-                    if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start your journey"
-                )
-                isConfirmed = false
-                screen.leaveState(showConfirmationPopupScreenState)
-            }
-
-        }.asAction())
-
-        is PopupConfirmationEvent -> {
-            isConfirmed = true
-        }
-
-        else -> {}
-
     }
 
     private fun doTransitionAwayAnim() {
