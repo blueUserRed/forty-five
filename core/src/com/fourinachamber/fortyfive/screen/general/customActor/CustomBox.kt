@@ -8,32 +8,33 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.keyInput.FocusAlignment
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.between
 import ktx.actors.alpha
 import kotlin.math.max
 
 //TODO (optional):
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
-open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower, KotlinStyledActor, DisableActor,
-    DragAndDroppableActor, HasPaddingActor {
+open class CustomBox(
+    screen: OnjScreen,
+    backgroundHints: Array<String> = arrayOf(),
+) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor, DisableActor, HasPaddingActor
+{
 
     override var positionType: PositionType = PositionType.RELATIV
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-    override var isFocused: Boolean = false
-    override var isSelected: Boolean = false
-    override var isSelectable: Boolean = false
-
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
     override var isDisabled: Boolean = false
 
     var verticalAlign: CustomAlign = CustomAlign.START      // top
@@ -45,6 +46,15 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     private var invalidSize: Boolean = true
 
     var flexDirection = FlexDirection.COLUMN
+        set(value) {
+            field = value
+            childrenFocusAlignment = if (flexDirection.isColumn) {
+                FocusAlignment.VERTICAL
+            } else {
+                FocusAlignment.HORIZONTAL
+            }
+        }
+
     var wrap = CustomWrap.NONE
 
     override var marginTop: Float = 0F
@@ -57,12 +67,6 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
     override var paddingLeft: Float = 0F
     override var paddingRight: Float = 0F
 
-    override var isDraggable: Boolean = false
-    override var targetGroups: List<String> = listOf()
-    override var resetCondition: ((Actor?) -> Boolean)? = null
-    override var inDragPreview: Boolean = false
-    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
-
     var fitContentInFlexDirection: Boolean = false
 
     /**
@@ -72,6 +76,25 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
 
     init {
         touchable = Touchable.childrenOnly
+    }
+
+    override fun validate() {
+        if (!needsLayout()) return
+        val fieldSource = WidgetGroup::class.java.getDeclaredField("needsLayout")
+        fieldSource.isAccessible = true
+        layout()
+
+        // Widgets may call invalidateHierarchy during layout (eg, a wrapped label). The root-most widget group retries layout a
+        // reasonable number of times.
+        if (parent is CustomBox) return // The parent widget will layout again.
+        var i = 0
+        while (needsLayout()) {
+            fieldSource.set(this, false)
+            layout()
+            i++
+            if (i > 30) break
+        }
+        if (i >= 10) FortyFiveLogger.warn("CustomBox", "$i Layout iterations were necessary until needsLayout() was false")
     }
 
     override fun layout() {
@@ -335,6 +358,7 @@ open class CustomBox(screen: OnjScreen) : CustomGroup(screen), ResourceBorrower,
 
     data class Box(val x: Float, val y: Float, val w: Float, val h: Float)
 
+    override fun childrenInCorrectOrder(): List<Actor>? = originalChildren
 
     override fun invalidate() {
         invalidSize = true
@@ -425,7 +449,7 @@ enum class PositionType {
 }
 
 
-class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
+class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: OnjScreen) : CustomBox(screen, backgroundHints) {
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */
@@ -520,6 +544,8 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
 
 
     var overflowHidden = true
+
+    var liftChild: Actor? = null
 
     fun scrolledBy(amount: Float) {
         //it just feels wrong if it starts at the bottom to scroll like that, for everything else it is okay
@@ -711,15 +737,36 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         batch ?: return
         batch.flush()
         val viewport = screen.stage.viewport
-        background?.draw(batch, x, y, width, height)
-        if (drawItemsWithScissor(viewport, batch, parentAlpha)) return
 
-        if (maxScrollableDistanceInDirection != 0F) {
+        val oldX = x
+        val oldY = y
+        if (isDragged) {
+            x = dragX
+            y = dragY
+        }
+        background?.draw(batch, x, y, width, height)
+        val liftChild = if (liftChild?.isVisible ?: false) liftChild else null
+        liftChild?.isVisible = false
+        if (drawItemsWithScissor(viewport, batch, parentAlpha)) {
+            x = oldX
+            y = oldY
+            return
+        }
+        liftChild?.isVisible = true
+
+        if (maxScrollableDistanceInDirection != 0F || liftChild != null) {
             if (isTransform) applyTransform(batch, computeTransform())
-            scrollBarBackground?.draw(batch, parentAlpha)
-            scrollBar?.draw(batch, alpha)
+            if (maxScrollableDistanceInDirection != 0F) {
+                scrollBarBackground?.draw(batch, parentAlpha)
+                scrollBar?.draw(batch, alpha)
+            }
+            if (liftChild != null) {
+                liftChild.draw(batch, parentAlpha)
+            }
             if (isTransform) resetTransform(batch)
         }
+        x = oldX
+        y = oldY
     }
 
     private fun drawItemsWithScissor(
@@ -745,6 +792,10 @@ class CustomScrollableBox(screen: OnjScreen) : CustomBox(screen) {
         ScissorStack.popScissors()
         batch.flush()
         return false
+    }
+
+    override fun childWasKeyboardFocused(child: InputActor) {
+        scrollTo(child.actor)
     }
 
     fun scrollTo(actor: Actor) {

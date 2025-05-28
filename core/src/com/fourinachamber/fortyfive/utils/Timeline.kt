@@ -234,7 +234,7 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
          */
         inline fun includeLater(
             crossinline timelineCreator: @AllThreadsAllowed Timeline.() -> Timeline,
-            crossinline condition: @AllThreadsAllowed Timeline.() -> Boolean
+            crossinline condition: @AllThreadsAllowed Timeline.() -> Boolean = { true }
         ) {
             timelineActions.add(object : TimelineAction() {
 
@@ -248,6 +248,21 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
 
                 override fun isFinished(timeline: Timeline): Boolean = true
 
+            })
+        }
+
+        inline fun later(crossinline block: TimelineBuilderDSL.() -> Unit) {
+            timelineActions.add(object : TimelineAction() {
+
+                override fun start(timeline: Timeline) {
+                    super.start(timeline)
+                    val dsl = TimelineBuilderDSL()
+                    block(dsl)
+                    val toInclude = dsl.build()
+                    toInclude.actions.reversed().forEach { timeline.pushAction(it) }
+                }
+
+                override fun isFinished(timeline: Timeline): Boolean = true
             })
         }
 

@@ -6,7 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
@@ -14,7 +13,7 @@ import io.github.orioncraftmc.meditate.enums.YogaUnit
 import kotlin.math.sin
 import kotlin.reflect.KClass
 
-interface StyledActor : HoverStateActor {
+interface StyledActor {
 
     var styleManager: StyleManager?
 
@@ -263,17 +262,13 @@ sealed class StyleCondition {
     }
 
     object IsHoveredOver : StyleCondition() {
-        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
-            actor.isHoveredOver
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor = TODO()
+//            actor.isHoveredOver
     }
 
     class IsActorHoveredOver(val actorName: String) : StyleCondition() {
 
-        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
-            (
-                    (screen.namedActorOrError(actorName) as? HoverStateActor)
-                        ?: throw RuntimeException("actor $actorName must be a HoverStateActor")
-                    ).isHoveredOver
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor = TODO()
     }
 
     class ScreenState(val state: String) : StyleCondition() {

@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
@@ -16,7 +17,11 @@ import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActor
+import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActorImpl
+import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screens.TestScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -78,15 +83,7 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-//        resetAll()
-//        newRun(false)
-        changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen"), object : EncounterContext {
-            override val encounterIndex: Int = GameDirector.encounters.size - 5
-            override val forwardToScreen: String = "mapScreen"
-            override fun completed() {
-            }
-        })
-        return
+        UserPrefs.startScreen = UserPrefs.StartScreen.MAP
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
@@ -130,7 +127,7 @@ object FortyFive : Game() {
                 mainThreadTasks.remove(task)
             }
             currentScreen?.update(Gdx.graphics.deltaTime)
-            nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
+//            nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
             currentRenderPipeline?.render(Gdx.graphics.deltaTime)
         }
         renderTimes[(renderCounter % renderTimes.size).toInt()] = renderTime.toInt()
@@ -142,19 +139,17 @@ object FortyFive : Game() {
         inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
-        val screen = screenBuilder.build(controllerContext)
+        val screen = screenBuilder.build(controllerContext, currentScreen)
         nextScreen = screen
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
             currentScreen?.dispose()
-            screen.update(Gdx.graphics.deltaTime, isEarly = true)
+//            screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen
             nextScreen = null
             currentRenderPipeline?.dispose()
-            currentRenderPipeline = RenderPipeline(screen, screen).also {
-                it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
-            }
+            currentRenderPipeline = RenderPipeline(screen, screen)
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
@@ -180,9 +175,7 @@ object FortyFive : Game() {
     @AllThreadsAllowed
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
-        currentRenderPipeline = renderPipeline.also {
-            it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
-        }
+        currentRenderPipeline = renderPipeline
     }
 
     fun newRun(forwardToLooseScreen: Boolean) {
@@ -214,7 +207,6 @@ object FortyFive : Game() {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
             registerNameSpace("Style", StyleNamespace)
-            registerNameSpace("Screen", ScreenNamespace)
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
@@ -272,6 +264,7 @@ object FortyFive : Game() {
 
     override fun dispose() {
         FortyFiveLogger.debug(logTag, "game closing")
+        DebugBoundsActorImpl.dumpActorsWithBadTextures()
         MapManager.write()
         PermaSaveState.write()
         SaveState.write()

@@ -1,26 +1,29 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
-import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
@@ -28,7 +31,6 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.contains
-import onj.value.OnjNamedObject
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -41,18 +43,16 @@ class Revolver(
     private val backgroundHandle: ResourceHandle,
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
+    private val slotSize: Float,
+    private val animationDuration: Float,
+    private val events: EventPipeline,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower {
+) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
 
     override var styleManager: StyleManager? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
-
     override var fixedZIndex: Int = 0
-
-    var slotSize: Float? = null
 
     var cardZIndex: Int = 0
 
@@ -60,11 +60,6 @@ class Revolver(
      * the scale of a card placed into the revolver
      */
     var cardScale: Float = 1f
-
-    /**
-     * the duration of the revolver spin animation
-     */
-    var animationDuration: Float = 1f
 
     /**
      * the radius of the circle in which the slots are laid out
@@ -82,8 +77,18 @@ class Revolver(
     /**
      * the slots of the revolver
      */
-    lateinit var slots: Array<RevolverSlot>
-        private set
+    val slots: Array<RevolverSlot> = Array(5) {
+        val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, events, animationDuration)
+        slot.reportDimensionsWithScaling = true
+        slot.ignoreScalingWhenDrawing = true
+        addActor(slot)
+        screen.addNamedActor("revolverSlot-$it", slot)
+        slot
+    }
+
+    private val orderedChildren: List<Actor> by lazy {
+        listOf(slots[4], slots[0], slots[1], slots[2], slots[3])
+    }
 
     private val background: Promise<Drawable> = ResourceManager.request(this, screen, backgroundHandle)
 
@@ -94,7 +99,8 @@ class Revolver(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     init {
-        bindHoverStateListeners(this)
+        initInput(this, screen)
+        keyboardFocusable = KeyboardFocusable.GROUP
         touchable = Touchable.childrenOnly
     }
 
@@ -104,7 +110,6 @@ class Revolver(
      */
     fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
-        card?.isDraggable = false
         slots[slot - 1].card = card
         card?.actor?.let {
             it.width = slots[0].width * cardScale
@@ -112,13 +117,14 @@ class Revolver(
             it.rotation = 0f
             it.fixedZIndex = cardZIndex
         }
-        if (card != null && card.actor !in this) addActor(card.actor)
+        if (card != null && card.actor !in this) {
+            addActor(card.actor)
+        }
         slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
     }
 
     fun preAddCard(slot: Int, card: Card) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
-        card.isDraggable = false
         val revolverSlot = slots[slot - 1]
         if (card.actor !in this) addActor(card.actor)
         card.actor.let {
@@ -149,6 +155,7 @@ class Revolver(
         for (slot in slots) if (slot.card === card) {
             if (card.actor in screen.stage.root) screen.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
+            card.actor.leaveInputStateManually(GameInputs.States.manuallyFocused)
             removeActor(card.actor)
             return
         }
@@ -166,39 +173,6 @@ class Revolver(
      * true when at least one bullet is loaded into the revolver
      */
     fun isBulletLoaded(): Boolean = slots.any { it.card != null }
-
-    fun initDragAndDrop(dragAndDrop: DragAndDrop) {
-        slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, animationDuration)
-            slot.reportDimensionsWithScaling = true
-            slot.ignoreScalingWhenDrawing = true
-            addActor(slot)
-            screen.addNamedActor("revolverSlot-$it", slot)
-            val dropBehaviour = RevolverDropTarget(dragAndDrop, slot)
-            dragAndDrop.addTarget(dropBehaviour)
-            slot
-        }
-    }
-
-    fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
-        slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, animationDuration)
-            slot.reportDimensionsWithScaling = true
-            slot.ignoreScalingWhenDrawing = true
-            addActor(slot)
-            screen.addNamedActor("revolverSlot-$it", slot)
-            val (dragAndDrop, dropOnj) = config
-            val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-                dropOnj.name,
-                dragAndDrop,
-                slot,
-                dropOnj
-            )
-            dragAndDrop.addTarget(dropBehaviour)
-            slot
-        }
-        invalidateHierarchy()
-    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
@@ -239,8 +213,8 @@ class Revolver(
             val slot = slots[i]
             val angle = angleForIndex(i)
             slot.position(basePos, radius, angle)
-            slot.width = slotSize!!
-            slot.height = slotSize!!
+            slot.width = slotSize
+            slot.height = slotSize
         }
     }
 
@@ -309,6 +283,9 @@ class Revolver(
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
 
+
+    override fun childrenInCorrectOrder(): List<Actor>? = orderedChildren
+
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
@@ -335,13 +312,13 @@ class RevolverSlot(
     drawableHandle: ResourceHandle,
     size: Float,
     screen: OnjScreen,
+    private val events: EventPipeline,
     private val animationDuration: Float
-) : CustomImageActor(drawableHandle, screen), AnimationActor, KeySelectableActor {
+) : CustomImageActor(drawableHandle, screen) {
 
-    override var isSelected: Boolean = false
-    override var isSelectable: Boolean = false
+    override var dropShadow: DropShadow? = null
 
-    override var inAnimation: Boolean = false
+    var inAnimation: Boolean = false
 
     /**
      * if set to a card, the card will be moved along with the spin animation
@@ -356,12 +333,33 @@ class RevolverSlot(
         height = size
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
-        isFocusable = true
-        makeDraggable(this)
-        group = revolverSlotFocusGroupName
-        bindDroppable(this, screen, listOf(NewCardHand.cardFocusGroupName))
-        onFocusChange { _, _ -> debug = isFocused }
-//        onSelectChange { _, _, selected -> println("selected $selected") }
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        joinGroup(revolverSlotGroup)
+        val dropShadow = DropShadow(
+            color = Color.Black,
+            scale = 1.1f,
+            offX = 3f,
+            offY = -3f
+        )
+        dropShadow.showDropShadow = false
+        this.dropShadow = dropShadow
+        observeInputState(
+            GameInputs.States.focused,
+            {
+                dropShadow.showDropShadow = true
+                card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused)
+            },
+            {
+                dropShadow.showDropShadow = false
+                card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused)
+            }
+        )
+        isDropTarget = true
+        onDrop { actor ->
+            if (actor !is CardActor) return@onDrop
+            events.fire(CardHand.CardDraggedOntoSlotEvent(actor.card, this))
+        }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -387,7 +385,7 @@ class RevolverSlot(
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
-        if (card?.actor?.inAnimation ?: true) return
+//        if (card?.actor?.inAnimation ?: true) return
         card?.actor?.setPosition(cardPosition())
     }
 
@@ -429,6 +427,7 @@ class RevolverSlot(
         val action = RevolverSlotRotationAction(base, radius, this, from, to)
         action.isReverse = false
         action.duration = animationDuration
+        action.interpolation = Interpolation.pow2
         addAction(action)
         inAnimation = true
         this.action = action
@@ -436,15 +435,6 @@ class RevolverSlot(
 
     override fun toString(): String {
         return "revolverSlot: $num with card $card"
-    }
-
-    override fun getBounds(): Rectangle {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        return if (reportDimensionsWithScaling) {
-            Rectangle(x, y, width, height)
-        } else {
-            Rectangle(x, y, width * scaleX, height * scaleY)
-        }
     }
 
     /**
@@ -467,7 +457,8 @@ class RevolverSlot(
     }
 
     companion object {
-        const val revolverSlotFocusGroupName: String = "revolverSlot"
+
+        const val revolverSlotGroup: String = "revolverSlot"
     }
 
 }

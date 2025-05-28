@@ -32,9 +32,6 @@ class Selector(
     var forcedPrefHeight: Float? = null
     var forcedPrefWidth: Float? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
-
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
@@ -55,7 +52,6 @@ class Selector(
     private var lastValue: Any = Unit
 
     init {
-        bindHoverStateListeners(this)
         addListener(clickListener)
         options = bindTarget
             .mappings
@@ -105,7 +101,7 @@ class Selector(
         glyphLayout.setText(font, options[curOptionIndex].first)
     }
 
-    private fun switch(amount: Int) {
+    fun switch(amount: Int) {
         curOptionIndex = (options.size + curOptionIndex + amount) % options.size
         @Suppress("UNCHECKED_CAST") // I hate generics
         (bindTarget.setter as (Any) -> Unit)(options[curOptionIndex].second)

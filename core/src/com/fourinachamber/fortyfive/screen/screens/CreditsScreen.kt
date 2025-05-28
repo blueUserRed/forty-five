@@ -6,10 +6,6 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -42,22 +38,6 @@ class CreditsScreen : ScreenCreator() {
     )
 
     private val scrollSpeed = 5f
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf(backButtonFocusGroup)
-                ),
-            ),
-            startGroups = listOf(backButtonFocusGroup),
-        )
-    )
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(), screen)
-    )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
 //        TitleScreenController(screen)
@@ -111,13 +91,6 @@ class CreditsScreen : ScreenCreator() {
 
 
         label("red_wing", "Back") {
-            addButtonDefaults()
-            group = backButtonFocusGroup
-            setFocusableTo(true, this)
-            isSelectable = true
-            onSelect {
-                MapManager.changeToTitleScreen()
-            }
             x = 20f
             y = 20f
             setAlignment(Align.center)

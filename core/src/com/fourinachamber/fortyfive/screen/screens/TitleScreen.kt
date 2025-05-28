@@ -1,27 +1,25 @@
 package com.fourinachamber.fortyfive.screen.screens
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.settingsKeyMap
 import com.fourinachamber.fortyfive.screen.gameWidgets.TitleScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.Timeline
+import ktx.actors.alpha
 import ktx.actors.onClick
 
 class TitleScreen : ScreenCreator() {
@@ -31,9 +29,6 @@ class TitleScreen : ScreenCreator() {
     val worldWidth = 1600f
     val worldHeight = 900f
 
-    val menuFocusGroup = "title_menu"
-
-    val popupFocusGroup = "popup_group"
     val popupWidgetName = "popup_widget"
 
     override val background: String = "background_bewitched_forest"
@@ -46,25 +41,15 @@ class TitleScreen : ScreenCreator() {
         "*" to 800 //800 fits good with the animation
     )
 
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf(menuFocusGroup)
-                ),
-            ),
-            startGroups = listOf(menuFocusGroup),
-        )
-    )
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(settingsKeyMap, screen)
-    )
-
     override fun getScreenControllers(): List<ScreenController> = listOf(
         TitleScreenController(screen)
     )
+
+    private val controller: TitleScreenController by lazy {
+        screen.screenControllers.filterIsInstance<TitleScreenController>().first()
+    }
+
+    private var settingsOpen: Boolean = false
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -85,10 +70,11 @@ class TitleScreen : ScreenCreator() {
             y = 0f
             width = worldWidth
             height = worldHeight
-            backgroundHandle = "transparent_black_texture"
+            backgroundHandle = "black_texture"
+            alpha = 0.3f
             fixedZIndex = 100
             isVisible = false
-            touchable = Touchable.enabled
+            touchable = Touchable.disabled
         }
 
         for (i in 1..15) {
@@ -96,21 +82,31 @@ class TitleScreen : ScreenCreator() {
         }
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
 
+        blackOverlay.onInput(GameInputs.interact) {
+            closeSettings(blackOverlay, settingsObject)
+        }
+
+        screen.inputManager.onInput(GameInputs.cancel) {
+            closeSettings(blackOverlay, settingsObject)
+        }
 
         box {
-            debug = true
             x = 120F
             y = worldHeight * 0.65F
             addOption("Continue") { MapManager.changeToMapScreen() }
             addOption("Abandon Run") {}
             addOption("Reset Game") {}
 
-            addOption("Settings") { handleSettings(blackOverlay, settingsObject) }
+            addOption("Settings") { openSettings(blackOverlay, settingsObject) }
             addOption("View Credits") { MapManager.changeToCreditsScreen() }
-            addOption("Quit") { handleQuit() }
+            addOption("Quit") { Gdx.app.exit() } // TODO: fix popup
+//            addOption("Quit") {handleQuit() }
         }
 
-        actor(settings)
+        actor(settings) {
+            centerX()
+            fixedZIndex = 10000
+        }
     }
 
     private fun CustomBox.handleQuit() {
@@ -124,28 +120,31 @@ class TitleScreen : ScreenCreator() {
         )
     }
 
-    private fun CustomBox.handleSettings(
-        blackOverlay: CustomImageActor,
-        settingsObject: NavbarCreator.NavBarObject
-    ) {
-        blackOverlay.isVisible = true
-        val controller = screen.screenControllers.filterIsInstance<TitleScreenController>().first()
-        controller.timeline.appendAction(settingsObject.openTimelineCreator.invoke().asAction())
-        blackOverlay.onClick {
-            screen.escapeSelectionHierarchy()
-        }
+    private fun openSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
+        if (settingsOpen) return
+        settingsOpen = true
         controller.timeline.appendAction(Timeline.timeline {
+            include(settingsObject.openTimelineCreator())
             action {
-                screen.curSelectionParent.onLeave = {
-                    controller.timeline.appendAction(settingsObject.closeTimelineCreator.invoke().asAction())
-                    blackOverlay.isVisible = false
-                }
+                blackOverlay.isVisible = true
+                blackOverlay.touchable = Touchable.enabled
             }
         }.asAction())
     }
 
+    private fun closeSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
+        if (!settingsOpen) return
+        settingsOpen = false
+        controller.timeline.appendAction(Timeline.timeline {
+            include(settingsObject.closeTimelineCreator())
+            action {
+                blackOverlay.isVisible = false
+                blackOverlay.touchable = Touchable.disabled
+            }
+        }.asAction())
+    }
 
-    fun Group.showPopup(title: String, description: String, actions: Map<String, (() -> Unit)?>) {
+    private fun Group.showPopup(title: String, description: String, actions: Map<String, (() -> Unit)?>) {
         var curParent = parent
         while (curParent.parent != null) curParent = curParent.parent
         curParent.box {
@@ -181,17 +180,15 @@ class TitleScreen : ScreenCreator() {
                 val labels = mutableListOf<CustomLabel>()
                 actions.entries.forEach {
                     labels.add(label("red_wing", it.key) {
-                        addButtonDefaults()
-                        group = popupFocusGroup
-                        onSelect {
-                            it.value?.invoke()
-                            if (it.value == null) removePopup()
-                        }
+//                        onSelect {
+//                            it.value?.invoke()
+//                            if (it.value == null) removePopup()
+//                        }
                         onLayoutAndNow {
                             height = prefHeight * 1.2f
                             setAlignment(Align.center)
                         }
-                        if (it.value == null) screen.focusSpecific(this)
+//                        if (it.value == null) screen.focusSpecific(this)
                     })
                 }
 
@@ -200,38 +197,37 @@ class TitleScreen : ScreenCreator() {
             }
         }
 
-        screen.addToSelectionHierarchy(
-            FocusableParent(listOf(SelectionTransition(groups = listOf(popupFocusGroup))),
-                onLeave = {
-                    removePopup()
-                })
-        )
+//        screen.addToSelectionHierarchy(
+//            FocusableParent(listOf(SelectionTransition(groups = listOf(popupFocusGroup))),
+//                onLeave = {
+//                    removePopup()
+//                })
+//        )
     }
 
     fun removePopup() {
         val popup = screen.namedActorOrNull(popupWidgetName)
         if (popup != null) {
             screen.removeActorFromScreen(popup)
-            screen.escapeSelectionHierarchy()
         }
     }
 
 
-    fun Group.addOption(displayText: String, action: () -> Unit) = label("red_wing_bmp", displayText) {
+    private fun Group.addOption(displayText: String, action: () -> Unit) = label("red_wing_bmp", displayText) {
         setFontScale(0.4f)
         syncWidth()
         syncHeight()
-        group = menuFocusGroup
-        setFocusableTo(true, this)
-        isSelectable = true
-        onSelect {
-            screen.changeSelectionFor(this)
-            action.invoke()
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+
+        onInput(GameInputs.interact) {
+            action()
         }
-        styles(
-            resetEachTime = {
-                underline = isFocused
-            }
+
+        observeInputState(
+            GameInputs.States.focused,
+            { underline = true },
+            { underline = false }
         )
     }
 

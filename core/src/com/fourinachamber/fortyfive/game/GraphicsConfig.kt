@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
@@ -55,12 +56,13 @@ object GraphicsConfig {
         source: Vector2,
         target: Vector2,
         isReserves: Boolean,
-        renderPipeline: RenderPipeline
-    ): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
+        renderPipeline: RenderPipeline,
+        duration: Int = 300,
+    ) = RenderPipeline.OrbAnimation(
         orbTexture = if (isReserves) "reserves_orb" else "card_orb",
         width = 10f,
         height = 10f,
-        duration = 300,
+        duration = duration,
         segments = 20,
         renderPipeline = renderPipeline,
         position = RenderPipeline.OrbAnimation.curvedPath(
@@ -70,8 +72,22 @@ object GraphicsConfig {
         )
     )
 
+    fun cashOrbAnimation(
+        start: Vector2,
+        end: Vector2,
+        renderPipeline: RenderPipeline
+    ) = RenderPipeline.OrbAnimation(
+        orbTexture = "cash_symbol",
+        width = 30f,
+        height = 30f,
+        duration = 600,
+        segments = 20,
+        renderPipeline = renderPipeline,
+        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+    )
+
     fun chargeTimeline(actor: Actor): Timeline {
-        val moveByAction = CustomMoveByAction()
+        val moveByAction = MoveByAction()
         moveByAction.setAmount(xCharge, yCharge)
         moveByAction.duration = chargeDuration
         moveByAction.interpolation = chargeInterpolation

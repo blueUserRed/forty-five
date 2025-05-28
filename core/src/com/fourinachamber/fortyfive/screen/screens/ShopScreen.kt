@@ -9,19 +9,19 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
+import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.percent
 
 class ShopScreen : ScreenCreator() {
@@ -51,30 +51,12 @@ class ShopScreen : ScreenCreator() {
     private val shopPersonWidgetName: String = "shop_personWidget"
     private val rerollWidgetName: String = "shop_rerollWidget"
 
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-
-        getHealOrMaxHPFocusableParent()
-    )
-
-    private fun getHealOrMaxHPFocusableParent(): FocusableParent {
-        return FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf("shop_leave", "shop_cards", "shop_cards_first", "shop_reroll", navbarFocusGroup)
-                ),
-                SelectionTransition(
-                    TransitionType.InScrollableBox,
-                    groups = listOf("shop_cards_first", "shop_cards")
-                )
-            ),
-            startGroups = listOf("shop_cards_first", "shop_cards", navbarFocusGroup),
+    private val dropTargetFilter: InputManager.FocusFilter by lazy {
+        InputManager.FocusFilter(
+            listOf(shopDropTargetGroup),
+            screen
         )
     }
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(), screen)
-    )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         ShopScreenController(
@@ -94,6 +76,9 @@ class ShopScreen : ScreenCreator() {
         y = 0f
         width = worldWidth
         height = worldHeight
+
+        dropTargetFilter.start()
+        screen.inputManager.enableDragAndDrop(ShopScreenController.availableCardGroup, shopDropTargetGroup)
 
         image {
             x = 0f
@@ -136,8 +121,28 @@ class ShopScreen : ScreenCreator() {
                 paddingLeft = 30f
                 paddingTop = 15f
                 paddingBottom = 30f
+
+                val cardFocusGrid = InputManager.FocusGrid()
+                onLayout {
+                    cardFocusGrid.clear()
+                    var x = 0
+                    var y = 0
+                    walk().forEach { child ->
+                        if (child !is CardActor) return@forEach
+                        cardFocusGrid.set(x, y, child)
+                        x++
+                        if (x >= 4) {
+                            x = 0
+                            y++
+                        }
+                    }
+                }
 //                addTestChildren()
-                addScrollbarFromDefaults(CustomDirection.RIGHT, "backpack_scrollbar", "backpack_scrollbar_background")
+                addScrollbarFromDefaults(
+                    CustomDirection.RIGHT,
+                    "backpack_scrollbar",
+                    "backpack_scrollbar_background"
+                )
             }
 
             label(
@@ -160,13 +165,16 @@ class ShopScreen : ScreenCreator() {
                 width = 200F
                 setAlignment(Align.center)
                 positionType = PositionType.ABSOLUTE
-                onSelect { screen.findController<ShopScreenController>()?.rerollShop() }
-                group = "shop_reroll"
+                badTexture("reroll shop button", missingFocusTexture = true)
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                onInput(GameInputs.interact) {
+                    screen.findController<ShopScreenController>()?.rerollShop()
+                }
                 onLayoutAndNow {
                     x = (parent.width - width) / 2
                     y = 70F
                 }
-                addButtonDefaults()
             }
         }
 
@@ -182,20 +190,7 @@ class ShopScreen : ScreenCreator() {
             }
         }
 
-
-        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        actor(
-            getSharedNavBar(
-                worldWidth,
-                worldHeight,
-                listOf(settingsObject, settingsObject, settingsObject),
-                screen
-            )
-        ) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
-        }
-        actor(settings)
+        addDefaultOverlays(worldHeight, worldHeight, EventPipeline())
     }
 
     private fun Group.addTestChildren() {
@@ -204,20 +199,8 @@ class ShopScreen : ScreenCreator() {
             val listOf = listOf("shop_targets")
             width = size
             height = size
-            targetGroups = listOf
-            makeDraggable(this)
-            group = "shop_cards"
-            styles(
-                normal = {
-                    debug = isFocused
-                },
-                focused = {
-                    debug = isFocused
-                }
-            )
-            bindDragging(this, screen)
-            resetCondition = { true }
-            onFocus { if (!it) (parent as CustomScrollableBox).scrollTo(this) }
+
+//            onFocus { if (!it) (parent as CustomScrollableBox).scrollTo(this) }
         }
 
         for (i in 0..20) {
@@ -259,18 +242,21 @@ class ShopScreen : ScreenCreator() {
                 }
             }
 
-            box {// leave
+            box(backgroundHints = arrayOf("shop_back_button_hover", "shop_back_button")) {// leave
                 name("shop_back_button_name")
                 backgroundHandle = "shop_back_button"
                 width = 200F
-                isSelectable = true
-                setFocusableTo(true, this)
-                group = "shop_leave"
                 relativeHeight(70F)
-                onFocusChange { _, _ ->
-                    backgroundHandle = if (isFocused) "shop_back_button_hover" else "shop_back_button"
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                observeInputState(
+                    GameInputs.States.focused,
+                    { backgroundHandle = "shop_back_button_hover" },
+                    { backgroundHandle = "shop_back_button" }
+                )
+                onInput(GameInputs.interact) {
+                    FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen"))
                 }
-                onSelect { FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen")) }
             }
 
         }
@@ -305,34 +291,35 @@ class ShopScreen : ScreenCreator() {
         x = -width
         backgroundHandle = textureName
         fixedZIndex = 200
-        makeDraggable(this)
-        isDraggable = false
-        group = "shop_targets"
-        bindDroppable(this, screen, listOf("shop_cards", "shop_cards_first"))
         val distanceNotSelected = -20F
-        styles(
-            focused = { addAction(getAction(0F, y)) },
-            normal = {
-                if (DragAndDroppableActor.dragAndDropStateName in screen.screenState) //TODO add check for screenstate when in Navbar
-                    addAction(getAction(distanceNotSelected, y))
-            }
+        touchable = Touchable.disabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+
+        isDropTarget = true
+        joinGroup(shopDropTargetGroup)
+
+        observeInputState(
+            GameInputs.States.awaitingDrop,
+            {
+                dropTargetFilter.end()
+                touchable = Touchable.enabled
+            },
+            {
+                dropTargetFilter.start()
+                touchable = Touchable.disabled
+            },
         )
-        onDragAndDrop.add { source, target ->
-            screen.escapeSelectionHierarchy()
-            val controller = screen.findController<ShopScreenController>() ?: return@add
-            controller.buyCard(source, target.name == addToDeckWidgetName)
-        }
-        screen.addOnScreenStateChangedListener { entered, state ->
-            //TODO add check for screenstate when in Navbar
-            if (state == DragAndDroppableActor.dragAndDropStateName) {
-                val targetX = if (entered) {
-                    distanceNotSelected
-                } else {
-                    -width
-                }
-                addAction(getAction(targetX, y))
+
+        fun updateState(){
+            when {
+                isInInputState(GameInputs.States.focused) -> addAction(getAction(0f, y))
+                isInInputState(GameInputs.States.awaitingDrop) -> addAction(getAction(distanceNotSelected, y))
+                else -> addAction(getAction(-width, y))
             }
         }
+
+        observeInputState(GameInputs.States.awaitingDrop, ::updateState, ::updateState)
+        observeInputState(GameInputs.States.focused, ::updateState, ::updateState)
     }
 
     private fun getAction(to: Float, y: Float) = MoveToAction().also {
@@ -340,5 +327,9 @@ class ShopScreen : ScreenCreator() {
         it.y = y
         it.duration = 0.2f
         it.interpolation = Interpolation.pow2Out
+    }
+
+    companion object {
+        const val shopDropTargetGroup = "shop-drop-target"
     }
 }

@@ -3,12 +3,79 @@ package com.fourinachamber.fortyfive.rendering
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.keyInput.Keycode
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import kotlin.reflect.KProperty
+
+class DebugMenu(val pages: List<DebugMenuPage>) {
+
+    private var pageIndex: Int = 0
+    var show: Boolean = false
+
+    fun toggle() {
+        show = !show
+    }
+
+    fun nextDebugPage() {
+        pageIndex++
+        if (pageIndex >= pages.size) pageIndex = 0
+    }
+
+    fun previousDebugPage() {
+        pageIndex--
+        if (pageIndex < 0) pageIndex = pages.size - 1
+    }
+
+    fun currentPage(): DebugMenuPage = pages[pageIndex]
+
+    fun currentPageNumber(): Int = pageIndex + 1
+
+    fun amountOfPages(): Int = pages.size
+
+    fun update() {
+        pages.forEach { it.update() }
+    }
+
+    inline fun <reified T : DebugMenuPage> findPage(): T? = pages.find { it is T } as T?
+
+    fun newMenuWithPages(pageNames: List<String>): DebugMenu {
+        val newPages = pageNames.map { name ->
+            pages.find { it.name == name }
+                ?: knownDebugMenuPages[name]?.invoke()
+                ?: throw RuntimeException("unknown debug menu page $name")
+        }
+        val newMenu = DebugMenu(newPages)
+        newMenu.show = show
+        return newMenu
+    }
+
+    companion object {
+
+        private val knownDebugMenuPages: MutableMap<String, () -> DebugMenuPage> = mutableMapOf()
+
+        init {
+            registerDebugMenuPage("Performance infos") { ScreenDebugMenuPage() }
+            registerDebugMenuPage("Card Textures") { CardTextureDebugMenuPage() }
+            registerDebugMenuPage("Resources") { ResourceDebugMenuPage() }
+            registerDebugMenuPage("Map") { MapDebugMenuPage() }
+        }
+
+        fun registerDebugMenuPage(name: String, creator: () -> DebugMenuPage) {
+            knownDebugMenuPages[name] = creator
+        }
+
+        fun fromNames(names: List<String>): DebugMenu {
+            val menuPages = names.map { name ->
+                knownDebugMenuPages[name]?.invoke()
+                    ?: throw RuntimeException("unknown debug menu page $name")
+            }
+            return DebugMenu(menuPages)
+        }
+
+    }
+}
 
 abstract class DebugMenuPage(val name: String) {
 
@@ -24,7 +91,7 @@ abstract class DebugMenuPage(val name: String) {
 
     protected fun debugButton(
         name: String,
-        key: Keycode,
+        key: Int,
         default: Boolean
     ): DebugButton = DebugButton(name, key, default).also { buttons.add(it) }
 
@@ -32,7 +99,7 @@ abstract class DebugMenuPage(val name: String) {
 
     data class DebugButton(
         val name: String,
-        val key: Keycode,
+        val key: Int,
         var set: Boolean
     ) {
         override fun toString(): String = "[${if (set) "x" else " "}] $name <${Keys.toString(key)}>"
@@ -46,16 +113,20 @@ abstract class DebugMenuPage(val name: String) {
 
 }
 
-class StandardDebugMenuPage : DebugMenuPage("Performance infos") {
+class ScreenDebugMenuPage : DebugMenuPage("Performance infos") {
+
+    val makeLaggy = debugButton("make laggy", Keys.L, false)
 
     override fun getText(screen: OnjScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
+        version: ${FortyFiveLogger.versionTag}
         15s render lagSpike: ${FortyFive.renderTimes.max()}ms
         15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
         screen transition max lagSpike: ${FortyFive.screenTransitionTimes.max()}ms
         screen transition avg. lagSpike: ${FortyFive.screenTransitionTimes.average().toInt()}ms
         active style managers: ${screen.styleManagerCount()}
-        version: ${FortyFiveLogger.versionTag}
+        
+        $makeLaggy
     """.trimIndent()
 }
 

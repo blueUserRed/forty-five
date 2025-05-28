@@ -5,13 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -35,27 +30,6 @@ class AddMaxHPScreen : ScreenCreator() {
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "*" to 100
-    )
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-
-        getHealOrMaxHPFocusableParent()
-    )
-
-    private fun getHealOrMaxHPFocusableParent(): FocusableParent {
-        return FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf("addMaxHP_accept", navbarFocusGroup)
-                ),
-            ),
-            startGroups = listOf("addMaxHP_accept", navbarFocusGroup),
-        )
-    }
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(), screen)
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
@@ -125,29 +99,26 @@ class AddMaxHPScreen : ScreenCreator() {
             }
 
             box {
-                group = "addMaxHP_accept"
                 backgroundHandle = "heal_or_max_accept_invalid"
                 relativeWidth(28F)
                 relativeHeight(13F)
                 touchable = Touchable.enabled
                 backgroundHandle = "heal_or_max_accept"
-                setFocusableTo(true,this)
-                isSelectable = true
 
-                onFocusChange { _, _ ->
-                    backgroundHandle = if (isFocused) {
-                        "heal_or_max_accept_hover"
-                    } else {
-                        "heal_or_max_accept"
-                    }
-                }
-                onSelect {
-                    val controller =
-                        screen.screenControllers.filterIsInstance<AddMaxHPScreenController>().firstOrNull()
-                    controller
-                        ?: throw RuntimeException("The AddMaxHPScreen needs a corresponding Controller to work")
-                    controller.completed()
-                }
+//                onFocusChange { _, _ ->
+//                    backgroundHandle = if (isFocused) {
+//                        "heal_or_max_accept_hover"
+//                    } else {
+//                        "heal_or_max_accept"
+//                    }
+//                }
+//                onSelect {
+//                    val controller =
+//                        screen.screenControllers.filterIsInstance<AddMaxHPScreenController>().firstOrNull()
+//                    controller
+//                        ?: throw RuntimeException("The AddMaxHPScreen needs a corresponding Controller to work")
+//                    controller.completed()
+//                }
             }
         }
 

@@ -1,243 +1,151 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.fourinachamber.fortyfive.game.controller.GameController
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Event
+import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.screen.general.CustomGroup
+import com.fourinachamber.fortyfive.screen.general.FocusChangeEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
-import com.fourinachamber.fortyfive.utils.between
-import ktx.actors.contains
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import kotlin.math.pow
 
-
-/**
- * displays the cards in the hand
- * @param targetWidth the width this aims to be
- */
 class CardHand(
-    private val targetWidth: Float,
-    private val cardSize: Float,
-    private val opacityIfNotPlayable: Float,
+    screen: OnjScreen,
     private val centerGap: Float,
-    private val screen: OnjScreen,
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, OnLayoutActor, StyledActor {
+    private val cardSize: Float,
+    private val maxDistanceBetweenCards: Float,
+) : CustomGroup(screen) {
 
-    override var fixedZIndex: Int = 0
+    private val leftSide: MutableList<Card> = mutableListOf()
+    private val rightSide: MutableList<Card> = mutableListOf()
 
-    override var styleManager: StyleManager? = null
+    val amountOfCards: Int
+        get() = leftSide.size + rightSide.size
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
+    val events: EventPipeline = EventPipeline()
 
-    private val onLayout: MutableList<() -> Unit> = mutableListOf()
+    private val addedListenersToCards: MutableList<Card> = mutableListOf()
 
-    /**
-     * scaling applied to the card when hovered over
-     */
-    var hoveredCardScale = 1.0f
+    private var orderedChildrenDirty: Boolean = true
+    private var childrenInCorrectOrderCache: MutableList<Actor> = mutableListOf()
 
-    /**
-     * the spacing between the cards
-     */
-    var maxCardSpacing: Float = 0.0f
+    fun allCards(): List<Card> = leftSide + rightSide
 
-    /**
-     * the z-index of any card in the hand that is not hovered over
-     * will be startCardZIndicesAt + the number of the card
-     */
-    var startCardZIndicesAt: Int = 0
-
-    /**
-     * the z-index of a card that is hovered over
-     */
-    var hoveredCardZIndex: Int = 0
-
-    /**
-     * the z-index of the card-actors while dragged
-     */
-    var draggedCardZIndex: Int = 0
-
-    /**
-     * the cards currently in the hand
-     */
-    val cards: List<Card>
-        get() = _cards
-
-    private var _cards: MutableList<Card> = mutableListOf()
-
-    private lateinit var controller: GameController
-
-    private var originalParent: CustomFlexBox? = null
-
-    init {
-        bindHoverStateListeners(this)
-    }
-
-    fun init(controller: GameController) {
-        this.controller = controller
-    }
-
-    /**
-     * adds a card to the hand
-     */
     fun addCard(card: Card) {
-        _cards.add((_cards.size / 2), card)
-        if (card.actor !in this) addActor(card.actor)
-        // This breaks when multiple cards with the same name are added, but because this is only used in the tutorial
-        // it shouldn't matter
-        screen.addNamedActor("card-${card.name}", card.actor)
-        card.actor.playSoundsOnHover = true
-        invalidateHierarchy()
+        orderedChildrenDirty = true
+        if (leftSide.size < rightSide.size) leftSide.add(card)
+        else rightSide.add(card)
+        val actor = card.actor
+        addActor(actor)
+        actor.fixedZIndex = zIndexFor(card)
+        resortZIndices()
+        if (card !in addedListenersToCards) {
+            card.actor.observeInputState(
+                GameInputs.States.focused,
+                {
+                    if (!card.inZone(GameControllerImpl.Zone.HAND)) return@observeInputState
+                    actor.width = cardSize * 1.2f
+                    actor.height = cardSize * 1.2f
+                    actor.fixedZIndex = 100
+                    resortZIndices()
+                },
+                {
+                    if (!card.inZone(GameControllerImpl.Zone.HAND)) return@observeInputState
+                    actor.width = cardSize
+                    actor.height = cardSize
+                    actor.fixedZIndex = zIndexFor(card)
+                    resortZIndices()
+                }
+            )
+            addedListenersToCards.add(card)
+        }
+        layout() // layout added card immediately to make animations work
     }
 
-    /**
-     * removes a card from the hand
-     */
+    override fun childrenInCorrectOrder(): List<Actor>? {
+        if (!orderedChildrenDirty) return childrenInCorrectOrderCache
+        val new = mutableListOf<Actor>()
+        var i = leftSide.size - 1
+        while (i >= 0) {
+            new.add(leftSide[i].actor)
+            i--
+        }
+        new.addAll(rightSide.map { it.actor })
+        childrenInCorrectOrderCache = new
+        orderedChildrenDirty = false
+        return new
+    }
+
+    private fun zIndexFor(card: Card): Int {
+        var zIndex = leftSide.indexOf(card)
+        if (zIndex == -1) zIndex = rightSide.indexOf(card)
+        return 50 - zIndex
+    }
+
     fun removeCard(card: Card) {
-        _cards.remove(card)
+        orderedChildrenDirty = true
+        when (card) {
+            in leftSide -> leftSide.remove(card)
+            in rightSide -> rightSide.remove(card)
+            else -> throw RuntimeException("card $card can't be removed because it is not the cardHand")
+        }
         removeActor(card.actor)
-        screen.removeNamedActor("card-${card.name}")
-        card.actor.playSoundsOnHover = false
-        invalidateHierarchy()
+        evenOutCards()
+        invalidate()
     }
 
-    override fun layout() {
-        onLayout.forEach { it() }
-        super.layout()
+    private fun evenOutCards() {
+
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        updateCards()
     }
 
-    private fun updateCards() {
-        if (_cards.isEmpty()) return
-        val cardsLeft = _cards.size / 2
-        val spacePerSide = (width - centerGap) / 2f
-        val zIndexChanged =
-            layoutSide(0, cardsLeft, -cardSize / 2, spacePerSide - cardSize, true) ||
-            layoutSide(cardsLeft, _cards.size, spacePerSide + centerGap, width - cardSize / 2, false)
-        if (zIndexChanged) resortZIndices()
-    }
+    override fun layout() {
+        super.layout()
+        val widthPerSide = (width - centerGap) / 2f
 
-    private fun layoutSide(fromIndex: Int, toIndex: Int, fromX: Float, toX: Float, reverseDirection: Boolean): Boolean {
-        val sideWidth = toX - fromX
-        val amountCards = toIndex - fromIndex
-        val spacePerCard = (sideWidth / amountCards).coerceAtMost(maxCardSpacing)
+        var x = 0f
 
-        var zIndexChanged = false
-
-        fun doZIndexFor(card: Card, zIndex: Int) {
-            if (card.actor.fixedZIndex == zIndex) return
-            card.actor.fixedZIndex = zIndex
-            zIndexChanged = true
+        val cardDistLeftSide = (widthPerSide / (leftSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
+        x = width / 2 - centerGap / 2 - cardSize
+        leftSide.forEach { card ->
+            val actor = card.actor
+            actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
+            actor.rotation = cardHeightFuncDerivative(x) * 50f
+            card.actor.fixedZIndex = zIndexFor(card)
+            x -= cardDistLeftSide
         }
 
-        var i = if (reverseDirection) toIndex - 1 else fromIndex
-        var x = if (reverseDirection) toX else fromX
-        while (
-            (!reverseDirection && i < toIndex) ||
-            (reverseDirection && i >= fromIndex)
-        ) {
-            val card = _cards[i]
-
-            if (card.actor.isDragged) {
-                doZIndexFor(card, draggedCardZIndex)
-                if (reverseDirection) {
-                    x -= spacePerCard
-                    i--
-                } else {
-                    x += spacePerCard
-                    i++
-                }
-                continue
-            }
-
-            val hoveredOver = card.actor.isHoveredOver
-            doZIndexFor(
-                card,
-                if (hoveredOver) {
-                    hoveredCardZIndex
-                } else if (reverseDirection) {
-                    startCardZIndicesAt + i
-                } else {
-                    startCardZIndicesAt + fromIndex + (amountCards - (i - fromIndex))
-                }
-            )
-            if (hoveredOver) {
-                card.actor.setBounds(
-                    x.between(0f, width - cardSize * hoveredCardScale),
-                    cardHeightFunc(x).coerceAtLeast(-2f),
-                    cardSize * hoveredCardScale,
-                    cardSize * hoveredCardScale
-                )
-            } else {
-                card.actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
-            }
-            card.actor.rotation = if (hoveredOver) 0f else cardHeightFuncDerivative(card.actor.x) * 50
-            if (reverseDirection) {
-                x -= spacePerCard
-                i--
-            } else {
-                x += spacePerCard
-                i++
-            }
+        val cardDistRightSide = (widthPerSide / (rightSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
+        x = width / 2 + centerGap / 2
+        rightSide.forEach { card ->
+            val actor = card.actor
+            actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
+            actor.rotation = cardHeightFuncDerivative(x) * 50f
+            card.actor.fixedZIndex = zIndexFor(card)
+            x += cardDistRightSide
         }
-        return zIndexChanged
     }
 
     private fun cardHeightFuncDerivative(x: Float): Float = 0.16f - 0.0002f * x
 
-    private fun cardHeightFunc(x: Float): Float = -(0.01f * (x - 800f)).pow(2)
+    private fun cardHeightFunc(x: Float): Float = -(0.008f * (x - 800f)).pow(2)
 
-    fun attachToActor(name: String) {
-        if (originalParent == null) originalParent = parent as CustomFlexBox
-        val target = screen.namedActorOrError(name) as? CustomFlexBox
-            ?: throw RuntimeException("CardHand can only attach to CustomFlexBox")
-        attachTo(target)
+    private inline fun forAllCards(block: (Card) -> Unit) {
+        leftSide.forEach { block(it) }
+        rightSide.forEach { block(it) }
     }
 
-    fun reattachToOriginalParent() {
-        val target = originalParent
-            ?: throw RuntimeException("attachToActor must be called before reattachToOriginalParent")
-        attachTo(target)
-    }
+    data class CardDraggedOntoSlotEvent(val card: Card, val slot: RevolverSlot)
 
-    private fun attachTo(target: CustomFlexBox) {
-        val node = target.add(this)
-        val oldManager = styleManager
-        styleManager = oldManager!!.copyWithNode(node)
-        screen.swapStyleManager(oldManager, styleManager!!)
-    }
-
-    fun unfreeze() = cards.forEach { it.isDraggable = true }
-    fun freeze() = cards.forEach { it.isDraggable = false }
-
-    override fun resortZIndices() {
-        children.sort { el1, el2 ->
-            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-        }
-    }
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-    }
-
-    override fun getPrefWidth(): Float {
-        return targetWidth
-    }
-
-    override fun onLayout(callback: () -> Unit) {
-        onLayout.add(callback)
+    companion object {
+        const val cardFocusGroupName = "cardInCardHand"
     }
 
 }

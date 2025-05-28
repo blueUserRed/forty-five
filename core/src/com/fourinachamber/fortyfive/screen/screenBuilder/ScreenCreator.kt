@@ -12,11 +12,15 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.DefaultInterpolators
 import com.fourinachamber.fortyfive.animation.Interpolator
 import com.fourinachamber.fortyfive.animation.PropertyAnimation
-import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
+import com.fourinachamber.fortyfive.screen.components.WarningParent
+import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
@@ -24,13 +28,14 @@ import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.Selector
 import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.TemplateString
-import onj.value.OnjArray
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KMutableProperty
 
+@OptIn(ExperimentalContracts::class)
 abstract class ScreenCreator : ResourceBorrower {
 
     abstract val name: String
@@ -56,58 +61,78 @@ abstract class ScreenCreator : ResourceBorrower {
         this.screen = screen
     }
 
+    open fun update() { }
+
     abstract fun getRoot(): Group
 
     abstract fun getScreenControllers(): List<ScreenController>
 
-    abstract fun getInputMaps(): List<KeyInputMap>
-    abstract fun getSelectionHierarchyStructure(): List<FocusableParent>
+    open fun debugMenuPages(): List<String> = emptyList()
 
-    inline fun newGroup(builder: CustomGroup.() -> Unit = {}): CustomGroup {
-        val group = CustomGroup(screen)
+    inline fun newGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val group = CustomGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
-    @OptIn(ExperimentalContracts::class)
-    inline fun newBox(builder: CustomBox.() -> Unit = {}): CustomBox {
-        val box = CustomBox(screen)
+    inline fun newBox(backgroundHints: Array<String> = arrayOf(), builder: CustomBox.() -> Unit = {}): CustomBox {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val box = CustomBox(
+            backgroundHints = backgroundHints,
+            screen = screen
+        )
         builder(box)
         return box
     }
 
-    inline fun newHorizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
-        val group = CustomHorizontalGroup(screen)
-        builder(group)
-        return group
-    }
-
-    @OptIn(ExperimentalContracts::class)
-    inline fun newVerticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+    inline fun newHorizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
-        val group = CustomVerticalGroup(screen)
+        val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
         builder(group)
         return group
     }
 
-    inline fun Group.group(builder: CustomGroup.() -> Unit = {}): CustomGroup {
-        val group = CustomGroup(screen)
+    inline fun newVerticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val group = CustomVerticalGroup(screen, backgroundHints = backgroundHints)
+        builder(group)
+        return group
+    }
+
+    inline fun Group.group(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val group = CustomGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
     }
 
-    inline fun Group.horizontalGroup(builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
-        val group = CustomHorizontalGroup(screen)
+    inline fun Group.horizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
     }
 
-    inline fun Group.verticalGroup(builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
-        val group = CustomVerticalGroup(screen)
+    inline fun Group.verticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val group = CustomVerticalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
@@ -118,25 +143,44 @@ abstract class ScreenCreator : ResourceBorrower {
         this.name = name
     }
 
-    inline fun Group.image(builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
-        val image = CustomImageActor(null, screen, false)
+    inline fun Group.image(backgroundHints: Array<String> = arrayOf(), builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val image = CustomImageActor(null, screen, backgroundHints)
         this.addActor(image)
         builder(image)
         return image
     }
 
-    inline fun Group.box(isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
-        val box = if (isScrollable) CustomScrollableBox(screen) else CustomBox(screen)
+    inline fun Group.box(backgroundHints: Array<String> = arrayOf(), isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val box = if (isScrollable) {
+            CustomScrollableBox(backgroundHints, screen)
+        } else {
+            CustomBox(screen, backgroundHints)
+        }
         this.addActor(box)
         builder(box)
         return box
     }
 
-    inline fun Group.selector(font: String, bindTarget: String, builder: Selector.() -> Unit = {}): Selector {
+    inline fun Group.selector(
+        font: String,
+        bindTarget: String,
+        fontScale: Float = 1f,
+        builder: Selector.() -> Unit = {}
+    ): Selector {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val selector = Selector(
             forceLoadFont(font),
             arrowTextureHandle = "common_symbol_arrow_right",
             bind = bindTarget,
+            fontScale = fontScale,
             screen = screen
         )
         this.addActor(selector)
@@ -145,6 +189,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.slider(min: Float, max: Float, bindTarget: String, builder: Slider.() -> Unit = {}): Slider {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val slider = Slider(
             sliderBackground = "common_slider_background",
             handleRadius = 7f,
@@ -160,7 +207,31 @@ abstract class ScreenCreator : ResourceBorrower {
         return slider
     }
 
+    inline fun Group.inputField(
+        font: String,
+        fontColor: Color,
+        defaultText: String = "",
+        backgroundHints: Array<String> = arrayOf(),
+        builder: CustomInputField.() -> Unit = {}
+    ): CustomInputField {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        val inputField = CustomInputField(
+            screen,
+            defaultText,
+            Label.LabelStyle(forceLoadFont(font), color),
+            backgroundHints
+        )
+        this.addActor(inputField)
+        builder(inputField)
+        return inputField
+    }
+
     inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(definedWidth = width)
         this.addActor(spacer)
         builder(spacer)
@@ -168,6 +239,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(definedHeight = height)
         this.addActor(spacer)
         builder(spacer)
@@ -175,6 +249,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(growProportionHeight = proportion)
         this.addActor(spacer)
         builder(spacer)
@@ -182,6 +259,9 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     inline fun Group.horizontalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val spacer = Spacer(growProportionWidth = proportion)
         this.addActor(spacer)
         builder(spacer)
@@ -196,6 +276,9 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: CustomLabel.() -> Unit = {}
     ): CustomLabel {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val label = if (isTemplate) {
             TemplateStringLabel(
                 screen,
@@ -223,6 +306,9 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val advancedText =
             AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
         this.addActor(advancedText)
@@ -235,6 +321,9 @@ abstract class ScreenCreator : ResourceBorrower {
         isDistanceField: Boolean = true,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
         val advancedText =
             AdvancedTextWidget(defaults, screen, isDistanceField)
         this.addActor(advancedText)
@@ -290,6 +379,90 @@ abstract class ScreenCreator : ResourceBorrower {
         onHoverLeave { backgroundHandle = normal }
     }
 
+    fun CustomGroup.addDefaultOverlays(
+        worldWidth: Float,
+        worldHeight: Float,
+        warningEvents: EventPipeline,
+        hasSettings: Boolean = true,
+        hasBackpack: Boolean = true,
+        hasNavbar: Boolean = true,
+        navbarIsLeft: Boolean = false,
+        hasWarnings: Boolean = true,
+        hasTutorial: Boolean = true,
+        hasTitleScreenInNavbar: Boolean = true,
+    ): WarningParent? {
+
+        val warningParent = WarningParent(this@ScreenCreator, screen, warningEvents)
+        val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
+
+        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
+
+        var settings: CustomGroup? = null
+        if (hasSettings) {
+            val (_settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+            settings = _settings
+            navbarObjects.add(settingsObject)
+        }
+
+        var backpack: CustomGroup? = null
+        if (hasBackpack) {
+            val (_backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, warningEvents)
+            backpack = _backpack
+            navbarObjects.add(backpackObject)
+        }
+
+        val navbar = getSharedNavBar(
+            worldWidth, worldHeight,
+            navbarObjects,
+            screen,
+            isLeft = navbarIsLeft
+        )
+
+        actor(navbar) {
+            onLayoutAndNow { y = worldHeight - height }
+            centerX()
+        }
+        backpack?.let { actor(it) }
+        settings?.let {
+            actor(it) {
+                centerX()
+            }
+        }
+
+        if (hasTutorial) {
+            val tutorialInfoActor = TutorialInfoActor(
+                "tutorial_info_actor_background",
+                2f,
+                200f,
+                screen
+            )
+            actor(tutorialInfoActor) {
+                name("tutorialInfoActor")
+                x = 0f
+                y = 0f
+                width = worldWidth
+                height = worldHeight
+                isVisible = false
+            }
+            advancedText("red_wing", com.fourinachamber.fortyfive.utils.Color.FortyWhite, 1f) {
+                name("tutorial_info_text")
+                horizontalTextAlign = CustomAlign.CENTER
+                centerX()
+                onLayout { y = worldHeight - prefHeight }
+                syncHeight()
+                relativeWidth(40f)
+                isVisible = false
+            }
+        }
+
+        if (hasWarnings) {
+            actor(warningParent.getActor())
+            return warningParent
+        } else {
+            return null
+        }
+    }
+
     inline fun <A, reified P> A.propertyAnimation(
         property: KMutableProperty<P>,
         vararg states: AnimState<P>,
@@ -314,70 +487,11 @@ abstract class ScreenCreator : ResourceBorrower {
         *states
     )
 
-    fun <T> T.addButtonDefaults() where T : Actor, T : KotlinStyledActor, T : BackgroundActor {
-        setFocusableTo(true, this)
-        isSelectable = true
-        styles(
-            normal = {
-                if (this is DisableActor && isDisabled)
-                    backgroundHandle = "common_button_disabled"
-                else backgroundHandle = "common_button_default"
-            },
-            focused = {
-                backgroundHandle = "common_button_hover"
-            },
-            selectedAndFocused = {
-                backgroundHandle = "common_button_hover"
-//                backgroundHandle = if (this !is DisableActor || !isDisabled)
-//                    "common_button_hover"
-//                else
-//                    "common_button_disabled"
-            }
-        )
-        onSelect { screen.changeSelectionFor(this) }
-    }
-
-    inline fun <T> T.styles(
-        crossinline normal: () -> Unit = {},
-        crossinline focused: () -> Unit = {},
-        crossinline selected: () -> Unit = {},
-        crossinline selectedAndFocused: () -> Unit = {},
-        crossinline resetEachTime: () -> Unit = {},
-    ) where T : Actor, T : KotlinStyledActor {
-        onFocusChange { _, _ ->
-            resetEachTime()
-            if (isSelected) {
-                if (isFocused) selectedAndFocused()
-                else selected()
-            } else if (isFocused) focused()
-            else normal()
-        }
-        onSelectChange { _, _ ->
-            resetEachTime()
-            if (isSelected) {
-                if (isFocused) selectedAndFocused()
-                else selected()
-            } else if (isFocused) focused()
-            else normal()
-        }
-        resetEachTime()
-        if (isSelected) {
-            if (isFocused) selectedAndFocused()
-            else selected()
-        } else if (isFocused) focused()
-        else normal()
-    }
-
     var Label.fontColor: Color
         get() = style.fontColor
         set(value) {
             style.fontColor = value
         }
-
-    fun loadInputMap(name: String, screen: OnjScreen): KeyInputMap {
-        val file = ConfigFileManager.getConfigFile("inputMaps")
-        return KeyInputMap.readFromOnj(file.get<OnjArray>(name), screen)
-    }
 
     companion object {
         val fortyWhite: Color = Color.valueOf("F0EADD")

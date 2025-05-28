@@ -1,52 +1,53 @@
 package com.fourinachamber.fortyfive.screen.components
 
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapEntry
-import com.fourinachamber.fortyfive.keyInput.KeyInputMapKeyEntry
-import com.fourinachamber.fortyfive.keyInput.KeyPreset
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
-import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
+import com.fourinachamber.fortyfive.screen.general.CustomGroup
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
+import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.Selector
 import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Timeline
-import java.security.Key
-import kotlin.math.ceil
 
 object SettingsCreator {
-    private const val settingsFocusGroup = "settings_singleSettingOption"
+
     private const val settingsOpenScreenState = "settingsAreOpen"
 
     fun ScreenCreator.getSharedSettingsMenu(
         worldWidth: Float,
         worldHeight: Float
-    ): Pair<CustomVerticalGroup, NavbarCreator.NavBarObject> {
+    ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
 
         val openTimelineCreator: () -> Timeline
         val closeTimelineCreator: () -> Timeline
 
-        val group = newVerticalGroup {
-            forcedPrefWidth = worldWidth * 0.6f
-            forcedPrefHeight = worldHeight
-            syncDimensions()
-            backgroundHandle = "settings_background"
-            fixedZIndex = NavbarCreator.navbarZIndex + 1
+        val modal = InputManager.Modal(listOf(settingsGroup, NavbarCreator.navbarButtonGroup), screen)
+        val filter = InputManager.FocusFilter(listOf(settingsGroup), screen)
+        filter.start()
 
-            onLayout { x = parent.width / 2 - width / 2 }
+        val group = newGroup {
+            debug()
+            width = worldWidth * 0.6f
+            height = worldHeight
+            backgroundHandle = "settings_background"
+
             y = -height
 
-            verticalGroup {
-                forcedPrefWidth = (worldWidth * 0.6f) * 0.9f
-                forcedPrefHeight = worldHeight
-                verticalSpacer(30f)
-                settings(this@getSharedSettingsMenu, forcedPrefWidth!!)
+            box {
+                width = (worldWidth * 0.6f) * 0.9f
+                height = worldHeight - 30f
+                centerX()
+                paddingTop = 30f
+                flexDirection = FlexDirection.COLUMN
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.START
+                settings(this@getSharedSettingsMenu, width)
             }
 
             fun getAction(to: Float) = MoveToAction().also {
@@ -62,24 +63,8 @@ object SettingsCreator {
                     action {
                         addAction(action)
                         screen.enterState(settingsOpenScreenState)
-                        screen.addToSelectionHierarchy(
-                            FocusableParent(
-                                listOf(
-                                    SelectionTransition(
-                                        groups = listOf(
-                                            NavbarCreator.navbarFocusGroup,
-                                            settingsFocusGroup + "_first",
-                                        )
-                                    ),
-                                    SelectionTransition(
-                                        groups = listOf(
-                                            settingsFocusGroup, //this is needed, or it just jumps to the third element when coming from a side option
-                                            settingsFocusGroup + "_first",
-                                        )
-                                    )
-                                )
-                            )
-                        )
+                        modal.push()
+                        filter.end()
                     }
                     delayUntil { action.isComplete }
                 }
@@ -91,6 +76,8 @@ object SettingsCreator {
                     action {
                         screen.leaveState(settingsOpenScreenState)
                         addAction(action)
+                        modal.finished()
+                        filter.start()
                     }
                     delayUntil { action.isComplete }
                 }
@@ -105,13 +92,13 @@ object SettingsCreator {
         )
     }
 
-    fun CustomVerticalGroup.settings(creator: ScreenCreator, parentWidth: Float) = with(creator) {
+    fun CustomBox.settings(creator: ScreenCreator, parentWidth: Float) = with(creator) {
 
         label("red_wing", "General") {
+            marginBottom = 10f
             setFontScale(1.4f)
             fontColor = ScreenCreator.fortyWhite
         }
-        verticalSpacer(10f)
 
         singleSettingSelector(creator, parentWidth, "Show Screenshake", "enableScreenShake", true)
         singleSettingSelector(creator, parentWidth, "Start game on:", "startScreen")
@@ -120,56 +107,74 @@ object SettingsCreator {
 
 
         label("red_wing", "Audio") {
+            marginTop = 20f
+            marginBottom = 10f
             setFontScale(1.4f)
             fontColor = ScreenCreator.fortyWhite
         }
-        verticalSpacer(10f)
 
         singleSettingSlider(creator, parentWidth, "Master Volume", "masterVolume", 0f, 1f)
         singleSettingSlider(creator, parentWidth, "Music", "musicVolume", 0f, 1f)
         singleSettingSlider(creator, parentWidth, "Sound Effects", "soundEffectsVolume", 0f, 1f)
     }
 
-    private fun CustomVerticalGroup.singleSettingSelector(
+    private fun CustomBox.singleSettingSelector(
         creator: ScreenCreator,
         parentWidth: Float,
         name: String,
         bindTarget: String,
         isFirst: Boolean = false,
     ) = with(creator) {
-        horizontalGroup {
-            group = if (isFirst) settingsFocusGroup + "_first" else settingsFocusGroup
-            setFocusableTo(true, this)
-            forcedPrefWidth = parentWidth
-            syncDimensions()
+        box(backgroundHints = arrayOf("single_setting_background", "single_setting_background_focused")) {
+            flexDirection = FlexDirection.ROW
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            verticalAlign = CustomAlign.CENTER
+            width = parentWidth
+            height = 50f
+            marginTop = 10f
 
-            styles(
-                normal = {
-                    backgroundHandle = "single_setting_background"
-                },
-                focused = {
-                    backgroundHandle = "single_setting_background_focused"
-                }
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            joinGroup(settingsGroup)
+            backgroundHandle = "single_setting_background"
+            observeInputState(
+                GameInputs.States.focused,
+                { backgroundHandle = "single_setting_background_focused" },
+                { backgroundHandle = "single_setting_background" }
             )
 
-            horizontalSpacer(20f)
-
-            label("red_wing", name, color = ScreenCreator.fortyWhite)
-
-            horizontalGrowingSpacer(1f)
-
-            selector("red_wing", bindTarget) {
-                onLayoutAndNow { forcedPrefHeight = parent.height }
-                forcedPrefWidth = 200f
-                syncWidth()
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                relativeHeight(100f)
+                width = 210f
+                horizontalSpacer(10f)
+                label("red_wing", name, color = ScreenCreator.fortyWhite) {
+                    setFontScale(0.8f)
+                    syncHeight()
+                    width = 200f
+                }
             }
 
-            horizontalSpacer(20f)
+            val selector: Selector
+
+            box {
+                flexDirection = FlexDirection.ROW
+                relativeHeight(100f)
+                width = 210f
+                selector = selector("red_wing", bindTarget, fontScale = 0.8f) {
+                    onLayoutAndNow { height = parent.height }
+                    width = 200f
+                }
+                horizontalSpacer(10f)
+            }
+
+            onInput(GameInputs.switchSelectorToLeft) { selector.switch(-1) }
+            onInput(GameInputs.switchSelectorToRight) { selector.switch(1) }
         }
-        verticalSpacer(25f)
     }
 
-    private fun CustomVerticalGroup.singleSettingSlider(
+    private fun CustomBox.singleSettingSlider(
         creator: ScreenCreator,
         parentWidth: Float,
         name: String,
@@ -178,92 +183,55 @@ object SettingsCreator {
         max: Float,
         isFirst: Boolean = false,
     ) = with(creator) {
-        horizontalGroup {
-            group = if (isFirst) settingsFocusGroup + "_first" else settingsFocusGroup
-            setFocusableTo(true, this)
+        box(backgroundHints = arrayOf("single_setting_background", "single_setting_background_focused")) {
+            flexDirection = FlexDirection.ROW
+            width = parentWidth
+            height = 50f
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            marginTop = 10f
 
-            forcedPrefWidth = parentWidth
-            syncDimensions()
-
-            styles(
-                normal = {
-                    backgroundHandle = "single_setting_background"
-                },
-                focused = {
-                    backgroundHandle = "single_setting_background_focused"
-                }
+            keyboardFocusable = KeyboardFocusable.LEAF
+            joinGroup(settingsGroup)
+            backgroundHandle = "single_setting_background"
+            observeInputState(
+                GameInputs.States.focused,
+                { backgroundHandle = "single_setting_background_focused" },
+                { backgroundHandle = "single_setting_background" }
             )
 
-            horizontalSpacer(20f)
-
-            label("red_wing", name, color = ScreenCreator.fortyWhite)
-
-            horizontalGrowingSpacer(1f)
-
-            slider(min, max, bindTarget) {
-                onLayoutAndNow { forcedPrefHeight = parent.height }
-                forcedPrefWidth = 200f
-                syncDimensions()
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                horizontalSpacer(10f)
+                width = 210f
+                relativeHeight(100f)
+                label("red_wing", name, color = ScreenCreator.fortyWhite) {
+                    setFontScale(0.8f)
+                    width = 200f
+                    syncHeight()
+                    marginLeft = 10f
+                }
             }
 
-            horizontalSpacer(20f)
+            val slider: Slider
+
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                relativeHeight(100f)
+                width = 210f
+                slider = slider(min, max, bindTarget) {
+                    onLayoutAndNow { height = parent.height }
+                    width = 200f
+                    marginRight = 10f
+                }
+                horizontalSpacer(10f)
+            }
+
+            onInput(GameInputs.switchSelectorToLeft) { slider.move(-0.1f) } // TODO: veeeeryyy baad
+            onInput(GameInputs.switchSelectorToRight) { slider.move(0.1f) }
         }
-        verticalSpacer(25f)
     }
 
-    val settingsKeyMap = listOf<KeyInputMapEntry>(
-        KeyInputMapEntry(
-            100,
-//            KeyInputCondition.And(
-//                KeyInputCondition.ScreenState(NavbarCreator.navbarOpenScreenState),
-                KeyInputCondition.ScreenState(settingsOpenScreenState),
-//            ),
-            singleKeys = KeyPreset.LEFT.keys + KeyPreset.RIGHT.keys,
-            { screen, keycode ->
-                val par = screen.focusedActor ?: return@KeyInputMapEntry false
-                if (par !is Layout || par !is CustomHorizontalGroup) return@KeyInputMapEntry false
-                val selectionActor = par.children.filterIsInstance<Selector>().firstOrNull()
-                val isLeft=KeyPreset.fromKeyCode(keycode) == KeyPreset.LEFT
-                if (selectionActor != null) {
-                    if (isLeft) selectionActor.onClick(0F)
-                    else selectionActor.onClick(selectionActor.width)
-                    return@KeyInputMapEntry true
-                }
-                val sliderActor = par.children.filterIsInstance<Slider>().firstOrNull()
-                if (sliderActor != null) {
-                    var oldPos = sliderActor.cursorPos
-                    if (isLeft) sliderActor.updatePos((oldPos - 0.1F) * sliderActor.width)
-                    else sliderActor.updatePos((oldPos + 0.1f) * sliderActor.width)
-                    return@KeyInputMapEntry true
-                }
-                return@KeyInputMapEntry false
-            }
-        ),
-        KeyInputMapEntry(
-            100,
-            KeyInputCondition.And(
-                KeyInputCondition.ScreenState(NavbarCreator.navbarOpenScreenState),
-                KeyInputCondition.ScreenState(settingsOpenScreenState)
-            ),
-            singleKeys = KeyPreset.ACTION.keys,
-            { screen, keycode ->
-                val par = screen.focusedActor ?: return@KeyInputMapEntry false
-                if (par !is Layout || par !is CustomHorizontalGroup) return@KeyInputMapEntry false
-                val selectionActor = par.children.filterIsInstance<Selector>().firstOrNull()
-                if (selectionActor != null) {
-                    selectionActor.onClick(selectionActor.width)
-                    return@KeyInputMapEntry true
-                }
-                val sliderActor = par.children.filterIsInstance<Slider>().firstOrNull()
-                if (sliderActor != null) {
-                    if (sliderActor.cursorPos == 1F) sliderActor.updatePos(0F)
-                    else {
-                        sliderActor.updatePos(ceil((sliderActor.cursorPos + 0.01f) * 4) / 4F * sliderActor.width)
-                    }
-                    return@KeyInputMapEntry true
-                }
-                return@KeyInputMapEntry false
-            }
-        ),
-    )
+    const val settingsGroup: String = "settings-element"
 }

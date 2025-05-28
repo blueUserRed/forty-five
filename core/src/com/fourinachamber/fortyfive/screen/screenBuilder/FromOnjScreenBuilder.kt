@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.statusbar.Backpack
@@ -57,7 +56,7 @@ class FromOnjScreenBuilder(
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
     @MainThreadOnly
-    override fun build(controllerContext: Any?): OnjScreen {
+    override fun build(controllerContext: Any?, previousScreen: OnjScreen?): OnjScreen {
 
         earlyRenderTasks.clear()
         lateRenderTasks.clear()
@@ -84,11 +83,7 @@ class FromOnjScreenBuilder(
         )
         screen.background = background
 
-        onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
-            screen.inputMap = KeyInputMap.readFromOnj(it, screen)
-        }
-
-        val root = CustomFlexBox(screen, false)
+        val root = CustomFlexBox(screen, arrayOf())
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -322,18 +317,19 @@ class FromOnjScreenBuilder(
         "Image" -> CustomImageActor(
             widgetOnj.getOr<String?>("textureName", null),
             screen,
-            widgetOnj.getOr("partOfSelectionHierarchy", false)
+            arrayOf(),
         ).apply {
             applyImageKeys(this, widgetOnj)
         }
 
-        "Box" -> CustomFlexBox(
-            screen,
-            widgetOnj.getOr("hasHoverDetail", false),
-            widgetOnj.getOr("hoverText", "")
-        ).apply {
-            initFlexBox(this, widgetOnj, screen)
-        }
+//        "Box" -> CustomFlexBox(
+//            screen,
+//            arrayOf(),
+//            widgetOnj.getOr("hasHoverDetail", false),
+//            widgetOnj.getOr("hoverText", "")
+//        ).apply {
+//            initFlexBox(this, widgetOnj, screen)
+//        }
 
         "ScrollBox" -> CustomScrollableFlexBox(
             screen,
@@ -370,8 +366,6 @@ class FromOnjScreenBuilder(
                 }
             },
             isDistanceField = widgetOnj.getOr("isDistanceFiled", true),
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
-            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -391,7 +385,6 @@ class FromOnjScreenBuilder(
                     fontColor = widgetOnj.get<Color>("color")
                 }
             },
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -400,33 +393,20 @@ class FromOnjScreenBuilder(
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
-        "CardHand" -> CardHand(
-            widgetOnj.get<Double>("targetWidth").toFloat(),
-            widgetOnj.get<Double>("cardSize").toFloat(),
-            widgetOnj.get<Double>("opacityIfNotPlayable").toFloat(),
-            widgetOnj.get<Double>("centerGap").toFloat(),
-            screen
-        ).apply {
-            hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
-            maxCardSpacing = widgetOnj.get<Double>("maxCardSpacing").toFloat()
-            startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
-            hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
-            draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
-        }
-
-        "Revolver" -> Revolver(
-            widgetOnj.get<String>("background"),
-            widgetOnj.get<String>("slotTexture"),
-            widgetOnj.get<Double>("radiusExtension").toFloat(),
-            screen
-        ).apply {
-            slotSize = widgetOnj.get<Double>("slotScale").toFloat()
-            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
-            animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
-            radius = widgetOnj.get<Double>("radius").toFloat()
-            rotationOff = widgetOnj.get<Double>("rotationOff")
-            cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
-        }
+//        "Revolver" -> Revolver(
+//            widgetOnj.get<String>("background"),
+//            widgetOnj.get<String>("slotTexture"),
+//            widgetOnj.get<Double>("radiusExtension").toFloat(),
+//            EventPipeline(),
+//            screen
+//        ).apply {
+//            slotSize = widgetOnj.get<Double>("slotScale").toFloat()
+//            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+//            animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
+//            radius = widgetOnj.get<Double>("radius").toFloat()
+//            rotationOff = widgetOnj.get<Double>("rotationOff")
+//            cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
+//        }
 
         "EnemyArea" -> EnemyArea(
             widgetOnj.get<String>("enemySelectionDrawable"),
@@ -441,8 +421,6 @@ class FromOnjScreenBuilder(
                 widgetOnj.get<Color>("color")
             ),
             isDistanceField = widgetOnj.getOr("isDistanceField", true),
-            detailWidget = if (widgetOnj.getOr("hasHoverDetail", false)){DetailWidget.SimpleBigDetailActor(screen){widgetOnj.getOr("hoverText", "")}} else null,
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
@@ -513,11 +491,11 @@ class FromOnjScreenBuilder(
             return this
         }
 
-        "PutCardsUnderDeckWidget" -> PutCardsUnderDeckWidget(
-            screen,
-            widgetOnj.get<Double>("cardSize").toFloat(),
-            widgetOnj.get<Double>("cardSpacing").toFloat(),
-        )
+//        "PutCardsUnderDeckWidget" -> PutCardsUnderDeckWidget(
+//            screen,
+//            widgetOnj.get<Double>("cardSize").toFloat(),
+//            widgetOnj.get<Double>("cardSpacing").toFloat(),
+//        )
 
         "StatusEffectDisplay" -> HorizontalStatusEffectDisplay(
             screen,
@@ -527,19 +505,14 @@ class FromOnjScreenBuilder(
             widgetOnj.getOr<Double>("iconScale", 1.0).toFloat(),
         )
 
-        "TextEffectEmitter" -> TextEffectEmitter(
-            TextEffectEmitter.configsFromOnj(widgetOnj.get<OnjArray>("config"), screen),
-            screen
-        )
-
-        "TutorialInfoActor" -> TutorialInfoActor(
-            widgetOnj.get<String>("background"),
-            widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),
-            widgetOnj.get<Double>("circleRadiusExtension").toFloat(),
-            screen
-        ).apply {
-            initFlexBox(this, widgetOnj, screen)
-        }
+//        "TutorialInfoActor" -> TutorialInfoActor(
+//            widgetOnj.get<String>("background"),
+//            widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),
+//            widgetOnj.get<Double>("circleRadiusExtension").toFloat(),
+//            screen
+//        ).apply {
+//            initFlexBox(this, widgetOnj, screen)
+//        }
 
         "Slider" -> Slider(
             widgetOnj.get<String>("sliderBackground"),
@@ -677,10 +650,10 @@ class FromOnjScreenBuilder(
             }
         }
 
-        widgetOnj.ifHas<String>("hoverDetailActor") { name ->
-            actor as DisplayDetailActor
-            throw RuntimeException("hover Details are only implemented in the kotlin ScreenCreator")
-        }
+//        widgetOnj.ifHas<String>("hoverDetailActor") { name ->
+//            actor as DisplayDetailActor
+//            throw RuntimeException("hover Details are only implemented in the kotlin ScreenCreator")
+//        }
 
         widgetOnj.ifHas<Long>("zIndex") {
             if (this !is ZIndexActor) throw RuntimeException("can only apply z-index to ZIndexActors")

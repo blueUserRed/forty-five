@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.BoundedActor
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.utils.Promise
 import java.lang.Float.max
 
@@ -19,7 +20,7 @@ class TutorialInfoActor(
     private val circleRadiusMultiplier: Float,
     private val circleRadiusExtension: Float,
     screen: OnjScreen
-) : CustomFlexBox(screen), ResourceBorrower {
+) : CustomBox(screen), ResourceBorrower {
 
     private val loadedBackground: Promise<Drawable> = ResourceManager.request(this, screen, maskedBackgroundTextureName)
 

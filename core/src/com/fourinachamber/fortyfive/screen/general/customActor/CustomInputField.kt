@@ -38,8 +38,8 @@ open class CustomInputField(
     screen: OnjScreen,
     defText: String,
     val labelStyle: LabelStyle,
-    override val partOfHierarchy: Boolean = false
-) : CustomLabel(screen, defText, labelStyle, true, partOfHierarchy = partOfHierarchy) {
+    val backgroundHints: Array<String> = arrayOf()
+) : CustomLabel(screen, defText, labelStyle, true, backgroundHints) {
     //TODO ctrl+Z
     //TODO fix if leaved / unfocused
     //TODO add on
@@ -77,7 +77,8 @@ open class CustomInputField(
         }
     private var focused = false
     val selectionRect = CustomRectangle(Color(0F, 0F, 1F, 0.7F))
-    val cursorRect = CustomRectangle(Color.valueOf("2A2424"))
+    val cursorRect = CustomRectangle(Color.valueOf("000000"))
+//    val cursorRect = CustomRectangle(Color.valueOf("2A2424"))
     private val keyRepeatTask: KeyRepeatTask
     private var lastCorrectText: String = text.toString()
     private var lastCorrectCursor: Int = cursor
@@ -598,7 +599,8 @@ open class CustomInputField(
                         return false
                     }
                 }
-                if (!field.hasKeyboardFocus()) {
+                if (false) {
+//                if (!field.hasKeyboardFocus()) {
                     false
                 } else if (UIUtils.isMac && Gdx.input.isKeyPressed(63)) {
                     true
@@ -710,11 +712,10 @@ open class CustomInputField(
         if (batch == null) return
         validate()
         drawBackground(batch, parentAlpha)
-        val pos = localToStageCoordinates(Vector2())
         val ySize = glyphLayout.height * 1.2F
-        val yPosCursor = pos.y + (height - ySize) / 2
+        val yPosCursor = y + (height - ySize) / 2
         if (hasSelection) {
-            selectionRect.setPosition(pos.x + glyphPositions.get(max(selectionStart, 0)), yPosCursor)
+            selectionRect.setPosition(x + glyphPositions.get(max(selectionStart, 0)), yPosCursor)
             selectionRect.setSize(
                 glyphPositions.get(cursor) - glyphPositions.get(max(selectionStart, 0)),
                 ySize
@@ -727,15 +728,15 @@ open class CustomInputField(
         super.draw(batch, parentAlpha)
         backgroundHandle = background
         val cursorWidth = 3F * fontScaleX
-        if ((focused || hasKeyboardFocus()) && !isDisabled) {
+        if (!isDisabled) {
             countFrames = if (lastCursorPosition == cursor) {
                 countFrames++
                 countFrames and 127
             } else {
                 0
             }
-            if (((countFrames shr 6)) == 0) {
-                cursorRect.setPosition(pos.x + glyphPositions.get(cursor) - cursorWidth / 2, yPosCursor)
+            if ((countFrames shr 6) == 0) {
+                cursorRect.setPosition(x + glyphPositions.get(cursor) - cursorWidth / 2, yPosCursor)
                 cursorRect.setSize(cursorWidth, ySize)
                 cursorRect.draw(batch, parentAlpha)
             }

@@ -32,9 +32,6 @@ class Slider(
 
     override var styleManager: StyleManager? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
-
     var forcedPrefHeight: Float? = null
     var forcedPrefWidth: Float? = null
 
@@ -67,7 +64,6 @@ class Slider(
     private var bindTarget: BindTarget<Float>? = bind?.let { BindTargetFactory.get<Float>(it) }
 
     init {
-        bindHoverStateListeners(this)
         addListener(inputListener)
     }
 
@@ -103,7 +99,12 @@ class Slider(
 
     fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
-        bindTarget?.let { it.setter(min + cursorPos * (max - min)) }
+        bindTarget?.setter(min + cursorPos * (max - min))
+    }
+
+    fun move(by: Float) {
+        cursorPos = (cursorPos + by).between(0f, 1f)
+        bindTarget?.setter(min + cursorPos * (max - min))
     }
 
     override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()

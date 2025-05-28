@@ -138,7 +138,6 @@ class ShopScreenController(
         if (context.currentRerollPrice > SaveState.playerMoney) {
             val customLabel = screen.namedActorOrNull(rerollWidgetName) as CustomLabel
             customLabel.isDisabled = true
-            customLabel.setFocusableTo(false, customLabel)
             customLabel.backgroundHandle = "common_button_disabled"
         }
 
@@ -166,13 +165,6 @@ class ShopScreenController(
             val fl = card.actor.parent.height * 0.8f
             card.actor.setSize(fl, fl)
         }
-        card.actor.targetGroups = listOf("shop_targets")
-        card.actor.makeDraggable(card.actor)
-
-        card.actor.group = if (isFirst) "shop_cards_first" else "shop_cards"
-        card.actor.resetCondition = { true }
-        card.actor.bindDragging(card.actor, screen)
-        card.actor.onFocus { if (!it) cardsParentWidget.scrollTo(curParent) }
 
         val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
         val label =
@@ -200,9 +192,9 @@ class ShopScreenController(
     ) {
         fun CardActor.unavailable() {
             this.alpha = 0.5f
-            this.isSelectable = false
-            this.isDraggable = false
         }
+        card.actor.leaveGroup(availableCardGroup)
+        card.actor.isDraggable = false
         if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
             if (label.alpha != 1f) return
             label.alpha = 0.6f
@@ -213,12 +205,16 @@ class ShopScreenController(
             label.alpha = 0.9f
             label.setText("bought")
             card.actor.unavailable()
+            return
         }
         if (setSoldOut) {
             label.alpha = 0.9f
             label.setText("sold out")
             card.actor.unavailable()
+            return
         }
+        card.actor.isDraggable = true
+        card.actor.joinGroup(availableCardGroup)
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
@@ -246,5 +242,9 @@ class ShopScreenController(
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), actor.card.name)
         updateStateOfCard(actor.card, setBought = true)
         updateStatesOfUnboughtCards()
+    }
+
+    companion object {
+        const val availableCardGroup = "shop-card-available"
     }
 }

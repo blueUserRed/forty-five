@@ -14,30 +14,17 @@ import kotlin.math.floor
 import kotlin.math.min
 
 abstract class StatusEffect(
-    private val iconHandle: ResourceHandle,
+    val iconHandle: ResourceHandle,
     private val iconScale: Float
 ) {
 
     abstract val name: String
-
-    lateinit var icon: CustomImageActor
-        private set
-
-    private var isIconInitialised: Boolean = false
 
     protected lateinit var controller: GameController
 
     abstract val effectType: StatusEffectType
 
     open val blocksStatusEffects: List<StatusEffectType> = listOf()
-
-    fun initIcon(gameController: GameController) {
-        icon = CustomImageActor(iconHandle, gameController.screen)
-        icon.setScale(iconScale)
-        icon.reportDimensionsWithScaling = true
-        icon.ignoreScalingWhenDrawing = true
-        isIconInitialised = true
-    }
 
     open fun start(controller: GameController) {
         this.controller = controller
@@ -94,10 +81,10 @@ abstract class RotationBasedStatusEffect(
 
     override fun getDisplayText(): String = if (!continueForever) {
         val rotations = min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)
-        rotations pluralS "rotation"
-        } else {
-            "∞"
-        }
+        rotations.toString()
+    } else {
+        "inf"
+    }
 
     protected fun extendDuration(extension: Int) {
         duration += extension
@@ -139,9 +126,9 @@ abstract class TurnBasedStatusEffect(
 
     override fun getDisplayText(): String = if (!continueForever) {
         val turns = turnOnEffectStart + duration - controller.turnCounter
-        turns pluralS "turn"
+        turns.toString()
     } else {
-        "∞"
+        "inf"
     }
 
     protected fun extendDuration(extension: Int) {
@@ -256,7 +243,7 @@ class Poison(
         var actualTurns: Int? = null
         action {
             actualTurns = min(turns, turnOnEffectStart + duration - controller.turnCounter)
-            damage = actualTurns!! * this@Poison.damage
+            damage = actualTurns * this@Poison.damage
         }
         includeLater(
             { target.damage(damage!!, controller) },
@@ -276,14 +263,14 @@ class Poison(
     }
 
     override fun getDisplayText(): String {
-        val damageString = "damage $damage"
+        val damageString = damage.toString()
         val turnsString = if (continueForever) {
-            "∞"
+            "inf"
         } else {
             val turns = turnOnEffectStart + duration - controller.turnCounter
-            turns pluralS "turn"
+            turns.toString()
         }
-        return "$damageString / $turnsString"
+        return "$damageString, $turnsString"
     }
 
     override fun equals(other: Any?): Boolean = other is Poison
@@ -357,7 +344,7 @@ class Bewitched(
             rotationDuration
         )
         val turns = turnOnEffectStart + turnsDuration - controller.turnCounter
-        return "${rotations pluralS "rotation"} or ${turns pluralS "turn"}"
+        return "$turns, $rotations"
     }
 
     override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
