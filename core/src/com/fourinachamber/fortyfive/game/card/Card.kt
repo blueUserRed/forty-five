@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -16,8 +15,8 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
@@ -33,7 +32,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
-import ktx.actors.onTouchEvent
 import onj.value.*
 import kotlin.math.absoluteValue
 
@@ -208,7 +206,7 @@ class Card(
 
     fun bindGameEvents(gameEvents: EventPipeline, controller: GameController) {
         var currentTargetSelection: Promise<Card>? = null
-        gameEvents.watchFor<NewGameController.Events.TargetSelectionEvent> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
             if (!inZone(Zone.REVOLVER)) return@watchFor
             if (this === event.exclude) return@watchFor
             TODO()
@@ -246,10 +244,7 @@ class Card(
         }
     }
 
-    fun inZone(vararg zones: Zone): Boolean {
-        zones.forEach { if (it == zone) return true }
-        return false
-    }
+    fun inZone(vararg zones: Zone): Boolean = zones.contains(zone)
 
     inline fun <T> checkValiditySingleModifierList(
         controller: GameController,

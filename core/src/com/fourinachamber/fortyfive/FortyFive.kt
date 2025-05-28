@@ -83,25 +83,12 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-//        MapManager.changeToMapScreen()
-//        resetAll()
-//        newRun(false)
-//        MapManager.changeToMapScreen()
-        MapManager.changeToTitleScreen()
-//        changeToScreen(ConfigFileManager.screenBuilderFor("encounterScreen"), object : EncounterContext {
-//            override val encounterIndex: Int = GameDirector.encounters.size - 5
-//            override val forwardToScreen: String = "mapScreen"
-//            override fun completed() {
-//            }
-//        })
-//        return
-//        changeToScreen(FromKotlinScreenBuilder(TestScreen()))
-//        return
-//        when (UserPrefs.startScreen) {
-//            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
-//            UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
-//            UserPrefs.StartScreen.MAP -> changeToInitialScreen()
-//        }
+        UserPrefs.startScreen = UserPrefs.StartScreen.MAP
+        when (UserPrefs.startScreen) {
+            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
+            UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
+            UserPrefs.StartScreen.MAP -> changeToInitialScreen()
+        }
     }
 
     fun changeToInitialScreen() {

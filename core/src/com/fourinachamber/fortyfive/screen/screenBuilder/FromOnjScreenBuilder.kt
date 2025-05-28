@@ -393,20 +393,6 @@ class FromOnjScreenBuilder(
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
-        "CardHand" -> CardHand(
-            widgetOnj.get<Double>("targetWidth").toFloat(),
-            widgetOnj.get<Double>("cardSize").toFloat(),
-            widgetOnj.get<Double>("opacityIfNotPlayable").toFloat(),
-            widgetOnj.get<Double>("centerGap").toFloat(),
-            screen
-        ).apply {
-            hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
-            maxCardSpacing = widgetOnj.get<Double>("maxCardSpacing").toFloat()
-            startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
-            hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
-            draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
-        }
-
 //        "Revolver" -> Revolver(
 //            widgetOnj.get<String>("background"),
 //            widgetOnj.get<String>("slotTexture"),

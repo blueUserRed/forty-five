@@ -1,15 +1,8 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
-import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.CardActor
-import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.utils.EventPipeline
@@ -42,7 +35,7 @@ class PutCardsUnderDeckWidget(
 //            if (source !is CardActor) return@add
 //            addCard(source.card)
 //        }
-        gameEvents.watchFor<NewGameController.Events.PutCardsUnderStack> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
             targetSize = event.amount
             remainingCardsForTemplate = targetSize
             currentPromise = event.selectedCards

@@ -2,7 +2,7 @@ package com.fourinachamber.fortyfive.game.card
 
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.*
@@ -511,7 +511,7 @@ abstract class Effect(val data: EffectData) {
             action {
                 controller.addTemporaryEncounterModifier(
                     modifier = EncounterModifier.getFromName(encounterModifierName),
-                    validityChecker = { card.inZone(NewGameController.Zone.REVOLVER) }
+                    validityChecker = { card.inZone(GameControllerImpl.Zone.REVOLVER) }
                 )
             }
         }
@@ -666,8 +666,8 @@ sealed class GameSituation {
 
     class ZoneChange(
         val card: Card,
-        val oldZone: NewGameController.Zone,
-        val newZone: NewGameController.Zone,
+        val oldZone: GameControllerImpl.Zone,
+        val newZone: GameControllerImpl.Zone,
         val before: Boolean
     ) : GameSituation()
 
@@ -708,6 +708,6 @@ data class EffectData(
     val isHidden: Boolean = false,
     val cacheAffectedCards: Boolean = false,
     val condition: GamePredicate? = null,
-    val onlyTriggerInZones: List<NewGameController.Zone>? = null,
+    val onlyTriggerInZones: List<GameControllerImpl.Zone>? = null,
     val canPreventEnteringGame: Boolean = false
 )

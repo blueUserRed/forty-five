@@ -1,15 +1,12 @@
 package com.fourinachamber.fortyfive.screen.gameWidgets
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
@@ -22,7 +19,6 @@ import com.fourinachamber.fortyfive.keyInput.InputActorImpl
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.DropShadow
-import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -35,7 +31,6 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.contains
-import onj.value.OnjNamedObject
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -363,7 +358,7 @@ class RevolverSlot(
         isDropTarget = true
         onDrop { actor ->
             if (actor !is CardActor) return@onDrop
-            events.fire(NewCardHand.CardDraggedOntoSlotEvent(actor.card, this))
+            events.fire(CardHand.CardDraggedOntoSlotEvent(actor.card, this))
         }
     }
 

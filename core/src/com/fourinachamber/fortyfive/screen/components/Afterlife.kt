@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
@@ -219,7 +219,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                 { debug = false }
             )
             onInput(GameInputs.interact) {
-                gameEvents.fire(NewGameController.Events.AfterlifeOpenToggle)
+                gameEvents.fire(GameControllerImpl.Events.AfterlifeOpenToggle)
             }
         }
 

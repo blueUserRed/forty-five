@@ -1,7 +1,7 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl.Zone
 
 fun interface CardPredicate {
 

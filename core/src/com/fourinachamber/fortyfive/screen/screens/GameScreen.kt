@@ -16,7 +16,7 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.card.CardActor
-import com.fourinachamber.fortyfive.game.controller.NewGameController
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.game.enemy.StatusBar
@@ -25,12 +25,10 @@ import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.HorizontalStatusEffectDisplay
-import com.fourinachamber.fortyfive.screen.gameWidgets.NewCardHand
+import com.fourinachamber.fortyfive.screen.gameWidgets.CardHand
 import com.fourinachamber.fortyfive.screen.gameWidgets.PutCardsUnderDeckWidget
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
@@ -94,7 +92,7 @@ class GameScreen : ScreenCreator() {
     }
 
     private val cardHand by lazy {
-        NewCardHand(
+        CardHand(
             screen,
             300f,
             596f * 0.22f,
@@ -159,11 +157,11 @@ class GameScreen : ScreenCreator() {
                 centerY()
             }
 
-            gameEvents.watchFor<NewGameController.Events.AddedPlayerStatusEffect> { event ->
+            gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
                 playerStatusEffectDisplay.displayEffect(event.statusEffect)
                 isVisible = true
             }
-            gameEvents.watchFor<NewGameController.Events.RemovedPlayerStatusEffect> { event ->
+            gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
                 playerStatusEffectDisplay.removeEffect(event.statusEffect)
                 if (playerStatusEffectDisplay.effects.isEmpty()) isVisible = false
             }
@@ -190,7 +188,7 @@ class GameScreen : ScreenCreator() {
             relativeHeight(100f)
             touchable = Touchable.childrenOnly
             isVisible = false
-            gameEvents.watchFor<NewGameController.Events.PutCardsUnderStack> { event ->
+            gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
                 isVisible = true
                 event.selectedCards.then { isVisible = false }
             }
@@ -201,7 +199,7 @@ class GameScreen : ScreenCreator() {
                 touchable = Touchable.disabled
                 centerX()
                 centerY()
-                gameEvents.watchFor<NewGameController.Events.PutCardsUnderStack> { event ->
+                gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
                     touchable = Touchable.enabled
                     event.selectedCards.then { touchable = Touchable.disabled }
                 }
@@ -250,7 +248,7 @@ class GameScreen : ScreenCreator() {
 
             onInput(GameInputs.interact) {
                 if (enemySelected) return@onInput
-                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
+                gameEvents.fire(GameControllerImpl.Events.EnemySelected(enemy))
             }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
@@ -374,7 +372,7 @@ class GameScreen : ScreenCreator() {
                         amplitude = 14f,
                         frequency = 0.4f
                     )
-                    gameEvents.watchFor<NewGameController.Events.EnemySelected> { (e) ->
+                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelected> { (e) ->
                         enemySelected = e === enemy
                         isVisible = enemySelected
                     }
@@ -406,7 +404,7 @@ class GameScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         color.a = 0f
         touchable = Touchable.disabled
-        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
             val action = AlphaAction()
             action.duration = 0.2f
             action.alpha = if (event.inParryMenu) 1f else 0f
@@ -419,7 +417,7 @@ class GameScreen : ScreenCreator() {
             syncHeight()
         }
         label("roadgeek", "", Color.GRAY) {
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, blockable) ->
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, blockable) ->
                 setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
             }
             setFontScale(0.7f)
@@ -428,7 +426,7 @@ class GameScreen : ScreenCreator() {
             syncHeight()
         }
         label("roadgeek", "", Color.GRAY) {
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (_, damage, _) ->
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, _) ->
                 setText("Passing will let $damage damage through")
             }
             setFontScale(0.7f)
@@ -457,7 +455,7 @@ class GameScreen : ScreenCreator() {
             addAction(action)
         }
 
-        gameEvents.watchFor<NewGameController.Events.TargetSelectionEvent> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
             animateInOut(true)
             event.promise.then { animateInOut(false) }
         }
@@ -465,7 +463,7 @@ class GameScreen : ScreenCreator() {
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
-            gameEvents.watchFor<NewGameController.Events.TargetSelectionEvent> { event ->
+            gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
                 setText(event.text)
             }
         }
@@ -481,7 +479,7 @@ class GameScreen : ScreenCreator() {
 
         val modal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
 
-        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
             if (event.inParryMenu) modal.push() else modal.finished()
         }
 
@@ -529,8 +527,8 @@ class GameScreen : ScreenCreator() {
                 setFontScale(1.1f)
                 centerX()
                 centerY()
-                gameEvents.watchFor<NewGameController.Events.ReservesChanged> { (_, new) ->
-                    setText("${new}/${NewGameController.Config.baseReserves}")
+                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new) ->
+                    setText("${new}/${GameControllerImpl.Config.baseReserves}")
                 }
             }
         }
@@ -566,7 +564,7 @@ class GameScreen : ScreenCreator() {
 
     private fun CustomGroup.shootButton() {
         var parryPromise: Promise<Boolean>? = null
-        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
             parryPromise = event.resolutionPromise
         }
         group(backgroundHints = arrayOf("shoot_button_texture", "shoot_button_hover_texture")) {
@@ -599,9 +597,9 @@ class GameScreen : ScreenCreator() {
                 }
             )
             onInput(GameInputs.interact){
-                gameEvents.fire(NewGameController.Events.ShootButtonPressed)
+                gameEvents.fire(GameControllerImpl.Events.ShootButtonPressed)
             }
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
                     filter.start()
@@ -650,7 +648,7 @@ class GameScreen : ScreenCreator() {
                     if (it.isNotResolved) it.resolve(false)
                 }
             }
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
                     filter.start()
@@ -668,7 +666,7 @@ class GameScreen : ScreenCreator() {
 
     private fun CustomGroup.holsterButton() {
         var parryPromise: Promise<Boolean>? = null
-        gameEvents.watchFor<NewGameController.Events.ParryStateChange> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
             parryPromise = event.resolutionPromise
         }
         group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
@@ -689,7 +687,7 @@ class GameScreen : ScreenCreator() {
             height = 250f * (543f / 655f)
 
             onInput(GameInputs.interact) {
-                gameEvents.fire(NewGameController.Events.HolsterButtonPressed)
+                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
             }
             backgroundHandle = "end_turn_button_texture"
             xAnim.state("open")
@@ -704,7 +702,7 @@ class GameScreen : ScreenCreator() {
                     xAnim.state("open")
                 }
             )
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
                     filter.start()
@@ -754,7 +752,7 @@ class GameScreen : ScreenCreator() {
                     xAnim.state(if (closed) "closed" else "open")
                 }
             )
-            gameEvents.watchFor<NewGameController.Events.ParryStateChange> { (inParryMenu) ->
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (!inParryMenu) {
                     xAnim.state("closed")
                     filter.start()
@@ -790,7 +788,7 @@ class GameScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             isVisible = false
 
-            gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { event ->
+            gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { event ->
                 isVisible = true
                 continuePromise = event.popupPromise
                 filter.end()
@@ -823,12 +821,12 @@ class GameScreen : ScreenCreator() {
                         marginRight = 10f
                     }
 
-                    gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { (_, money, _) ->
+                    gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, money, _) ->
                         isVisible = money > 0
                     }
 
                     label("red_wing", "", Color.FortyWhite) {
-                        gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { (_, money, _) ->
+                        gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, money, _) ->
                             setText("You get \$$money overkill cash")
                         }
                     }
@@ -850,7 +848,7 @@ class GameScreen : ScreenCreator() {
                         marginRight = 10f
                     }
 
-                    gameEvents.watchFor<NewGameController.Events.ShowPlayerWonPopup> { (gotCard, _, _) ->
+                    gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (gotCard, _, _) ->
                         isVisible = gotCard
                     }
 
@@ -904,7 +902,7 @@ class GameScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
-        NewGameController(screen, gameEvents, warningParent!!, afterlife)
+        GameControllerImpl(screen, gameEvents, warningParent!!, afterlife)
     )
 
     private fun orbAnimationTimeline(
@@ -941,14 +939,14 @@ class GameScreen : ScreenCreator() {
 
 
     private fun bindEventHandlers() {
-        gameEvents.watchFor<NewGameController.Events.ReservesChanged>(::reservesChangedAnim)
-        gameEvents.watchFor<NewGameController.Events.PlayCardOrbAnimation> { event ->
+        gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged>(::reservesChangedAnim)
+        gameEvents.watchFor<GameControllerImpl.Events.PlayCardOrbAnimation> { event ->
             event.orbAnimationTimeline = orbAnimationTimeline(deckAnimationTarget, event.targetActor, 1, false, duration = 200)
         }
-        gameEvents.watchFor<NewGameController.Events.SetupEnemies>(::setupEnemies)
+        gameEvents.watchFor<GameControllerImpl.Events.SetupEnemies>(::setupEnemies)
     }
 
-    private fun setupEnemies(event: NewGameController.Events.SetupEnemies) {
+    private fun setupEnemies(event: GameControllerImpl.Events.SetupEnemies) {
         var x = 10f
         var y = 160f
         event.enemies.forEach { enemy ->
@@ -958,7 +956,7 @@ class GameScreen : ScreenCreator() {
         }
     }
 
-    private fun reservesChangedAnim(event: NewGameController.Events.ReservesChanged) {
+    private fun reservesChangedAnim(event: GameControllerImpl.Events.ReservesChanged) {
         val (old, new, source, controller) = event
         source ?: return
         val amount = new - old

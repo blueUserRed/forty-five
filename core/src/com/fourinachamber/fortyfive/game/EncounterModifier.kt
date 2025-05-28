@@ -9,8 +9,7 @@ import com.fourinachamber.fortyfive.game.card.GameSituation
 import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
-import com.fourinachamber.fortyfive.game.controller.OldGameController
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -102,11 +101,12 @@ sealed class EncounterModifier {
 
         override fun update(controller: GameController) {
             if (baseTime == -1L) return
-            if (controller.playerLost || OldGameController.showWinScreen in controller.screen.screenState) {
-                controller.screen.leaveState("steel_nerves")
-                baseTime = -1
-                return
-            }
+            TODO()
+//            if (controller.playerLost || OldGameController.showWinScreen in controller.screen.screenState) {
+//                controller.screen.leaveState("steel_nerves")
+//                baseTime = -1
+//                return
+//            }
             val now = TimeUtils.millis()
             val diff = max(10 - ((now - baseTime).toDouble() / 1000.0).roundToInt(), 0)
             TemplateString.updateGlobalParam("game.steelNerves.remainingTime", diff)

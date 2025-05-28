@@ -4,7 +4,7 @@ import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.card.Trigger.Companion.triggerForSituation
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.game.controller.NewGameController.Zone
+import com.fourinachamber.fortyfive.game.controller.GameControllerImpl.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
