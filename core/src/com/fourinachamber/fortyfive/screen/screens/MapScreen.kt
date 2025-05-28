@@ -46,8 +46,6 @@ class MapScreen : ScreenCreator() {
 
     override val playAmbientSounds: Boolean = false
 
-    private var warningParent: WarningParent? = null
-
     private val warningEvents: EventPipeline = EventPipeline()
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
@@ -92,10 +90,6 @@ class MapScreen : ScreenCreator() {
 //        MapScreenController(screen)
     )
 
-    override fun update() {
-        warningParent?.update()
-    }
-
     override fun getRoot(): Group = newGroup {
         x = 0f
         y = 0f
@@ -115,47 +109,7 @@ class MapScreen : ScreenCreator() {
             }
         }
         getInfoPopup()
-        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, warningEvents)
-
-        val navbar = getSharedNavBar(
-            worldWidth, worldHeight,
-            listOf(getSharedTitleScreen(), settingsObject, backpackObject),
-            screen
-        )
-
-        actor(navbar) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
-        }
-        actor(backpack)
-        actor(settings) {
-            onLayout { x = parent.width / 2 - width / 2 }
-        }
-        val tutorial = actor(tutorialInfoActor) {
-            name("tutorialInfoActor")
-            x = 0f
-            y = 0f
-            width = worldWidth
-            height = worldHeight
-            isVisible = false
-        }
-        val tutorialText = advancedText("red_wing", Color.FortyWhite, 1f) {
-            name("tutorial_info_text")
-            horizontalTextAlign = CustomAlign.CENTER
-            centerX()
-            onLayout { y = worldHeight - prefHeight }
-            syncHeight()
-            relativeWidth(40f)
-            isVisible = false
-        }
-        screen.listenToScreenState(MapScreenController.showTutorialActorScreenState) { entered ->
-            tutorial.isVisible = entered
-            tutorialText.isVisible = entered
-        }
-        val warningParent = WarningParent(this@MapScreen, screen, warningEvents)
-        this@MapScreen.warningParent = warningParent
-        actor(warningParent.getActor())
+        addDefaultOverlays(worldWidth, worldHeight, warningEvents)
     }
 
     private fun Group.getInfoPopup() = box {

@@ -35,6 +35,7 @@ class WarningParent(
         with(creator) {
             val created = createActorWithReceiver()
             actor = created
+            created.onUpdate { this@WarningParent.update() }
             return created
         }
     }
@@ -48,7 +49,7 @@ class WarningParent(
         }
     }
 
-    fun update() {
+    private fun update() {
         displayedWarnings.forEach { it.update() }
     }
 

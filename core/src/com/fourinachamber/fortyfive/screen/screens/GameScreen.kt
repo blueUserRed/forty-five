@@ -110,10 +110,6 @@ class GameScreen : ScreenCreator() {
         bindEventHandlers()
     }
 
-    override fun update() {
-        warningParent?.update()
-    }
-
     override fun getRoot(): Group = newGroup {
 
         x = 0f
@@ -177,23 +173,12 @@ class GameScreen : ScreenCreator() {
 
         winPopup()
 
-        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        val navBar = getSharedNavBar(
-            worldWidth,
-            worldHeight,
-            listOf(settingsObject),
-            screen,
-            isLeft = true
+        warningParent = addDefaultOverlays(
+            worldWidth, worldHeight,
+            gameEvents,
+            navbarIsLeft = true,
+            hasTitleScreenInNavbar = false
         )
-        actor(navBar) {
-            onLayoutAndNow { y = worldHeight - height }
-            x = 0f
-        }
-        actor(settings)
-
-        val warningParent = WarningParent(this@GameScreen, screen)
-        this@GameScreen.warningParent = warningParent
-        actor(warningParent.getActor())
     }
 
     private fun CustomGroup.putCardsUnderStackPopup() {
@@ -255,11 +240,6 @@ class GameScreen : ScreenCreator() {
             this.y = y
             width = enemyWidth
             height = enemyHeight
-
-//            onSelect {
-//                if (enemySelected) return@onSelect
-//                gameEvents.fire(NewGameController.Events.EnemySelected(enemy))
-//            }
 
             keyboardFocusable = KeyboardFocusable.LEAF
             observeInputState(

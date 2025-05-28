@@ -147,8 +147,15 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             direction != FocusChangeDirection.PREVIOUS
         ) {
             if (canBeSelf && canBeFocused(inputActor)) return inputActor
-            val next = inputActor.partOfFocusGrid?.move(inputActor, direction)
-            if (next != null && canBeFocused(next)) return next
+            val result = inputActor.partOfFocusGrid?.move(inputActor, direction)
+            when (result) {
+                is FocusGrid.MoveResult.MovedToActor -> {
+                    val next = result.actor
+                    return if (next != null && canBeFocused(next)) next else null
+                }
+                is FocusGrid.MoveResult.LeftGrid -> {}
+                else -> {}
+            }
         }
         if (inputActor.keyboardFocusable == KeyboardFocusable.GROUP) {
             actor as? Group ?: throw RuntimeException("keyboardFocusable.Group should only be set on groups")
@@ -559,7 +566,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
         fun get(x: Int, y: Int): InputActor? = columns.getOrNull(x)?.getOrNull(y)
 
-        fun move(start: InputActor, direction: FocusChangeDirection): InputActor? {
+        fun move(start: InputActor, direction: FocusChangeDirection): MoveResult {
             if (start.partOfFocusGrid !== this) {
                 throw RuntimeException("FocusGrid.move called with actor that isn't part of the grid")
             }
@@ -572,10 +579,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
                 FocusChangeDirection.LEFT -> x--
                 else -> {}
             }
-            x = x.between(0, columns.size - 1)
+            if (x !in columns.indices) return MoveResult.LeftGrid
             val column = columns[x]
-            y = y.between(0, column.size - 1)
-            return get(x, y)
+            if (y !in column.indices) return MoveResult.LeftGrid
+            return MoveResult.MovedToActor(get(x, y))
         }
 
         operator fun contains(actor: InputActor): Boolean {
@@ -585,6 +592,11 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
                 }
             }
             return false
+        }
+
+        sealed class MoveResult {
+            data object LeftGrid : MoveResult()
+            class MovedToActor(val actor: InputActor?) : MoveResult()
         }
 
     }

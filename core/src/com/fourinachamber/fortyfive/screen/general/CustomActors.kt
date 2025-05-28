@@ -22,9 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
-import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputActorImpl
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
@@ -1295,6 +1293,8 @@ open class CustomGroup(
 
     var manualBackground: Drawable? = null
 
+    private val onUpdateCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     init {
         initInput(this, screen)
         initDebugBounds(this)
@@ -1332,6 +1332,15 @@ open class CustomGroup(
         super.draw(batch, parentAlpha)
         x = oldX
         y = oldY
+    }
+
+    override fun act(delta: Float) {
+        onUpdateCallbacks.forEach { it() }
+        super.act(delta)
+    }
+
+    fun onUpdate(callback: () -> Unit) {
+        onUpdateCallbacks.add(callback)
     }
 
     private fun drawBackground(batch: Batch?) {

@@ -14,6 +14,13 @@ import com.fourinachamber.fortyfive.animation.Interpolator
 import com.fourinachamber.fortyfive.animation.PropertyAnimation
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator
+import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
+import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
+import com.fourinachamber.fortyfive.screen.components.WarningParent
+import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
@@ -21,6 +28,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.Selector
 import com.fourinachamber.fortyfive.screen.general.customActor.Slider
 import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.TemplateString
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -369,6 +377,90 @@ abstract class ScreenCreator : ResourceBorrower {
         backgroundHandle = normal
         onHoverEnter { backgroundHandle = hover }
         onHoverLeave { backgroundHandle = normal }
+    }
+
+    fun CustomGroup.addDefaultOverlays(
+        worldWidth: Float,
+        worldHeight: Float,
+        warningEvents: EventPipeline,
+        hasSettings: Boolean = true,
+        hasBackpack: Boolean = true,
+        hasNavbar: Boolean = true,
+        navbarIsLeft: Boolean = false,
+        hasWarnings: Boolean = true,
+        hasTutorial: Boolean = true,
+        hasTitleScreenInNavbar: Boolean = true,
+    ): WarningParent? {
+
+        val warningParent = WarningParent(this@ScreenCreator, screen, warningEvents)
+        val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
+
+        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
+
+        var settings: CustomGroup? = null
+        if (hasSettings) {
+            val (_settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+            settings = _settings
+            navbarObjects.add(settingsObject)
+        }
+
+        var backpack: CustomGroup? = null
+        if (hasBackpack) {
+            val (_backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, warningEvents)
+            backpack = _backpack
+            navbarObjects.add(backpackObject)
+        }
+
+        val navbar = getSharedNavBar(
+            worldWidth, worldHeight,
+            navbarObjects,
+            screen,
+            isLeft = navbarIsLeft
+        )
+
+        actor(navbar) {
+            onLayoutAndNow { y = worldHeight - height }
+            centerX()
+        }
+        backpack?.let { actor(it) }
+        settings?.let {
+            actor(it) {
+                centerX()
+            }
+        }
+
+        if (hasTutorial) {
+            val tutorialInfoActor = TutorialInfoActor(
+                "tutorial_info_actor_background",
+                2f,
+                200f,
+                screen
+            )
+            actor(tutorialInfoActor) {
+                name("tutorialInfoActor")
+                x = 0f
+                y = 0f
+                width = worldWidth
+                height = worldHeight
+                isVisible = false
+            }
+            advancedText("red_wing", com.fourinachamber.fortyfive.utils.Color.FortyWhite, 1f) {
+                name("tutorial_info_text")
+                horizontalTextAlign = CustomAlign.CENTER
+                centerX()
+                onLayout { y = worldHeight - prefHeight }
+                syncHeight()
+                relativeWidth(40f)
+                isVisible = false
+            }
+        }
+
+        if (hasWarnings) {
+            actor(warningParent.getActor())
+            return warningParent
+        } else {
+            return null
+        }
     }
 
     inline fun <A, reified P> A.propertyAnimation(

@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.percent
 
 class ShopScreen : ScreenCreator() {
@@ -189,20 +190,7 @@ class ShopScreen : ScreenCreator() {
             }
         }
 
-
-        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        actor(
-            getSharedNavBar(
-                worldWidth,
-                worldHeight,
-                listOf(settingsObject, settingsObject, settingsObject),
-                screen
-            )
-        ) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
-        }
-        actor(settings)
+        addDefaultOverlays(worldHeight, worldHeight, EventPipeline())
     }
 
     private fun Group.addTestChildren() {
