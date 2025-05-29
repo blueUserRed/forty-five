@@ -1,22 +1,10 @@
 package com.fourinachamber.fortyfive.config
 
 import com.badlogic.gdx.Gdx
-import com.fourinachamber.fortyfive.screen.screens.AddMaxHPScreen
-import com.fourinachamber.fortyfive.screen.screens.HealOrMaxHPScreen
-import com.fourinachamber.fortyfive.screen.screens.ShopScreen
-import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
-import com.fourinachamber.fortyfive.screen.screenBuilder.FromOnjScreenBuilder
-import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
-import com.fourinachamber.fortyfive.screen.screens.CreditsScreen
-import com.fourinachamber.fortyfive.screen.screens.DialogScreen
-import com.fourinachamber.fortyfive.screen.screens.GameScreen
-import com.fourinachamber.fortyfive.screen.screens.MapScreen
-import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
-import onj.value.OnjArray
 import onj.value.OnjObject
 
 object ConfigFileManager {
@@ -28,10 +16,7 @@ object ConfigFileManager {
         OnjSchemaParser.parseFile("onjschemas/files.onjschema")
     }
 
-    private lateinit var screenSchema: OnjSchema
-
     private lateinit var configFiles: List<ConfigFile>
-    private val screens: MutableList<ScreenData> = mutableListOf()
 
     fun init() {
         val onj = OnjParser.parseFile(path)
@@ -49,30 +34,6 @@ object ConfigFileManager {
                     null
                 )
             }
-    }
-
-    private fun addScreen(name: String, creator: () -> ScreenBuilder) {
-        screens.add(ScreenData(name, null, creator, null))
-    }
-
-    fun screenBuilderFor(screen: String): ScreenBuilder {
-        val s = screenOrError(screen)
-        s.creator?.let { return it() }
-        if (s.onj == null) forceLoadScreen(screen)
-        return FromOnjScreenBuilder(s.name, s.onj!!)
-    }
-
-    fun forceLoadScreen(screen: String) {
-        val s = screenOrError(screen)
-        val path = s.path ?: run {
-            FortyFiveLogger.warn(logTag, "couldn't load screen $screen because it is not associated with an onj file")
-            return
-        }
-        if (s.onj != null) return
-        val onj = OnjParser.parseFile(path)
-        screenSchema.assertMatches(onj)
-        onj as OnjObject
-        s.onj = onj
     }
 
     fun getConfigFile(configFile: String): OnjObject {
@@ -100,36 +61,10 @@ object ConfigFileManager {
         .find { it.name == configFile }
         ?: throw RuntimeException("no config file called $configFile")
 
-    private fun screenOrError(screen: String): ScreenData = screens
-        .find { it.name == screen }
-        ?: throw RuntimeException("no screen called $screen")
-
-    fun addKotlinScreens() {
-        val data = listOf(
-            "mapScreen" to { FromKotlinScreenBuilder(MapScreen()) },
-            "healOrMaxHPScreen" to { FromKotlinScreenBuilder(HealOrMaxHPScreen()) },
-//            "healOrMaxHPScreen" to { FromKotlinScreenBuilder(CustomBoxPlaygroundScreen()) },
-            "addMaxHPScreen" to { FromKotlinScreenBuilder(AddMaxHPScreen()) },
-            "titleScreen" to { FromKotlinScreenBuilder(TitleScreen()) },
-            "creditsScreen" to { FromKotlinScreenBuilder(CreditsScreen()) },
-            "shopScreen" to { FromKotlinScreenBuilder(ShopScreen()) },
-            "dialogScreen" to { FromKotlinScreenBuilder(DialogScreen()) },
-            "encounterScreen" to { FromKotlinScreenBuilder(GameScreen()) }
-        )
-        data.forEach { addScreen(it.first,it.second) }
-    }
-
     private data class ConfigFile(
         val name: String,
         val path: String,
         val schemaPath: String?,
-        var onj: OnjObject?
-    )
-
-    private data class ScreenData(
-        val name: String,
-        val path: String?,
-        val creator: (() -> ScreenBuilder)?,
         var onj: OnjObject?
     )
 

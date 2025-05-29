@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.map.detailMap.generation.BaseMapGenerator
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.screens.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -105,6 +106,8 @@ object MapManager {
         currentDetailMap = readDetailMap(map)
     }
 
+    // TODO: we need to come up with a better system for managing screen order anyways
+
     fun changeToEncounterScreen(context: EncounterContext, immediate: Boolean = false) {
         val encounter = GameDirector.encounters[context.encounterIndex]
         val intermediate = encounter
@@ -112,38 +115,39 @@ object MapManager {
             .map { it.intermediateScreen() }
             .find { it != null }
         if (intermediate != null && !immediate) {
-            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(intermediate), context)
+            TODO()
+//            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(intermediate), context)
         } else {
-            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("encounterScreen"), context)
+            FortyFive.changeToScreen(GameScreen(), context)
         }
     }
 
     fun changeToDialogScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("dialogScreen"), event)
+        FortyFive.changeToScreen(DialogScreen(), event)
     }
 
     fun changeToShopScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("shopScreen"), event)
+        FortyFive.changeToScreen(ShopScreen(), event)
     }
 
     fun changeToChooseCardScreen(context: ChooseCardScreenContext) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("chooseCardScreen"), context)
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("chooseCardScreen"), context)
     }
 
     fun changeToHealOrMaxHPScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("healOrMaxHPScreen"), event)
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("healOrMaxHPScreen"), event)
     }
 
     fun changeToAddMaxHPScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("addMaxHPScreen"), event)
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("addMaxHPScreen"), event)
     }
 
     fun changeToTitleScreen() {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("titleScreen"))
+        FortyFive.changeToScreen(TitleScreen())
     }
 
     fun changeToCreditsScreen() {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("creditsScreen"))
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("creditsScreen"))
     }
 
     /**
@@ -213,7 +217,7 @@ object MapManager {
     }
 
     fun changeToMapScreen() {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen"))
+        FortyFive.changeToScreen(MapScreen())
     }
 
     fun lookupMapFile(mapName: String): FileHandle =

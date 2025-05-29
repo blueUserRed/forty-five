@@ -25,6 +25,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import onj.value.OnjArray
@@ -134,6 +135,8 @@ class GameControllerImpl(
         }
         encounterContext = context
 
+        FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.BATTLE)
+
         encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
             ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
 
@@ -174,7 +177,7 @@ class GameControllerImpl(
             // The afterlife opening and closing is handled on the main timeline because it could be important for
             // trigger anims, where the afterlife can open/close automatically
             if (isUIFrozen) {
-                SoundPlayer.situation("not_allowed", screen)
+                FortyFive.soundPlayer.situation("not_allowed", screen)
                 return@watchFor
             }
             appendMainTimeline(afterlife.toggleTimeline())
@@ -549,7 +552,7 @@ class GameControllerImpl(
         if (newDamage == 0) return@later
         include(updatePlayerLivesTimeline(curPlayerLives - newDamage))
         action {
-            SoundPlayer.situation("enemy_attack", this@GameControllerImpl.screen)
+            FortyFive.soundPlayer.situation("enemy_attack", this@GameControllerImpl.screen)
             dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
             dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen, this@GameControllerImpl).wrap())
             curPlayerLives -= newDamage
@@ -607,7 +610,7 @@ class GameControllerImpl(
                 delay(100)
                 include(gameRenderPipeline.getScreenShakePopoutTimeline())
                 delay(50)
-                action { SoundPlayer.situation("shield_anim", screen) }
+                action { FortyFive.soundPlayer.situation("shield_anim", screen) }
             }.asAction()
             parallelActions(bannerAnim, postProcessorAction)
         }
@@ -657,7 +660,7 @@ class GameControllerImpl(
         isPiercing: Boolean,
         card: Card
     ): Timeline = Timeline.timeline { later {
-        SoundPlayer.situation("enter_parry", this@GameControllerImpl.screen)
+        FortyFive.soundPlayer.situation("enter_parry", this@GameControllerImpl.screen)
         val damageOfCard = card.curDamage(this@GameControllerImpl)
         val remainingDamage = if (card.isReinforced) 0 else (damage - damageOfCard).coerceAtLeast(0)
         val parryEnterEvent = Events.ParryStateChange(true, damage, damageOfCard)
@@ -765,7 +768,7 @@ class GameControllerImpl(
         )
 
         action {
-            SoundPlayer.situation("revolver_shot", screen)
+            FortyFive.soundPlayer.situation("revolver_shot", screen)
             val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline()
             dispatchAnimTimeline(postProcessor)
         }
@@ -871,7 +874,7 @@ class GameControllerImpl(
                         || blockedByCard
                         || !tryPay(card.baseCost, card.actor)
                     if (!shouldSkip) return@action
-                    SoundPlayer.situation("not_allowed", screen)
+                    FortyFive.soundPlayer.situation("not_allowed", screen)
                     skip()
                 }
                 includeLater({
@@ -943,14 +946,14 @@ class GameControllerImpl(
         )
         action {
             gameEvents.fire(event)
-            SoundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
+            FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
             SaveState.encountersWon++
         }
         delayUntil { event.popupPromise.isResolved }
         if (money > 0) {
             delay(600)
             action {
-                SoundPlayer.situation("money_earned", this@GameControllerImpl.screen)
+                FortyFive.soundPlayer.situation("money_earned", this@GameControllerImpl.screen)
                 SaveState.earnMoney(money)
             }
         }
@@ -975,13 +978,13 @@ class GameControllerImpl(
             if (playerGetsCard) {
                 MapManager.changeToChooseCardScreen(chooseCardContext)
             } else {
-                FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(encounterContext.forwardToScreen))
+                FortyFive.changeToScreen(MapScreen())
             }
         }
     } }
 
     private fun endTurnTimeline(): Timeline = Timeline.timeline { later {
-        action { SoundPlayer.situation("end_turn", screen) }
+        action { FortyFive.soundPlayer.situation("end_turn", screen) }
 
         if (hasWon) {
             include(winTimeline())
@@ -1017,7 +1020,7 @@ class GameControllerImpl(
 
         action {
             chooseEnemyActions()
-            SoundPlayer.situation("turn_begin", screen)
+            FortyFive.soundPlayer.situation("turn_begin", screen)
             updateReserves(Config.baseReserves, revolver)
         }
 
@@ -1094,8 +1097,7 @@ class GameControllerImpl(
     }
 
     object Config {
-        const val baseReserves = 40
-//        const val baseReserves = 4
+        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
 //        const val cardsToDrawInFirstRound = 20

@@ -879,7 +879,7 @@ class GameScreen : ScreenCreator() {
                     filter.start()
                     modal.finished()
                     continuePromise?.resolve(Unit)
-                    SoundPlayer.situation("money_earned", screen)
+                    FortyFive.soundPlayer.situation("money_earned", screen)
                     val navBarSymbol = screen.namedActorOrError("cash_symbol")
                     val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
                     val renderPipeline = FortyFive.currentRenderPipeline!!
@@ -915,7 +915,7 @@ class GameScreen : ScreenCreator() {
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
         repeat(amount) {
             action {
-                SoundPlayer.situation("orb_anim_playing", screen)
+                FortyFive.soundPlayer.situation("orb_anim_playing", screen)
                 renderPipeline.addOrbAnimation(
                     GraphicsConfig.orbAnimation(
                         source.localToStageCoordinates(Vector2(0f, 0f)) +

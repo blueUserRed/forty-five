@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.events.heals
 
 
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.AddMaxHPMapEvent
@@ -37,7 +38,7 @@ class AddMaxHPScreenController(private val screen: OnjScreen) : ScreenController
      * gets called from the accept button, only if he is in the correct state ("valid")
      */
     override fun completed() {
-        SoundPlayer.situation("heal", screen)
+        FortyFive.soundPlayer.situation("heal", screen)
         FortyFiveLogger.debug(
             logTag,
             "Max lives increased from ${SaveState.maxPlayerLives} to ${SaveState.maxPlayerLives + amount}!"

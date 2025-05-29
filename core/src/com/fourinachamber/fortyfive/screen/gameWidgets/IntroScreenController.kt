@@ -5,15 +5,16 @@ import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import onj.value.OnjNamedObject
 
 class IntroScreenController(private val screen: OnjScreen, onj: OnjNamedObject) : ScreenController() {
 
     override fun init(context: Any?) {
         OnjScreen.toggleFullScreen(true)
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("titleScreen")) // screen change occurs after 5s because of the transitionAwayTime
+        FortyFive.changeToScreen(TitleScreen()) // screen change occurs after 5s because of the transitionAwayTime
         screen.afterMs(500) { // changeToInitialScreen causes a lagSpike, this prevents it from interrupting the sound
-            SoundPlayer.playMusicOnce("microwave_theme", screen)
+            FortyFive.soundPlayer.playMusicOnce("microwave_theme", screen)
         }
     }
 }

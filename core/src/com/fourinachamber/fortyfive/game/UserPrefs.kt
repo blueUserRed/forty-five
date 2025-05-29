@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.builder.buildOnjObject
@@ -27,21 +28,21 @@ object UserPrefs {
     var soundEffectsVolume: Float = 1f
         set(value) {
             field = value
-            SoundPlayer.soundEffectVolume = value
+            FortyFive.soundPlayer.soundEffectVolume = value
             dirty = true
         }
 
     var musicVolume: Float = 1f
         set(value) {
             field = value
-            SoundPlayer.musicVolume = value
+            FortyFive.soundPlayer.musicVolume = value
             dirty = true
         }
 
     var masterVolume: Float = 1f
         set(value) {
             field = value
-            SoundPlayer.masterVolume = value
+            FortyFive.soundPlayer.masterVolume = value
             dirty = true
         }
 

@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
@@ -55,9 +56,6 @@ open class OnjScreen(
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
-
-    var _dragAndDrop: MutableMap<String, DragAndDrop> = mutableMapOf()
-    val dragAndDrop: Map<String, DragAndDrop> get() = _dragAndDrop.toMap()
 
     private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -248,8 +246,6 @@ open class OnjScreen(
             }
         }
         actor.remove()
-        _dragAndDrop.values.forEach { it.removeAllListenersWithActor(actor) }
-        //TODO remove from behaviour and so on
     }
 
 
@@ -335,7 +331,7 @@ open class OnjScreen(
     }
 
     fun update(delta: Float, isEarly: Boolean = false) {
-        SoundPlayer.update(this, playAmbientSounds)
+        FortyFive.soundPlayer.update(this, playAmbientSounds)
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         if (!isEarly) screenControllers.forEach(ScreenController::update)

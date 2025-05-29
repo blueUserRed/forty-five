@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActor
 import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActorImpl
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
+import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.screen.screens.TestScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
@@ -38,24 +39,24 @@ object FortyFive : Game() {
 
     const val logTag = "forty-five"
 
+    val cardTextureManager: CardTextureManager = CardTextureManager()
+    val serviceThread: ServiceThread = ServiceThread()
+    val soundPlayer = SoundPlayer()
+
+    lateinit var steamHandler: SteamHandler
+        private set
+
     var currentRenderPipeline: RenderPipeline? = null
         private set
 
-    val cardTextureManager: CardTextureManager = CardTextureManager()
-
     private var currentScreen: OnjScreen? = null
     private var nextScreen: OnjScreen? = null
-
-    val serviceThread: ServiceThread = ServiceThread()
 
     var cleanExit: Boolean = true
 
     private var inScreenTransition: Boolean = false
 
     private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
-
-    lateinit var steamHandler: SteamHandler
-        private set
 
     private var renderCounter: Long = 0L
     val renderTimes: IntArray = IntArray(15 * 60)
@@ -81,7 +82,7 @@ object FortyFive : Game() {
         init()
         UserPrefs.startScreen = UserPrefs.StartScreen.MAP
         when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("introScreen"))
+            UserPrefs.StartScreen.INTRO -> TODO()
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
             UserPrefs.StartScreen.MAP -> changeToInitialScreen()
         }
@@ -119,11 +120,15 @@ object FortyFive : Game() {
                 mainThreadTasks.remove(task)
             }
             currentScreen?.update(Gdx.graphics.deltaTime)
-//            nextScreen?.update(Gdx.graphics.deltaTime, isEarly = true)
             currentRenderPipeline?.render(Gdx.graphics.deltaTime)
         }
         renderTimes[(renderCounter % renderTimes.size).toInt()] = renderTime.toInt()
         renderCounter++
+    }
+
+    fun changeToScreen(screenCreator: ScreenCreator, controllerContext: Any? = null) {
+        val builder = FromKotlinScreenBuilder(screenCreator)
+        changeToScreen(builder, controllerContext)
     }
 
     fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
@@ -137,7 +142,6 @@ object FortyFive : Game() {
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
             currentScreen?.dispose()
-//            screen.update(Gdx.graphics.deltaTime, isEarly = true)
             this.currentScreen = screen
             nextScreen = null
             currentRenderPipeline?.dispose()
@@ -175,7 +179,7 @@ object FortyFive : Game() {
         if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
         MapManager.newRunSync()
-        if (forwardToLooseScreen) changeToScreen(ConfigFileManager.screenBuilderFor("looseScreen"))
+        if (forwardToLooseScreen) TODO()
     }
 
     override fun resize(width: Int, height: Int) {
@@ -201,17 +205,13 @@ object FortyFive : Game() {
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
-        ConfigFileManager.addKotlinScreens()
         TemplateString.init()
         FortyFiveLogger.init()
         steamHandler = SteamHandler()
         UserPrefs.read()
-        SoundPlayer.init()
+        soundPlayer.init()
         GameDirector.init()
         MapManager.init()
-//        resetAll()
-//        MapManager.generateMapsSync()
-//        newRun(false)
 
         if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
             resetAll()
@@ -224,34 +224,7 @@ object FortyFive : Game() {
         serviceThread.start()
         cardTextureManager.init()
         RandomCardSelection.init()
-//        resetAll()
-//        newRun()
-//        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
-//        printAllCards(cards)
-//        println(cards.get<OnjArray>("cards").value.size)
-//        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }
-
-    // this abomination prints all cards in respect to their rarities (a rarity3 card is printed three times)
-    private fun printAllCards(cards: OnjObject) = cards
-        .get<OnjArray>("cards")
-        .value
-        .map { it as OnjObject }
-        .zip { it.get<OnjArray>("tags") }
-        .mapSecond { it.value.find { (it.value as String).startsWith("rarity") } }
-        .mapSecond {
-            when (it?.value) {
-                "rarity1" -> 1
-                "rarity2" -> 2
-                "rarity3" -> 3
-                else -> null
-            }
-        }
-        .filter { it.second != null }
-        .map { (card, num) -> List(num!!) { card.get<String>("name") } }
-        .flatten()
-        .joinToString(separator = ",\n", transform = { "'$it'" })
-        .let { println(it) }
 
     override fun dispose() {
         FortyFiveLogger.debug(logTag, "game closing")

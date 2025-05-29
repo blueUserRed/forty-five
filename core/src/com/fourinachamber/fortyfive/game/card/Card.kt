@@ -797,7 +797,7 @@ class CardActor(
         startDragAndDropOn(GameInputs.interact)
         onEnterInputState(GameInputs.States.focused) {
             if (!playSoundsOnHover) return@onEnterInputState
-            SoundPlayer.situation("card_hover", screen)
+            FortyFive.soundPlayer.situation("card_hover", screen)
         }
         onInput(GameInputs.triggerCard) {
             TODO()
@@ -903,7 +903,7 @@ class CardActor(
     // TODO: came up with system for animations
     fun destroyAnimation(): Timeline = Timeline.timeline {
         action {
-            SoundPlayer.situation("card_destroyed", screen)
+            FortyFive.soundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
             if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
             destroyShader.getOrError().resetReferenceTime()
@@ -950,7 +950,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
-            SoundPlayer.situation("card_trigger_anim_in", screen)
+            FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)
             addAction(scaleAction)
@@ -980,7 +980,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2
         action {
-            SoundPlayer.situation("card_trigger_anim_out", screen)
+            FortyFive.soundPlayer.situation("card_trigger_anim_out", screen)
             addAction(moveAction)
             addAction(scaleAction)
         }

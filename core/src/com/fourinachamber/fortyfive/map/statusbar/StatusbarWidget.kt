@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -100,7 +101,7 @@ class StatusbarWidget(
     }
 
     private fun buttonClicked(clickedBox: CustomFlexBox) {
-        SoundPlayer.situation("statusbar_button_clicked", screen)
+        FortyFive.soundPlayer.situation("statusbar_button_clicked", screen)
         if (timeline.isFinished) {
             val option = optionWidgets.find { it.first == clickedBox }!!
             when (displayedOptionIndex) {

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.events.heals
 
 
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.Completable
@@ -50,7 +51,7 @@ class HealOrMaxHPScreenController(private val screen: OnjScreen, healChosenName:
      * gets called from the accept button, only if he is in the correct state ("valid")
      */
     override fun completed() {
-        SoundPlayer.situation("heal", screen)
+        FortyFive.soundPlayer.situation("heal", screen)
         if ((screen.namedActorOrError(healWidgetName) as BackgroundActor).backgroundHandle?.contains("selected") == true) {
             val newLives = min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
             FortyFiveLogger.debug(logTag, "Lives healed from ${SaveState.playerLives} to $newLives!")

@@ -31,7 +31,7 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
     private lateinit var tutorialInfoText: AdvancedTextWidget
 
     override fun init(context: Any?) {
-        SoundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN)
+        FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN)
         PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
     }

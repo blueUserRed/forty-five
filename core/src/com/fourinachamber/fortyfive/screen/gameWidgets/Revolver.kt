@@ -225,7 +225,7 @@ class Revolver(
 
             is RevolverRotation.Right -> repeat(rotation.amount) {
                 action {
-                    SoundPlayer.situation("revolver_rotation", screen)
+                    FortyFive.soundPlayer.situation("revolver_rotation", screen)
                     rotateRight()
                 }
                 delayUntil { animFinished() }
@@ -234,7 +234,7 @@ class Revolver(
 
             is RevolverRotation.Left -> repeat(rotation.amount) {
                 action {
-                    SoundPlayer.situation("revolver_rotation", screen)
+                    FortyFive.soundPlayer.situation("revolver_rotation", screen)
                     rotateLeft()
                 }
                 delayUntil { animFinished() }

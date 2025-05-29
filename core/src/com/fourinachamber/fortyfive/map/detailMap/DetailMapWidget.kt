@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.GameDirector
@@ -327,7 +328,7 @@ class DetailMapWidget(
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
-        SoundPlayer.situation("walk", screen)
+        FortyFive.soundPlayer.situation("walk", screen)
         if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
     }

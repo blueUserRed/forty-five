@@ -255,7 +255,7 @@ class ShopScreen : ScreenCreator() {
                     { backgroundHandle = "shop_back_button" }
                 )
                 onInput(GameInputs.interact) {
-                    FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen"))
+                    FortyFive.changeToScreen(MapScreen())
                 }
             }
 

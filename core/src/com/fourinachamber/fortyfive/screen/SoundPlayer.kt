@@ -11,7 +11,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
 
-object SoundPlayer : ResourceBorrower {
+class SoundPlayer : ResourceBorrower {
 
     private lateinit var situations: List<Situation>
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
@@ -67,7 +67,8 @@ object SoundPlayer : ResourceBorrower {
                     it.get<String>("name"),
                     it.get<String>("sound"),
                     it.getOr("volume", 1.0).toFloat(),
-                    it.get<OnjArray>("delay").toIntRange()
+                    it.get<OnjArray>("delay").toIntRange(),
+                    this
                 )
             }
             .associateWith { 0L }
@@ -172,13 +173,14 @@ object SoundPlayer : ResourceBorrower {
         val name: String,
         val sound: ResourceHandle,
         val volume: Float,
-        val delay: IntRange
+        val delay: IntRange,
+        val soundPlayer: SoundPlayer
     ) {
         private var soundPromise: Promise<Sound>? = null
 
         fun getSoundPromise(lifetime: Lifetime): Promise<Sound> {
             if (soundPromise == null) {
-                soundPromise = ResourceManager.request(SoundPlayer, lifetime, sound)
+                soundPromise = ResourceManager.request(soundPlayer, lifetime, sound)
             }
             return soundPromise!!
         }
@@ -196,6 +198,8 @@ object SoundPlayer : ResourceBorrower {
         BATTLE("encounter_theme")
     }
 
-    const val logTag = "SoundPlayer"
+    companion object {
+        const val logTag = "SoundPlayer"
+    }
 
 }

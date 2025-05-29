@@ -17,7 +17,6 @@ import com.fourinachamber.fortyfive.game.GameAnimation
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.CenteredDragSource
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
@@ -213,7 +212,7 @@ infix fun IntRange.intersection(other: IntRange): Boolean = this.start in other 
 inline fun <reified T> ClosedFloatingPointRange<T>.asArray(
 ): Array<T> where T : Comparable<T> = arrayOf(this.start, this.endInclusive)
 
-public fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
+fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
     return subList(0, min(size, toIndex))
 }
 
@@ -322,21 +321,6 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
     if (isEmpty()) return ""
     return substring(max(start, 0), min(max(end, 0), length - 1))
-}
-
-@Suppress("UNCHECKED_CAST")
-fun DragAndDrop.removeAllListenersWithActor(actor: Actor) { //This feels highly illegal
-    val fieldSource = DragAndDrop::class.java.getDeclaredField("sourceListeners")
-    fieldSource.isAccessible = true
-    val sources = (fieldSource.get(this) as ObjectMap<DragAndDrop.Source, DragListener>).map { it.key }
-    sources.filter { it.actor == actor }.forEach {
-        removeSource(it)
-        if (it is CenteredDragSource) actor.removeListener(it.centerOnClick)
-    }
-    val fieldTarget = DragAndDrop::class.java.getDeclaredField("targets")
-    fieldTarget.isAccessible = true
-    val targets = (fieldTarget.get(this) as com.badlogic.gdx.utils.Array<DragAndDrop.Target>)
-    targets.filter { it.actor == actor }.forEach { removeTarget(it) }
 }
 
 fun GameAnimation.asTimeline(controller: GameController): Timeline = Timeline.timeline {
