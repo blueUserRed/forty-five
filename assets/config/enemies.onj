@@ -3,35 +3,6 @@ import "imports/colors.onj" as color;
 
 use Cards; // include Card namespace for status effects
 
-var textEmitterSharedConfig = {
-    font: "roadgeek",
-    fontScale: 0.9,
-    spawnVarianceX: 30.0,
-    spawnVarianceY: 30.0,
-    duration: [1_000, 1_500]
-};
-
-var textEmitterConfig = [
-    {
-        name: "number_positive",
-        color: color.green,
-        speed: [60.0, 80.0],
-        ...textEmitterSharedConfig
-    },
-    {
-        name: "number_negative",
-        color: color.red,
-        speed: [-80.0, -60.0],
-        ...textEmitterSharedConfig
-    },
-    {
-        name: "number",
-        color: color.black,
-        speed: [-80.0, -60.0],
-        ...textEmitterSharedConfig
-    },
-];
-
 enemies: [
 
     {
@@ -39,15 +10,6 @@ enemies: [
         title: "Outlaw",
         baseHealth: 80,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.78,
             normalSpecialActionWeight: 1.0,
@@ -56,8 +18,6 @@ enemies: [
             scaleIncreasePerTurn: 0.3,
             actions: [],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
     {
@@ -65,15 +25,6 @@ enemies: [
         title: "Outlaw",
         baseHealth: 80,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.7,
             normalSpecialActionWeight: 1.0,
@@ -82,8 +33,6 @@ enemies: [
             scaleIncreasePerTurn: 0.15,
             actions: [],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
     {
@@ -91,15 +40,6 @@ enemies: [
         title: "Outlaw",
         baseHealth: 100,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.78,
             normalSpecialActionWeight: 1.0,
@@ -108,8 +48,6 @@ enemies: [
             scaleIncreasePerTurn: 0.3,
             actions: [],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
     {
@@ -117,15 +55,6 @@ enemies: [
         title: "Outlaw",
         baseHealth: 100,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.7,
             normalSpecialActionWeight: 1.0,
@@ -134,8 +63,6 @@ enemies: [
             scaleIncreasePerTurn: 0.15,
             actions: [],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
     {
@@ -143,15 +70,6 @@ enemies: [
         title: "Pyro",
         baseHealth: 75,
         texture: "enemy_pyro",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (821.0 * 0.22),
-        height: (1070.0 * 0.22),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.78,
             normalSpecialActionWeight: 0.7,
@@ -192,8 +110,6 @@ enemies: [
                 },
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
     {
@@ -201,15 +117,6 @@ enemies: [
         title: "Pyro",
         baseHealth: 75,
         texture: "enemy_pyro",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (821.0 * 0.22),
-        height: (1070.0 * 0.22),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.7,
             normalSpecialActionWeight: 0.4,
@@ -250,8 +157,6 @@ enemies: [
                 },
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
     {
@@ -259,17 +164,6 @@ enemies: [
         title: "Witch",
         baseHealth: 90,
         texture: "enemy_witch",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (389.0 * 0.31),
-        height: (925.0 * 0.31),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.78,
             normalSpecialActionWeight: 0.8,
@@ -317,17 +211,6 @@ enemies: [
         title: "Witch",
         baseHealth: 90,
         texture: "enemy_witch",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (389.0 * 0.31),
-        height: (925.0 * 0.31),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.7,
             normalSpecialActionWeight: 0.4,
@@ -375,18 +258,6 @@ enemies: [
         title: "Sniper",
         baseHealth: 90,
         texture: "enemy_sniper",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (666.0 * 0.22),
-        height: (1156.0 * 0.22),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
-        headOffset: 10.0,
         brain: $SniperEnemyBrain {
             damageShieldWeight: 0.8,
             normalSpecialActionWeight: 0.5,
@@ -461,35 +332,15 @@ enemies: [
         title: "Scarecrow",
         baseHealth: 30,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
             actions: [],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_2",
         title: "Outlaw",
         baseHealth: 25,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
             actions: [
                 {
@@ -506,23 +357,12 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_3",
         title: "Outlaw",
         baseHealth: 45,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
             actions: [
                 {
@@ -539,23 +379,12 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_4",
         title: "Outlaw",
         baseHealth: 42,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
             actions: [
                 {
@@ -572,23 +401,12 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_5",
         title: "Outlaw",
         baseHealth: 55,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
             actions: [
                 {
@@ -605,23 +423,12 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_6",
         title: "Outlaw",
         baseHealth: 75,
         texture: "enemy_outlaw",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "enemy_action_unknown",
-        coverIconScale: 0.6,
-        indicatorIconScale: 0.6,
-        width: (441.0 * 0.25),
-        height: (962.0 * 0.25),
-        detailFont: "roadgeek",
-        detailFontScale: 0.6,
-        textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
             actions: [
                 {
@@ -662,8 +469,6 @@ enemies: [
                 },
             ],
         },
-        detailFontColor: color.black,
-        detailFontColorDark: color.white,
     },
 
 ]

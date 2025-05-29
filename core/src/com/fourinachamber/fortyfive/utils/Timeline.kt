@@ -163,25 +163,6 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             })
         }
 
-        /**
-         * Adds an action that finishes instantly to the timeline.
-         *
-         * In contrast to [action()](Timeline.TimelineBuilderDSL.action) the action is always executed on the
-         * main thread using `Gdx.app.postRunnable`
-         *
-         * *WARNING:* because the action is executed on the next render call, this may break the sequence of actions,
-         * for example if the next action is an [action()](Timeline.TimelineBuilderDSL.action)'
-         */
-        inline fun mainThreadAction(crossinline action: @MainThreadOnly Timeline.() -> Unit) {
-            timelineActions.add(object : TimelineAction() {
-                override fun isFinished(timeline: Timeline): Boolean = true
-                override fun start(timeline: Timeline) {
-                    super.start(timeline)
-                    Gdx.app.postRunnable { action(timeline) }
-                }
-            })
-        }
-
         fun includeAction(action: TimelineAction) {
             timelineActions.add(action)
         }
@@ -266,22 +247,6 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             })
         }
 
-        /**
-         * same as [includeLater], but includes an action instead of a timeline
-         */
-        fun includeActionLater(action: TimelineAction, condition: @AllThreadsAllowed Timeline.() -> Boolean) {
-            timelineActions.add(object : TimelineAction() {
-
-                override fun start(timeline: Timeline) {
-                    super.start(timeline)
-                    if (condition(timeline)) timeline.pushAction(action)
-                }
-
-                override fun isFinished(timeline: Timeline): Boolean = true
-
-            })
-        }
-
         fun parallelActions(vararg actions: TimelineAction) {
             timelineActions.add(ParallelTimelineAction(actions.toList()))
         }
@@ -320,40 +285,6 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
 
 }
 
-/**
- * useful for including gameAnimations in timelines
- */
-class GameAnimationTimelineAction(private val gameAnimation: GameAnimation) : Timeline.TimelineAction() {
-
-    override fun start(timeline: Timeline) {
-        super.start(timeline)
-        FortyFive.currentGame!!.playGameAnimation(gameAnimation)
-    }
-
-    override fun isFinished(timeline: Timeline): Boolean = gameAnimation.isFinished()
-}
-
-/**
- * useful for including actions on actors in timelines
- */
-class ActorActionTimelineAction(
-    private val action: TemporalAction,
-    private val actor: Actor
-) : Timeline.TimelineAction() {
-
-    override fun start(timeline: Timeline) {
-        super.start(timeline)
-        actor.addAction(action)
-    }
-
-    override fun isFinished(timeline: Timeline): Boolean = action.isComplete
-
-    override fun end(timeline: Timeline) {
-        actor.removeAction(action)
-        action.reset()
-    }
-}
-
 class TimelineAsAction(private val timeline: Timeline) : Timeline.TimelineAction() {
 
     override fun start(timeline: Timeline) {
@@ -368,25 +299,6 @@ class TimelineAsAction(private val timeline: Timeline) : Timeline.TimelineAction
 
     override fun isFinished(timeline: Timeline): Boolean = this.timeline.isFinished
 
-}
-
-class ParticleTimelineAction(
-    val particle: ParticleEffect,
-    val coords: Vector2,
-    private val screen: OnjScreen
-) : Timeline.TimelineAction() {
-
-    override fun start(timeline: Timeline) {
-        super.start(timeline)
-        val particleActor = CustomParticleActor(particle)
-        particleActor.isAutoRemove = true
-        particleActor.fixedZIndex = Int.MAX_VALUE
-        particleActor.setPosition(coords.x, coords.y)
-        screen.addActorToRoot(particleActor)
-        particleActor.start()
-    }
-
-    override fun isFinished(timeline: Timeline): Boolean = particle.isComplete
 }
 
 class ParallelTimelineAction(private var actions: List<Timeline.TimelineAction>) : Timeline.TimelineAction() {

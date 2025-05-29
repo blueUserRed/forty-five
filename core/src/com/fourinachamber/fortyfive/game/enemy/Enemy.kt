@@ -33,28 +33,12 @@ data class EnemyPrototype(
 class Enemy(
     val name: String,
     val drawableHandle: ResourceHandle,
-    val coverIconHandle: ResourceHandle,
-    val hiddenActionIconHandle: ResourceHandle,
     val health: Int,
-    val enemyWidth: Float,
-    val enemyHeight: Float,
-    val coverIconScale: Float,
-    val indicatorIconScale: Float,
-    val detailFontHandle: String,
-    val detailFont: BitmapFont,
-    val detailFontScale: Float,
-    val detailFontColor: Color,
-    val detailFontColorDark: Color,
-    val headOffset: Float,
-    textEmitterConfig: OnjArray,
-    private val screen: OnjScreen
 ) {
 
     val logTag = "enemy-$name-${++instanceCounter}"
 
     private var brain: EnemyBrain = NoOpEnemyBrain
-
-    private val gameController = FortyFive.currentGame!!
 
     val enemyEvents: EventPipeline = EventPipeline()
 
@@ -64,11 +48,7 @@ class Enemy(
     var currentHealth: Int = health
         private set(value) {
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
-            val oldValue = field
             field = max(value, -300)
-            if (oldValue > 0 && value <= 0) {
-                gameController.enemyDefeated(this)
-            }
             enemyEvents.fire(HealthChangedEvent)
         }
 
@@ -124,13 +104,7 @@ class Enemy(
         return action
     }
 
-    fun onDefeat() {
-//        _statusEffects.forEach { actor.removeStatusEffect(it) }
-        _statusEffects.clear()
-//        actor.setupForAction(NextEnemyAction.None)
-    }
-
-    fun applyEffect(effect: StatusEffect) {
+    fun applyEffect(effect: StatusEffect, controller: GameController) {
         if (isDefeated) return
         FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
         for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
@@ -138,7 +112,7 @@ class Enemy(
             effectToTest.stack(effect)
             return
         }
-        effect.start(gameController)
+        effect.start(controller)
         _statusEffects.add(effect)
         enemyEvents.fire(StatusEffectsChangedEvent)
 //        actor.displayStatusEffect(effect)
@@ -264,33 +238,11 @@ class Enemy(
             }
         
         fun readEnemy(onj: OnjObject, health: Int): Enemy {
-            val gameController = FortyFive.currentGame!!
-            val curScreen = gameController.screen
             val drawableHandle = onj.get<String>("texture")
-            val coverIconHandle = onj.get<String>("coverIcon")
-            val detailFont = ResourceManager.forceGet<BitmapFont>(
-                object : ResourceBorrower {},
-                curScreen,
-                onj.get<String>("detailFont")
-            )
             val enemy = Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
-                coverIconHandle,
-                onj.get<String>("hiddenActionIcon"),
-                health,
-                onj.get<Double>("width").toFloat(),
-                onj.get<Double>("height").toFloat(),
-                onj.get<Double>("coverIconScale").toFloat(),
-                onj.get<Double>("indicatorIconScale").toFloat(),
-                onj.get<String>("detailFont"),
-                detailFont,
-                onj.get<Double>("detailFontScale").toFloat(),
-                onj.get<Color>("detailFontColor"),
-                onj.get<Color>("detailFontColorDark"),
-                onj.getOr("headOffset", 1.0).toFloat(),
-                onj.get<OnjArray>("textEmitterConfig"),
-                curScreen
+                health
             )
             val brain = EnemyBrain.fromOnj(onj.get<OnjNamedObject>("brain"), enemy)
             enemy.brainTransplant(brain)
@@ -300,130 +252,3 @@ class Enemy(
     }
 
 }
-
-///**
-// * used for representing an enemy on the screen
-// */
-//class EnemyActor(
-//    val enemy: Enemy,
-//    textEmitterConfig: OnjArray,
-//    private val hiddenActionIconHandle: ResourceHandle,
-//    val screen: OnjScreen
-//) : ResourceBorrower {
-//
-//    private val fontColor = if (GraphicsConfig.isEncounterBackgroundDark(MapManager.currentDetailMap.biome)) {
-//        enemy.detailFontColorDark
-//    } else {
-//        enemy.detailFontColor
-//    }
-//
-//    private val enemyDrawable: Promise<Drawable> = ResourceManager.request(this, screen, enemy.drawableHandle)
-//
-//    private val defeatedDrawable: Promise<Drawable> = GraphicsConfig.defeatedEnemyDrawable(this, screen)
-//
-//
-//    private val attackIndicatorAnimTimeOffset: Int = (0..10_000).random()
-//
-//    private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
-//    private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
-//
-//    private val animationLifetime: EndableLifetime = EndableLifetime()
-//
-//    // animations are hardcoded, deal with it
-//    private val animation: AnimationDrawable? = when {
-//
-//        enemy.name.startsWith("Outlaw") || enemy.name.startsWith("tutorial") -> createAnimation(this, animationLifetime.shorter(screen)) {
-//            val anim = deferredAnimation("outlaw_animation")
-//            order {
-//                loop(anim, frameOffset = (0..50).random())
-//            }
-//        }
-//
-//        enemy.name.startsWith("Pyro") -> createAnimation(this, animationLifetime.shorter(screen)) {
-//            val anim = deferredAnimation("pyro_animation")
-//            order {
-//                loop(anim, frameOffset = (0..50).random())
-//            }
-//        }
-//
-//        else -> null
-//
-//    }
-//
-//    init {
-//        val emitterConfig = TextEffectEmitter.configsFromOnj(textEmitterConfig, screen)
-//        val healthTextEmitter = TextEffectEmitter(emitterConfig, screen)
-//        val coverTextEmitter = TextEffectEmitter(emitterConfig, screen)
-//
-//        animation?.start()
-//    }
-//
-//    fun enemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = if (action.prototype.hasSpecialAnimation) {
-//        specialEnemyActionAnimationTimeline(action, controller)
-//    } else {
-//        Timeline()
-//    }
-//
-//    private fun specialEnemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = Timeline.timeline {
-//        val actionDescription =
-//            TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
-//        val data = mapOf<String, OnjValue>(
-//            "commonPanel1" to action.prototype.commonPanel1.onjString(),
-//            "commonPanel2" to action.prototype.commonPanel2.onjString(),
-//            "commonPanel3" to action.prototype.commonPanel3.onjString(),
-//            "actionPanel" to action.prototype.specialPanel.onjString(),
-//            "actionName" to action.prototype.title.onjString(),
-//            "actionDescription" to actionDescription,
-//            "actionIcon" to action.prototype.iconHandle.onjString(),
-//        )
-//        val parent = screen.namedActorOrError(enemyActionAnimationParentName) as? FlexBox
-//            ?: throw RuntimeException("actor named $enemyActionAnimationParentName must be a FlexBox")
-//        var animActor: CustomFlexBox? = null
-//        action {
-//            animActor = screen.screenBuilder.generateFromTemplate(
-//                enemyActionAnimationTemplateName,
-//                data,
-//                parent,
-//                screen
-//            ) as? CustomFlexBox
-//                ?: throw RuntimeException("template named $enemyActionAnimationTemplateName must be a FlexBox")
-//        }
-//        delay(10)
-//        action {
-//            screen.enterState("enemy_action_anim")
-//            controller.dispatchAnimTimeline(Timeline.timeline {
-//                repeat(4) {
-//                    action {
-//                        SoundPlayer.situation("enemy_action_anim", screen)
-//                    }
-//                    delay(200)
-//                }
-//            })
-//        }
-//        awaitConfirmationInput(screen, maxTime = 10_000)
-////        awaitConfirmationInput(screen, maxTime = 5_000)
-//        action {
-//            screen.leaveState("enemy_action_anim")
-//            parent.remove(animActor!!.styleManager!!.node)
-//            screen.removeAllStyleManagers(animActor!!)
-//        }
-//    }
-//
-//    fun setupForAction(action: NextEnemyAction) {
-//
-//    }
-//
-//    fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
-//    fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
-//
-//    fun defeated() {
-//        animationLifetime.die()
-//    }
-//
-//    /**
-//     * updates the description text of the actor
-//     */
-//    fun updateText() {
-//    }
-//
-//}

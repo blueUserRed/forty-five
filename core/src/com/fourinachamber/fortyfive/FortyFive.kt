@@ -46,8 +46,6 @@ object FortyFive : Game() {
     private var currentScreen: OnjScreen? = null
     private var nextScreen: OnjScreen? = null
 
-    var currentGame: GameController? = null
-
     val serviceThread: ServiceThread = ServiceThread()
 
     var cleanExit: Boolean = true
@@ -55,8 +53,6 @@ object FortyFive : Game() {
     private var inScreenTransition: Boolean = false
 
     private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
-
-    private val screenChangeCallbacks: MutableList<() -> Unit> = mutableListOf()
 
     lateinit var steamHandler: SteamHandler
         private set
@@ -109,10 +105,6 @@ object FortyFive : Game() {
         timedCallbacks[callback] = TimeUtils.millis() + time
     }
 
-    fun onScreenChange(callback: () -> Unit) {
-        screenChangeCallbacks.add(callback)
-    }
-
     override fun render() {
         val renderTime = measureTimeMillis {
             timedCallbacks.iterateRemoving { (callback, time), remove ->
@@ -154,7 +146,6 @@ object FortyFive : Game() {
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
             inScreenTransition = false
-            screenChangeCallbacks.forEach { it() }
             inMs(100) {
                 val lagSpike = renderTimes.max()
                 screenTransitionTimes[(screenTransitionCount % screenTransitionTimes.size).toInt()] = lagSpike

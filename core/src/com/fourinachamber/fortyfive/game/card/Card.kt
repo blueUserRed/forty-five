@@ -145,11 +145,6 @@ class Card(
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
 
-    fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
-            (isEverlasting && !controller.isEverlastingDisabled) ||
-                    protectingModifiers.isNotEmpty()
-            )
-
     private var lastDamageValue: Int = baseDamage
     private var lastCostValue: Int = baseCost
 
@@ -162,7 +157,7 @@ class Card(
     private val protectingModifiers: MutableList<ProtectingModifier> = mutableListOf()
 
     /**
-     * first ist the keyword, second is the actual text
+     * first is the keyword, second is the actual text
      */
     var currentHoverTexts: List<Pair<String, String>> = listOf()
         private set
@@ -189,6 +184,8 @@ class Card(
     var zone: Zone = Zone.STACK
         private set
 
+    private var game: GameController? = null
+
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
         // card texture while the constructor is running and actor is not yet assigned
@@ -202,6 +199,10 @@ class Card(
                 enableHoverDetails
             )
         }
+    }
+
+    fun setGame(game: GameController) {
+        this.game = game
     }
 
     fun bindGameEvents(gameEvents: EventPipeline, controller: GameController) {
@@ -341,17 +342,6 @@ class Card(
         controller.cardStack.dirty()
     }
 
-    fun beforeShot() {
-    }
-
-    fun leaveGame() {
-        TODO("dont use")
-        isMarked = false
-        inGame = false
-        rotationCounter = 0
-        modifiersChanged()
-    }
-
     fun protect(protectingModifier: ProtectingModifier) {
         if (isUndead) {
             FortyFiveLogger.debug(logTag, "cant protect undead bullet")
@@ -415,17 +405,6 @@ class Card(
             )
         )
         addDamageModifier(modifier)
-    }
-
-    /**
-     * called when the card enters the game
-     */
-    fun onEnter(controller: GameController) {
-        TODO("dont use this function")
-//        inGame = true
-//        enteredInSlot = controller.slotOfCard(this)!!
-//        enteredOnTurn = controller.turnCounter
-//        if (isRotten) addRottenModifier(controller)
     }
 
     /**
@@ -568,9 +547,9 @@ class Card(
 
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
-                    val mostExpensive = FortyFive.currentGame!!
-                        .cardsInRevolver()
-                        .maxOfOrNull { it.lastCostValue }
+                    val mostExpensive = game
+                        ?.cardsInRevolver()
+                        ?.maxOfOrNull { it.lastCostValue }
                         ?: 0
                     "most expensive bullet costs $mostExpensive"
                 }
@@ -1029,10 +1008,7 @@ class CardActor(
         texts.addAll(DetailDescriptionHandler
             .descriptions
             .filter { it.key in allKeys }.map { it.value.second })
-
-        if (FortyFive.currentGame != null){
             texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
-        }
         texts
     }
 

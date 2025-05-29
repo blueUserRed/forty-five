@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -29,7 +30,7 @@ object GraphicsConfig {
     }
 
     @MainThreadOnly
-    fun damageOverlay(screen: OnjScreen): Timeline.TimelineAction {
+    fun damageOverlay(screen: OnjScreen, controller: GameController): Timeline.TimelineAction {
         val overlayActor = CustomImageActor(damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
@@ -45,7 +46,7 @@ object GraphicsConfig {
 
             override fun start(timeline: Timeline) {
                 super.start(timeline)
-                FortyFive.currentGame!!.playGameAnimation(anim)
+                controller.playGameAnimation(anim)
             }
 
             override fun isFinished(timeline: Timeline): Boolean = anim.isFinished()

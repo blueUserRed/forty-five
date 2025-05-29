@@ -133,7 +133,6 @@ class GameControllerImpl(
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
         encounterContext = context
-        FortyFive.currentGame = this
 
         encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
             ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
@@ -285,6 +284,7 @@ class GameControllerImpl(
                 createdCards.add(card)
                 _encounterModifiers.forEach { it.initBullet(card) }
                 card.bindGameEvents(gameEvents, this)
+                card.setGame(this@GameControllerImpl)
             }
             .toMutableList()
 
@@ -532,7 +532,7 @@ class GameControllerImpl(
         enemy: Enemy
     ): Timeline = Timeline.timeline { later {
         if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
-        action { enemy.applyEffect(statusEffect) }
+        action { enemy.applyEffect(statusEffect, this@GameControllerImpl) }
     } }
 
     override fun damagePlayerTimeline(
@@ -551,7 +551,7 @@ class GameControllerImpl(
         action {
             SoundPlayer.situation("enemy_attack", this@GameControllerImpl.screen)
             dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
-            dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen).wrap())
+            dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen, this@GameControllerImpl).wrap())
             curPlayerLives -= newDamage
             FortyFiveLogger.debug(
                 logTag,
@@ -847,9 +847,6 @@ class GameControllerImpl(
     }
 
     override fun initEnemyArea(enemies: List<Enemy>) {
-    }
-
-    override fun enemyDefeated(enemy: Enemy) {
     }
 
     override fun playGameAnimation(anim: GameAnimation) {

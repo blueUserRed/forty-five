@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
@@ -98,10 +99,16 @@ class Revolver(
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
+    private var game: GameController? = null
+
     init {
         initInput(this, screen)
         keyboardFocusable = KeyboardFocusable.GROUP
         touchable = Touchable.childrenOnly
+    }
+
+    fun setGame(controller: GameController) {
+        game = controller
     }
 
     /**
@@ -169,19 +176,14 @@ class Revolver(
         return slots[slot - 1].card
     }
 
-    /**
-     * true when at least one bullet is loaded into the revolver
-     */
-    fun isBulletLoaded(): Boolean = slots.any { it.card != null }
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         batch ?: return
         background.getOrNull()?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
         // This is really ugly but I won't bother with a better solution
-        val currentGame = FortyFive.currentGame
-        if (currentGame != null && EncounterModifier.Frost in currentGame.encounterModifiers && iceShader.isResolved) {
+        val game = game
+        if (game != null && EncounterModifier.Frost in game.encounterModifiers && iceShader.isResolved) {
             val iceShader = iceShader.getOrError()
             batch.flush()
             batch.shader = iceShader.shader
