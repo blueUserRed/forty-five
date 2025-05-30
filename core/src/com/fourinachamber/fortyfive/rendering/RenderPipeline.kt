@@ -20,13 +20,11 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.UserPrefs
-import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.*
-import java.lang.Integer.min
 import java.lang.Long.max
 import kotlin.math.absoluteValue
 
@@ -39,10 +37,6 @@ open class RenderPipeline(
     protected val screen: OnjScreen,
     private val baseRenderable: Renderable
 ) : Disposable, ResourceBorrower, Lifetime {
-
-    var showDebugMenu: Boolean = false
-    private val debugMenuPages: MutableList<DebugMenuPage> = mutableListOf()
-    private var currentDebugMenuPage: Int = 0
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
@@ -107,31 +101,9 @@ open class RenderPipeline(
     init {
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
-        addDebugMenuPage(StandardDebugMenuPage())
-        addDebugMenuPage(CardTextureDebugMenuPage())
-        addDebugMenuPage(ResourceDebugMenuPage())
     }
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
-
-    fun nextDebugPage() {
-        currentDebugMenuPage++
-        if (currentDebugMenuPage >= debugMenuPages.size) currentDebugMenuPage = 0
-    }
-
-    fun previousDebugPage() {
-        currentDebugMenuPage--
-        if (currentDebugMenuPage < 0) currentDebugMenuPage = debugMenuPages.size - 1
-    }
-
-    fun addDebugMenuPage(page: DebugMenuPage) {
-        debugMenuPages.add(page)
-    }
-
-    fun removeDebugMenuPage(page: DebugMenuPage) {
-        debugMenuPages.remove(page)
-        currentDebugMenuPage = min(currentDebugMenuPage, debugMenuPages.size - 1)
-    }
 
     fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
         action {
@@ -290,22 +262,23 @@ open class RenderPipeline(
         } else {
             renderWithPostProcessors(delta)
         }
-        if (!showDebugMenu) return
-        showPerformanceInfo()
+        val debugMenu = screen.debugMenu ?: return
+        if (!debugMenu.show) return
+        renderDebugMenu(debugMenu)
     }
 
-    private fun showPerformanceInfo() {
-        debugMenuPages.forEach { it.update() }
+    private fun renderDebugMenu(menu: DebugMenu) {
+        menu.update()
         val font = ResourceManager.forceGet<BitmapFont>(this, this, "red_wing_bmp")
         font.data.setScale(0.2f)
 
-        val page = debugMenuPages[currentDebugMenuPage]
+        val page = menu.currentPage()
         val pageText = page.getText(screen)
         var text = ""
         text += "* ---${page.name}---\n"
-        text += "* Press 't' to toggle the debug menu.\n"
-        text += "* Use the arrow keys to change page\n"
-        text += "* page: ${currentDebugMenuPage + 1}/${debugMenuPages.size}\n\n"
+        text += "* Press alt + d to toggle the debug menu.\n"
+        text += "* Use j/k to change page\n"
+        text += "* page: ${menu.currentPageNumber()}/${menu.amountOfPages()}\n\n"
         text += pageText
 
         val layout = GlyphLayout(

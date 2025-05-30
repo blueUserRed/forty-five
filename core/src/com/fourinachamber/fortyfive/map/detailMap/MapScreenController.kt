@@ -27,18 +27,13 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
     @Inject(name = "map")
     private lateinit var mapWidget: DetailMapWidget
 
+    @Inject(name = "tutorial_info_text")
+    private lateinit var tutorialInfoText: AdvancedTextWidget
+
     override fun init(context: Any?) {
         SoundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN)
         PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
-    }
-
-    override fun onShow() {
-        FortyFive.currentRenderPipeline?.addDebugMenuPage(mapWidget.debugMenuPage)
-    }
-
-    override fun end() {
-        FortyFive.currentRenderPipeline?.removeDebugMenuPage(mapWidget.debugMenuPage)
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {
@@ -62,7 +57,7 @@ class MapScreenController(private val screen: OnjScreen) : ScreenController() {
     private fun showTutorialPopupActor(tutorialTextPart: MapTutorialTextPart) {
         currentlyShowingTutorialText = true
         screen.enterState(showTutorialActorScreenState)
-        (screen.namedActorOrError("tutorial_info_text") as AdvancedTextWidget).setRawText(tutorialTextPart.text, listOf())
+        tutorialInfoText.setRawText(tutorialTextPart.text, listOf())
         TemplateString.updateGlobalParam("game.tutorial.confirmButtonText", tutorialTextPart.confirmationText)
         tutorialInfoActor.removeFocus()
         tutorialTextPart.focusActorName?.let { tutorialInfoActor.focusActor(it) }

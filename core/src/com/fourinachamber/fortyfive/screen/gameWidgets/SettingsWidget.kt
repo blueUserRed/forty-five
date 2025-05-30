@@ -16,9 +16,6 @@ class SettingsWidget(private val screen: OnjScreen) : Widget(), StyledActor, InO
 
     override var styleManager: StyleManager? = null
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
-
     override fun display(): Timeline = Timeline.timeline {
         action {
             screen.enterState("show_settings")

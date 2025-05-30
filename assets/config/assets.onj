@@ -103,10 +103,6 @@ textures: [
         file: "blobs/game_screen/card_orb.png"
     },
     {
-        name: "enemy_texture",
-        file: "blobs/game_screen/enemy.png"
-    },
-    {
         name: "normal_bullet",
         file: "blobs/game_screen/normal_bullet.png"
     },
@@ -223,20 +219,20 @@ textures: [
         file: "blobs/game_screen/player.png"
     },
     {
-        name: "win_screen_background",
-        file: "blobs/game_screen/win_screen_background.png"
+        name: "win_popup_background",
+        file: "blobs/game_screen/win_popup/background.png"
     },
     {
-        name: "win_screen_spacer",
-        file: "blobs/game_screen/win_screen_spacer.png"
+        name: "win_popup_spacer",
+        file: "blobs/game_screen/win_popup/spacer.png"
     },
     {
-        name: "win_screen_item_cash",
-        file: "blobs/game_screen/win_screen_item_cash.png"
+        name: "win_popup_item_cash",
+        file: "blobs/game_screen/win_popup/item_cash.png"
     },
     {
-        name: "win_screen_item_card",
-        file: "blobs/game_screen/win_screen_item_card.png"
+        name: "win_popup_item_card",
+        file: "blobs/game_screen/win_popup/item_card.png"
     },
     {
         name: "status_effect_background",
@@ -625,7 +621,7 @@ textures: [
     },
     {
         name: "warning_label_background_red",
-        file: "blobs/ui_elements/warning_label//background_red.png"
+        file: "blobs/ui_elements/warning_label/background_red.png"
     },
     {
         name: "warning_label_background_grey",
@@ -713,6 +709,26 @@ textures: [
     {
         name: "dialog_name_field",
         file: "blobs/events/dialog/name_field.png"
+    },
+    {
+        name: "enemy_status_bar_main_bar",
+        file: "blobs/game_screen/status_bar/main_bar.png",
+        useMipMaps: true,
+    },
+    {
+        name: "enemy_status_bar_hp_label",
+        file: "blobs/game_screen/status_bar/hp_label.png",
+        useMipMaps: true,
+    },
+    {
+        name: "enemy_status_bar_shield_overlay",
+        file: "blobs/game_screen/status_bar/shield_overlay.png",
+        useMipMaps: true,
+    },
+    {
+        name: "enemy_status_bar_effect_box",
+        file: "blobs/game_screen/status_bar/effect_box.png",
+        useMipMaps: true,
     },
     {
         name: "enemy_action_burning",
@@ -1354,6 +1370,14 @@ shaders: [
         }
     },
     {
+        name: "enemy_status_bar_shader",
+        file: "shaders/hp_bar.glsl",
+        constantArgs: {
+            firstColor: color("eb2c2c"),
+            secondColor: color("3C0C02")
+        }
+    },
+    {
         name: "drop_shadow_shader",
         file: "shaders/drop_shadow.glsl",
         constantArgs: {
@@ -1366,8 +1390,8 @@ shaders: [
         }
     },
     {
-        name: "test_shader",
-        file: "shaders/test.glsl",
+        name: "card_spawn_shader",
+        file: "shaders/card_spawn.glsl",
         constantArgs: {
         }
     },

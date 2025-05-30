@@ -23,7 +23,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionGroup
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -45,33 +47,16 @@ open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
     private val isDistanceField: Boolean,
-    override var detailWidget: DetailWidget? = null,
-    override val partOfHierarchy: Boolean = false
-) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, OnLayoutActor, DropShadowActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, DisplayDetailActor, KotlinStyledActor,
-    OffSettable {
-
-    override val actor: Actor = this
+    private val backgroundHints: Array<String> = arrayOf(),
+) : Label(text, labelStyle), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
+    DebugBoundsActor by DebugBoundsActorImpl(), StyledActor, BackgroundActor, HasOnjScreen,
+    InputActor by InputActorImpl(), KotlinStyledActor, OffSettable {
 
     override var dropShadow: DropShadow? = null
-
-    private val _animationSpawners: MutableList<AnimationSpawner> = mutableListOf()
-
-    override val animationSpawners: List<AnimationSpawner>
-        get() = _animationSpawners
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
 
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-    override var isFocused: Boolean = false
-    override var isSelectable: Boolean = false
-    override var isSelected: Boolean = false
-
-    //    override var isSelected: Boolean = false
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
 
     var underline: Boolean = false
@@ -79,7 +64,7 @@ open class CustomLabel(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
 
     override var marginTop: Float = 0f
@@ -105,22 +90,20 @@ open class CustomLabel(
     var forcedPrefWidth: Float? = null
 
     init {
-        bindDefaultListeners(this, screen)
-        registerOnFocusDetailActor(this, screen)
+        initInput(this, screen)
+        initDebugBounds(this)
+        touchable = Touchable.disabled
     }
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
     }
 
-    override fun getBounds(): Rectangle {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        return Rectangle(x, y, width, height)
-    }
-
-    override fun addAnimationSpawner(spawner: AnimationSpawner) {
-        _animationSpawners.add(spawner)
-        screen.addActorToRoot(spawner.actor)
+    override fun setFontScale(fontScale: Float) {
+        super.setFontScale(fontScale)
+        if (fontScale !in (0.7f..1.3f)) {
+            badTexture(name ?: text.toString(), comment = "font scale is $fontScale; Choose different font instead")
+        }
     }
 
     @MainThreadOnly
@@ -159,8 +142,6 @@ open class CustomLabel(
 
     override fun layout() {
         onLayout.forEach { it() }
-        // Dont ask me why the -width is necessary
-        layoutSpawners(x - width, y, width, height)
         super.layout()
     }
 
@@ -211,15 +192,13 @@ open class TemplateStringLabel(
     var templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
-    detailWidget: DetailWidget? = null,
-    partOfHierarchy: Boolean = false
+    backgroundHints: Array<String> = arrayOf(),
 ) : CustomLabel(
     screen,
     templateString.string,
     labelStyle,
     isDistanceField,
-    detailWidget,
-    partOfHierarchy
+    backgroundHints,
 ), BackgroundActor {
 
     var skipTextCheck = false
@@ -245,13 +224,17 @@ open class TemplateStringLabel(
 open class CustomImageActor(
     drawableHandle: ResourceHandle?,
     override val screen: OnjScreen,
-    override val partOfHierarchy: Boolean = false,
-) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor,
-    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailActor, HasOnjScreen,
-    KotlinStyledActor, DragAndDroppableActor, DropShadowActor {
+    private val backgroundHints: Array<String> = arrayOf(),
+) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor, StyledActor, BackgroundActor,
+    OffSettable, InputActor by InputActorImpl(), HasOnjScreen, DropShadowActor,
+    KotlinStyledActor, DebugBoundsActor by DebugBoundsActorImpl() {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
+
+    override var dropShadow: DropShadow? = null
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     override var marginTop: Float = 0f
     override var marginBottom: Float = 0f
@@ -275,37 +258,15 @@ open class CustomImageActor(
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
 
-    override var detailWidget: DetailWidget? = null
-
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
-    override var isSelected: Boolean = false
-    override var isSelectable: Boolean = false
-
-    override var isDraggable: Boolean = false
-    override var inDragPreview: Boolean = false
-    override var targetGroups: List<String> = listOf()
-    override var resetCondition: ((Actor?) -> Boolean)? = null
-    override val onDragAndDrop: MutableList<(Actor, Actor) -> Unit> = mutableListOf()
-
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-        set(value) {
-            if (this.isFocused) screen.focusedActor = null
-            field = value
-        }
-    override var isFocused: Boolean = false
-    override var isClicked: Boolean = false
-
-    override var dropShadow: DropShadow? = null
-
-    override var isHoveredOver: Boolean = false
-
     override var styleManager: StyleManager? = null
+
+    private var badTexture: Boolean = false
 
     /**
      * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
@@ -325,15 +286,14 @@ open class CustomImageActor(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     init {
-        bindDefaultListeners(this, screen)
-        registerOnFocusDetailActor(this, screen)
+        initInput(this, screen)
+        initDebugBounds(this)
+        touchable = Touchable.disabled
     }
 
-//    override fun generateDetailActor(): Actor? = mutableMapOf<String, OnjValue>(
-//        "hoverText" to OnjString(hoverText)
-//    ).also {
-//        it.putAll(additionalHoverData)
-//    }
+    override fun drawDebugBounds(shapes: ShapeRenderer?) {
+        drawCustomDebugBounds(shapes)
+    }
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
@@ -341,6 +301,7 @@ open class CustomImageActor(
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         val mask = mask
 
         drawable = loadedDrawable
@@ -403,15 +364,6 @@ open class CustomImageActor(
         super.layout()
     }
 
-    override fun getBounds(): Rectangle {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        return if (reportDimensionsWithScaling) {
-            Rectangle(x, y, width, height)
-        } else {
-            Rectangle(x, y, width * scaleX, height * scaleY)
-        }
-    }
-
     override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
     override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
 
@@ -444,14 +396,14 @@ open class CustomImageActor(
 
 open class CustomFlexBox(
     override val screen: OnjScreen,
-    private val hasHoverDetail: Boolean = false,
-    private val hoverText: String = ""
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
-    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, DisplayDetailActor,
+    private val backgroundHints: Array<String> = arrayOf(),
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, AnimatedActor,
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, InputActor by InputActorImpl(),
     InOutAnimationActor, ResourceBorrower {
 
     override var fixedZIndex: Int = 0
 
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     private val dropShadowShader: Promise<BetterShader> by lazy {
 //        ResourceManager.request<BetterShader>(this, screen, "gaussian_blur_shader")
@@ -460,22 +412,17 @@ open class CustomFlexBox(
 
     override var isDisabled: Boolean = false
 
-    override var isHoveredOver: Boolean = false
-
     override var styleManager: StyleManager? = null
-    override var isClicked: Boolean = false
 
     override var drawOffsetX: Float = 0F
     override var drawOffsetY: Float = 0F
     override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
 
-    override var detailWidget: DetailWidget? = null
-
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     private var reattachTo: Group? = null
 
@@ -500,15 +447,8 @@ open class CustomFlexBox(
     }
 
     init {
-        bindHoverStateListeners(this)
-        registerOnFocusDetailActor(this, screen)
+        throw RuntimeException()
     }
-
-//    override fun generateDetailActor(): Actor? = mutableMapOf<String, OnjValue>(
-//        "hoverText" to OnjString(hoverText)
-//    ).also {
-//        it.putAll(additionalHoverData)
-//    }
 
     @Suppress("UNCHECKED_CAST")
     fun getAllChildren(): List<Pair<YogaNode, Actor>> {
@@ -565,6 +505,7 @@ open class CustomFlexBox(
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
+        updateAnimations()
         x += drawOffsetX
         y += drawOffsetY
         if (batch != null && background != null) {
@@ -628,7 +569,8 @@ class CustomScrollableFlexBox(
     private val scrollbarBackgroundName: String?,
     private val scrollbarName: String?,
     private val scrollbarSide: String?,
-) : CustomFlexBox(screen, false) { //TODO fix bug with children with fixed size
+    backgroundHints: Array<String> = arrayOf(),
+) : CustomFlexBox(screen, backgroundHints) { //TODO fix bug with children with fixed size
 
     private val scrollListener = object : InputListener() {
         override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
@@ -1187,7 +1129,8 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomHorizontalGroup(
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf(),
 ) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
     KotlinStyledActor {
 
@@ -1203,13 +1146,6 @@ open class CustomHorizontalGroup(
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
     override var positionType: PositionType = PositionType.RELATIV
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-    override var isFocused: Boolean = false
-    override var isSelectable: Boolean = false
-    override var isSelected: Boolean = false
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -1219,7 +1155,7 @@ open class CustomHorizontalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         this.x += drawOffsetX
@@ -1259,13 +1195,12 @@ open class CustomHorizontalGroup(
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomVerticalGroup(
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf()
 ) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor, HasOnjScreen, OnLayoutActor {
 
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
 
     var forcedPrefWidth: Float? = null
     var forcedPrefHeight: Float? = null
@@ -1275,7 +1210,7 @@ open class CustomVerticalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         background?.draw(batch, x, y, width, height)
@@ -1314,10 +1249,12 @@ open class CustomVerticalGroup(
 }
 
 open class CustomGroup(
-    override val screen: OnjScreen
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor,
-    KotlinStyledActor,
-    DropShadowActor {
+    override val screen: OnjScreen,
+    private val backgroundHints: Array<String> = arrayOf()
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable, OnLayoutActor, KotlinStyledActor,
+    DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugBoundsActor by DebugBoundsActorImpl() {
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
@@ -1329,15 +1266,10 @@ open class CustomGroup(
     override var marginLeft: Float = 0f
     override var marginRight: Float = 0f
     override var positionType: PositionType = PositionType.RELATIV
-    override var group: SelectionGroup? = null
-    override var isFocusable: Boolean = false
-    override var isFocused: Boolean = false
-    override var isSelectable: Boolean = false
-    override var isSelected: Boolean = false
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
 
     override var fixedZIndex: Int = 0
+
+    override var keyboardFocusable: KeyboardFocusable = KeyboardFocusable.GROUP
 
     /**
      * the children in the original order as they were added
@@ -1356,16 +1288,32 @@ open class CustomGroup(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     override var backgroundHandle: String? by backgroundHandleObserver
-    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen)
+    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
     override var dropShadow: DropShadow? = null
 
+    var manualBackground: Drawable? = null
+
+    private val onUpdateCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     init {
-        bindDefaultListeners(this, screen)
+        initInput(this, screen)
+        initDebugBounds(this)
+    }
+
+    override fun drawDebugBounds(shapes: ShapeRenderer?) {
+        drawCustomDebugBounds(shapes)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         validate()
         batch ?: return
+        val oldX = x
+        val oldY = y
+        if (isDragged) {
+            x = dragX
+            y = dragY
+        }
         this.x += drawOffsetX
         this.y += drawOffsetY
         if (batch.color != color || parentAlpha != 1f) {
@@ -1382,14 +1330,28 @@ open class CustomGroup(
             sortedChildrenDirty = false
         }
         super.draw(batch, parentAlpha)
-        this.x -= drawOffsetX
-        this.y -= drawOffsetY
+        x = oldX
+        y = oldY
+    }
+
+    override fun act(delta: Float) {
+        onUpdateCallbacks.forEach { it() }
+        super.act(delta)
+    }
+
+    fun onUpdate(callback: () -> Unit) {
+        onUpdateCallbacks.add(callback)
     }
 
     private fun drawBackground(batch: Batch?) {
+        val background = manualBackground ?: background
         background?.let {
             dropShadow?.doDropShadow(batch, screen, it, this)
-            it.draw(batch, x, y, width, height)
+            if (it is TransformDrawable) {
+                it.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
+            } else {
+                it.draw(batch, x, y, width, height)
+            }
         }
     }
 
@@ -1417,12 +1379,14 @@ open class CustomGroup(
     override fun addActor(actor: Actor) {
         sortedChildrenDirty = true
         _originalChildren.add(actor)
+        invalidate()
         super.addActor(actor)
     }
 
     override fun addActorAt(index: Int, actor: Actor) {
         sortedChildrenDirty = true
         _originalChildren.add(index, actor)
+        invalidate()
         super.addActorAt(index, actor)
     }
 
@@ -1430,6 +1394,7 @@ open class CustomGroup(
         sortedChildrenDirty = true
         val index = children.indexOf(actor, true)
         if (index == -1) return false
+        invalidate()
         removeActorAt(_originalChildren.indexOf(actor), unfocus)
         return true
     }
@@ -1437,11 +1402,13 @@ open class CustomGroup(
     override fun removeActorAt(index: Int, unfocus: Boolean): Actor {
         sortedChildrenDirty = true
         val actor = _originalChildren.removeAt(index)
+        invalidate()
         return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
     override fun clearChildren(unfocus: Boolean) {
         sortedChildrenDirty = true
+        invalidate()
         super.clearChildren(unfocus)
     }
 
@@ -1454,6 +1421,18 @@ open class CustomGroup(
         invalidate()
     }
 
+    override fun clearChildren() {
+        _originalChildren.clear()
+        invalidate()
+        super.clearChildren()
+    }
+
+    fun walk(): Sequence<Actor> = sequence {
+        childrenInCorrectOrderOrOriginal().forEach { child ->
+            yield(child)
+            if (child is CustomGroup) yieldAll(child.walk())
+        }
+    }
 }
 
 class CustomParticleActor(

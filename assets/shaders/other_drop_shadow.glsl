@@ -20,11 +20,15 @@ out vec4 outColor;
 %uniform u_time
 %uniform u_resolution
 
+uniform vec4 u_color;
+uniform float u_scale;
+uniform float u_blurFactor;
+
 #define SQRT_TWO 1.41421
 
 void main() {
 
-    float squareScale = (1.0 / 1.6);
+    float squareScale = (1.0 / u_scale) * u_blurFactor;
     float w = squareScale;
     float h = squareScale;
     float xs = (1.0 - w) / 2.0;
@@ -41,7 +45,9 @@ void main() {
 
     float value = dist * (1.0 / maxDist);
     value = 1.0 - value;
+    value = smoothstep(0.0, 1.0, value);
+//    value = (value * value);
     value = 0.6 * (value * value);
 
-    outColor = vec4(245.0 / 255.0, 198.0 / 255.0, 1.0 / 255.0, value);
+    outColor = vec4(u_color.r, u_color.g, u_color.b, u_color.a * value);
 }

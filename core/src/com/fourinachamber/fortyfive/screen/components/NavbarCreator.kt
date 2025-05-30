@@ -6,35 +6,34 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
+import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.*
-import com.fourinachamber.fortyfive.screen.general.onSelectChange
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
-import ktx.actors.onClick
 
 object NavbarCreator {
 
-    const val navbarZIndex = 1000
-    const val navbarFocusGroup = "navbar_selectors"
     const val navbarOpenScreenState = "navbarIsOpen"
 
     fun ScreenCreator.getSharedNavBar(
         worldWidth: Float,
         worldHeight: Float,
         objects: List<NavBarObject>,
-        screen: OnjScreen
+        screen: OnjScreen,
+        isLeft: Boolean = false,
     ) = newGroup {
         x = 0f
         y = 0f
         width = worldWidth
         height = worldHeight
         touchable = Touchable.childrenOnly
-        fixedZIndex = navbarZIndex
 
         val navBarEvents = EventPipeline()
         val navBarTimeline = Timeline()
@@ -51,12 +50,15 @@ object NavbarCreator {
             }
             isVisible = false
             touchable = Touchable.enabled
-            onClick {
-                if (!isVisible) return@onClick
+            onInput(GameInputs.interact) {
+                if (!isVisible) return@onInput
                 isVisible = false
-                val box = screen.namedActorOrError("navbar_buttonParent") as CustomBox
-                val c = box.children.filterIsInstance<FocusableActor>().firstOrNull { it.isSelected } ?: return@onClick
-                screen.changeSelectionFor(c as Actor)
+                navBarEvents.fire(CloseNavBarButtons)
+            }
+            onInput(GameInputs.cancel) { // Global input, works even when this actor isn't focused
+                if (!isVisible) return@onInput
+                isVisible = false
+                navBarEvents.fire(CloseNavBarButtons)
             }
         }
 
@@ -64,7 +66,11 @@ object NavbarCreator {
 
         actor(boxWithTimeline) {
             flexDirection = FlexDirection.COLUMN
-            getNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+            if (isLeft) {
+                getSmallerLeftNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+            } else {
+                getNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+            }
         }
     }
 
@@ -73,6 +79,82 @@ object NavbarCreator {
         override fun act(delta: Float) {
             timeline.updateTimeline()
             super.act(delta)
+        }
+    }
+
+    private fun CustomBox.getSmallerLeftNavBar(
+        creator: ScreenCreator,
+        worldWidth: Float,
+        worldHeight: Float,
+        events: EventPipeline,
+        objects: List<NavBarObject>,
+        timeline: Timeline
+    ) = with(creator) {
+        x = 0f
+        y = 0f
+        width = worldWidth * 0.32f
+        height = 130f
+        onLayoutAndNow { y = worldHeight - height }
+
+        box {
+            flexDirection = FlexDirection.ROW
+            relativeWidth(100f)
+            relativeHeight(50f)
+            backgroundHandle = "statusbar_background_left"
+            badTexture("navbar small", lowRes = true)
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            verticalAlign = CustomAlign.CENTER
+            paddingLeft = 50f
+            paddingRight = 50f
+
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                syncDimensions()
+                image {
+                    name("player_health_icon")
+                    marginRight = 10f
+                    width = 30f
+                    height = 30f
+                    backgroundHandle = "statusbar_lives"
+                }
+
+                label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
+                    fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
+                }
+            }
+
+            box {
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                syncDimensions()
+                image {
+                    name("cash_symbol")
+                    marginRight = 10f
+                    backgroundHandle = "cash_symbol"
+                    width = 30f
+                    height = 30f
+                }
+
+                label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
+                    fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
+                }
+            }
+        }
+
+        box {
+            name("navbar_buttonParent")
+            fixedZIndex = -1
+            relativeWidth(92f)
+            relativeHeight(50f)
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.START
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            objects.forEach {
+                navBarButton(creator, events, it, timeline, scale = 0.9f)
+            }
         }
     }
 
@@ -96,6 +178,7 @@ object NavbarCreator {
             relativeWidth(100f)
             relativeHeight(50f)
             backgroundHandle = "statusbar_background"
+            badTexture("navbar", lowRes = true)
             horizontalAlign = CustomAlign.SPACE_BETWEEN
             verticalAlign = CustomAlign.CENTER
             paddingLeft = 50f
@@ -115,13 +198,14 @@ object NavbarCreator {
 
                 label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
                 }
             }
 
             box {
-                syncDimensions()
                 flexDirection = FlexDirection.ROW
                 locationIndicator(creator)
+                syncDimensions()
             }
 
             box {
@@ -138,6 +222,7 @@ object NavbarCreator {
 
                 label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
+                    syncDimensions()
                 }
             }
         }
@@ -162,15 +247,14 @@ object NavbarCreator {
         events: EventPipeline,
         obj: NavBarObject,
         timeline: Timeline,
+        scale: Float = 1f,
     ) = with(creator) {
         box {
-            height = parent.parent.height * 0.7f
-            width = 250f
+            height = parent.parent.height * 0.7f * scale
+            width = 250f * scale
             backgroundHandle = "statusbar_option"
-            logicalOffsetY = 30f
-            setFocusableTo(true, this)
-            group = navbarFocusGroup
-            isSelectable = true
+            joinGroup(navbarButtonGroup)
+            touchable = Touchable.enabled
 
             label("red_wing", obj.name) {
                 centerX()
@@ -178,7 +262,7 @@ object NavbarCreator {
                 setAlignment(Align.center)
                 positionType = PositionType.ABSOLUTE
                 fontColor = ScreenCreator.fortyWhite
-                setFontScale(0.7f)
+                setFontScale(0.7f * scale)
             }
 
             fun createAction(end: Float): PropertyAction<Float> = PropertyAction<Float>(
@@ -191,39 +275,52 @@ object NavbarCreator {
                 it.interpolation = Interpolation.pow2In
             }
 
-            styles(
-                normal = {
-                    addAction(createAction(30f))
+            var isOpen = false
+
+            keyboardFocusable = KeyboardFocusable.LEAF
+            logicalOffsetY = 25f
+
+            val dropShadow = DropShadow(
+                Color.BLACK, 2f, -2f, 1.1f, blurFactor = 0.5f, showDropShadow = false
+            )
+            this.dropShadow = dropShadow
+
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    if (isOpen) addAction(createAction(27f)) else addAction(createAction(25f))
+                    dropShadow.showDropShadow = true
                 },
-                focused = {
-                    addAction(createAction(25f))
-                },
-                selected = {
-                    addAction(createAction(21f))
-                },
-                selectedAndFocused = {
-                    addAction(createAction(16f))
+                {
+                    if (isOpen) addAction(createAction(32f)) else addAction(createAction(30f))
+                    dropShadow.showDropShadow = false
                 }
             )
 
-            var isOpen = false
             events.watchFor<CloseNavBarButtons> {
                 if (!isOpen) return@watchFor
                 isOpen = false
                 timeline.appendAction(obj.closeTimelineCreator().asAction())
-                screen.escapeSelectionHierarchy(deselectActors = false)
-                timeline.appendAction(Timeline.timeline { screen.leaveState(navbarOpenScreenState) }.asAction())
+                timeline.appendAction(Timeline.timeline {
+                    action { screen.leaveState(navbarOpenScreenState) }
+                }.asAction())
+                addAction(createAction(25f))
             }
 
-            onSelectChange { _, _ ->
-                if (isSelected) {
-                    events.fire(ChangeBlackBackground(true))
-                    timeline.appendAction(obj.openTimelineCreator().asAction())
-                    timeline.appendAction(Timeline.timeline { screen.enterState(navbarOpenScreenState) }.asAction())
-                    isOpen = true
-                } else {
+            onInput(GameInputs.interact) {
+                if (isOpen) {
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))
+                    addAction(createAction(30f))
+                } else {
+                    events.fire(CloseNavBarButtons)
+                    events.fire(ChangeBlackBackground(true))
+                    timeline.appendAction(Timeline.timeline {
+                        include(obj.openTimelineCreator())
+                        action { screen.enterState(navbarOpenScreenState) }
+                    }.asAction())
+                    isOpen = true
+                    addAction(createAction(32f))
                 }
             }
         }
@@ -289,4 +386,6 @@ object NavbarCreator {
         val openTimelineCreator: () -> Timeline,
         val closeTimelineCreator: () -> Timeline,
     )
+
+    const val navbarButtonGroup: String = "navbar-button"
 }

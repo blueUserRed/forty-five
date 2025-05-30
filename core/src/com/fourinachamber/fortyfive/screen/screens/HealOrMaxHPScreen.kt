@@ -5,16 +5,10 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.keyInput.KeyInputMap
-import com.fourinachamber.fortyfive.keyInput.selection.FocusableParent
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransition
-import com.fourinachamber.fortyfive.keyInput.selection.SelectionTransitionCondition
-import com.fourinachamber.fortyfive.keyInput.selection.TransitionType
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.navbarFocusGroup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
@@ -39,31 +33,6 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "*" to 100
-    )
-
-    override fun getSelectionHierarchyStructure(): List<FocusableParent> = listOf(
-        getHealOrMaxHPFocusableParent()
-    )
-
-    private fun getHealOrMaxHPFocusableParent(): FocusableParent {
-        return FocusableParent(
-            listOf(
-                SelectionTransition(
-                    TransitionType.Seamless,
-                    groups = listOf("healOrMaxHP_selection", navbarFocusGroup)
-                ),
-                SelectionTransition(
-                    TransitionType.LastResort,
-                    condition = SelectionTransitionCondition.Screenstate("healOrMaxHP_optionSelected"),
-                    groups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept")
-                ),
-            ),
-            startGroups = listOf("healOrMaxHP_selection", "healOrMaxHP_accept", navbarFocusGroup),
-        )
-    }
-
-    override fun getInputMaps(): List<KeyInputMap> = listOf(
-        KeyInputMap.createFromKotlin(listOf(), screen)
     )
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
@@ -126,41 +95,26 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
             box {
                 name("acceptButton")
-                group = "healOrMaxHP_accept"
                 backgroundHandle = "heal_or_max_accept_invalid"
                 relativeWidth(23F)
                 relativeHeight(10F)
                 marginTop = parent.height.percent(6)
                 touchable = Touchable.enabled
-                screen.addOnScreenStateChangedListener { entered, state ->
-                    if (state == "healOrMaxHP_optionSelected") {
-                        if (entered) {
-                            backgroundHandle = "heal_or_max_accept"
-                            setFocusableTo(true,this)
-                            isDisabled = false
-                            isSelectable = true
-                        } else {
-                            isDisabled = true
-                            setFocusableTo(false,this)
-                            isSelectable = false
-                            backgroundHandle = "heal_or_max_accept_invalid"
-                        }
-                    }
-                }
-                onFocusChange { _, _ ->
-                    backgroundHandle = if (isFocused) {
-                        "heal_or_max_accept_hover"
-                    } else {
-                        "heal_or_max_accept"
-                    }
-                }
-                onSelect {
-                    val controller =
-                        screen.screenControllers.filterIsInstance<HealOrMaxHPScreenController>().firstOrNull()
-                    controller
-                        ?: throw RuntimeException("The HealOrMaxHPScreen needs a corresponding Controller to work")
-                    controller.completed()
-                }
+
+//                onFocusChange { _, _ ->
+//                    backgroundHandle = if (isFocused) {
+//                        "heal_or_max_accept_hover"
+//                    } else {
+//                        "heal_or_max_accept"
+//                    }
+//                }
+//                onSelect {
+//                    val controller =
+//                        screen.screenControllers.filterIsInstance<HealOrMaxHPScreenController>().firstOrNull()
+//                    controller
+//                        ?: throw RuntimeException("The HealOrMaxHPScreen needs a corresponding Controller to work")
+//                    controller.completed()
+//                }
             }
         }
 
@@ -215,19 +169,16 @@ class HealOrMaxHPScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.CENTER
         backgroundHandle = "heal_or_max_selector_background"
         touchable = Touchable.enabled
-        setFocusableTo(true,this)
-        isSelectable = true
-        group = "healOrMaxHP_selection"
 
-        dropShadow = DropShadow(Color.Yellow, scaleY = 1f, showDropShadow = false)
-        onSelectChange { _, new ->
-            if (isSelected) {
-                screen.enterState("healOrMaxHP_optionSelected")
-            }
-            if (new.isEmpty()) {
-                screen.leaveState("healOrMaxHP_optionSelected")
-            }
-        }
+        dropShadow = DropShadow(Color.Yellow, scale = 1f, showDropShadow = false)
+//        onSelectChange { _, new ->
+//            if (isSelected) {
+//                screen.enterState("healOrMaxHP_optionSelected")
+//            }
+//            if (new.isEmpty()) {
+//                screen.leaveState("healOrMaxHP_optionSelected")
+//            }
+//        }
 
         image {
             backgroundHandle = textureName
@@ -254,31 +205,31 @@ class HealOrMaxHPScreen : ScreenCreator() {
 
         subtext.onLayout { img.width = subtext.prefWidth * 1.2F }
 
-        styles(
-            normal = {
-                backgroundHandle = "heal_or_max_selector_background"
-                dropShadow?.maxOpacity = 0.2f
-                dropShadow?.showDropShadow = false
-            },
-            focused = {
-                backgroundHandle = "heal_or_max_selector_background"
-                dropShadow?.color = Color.FortyWhite
-                dropShadow?.showDropShadow = true
-                dropShadow?.maxOpacity = 0.2f
-            },
-            selected = {
-                backgroundHandle = "heal_or_max_selector_background_selected"
-                dropShadow?.color = Color.Yellow
-                dropShadow?.showDropShadow = true
-                dropShadow?.maxOpacity = 0.2f
-
-            },
-            selectedAndFocused = {
-                backgroundHandle = "heal_or_max_selector_background_selected"
-                dropShadow?.color = Color.FortyWhite.interpolate(Color.Yellow)
-                dropShadow?.maxOpacity = 0.4f
-                dropShadow?.showDropShadow = true
-            }
-        )
+//        styles(
+//            normal = {
+//                backgroundHandle = "heal_or_max_selector_background"
+//                dropShadow?.maxOpacity = 0.2f
+//                dropShadow?.showDropShadow = false
+//            },
+//            focused = {
+//                backgroundHandle = "heal_or_max_selector_background"
+//                dropShadow?.color = Color.FortyWhite
+//                dropShadow?.showDropShadow = true
+//                dropShadow?.maxOpacity = 0.2f
+//            },
+//            selected = {
+//                backgroundHandle = "heal_or_max_selector_background_selected"
+//                dropShadow?.color = Color.Yellow
+//                dropShadow?.showDropShadow = true
+//                dropShadow?.maxOpacity = 0.2f
+//
+//            },
+//            selectedAndFocused = {
+//                backgroundHandle = "heal_or_max_selector_background_selected"
+//                dropShadow?.color = Color.FortyWhite.interpolate(Color.Yellow)
+//                dropShadow?.maxOpacity = 0.4f
+//                dropShadow?.showDropShadow = true
+//            }
+//        )
     }
 }

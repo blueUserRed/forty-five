@@ -5,12 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fortyfive.game.card.CardDragSource
-import com.fourinachamber.fortyfive.game.card.CardDropTarget
-import com.fourinachamber.fortyfive.game.card.PutCardsUnderDeckDropTarget
-import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDragSource
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
@@ -27,15 +21,7 @@ object DragAndDropBehaviourFactory {
     private val dropBehaviours: MutableMap<String, DropBehaviourCreator> = mutableMapOf()
 
     init {
-        dragBehaviours["CardDragSource"] = { dragAndDrop, actor, onj ->
-            CardDragSource(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
-            RevolverDropTarget(dragAndDrop, actor)
-        }
-        dropBehaviours["CardDropTarget"] = { dragAndDrop, actor, onj ->
-            CardDropTarget(dragAndDrop, actor, onj)
-        }
+
         dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
             BackpackDragSource(dragAndDrop, actor, onj)
         }
@@ -44,15 +30,6 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["BackpackDropTarget"] = { dragAndDrop, actor, onj ->
             BackpackDropTarget(dragAndDrop, actor, onj)
-        }
-        dragBehaviours["ChooseCardDragSource"] = { dragAndDrop, actor, onj ->
-            ChooseCardDragSource(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["ChooseCardDropTarget"] = { dragAndDrop, actor, onj ->
-            ChooseCardDropTarget(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["PutCardsUnderDeckDropTarget"] = { dragAndDrop, actor, onj ->
-            PutCardsUnderDeckDropTarget(dragAndDrop, actor, onj)
         }
     }
 

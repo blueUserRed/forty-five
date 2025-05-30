@@ -14,7 +14,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
-import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
@@ -29,12 +28,10 @@ open class AdvancedTextWidget(
     private val defaults: Triple<String, Color, Float>,
     screen: OnjScreen,
     private val isDistanceField: Boolean,
-) : CustomGroup(screen), HoverStateActor, StyledActor, HasPaddingActor {
+) : CustomGroup(screen), StyledActor, HasPaddingActor {
 
     override var fixedZIndex: Int = 0
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
 
     override var paddingTop: Float = 0F
@@ -62,8 +59,6 @@ open class AdvancedTextWidget(
     private var initialisedStyleInstruction: Boolean = false
 
     init {
-        @Suppress("LeakingThis")
-        bindHoverStateListeners(this)
         @Suppress("LeakingThis")
         initText(advancedText)
 
@@ -138,7 +133,11 @@ open class AdvancedTextWidget(
                 }
 
         }
-        if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        if (lines.isNotEmpty()) {
+            if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+        } else {
+            paddingRight
+        }
         alignHorizontalTextAfterLayout(lines)
     }
 
@@ -346,7 +345,7 @@ class IconAdvancedTextPart(
     screen: OnjScreen,
     private val dialogFontScale: Float,
     override val breakLine: Boolean
-) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart, ResourceBorrower {
+) : CustomImageActor(resourceHandle, screen), AdvancedTextPart, ResourceBorrower {
 
 
     override val actor: Actor = this

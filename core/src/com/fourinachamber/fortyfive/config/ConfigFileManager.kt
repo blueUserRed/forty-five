@@ -31,7 +31,7 @@ object ConfigFileManager {
     private lateinit var screenSchema: OnjSchema
 
     private lateinit var configFiles: List<ConfigFile>
-    private lateinit var screens: MutableList<ScreenData>
+    private val screens: MutableList<ScreenData> = mutableListOf()
 
     fun init() {
         val onj = OnjParser.parseFile(path)
@@ -49,20 +49,6 @@ object ConfigFileManager {
                     null
                 )
             }
-        screenSchema = OnjSchemaParser.parseFile(Gdx.files.internal(onj.get<String>("screenSchema")).file())
-        screens = onj
-            .get<OnjArray>("screens")
-            .value
-            .map {
-                it as OnjObject
-                ScreenData(
-                    it.get<String>("name"),
-                    it.get<String>("file"),
-                    null,
-                    null
-                )
-            }
-            .toMutableList()
     }
 
     private fun addScreen(name: String, creator: () -> ScreenBuilder) {
@@ -128,7 +114,7 @@ object ConfigFileManager {
             "creditsScreen" to { FromKotlinScreenBuilder(CreditsScreen()) },
             "shopScreen" to { FromKotlinScreenBuilder(ShopScreen()) },
             "dialogScreen" to { FromKotlinScreenBuilder(DialogScreen()) },
-            "gameScreen" to { FromKotlinScreenBuilder(GameScreen()) }
+            "encounterScreen" to { FromKotlinScreenBuilder(GameScreen()) }
         )
         data.forEach { addScreen(it.first,it.second) }
     }

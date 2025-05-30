@@ -16,9 +16,6 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     val isShown: Boolean = detailActor != null
 
     var shownAlpha = 1F
-        set(value) {
-            field = value
-        }
 
     abstract fun generateDetailActor(addFadeInAction: Boolean): Actor
 
@@ -38,6 +35,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         //TODO the limits (at the border) of this method need to be tested once backpack and fight are working
         val detailActor = detailActor
         if (detailActor !is Layout) return
+        detailActor.validate()
         val width = if (detailActor.prefWidth == 0f) detailActor.width else detailActor.prefWidth
         val height = if (detailActor.prefHeight == 0f) detailActor.height else detailActor.prefHeight
 

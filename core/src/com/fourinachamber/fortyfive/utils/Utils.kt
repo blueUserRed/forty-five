@@ -208,6 +208,8 @@ infix fun <T> ClosedFloatingPointRange<T>.intersection(
     other: ClosedFloatingPointRange<T>
 ): Boolean where T : Comparable<T> = this.start in other || other.start in this
 
+infix fun IntRange.intersection(other: IntRange): Boolean = this.start in other || other.start in this
+
 inline fun <reified T> ClosedFloatingPointRange<T>.asArray(
 ): Array<T> where T : Comparable<T> = arrayOf(this.start, this.endInclusive)
 
@@ -318,6 +320,7 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
 }
 
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
+    if (isEmpty()) return ""
     return substring(max(start, 0), min(max(end, 0), length - 1))
 }
 
@@ -341,6 +344,12 @@ fun GameAnimation.asTimeline(controller: GameController): Timeline = Timeline.ti
         controller.playGameAnimation(this@asTimeline)
     }
     delayUntil { this@asTimeline.isFinished() }
+}
+
+fun Float.minMagnitude(min: Float): Float = when {
+    this > 0 && this < min -> min
+    this < 0 && this > -min -> -min
+    else -> this
 }
 
 infix fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"

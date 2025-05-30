@@ -14,26 +14,26 @@ class EnemyActionIcon(
     fun setupForAction(action: NextEnemyAction) = when (action) {
 
         is NextEnemyAction.None -> {
-            detailWidget=null
+//            detailWidget = null
             backgroundHandle = null
         }
 
         is NextEnemyAction.HiddenEnemyAction -> {
-            detailWidget = DetailWidget.SimpleBigDetailActor(screen){
-                "The enemy is going to perform an unknown action"
-            }
+//            detailWidget = DetailWidget.SimpleBigDetailActor(screen) {
+//                "The enemy is going to perform an unknown action"
+//            }
 
             backgroundHandle = hiddenActionIconHandle
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
 
-            detailWidget = DetailWidget.SimpleBigDetailActor(screen){
-                TemplateString(
-                    action.action.prototype.descriptionTemplate,
-                    action.action.descriptionParams
-                ).string
-            }
+//            detailWidget = DetailWidget.SimpleBigDetailActor(screen){
+//                TemplateString(
+//                    action.action.prototype.descriptionTemplate,
+//                    action.action.descriptionParams
+//                ).string
+//            }
             backgroundHandle = action.action.prototype.iconHandle
         }
 

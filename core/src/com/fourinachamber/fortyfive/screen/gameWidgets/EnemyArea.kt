@@ -4,6 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.keyInput.InputActor
+import com.fourinachamber.fortyfive.keyInput.InputActorImpl
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -21,11 +24,9 @@ import com.fourinachamber.fortyfive.utils.Promise
 class EnemyArea(
     private val enemySelectionDrawableHandle: ResourceHandle,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, ResourceBorrower {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var styleManager: StyleManager? = null
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
 
     override var fixedZIndex: Int = 0
 
@@ -45,8 +46,10 @@ class EnemyArea(
     private val canSelectEnemy: Boolean
         get() = _enemies.filter { !it.isDefeated }.size >= 2
 
+
     init {
-        bindHoverStateListeners(this)
+        initInput(this, screen)
+        keyboardFocusable = KeyboardFocusable.GROUP
     }
 
     /**
@@ -54,7 +57,7 @@ class EnemyArea(
      */
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
-        addActor(enemy.actor)
+//        addActor(enemy.actor)
         if (canSelectEnemy) selectEnemy(_enemies.first { !it.isDefeated })
         invalidate()
     }
@@ -85,25 +88,25 @@ class EnemyArea(
         val enemy = selectedEnemy ?: return
         val selectionWidth = 30f
         val enemySelectionDrawable = this.enemySelectionDrawable.getOrNull() ?: return
-        enemySelectionDrawable.draw(
-            batch,
-            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,
-            y + enemy.actor.y + enemy.actor.height + 20f,
-            selectionWidth,
-            selectionWidth * (enemySelectionDrawable.minHeight / enemySelectionDrawable.minWidth)
-        )
+//        enemySelectionDrawable.draw(
+//            batch,
+//            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,
+//            y + enemy.actor.y + enemy.actor.height + 20f,
+//            selectionWidth,
+//            selectionWidth * (enemySelectionDrawable.minHeight / enemySelectionDrawable.minWidth)
+//        )
     }
 
     override fun layout() {
         super.layout()
-        val neededWidth = enemies.sumOf { it.actor.width.toDouble() * 1.3 }.toFloat()
-        var curX = width / 2 - neededWidth / 2
-        enemies
-            .map { it.actor }
-            .forEach { enemy ->
-                enemy.setBounds(curX, height / 2, enemy.prefWidth, enemy.prefHeight)
-                curX += enemy.width * 1.3f
-            }
+//        val neededWidth = enemies.sumOf { it.actor.width.toDouble() * 1.3 }.toFloat()
+//        var curX = width / 2 - neededWidth / 2
+//        enemies
+//            .map { it.actor }
+//            .forEach { enemy ->
+//                enemy.setBounds(curX, height / 2, enemy.prefWidth, enemy.prefHeight)
+//                curX += enemy.width * 1.3f
+//            }
     }
 
     override fun resortZIndices() {

@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.screen.general
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.StatsScreenController
-import com.fourinachamber.fortyfive.game.controller.OldGameController
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenController
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.statusbar.CardCollectionScreenController
@@ -15,7 +14,6 @@ import onj.value.OnjNamedObject
 object ScreenControllerFactory {
 
     private val controllers: MutableMap<String, (OnjNamedObject, OnjScreen) -> ScreenController> = mutableMapOf(
-        "GameScreenController" to { onj, screen -> OldGameController(screen, onj) },
         "IntroScreenController" to { onj, screen -> IntroScreenController(screen, onj) },
 //        "DialogScreenController" to { onj, screen -> DialogScreenController(screen, onj.get<String>("dialogWidgetName")) },
 //        "ShopScreenController" to { onj, screen -> ShopScreenController(screen, onj.get<String>("messageWidgetName"), onj.get<String>("cardsParentName"), onj.get<String>("addToDeckWidgetName"), onj.get<String>("addToBackpackWidgetName"))},

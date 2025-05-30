@@ -70,7 +70,7 @@ class BetterShader(
         }
 
         "u_perlin512x512" -> {
-            val texture = getTexture(uniformResourceNameMapping[uniform]!!)
+            val texture = getTexture(uniform)
             texture.bind(1)
             shader.setUniformi("u_perlin512x512", 1)
             Gdx.gl.glActiveTexture(GL_TEXTURE0)
@@ -78,7 +78,7 @@ class BetterShader(
 
         "u_iceTexture" -> {
             // TODO: This fails if both textures are included in a shader
-            val texture = getTexture(uniformResourceNameMapping[uniform]!!)
+            val texture = getTexture(uniform)
             texture.bind(1)
             shader.setUniformi("u_iceTexture", 1)
             Gdx.gl.glActiveTexture(GL_TEXTURE0)
