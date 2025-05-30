@@ -17,7 +17,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
-import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -28,11 +27,9 @@ open class AdvancedTextWidget(
     private val defaults: Triple<String, Color, Float>,
     screen: OnjScreen,
     private val isDistanceField: Boolean,
-) : CustomGroup(screen), StyledActor, HasPaddingActor {
+) : CustomGroup(screen), HasPaddingActor {
 
     override var fixedZIndex: Int = 0
-
-    override var styleManager: StyleManager? = null
 
     override var paddingTop: Float = 0F
     override var paddingBottom: Float = 0F
@@ -180,10 +177,6 @@ open class AdvancedTextWidget(
 
     private fun clearText() = advancedText.parts.forEach {
         removeActor(it.actor)
-    }
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
     }
 }
 

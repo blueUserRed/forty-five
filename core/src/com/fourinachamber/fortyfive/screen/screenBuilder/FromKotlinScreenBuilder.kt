@@ -22,7 +22,6 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             controllerContext = controllerContext,
             earlyRenderTasks = listOf({ creator.update() }),
             lateRenderTasks = listOf(),
-            styleManagers = listOf(),
             namedActors = namedActors,
             printFrameRate = false,
             transitionAwayTimes = creator.transitionAwayTimes,

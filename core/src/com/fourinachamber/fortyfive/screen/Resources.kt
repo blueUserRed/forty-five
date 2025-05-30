@@ -46,13 +46,10 @@ abstract class Resource(
 
     var stayLoaded: Boolean = false
 
-    @AllThreadsAllowed
     abstract suspend fun prepareLoadingAllThreads()
 
-    @MainThreadOnly
     abstract fun finishLoadingMainThread()
 
-    @MainThreadOnly
     fun <T> get(variantType: KClass<T>): T? where T : Any {
         if (state != ResourceState.LOADED) {
             runBlocking { load() }
@@ -127,7 +124,6 @@ abstract class Resource(
         return variantType.cast(variant)
     }
 
-    @MainThreadOnly
     protected open suspend fun load() = mutex.withLock {
         if (state == ResourceState.NOT_LOADED) {
             prepareLoadingAllThreads()
@@ -138,7 +134,6 @@ abstract class Resource(
         state = ResourceState.LOADED
     }
 
-    @AllThreadsAllowed
     open suspend fun prepare() = mutex.withLock {
         if (state != ResourceState.NOT_LOADED) return
         prepareLoadingAllThreads()
@@ -156,7 +151,6 @@ abstract class Resource(
         if (!stayLoaded && borrowedBy.isEmpty()) dispose()
     }
 
-    @MainThreadOnly
     override fun dispose() = synchronized(this) {
         disposables.forEach(Disposable::dispose)
         variants = listOf()
@@ -336,7 +330,6 @@ class AtlasRegionResource(
     override fun finishLoadingMainThread() {
     }
 
-    @MainThreadOnly
     override fun dispose() {
         atlasPromise = null
     }

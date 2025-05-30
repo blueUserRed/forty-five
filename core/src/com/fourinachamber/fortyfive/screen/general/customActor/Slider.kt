@@ -7,15 +7,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.between
 
@@ -28,12 +24,7 @@ class Slider(
     val max: Float,
     bind: String?,
     val screen: OnjScreen
-) : Widget(), StyledActor, ResourceBorrower {
-
-    override var styleManager: StyleManager? = null
-
-    var forcedPrefHeight: Float? = null
-    var forcedPrefWidth: Float? = null
+) : Widget(), ResourceBorrower {
 
     var cursorPos: Float = 0.5f
         private set
@@ -99,20 +90,12 @@ class Slider(
 
     fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
-        bindTarget?.setter(min + cursorPos * (max - min))
+        bindTarget?.setter?.let { it(min + cursorPos * (max - min)) }
     }
 
     fun move(by: Float) {
         cursorPos = (cursorPos + by).between(0f, 1f)
-        bindTarget?.setter(min + cursorPos * (max - min))
-    }
-
-    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
-
-    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
+        bindTarget?.setter?.let { it(min + cursorPos * (max - min)) }
     }
 
 }

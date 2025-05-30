@@ -85,18 +85,6 @@ interface ZIndexGroup {
     fun resortZIndices()
 }
 
-/**
- * A Class for all possible widgets which want to be shown by [com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget],
- * so that it can call the display and hide timelines when pressing the corresponding button
- */
-interface InOutAnimationActor {
-
-    fun display(): Timeline
-
-    fun hide(): Timeline
-}
-
-
 interface BoundedActor {
 
     /**
@@ -117,8 +105,11 @@ interface BoundedActor {
     }
 }
 
-interface AnimatedActor : HasOnjScreen {
-    abstract val animationsNeedingUpdate: MutableList<NeedsUpdate>
+interface AnimatedActor {
+
+    val screen: OnjScreen
+
+    val animationsNeedingUpdate: MutableList<NeedsUpdate>
 
     fun updateAnimations() {
         animationsNeedingUpdate.forEach { it.update() }
@@ -209,28 +200,6 @@ interface AnimatedActor : HasOnjScreen {
     }
 }
 
-/**
- * actor that has a background that can be changed
- */
-interface BackgroundActor {
-
-    /**
-     * handle of the current background
-     */
-    var backgroundHandle: ResourceHandle?
-}
-
-/**
- * Actor that can be detached from the screen and then reattached
- */
-interface Detachable {
-
-    val attached: Boolean
-
-    fun detach()
-    fun reattach()
-}
-
 interface OffSettable {
     fun resetAllOffsets() {
         drawOffsetX = 0F
@@ -245,15 +214,10 @@ interface OffSettable {
     var logicalOffsetY: Float
 }
 
-interface HasOnjScreen {
-    val screen: OnjScreen
-}
-
 interface OnLayoutActor {
 
     fun onLayout(callback: () -> Unit)
 }
-
 
 interface HasPaddingActor {
     var paddingTop: Float

@@ -1,21 +1,18 @@
 package com.fourinachamber.fortyfive.map.events.heals
 
-
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
-import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
+
+// TODO: adapt to new system (if the screen is still needed)
 
 class HealOrMaxHPScreenController(private val screen: OnjScreen, healChosenName: String) : ScreenController(), Completable {
 
@@ -52,18 +49,18 @@ class HealOrMaxHPScreenController(private val screen: OnjScreen, healChosenName:
      */
     override fun completed() {
         FortyFive.soundPlayer.situation("heal", screen)
-        if ((screen.namedActorOrError(healWidgetName) as BackgroundActor).backgroundHandle?.contains("selected") == true) {
-            val newLives = min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
-            FortyFiveLogger.debug(logTag, "Lives healed from ${SaveState.playerLives} to $newLives!")
-            SaveState.playerLives = newLives
-        } else {
-            FortyFiveLogger.debug(
-                logTag,
-                "Max lives increased from ${SaveState.maxPlayerLives} to ${SaveState.maxPlayerLives + amount.second}!"
-            )
-            SaveState.maxPlayerLives += amount.second
-            SaveState.playerLives += amount.second
-        }
+//        if ((screen.namedActorOrError(healWidgetName) as BackgroundActor).backgroundHandle?.contains("selected") == true) {
+//            val newLives = min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
+//            FortyFiveLogger.debug(logTag, "Lives healed from ${SaveState.playerLives} to $newLives!")
+//            SaveState.playerLives = newLives
+//        } else {
+//            FortyFiveLogger.debug(
+//                logTag,
+//                "Max lives increased from ${SaveState.maxPlayerLives} to ${SaveState.maxPlayerLives + amount.second}!"
+//            )
+//            SaveState.maxPlayerLives += amount.second
+//            SaveState.playerLives += amount.second
+//        }
         context?.completed()
     }
 

@@ -1,22 +1,16 @@
 package com.fourinachamber.fortyfive.map.events.heals
 
-
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.AddMaxHPMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.Completable
-import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
-import com.fourinachamber.fortyfive.screen.SoundPlayer
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
-import onj.value.OnjObject
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.random.Random
+
+// TODO: adapt to new system (if the screen is still needed)
 
 class AddMaxHPScreenController(private val screen: OnjScreen) : ScreenController(), Completable {
     private var context: AddMaxHPMapEvent? = null

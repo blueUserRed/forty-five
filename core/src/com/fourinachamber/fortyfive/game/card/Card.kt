@@ -26,10 +26,8 @@ import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
-import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import onj.value.*
@@ -418,7 +416,6 @@ class Card(
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
-    @MainThreadOnly
     fun checkEffects(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
@@ -599,7 +596,6 @@ class Card(
             return prototypes
         }
 
-        @MainThreadOnly
         private fun getCardFrom(
             onj: OnjObject,
             onjScreen: OnjScreen,
@@ -734,9 +730,9 @@ class CardActor(
     val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
-    override val screen: OnjScreen,
-    val enableHoverDetails: Boolean
-) : Widget(), ZIndexActor, InputActor by InputActorImpl(), HasOnjScreen, StyledActor,
+    val screen: OnjScreen,
+    val enableHoverDetails: Boolean // TODO: fix
+) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
     OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
@@ -752,7 +748,6 @@ class CardActor(
     override var drawOffsetY: Float = 0F
     override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
-    override var styleManager: StyleManager? = null
 
     override var marginTop: Float = 0F
     override var marginBottom: Float = 0F
@@ -805,13 +800,7 @@ class CardActor(
         }
     }
 
-    fun currentTexturePromise(): Promise<Texture>? = cardTexturePromise
-
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
-
-    override fun setX(x: Float) {
-        super.setX(x)
-    }
 
     private fun setupShader(batch: Batch): Boolean {
         val shaderPromise = when {
@@ -1010,11 +999,6 @@ class CardActor(
             .filter { it.key in allKeys }.map { it.value.second })
             texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
         texts
-    }
-
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
     }
 
     companion object {

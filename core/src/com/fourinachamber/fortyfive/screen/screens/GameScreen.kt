@@ -29,7 +29,6 @@ import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.HorizontalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameWidgets.CardHand
-import com.fourinachamber.fortyfive.screen.gameWidgets.PutCardsUnderDeckWidget
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.gameWidgets.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
@@ -62,8 +61,6 @@ class GameScreen : ScreenCreator() {
         "*" to 0
     )
 
-    private val cardDragAndDrop = DragAndDrop()
-
     val gameEvents: EventPipeline = EventPipeline()
 
     private lateinit var reservesAnimationTarget: Actor
@@ -87,7 +84,6 @@ class GameScreen : ScreenCreator() {
             cardScale = 0.9f
             radius = 140f
             rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
-//            cardZIndex = 100
         }
     }
 
@@ -180,49 +176,52 @@ class GameScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.putCardsUnderStackPopup() {
-        val putCardsUnderDeckPopup = PutCardsUnderDeckWidget(screen, 596f * 0.22f, 10f, gameEvents)
-        group {
-            x = 0f
-            y = 0f
-            relativeWidth(100f)
-            relativeHeight(100f)
-            touchable = Touchable.childrenOnly
-            isVisible = false
-            gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
-                isVisible = true
-                event.selectedCards.then { isVisible = false }
-            }
-            actor(putCardsUnderDeckPopup) {
-                backgroundHandle = "under_deck_background"
-                width = worldWidth * 0.5f
-                height = worldHeight * 0.48f
-                touchable = Touchable.disabled
-                centerX()
-                centerY()
-                gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
-                    touchable = Touchable.enabled
-                    event.selectedCards.then { touchable = Touchable.disabled }
-                }
-            }
-            label(
-                "red_wing",
-                "Put {game.remainingCardsToPutUnderStack} Cards back under your stack",
-                color = Color.FortyWhite,
-                isTemplate = true
-            ) {
-                centerX()
-                y = worldHeight * 0.63f
-            }
-            image {
-                backgroundHandle = "draw_bullet"
-                width = 300f
-                height = 300f
-                centerY()
-                onLayoutAndNow { x = parent.width / 2 - width / 2 - 500f }
-                touchable = Touchable.disabled
-                rotation = -10f
-            }
-        }
+
+        // TODO: adapt to new system
+
+//        val putCardsUnderDeckPopup = PutCardsUnderDeckWidget(screen, 596f * 0.22f, 10f, gameEvents)
+//        group {
+//            x = 0f
+//            y = 0f
+//            relativeWidth(100f)
+//            relativeHeight(100f)
+//            touchable = Touchable.childrenOnly
+//            isVisible = false
+//            gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
+//                isVisible = true
+//                event.selectedCards.then { isVisible = false }
+//            }
+//            actor(putCardsUnderDeckPopup) {
+//                backgroundHandle = "under_deck_background"
+//                width = worldWidth * 0.5f
+//                height = worldHeight * 0.48f
+//                touchable = Touchable.disabled
+//                centerX()
+//                centerY()
+//                gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
+//                    touchable = Touchable.enabled
+//                    event.selectedCards.then { touchable = Touchable.disabled }
+//                }
+//            }
+//            label(
+//                "red_wing",
+//                "Put {game.remainingCardsToPutUnderStack} Cards back under your stack",
+//                color = Color.FortyWhite,
+//                isTemplate = true
+//            ) {
+//                centerX()
+//                y = worldHeight * 0.63f
+//            }
+//            image {
+//                backgroundHandle = "draw_bullet"
+//                width = 300f
+//                height = 300f
+//                centerY()
+//                onLayoutAndNow { x = parent.width / 2 - width / 2 - 500f }
+//                touchable = Touchable.disabled
+//                rotation = -10f
+//            }
+//        }
     }
 
     private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {

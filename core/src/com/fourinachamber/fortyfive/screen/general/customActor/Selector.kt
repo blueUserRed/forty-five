@@ -12,9 +12,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.Promise
 
 class Selector(
@@ -25,12 +22,7 @@ class Selector(
     private val arrowHeight: Float = 20f,
     bind: String,
     private val screen: OnjScreen,
-) : Widget(), StyledActor, ResourceBorrower {
-
-    override var styleManager: StyleManager? = null
-
-    var forcedPrefHeight: Float? = null
-    var forcedPrefWidth: Float? = null
+) : Widget(), ResourceBorrower {
 
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
@@ -112,11 +104,4 @@ class Selector(
         else -> switch(-1)
     }
 
-    override fun getPrefWidth(): Float = forcedPrefWidth ?: super.getPrefWidth()
-
-    override fun getPrefHeight(): Float = forcedPrefHeight ?: super.getPrefHeight()
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-    }
 }

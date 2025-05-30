@@ -167,7 +167,6 @@ object FortyFive : Game() {
         }
     }
 
-    @AllThreadsAllowed
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
         currentRenderPipeline = renderPipeline
@@ -201,7 +200,6 @@ object FortyFive : Game() {
         with(OnjConfig) {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
-            registerNameSpace("Style", StyleNamespace)
             registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()

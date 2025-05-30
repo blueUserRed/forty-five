@@ -22,7 +22,6 @@ import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSh
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.Selector
@@ -248,26 +247,6 @@ abstract class ScreenCreator : ResourceBorrower {
         return spacer
     }
 
-    inline fun Group.verticalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
-        contract {
-            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
-        }
-        val spacer = Spacer(growProportionHeight = proportion)
-        this.addActor(spacer)
-        builder(spacer)
-        return spacer
-    }
-
-    inline fun Group.horizontalGrowingSpacer(proportion: Float, builder: Spacer.() -> Unit = {}): Spacer {
-        contract {
-            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
-        }
-        val spacer = Spacer(growProportionWidth = proportion)
-        this.addActor(spacer)
-        builder(spacer)
-        return spacer
-    }
-
     inline fun Group.label(
         font: String,
         text: String,
@@ -371,12 +350,6 @@ abstract class ScreenCreator : ResourceBorrower {
 
     fun <T> T.centerY() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { y = parent.height / 2 - height / 2 }
-    }
-
-    fun <T> T.backgrounds(normal: String?, hover: String) where T : Actor, T : BackgroundActor {
-        backgroundHandle = normal
-        onHoverEnter { backgroundHandle = hover }
-        onHoverLeave { backgroundHandle = normal }
     }
 
     fun CustomGroup.addDefaultOverlays(

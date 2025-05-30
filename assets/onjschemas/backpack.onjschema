@@ -1,8 +1,0 @@
-deckNameDef: {
-    minLength: int,
-    maxLength: int,
-    regEx?: string,
-},
-
-slotsPerDeck: int,
-minCardsPerDeck: int,

@@ -1,15 +1,6 @@
 package com.fourinachamber.fortyfive.utils
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.GameAnimation
-import com.fourinachamber.fortyfive.screen.general.CustomParticleActor
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
 
 /**
  * tool for timing tasks. can be created directly using a list of TimelineActions or using
@@ -38,14 +29,12 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
     /**
      * starts executing the tasks in the timeline
      */
-    @AllThreadsAllowed
     fun startTimeline() {
         hasBeenStarted = true
         if (_actions.isEmpty()) return
         _actions.first().start(this)
     }
 
-    @AllThreadsAllowed
     fun stopTimeline() {
         hasBeenStopped = true
         _actions.firstOrNull()?.end(this)
@@ -54,7 +43,6 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
     /**
      * should be called every frame to keep the timeline updated
      */
-    @AllThreadsAllowed
     fun updateTimeline() {
         if (isFinished || !hasBeenStarted || hasBeenStopped) return
         while (true) {
@@ -83,7 +71,6 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
      * pushes an action to the beginning of timeline. the action will be temporarily stored in a buffer until the
      * current action finishes, after which this action will be started
      */
-    @AllThreadsAllowed
     fun pushAction(timelineAction: TimelineAction) {
         pushActionsBuffer.add(timelineAction)
     }
@@ -91,12 +78,10 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
     /**
      * appends an action to the end of the timeline
      */
-    @AllThreadsAllowed
     fun appendAction(timelineAction: TimelineAction) {
         _actions.add(timelineAction)
     }
 
-    @AllThreadsAllowed
     fun asAction(): TimelineAction {
         if (hasBeenStarted) {
             throw RuntimeException("Timeline cannot be made into an action if it has already started")
@@ -153,7 +138,7 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
         /**
          * adds an action that finishes instantly to the timeline
          */
-        inline fun action(crossinline action: @AllThreadsAllowed Timeline.() -> Unit) {
+        inline fun action(crossinline action: Timeline.() -> Unit) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(timeline: Timeline): Boolean = true
                 override fun start(timeline: Timeline) {
@@ -170,7 +155,7 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
         /**
          * delays the timeline until a condition is met
          */
-        inline fun delayUntil(crossinline condition: @AllThreadsAllowed Timeline.() -> Boolean) {
+        inline fun delayUntil(crossinline condition: Timeline.() -> Boolean) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(timeline: Timeline): Boolean = condition(timeline)
             })
@@ -214,8 +199,8 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
          * the creation of the timeline to include is also dependent on factors not known when the timeline is created
          */
         inline fun includeLater(
-            crossinline timelineCreator: @AllThreadsAllowed Timeline.() -> Timeline,
-            crossinline condition: @AllThreadsAllowed Timeline.() -> Boolean = { true }
+            crossinline timelineCreator: Timeline.() -> Timeline,
+            crossinline condition: Timeline.() -> Boolean = { true }
         ) {
             timelineActions.add(object : TimelineAction() {
 

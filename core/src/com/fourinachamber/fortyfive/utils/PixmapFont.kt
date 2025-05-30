@@ -11,7 +11,7 @@ import kotlin.math.roundToInt
  * libgdx's BitmapFont can't draw on pixmaps and uses the Texture-class, which doesn't work on a non-openGL thread,
  * so I had to write a custom Font class which was a great experience and a lot of Fun. I love multithreading in libgdx!
  */
-class PixmapFont @AllThreadsAllowed constructor(fntFile: FileHandle) : Disposable {
+class PixmapFont(fntFile: FileHandle) : Disposable {
 
     private val pixmap: Pixmap
     private val letters: List<Letter>
@@ -54,7 +54,6 @@ class PixmapFont @AllThreadsAllowed constructor(fntFile: FileHandle) : Disposabl
     /**
      * writes text to a pixmap
      */
-    @AllThreadsAllowed
     fun write(on: Pixmap, text: String, x: Int, y: Int, scale: Float = 1f, color: Color = Color.BLACK) {
         var curX = x
         var curY = y

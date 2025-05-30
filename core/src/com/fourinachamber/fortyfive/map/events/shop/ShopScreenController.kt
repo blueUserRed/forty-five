@@ -96,8 +96,7 @@ class ShopScreenController(
         context.boughtIndices.clear()
         context.selectedCards.clear()
         context.seed = Random(context.seed).nextLong()
-        screen.removeAllStyleManagersOfChildren(cardsParentWidget)
-        cardsParentWidget.children.filterIsInstance<CustomBox>().toMutableList().forEach { screen.removeActorFromScreen(it) }
+        cardsParentWidget.children.filterIsInstance<CustomBox>().forEach { it.remove() }
         cardWidgets.clear()
         labels.clear()
         addCards(context.types)

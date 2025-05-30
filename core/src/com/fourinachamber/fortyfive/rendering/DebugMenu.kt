@@ -124,7 +124,6 @@ class ScreenDebugMenuPage : DebugMenuPage("Performance infos") {
         15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
         screen transition max lagSpike: ${FortyFive.screenTransitionTimes.max()}ms
         screen transition avg. lagSpike: ${FortyFive.screenTransitionTimes.average().toInt()}ms
-        active style managers: ${screen.styleManagerCount()}
         
         $makeLaggy
     """.trimIndent()

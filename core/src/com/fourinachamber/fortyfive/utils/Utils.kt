@@ -8,15 +8,10 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener
-import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.GameAnimation
 import com.fourinachamber.fortyfive.game.controller.GameController
-import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
@@ -314,10 +309,6 @@ fun IntRange.scale(factor: Double): IntRange = IntRange(
     (this.last * factor).roundToInt()
 )
 
-fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
-    return OnjYogaValue(YogaValue(this, unit))
-}
-
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
     if (isEmpty()) return ""
     return substring(max(start, 0), min(max(end, 0), length - 1))
@@ -372,7 +363,6 @@ object Utils {
     /**
      * sets the currently active cursor
      */
-    @MainThreadOnly
     fun setCursor(cursor: Either<Cursor, SystemCursor>) = when (cursor) {
         is Either.Left -> Gdx.graphics.setCursor(cursor.value)
         is Either.Right -> Gdx.graphics.setSystemCursor(cursor.value)
@@ -381,7 +371,6 @@ object Utils {
     /**
      * gets the current cursor pos and unprojects it using [viewport]
      */
-    @AllThreadsAllowed
     fun getCursorPos(viewport: Viewport): Vector2 {
         return viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
     }
@@ -398,42 +387,6 @@ object Utils {
      */
     fun convertSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
 
-    /**
-     * loads either a custom cursor or a system cursor
-     * @throws RuntimeException when [cursorName] is not known
-     */
-    @MainThreadOnly
-    fun loadCursor(
-        useSystemCursor: Boolean,
-        cursorName: String,
-        onjScreen: OnjScreen
-    ): Promise<Either<Cursor, SystemCursor>> {
-
-        if (useSystemCursor) {
-
-            return when (cursorName) {
-
-                "hand" -> SystemCursor.Hand
-                "arrow" -> SystemCursor.Arrow
-                "ibeam" -> SystemCursor.Ibeam
-                "crosshair" -> SystemCursor.Crosshair
-                "horizontal resize" -> SystemCursor.HorizontalResize
-                "vertical resize" -> SystemCursor.VerticalResize
-                "nw se resize" -> SystemCursor.NWSEResize
-                "ne sw resize" -> SystemCursor.NESWResize
-                "all resize" -> SystemCursor.AllResize
-                "not allowed" -> SystemCursor.NotAllowed
-                "none" -> SystemCursor.None
-                else -> throw RuntimeException("unknown system cursor: $cursorName")
-
-            }.eitherRight().asPromise()
-
-        } else {
-            return ResourceManager.request<Cursor>(onjScreen, onjScreen, cursorName).map { it.eitherLeft() }
-        }
-    }
-
-    @AllThreadsAllowed
     fun interpolationOrError(name: String): Interpolation = when (name) {
 
         "linear" -> Interpolation.linear

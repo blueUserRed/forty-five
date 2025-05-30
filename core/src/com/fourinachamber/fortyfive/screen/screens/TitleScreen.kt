@@ -1,8 +1,6 @@
 package com.fourinachamber.fortyfive.screen.screens
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
@@ -20,7 +18,6 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.Timeline
 import ktx.actors.alpha
-import ktx.actors.onClick
 
 class TitleScreen : ScreenCreator() {
 
@@ -206,12 +203,8 @@ class TitleScreen : ScreenCreator() {
     }
 
     fun removePopup() {
-        val popup = screen.namedActorOrNull(popupWidgetName)
-        if (popup != null) {
-            screen.removeActorFromScreen(popup)
-        }
+        screen.namedActorOrNull(popupWidgetName)?.remove()
     }
-
 
     private fun Group.addOption(displayText: String, action: () -> Unit) = label("red_wing_bmp", displayText) {
         setFontScale(0.4f)

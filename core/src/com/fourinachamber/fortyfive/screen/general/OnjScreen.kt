@@ -27,14 +27,10 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.rendering.ScreenDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.customActor.*
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-
 
 /**
  * a screen that was build from an onj file.
@@ -45,7 +41,6 @@ open class OnjScreen(
     private val controllerContext: Any?,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
-    styleManagers: List<StyleManager>,
     private val namedActors: MutableMap<String, Actor>,
     val printFrameRate: Boolean,
     val transitionAwayTimes: Map<String, Int>,
@@ -54,10 +49,6 @@ open class OnjScreen(
     val playAmbientSounds: Boolean
 ) : ScreenAdapter(), Renderable, Lifetime, ResourceBorrower {
 
-    var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
-        private set
-
-    private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val additionalDisposables: MutableList<Disposable> = mutableListOf()
@@ -69,7 +60,7 @@ open class OnjScreen(
         private set
 
     var defaultCursor: Either<Cursor, Cursor.SystemCursor> = Cursor.SystemCursor.Arrow.eitherRight()
-        @MainThreadOnly set(value) {
+        set(value) {
             field = value
             Utils.setCursor(value)
         }
@@ -133,62 +124,28 @@ open class OnjScreen(
         lifetime.onEnd(callback)
     }
 
-    @AllThreadsAllowed
-    fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
+    fun afterMs(ms: Int, callback: () -> Unit) {
         callbackAddBuffer.add((TimeUtils.millis() + ms) to callback)
     }
 
-    @AllThreadsAllowed
     fun addDisposable(disposable: Disposable) {
         additionalDisposables.add(disposable)
     }
 
-    @AllThreadsAllowed
     fun addActorToRoot(actor: Actor) {
         stage.root.addActor(actor)
     }
 
-    @AllThreadsAllowed
-    fun invalidateEverything() {
-
-        fun invalidateGroup(group: Group) {
-            for (child in group.children) {
-                if (child is Layout) {
-                    child.invalidate()
-                }
-                if (child is Group) invalidateGroup(child)
-            }
-        }
-
-        invalidateGroup(stage.root)
-    }
-
-//    fun borrowResource(handle: ResourceHandle) {
-//        useAssets.add(handle)
-//        ResourceManager.borrow(this, handle)
-//    }
-
-    @AllThreadsAllowed
     fun removeActorFromRoot(actor: Actor) {
         stage.root.removeActor(actor)
     }
 
-    @AllThreadsAllowed
-    fun resortRootZIndices() {
-        stage.root.children.sort { el1, el2 ->
-            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-        }
-    }
-
-    @AllThreadsAllowed
     fun enterState(state: String) {
         if (state in _screenState) return
         _screenState.add(state)
         screenStateChangeListeners.forEach { it(true, state) }
     }
 
-    @AllThreadsAllowed
     fun leaveState(state: String) {
         if (state !in _screenState) return
         _screenState.remove(state)
@@ -199,55 +156,18 @@ open class OnjScreen(
         screenStateChangeListeners.add(listener)
     }
 
-    inline fun listenToScreenState(listenToState: String, crossinline listener: (entered: Boolean) -> Unit) {
-        addOnScreenStateChangedListener { entered, state ->
-            if (state != listenToState) return@addOnScreenStateChangedListener
-            listener(entered)
-        }
-    }
+    fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
 
-    @AllThreadsAllowed
-    fun addLateRenderTask(task: @MainThreadOnly (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
+    fun addEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
 
-    @AllThreadsAllowed
-    fun addEarlyRenderTask(task: @MainThreadOnly (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
-
-    @AllThreadsAllowed
-    fun removeLateRenderTask(task: @MainThreadOnly (Batch) -> Unit) {
+    fun removeLateRenderTask(task: (Batch) -> Unit) {
         additionalLateRenderTasks.remove(task)
-    }
-
-    @AllThreadsAllowed
-    fun removeEarlyRenderTask(task: @MainThreadOnly (Batch) -> Unit) {
-        additionalEarlyRenderTasks.remove(task)
     }
 
     fun addNamedActor(name: String, actor: Actor) {
         namedActors[name] = actor
         actor.name = name
     }
-
-    fun removeNamedActor(name: String) {
-        namedActors.remove(name)
-    }
-
-    @MainThreadOnly //I am not sure if it is only main thread, but this is the safer way I guess
-    fun removeActorFromScreen(actor: Actor) {
-        if (actor is Group) {
-            actor.children.toMutableList().forEach { removeActorFromScreen(it) }
-        }
-        if (actor is StyledActor) {
-            actor.styleManager?.let { styleManager ->
-                styleManagers.remove(styleManager)
-                val parent = actor.parent
-                if (parent is FlexBox) {
-                    parent.remove(styleManager.node)
-                }
-            }
-        }
-        actor.remove()
-    }
-
 
     fun showHoverDetail(actor: InputActor) {
         val detailWidget = actor.detailWidget ?: return
@@ -263,22 +183,6 @@ open class OnjScreen(
         actorsWithActiveHoverDetails.remove(sourceActor)
     }
 
-    fun removeAllStyleManagers(actor: StyledActor) {
-        styleManagers.remove(actor.styleManager)
-        if (actor is Group) {
-            actor.children
-                .filterIsInstance<StyledActor>()
-                .forEach { removeAllStyleManagers(it) }
-        }
-    }
-
-    fun removeAllStyleManagersOfChildren(group: Group) = group
-        .children
-        .filter { it is StyledActor }
-        .forEach { removeAllStyleManagers(it as StyledActor) }
-
-
-    @AllThreadsAllowed
     fun namedActorOrError(name: String): Actor = namedActors[name] ?: throw RuntimeException(
         "no actor named $name"
     )
@@ -299,7 +203,6 @@ open class OnjScreen(
         }
     }
 
-    @MainThreadOnly
     override fun show() {
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
@@ -313,26 +216,13 @@ open class OnjScreen(
         _screenControllers.forEach(ScreenController::onTransitionAway)
     }
 
-    @MainThreadOnly
     override fun hide() {
         super.hide()
         isVisible = false
     }
 
-    fun swapStyleManager(
-        old: StyleManager,
-        new: StyleManager
-    ) { // TODO: this whole swapping stylemanager thing is kinda ugly
-        styleManagers = styleManagers.map { if (it === old) new else it }.toMutableList()
-    }
-
-    fun addStyleManager(manager: StyleManager) {
-        styleManagers.add(manager)
-    }
-
     fun update(delta: Float, isEarly: Boolean = false) {
         FortyFive.soundPlayer.update(this, playAmbientSounds)
-        styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         if (!isEarly) screenControllers.forEach(ScreenController::update)
         updateCallbacks()
@@ -347,12 +237,10 @@ open class OnjScreen(
         actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
     }
 
-    @MainThreadOnly
     override fun render(delta: Float) = try {
         if (makeLaggy) Thread.sleep(500)
         val batch = stage.batch
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-        val oldStyleManagers = styleManagers.toList()
         if (batch.isDrawing) batch.end()
         stage.viewport.apply()
         doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
@@ -373,14 +261,9 @@ open class OnjScreen(
         }
         batch.end()
         doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-        styleManagers
-            .filter { it !in oldStyleManagers }
-            .forEach(StyleManager::update) //all added items get updated too
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
-
-    fun styleManagerCount(): Int = styleManagers.size
 
     private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
         stage.batch.begin()
@@ -389,7 +272,6 @@ open class OnjScreen(
         stage.batch.end()
     }
 
-    @MainThreadOnly
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
     }
@@ -420,7 +302,6 @@ open class OnjScreen(
 //            }
 //        }
 
-    @MainThreadOnly
     override fun dispose() {
         hide()
         screenControllers.forEach(ScreenController::end)

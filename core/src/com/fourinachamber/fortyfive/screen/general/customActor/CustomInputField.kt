@@ -17,13 +17,7 @@ import com.badlogic.gdx.utils.Pools
 import com.badlogic.gdx.utils.Timer
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.styles.WidthStyleProperty
-import com.fourinachamber.fortyfive.screen.general.styles.addBackgroundStyles
-import com.fourinachamber.fortyfive.screen.general.styles.addDisableStyles
-import com.fourinachamber.fortyfive.screen.general.styles.addTextInputStyles
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.substringTillEnd
-import io.github.orioncraftmc.meditate.YogaValue
 import ktx.actors.onKeyboardFocusEvent
 import kotlin.math.abs
 import kotlin.math.max
@@ -707,7 +701,6 @@ open class CustomInputField(
         }
     }
 
-    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) return
         validate()

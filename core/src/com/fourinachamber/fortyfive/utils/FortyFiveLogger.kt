@@ -74,7 +74,6 @@ object FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    @AllThreadsAllowed
     fun debug(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.DEBUG)) return
         writelnFormatted(tag, message, LogLevel.DEBUG)
@@ -85,7 +84,6 @@ object FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    @AllThreadsAllowed
     fun warn(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.MEDIUM)) return
         writelnFormatted(tag, message, LogLevel.MEDIUM)
@@ -96,7 +94,6 @@ object FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    @AllThreadsAllowed
     fun severe(tag: String, message: String) {
         writelnFormatted(tag, message, LogLevel.SEVERE)
     }
@@ -104,7 +101,6 @@ object FortyFiveLogger {
     /**
      * logs the exception and exits the application
      */
-    @AllThreadsAllowed
     fun fatal(exception: java.lang.Exception) {
         severe("fatal",  "Encountered an exception that could not be recovered from")
         stackTrace(exception)
@@ -150,7 +146,6 @@ object FortyFiveLogger {
     /**
      * logs the stackTrace of an exception. will always be logged, regardless of the log level
      */
-    @AllThreadsAllowed
     fun stackTrace(e: Exception) {
         outputs.forEach { e.printStackTrace(it.first) }
     }
@@ -159,7 +154,6 @@ object FortyFiveLogger {
      * logs a message formatted as a title. This should be used when a big change in the state of the game happens
      * and makes navigating the log file easier
      */
-    @AllThreadsAllowed
     fun title(message: String) {
         writeln("-------------$message-------------")
     }
@@ -167,7 +161,6 @@ object FortyFiveLogger {
     /**
      * logs the current frameRate, only logs when the logLevel is set to debug
      */
-    @AllThreadsAllowed
     fun fps() {
         if (logLevel != LogLevel.DEBUG) return
         writeln("-[fps]- ${Gdx.graphics.framesPerSecond}")

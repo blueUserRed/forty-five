@@ -23,13 +23,9 @@ import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.contains
 import kotlin.math.cos
@@ -48,14 +44,9 @@ class Revolver(
     private val animationDuration: Float,
     private val events: EventPipeline,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
-
-
-    override var styleManager: StyleManager? = null
+) : WidgetGroup(), ZIndexActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var fixedZIndex: Int = 0
-
-    var cardZIndex: Int = 0
 
     /**
      * the scale of a card placed into the revolver
@@ -122,7 +113,6 @@ class Revolver(
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
             it.rotation = 0f
-            it.fixedZIndex = cardZIndex
         }
         if (card != null && card.actor !in this) {
             addActor(card.actor)
@@ -286,11 +276,7 @@ class Revolver(
     override fun getPrefHeight(): Float = prefHeight
 
 
-    override fun childrenInCorrectOrder(): List<Actor>? = orderedChildren
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-    }
+    override fun childrenInCorrectOrder(): List<Actor> = orderedChildren
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)

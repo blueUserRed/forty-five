@@ -8,7 +8,6 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.Promise
 import kotlin.math.*
 
@@ -108,7 +107,6 @@ data class MapNode(
         return curBestPos to (distance + curBestDist)
     }
 
-    @MainThreadOnly
     fun getImage(screen: OnjScreen): Promise<Drawable>? {
         if (imageName == null) return null
         if (imageCache != null) return imageCache
@@ -121,7 +119,6 @@ data class MapNode(
         return imageCache
     }
 
-    @MainThreadOnly
     fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache

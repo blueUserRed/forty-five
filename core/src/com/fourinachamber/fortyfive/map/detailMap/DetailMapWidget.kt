@@ -16,26 +16,16 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
-import com.fourinachamber.fortyfive.game.GameDirector
-import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.MapDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.DisableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
-import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
-import onj.value.OnjString
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -58,17 +48,13 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
-    private val encounterModifierParentName: String,
-    private val encounterModifierDisplayTemplateName: String,
     private var screenSpeed: Float,
     private val scrollMargin: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val mapScale: Float
-) : Widget(), ZIndexActor, StyledActor, BackgroundActor, ResourceBorrower {
+) : Widget(), ZIndexActor, ResourceBorrower {
 
     override var fixedZIndex: Int = 0
-
-    override var styleManager: StyleManager? = null
 
     private val mapBounds: Rectangle by lazy {
         val nodes = map.uniqueNodes.map { scaledNodePos(it) }
@@ -102,7 +88,7 @@ class DetailMapWidget(
     private val nodeDrawable: Promise<Drawable> = ResourceManager.request(this, screen, defaultNodeDrawableHandle)
     private val playerDrawable: Promise<Drawable> = ResourceManager.request(this, screen, playerDrawableHandle)
 
-    override var backgroundHandle: ResourceHandle? = null
+    var backgroundHandle: ResourceHandle? = null
         set(value) {
             field = value
             if (background != null) return
@@ -127,8 +113,6 @@ class DetailMapWidget(
 
     private var moveScreenToPoint: Vector2? = null
 
-    private var setupStartButtonListener: Boolean = false
-
     private var pointToNode: MapNode? = null
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
@@ -142,19 +126,12 @@ class DetailMapWidget(
             decoration.instances.map { Triple(it.first, it.second, createDecorationAnimation(decoration.drawableHandle)) }
         }
 
-//    private val encounterModifierParent: CustomFlexBox by lazy {
-//        screen.namedActorOrError(encounterModifierParentName) as? CustomFlexBox
-//            ?: throw RuntimeException("actor named $encounterModifierParentName must be a CustomFlexBox")
-//    }
-
-
     private val dragListener = object : DragListener() {
 
         private var dragStartPosition: Vector2? = null
         private var mapOffsetOnDragStart: Vector2? = null
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             if (!map.scrollable) return
             super.dragStart(event, x, y, pointer)
             dragStartPosition = Vector2(x, y)
@@ -163,7 +140,6 @@ class DetailMapWidget(
         }
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             if (!map.scrollable) return
             super.drag(event, x, y, pointer)
             val dragStartPosition = dragStartPosition ?: return
@@ -174,7 +150,6 @@ class DetailMapWidget(
         }
 
         override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             if (!map.scrollable) return
             super.dragStop(event, x, y, pointer)
             dragStartPosition = null
@@ -189,20 +164,17 @@ class DetailMapWidget(
         private var lastTouchDownTime: Long = 0
 
         override fun mouseMoved(event: InputEvent?, x: Float, y: Float): Boolean {
-            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return false
             updateDirectionIndicator(Vector2(x, y))
             lastPointerPosition = Vector2(x, y)
             return super.mouseMoved(event, x, y)
         }
 
         override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return false
             lastTouchDownTime = TimeUtils.millis()
             return super.touchDown(event, x, y, pointer, button)
         }
 
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
-            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             val screenDragged = screenDragged
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
@@ -254,7 +226,6 @@ class DetailMapWidget(
     fun onStartButtonClicked(startButton: Actor? = null) {
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
-        if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
         if (playerNode.event?.canBeStarted?.not() ?: true) return
         playerNode.event?.start()
     }
@@ -343,15 +314,6 @@ class DetailMapWidget(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (!setupStartButtonListener) {
-//            val startButton = screen.namedActorOrError(startButtonName)
-//            startButton.onButtonClick {
-//                onStartButtonClicked(startButton)
-//            }
-            setupStartButtonListener = true
-            setupMapEvent(playerNode.event)
-        }
-
         validate()
         updatePlayerMovement()
         updateScreenMovement()
@@ -568,61 +530,9 @@ class DetailMapWidget(
         MapManager.currentMapNode = movePlayerTo
         MapManager.lastMapNode = playerNode
         playerPos = scaledNodePos(movePlayerTo)
-        setupMapEvent(movePlayerTo.event)
-        updateScreenState(movePlayerTo.event)
+        events.fire(PlayerChangedNodeEvent(playerNode))
         this.movePlayerTo = null
         updateDirectionIndicator(lastPointerPosition)
-    }
-
-    private fun setupMapEvent(event: MapEvent?) {
-        events.fire(PlayerChangedNodeEvent(playerNode))
-//        return
-//        if (event == null || !event.displayDescription) {
-//            screen.leaveState(displayEventDetailScreenState)
-//            screen.leaveState(eventCanBeStartedScreenState)
-//        } else {
-//            screen.enterState(displayEventDetailScreenState)
-//        }
-//        event ?: return
-//        if (event.canBeStarted) {
-//            screen.enterState(eventCanBeStartedScreenState)
-//        } else {
-//            screen.leaveState(eventCanBeStartedScreenState)
-//        }
-//        TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
-//        TemplateString.updateGlobalParam("map.cur_event.buttonText", event.buttonText)
-//        TemplateString.updateGlobalParam(
-//            "map.cur_event.description",
-//            if (event.isCompleted) event.completedDescriptionText else event.descriptionText
-//        )
-////        screen.removeAllStyleManagersOfChildren(encounterModifierParent)
-////        encounterModifierParent.clear()
-//        screen.enterState(noEncounterModifierScreenState)
-//        if (event !is EncounterMapEvent) return
-//        val encounter = GameDirector.encounters[event.encounterIndex]
-//        val encounterModifiers = encounter.encounterModifier
-//        if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
-////        encounterModifiers.forEach { modifier ->
-////            screen.screenBuilder.generateFromTemplate(
-////                encounterModifierDisplayTemplateName,
-////                mapOf(
-////                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
-////                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
-////                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
-////                ),
-////                encounterModifierParent,
-////                screen
-////            )!!
-////        }
-    }
-
-    private fun updateScreenState(event: MapEvent?) {
-        val enter = event?.displayDescription ?: false
-        if (enter) {
-            screen.enterState(displayEventDetailScreenState)
-        } else {
-            screen.leaveState(displayEventDetailScreenState)
-        }
     }
 
     private fun drawNodes(batch: Batch) {
@@ -685,20 +595,11 @@ class DetailMapWidget(
 
     private fun scaledNodePos(node: MapNode): Vector2 = Vector2(node.x, node.y) * mapScale
 
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-        addMapStyles(screen)
-    }
-
-
     data class PlayerChangedNodeEvent(
         val newNode: MapNode
     )
 
     companion object {
-        const val displayEventDetailScreenState: String = "displayEventDetail"
-        const val eventCanBeStartedScreenState: String = "canStartEvent"
-        const val noEncounterModifierScreenState: String = "noEncounterModifier"
         const val logTag = "Map"
     }
 

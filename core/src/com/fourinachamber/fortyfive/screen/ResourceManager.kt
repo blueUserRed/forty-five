@@ -54,14 +54,12 @@ object ResourceManager {
         return resource.request(borrower, lifetime, type)
     }
 
-    @MainThreadOnly
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         toGiveBack.giveBack(borrower)
     }
 
-    @MainThreadOnly
     fun init() {
         val resources = mutableListOf<Resource>()
         val assets = ConfigFileManager.getConfigFile("assets")

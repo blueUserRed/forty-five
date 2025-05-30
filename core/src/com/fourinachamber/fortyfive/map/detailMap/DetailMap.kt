@@ -34,7 +34,6 @@ data class DetailMap(
     val isArea: Boolean,
     val biome: String,
     val progress: ClosedFloatingPointRange<Float>,
-    val tutorialText: MutableList<MapScreenController.MapTutorialTextPart>,
     val scrollable: Boolean,
     val camPosOffset: Vector2
 ) {
@@ -84,7 +83,7 @@ data class DetailMap(
         "isArea" with isArea
         "biome" with biome
         "progress" with progress.asArray()
-        "tutorialText" with tutorialText.map { it.asOnjObject() }
+        "tutorialText" with listOf<Nothing>()
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
     }
@@ -193,11 +192,11 @@ data class DetailMap(
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
                 onj.get<OnjArray>("progress").toFloatRange(),
-                onj.getOr<OnjArray?>("tutorialText", null)
-                    ?.value
-                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
-                    ?.toMutableList()
-                    ?: mutableListOf(),
+//                onj.getOr<OnjArray?>("tutorialText", null)
+//                    ?.value
+//                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
+//                    ?.toMutableList()
+//                    ?: mutableListOf(),
                 onj.getOr("scrollable", true),
                 if (onj.hasKey<OnjArray>("camPosOffset")) {
                     onj.get<OnjArray>("camPosOffset").toVector2()
@@ -235,7 +234,6 @@ data class DetailMap(
             drawableCache = ResourceManager.request<Drawable>(mapWidget, screen, drawableHandle)
         }
 
-        @MainThreadOnly
         fun getDrawable(screen: OnjScreen, mapWidget: DetailMapWidget): Promise<Drawable> {
             drawableCache?.let { return it }
             requestDrawable(screen, mapWidget)

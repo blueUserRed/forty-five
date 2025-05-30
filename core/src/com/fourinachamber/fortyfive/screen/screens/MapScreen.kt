@@ -68,8 +68,6 @@ class MapScreen : ScreenCreator() {
             playerMoveTime = 300,
             directionIndicatorHandle = "common_symbol_arrow_right",
             startButtonName = "",
-            encounterModifierParentName = "",
-            encounterModifierDisplayTemplateName = "",
             screenSpeed = 25f,
             scrollMargin = 0f,
             disabledDirectionIndicatorAlpha = 0.5f,

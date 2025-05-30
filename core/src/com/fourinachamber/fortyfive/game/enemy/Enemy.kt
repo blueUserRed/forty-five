@@ -22,14 +22,6 @@ data class EnemyPrototype(
     fun create(health: Int): Enemy = creator(health)
 }
 
-/**
- * represents an enemy
- * @param name the name of the enemy
- * @param health the initial (and maximum) lives of this enemy
- * @param detailFont the font used for the description of the enemy
- * @param detailFontScale scales [detailFont]
- * @param detailFontColor the color of [detailFont]
- */
 class Enemy(
     val name: String,
     val drawableHandle: ResourceHandle,
@@ -115,7 +107,6 @@ class Enemy(
         effect.start(controller)
         _statusEffects.add(effect)
         enemyEvents.fire(StatusEffectsChangedEvent)
-//        actor.displayStatusEffect(effect)
     }
 
     fun executeStatusEffectsAfterTurn(): Timeline = _statusEffects
@@ -144,18 +135,6 @@ class Enemy(
         enemyEvents.fire(StatusEffectsChangedEvent)
     }
 
-    @MainThreadOnly
-    fun damagePlayerDirectly(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
-//        val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
-//        include(chargeTimeline)
-//        delay(GraphicsConfig.bufferTime)
-        includeLater(
-            { getPlayerDamagedTimeline(damage, gameController) },
-            { true }
-        )
-    }
-
-
     private fun getPlayerDamagedTimeline(
         damage: Int,
         gameController: GameController,
@@ -166,7 +145,6 @@ class Enemy(
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
         action {
             currentCover += amount
-//            actor.startCoverChangeAnimation(amount)
         }
     }
 
@@ -188,10 +166,8 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-//                    actor.startCoverChangeAnimation(-damage.coerceAtMost(currentCover))
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
-//                    actor.updateText()
                 }
             } },
             { currentCover != 0 }
@@ -201,8 +177,6 @@ class Enemy(
             { Timeline.timeline {
                 action {
                     currentHealth -= remaining
-//                    actor.updateText()
-//                    actor.startHealthChangeAnimation(-remaining)
                 }
             } },
             { remaining != 0 }
