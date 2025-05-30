@@ -81,10 +81,10 @@ class Revolver(
         listOf(slots[4], slots[0], slots[1], slots[2], slots[3])
     }
 
-    private val background: Promise<Drawable> = ResourceManager.request(this, screen, backgroundHandle)
+    private val background: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, backgroundHandle)
 
     private val iceShader: Promise<BetterShader> by lazy {
-        ResourceManager.request(this, screen, "ice_shader")
+        FortyFive.resourceManager.request(this, screen, "ice_shader")
     }
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()

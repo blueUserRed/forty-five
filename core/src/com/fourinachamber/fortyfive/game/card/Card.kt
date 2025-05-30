@@ -761,13 +761,13 @@ class CardActor(
     private val lifetime: EndableLifetime = EndableLifetime()
 
     private val destroyShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "dissolve_shader")
+        FortyFive.resourceManager.request(this, this, "dissolve_shader")
 
     private val spawnShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "card_spawn_shader")
+        FortyFive.resourceManager.request(this, this, "card_spawn_shader")
 
     private val markedSymbol: Promise<TransformDrawable> =
-        ResourceManager.request(this, this, "card_symbol_marked")
+        FortyFive.resourceManager.request(this, this, "card_symbol_marked")
 
     private var prevPosition: Vector2? = null
 
@@ -807,7 +807,7 @@ class CardActor(
             spawnAnimStart != 0L -> spawnShader
             else -> return false
         }
-        if (shaderPromise.isNotResolved) ResourceManager.forceResolve(shaderPromise)
+        if (shaderPromise.isNotResolved) FortyFive.resourceManager.forceResolve(shaderPromise)
         val shader = shaderPromise.getOrError()
         batch.flush()
         shader.shader.bind()
@@ -893,7 +893,7 @@ class CardActor(
         action {
             FortyFive.soundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
-            if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
+            if (destroyShader.isResolved) FortyFive.resourceManager.forceResolve(destroyShader)
             destroyShader.getOrError().resetReferenceTime()
         }
         delay(1200)

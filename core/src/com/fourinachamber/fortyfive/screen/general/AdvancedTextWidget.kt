@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -267,7 +268,7 @@ class TextAdvancedTextPart(
     screen,
     TemplateString(rawText),
     LabelStyle(
-        ResourceManager.forceGet(object : ResourceBorrower {}, screen, font),
+        FortyFive.resourceManager.forceGet(object : ResourceBorrower {}, screen, font),
         fontColor
     ), // TODO: better way to do ResourceBorrowers
     isDistanceFiled
@@ -352,7 +353,7 @@ class IconAdvancedTextPart(
 
     private var calculatedLayout = false
 
-    private val fontPromise: Promise<BitmapFont> = ResourceManager.request(this, screen, font)
+    private val fontPromise: Promise<BitmapFont> = FortyFive.resourceManager.request(this, screen, font)
 
     init {
         reportDimensionsWithScaling = true

@@ -113,10 +113,10 @@ class GameControllerImpl(
         get() = allEnemies.all { it.isDefeated }
 
     private val enemyBannerPromise: Promise<Drawable> =
-        ResourceManager.request(this, this.screen, "enemy_turn_banner")
+        FortyFive.resourceManager.request(this, this.screen, "enemy_turn_banner")
 
     private val playerBannerPromise: Promise<Drawable> =
-        ResourceManager.request(this, this.screen, "player_turn_banner")
+        FortyFive.resourceManager.request(this, this.screen, "player_turn_banner")
 
     private val softMaxCardsWarning = warningParent.Warning(
         "Maximum Card Number Reached\nAfter this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
@@ -586,10 +586,10 @@ class GameControllerImpl(
     } }
 
     private val shieldIconPromise: Promise<Drawable> =
-        ResourceManager.request(this, this.screen, "shield_icon_large")
+        FortyFive.resourceManager.request(this, this.screen, "shield_icon_large")
 
     private val shieldShaderPromise: Promise<BetterShader> =
-        ResourceManager.request(this, this.screen, "glow_shader_shield")
+        FortyFive.resourceManager.request(this, this.screen, "glow_shader_shield")
 
     private fun shieldAnimationTimeline(): Timeline {
         val shieldIcon = shieldIconPromise.getOrNull() ?: return Timeline()

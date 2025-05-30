@@ -116,14 +116,14 @@ data class MapNode(
             FortyFive.logger.warn(logTag, "No image data found for $imageName")
             return null
         }
-        imageCache = ResourceManager.request(this, screen, handle)
+        imageCache = FortyFive.resourceManager.request(this, screen, handle)
         return imageCache
     }
 
     fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache
-        nodeTextureCache = ResourceManager.request(this, screen, nodeTexture)
+        nodeTextureCache = FortyFive.resourceManager.request(this, screen, nodeTexture)
         return nodeTextureCache
     }
 

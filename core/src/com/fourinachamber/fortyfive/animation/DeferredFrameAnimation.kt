@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.animation
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -19,7 +20,7 @@ class DeferredFrameAnimation(
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
-    private val previewDrawable: Promise<Drawable> = ResourceManager.request(this, this, previewHandle)
+    private val previewDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, this, previewHandle)
 
     private var hasBeenDisposed: Boolean = false
 
@@ -33,7 +34,8 @@ class DeferredFrameAnimation(
     }
 
     private fun load() {
-        ResourceManager
+        FortyFive
+            .resourceManager
             .request<TextureAtlas>(this, this, atlasHandle)
             .then(::createFrameAnimation)
     }
@@ -52,7 +54,7 @@ class DeferredFrameAnimation(
 
     override fun update() {
         if (loadedFrameAnimation != null) return
-        val loadingResources = ResourceManager.resources
+        val loadingResources = FortyFive.resourceManager.resources
             .filter { it.startedLoading && it.state != Resource.ResourceState.LOADED }
             .size
         if (loadingResources > 3) return // magic number

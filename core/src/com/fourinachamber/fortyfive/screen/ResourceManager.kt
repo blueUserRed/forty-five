@@ -16,7 +16,7 @@ interface ResourceBorrower
 
 typealias ResourceHandle = String
 
-object ResourceManager {
+class ResourceManager {
 
     lateinit var resources: List<Resource>
         private set
@@ -229,12 +229,6 @@ object ResourceManager {
         this.resources = resources
     }
 
-    private val cardConfigSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/cards.onjschema").file())
-    }
-
-    private const val logTag = "ResourceManager"
-
     fun end() {
         val message = StringBuilder()
         for (resource in resources) {
@@ -247,6 +241,10 @@ object ResourceManager {
         FortyFive.logger.warn(logTag, "Resources were loaded when the game closed. This could " +
                 "be indicative of a memory leak. Summary:")
         FortyFive.logger.dump(FortyFiveLogger.LogLevel.MEDIUM, message.toString())
+    }
+
+    companion object {
+        private const val logTag = "ResourceManager"
     }
 
 }

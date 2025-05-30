@@ -40,6 +40,7 @@ object FortyFive : Game() {
     val serviceThread = ServiceThread()
     val soundPlayer = SoundPlayer()
     val logger = FortyFiveLogger()
+    val resourceManager = ResourceManager()
 
     lateinit var steamHandler: SteamHandler
         private set
@@ -216,7 +217,7 @@ object FortyFive : Game() {
         SaveState.read()
         MapManager.read()
         GraphicsConfig.init()
-        ResourceManager.init()
+        resourceManager.init()
         serviceThread.start()
         cardTextureManager.init()
         RandomCardSelection.init()
@@ -231,7 +232,7 @@ object FortyFive : Game() {
         UserPrefs.write()
         currentScreen?.dispose()
         serviceThread.close()
-        ResourceManager.end()
+        resourceManager.end()
         super.dispose()
     }
 }

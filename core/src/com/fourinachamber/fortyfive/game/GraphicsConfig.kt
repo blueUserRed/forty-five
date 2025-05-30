@@ -114,7 +114,7 @@ object GraphicsConfig {
     }
 
     fun cardFont(borrower: ResourceBorrower, screen: OnjScreen): Promise<PixmapFont> =
-        ResourceManager.request(borrower, screen, cardFont)
+        FortyFive.resourceManager.request(borrower, screen, cardFont)
 
     fun cardFontScale(): Float = cardFontScale
 
@@ -126,7 +126,7 @@ object GraphicsConfig {
     }
 
     fun shootShader(borrower: ResourceBorrower, lifetime: Lifetime): Promise<BetterShader> =
-        ResourceManager.request(borrower, lifetime, shootPostProcessor)
+        FortyFive.resourceManager.request(borrower, lifetime, shootPostProcessor)
 
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
 

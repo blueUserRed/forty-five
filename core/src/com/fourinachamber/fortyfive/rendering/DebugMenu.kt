@@ -149,13 +149,19 @@ class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
 class ResourceDebugMenuPage : DebugMenuPage("Resources") {
 
     override fun getText(screen: OnjScreen): String {
-        val unloaded = ResourceManager.resources
+        val unloaded = FortyFive
+            .resourceManager
+            .resources
             .filter { it.state == Resource.ResourceState.NOT_LOADED && !it.startedLoading }
             .size
-        val loading = ResourceManager.resources
+        val loading = FortyFive
+            .resourceManager
+            .resources
             .filter { it.startedLoading && it.state != Resource.ResourceState.LOADED }
             .size
-        val loaded = ResourceManager.resources
+        val loaded = FortyFive
+            .resourceManager
+            .resources
             .filter { it.state == Resource.ResourceState.LOADED }
             .size
         return """

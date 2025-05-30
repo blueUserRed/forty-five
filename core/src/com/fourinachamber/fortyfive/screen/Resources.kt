@@ -291,7 +291,7 @@ class AtlasRegionResource(
 ) : Resource(handle), ResourceBorrower {
 
     private val atlasResource: AtlasResource by lazy {
-        val atlasResource = ResourceManager.resources.find { it.handle == atlasResourceHandle }
+        val atlasResource = FortyFive.resourceManager.resources.find { it.handle == atlasResourceHandle }
             ?: throw RuntimeException("No atlas with handle $atlasResourceHandle")
         atlasResource as? AtlasResource
             ?: throw RuntimeException("resource with handle $atlasResourceHandle is not an atlas")
@@ -301,7 +301,7 @@ class AtlasRegionResource(
     private var atlasPromise: Promise<TextureAtlas>? = null
 
     override fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
-        atlasPromise = ResourceManager.request<TextureAtlas>(borrower, lifetime, atlasResourceHandle)
+        atlasPromise = FortyFive.resourceManager.request<TextureAtlas>(borrower, lifetime, atlasResourceHandle)
         return atlasPromise!!.map {
             loadFromAtlas()
             getVariant(variantType)

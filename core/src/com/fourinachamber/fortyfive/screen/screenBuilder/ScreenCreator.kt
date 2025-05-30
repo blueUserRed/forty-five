@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AbstractProperty
 import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.DefaultInterpolators
@@ -310,7 +311,7 @@ abstract class ScreenCreator : ResourceBorrower {
         return advancedText
     }
 
-    fun forceLoadFont(handle: String): BitmapFont = ResourceManager.forceGet(this, screen, handle)
+    fun forceLoadFont(handle: String): BitmapFont = FortyFive.resourceManager.forceGet(this, screen, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
         this.addActor(actor)

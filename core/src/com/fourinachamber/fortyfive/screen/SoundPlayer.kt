@@ -87,7 +87,7 @@ class SoundPlayer : ResourceBorrower {
         if (theme == currentMusicTheme) return@timeline
 
         val nextMusicLifetime = EndableLifetime()
-        val nextMusic: Promise<Music> = ResourceManager.request(
+        val nextMusic: Promise<Music> = FortyFive.resourceManager.request(
             this@SoundPlayer,
             nextMusicLifetime,
             theme.resourceHandle
@@ -122,14 +122,14 @@ class SoundPlayer : ResourceBorrower {
             FortyFive.logger.warn(logTag, "No sound config for situation $name")
             return
         }
-        val soundPromise = ResourceManager.request<Sound>(this, screen, situation.sound ?: return)
+        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen, situation.sound ?: return)
         soundPromise.then { sound ->
             sound.play(situation.volume * soundEffectVolume * masterVolume)
         }
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
-        val soundPromise = ResourceManager.request<Sound>(this, screen, soundHandle)
+        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen, soundHandle)
         soundPromise.then { sound ->
             sound.play(soundEffectVolume * masterVolume)
         }
@@ -163,7 +163,7 @@ class SoundPlayer : ResourceBorrower {
     }
 
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
-        val musicPromise = ResourceManager.request<Music>(this, screen, musicHandle)
+        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen, musicHandle)
         musicPromise.then { music ->
             music.play()
             music.volume = musicVolume * masterVolume
@@ -181,7 +181,7 @@ class SoundPlayer : ResourceBorrower {
 
         fun getSoundPromise(lifetime: Lifetime): Promise<Sound> {
             if (soundPromise == null) {
-                soundPromise = ResourceManager.request(soundPlayer, lifetime, sound)
+                soundPromise = FortyFive.resourceManager.request(soundPlayer, lifetime, sound)
             }
             return soundPromise!!
         }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -21,7 +22,8 @@ class TutorialInfoActor(
     screen: OnjScreen
 ) : CustomBox(screen), ResourceBorrower {
 
-    private val loadedBackground: Promise<Drawable> = ResourceManager.request(this, screen, maskedBackgroundTextureName)
+    private val loadedBackground: Promise<Drawable> =
+        FortyFive.resourceManager.request(this, screen, maskedBackgroundTextureName)
 
     private var positionProvider: (() -> Circle)? = null
 

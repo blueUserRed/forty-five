@@ -85,8 +85,8 @@ class DetailMapWidget(
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
-    private val nodeDrawable: Promise<Drawable> = ResourceManager.request(this, screen, defaultNodeDrawableHandle)
-    private val playerDrawable: Promise<Drawable> = ResourceManager.request(this, screen, playerDrawableHandle)
+    private val nodeDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, defaultNodeDrawableHandle)
+    private val playerDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, playerDrawableHandle)
 
     var backgroundHandle: ResourceHandle? = null
         set(value) {
@@ -95,7 +95,7 @@ class DetailMapWidget(
             background = if (value == null) {
                 null
             } else {
-                ResourceManager.request(this, screen, value)
+                FortyFive.resourceManager.request(this, screen, value)
             }
         }
 
@@ -108,8 +108,8 @@ class DetailMapWidget(
             }
         }
 
-    private val edgeTexture: Promise<TextureRegion> = ResourceManager.request(this, screen, edgeTextureHandle)
-    private val directionIndicator: Promise<TextureRegion> = ResourceManager.request(this, screen, directionIndicatorHandle)
+    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen, edgeTextureHandle)
+    private val directionIndicator: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen, directionIndicatorHandle)
 
     private var moveScreenToPoint: Vector2? = null
 
@@ -556,11 +556,10 @@ class DetailMapWidget(
         normalNodes.forEach(nodeDrawer)
     }
 
-    // TODO: remove
-    private val visitedNodeShader: Promise<BetterShader> = ResourceManager.request(this, screen, "grayscale_shader")
-
-    // TODO: remove
-    private val edgeShader: Promise<BetterShader> = ResourceManager.request(this, screen, "map_edge_shader")
+    private val visitedNodeShader: Promise<BetterShader> =
+        FortyFive.resourceManager.request(this, screen, "grayscale_shader")
+    private val edgeShader: Promise<BetterShader> =
+        FortyFive.resourceManager.request(this, screen, "map_edge_shader")
 
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges

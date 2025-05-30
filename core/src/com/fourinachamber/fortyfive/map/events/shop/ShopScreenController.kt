@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -165,7 +166,7 @@ class ShopScreenController(
             card.actor.setSize(fl, fl)
         }
 
-        val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
+        val forceGet = FortyFive.resourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
         val label =
             CustomLabel(screen, "${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
         curParent.addActor(label)

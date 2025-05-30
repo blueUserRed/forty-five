@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -27,7 +28,7 @@ class Selector(
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
-    private val arrowTexture: Promise<Texture> = ResourceManager.request(this, screen, arrowTextureHandle)
+    private val arrowTexture: Promise<Texture> = FortyFive.resourceManager.request(this, screen, arrowTextureHandle)
 
     private val bindTarget: BindTarget<*> = BindTargetFactory.getAnyType(bind)
 

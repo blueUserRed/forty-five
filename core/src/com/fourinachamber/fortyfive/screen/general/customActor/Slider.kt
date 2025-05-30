@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -35,9 +36,9 @@ class Slider(
         renderer
     }
 
-    private val sliderDrawable: Promise<Drawable> = ResourceManager.request(this, screen, sliderBackground)
+    private val sliderDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, sliderBackground)
 
-    private val sliderShader: Promise<BetterShader> = ResourceManager.request(this, screen, "slider_shader")
+    private val sliderShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, screen, "slider_shader")
 
     private val inputListener = object : DragListener() {
 

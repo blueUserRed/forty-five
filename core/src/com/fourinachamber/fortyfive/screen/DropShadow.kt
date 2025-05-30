@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -90,7 +91,7 @@ data class DropShadow(
     companion object : ResourceBorrower {
 
         val dropShadowShader: Promise<BetterShader> by lazy {
-            ResourceManager.request(this, Lifetime.endless, "other_drop_shadow_shader")
+            FortyFive.resourceManager.request(this, Lifetime.endless, "other_drop_shadow_shader")
         }
     }
 

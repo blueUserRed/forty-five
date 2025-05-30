@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -31,15 +32,17 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
 
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
-    private val mainBar: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_main_bar")
-    private val hpLabel: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_hp_label")
-    private val shieldOverlay: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_shield_overlay")
-    private val effectBox: Promise<Drawable> = ResourceManager.request(this, screen, "enemy_status_bar_effect_box")
-    private val whiteTexture: Promise<TextureRegion> = ResourceManager.request(this, screen, "white_texture")
-    private val sliderShader: Promise<BetterShader> = ResourceManager.request(this, screen, "enemy_status_bar_shader")
+    private val resourceManager = FortyFive.resourceManager
+
+    private val mainBar: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_main_bar")
+    private val hpLabel: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_hp_label")
+    private val shieldOverlay: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_shield_overlay")
+    private val effectBox: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_effect_box")
+    private val whiteTexture: Promise<TextureRegion> = resourceManager.request(this, screen, "white_texture")
+    private val sliderShader: Promise<BetterShader> = resourceManager.request(this, screen, "enemy_status_bar_shader")
 
     // TODO: add a smaller version of roadgeek
-    private val roadgeek: BitmapFont = ResourceManager.forceGet(this, screen, "roadgeek")
+    private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen, "roadgeek")
 
     private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Color.FortyWhite, 100f, Align.center, false)
 
@@ -64,7 +67,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         enemy.statusEffects.forEach { effect ->
             if (statusEffectIcons.containsKey(effect.name)) return@forEach
             val iconHandle = GraphicsConfig.iconName(effect.name)
-            val promise = ResourceManager.request<Drawable>(this, screen, iconHandle)
+            val promise = resourceManager.request<Drawable>(this, screen, iconHandle)
             statusEffectIcons[effect.name] = promise
         }
     }

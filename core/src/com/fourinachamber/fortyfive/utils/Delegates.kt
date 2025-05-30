@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.utils
 
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import kotlin.reflect.KClass
@@ -46,8 +47,9 @@ class AutomaticResourceGetter<T : Any>(
         hints.forEach { handle ->
             val lifetime = EndableLifetime()
             val guardedLifetime = lifetime.shorter(guardLifetime)
-            val promise = ResourceManager.request(this, guardedLifetime, handle, resourceType)
+            val promise = FortyFive.resourceManager.request(this, guardedLifetime, handle, resourceType)
             val resource = Resource(handle, promise, lifetime, alwaysLoaded = true)
+            resources.add(resource)
         }
     }
 
@@ -85,7 +87,7 @@ class AutomaticResourceGetter<T : Any>(
 
         val lifetime = EndableLifetime()
         val guardedLifetime = lifetime.shorter(guardLifetime)
-        val promise = ResourceManager.request(this, guardedLifetime, new, resourceType)
+        val promise = FortyFive.resourceManager.request(this, guardedLifetime, new, resourceType)
         val newResource = Resource(new, promise, lifetime)
         resources.add(newResource)
 
