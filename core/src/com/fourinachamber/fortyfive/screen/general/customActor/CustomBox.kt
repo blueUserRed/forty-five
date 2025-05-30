@@ -267,7 +267,7 @@ open class CustomBox(
     private fun layoutSize(children: List<Box>) {
         if (wrap != CustomWrap.NONE) {
             if (flexDirection.isColumn) {
-                layoutPrefHeight = (forcedPrefHeight ?: height)
+                layoutPrefHeight = height
                 layoutPrefWidth = simulateChildrenFast(
                     children,
                     FlexDirection.COLUMN,
@@ -275,7 +275,7 @@ open class CustomBox(
                     minHorizontalDistBetweenElements
                 )
             } else {
-                layoutPrefWidth = (forcedPrefWidth ?: width)
+                layoutPrefWidth = width
                 layoutPrefHeight =
                     simulateChildrenFast(
                         children,
@@ -366,10 +366,6 @@ open class CustomBox(
         super.invalidate()
     }
 
-    override fun getMinWidth(): Float = forcedPrefWidth ?: super.getMinWidth()
-    override fun getMinHeight(): Float = forcedPrefHeight ?: super.getMinHeight()
-    override fun getMaxWidth(): Float = forcedPrefWidth ?: super.getMaxWidth()
-    override fun getMaxHeight(): Float = forcedPrefHeight ?: super.getMaxHeight()
 }
 
 

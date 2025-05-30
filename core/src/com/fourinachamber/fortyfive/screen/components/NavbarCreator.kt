@@ -339,7 +339,7 @@ object NavbarCreator {
             val exitMap = (map.endNode.event as? EnterMapMapEvent)?.targetMap
             if (enterMap == null || exitMap == null) {
                 label("red_wing", "You are on a road", color = Color.WHITE) {
-                    positionType = PositionType.ABSOLUTE
+                    syncDimensions()
                 }
             } else {
                 label("red_wing", "Road between", color = Color.WHITE) {

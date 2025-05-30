@@ -461,9 +461,6 @@ open class CustomGroup(
 
     private var sortedChildrenDirty: Boolean = false
 
-    var forcedPrefWidth: Float? = null
-    var forcedPrefHeight: Float? = null
-
     protected var layoutPrefWidth = 0F
     protected var layoutPrefHeight = 0F
 
@@ -613,6 +610,10 @@ open class CustomGroup(
             if (child is CustomGroup) yieldAll(child.walk())
         }
     }
+
+    override fun getPrefWidth(): Float = layoutPrefWidth
+
+    override fun getPrefHeight(): Float = layoutPrefHeight
 }
 
 class Spacer(
