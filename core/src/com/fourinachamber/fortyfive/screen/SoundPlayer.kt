@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -118,7 +119,7 @@ class SoundPlayer : ResourceBorrower {
 
     fun situation(name: String, screen: OnjScreen) {
         val situation = situations.find { it.name == name } ?: run {
-            FortyFiveLogger.warn(logTag, "No sound config for situation $name")
+            FortyFive.logger.warn(logTag, "No sound config for situation $name")
             return
         }
         val soundPromise = ResourceManager.request<Sound>(this, screen, situation.sound ?: return)
@@ -149,7 +150,7 @@ class SoundPlayer : ResourceBorrower {
         val now = TimeUtils.millis()
         val biome = MapManager.currentDetailMap.biome
         val sounds = biomeAmbience[biome] ?: run {
-            FortyFiveLogger.warn(logTag, "No ambience defined for biome $biome")
+            FortyFive.logger.warn(logTag, "No ambience defined for biome $biome")
             return
         }
         ambientSounds.filter { it.key.name in sounds }.forEach { (ambient, nextPlayTime) ->

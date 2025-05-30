@@ -27,7 +27,6 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.alpha
 import onj.value.OnjArray
 import kotlin.collections.map
 import kotlin.math.floor
@@ -301,7 +300,7 @@ class GameControllerImpl(
         if (encounter.shuffleCards) stack.shuffle()
         cardStack.set(stack)
 
-        FortyFiveLogger.debug(logTag, "card stack: $stack")
+        FortyFive.logger.debug(logTag, "card stack: $stack")
 
         val defaultBulletName = onj.get<String>("defaultBullet")
 
@@ -556,7 +555,7 @@ class GameControllerImpl(
             dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
             dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen, this@GameControllerImpl).wrap())
             curPlayerLives -= newDamage
-            FortyFiveLogger.debug(
+            FortyFive.logger.debug(
                 logTag,
                 "player got damaged; damage = $newDamage; curPlayerLives = $curPlayerLives"
             )
@@ -618,7 +617,7 @@ class GameControllerImpl(
 
     override fun playerDeathTimeline(): Timeline = Timeline.timeline {
         action {
-            FortyFiveLogger.debug(logTag, "player lost")
+            FortyFive.logger.debug(logTag, "player lost")
             animTimelines.forEach(Timeline::stopTimeline)
         }
         include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
@@ -629,11 +628,11 @@ class GameControllerImpl(
 
     override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline = Timeline.timeline {
         action {
-            FortyFiveLogger.debug(logTag, "status effect $effect applied to player")
+            FortyFive.logger.debug(logTag, "status effect $effect applied to player")
             _playerStatusEffects
                 .find { it.canStackWith(effect) }
                 ?.let {
-                    FortyFiveLogger.debug(logTag, "stacked with $it")
+                    FortyFive.logger.debug(logTag, "stacked with $it")
                     it.stack(effect)
                     return@action
                 }
@@ -748,13 +747,13 @@ class GameControllerImpl(
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
 
-        FortyFiveLogger.debug(logTag,
+        FortyFive.logger.debug(logTag,
             "revolver is shooting;" +
                     "cardToShoot = $cardToShoot"
         )
 
         if (cardToShoot?.canBeShot(this@GameControllerImpl)?.not() ?: false) {
-            FortyFiveLogger.debug(logTag, "Card can't be shot because it blocks")
+            FortyFive.logger.debug(logTag, "Card can't be shot because it blocks")
             return@later
         }
 
@@ -811,7 +810,7 @@ class GameControllerImpl(
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
         if (cost > curReserves) return false
         SaveState.usedReserves += cost
-        FortyFiveLogger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
+        FortyFive.logger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
         updateReserves(curReserves - cost, sourceActor = animTarget)
         return true
     }
@@ -867,7 +866,7 @@ class GameControllerImpl(
         val timeline = Timeline.timeline {
             skipping { skip ->
                 action {
-                    FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
+                    FortyFive.logger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
                     cardInSlot = revolver.getCardInSlot(slot)
                     val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(this@GameControllerImpl, card)
                     val shouldSkip = !card.allowsEnteringGame(this@GameControllerImpl, slot)

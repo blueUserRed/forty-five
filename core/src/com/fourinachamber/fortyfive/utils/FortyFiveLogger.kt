@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter
 /**
  * utility for logging to the console or to files
  */
-object FortyFiveLogger {
+class FortyFiveLogger {
 
     private lateinit var outputs: List<Pair<PrintStream, Boolean>>
     private var logLevel: LogLevel = LogLevel.DEBUG

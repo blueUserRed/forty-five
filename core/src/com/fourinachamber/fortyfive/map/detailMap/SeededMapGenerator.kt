@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.*
@@ -42,7 +43,7 @@ class SeededMapGenerator(
      * generates the line
      */
     fun generate(name: String, biome: String): DetailMap {
-        FortyFiveLogger.debug(logTag, "generating map $name with seed $seed")
+        FortyFive.logger.debug(logTag, "generating map $name with seed $seed")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)

@@ -29,7 +29,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.alpha
 import onj.value.*
 import kotlin.math.absoluteValue
 
@@ -254,7 +253,7 @@ class Card(
         modifiers.iterateRemoving { value, remover ->
             val modifier = getter(value)
             if (!modifier.data.validityChecker(controller, this, modifier.data)) {
-                FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
+                FortyFive.logger.debug(logTag, "modifier no longer valid: $modifier")
                 remover()
                 somethingChanged = true
             }
@@ -342,7 +341,7 @@ class Card(
 
     fun protect(protectingModifier: ProtectingModifier) {
         if (isUndead) {
-            FortyFiveLogger.debug(logTag, "cant protect undead bullet")
+            FortyFive.logger.debug(logTag, "cant protect undead bullet")
             return
         }
         protectingModifiers.add(protectingModifier.copy())
@@ -372,13 +371,13 @@ class Card(
     }
 
     fun addDamageModifier(modifier: CardDamageModifier) {
-        FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
+        FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         damageModifiers.add(++damageModifierCounter to modifier.copy())
         modifiersChanged()
     }
 
     fun addCostModifier(modifier: CardCostModifier) {
-        FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
+        FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         costModifiers.add(modifier.copy())
         modifiersChanged()
     }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger.LogLevel
@@ -35,17 +36,17 @@ class BetterShaderPreProcessor(
         val shader = ShaderProgram(code.first, code.second)
         if (shader.isCompiled) {
             if (shader.log.isNotBlank()) {
-                FortyFiveLogger.warn(logTag, "compilation of shader ${fileHandle.name()} had warnings")
-                FortyFiveLogger.dump(LogLevel.MEDIUM, shader.log, "log")
-                FortyFiveLogger.dump(LogLevel.MEDIUM, code.first, "pre-processed vertex shader")
-                FortyFiveLogger.dump(LogLevel.MEDIUM, code.second, "pre-processed fragment shader")
+                FortyFive.logger.warn(logTag, "compilation of shader ${fileHandle.name()} had warnings")
+                FortyFive.logger.dump(LogLevel.MEDIUM, shader.log, "log")
+                FortyFive.logger.dump(LogLevel.MEDIUM, code.first, "pre-processed vertex shader")
+                FortyFive.logger.dump(LogLevel.MEDIUM, code.second, "pre-processed fragment shader")
             }
             return BetterShader(shader, uniformsToBind, requiredTextures)
         }
-        FortyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
-        FortyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
-        FortyFiveLogger.dump(LogLevel.SEVERE, code.first, "pre-processed vertex shader")
-        FortyFiveLogger.dump(LogLevel.SEVERE, code.second, "pre-processed fragment shader")
+        FortyFive.logger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
+        FortyFive.logger.dump(LogLevel.SEVERE, shader.log, "log")
+        FortyFive.logger.dump(LogLevel.SEVERE, code.first, "pre-processed vertex shader")
+        FortyFive.logger.dump(LogLevel.SEVERE, code.second, "pre-processed fragment shader")
         throw RuntimeException("compilation of shader ${fileHandle.name()} failed")
     }
 

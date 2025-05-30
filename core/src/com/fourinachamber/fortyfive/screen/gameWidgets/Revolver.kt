@@ -27,7 +27,6 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.contains
 import kotlin.math.cos
 import kotlin.math.sin
 

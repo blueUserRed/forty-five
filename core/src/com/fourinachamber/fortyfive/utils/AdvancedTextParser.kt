@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.graphics.Color
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.screen.general.*
 import onj.builder.buildOnjObject
@@ -18,7 +19,7 @@ class AdvancedTextParser(
 ) {
     init {
         if (changes.any { ICON_INDICATOR in it.indicator }) {
-            FortyFiveLogger.warn(
+            FortyFive.logger.warn(
                 logTag,
                 "Cannot contain the ICON_INDICATOR '$ICON_INDICATOR' in an Indicator for the Effects"
             )

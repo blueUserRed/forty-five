@@ -84,7 +84,7 @@ object UserPrefs {
         }
 
     fun read() {
-        FortyFiveLogger.debug(logTag, "reading user_prefs")
+        FortyFive.logger.debug(logTag, "reading user_prefs")
 
         val file = Gdx.files.local(userPrefsPath).file()
         if (!file.exists()) copyDefaultFile()
@@ -92,14 +92,14 @@ object UserPrefs {
         var obj = try {
             OnjParser.parseFile(file)
         } catch (e: OnjParserException) {
-            FortyFiveLogger.debug(logTag, "Userprefs invalid: ${e.message}")
+            FortyFive.logger.debug(logTag, "Userprefs invalid: ${e.message}")
             copyDefaultFile()
             OnjParser.parseFile(file)
         }
 
         val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
         if (version?.equals(userPrefsVersion)?.not() ?: true) {
-            FortyFiveLogger.warn(
+            FortyFive.logger.warn(
                 logTag,
                 "incompatible userprefs found: version is $version; expected: $userPrefsVersion"
             )
@@ -109,7 +109,7 @@ object UserPrefs {
 
         val result = userPrefsSchema.check(obj)
         if (result != null) {
-            FortyFiveLogger.debug(logTag, "Userprefs invalid: $result")
+            FortyFive.logger.debug(logTag, "Userprefs invalid: $result")
             copyDefaultFile()
             obj = OnjParser.parseFile(Gdx.files.local(userPrefsPath).file())
             userPrefsSchema.assertMatches(obj)
@@ -153,7 +153,7 @@ object UserPrefs {
     }
 
     private fun copyDefaultFile() {
-        FortyFiveLogger.debug(logTag, "copying default user prefs file")
+        FortyFive.logger.debug(logTag, "copying default user prefs file")
         Gdx.files.local(defaultUserPrefsPath).copyTo(Gdx.files.local(userPrefsPath))
     }
 
@@ -162,14 +162,14 @@ object UserPrefs {
     }
 
     sealed class WindowMode {
-        object Window : WindowMode() {
+        data object Window : WindowMode() {
             override fun setScreenToOption() {
                 Gdx.graphics.setUndecorated(false)
                 Gdx.graphics.setWindowedMode(windowWidth, (windowWidth * 9 / 16))
             }
         }
 
-        object BorderlessWindow : WindowMode() {
+        data object BorderlessWindow : WindowMode() {
             override fun setScreenToOption() {
                 lastFullScreenAsBorderless = true
                 val displayMode = Gdx.graphics.displayMode
@@ -178,7 +178,7 @@ object UserPrefs {
             }
         }
 
-        object Fullscreen : WindowMode() {
+        data object Fullscreen : WindowMode() {
             override fun setScreenToOption() {
                 lastFullScreenAsBorderless = false
                 Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)

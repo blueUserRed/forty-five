@@ -42,7 +42,7 @@ object MapManager {
 
     var currentMapNode: MapNode
         get() = currentDetailMap.uniqueNodes.find { it.index == SaveState.currentNode } ?: run {
-            FortyFiveLogger.warn(logTag, "Player was on node ${SaveState.currentNode} in map $currentDetailMap, which doesn't exist. Reset player to node 0.")
+            FortyFive.logger.warn(logTag, "Player was on node ${SaveState.currentNode} in map $currentDetailMap, which doesn't exist. Reset player to node 0.")
             SaveState.currentNode = 0
             SaveState.lastNode = null
             currentDetailMap.uniqueNodes[0]
@@ -158,7 +158,7 @@ object MapManager {
     }
 
     fun displayName(internalName: String) = displayNames[internalName] ?: run {
-        FortyFiveLogger.warn(logTag, "no display name for $internalName")
+        FortyFive.logger.warn(logTag, "no display name for $internalName")
         internalName
     }
 
@@ -175,14 +175,14 @@ object MapManager {
             ?.index
             ?: 0
         SaveState.lastNode = null
-        FortyFiveLogger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
+        FortyFive.logger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
         changeToMapScreen()
     }
 
     private fun readDetailMap(map: FileHandle): DetailMap = try {
         DetailMap.readFromFile(map)
     } catch (e: DetailMap.InvalidMapFileException) {
-        FortyFiveLogger.warn(logTag, "Invalid map file found, reloading all maps")
+        FortyFive.logger.warn(logTag, "Invalid map file found, reloading all maps")
         generateMapsSync()
         copyStaticMaps()
         SaveState.currentNode = 0

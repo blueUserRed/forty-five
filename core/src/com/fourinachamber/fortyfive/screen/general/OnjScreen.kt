@@ -27,10 +27,8 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.rendering.ScreenDebugMenuPage
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.utils.*
-import dev.lyze.flexbox.FlexBox
 
 /**
  * a screen that was build from an onj file.
@@ -42,7 +40,6 @@ open class OnjScreen(
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val namedActors: MutableMap<String, Actor>,
-    val printFrameRate: Boolean,
     val transitionAwayTimes: Map<String, Int>,
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
@@ -223,7 +220,6 @@ open class OnjScreen(
 
     fun update(delta: Float, isEarly: Boolean = false) {
         FortyFive.soundPlayer.update(this, playAmbientSounds)
-        if (printFrameRate) FortyFiveLogger.fps()
         if (!isEarly) screenControllers.forEach(ScreenController::update)
         updateCallbacks()
         stage.act(Gdx.graphics.deltaTime)
@@ -262,7 +258,7 @@ open class OnjScreen(
         batch.end()
         doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
     } catch (e: Exception) {
-        FortyFiveLogger.fatal(e)
+        FortyFive.logger.fatal(e)
     }
 
     private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {

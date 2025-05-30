@@ -152,7 +152,7 @@ object SaveState {
         set(value) {
             field = value
             if (value < 0.5) {
-                FortyFiveLogger.warn(logTag, "tried to set difficulty to too small value $value")
+                FortyFive.logger.warn(logTag, "tried to set difficulty to too small value $value")
                 field = 1.0
             }
             savefileDirty = true
@@ -167,7 +167,7 @@ object SaveState {
      */
     fun read() {
 
-        FortyFiveLogger.debug(logTag, "reading SaveState")
+        FortyFive.logger.debug(logTag, "reading SaveState")
 
         val file = Gdx.files.local(saveFilePath).file()
         if (!file.exists()) copyDefaultFile()
@@ -175,21 +175,21 @@ object SaveState {
         var obj = try {
             OnjParser.parseFile(file)
         } catch (e: OnjParserException) {
-            FortyFiveLogger.warn(logTag, "Savefile invalid: ${e.message}")
+            FortyFive.logger.warn(logTag, "Savefile invalid: ${e.message}")
             copyDefaultFile()
             OnjParser.parseFile(file)
         }
 
         val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
         if (version?.equals(saveStateVersion)?.not() ?: true) {
-            FortyFiveLogger.warn(logTag, "incompatible savefile found: version is $version; expected: $saveStateVersion")
+            FortyFive.logger.warn(logTag, "incompatible savefile found: version is $version; expected: $saveStateVersion")
             copyDefaultFile()
             obj = OnjParser.parseFile(file)
         }
 
         val result = savefileSchema.check(obj)
         if (result != null) {
-            FortyFiveLogger.warn(logTag, "Savefile invalid: $result")
+            FortyFive.logger.warn(logTag, "Savefile invalid: $result")
             copyDefaultFile()
             obj = OnjParser.parseFile(Gdx.files.local(saveFilePath).file())
             savefileSchema.assertMatches(obj)
@@ -202,11 +202,11 @@ object SaveState {
             ?.map { it.value as String }
             ?.toMutableList()
             ?: run {
-                FortyFiveLogger.warn(logTag, "no cards array in savefile, falling back to some default bullets")
+                FortyFive.logger.warn(logTag, "no cards array in savefile, falling back to some default bullets")
                 mutableListOf("bullet", "bullet", "bullet",
                 ) //this should NEVER happen
             }
-        FortyFiveLogger.debug(logTag, "cards: $_cards")
+        FortyFive.logger.debug(logTag, "cards: $_cards")
 
         _cards.forEach {PermaSaveState.addCard(it)}
 
@@ -247,7 +247,7 @@ object SaveState {
         _playerMoney = obj.get<Long>("playerMoney").toInt()
         currentDifficulty = obj.get<Double>("currentDifficulty")
 
-        FortyFiveLogger.debug(
+        FortyFive.logger.debug(
             logTag, "stats: " +
                     "usedReserves = $usedReserves, " +
                     "enemiesDefeated = $enemiesDefeated, " +
@@ -256,7 +256,7 @@ object SaveState {
                     "maxPlayerLives = $maxPlayerLives"
         )
 
-        FortyFiveLogger.debug(
+        FortyFive.logger.debug(
             logTag, "position: " +
                     "currentMap = $currentMap, " +
                     "currentNode = $currentNode"
@@ -305,7 +305,7 @@ object SaveState {
     }
 
     private fun copyDefaultFile() {
-        FortyFiveLogger.debug(logTag, "copying default save")
+        FortyFive.logger.debug(logTag, "copying default save")
         Gdx.files.local(defaultSavefilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 
@@ -314,7 +314,7 @@ object SaveState {
      */
     fun write() {
         if (!savefileDirty) return
-        FortyFiveLogger.debug(logTag, "writing SaveState")
+        FortyFive.logger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
             "version" with saveStateVersion
             "cards" with _cards

@@ -17,7 +17,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.Timeline
-import ktx.actors.alpha
+import com.fourinachamber.fortyfive.utils.alpha
 
 class TitleScreen : ScreenCreator() {
 

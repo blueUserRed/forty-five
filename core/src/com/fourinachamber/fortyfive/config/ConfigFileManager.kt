@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.config
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -51,7 +52,7 @@ object ConfigFileManager {
             schema?.assertMatches(onj)
             onj
         } catch (e: Exception) {
-            FortyFiveLogger.severe(logTag, "Error parsing file: $configFile")
+            FortyFive.logger.severe(logTag, "Error parsing file: $configFile")
             throw e
         }
         file.onj = onj as OnjObject

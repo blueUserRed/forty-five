@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
 interface DebugBoundsActor {
@@ -101,7 +102,7 @@ class DebugBoundsActorImpl : DebugBoundsActor {
             actorsWithBadTextures.forEach { name, comment ->
                 builder.append("$name: $comment\n")
             }
-            FortyFiveLogger.dump(
+            FortyFive.logger.dump(
                 FortyFiveLogger.LogLevel.MEDIUM,
                 builder.toString(),
                 "Actors with bad textures were shown when playing the game"

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.graphics.Color
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
@@ -171,7 +172,7 @@ class Burning(
 
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
         if (target is StatusEffectTarget.PlayerTarget) {
-            FortyFiveLogger.warn("BurningStatus", "Burning should only be used on the enemy, consider using BurningPlayer instead")
+            FortyFive.logger.warn("BurningStatus", "Burning should only be used on the enemy, consider using BurningPlayer instead")
         }
         if (target.isBlocked(this@Burning, controller)) return Timeline()
         val additionalDamage = floor(damage * percent).toInt()

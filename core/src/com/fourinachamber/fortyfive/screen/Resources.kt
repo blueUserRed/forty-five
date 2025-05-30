@@ -66,7 +66,7 @@ abstract class Resource(
                 load()
             }
             if (time > warnThreshold) {
-                FortyFiveLogger.warn(logTag, "force resolving $handle blocked the main thread for ${time}ms")
+                FortyFive.logger.warn(logTag, "force resolving $handle blocked the main thread for ${time}ms")
             }
         }
         if (!promise.isResolved) promise.resolve(this)
@@ -79,7 +79,7 @@ abstract class Resource(
                 load()
             }
             if (time > warnThreshold) {
-                FortyFiveLogger.warn(logTag, "force getting $handle blocked the main thread for ${time}ms")
+                FortyFive.logger.warn(logTag, "force getting $handle blocked the main thread for ${time}ms")
             }
         }
         lifetime.onEnd { giveBack(borrower) }
@@ -99,7 +99,7 @@ abstract class Resource(
                 FortyFive.mainThreadTask {
                     val time = measureTimeMillis { runBlocking { load() } }
                     if (time > warnThreshold) {
-                        FortyFiveLogger.warn(
+                        FortyFive.logger.warn(
                             logTag,
                             "Resource $handle took ${time}ms to load on the main thread. Check if there is a way to speed" +
                                     "up the load to avoid blocking the main thread."

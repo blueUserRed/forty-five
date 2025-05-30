@@ -33,7 +33,7 @@ class AddMaxHPScreenController(private val screen: OnjScreen) : ScreenController
      */
     override fun completed() {
         FortyFive.soundPlayer.situation("heal", screen)
-        FortyFiveLogger.debug(
+        FortyFive.logger.debug(
             logTag,
             "Max lives increased from ${SaveState.maxPlayerLives} to ${SaveState.maxPlayerLives + amount}!"
         )

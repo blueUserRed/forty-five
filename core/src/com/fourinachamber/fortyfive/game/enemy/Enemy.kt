@@ -39,7 +39,7 @@ class Enemy(
      */
     var currentHealth: Int = health
         private set(value) {
-            FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
+            FortyFive.logger.debug(logTag, "enemy lives updated: new lives = $field ")
             field = max(value, -300)
             enemyEvents.fire(HealthChangedEvent)
         }
@@ -50,7 +50,7 @@ class Enemy(
     var currentCover: Int = 0
         private set(value) {
             field = value
-            FortyFiveLogger.debug(logTag, "enemy cover updated: new cover = $field")
+            FortyFive.logger.debug(logTag, "enemy cover updated: new cover = $field")
         }
 
     private val _statusEffects: MutableList<StatusEffect> = mutableListOf()
@@ -82,7 +82,7 @@ class Enemy(
             return nextAction
         }
         if (additionalDmgActions.size > 1) {
-            FortyFiveLogger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
+            FortyFive.logger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
         }
         val (action, additionalDamage) = additionalDmgActions.first()
         this.additionalDamage = additionalDamage
@@ -98,9 +98,9 @@ class Enemy(
 
     fun applyEffect(effect: StatusEffect, controller: GameController) {
         if (isDefeated) return
-        FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
+        FortyFive.logger.debug(logTag, "status effect $effect applied to enemy")
         for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
-            FortyFiveLogger.debug(logTag, "stacked with $effectToTest")
+            FortyFive.logger.debug(logTag, "stacked with $effectToTest")
             effectToTest.stack(effect)
             return
         }

@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import ktx.actors.alpha
+import com.fourinachamber.fortyfive.utils.alpha
 import java.lang.Float.min
 
 /**

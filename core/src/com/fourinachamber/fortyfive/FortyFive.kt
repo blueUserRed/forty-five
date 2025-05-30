@@ -32,16 +32,14 @@ import onj.value.OnjObject
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
 
-/**
- * main game object
- */
 object FortyFive : Game() {
 
     const val logTag = "forty-five"
 
-    val cardTextureManager: CardTextureManager = CardTextureManager()
-    val serviceThread: ServiceThread = ServiceThread()
+    val cardTextureManager = CardTextureManager()
+    val serviceThread = ServiceThread()
     val soundPlayer = SoundPlayer()
+    val logger = FortyFiveLogger()
 
     lateinit var steamHandler: SteamHandler
         private set
@@ -140,7 +138,7 @@ object FortyFive : Game() {
         nextScreen = screen
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen to ${screenBuilder.name}")
+            logger.title("changing screen to ${screenBuilder.name}")
             currentScreen?.dispose()
             this.currentScreen = screen
             nextScreen = null
@@ -173,7 +171,7 @@ object FortyFive : Game() {
     }
 
     fun newRun(forwardToLooseScreen: Boolean) {
-        FortyFiveLogger.title("newRun called; forwardToLooseScreen = $forwardToLooseScreen")
+        logger.title("newRun called; forwardToLooseScreen = $forwardToLooseScreen")
         PermaSaveState.newRun()
         if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
@@ -204,7 +202,7 @@ object FortyFive : Game() {
         }
         ConfigFileManager.init()
         TemplateString.init()
-        FortyFiveLogger.init()
+        logger.init()
         steamHandler = SteamHandler()
         UserPrefs.read()
         soundPlayer.init()
@@ -225,7 +223,7 @@ object FortyFive : Game() {
     }
 
     override fun dispose() {
-        FortyFiveLogger.debug(logTag, "game closing")
+        logger.debug(logTag, "game closing")
         DebugBoundsActorImpl.dumpActorsWithBadTextures()
         MapManager.write()
         PermaSaveState.write()

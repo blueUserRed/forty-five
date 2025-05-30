@@ -8,13 +8,12 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.GameAnimation
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjString
 import java.util.concurrent.atomic.AtomicInteger
@@ -45,6 +44,12 @@ var Payload.obj: Any?
     set(value) {
         this.`object` = value
     }
+
+var Actor.alpha: Float
+    get() = color.a
+    set(value) { color.a = value }
+
+operator fun Group.contains(actor: Actor): Boolean = actor in children
 
 /**
  * @see Either

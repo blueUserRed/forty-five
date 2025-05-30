@@ -19,8 +19,6 @@ import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.alpha
-import onj.value.*
 import kotlin.math.max
 
 open class CustomLabel(

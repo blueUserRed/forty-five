@@ -20,7 +20,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.TemplateString
-import ktx.actors.alpha
+import com.fourinachamber.fortyfive.utils.alpha
 import onj.value.*
 import kotlin.random.Random
 

@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.map.events.chooseCard
 
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.MapManager
@@ -42,7 +43,7 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
             forceCards?.let { getFixedCards(it) } ?: getRandomCards(seed, types, nbrOfCards)
         }
 
-        FortyFiveLogger.debug(
+        FortyFive.logger.debug(
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
         )
@@ -155,7 +156,7 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
     }
 
     fun getCard(card: String, addToDeck: Boolean) {
-        FortyFiveLogger.debug(logTag, "Chose card: $card")
+        FortyFive.logger.debug(logTag, "Chose card: $card")
         SaveState.buyCard(card)
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card)
         context.completed()

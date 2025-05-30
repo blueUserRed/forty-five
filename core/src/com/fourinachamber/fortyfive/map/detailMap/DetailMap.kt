@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -125,17 +126,17 @@ data class DetailMap(
                 mapOnjSchema.assertMatches(onj)
                 onj
             } catch (e: OnjParserException) {
-                FortyFiveLogger.warn(logTag, "invalid map loaded")
-                FortyFiveLogger.stackTrace(e)
+                FortyFive.logger.warn(logTag, "invalid map loaded")
+                FortyFive.logger.stackTrace(e)
                 throw InvalidMapFileException()
             } catch (e: OnjSchemaException) {
-                FortyFiveLogger.warn(logTag, "invalid map loaded")
-                FortyFiveLogger.stackTrace(e)
+                FortyFive.logger.warn(logTag, "invalid map loaded")
+                FortyFive.logger.stackTrace(e)
                 throw InvalidMapFileException()
             }
             onj as OnjObject
             if (onj.get<Long>("version").toInt() != mapVersion) {
-                FortyFiveLogger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
+                FortyFive.logger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
                 throw InvalidMapFileException()
             }
             val nodes = mutableListOf<MapNodeBuilder>()

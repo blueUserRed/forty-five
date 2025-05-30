@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
@@ -201,7 +202,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
     }
 
     override fun completed() {
-        FortyFiveLogger.debug("EncounterMapEvent", "Encounter with $encounterIndex is completed")
+        FortyFive.logger.debug("EncounterMapEvent", "Encounter with $encounterIndex is completed")
         currentlyBlocks = false
         canBeStarted = false
         isCompleted = true
