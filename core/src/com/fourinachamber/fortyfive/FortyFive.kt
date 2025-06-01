@@ -3,31 +3,25 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
-import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActor
-import com.fourinachamber.fortyfive.screen.general.customActor.DebugBoundsActorImpl
+import com.fourinachamber.fortyfive.screen.general.customActor.DebugActorImpl
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
-import com.fourinachamber.fortyfive.screen.screens.TestScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.value.OnjArray
-import onj.value.OnjObject
 
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
@@ -225,7 +219,7 @@ object FortyFive : Game() {
 
     override fun dispose() {
         logger.debug(logTag, "game closing")
-        DebugBoundsActorImpl.dumpActorsWithBadTextures()
+        DebugActorImpl.dumpActorsWithDebugWarnings()
         MapManager.write()
         PermaSaveState.write()
         SaveState.write()

@@ -28,7 +28,7 @@ open class CustomLabel(
     private val isDistanceField: Boolean,
     private val backgroundHints: Array<String> = arrayOf(),
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
-    DebugBoundsActor by DebugBoundsActorImpl(), InputActor by InputActorImpl(),
+    DebugActor by DebugActorImpl(), InputActor by InputActorImpl(),
     KotlinStyledActor, OffSettable {
 
     override var dropShadow: DropShadow? = null
@@ -62,10 +62,20 @@ open class CustomLabel(
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
+    // Label constructor calls invalidate() which is overridden here, and calls the invalidateCalled() function of
+    // DebugActorImpl, which isn't initialized at this point
+    private var constructed: Boolean = false // TODO: uglyyyyyy
+
     init {
         initInput(this, screen)
-        initDebugBounds(this)
+        initDebugBounds(this, screen)
         touchable = Touchable.disabled
+        constructed = true
+    }
+
+    override fun invalidate() {
+        if (constructed) invalidateCalled()
+        super.invalidate()
     }
 
     override fun onLayout(callback: () -> Unit) {
@@ -179,7 +189,7 @@ open class CustomImageActor(
     private val backgroundHints: Array<String> = arrayOf(),
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor,
     OffSettable, InputActor by InputActorImpl(), DropShadowActor,
-    KotlinStyledActor, DebugBoundsActor by DebugBoundsActorImpl() {
+    KotlinStyledActor, DebugActor by DebugActorImpl() {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -231,8 +241,13 @@ open class CustomImageActor(
 
     init {
         initInput(this, screen)
-        initDebugBounds(this)
+        initDebugBounds(this, screen)
         touchable = Touchable.disabled
+    }
+
+    override fun invalidate() {
+        invalidateCalled()
+        super.invalidate()
     }
 
     override fun drawDebugBounds(shapes: ShapeRenderer?) {
@@ -433,7 +448,7 @@ open class CustomGroup(
     override val screen: OnjScreen,
     private val backgroundHints: Array<String> = arrayOf()
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor, KotlinStyledActor,
-    DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugBoundsActor by DebugBoundsActorImpl() {
+    DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugActor by DebugActorImpl() {
 
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
@@ -477,7 +492,12 @@ open class CustomGroup(
 
     init {
         initInput(this, screen)
-        initDebugBounds(this)
+        initDebugBounds(this, screen)
+    }
+
+    override fun invalidate() {
+        invalidateCalled()
+        super.invalidate()
     }
 
     override fun drawDebugBounds(shapes: ShapeRenderer?) {

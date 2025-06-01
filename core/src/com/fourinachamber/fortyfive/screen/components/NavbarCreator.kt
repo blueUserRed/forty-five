@@ -209,6 +209,8 @@ object NavbarCreator {
             }
 
             box {
+                // TODO: this box (and others around it?) calls layout every frame
+                //  (but seemingly without invalidate being called)
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
                 syncDimensions()
@@ -219,7 +221,6 @@ object NavbarCreator {
                     width = 30f
                     height = 30f
                 }
-
                 label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
                     fontColor = ScreenCreator.fortyWhite
                     syncDimensions()

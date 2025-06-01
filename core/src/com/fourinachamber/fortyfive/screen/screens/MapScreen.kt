@@ -119,7 +119,6 @@ class MapScreen : ScreenCreator() {
         val normalX = worldWidth - width + 10f
         val closedX = normalX + 300f
         x = normalX
-
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.CENTER
         verticalAlign = CustomAlign.SPACE_BETWEEN
