@@ -230,14 +230,12 @@ class Card(
         }
         if (newZone == Zone.HAND) {
             actor.isDraggable = true
-        }
-        if (oldZone == Zone.HAND) {
+        } else {
             actor.isDraggable = false
         }
         if (newZone == Zone.REVOLVER) {
             actor.touchable = Touchable.disabled
-        }
-        if (oldZone == Zone.REVOLVER) {
+        } else {
             actor.touchable = Touchable.enabled
         }
     }

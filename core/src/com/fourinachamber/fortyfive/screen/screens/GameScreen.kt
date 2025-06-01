@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.controller.GameControllerImpl
 import com.fourinachamber.fortyfive.game.enemy.Enemy
@@ -43,6 +44,7 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
+import kotlin.random.Random
 
 class GameScreen : ScreenCreator() {
 
@@ -111,6 +113,9 @@ class GameScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight
 
+        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
+        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, underDeckGroup)
+
         image {
             backgroundHandle = "game_screen_player"
             x = 20f
@@ -175,9 +180,89 @@ class GameScreen : ScreenCreator() {
         )
     }
 
-    private fun CustomGroup.putCardsUnderStackPopup() {
+    private fun CustomGroup.putCardsUnderStackPopup() = group {
 
-        // TODO: adapt to new system
+        x = 0f
+        y = 0f
+        width = worldWidth
+        height = worldHeight
+
+        touchable = Touchable.disabled
+        isVisible = false
+
+        val filter = InputManager.FocusFilter(listOf(underDeckGroup), screen)
+        val modal = InputManager.Modal(listOf(underDeckGroup, CardActor.cardGroup), screen)
+        filter.start()
+
+        gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { (_, _, promise) ->
+            filter.end()
+            modal.push()
+            isVisible = true
+            promise.then {
+                filter.start()
+                modal.finished()
+                isVisible = false
+            }
+        }
+
+        val underDeck = group {
+            width = worldWidth * 0.5f
+            height = worldHeight * 0.48f
+            centerX()
+            centerY()
+            backgroundHandle = "under_deck_background"
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            isDropTarget = true
+            joinGroup(underDeckGroup)
+
+            badTexture("underDeckGroup", missingFocusTexture = true)
+
+            var cardCount = 0
+            var targetAmount = 0
+            var cards = mutableListOf<Card>()
+            var currentPromise: Promise<List<Card>>? = null
+            var cardAddedCallback: ((card: Card) -> Unit)? = null
+            val random = Random(34789267)
+
+            gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { (amount, callback, promise) ->
+                cardCount = 0
+                targetAmount = amount
+                cards = mutableListOf()
+                currentPromise = promise
+                cardAddedCallback = callback
+                promise.then {
+                    children.filterIsInstance<CardActor>().forEach { it.rotation = 0f }
+                    clearChildren()
+                }
+            }
+
+            onDrop { actor ->
+                if (actor !is CardActor) return@onDrop
+                val card = actor.card
+                if (!card.inZone(GameControllerImpl.Zone.HAND)) return@onDrop
+                cardAddedCallback?.invoke(card)
+                cards.add(card)
+                actor(actor) {
+                    width = 100f
+                    height = 100f
+                    touchable = Touchable.disabled
+                    isDraggable = false
+                    x = 40f + cardCount * 20f
+                    val heightOffset = random.nextDouble(-10.0, 10.0).toFloat()
+                    onLayoutAndNow { y = parent.height / 2 - height / 2 + heightOffset }
+                    rotation = random.nextDouble(-20.0, 20.0).toFloat()
+                }
+                cardCount++
+                if (cardCount >= targetAmount) currentPromise?.resolve(cards)
+            }
+        }
+
+        label("red_wing", "Select cards to put under the deck", color = Color.White) {
+            syncDimensions()
+            onLayoutAndNow { y = underDeck.y + underDeck.height - height - 40f }
+            centerX()
+        }
 
 //        val putCardsUnderDeckPopup = PutCardsUnderDeckWidget(screen, 596f * 0.22f, 10f, gameEvents)
 //        group {
@@ -484,8 +569,6 @@ class GameScreen : ScreenCreator() {
 
         shootButton()
         holsterButton()
-
-        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
 
         actor(revolver) {
             touchable = Touchable.enabled
@@ -965,6 +1048,10 @@ class GameScreen : ScreenCreator() {
             else -> null
         }
         anim?.let { controller.dispatchAnimTimeline(it) }
+    }
+
+    companion object {
+        const val underDeckGroup: String = "encounter-screen-under-deck"
     }
 
 }

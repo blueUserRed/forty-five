@@ -16,7 +16,6 @@ import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContex
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.WarningParent
@@ -999,13 +998,31 @@ class GameControllerImpl(
 
         later {
             if (cardHand.amountOfCards <= Config.softMaxCards) return@later
-            val event = Events.PutCardsUnderStack(cardHand.amountOfCards - Config.softMaxCards)
+
+            val callback: (card: Card) -> Unit = { card ->
+                val info = createTriggerInfo(card)
+                val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, true, info)
+                gameEvents.fire(event)
+                cardHand.removeCard(card)
+                checkCardMaximums()
+                action { println("hi") }
+            }
+            val event = Events.PutCardsUnderStack(cardHand.amountOfCards - Config.softMaxCards, callback)
             action { gameEvents.fire(event) }
-            delayUntil { event.selectedCards.isResolved }
-            action {
-                val selectedCards = event.selectedCards.getOrError()
-                selectedCards.forEach { cardHand.removeCard(it) }
-                selectedCards.forEach { cardStack.addCardAtBottom(it) }
+            later {
+                delayUntil { event.selectedCards.isResolved }
+                later {
+                    val selectedCards = event.selectedCards.getOrError()
+                    selectedCards.forEach { card ->
+                        val info = createTriggerInfo(card)
+                        val zoneChangeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, false, info)
+                        includeLater({
+                            gameEvents.fire(zoneChangeEvent)
+                            zoneChangeEvent.createTimeline()
+                        })
+                        cardStack.addCardAtBottom(card)
+                    }
+                }
             }
         }
 
@@ -1099,8 +1116,8 @@ class GameControllerImpl(
         const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-//        const val cardsToDrawInFirstRound = 20
-        const val cardsToDrawInFirstRound = 6
+        const val cardsToDrawInFirstRound = 20
+//        const val cardsToDrawInFirstRound = 6
 //        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
@@ -1126,7 +1143,11 @@ class GameControllerImpl(
         data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
         data class SetupEnemies(val enemies: List<Enemy>)
         data class EnemySelected(val selected: Enemy)
-        data class PutCardsUnderStack(val amount: Int, val selectedCards: Promise<List<Card>> = Promise())
+        data class PutCardsUnderStack(
+            val amount: Int,
+            val cardAddedCallback: (card: Card) -> Unit,
+            val selectedCards: Promise<List<Card>> = Promise()
+        )
         data class ShowPlayerWonPopup(
             val gotCard: Boolean,
             val cashAmount: Int,

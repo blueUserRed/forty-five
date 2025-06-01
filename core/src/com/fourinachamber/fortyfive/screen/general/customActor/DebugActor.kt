@@ -54,10 +54,10 @@ class DebugActorImpl : DebugActor {
         if (now - lastInvalidateCheckTime < 1000) return
         if (invalidateCalls > 30) {
             val name = actor.name?.ifBlank { actor.toString() } ?: actor.toString()
-            FortyFive.logger.warn(
-                "debugActor",
-                "actor '$name': invalidate called $invalidateCalls times in the last second"
-            )
+//            FortyFive.logger.warn(
+//                "debugActor",
+//                "actor '$name': invalidate called $invalidateCalls times in the last second"
+//            )
         }
         invalidateCalls = 0
         lastInvalidateCheckTime = now
