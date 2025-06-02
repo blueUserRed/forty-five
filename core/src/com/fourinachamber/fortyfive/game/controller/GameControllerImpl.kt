@@ -1005,7 +1005,6 @@ class GameControllerImpl(
                 gameEvents.fire(event)
                 cardHand.removeCard(card)
                 checkCardMaximums()
-                action { println("hi") }
             }
             val event = Events.PutCardsUnderStack(cardHand.amountOfCards - Config.softMaxCards, callback)
             action { gameEvents.fire(event) }
@@ -1015,6 +1014,7 @@ class GameControllerImpl(
                     val selectedCards = event.selectedCards.getOrError()
                     selectedCards.forEach { card ->
                         val info = createTriggerInfo(card)
+                        // TODO: figure out how to do the early action
                         val zoneChangeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, false, info)
                         includeLater({
                             gameEvents.fire(zoneChangeEvent)

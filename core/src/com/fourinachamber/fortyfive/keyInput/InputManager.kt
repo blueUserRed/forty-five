@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Vector2
-import com.fourinachamber.fortyfive.utils.between
 import java.util.Stack
 
 class InputManager(val screen: OnjScreen) : InputProcessor {
@@ -22,7 +21,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     private var currentlyDraggedActor: InputActor? = null
 
-    private val dragAndDrops: MutableList<Pair<String, String>> = mutableListOf()
+    private val dragAndDrops: MutableList<DragAndDrop> = mutableListOf()
 
     private var keyboardFocused: InputActor? = null
 
@@ -59,10 +58,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         recheckFocused()
     }
 
-    fun popModal(modal: Modal) {
-        val current = modals.peek()
-        if (current !== modal) throw RuntimeException("tried to pop modal $modal that isn't at the top of the stack")
-        modals.pop()
+    fun checkModals() {
+        while (modals.isNotEmpty() && modals.peek().finished) modals.pop()
     }
 
     private fun activeModal(): Modal? = if (modals.isEmpty()) null else modals.peek()
@@ -106,12 +103,22 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         group.remove(actor)
     }
 
-    fun enableDragAndDrop(source: String, target: String) {
-        dragAndDrops.add(source to target)
+    fun addDragAndDrop(source: String, target: String): DragAndDrop {
+        val dragAndDrop = DragAndDrop(source, target, screen)
+        dragAndDrops.add(dragAndDrop)
+        return dragAndDrop
+    }
+
+    fun enableDragAndDrop(dragAndDrop: DragAndDrop) {
+        dragAndDrops.add(dragAndDrop)
     }
 
     fun disableDragAndDrop(source: String, target: String) {
-        dragAndDrops.removeIf { it.first == source && it.second == target }
+        dragAndDrops.removeIf { it.source == source && it.target == target }
+    }
+
+    fun disableDragAndDrop(dragAndDrop: DragAndDrop) {
+        dragAndDrops.remove(dragAndDrop)
     }
 
     fun focusNext(direction: FocusChangeDirection) {
@@ -263,7 +270,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (currentDragAndDropModal != null || currentlyDraggedActor != null) return
         if (!actor.isDraggable) return
         val targets = dragAndDrops.mapNotNull {
-            if (actor.inGroup(it.first)) it.second else null
+            if (actor.inGroup(it.source)) it.target else null
         }
         val modal = Modal(targets, screen)
         currentDragAndDropModal = modal
@@ -292,7 +299,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val modal = currentDragAndDropModal
         if (modal == null) return
         if (activeModal() !== modal) return
-        popModal(modal)
+        modal.finished()
         val actor = currentKeyboardDragAndDropActor
         currentKeyboardDragAndDropActor?.leaveInputStateManually(BaseStates.keyboardFocus)
         currentKeyboardDragAndDropActor = null
@@ -463,7 +470,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (hitResult !is InputActor) return
         if (!hitResult.isDropTarget) return
         val dragAndDrop =
-            dragAndDrops.find { actor.inGroup(it.first) && hitResult.inGroup(it.second) }
+            dragAndDrops.find { actor.inGroup(it.source) && hitResult.inGroup(it.target) }
         if (dragAndDrop == null) return
         hitResult.notifyDropped(actor)
     }
@@ -513,12 +520,28 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     class Modal(val allowGroups: List<String>, private val screen: OnjScreen) {
 
+        var finished: Boolean = false
+            private set
+
         fun push() {
+            finished = false
             screen.inputManager.pushModal(this)
         }
 
         fun finished() {
-            screen.inputManager.popModal(this)
+            finished = true
+            screen.inputManager.checkModals()
+        }
+    }
+
+    data class DragAndDrop(val source: String, val target: String, val screen: OnjScreen) {
+
+        fun enable() {
+            screen.inputManager.enableDragAndDrop(this)
+        }
+
+        fun disable() {
+            screen.inputManager.disableDragAndDrop(this)
         }
     }
 

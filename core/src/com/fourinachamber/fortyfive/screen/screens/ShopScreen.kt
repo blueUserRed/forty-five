@@ -8,14 +8,11 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -78,7 +75,7 @@ class ShopScreen : ScreenCreator() {
         height = worldHeight
 
         dropTargetFilter.start()
-        screen.inputManager.enableDragAndDrop(ShopScreenController.availableCardGroup, shopDropTargetGroup)
+        screen.inputManager.addDragAndDrop(ShopScreenController.availableCardGroup, shopDropTargetGroup)
 
         image {
             x = 0f

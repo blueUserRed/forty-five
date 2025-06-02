@@ -12,6 +12,14 @@ object GameInputs {
         )
     ))
 
+    val toDel = Input("interact", arrayOf(
+        Input.Cause.Mouse(MouseButton.LEFT),
+        Input.Cause.Keyboard(
+            Keys.C,
+            requireStates = arrayOf(States.trueFocused)
+        )
+    ))
+
     val focusNext = Input(
         "focusNext",
         arrayOf(Input.Cause.Keyboard(Keys.TAB))

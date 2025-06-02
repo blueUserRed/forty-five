@@ -114,6 +114,7 @@ class InputActorImpl : InputActor {
             // make sure the actors listens to the confirmDragAndDrop Input when it is droppable, or else
             // it wouldn't react when the user selects this as the drop target
             _callbacks.putIfAbsent(GameInputs.confirmDragAndDrop, mutableListOf())
+            observeInputState(GameInputs.States.trueFocused)
             addToInputManagerIfNecessary()
             field = value
         }
@@ -127,6 +128,10 @@ class InputActorImpl : InputActor {
     override var dragY: Float = 0f
 
     override var keyboardFocusable: KeyboardFocusable = KeyboardFocusable.NONE
+        set(value) {
+            field = value
+            if (value == KeyboardFocusable.NONE) throw RuntimeException()
+        }
 
     private val _observedStates: MutableSet<InputState> = mutableSetOf()
 
@@ -178,8 +183,9 @@ class InputActorImpl : InputActor {
     }
 
     override fun observeInputState(inputState: InputState) {
-        _observedStates.add(inputState)
-        inputState.causedByStates.forEach { state -> _observedStates.add(state) }
+        val added = _observedStates.add(inputState)
+        if (!added) return
+        inputState.causedByStates.forEach { state -> observeInputState(state) }
     }
 
     override fun observeInputState(state: InputState, onEnter: () -> Unit, onLeave: () -> Unit) {

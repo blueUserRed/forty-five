@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -24,7 +23,6 @@ import com.fourinachamber.fortyfive.game.enemy.StatusBar
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
@@ -102,6 +100,9 @@ class GameScreen : ScreenCreator() {
         HorizontalStatusEffectDisplay(screen, forceLoadFont("red_wing"), Color.Black, 1.4f)
     }
 
+    private lateinit var cardRevolverDragAndDrop: InputManager.DragAndDrop
+    private lateinit var cardUnderDeckDragAndDrop: InputManager.DragAndDrop
+
     init {
         bindEventHandlers()
     }
@@ -113,8 +114,10 @@ class GameScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight
 
-        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
-        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, underDeckGroup)
+        cardRevolverDragAndDrop =
+            screen.inputManager.addDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
+        cardUnderDeckDragAndDrop =
+            screen.inputManager.addDragAndDrop(CardActor.cardGroup, underDeckGroup)
 
         image {
             backgroundHandle = "game_screen_player"
@@ -187,8 +190,9 @@ class GameScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight
 
-        touchable = Touchable.disabled
+        touchable = Touchable.childrenOnly
         isVisible = false
+        cardUnderDeckDragAndDrop.disable()
 
         val filter = InputManager.FocusFilter(listOf(underDeckGroup), screen)
         val modal = InputManager.Modal(listOf(underDeckGroup, CardActor.cardGroup), screen)
@@ -206,6 +210,7 @@ class GameScreen : ScreenCreator() {
         }
 
         val underDeck = group {
+            name("underDeck")
             width = worldWidth * 0.5f
             height = worldHeight * 0.48f
             centerX()
@@ -231,9 +236,13 @@ class GameScreen : ScreenCreator() {
                 cards = mutableListOf()
                 currentPromise = promise
                 cardAddedCallback = callback
+                cardUnderDeckDragAndDrop.enable()
+                cardRevolverDragAndDrop.disable()
                 promise.then {
                     children.filterIsInstance<CardActor>().forEach { it.rotation = 0f }
                     clearChildren()
+                    cardUnderDeckDragAndDrop.disable()
+                    cardRevolverDragAndDrop.enable()
                 }
             }
 
@@ -244,14 +253,14 @@ class GameScreen : ScreenCreator() {
                 cardAddedCallback?.invoke(card)
                 cards.add(card)
                 actor(actor) {
-                    width = 100f
-                    height = 100f
+                    width = 150f
+                    height = 150f
                     touchable = Touchable.disabled
                     isDraggable = false
-                    x = 40f + cardCount * 20f
+                    x = 40f + cardCount * 50f
                     val heightOffset = random.nextDouble(-10.0, 10.0).toFloat()
-                    onLayoutAndNow { y = parent.height / 2 - height / 2 + heightOffset }
-                    rotation = random.nextDouble(-20.0, 20.0).toFloat()
+                    y = parent.height / 2 - height / 2 + heightOffset
+                    rotation = random.nextDouble(-15.0, 15.0).toFloat()
                 }
                 cardCount++
                 if (cardCount >= targetAmount) currentPromise?.resolve(cards)
@@ -263,50 +272,6 @@ class GameScreen : ScreenCreator() {
             onLayoutAndNow { y = underDeck.y + underDeck.height - height - 40f }
             centerX()
         }
-
-//        val putCardsUnderDeckPopup = PutCardsUnderDeckWidget(screen, 596f * 0.22f, 10f, gameEvents)
-//        group {
-//            x = 0f
-//            y = 0f
-//            relativeWidth(100f)
-//            relativeHeight(100f)
-//            touchable = Touchable.childrenOnly
-//            isVisible = false
-//            gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
-//                isVisible = true
-//                event.selectedCards.then { isVisible = false }
-//            }
-//            actor(putCardsUnderDeckPopup) {
-//                backgroundHandle = "under_deck_background"
-//                width = worldWidth * 0.5f
-//                height = worldHeight * 0.48f
-//                touchable = Touchable.disabled
-//                centerX()
-//                centerY()
-//                gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
-//                    touchable = Touchable.enabled
-//                    event.selectedCards.then { touchable = Touchable.disabled }
-//                }
-//            }
-//            label(
-//                "red_wing",
-//                "Put {game.remainingCardsToPutUnderStack} Cards back under your stack",
-//                color = Color.FortyWhite,
-//                isTemplate = true
-//            ) {
-//                centerX()
-//                y = worldHeight * 0.63f
-//            }
-//            image {
-//                backgroundHandle = "draw_bullet"
-//                width = 300f
-//                height = 300f
-//                centerY()
-//                onLayoutAndNow { x = parent.width / 2 - width / 2 - 500f }
-//                touchable = Touchable.disabled
-//                rotation = -10f
-//            }
-//        }
     }
 
     private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {
@@ -324,11 +289,6 @@ class GameScreen : ScreenCreator() {
             height = enemyHeight
 
             keyboardFocusable = KeyboardFocusable.LEAF
-            observeInputState(
-                GameInputs.States.focused,
-                { debug = true },
-                { debug = false },
-            )
 
             onInput(GameInputs.interact) {
                 if (enemySelected) return@onInput

@@ -12,7 +12,6 @@ import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
-import com.fourinachamber.fortyfive.screen.components.BackpackCreator.deck
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -77,12 +76,12 @@ object BackpackCreator {
         state.currentDeck.checkDeck()
         state.events.fire(DeckChangedEvent)
         with(screen.inputManager) {
-            enableDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
-            enableDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
-            enableDragAndDrop(backpackCardInDeckGroup, backpackCardInCollectionGroup)
-            enableDragAndDrop(backpackCardInCollectionGroup, backpackCardInDeckGroup)
-            enableDragAndDrop(backpackCardInCollectionGroup, backpackSlotInDeckGroup)
-            enableDragAndDrop(backpackCardInDeckGroup, backpackCollectionBackgroundGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackCardInCollectionGroup)
+            addDragAndDrop(backpackCardInCollectionGroup, backpackCardInDeckGroup)
+            addDragAndDrop(backpackCardInCollectionGroup, backpackSlotInDeckGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackCollectionBackgroundGroup)
         }
 
         val deckSide = state.deckParent!!
