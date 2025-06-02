@@ -66,7 +66,7 @@ class CardTextureManager {
     ): Promise<Texture> {
         val pixmapPromise = getCardPixmap(data, card).chainMainThread { cardPixmap ->
             val pixmap = Pixmap(cardPixmap.width, cardPixmap.height, Pixmap.Format.RGBA8888)
-            if (!card.actor.font.isResolved) ResourceManager.forceResolve(card.actor.font)
+            if (!card.actor.font.isResolved) FortyFive.resourceManager.forceResolve(card.actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
                 pixmap,
                 cardPixmap,

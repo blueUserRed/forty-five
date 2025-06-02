@@ -30,7 +30,7 @@ public class DesktopLauncher {
 		}
 
 		if (exception != null) try {
-			FortyFiveLogger.INSTANCE.fatal(exception);
+			FortyFive.INSTANCE.getLogger().fatal(exception);
 		} catch (Exception ignored) {
 			// "more robust logging" failed in this case
 			//noinspection CallToPrintStackTrace

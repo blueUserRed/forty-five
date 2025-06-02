@@ -119,12 +119,11 @@ class ScreenDebugMenuPage : DebugMenuPage("Performance infos") {
 
     override fun getText(screen: OnjScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
-        version: ${FortyFiveLogger.versionTag}
+        version: ${FortyFive.logger.versionTag}
         15s render lagSpike: ${FortyFive.renderTimes.max()}ms
         15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
         screen transition max lagSpike: ${FortyFive.screenTransitionTimes.max()}ms
         screen transition avg. lagSpike: ${FortyFive.screenTransitionTimes.average().toInt()}ms
-        active style managers: ${screen.styleManagerCount()}
         
         $makeLaggy
     """.trimIndent()
@@ -150,13 +149,19 @@ class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
 class ResourceDebugMenuPage : DebugMenuPage("Resources") {
 
     override fun getText(screen: OnjScreen): String {
-        val unloaded = ResourceManager.resources
+        val unloaded = FortyFive
+            .resourceManager
+            .resources
             .filter { it.state == Resource.ResourceState.NOT_LOADED && !it.startedLoading }
             .size
-        val loading = ResourceManager.resources
+        val loading = FortyFive
+            .resourceManager
+            .resources
             .filter { it.startedLoading && it.state != Resource.ResourceState.LOADED }
             .size
-        val loaded = ResourceManager.resources
+        val loaded = FortyFive
+            .resourceManager
+            .resources
             .filter { it.state == Resource.ResourceState.LOADED }
             .size
         return """

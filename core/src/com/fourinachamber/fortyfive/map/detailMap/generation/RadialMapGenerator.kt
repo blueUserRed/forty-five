@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.detailMap.generation
 
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
@@ -42,7 +43,6 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             isArea = false,
             biome = data.biome,
             progress = data.progress,
-            tutorialText = mutableListOf(),
             scrollable = true,
             camPosOffset = Vector2(0f, 0f)
         )
@@ -83,7 +83,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 if (spawned >= eventSpawner.fixedAmount!!) break
                 val candidates = possibleNodes.filter { it !in usedNodes }
                 if (candidates.isEmpty()) {
-                    FortyFiveLogger.warn(
+                    FortyFive.logger.warn(
                         logTag,
                         "Cant spawn event $eventSpawner ${eventSpawner.fixedAmount} times because no possible nodes are left"
                     )

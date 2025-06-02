@@ -15,11 +15,6 @@ abstract class Effect(val data: EffectData) {
 
     protected fun cardDescName(card: Card): String = "[${card.title}]"
 
-    /**
-     * called when the effect triggers
-     * @return a timeline containing the actions of this effect
-     */
-    @MainThreadOnly
     abstract fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline
 
     open fun blocks(card: Card, controller: GameController): Boolean = false
@@ -220,7 +215,7 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = Draw(amount, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            delay(GraphicsConfig.bufferTime)
+            delay(100)
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
             include(controller.drawCardsTimeline(amount, sourceCard = card))
         }
@@ -527,7 +522,7 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = DrawFromBottomOfDeck(amount, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            delay(GraphicsConfig.bufferTime)
+            delay(100)
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
             include(controller.drawCardsTimeline(amount, fromBottom = true))
         }

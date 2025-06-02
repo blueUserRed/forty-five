@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -20,7 +21,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.TemplateString
-import ktx.actors.alpha
+import com.fourinachamber.fortyfive.utils.alpha
 import onj.value.*
 import kotlin.random.Random
 
@@ -96,8 +97,7 @@ class ShopScreenController(
         context.boughtIndices.clear()
         context.selectedCards.clear()
         context.seed = Random(context.seed).nextLong()
-        screen.removeAllStyleManagersOfChildren(cardsParentWidget)
-        cardsParentWidget.children.filterIsInstance<CustomBox>().toMutableList().forEach { screen.removeActorFromScreen(it) }
+        cardsParentWidget.children.filterIsInstance<CustomBox>().forEach { it.remove() }
         cardWidgets.clear()
         labels.clear()
         addCards(context.types)
@@ -166,7 +166,7 @@ class ShopScreenController(
             card.actor.setSize(fl, fl)
         }
 
-        val forceGet = ResourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
+        val forceGet = FortyFive.resourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
         val label =
             CustomLabel(screen, "${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
         curParent.addActor(label)

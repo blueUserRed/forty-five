@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -11,7 +12,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
 
-object SoundPlayer : ResourceBorrower {
+class SoundPlayer : ResourceBorrower {
 
     private lateinit var situations: List<Situation>
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
@@ -67,7 +68,8 @@ object SoundPlayer : ResourceBorrower {
                     it.get<String>("name"),
                     it.get<String>("sound"),
                     it.getOr("volume", 1.0).toFloat(),
-                    it.get<OnjArray>("delay").toIntRange()
+                    it.get<OnjArray>("delay").toIntRange(),
+                    this
                 )
             }
             .associateWith { 0L }
@@ -85,7 +87,7 @@ object SoundPlayer : ResourceBorrower {
         if (theme == currentMusicTheme) return@timeline
 
         val nextMusicLifetime = EndableLifetime()
-        val nextMusic: Promise<Music> = ResourceManager.request(
+        val nextMusic: Promise<Music> = FortyFive.resourceManager.request(
             this@SoundPlayer,
             nextMusicLifetime,
             theme.resourceHandle
@@ -117,17 +119,17 @@ object SoundPlayer : ResourceBorrower {
 
     fun situation(name: String, screen: OnjScreen) {
         val situation = situations.find { it.name == name } ?: run {
-            FortyFiveLogger.warn(logTag, "No sound config for situation $name")
+            FortyFive.logger.warn(logTag, "No sound config for situation $name")
             return
         }
-        val soundPromise = ResourceManager.request<Sound>(this, screen, situation.sound ?: return)
+        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen, situation.sound ?: return)
         soundPromise.then { sound ->
             sound.play(situation.volume * soundEffectVolume * masterVolume)
         }
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
-        val soundPromise = ResourceManager.request<Sound>(this, screen, soundHandle)
+        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen, soundHandle)
         soundPromise.then { sound ->
             sound.play(soundEffectVolume * masterVolume)
         }
@@ -148,7 +150,7 @@ object SoundPlayer : ResourceBorrower {
         val now = TimeUtils.millis()
         val biome = MapManager.currentDetailMap.biome
         val sounds = biomeAmbience[biome] ?: run {
-            FortyFiveLogger.warn(logTag, "No ambience defined for biome $biome")
+            FortyFive.logger.warn(logTag, "No ambience defined for biome $biome")
             return
         }
         ambientSounds.filter { it.key.name in sounds }.forEach { (ambient, nextPlayTime) ->
@@ -161,7 +163,7 @@ object SoundPlayer : ResourceBorrower {
     }
 
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
-        val musicPromise = ResourceManager.request<Music>(this, screen, musicHandle)
+        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen, musicHandle)
         musicPromise.then { music ->
             music.play()
             music.volume = musicVolume * masterVolume
@@ -172,13 +174,14 @@ object SoundPlayer : ResourceBorrower {
         val name: String,
         val sound: ResourceHandle,
         val volume: Float,
-        val delay: IntRange
+        val delay: IntRange,
+        val soundPlayer: SoundPlayer
     ) {
         private var soundPromise: Promise<Sound>? = null
 
         fun getSoundPromise(lifetime: Lifetime): Promise<Sound> {
             if (soundPromise == null) {
-                soundPromise = ResourceManager.request(SoundPlayer, lifetime, sound)
+                soundPromise = FortyFive.resourceManager.request(soundPlayer, lifetime, sound)
             }
             return soundPromise!!
         }
@@ -196,6 +199,8 @@ object SoundPlayer : ResourceBorrower {
         BATTLE("encounter_theme")
     }
 
-    const val logTag = "SoundPlayer"
+    companion object {
+        const val logTag = "SoundPlayer"
+    }
 
 }

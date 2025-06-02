@@ -20,10 +20,6 @@
    than to add another indentation layer.
 
 ## Application specific
- - use the ``@MainThreadOnly`` and the ``@AllThreadsAllowed`` annotations to indicate
-   whether a function / constructor / lambda has to be called from the main thread.
-   Functions that use the ``@AllThreadAllowed`` annotation should not call functions 
-   marked with ``@MainThreadOnly`` or perform actions that require the openGl context.
  - Don't load assets (textures, particles, shaders, etc) manually. Use the ResourceManager
    instead. This prevents accidental memory leaks.
 

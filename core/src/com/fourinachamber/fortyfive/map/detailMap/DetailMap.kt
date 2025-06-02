@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -34,7 +35,6 @@ data class DetailMap(
     val isArea: Boolean,
     val biome: String,
     val progress: ClosedFloatingPointRange<Float>,
-    val tutorialText: MutableList<MapScreenController.MapTutorialTextPart>,
     val scrollable: Boolean,
     val camPosOffset: Vector2
 ) {
@@ -84,7 +84,7 @@ data class DetailMap(
         "isArea" with isArea
         "biome" with biome
         "progress" with progress.asArray()
-        "tutorialText" with tutorialText.map { it.asOnjObject() }
+        "tutorialText" with listOf<Nothing>()
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
     }
@@ -126,17 +126,17 @@ data class DetailMap(
                 mapOnjSchema.assertMatches(onj)
                 onj
             } catch (e: OnjParserException) {
-                FortyFiveLogger.warn(logTag, "invalid map loaded")
-                FortyFiveLogger.stackTrace(e)
+                FortyFive.logger.warn(logTag, "invalid map loaded")
+                FortyFive.logger.stackTrace(e)
                 throw InvalidMapFileException()
             } catch (e: OnjSchemaException) {
-                FortyFiveLogger.warn(logTag, "invalid map loaded")
-                FortyFiveLogger.stackTrace(e)
+                FortyFive.logger.warn(logTag, "invalid map loaded")
+                FortyFive.logger.stackTrace(e)
                 throw InvalidMapFileException()
             }
             onj as OnjObject
             if (onj.get<Long>("version").toInt() != mapVersion) {
-                FortyFiveLogger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
+                FortyFive.logger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
                 throw InvalidMapFileException()
             }
             val nodes = mutableListOf<MapNodeBuilder>()
@@ -193,11 +193,11 @@ data class DetailMap(
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
                 onj.get<OnjArray>("progress").toFloatRange(),
-                onj.getOr<OnjArray?>("tutorialText", null)
-                    ?.value
-                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
-                    ?.toMutableList()
-                    ?: mutableListOf(),
+//                onj.getOr<OnjArray?>("tutorialText", null)
+//                    ?.value
+//                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
+//                    ?.toMutableList()
+//                    ?: mutableListOf(),
                 onj.getOr("scrollable", true),
                 if (onj.hasKey<OnjArray>("camPosOffset")) {
                     onj.get<OnjArray>("camPosOffset").toVector2()
@@ -232,10 +232,9 @@ data class DetailMap(
         private var drawableCache: Promise<Drawable>? = null
 
         fun requestDrawable(screen: OnjScreen, mapWidget: DetailMapWidget) {
-            drawableCache = ResourceManager.request<Drawable>(mapWidget, screen, drawableHandle)
+            drawableCache = FortyFive.resourceManager.request<Drawable>(mapWidget, screen, drawableHandle)
         }
 
-        @MainThreadOnly
         fun getDrawable(screen: OnjScreen, mapWidget: DetailMapWidget): Promise<Drawable> {
             drawableCache?.let { return it }
             requestDrawable(screen, mapWidget)

@@ -29,7 +29,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
     }
 
     override fun onShow() {
-        SoundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
+        FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
     }
 
     private fun doTransitionAwayAnim() {
@@ -51,7 +51,7 @@ class TitleScreenController(private val screen: OnjScreen) : ScreenController() 
             transitionAwayVelocity = 0f
             repeat(1) { i ->
                 screen.afterMs(i * 30) {
-                    SoundPlayer.situation("title_screen_card_drop", screen)
+                    FortyFive.soundPlayer.situation("title_screen_card_drop", screen)
                 }
             }
             return

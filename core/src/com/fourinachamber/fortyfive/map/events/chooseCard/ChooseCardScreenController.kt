@@ -1,25 +1,18 @@
 package com.fourinachamber.fortyfive.map.events.chooseCard
 
-import com.badlogic.gdx.scenes.scene2d.Event
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
-import com.fourinachamber.fortyfive.utils.toOnjYoga
-import io.github.orioncraftmc.meditate.enums.YogaUnit
-import onj.value.OnjFloat
 import onj.value.OnjObject
-import onj.value.OnjString
 import kotlin.math.abs
 import kotlin.random.Random
 
-//TODO BIOME
-// evtl. straßen different
-// encounter modifier (wahrscheinlicher)
+// TODO: adapt to new system (if the screen is still needed)
 
 class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) : ScreenController() {
 
@@ -50,7 +43,7 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
             forceCards?.let { getFixedCards(it) } ?: getRandomCards(seed, types, nbrOfCards)
         }
 
-        FortyFiveLogger.debug(
+        FortyFive.logger.debug(
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
         )
@@ -65,22 +58,22 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
         updateDropTargets()
     }
 
-    @EventHandler
-    fun reroll(event: ButtonClickEvent, actor: CustomLabel) {
-        val price = context.currentRerollPrice
-        if (SaveState.playerMoney < price) return
-        SaveState.payMoney(price)
-        context.amountOfRerolls++
-        val parent = screen.namedActorOrError(cardsParentName) as CustomFlexBox
-        screen.removeAllStyleManagersOfChildren(parent)
-        parent.clear()
-        context.seed = Random(context.seed).nextLong()
-        initCards(newCards = true)
-    }
+//    @EventHandler
+//    fun reroll(event: ButtonClickEvent, actor: CustomLabel) {
+//        val price = context.currentRerollPrice
+//        if (SaveState.playerMoney < price) return
+//        SaveState.payMoney(price)
+//        context.amountOfRerolls++
+//        val parent = screen.namedActorOrError(cardsParentName) as CustomFlexBox
+//        screen.removeAllStyleManagersOfChildren(parent)
+//        parent.clear()
+//        context.seed = Random(context.seed).nextLong()
+//        initCards(newCards = true)
+//    }
 
-    override fun onUnhandledEvent(event: Event) {
-        if (event is PopupConfirmationEvent) MapManager.changeToMapScreen()
-    }
+//    override fun onUnhandledEvent(event: Event) {
+//        if (event is PopupConfirmationEvent) MapManager.changeToMapScreen()
+//    }
 
     private fun getRandomCards(seed: Long, types: List<String>, nbrOfCards: Int): List<CardPrototype> {
         val rnd = Random(seed)
@@ -107,25 +100,25 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
     }
 
     private fun initCards(screen: OnjScreen, cardPrototypes: List<CardPrototype>) {
-        val parent = screen.namedActorOrError(cardsParentName) as CustomFlexBox
-        val data: List<Pair<Double, Float>> = getDataForCards(cardPrototypes.size)
-        for (i in cardPrototypes.indices) {
-            val curData = data[i]
-            val curCard = cardPrototypes[i].create(screen)
-            screen.addDisposable(curCard)
-            screen.screenBuilder.addDataToWidgetFromTemplate(
-                "cardTemplate",
-                mapOf(
-                    "rotation" to OnjFloat(curData.first),
-                    "bottom" to curData.second.toOnjYoga(YogaUnit.PERCENT),
-                    "textureName" to OnjString(Card.cardTexturePrefix + "bullet")
-                ),
-                parent,
-                screen,
-                curCard.actor
-            )
-            curCard.actor.name = curCard.name
-        }
+//        val parent = screen.namedActorOrError(cardsParentName) as CustomFlexBox
+//        val data: List<Pair<Double, Float>> = getDataForCards(cardPrototypes.size)
+//        for (i in cardPrototypes.indices) {
+//            val curData = data[i]
+//            val curCard = cardPrototypes[i].create(screen)
+//            screen.addDisposable(curCard)
+//            screen.screenBuilder.addDataToWidgetFromTemplate(
+//                "cardTemplate",
+//                mapOf(
+//                    "rotation" to OnjFloat(curData.first),
+//                    "bottom" to curData.second.toOnjYoga(YogaUnit.PERCENT),
+//                    "textureName" to OnjString(Card.cardTexturePrefix + "bullet")
+//                ),
+//                parent,
+//                screen,
+//                curCard.actor
+//            )
+//            curCard.actor.name = curCard.name
+//        }
     }
 
     private fun getDataForCards(size: Int): List<Pair<Double, Float>> {
@@ -155,15 +148,15 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
     }
 
     private fun updateDropTargets() {
-        if (!SaveState.curDeck.canAddCards()) addToDeckWidget.enterActorState("disabled")
-        else addToDeckWidget.leaveActorState("disabled")
-
-        if (!SaveState.curDeck.hasEnoughCards()) addToBackpackWidget.enterActorState("disabled")
-        else addToBackpackWidget.leaveActorState("disabled")
+//        if (!SaveState.curDeck.canAddCards()) addToDeckWidget.enterActorState("disabled")
+//        else addToDeckWidget.leaveActorState("disabled")
+//
+//        if (!SaveState.curDeck.hasEnoughCards()) addToBackpackWidget.enterActorState("disabled")
+//        else addToBackpackWidget.leaveActorState("disabled")
     }
 
     fun getCard(card: String, addToDeck: Boolean) {
-        FortyFiveLogger.debug(logTag, "Chose card: $card")
+        FortyFive.logger.debug(logTag, "Chose card: $card")
         SaveState.buyCard(card)
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card)
         context.completed()

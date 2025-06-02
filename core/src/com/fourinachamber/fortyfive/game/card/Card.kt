@@ -26,12 +26,9 @@ import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
-import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.alpha
 import onj.value.*
 import kotlin.math.absoluteValue
 
@@ -145,11 +142,6 @@ class Card(
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
 
-    fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
-            (isEverlasting && !controller.isEverlastingDisabled) ||
-                    protectingModifiers.isNotEmpty()
-            )
-
     private var lastDamageValue: Int = baseDamage
     private var lastCostValue: Int = baseCost
 
@@ -162,7 +154,7 @@ class Card(
     private val protectingModifiers: MutableList<ProtectingModifier> = mutableListOf()
 
     /**
-     * first ist the keyword, second is the actual text
+     * first is the keyword, second is the actual text
      */
     var currentHoverTexts: List<Pair<String, String>> = listOf()
         private set
@@ -189,6 +181,8 @@ class Card(
     var zone: Zone = Zone.STACK
         private set
 
+    private var game: GameController? = null
+
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
         // card texture while the constructor is running and actor is not yet assigned
@@ -202,6 +196,10 @@ class Card(
                 enableHoverDetails
             )
         }
+    }
+
+    fun setGame(game: GameController) {
+        this.game = game
     }
 
     fun bindGameEvents(gameEvents: EventPipeline, controller: GameController) {
@@ -232,14 +230,12 @@ class Card(
         }
         if (newZone == Zone.HAND) {
             actor.isDraggable = true
-        }
-        if (oldZone == Zone.HAND) {
+        } else {
             actor.isDraggable = false
         }
         if (newZone == Zone.REVOLVER) {
             actor.touchable = Touchable.disabled
-        }
-        if (oldZone == Zone.REVOLVER) {
+        } else {
             actor.touchable = Touchable.enabled
         }
     }
@@ -255,7 +251,7 @@ class Card(
         modifiers.iterateRemoving { value, remover ->
             val modifier = getter(value)
             if (!modifier.data.validityChecker(controller, this, modifier.data)) {
-                FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
+                FortyFive.logger.debug(logTag, "modifier no longer valid: $modifier")
                 remover()
                 somethingChanged = true
             }
@@ -341,20 +337,9 @@ class Card(
         controller.cardStack.dirty()
     }
 
-    fun beforeShot() {
-    }
-
-    fun leaveGame() {
-        TODO("dont use")
-        isMarked = false
-        inGame = false
-        rotationCounter = 0
-        modifiersChanged()
-    }
-
     fun protect(protectingModifier: ProtectingModifier) {
         if (isUndead) {
-            FortyFiveLogger.debug(logTag, "cant protect undead bullet")
+            FortyFive.logger.debug(logTag, "cant protect undead bullet")
             return
         }
         protectingModifiers.add(protectingModifier.copy())
@@ -384,13 +369,13 @@ class Card(
     }
 
     fun addDamageModifier(modifier: CardDamageModifier) {
-        FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
+        FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         damageModifiers.add(++damageModifierCounter to modifier.copy())
         modifiersChanged()
     }
 
     fun addCostModifier(modifier: CardCostModifier) {
-        FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
+        FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         costModifiers.add(modifier.copy())
         modifiersChanged()
     }
@@ -418,17 +403,6 @@ class Card(
     }
 
     /**
-     * called when the card enters the game
-     */
-    fun onEnter(controller: GameController) {
-        TODO("dont use this function")
-//        inGame = true
-//        enteredInSlot = controller.slotOfCard(this)!!
-//        enteredOnTurn = controller.turnCounter
-//        if (isRotten) addRottenModifier(controller)
-    }
-
-    /**
      * called when the revolver rotates (but not when this card was shot)
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
@@ -439,7 +413,6 @@ class Card(
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
-    @MainThreadOnly
     fun checkEffects(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
@@ -568,9 +541,9 @@ class Card(
 
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
-                    val mostExpensive = FortyFive.currentGame!!
-                        .cardsInRevolver()
-                        .maxOfOrNull { it.lastCostValue }
+                    val mostExpensive = game
+                        ?.cardsInRevolver()
+                        ?.maxOfOrNull { it.lastCostValue }
                         ?: 0
                     "most expensive bullet costs $mostExpensive"
                 }
@@ -620,7 +593,6 @@ class Card(
             return prototypes
         }
 
-        @MainThreadOnly
         private fun getCardFrom(
             onj: OnjObject,
             onjScreen: OnjScreen,
@@ -755,9 +727,9 @@ class CardActor(
     val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
-    override val screen: OnjScreen,
-    val enableHoverDetails: Boolean
-) : Widget(), ZIndexActor, InputActor by InputActorImpl(), HasOnjScreen, StyledActor,
+    val screen: OnjScreen,
+    val enableHoverDetails: Boolean // TODO: fix
+) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
     OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
@@ -773,7 +745,6 @@ class CardActor(
     override var drawOffsetY: Float = 0F
     override var logicalOffsetX: Float = 0F
     override var logicalOffsetY: Float = 0F
-    override var styleManager: StyleManager? = null
 
     override var marginTop: Float = 0F
     override var marginBottom: Float = 0F
@@ -788,13 +759,13 @@ class CardActor(
     private val lifetime: EndableLifetime = EndableLifetime()
 
     private val destroyShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "dissolve_shader")
+        FortyFive.resourceManager.request(this, this, "dissolve_shader")
 
     private val spawnShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "card_spawn_shader")
+        FortyFive.resourceManager.request(this, this, "card_spawn_shader")
 
     private val markedSymbol: Promise<TransformDrawable> =
-        ResourceManager.request(this, this, "card_symbol_marked")
+        FortyFive.resourceManager.request(this, this, "card_symbol_marked")
 
     private var prevPosition: Vector2? = null
 
@@ -818,7 +789,7 @@ class CardActor(
         startDragAndDropOn(GameInputs.interact)
         onEnterInputState(GameInputs.States.focused) {
             if (!playSoundsOnHover) return@onEnterInputState
-            SoundPlayer.situation("card_hover", screen)
+            FortyFive.soundPlayer.situation("card_hover", screen)
         }
         onInput(GameInputs.triggerCard) {
             TODO()
@@ -826,13 +797,7 @@ class CardActor(
         }
     }
 
-    fun currentTexturePromise(): Promise<Texture>? = cardTexturePromise
-
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
-
-    override fun setX(x: Float) {
-        super.setX(x)
-    }
 
     private fun setupShader(batch: Batch): Boolean {
         val shaderPromise = when {
@@ -840,7 +805,7 @@ class CardActor(
             spawnAnimStart != 0L -> spawnShader
             else -> return false
         }
-        if (shaderPromise.isNotResolved) ResourceManager.forceResolve(shaderPromise)
+        if (shaderPromise.isNotResolved) FortyFive.resourceManager.forceResolve(shaderPromise)
         val shader = shaderPromise.getOrError()
         batch.flush()
         shader.shader.bind()
@@ -924,9 +889,9 @@ class CardActor(
     // TODO: came up with system for animations
     fun destroyAnimation(): Timeline = Timeline.timeline {
         action {
-            SoundPlayer.situation("card_destroyed", screen)
+            FortyFive.soundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
-            if (destroyShader.isResolved) ResourceManager.forceResolve(destroyShader)
+            if (destroyShader.isResolved) FortyFive.resourceManager.forceResolve(destroyShader)
             destroyShader.getOrError().resetReferenceTime()
         }
         delay(1200)
@@ -971,7 +936,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
-            SoundPlayer.situation("card_trigger_anim_in", screen)
+            FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)
             addAction(scaleAction)
@@ -1001,7 +966,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2
         action {
-            SoundPlayer.situation("card_trigger_anim_out", screen)
+            FortyFive.soundPlayer.situation("card_trigger_anim_out", screen)
             addAction(moveAction)
             addAction(scaleAction)
         }
@@ -1029,16 +994,8 @@ class CardActor(
         texts.addAll(DetailDescriptionHandler
             .descriptions
             .filter { it.key in allKeys }.map { it.value.second })
-
-        if (FortyFive.currentGame != null){
             texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
-        }
         texts
-    }
-
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
     }
 
     companion object {

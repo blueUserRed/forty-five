@@ -70,7 +70,7 @@ object PermaSaveState {
     var statCardsLastRun: List<String> = listOf()
 
     fun read() {
-        FortyFiveLogger.debug(logTag, "reading SaveState")
+        FortyFive.logger.debug(logTag, "reading SaveState")
 
         val file = Gdx.files.local(saveFilePath).file()
         if (!file.exists()) copyDefaultFile()
@@ -78,14 +78,14 @@ object PermaSaveState {
         var obj = try {
             OnjParser.parseFile(file)
         } catch (e: OnjParserException) {
-            FortyFiveLogger.debug(logTag, "Savefile invalid: ${e.message}")
+            FortyFive.logger.debug(logTag, "Savefile invalid: ${e.message}")
             copyDefaultFile()
             OnjParser.parseFile(file)
         }
 
         val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
-        if (version?.equals(permaSaveStateVersion)?.not() ?: true) {
-            FortyFiveLogger.warn(
+        if (version?.equals(permaSaveStateVersion)?.not() != false) {
+            FortyFive.logger.warn(
                 logTag,
                 "incompatible perma_savefile found: version is $version; expected: $permaSaveStateVersion"
             )
@@ -95,7 +95,7 @@ object PermaSaveState {
 
         val result = savefileSchema.check(obj)
         if (result != null) {
-            FortyFiveLogger.debug(logTag, "Savefile invalid: $result")
+            FortyFive.logger.debug(logTag, "Savefile invalid: $result")
             copyDefaultFile()
             obj = OnjParser.parseFile(Gdx.files.local(saveFilePath).file())
             savefileSchema.assertMatches(obj)
@@ -147,7 +147,7 @@ object PermaSaveState {
     }
 
     fun reset() {
-        FortyFiveLogger.debug(logTag, "resetting perma_savefile")
+        FortyFive.logger.debug(logTag, "resetting perma_savefile")
         copyDefaultFile()
         read()
     }
@@ -159,7 +159,7 @@ object PermaSaveState {
     }
 
     private fun copyDefaultFile() {
-        FortyFiveLogger.debug(logTag, "copying default perma save")
+        FortyFive.logger.debug(logTag, "copying default perma save")
         Gdx.files.local(defaultSaveFilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 

@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
@@ -22,15 +23,10 @@ import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.OnLayoutActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.contains
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -47,14 +43,9 @@ class Revolver(
     private val animationDuration: Float,
     private val events: EventPipeline,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, StyledActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
-
-
-    override var styleManager: StyleManager? = null
+) : WidgetGroup(), ZIndexActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var fixedZIndex: Int = 0
-
-    var cardZIndex: Int = 0
 
     /**
      * the scale of a card placed into the revolver
@@ -90,18 +81,24 @@ class Revolver(
         listOf(slots[4], slots[0], slots[1], slots[2], slots[3])
     }
 
-    private val background: Promise<Drawable> = ResourceManager.request(this, screen, backgroundHandle)
+    private val background: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, backgroundHandle)
 
     private val iceShader: Promise<BetterShader> by lazy {
-        ResourceManager.request(this, screen, "ice_shader")
+        FortyFive.resourceManager.request(this, screen, "ice_shader")
     }
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
+
+    private var game: GameController? = null
 
     init {
         initInput(this, screen)
         keyboardFocusable = KeyboardFocusable.GROUP
         touchable = Touchable.childrenOnly
+    }
+
+    fun setGame(controller: GameController) {
+        game = controller
     }
 
     /**
@@ -115,7 +112,6 @@ class Revolver(
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
             it.rotation = 0f
-            it.fixedZIndex = cardZIndex
         }
         if (card != null && card.actor !in this) {
             addActor(card.actor)
@@ -169,19 +165,14 @@ class Revolver(
         return slots[slot - 1].card
     }
 
-    /**
-     * true when at least one bullet is loaded into the revolver
-     */
-    fun isBulletLoaded(): Boolean = slots.any { it.card != null }
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         batch ?: return
         background.getOrNull()?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
         // This is really ugly but I won't bother with a better solution
-        val currentGame = FortyFive.currentGame
-        if (currentGame != null && EncounterModifier.Frost in currentGame.encounterModifiers && iceShader.isResolved) {
+        val game = game
+        if (game != null && EncounterModifier.Frost in game.encounterModifiers && iceShader.isResolved) {
             val iceShader = iceShader.getOrError()
             batch.flush()
             batch.shader = iceShader.shader
@@ -223,7 +214,7 @@ class Revolver(
 
             is RevolverRotation.Right -> repeat(rotation.amount) {
                 action {
-                    SoundPlayer.situation("revolver_rotation", screen)
+                    FortyFive.soundPlayer.situation("revolver_rotation", screen)
                     rotateRight()
                 }
                 delayUntil { animFinished() }
@@ -232,7 +223,7 @@ class Revolver(
 
             is RevolverRotation.Left -> repeat(rotation.amount) {
                 action {
-                    SoundPlayer.situation("revolver_rotation", screen)
+                    FortyFive.soundPlayer.situation("revolver_rotation", screen)
                     rotateLeft()
                 }
                 delayUntil { animFinished() }
@@ -284,11 +275,7 @@ class Revolver(
     override fun getPrefHeight(): Float = prefHeight
 
 
-    override fun childrenInCorrectOrder(): List<Actor>? = orderedChildren
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-    }
+    override fun childrenInCorrectOrder(): List<Actor> = orderedChildren
 
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)

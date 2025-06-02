@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameWidgets.TextEffectEmitter.TextAnimationConfig
@@ -97,7 +98,11 @@ class TextEffectEmitter(
 
         val standardTextAnimConfigs by lazy {
             // Ugly, but fine because fonts stay loaded all the time anyway
-            val roadgeek = ResourceManager.forceGet<BitmapFont>(object : ResourceBorrower {}, Lifetime.endless, "roadgeek")
+            val roadgeek = FortyFive.resourceManager.forceGet<BitmapFont>(
+                object : ResourceBorrower {},
+                Lifetime.endless,
+                "roadgeek"
+            )
             mapOf(
                 "number_neutral" to TextAnimationConfig(
                     font = roadgeek,
@@ -135,7 +140,7 @@ class TextEffectEmitter(
             .associate { it.get<String>("name") to configFromOnj(it, screen) }
 
         fun configFromOnj(onj: OnjObject, screen: OnjScreen): TextAnimationConfig = TextAnimationConfig(
-            ResourceManager.forceGet(screen, screen, onj.get<String>("font")),
+            FortyFive.resourceManager.forceGet(screen, screen, onj.get<String>("font")),
             onj.get<Color>("color"),
             onj.get<Double>("fontScale").toFloat(),
             onj.get<OnjArray>("speed").toFloatRange(),

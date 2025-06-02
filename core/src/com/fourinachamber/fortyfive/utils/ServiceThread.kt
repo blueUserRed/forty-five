@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Pixmap
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.*
@@ -18,24 +19,23 @@ class ServiceThread : Thread("ServiceThread") {
     private val cardDrawingDispatcher = newSingleThreadContext("card-drawer")
 
     override fun run(): Unit = runBlocking {
-        FortyFiveLogger.debug(logTag, "starting up")
+        FortyFive.logger.debug(logTag, "starting up")
         launchChannelListener()
     }
 
     private fun CoroutineScope.launchChannelListener() = launch {
         for (message in channel) {
-//            FortyFiveLogger.debug(logTag, "received message $message")
             try {
                 handleMessage(message)
             } catch (e: Exception) {
-                FortyFiveLogger.severe(logTag, "encountered exception during processing of message $message")
-                FortyFiveLogger.stackTrace(e)
+                FortyFive.logger.severe(logTag, "encountered exception during processing of message $message")
+                FortyFive.logger.stackTrace(e)
                 // Retry
                 try {
                     handleMessage(message)
-                    FortyFiveLogger.debug(logTag, "Retry of message $message worked")
+                    FortyFive.logger.debug(logTag, "Retry of message $message worked")
                 } catch (_: Exception) {
-                    FortyFiveLogger.debug(logTag, "Retry failed as well")
+                    FortyFive.logger.debug(logTag, "Retry failed as well")
                 }
             }
         }
@@ -99,7 +99,7 @@ class ServiceThread : Thread("ServiceThread") {
 
     fun close() {
         channel.close()
-        FortyFiveLogger.debug(logTag, "closing channel")
+        FortyFive.logger.debug(logTag, "closing channel")
     }
 
     companion object {

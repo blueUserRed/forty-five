@@ -367,10 +367,10 @@ sealed class EnemyActionPrototype(
 
 sealed class NextEnemyAction {
 
-    object None : NextEnemyAction()
+    data object None : NextEnemyAction()
 
     class ShownEnemyAction(val action: EnemyAction) : NextEnemyAction()
 
-    object HiddenEnemyAction : NextEnemyAction()
+    data object HiddenEnemyAction : NextEnemyAction()
 
 }
