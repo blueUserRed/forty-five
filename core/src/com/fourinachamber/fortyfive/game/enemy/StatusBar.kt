@@ -96,7 +96,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         val barX = x + (width - barWidth) / 2
         val barY = y + height - barHeight
 
-        val firstHeight = barHeight * 0.74f
+        val firstHeight = barHeight * 0.72f
         val secondHeight = barHeight * 0.91f
 
         batch.end()

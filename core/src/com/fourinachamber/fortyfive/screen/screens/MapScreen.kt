@@ -277,6 +277,7 @@ class MapScreen : ScreenCreator() {
             }
         }
 
+        isVisible = false
         mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
             clearChildren()
             isVisible = false

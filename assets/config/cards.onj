@@ -7,19 +7,6 @@ import "config/game_config.onj" as gameConfig;
 
 var burningPercent = 0.5;
 
-//var bSelects = {
-//    allExceptSelf: bNum([1, 2, 3, 4, 5]),
-//    allBullets: bSelectByName("bullet"),
-//    fourButNotSelf: bNum([4]),
-//    threeButNotSelf: bNum([3]),
-//    targetRequiredNotSelf: bSelectTarget(false, false),
-//    targetOptionalNotSelf: bSelectTarget(false, true),
-//    neighbors: bSelectNeighbors(),
-//    self: bSelectSelf(),
-//    sourceBullet: bSelectSourceBullet(),
-//    cachedBullets: bSelectCachedBullets(),
-//};
-
 var iconPrefix = "§§";
 
 var slot = [

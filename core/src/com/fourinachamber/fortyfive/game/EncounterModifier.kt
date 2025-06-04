@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.controller.GameControllerImpl.Zone
 import com.fourinachamber.fortyfive.game.controller.RevolverRotation
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import kotlin.math.max
@@ -31,18 +32,28 @@ sealed class EncounterModifier {
         _types.addAll(getModifierTypes())
     }
 
-    object Rain : EncounterModifier() {
+    data object Rain : EncounterModifier() {
+        override val displayName: String = "Rain"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "Status effects don't work."
+
         override fun shouldApplyStatusEffects(): Boolean = false
     }
 
-    object Frost : EncounterModifier() {
+    data object Frost : EncounterModifier() {
+        override val displayName: String = "Frost"
+        override val iconHandle: ResourceHandle = "encounter_modifier_frost"
+        override val description: String = "The revolver doesn't turn. Everlasting doesn't work."
 
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
 
         override fun disableEverlasting(): Boolean = true
     }
 
-    object BewitchedMist : EncounterModifier() {
+    data object BewitchedMist : EncounterModifier() {
+        override val displayName: String = "Bewitched Mist"
+        override val iconHandle: ResourceHandle = "encounter_modifier_bewitched_mist"
+        override val description: String = "Revolver rotations are inverted."
 
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
             is RevolverRotation.Right -> RevolverRotation.Left(rotation.amount)
@@ -51,7 +62,10 @@ sealed class EncounterModifier {
         }
     }
 
-    object Lookalike : EncounterModifier() {
+    data object Lookalike : EncounterModifier() {
+        override val displayName: String = "Lookalike"
+        override val iconHandle: ResourceHandle = "encounter_modifier_lookalike"
+        override val description: String = "Whenever you place a bullet in the revolver, you get a copy of it in your hand."
 
         override fun executeAfterBulletWasPlacedInRevolver(
             card: Card,
@@ -59,7 +73,10 @@ sealed class EncounterModifier {
         ): Timeline = controller.tryToPutCardsInHandTimeline(card.name)
     }
 
-    object Moist : EncounterModifier() {
+    data object Moist : EncounterModifier() {
+        override val displayName: String = "Moist"
+        override val iconHandle: ResourceHandle = "encounter_modifier_moist"
+        override val description: String = "Every bullet in the revolver loses one damage every time it turns."
 
         override fun executeAfterBulletWasPlacedInRevolver(
             card: Card,
@@ -90,6 +107,9 @@ sealed class EncounterModifier {
     }
 
     class SteelNerves : EncounterModifier() {
+        override val displayName: String = "Steel Nerves"
+        override val iconHandle: ResourceHandle = "encounter_modifier_steel_nerves"
+        override val description: String = "The revolver shoots automatically every ten seconds."
 
         private var baseTime: Long = -1
 
@@ -135,18 +155,27 @@ sealed class EncounterModifier {
         }
     }
 
-    object DrawOneMoreCard : EncounterModifier() {
+    data object DrawOneMoreCard : EncounterModifier() {
+        override val displayName: String = "DrawOneMoreCard"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "-----"
 
         override fun additionalCardsToDrawInSpecialDraw(): Int = 1
         override fun additionalCardsToDrawInNormalDraw(): Int = 1
     }
 
-    object Draft : EncounterModifier() {
+    data object Draft : EncounterModifier() {
+        override val displayName: String = "Draft"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "You draft your deck from random cards before the encounter."
 
         override fun intermediateScreen(): String = "draftScreen"
     }
 
-    object AnOfferYouCantRefuse : EncounterModifier() {
+    data object AnOfferYouCantRefuse : EncounterModifier() {
+        override val displayName: String = "An Offer you can't refuse"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "All bullets cost 1 less, but shooting the revolver costs 1 reserve."
 
         override fun initBullet(card: Card) {
             card.addCostModifier(
@@ -168,13 +197,19 @@ sealed class EncounterModifier {
         }
     }
 
-    object BulletSkipping : EncounterModifier() {
+    data object BulletSkipping : EncounterModifier() {
+        override val displayName: String = "Bullet Skipping"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "When a bullet shoots, it turns twice, skipping the slot in between."
 
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation =
             rotation.withAmount(rotation.amount * 2)
     }
 
-    object Sacrifice : EncounterModifier() {
+    data object Sacrifice : EncounterModifier() {
+        override val displayName: String = "Sacrifice"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "At the beginning of every turn, destroy target bullet."
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             includeLater(
@@ -190,7 +225,10 @@ sealed class EncounterModifier {
         }
     }
 
-    object SorryNotSorry : EncounterModifier() {
+    data object SorryNotSorry : EncounterModifier() {
+        override val displayName: String = "Sorry not Sorry"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "At the beginning of every turn, return a random Bullet back to your hand."
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             var card: Card? = null
@@ -205,7 +243,10 @@ sealed class EncounterModifier {
 
     }
 
-    object Confused : EncounterModifier() {
+    data object Confused : EncounterModifier() {
+        override val displayName: String = "Rain"
+        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
+        override val description: String = "The revolver rotates when a card is placed down, not when it is shot. Everlasting doesn't work."
 
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
 
@@ -218,6 +259,10 @@ sealed class EncounterModifier {
 
         override fun disableEverlasting(): Boolean = true
     }
+
+    abstract val displayName: String
+    abstract val iconHandle: ResourceHandle
+    abstract val description: String
 
     open fun getModifierTypes(): List<Type> = listOf()
 

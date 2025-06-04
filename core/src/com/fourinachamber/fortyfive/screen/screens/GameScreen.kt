@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
+import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -135,6 +136,7 @@ class GameScreen : ScreenCreator() {
             height = 600f
         }
 
+        encounterModifierDisplay()
         parryPopup()
         targetSelectionPopup()
 
@@ -181,6 +183,56 @@ class GameScreen : ScreenCreator() {
             navbarIsLeft = true,
             hasTitleScreenInNavbar = false
         )
+    }
+
+    private fun CustomGroup.encounterModifierDisplay() = box {
+        width = 500f
+        onLayoutAndNow { height = children.sumOf { it.height.toDouble() }.toFloat() + 50f }
+        onLayoutAndNow { x = worldWidth - width + 50f }
+        onLayoutAndNow { y = worldHeight * 0.8f - height }
+        backgroundHandle = "encounter_modifier_background"
+        flexDirection = FlexDirection.COLUMN
+        verticalAlign = CustomAlign.SPACE_AROUND
+
+        fun encounterModifier(encounterModifier: EncounterModifier) = box {
+            flexDirection = FlexDirection.ROW
+            relativeWidth(100f)
+            height = 80f
+            verticalAlign = CustomAlign.CENTER
+            horizontalSpacer(30f)
+            box {
+                width = 50f
+                height = 50f
+                backgroundHandle = encounterModifier.iconHandle
+            }
+            horizontalSpacer(20f)
+            box {
+                onLayoutAndNow { width = parent.width - 50f - 160f }
+                syncHeight()
+                flexDirection = FlexDirection.COLUMN
+
+                label("roadgeek", encounterModifier.displayName) {
+                    syncDimensions()
+                    setFontScale(0.9f)
+                }
+                box {
+                    backgroundHandle = "black_texture"
+                    height = 1f
+                    relativeWidth(100f)
+                }
+                label("roadgeek", encounterModifier.description) {
+                    wrap = true
+                    setFontScale(0.6f)
+                    relativeWidth(100f)
+                    syncHeight()
+                }
+            }
+        }
+
+        encounterModifier(EncounterModifier.Rain)
+        encounterModifier(EncounterModifier.Draft)
+        encounterModifier(EncounterModifier.Frost)
+
     }
 
     private fun CustomGroup.putCardsUnderStackPopup() = group {
