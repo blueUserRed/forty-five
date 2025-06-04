@@ -530,7 +530,7 @@ class DetailMapWidget(
         MapManager.currentMapNode = movePlayerTo
         MapManager.lastMapNode = playerNode
         playerPos = scaledNodePos(movePlayerTo)
-        events.fire(PlayerChangedNodeEvent(playerNode))
+        events.fire(PlayerChangedNodeEvent(movePlayerTo))
         this.movePlayerTo = null
         updateDirectionIndicator(lastPointerPosition)
     }

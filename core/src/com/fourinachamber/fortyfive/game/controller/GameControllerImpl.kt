@@ -57,14 +57,15 @@ class GameControllerImpl(
         get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
-        get() = _encounterModifiers.any { it.disableEverlasting() }
+        get() = _encounterModifiers.any { it.second.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
 
-    private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
+    private val _encounterModifiers: MutableList<Pair<((GameController) -> Boolean)?, EncounterModifier>> = mutableListOf()
+
     override val encounterModifiers: List<EncounterModifier>
-        get() = _encounterModifiers
+        get() = _encounterModifiers.map { it.second }
 
     override var curPlayerLives: Int
         get() = SaveState.playerLives
@@ -137,6 +138,9 @@ class GameControllerImpl(
 
         encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
             ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
+        encounter.encounterModifier.forEach {
+            addEncounterModifier(it)
+        }
 
         bindGameEventListeners()
 
@@ -149,6 +153,9 @@ class GameControllerImpl(
         appendMainTimeline(Timeline.timeline {
             delay(300)
             updateReserves(Config.baseReserves)
+            action {
+                _encounterModifiers.forEach { it.second.onStart(this@GameControllerImpl) }
+            }
             action { chooseEnemyActions() }
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
@@ -184,7 +191,15 @@ class GameControllerImpl(
             targetedEnemy = enemy
         }
         gameEvents.watchFor<Events.CardChangeZoneEvent> { event ->
-            if (!event.before) event.card.changeZone(event.newZone, this)
+            if (!event.before) {
+                event.card.changeZone(event.newZone, this)
+                if (event.newZone == Zone.REVOLVER) event.append {
+                    _encounterModifiers.forEach { (_, modifier) ->
+                        val timeline = modifier.executeAfterBulletWasPlacedInRevolver(event.card, this@GameControllerImpl)
+                        if (timeline != null) include(timeline)
+                    }
+                }
+            }
             val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
@@ -223,6 +238,10 @@ class GameControllerImpl(
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
             val situation = GameSituation.RevolverRotation(event.rotation)
             event.append {
+                _encounterModifiers.forEach { (_, modifier) ->
+                    val timeline = modifier.executeAfterRevolverRotated(event.rotation, this@GameControllerImpl)
+                    if (timeline != null) include(timeline)
+                }
                 include(checkTrigger(situation, event.triggerInformation))
                 activeEnemies
                     .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
@@ -248,6 +267,14 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.AfterShotEvent> { event ->
+            event.append {
+                _encounterModifiers.forEach { (_, modifier) ->
+                    val timeline = modifier.executeAfterRevolverWasShot(event.card, this@GameControllerImpl)
+                    if (timeline != null) include(timeline)
+                }
+            }
+        }
     }
 
     private fun checkTrigger(situation: GameSituation, triggerInformation: TriggerInformation): Timeline = createdCards
@@ -263,6 +290,10 @@ class GameControllerImpl(
 
     override fun update() {
         TemplateString.updateGlobalParam("game.cardsInStack", cardStack.size())
+
+        _encounterModifiers.removeIf { (predicate, _) -> predicate != null && !predicate(this@GameControllerImpl) }
+        _encounterModifiers.forEach { it.second.update(this@GameControllerImpl) }
+
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
@@ -283,7 +314,7 @@ class GameControllerImpl(
         cardPrototypes = Card
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
-                _encounterModifiers.forEach { it.initBullet(card) }
+                encounterModifiers.forEach { it.initBullet(card) }
                 card.bindGameEvents(gameEvents, this)
                 card.setGame(this@GameControllerImpl)
             }
@@ -402,7 +433,7 @@ class GameControllerImpl(
         var newRotation = if (ignoreEncounterModifiers) {
             rotation
         } else {
-            _encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
+            encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
         }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
         include(revolver.rotate(newRotation))
@@ -532,7 +563,7 @@ class GameControllerImpl(
         statusEffect: StatusEffect,
         enemy: Enemy
     ): Timeline = Timeline.timeline { later {
-        if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
+        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
         action { enemy.applyEffect(statusEffect, this@GameControllerImpl) }
     } }
 
@@ -742,7 +773,7 @@ class GameControllerImpl(
 
     private fun shootTimeline(): Timeline = Timeline.timeline { later {
 
-        if (_encounterModifiers.any { !it.canShootRevolver(this@GameControllerImpl) }) return@later
+        if (encounterModifiers.any { !it.canShootRevolver(this@GameControllerImpl) }) return@later
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
 
@@ -795,11 +826,11 @@ class GameControllerImpl(
     } }
 
     override fun shoot() {
-//        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
-//        appendMainTimeline(Timeline.timeline {
-//            parallelActions(shootTimeline().asAction(), postProcessor)
-//        })
-        appendMainTimeline(shootTimeline())
+        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
+        appendMainTimeline(Timeline.timeline {
+            parallelActions(shootTimeline().asAction(), postProcessor)
+        })
+//        appendMainTimeline(shootTimeline())
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -836,11 +867,13 @@ class GameControllerImpl(
         modifier: EncounterModifier,
         validityChecker: (GameController) -> Boolean
     ) {
-        TODO("Not yet implemented")
+        _encounterModifiers.add(validityChecker to modifier)
+        // No event in this case, because temporary encounter modifiers aren't displayed
     }
 
     override fun addEncounterModifier(modifier: EncounterModifier) {
-        TODO("Not yet implemented")
+        _encounterModifiers.add(null to modifier)
+        gameEvents.fire(Events.EncounterModifierAdded(modifier))
     }
 
     override fun addTutorialText(textParts: List<GameDirector.GameTutorialTextPart>) {
@@ -1116,8 +1149,8 @@ class GameControllerImpl(
         const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-        const val cardsToDrawInFirstRound = 20
-//        const val cardsToDrawInFirstRound = 6
+//        const val cardsToDrawInFirstRound = 20
+        const val cardsToDrawInFirstRound = 6
 //        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
@@ -1142,6 +1175,7 @@ class GameControllerImpl(
         )
         data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
         data class SetupEnemies(val enemies: List<Enemy>)
+        data class EncounterModifierAdded(val modifier: EncounterModifier)
         data class EnemySelected(val selected: Enemy)
         data class PutCardsUnderStack(
             val amount: Int,

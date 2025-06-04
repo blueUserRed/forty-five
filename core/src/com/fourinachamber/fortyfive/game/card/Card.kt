@@ -356,18 +356,6 @@ class Card(
             .none { it.blocks(this, controller) }
     }
 
-    /**
-     * called when this card was destroyed by the destroy effect
-     */
-    fun onDestroy() {
-        TODO("dont use this function")
-//        if (isUndead) {
-//            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
-//            FortyFive.currentGame!!.cardHand.addCard(this)
-//        }
-//        leaveGame()
-    }
-
     fun addDamageModifier(modifier: CardDamageModifier) {
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         damageModifiers.add(++damageModifierCounter to modifier.copy())

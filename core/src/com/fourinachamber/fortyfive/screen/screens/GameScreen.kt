@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimState
+import com.fourinachamber.fortyfive.animation.PropertyAnimation
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GraphicsConfig
@@ -36,6 +37,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
+import com.fourinachamber.fortyfive.screen.general.customActor.PropertyAction
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
 import com.fourinachamber.fortyfive.utils.Color
@@ -43,6 +45,7 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
+import java.security.Key
 import kotlin.random.Random
 
 class GameScreen : ScreenCreator() {
@@ -187,12 +190,31 @@ class GameScreen : ScreenCreator() {
 
     private fun CustomGroup.encounterModifierDisplay() = box {
         width = 500f
+        x = worldWidth - 100f
         onLayoutAndNow { height = children.sumOf { it.height.toDouble() }.toFloat() + 50f }
-        onLayoutAndNow { x = worldWidth - width + 50f }
         onLayoutAndNow { y = worldHeight * 0.8f - height }
         backgroundHandle = "encounter_modifier_background"
         flexDirection = FlexDirection.COLUMN
         verticalAlign = CustomAlign.SPACE_AROUND
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        isVisible = false
+
+        val xAnim = PropertyAnimation(
+            this,
+            xPositionAbstractProperty(),
+            Float::class,
+            states = arrayOf(
+                AnimState("open", worldWidth - width + 50f, 100, Interpolation.pow2),
+                AnimState("closed", worldWidth - 100f, 100, Interpolation.pow2)
+            )
+        )
+
+        observeInputState(
+            GameInputs.States.focused,
+            { xAnim.state("open") },
+            { xAnim.state("closed") },
+        )
 
         fun encounterModifier(encounterModifier: EncounterModifier) = box {
             flexDirection = FlexDirection.ROW
@@ -229,9 +251,10 @@ class GameScreen : ScreenCreator() {
             }
         }
 
-        encounterModifier(EncounterModifier.Rain)
-        encounterModifier(EncounterModifier.Draft)
-        encounterModifier(EncounterModifier.Frost)
+        gameEvents.watchFor<GameControllerImpl.Events.EncounterModifierAdded> { (modifier) ->
+            isVisible = true
+            encounterModifier(modifier)
+        }
 
     }
 
