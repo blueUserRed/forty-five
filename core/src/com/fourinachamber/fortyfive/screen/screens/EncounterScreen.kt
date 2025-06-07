@@ -25,6 +25,7 @@ import com.fourinachamber.fortyfive.game.enemy.StatusBar
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
@@ -37,7 +38,6 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimatedActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
-import com.fourinachamber.fortyfive.screen.general.customActor.PropertyAction
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser.*
 import com.fourinachamber.fortyfive.utils.Color
@@ -45,10 +45,10 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
-import java.security.Key
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
-class GameScreen : ScreenCreator() {
+class EncounterScreen : ScreenCreator() {
 
     override val name: String = "gameScreen"
 
@@ -145,8 +145,8 @@ class GameScreen : ScreenCreator() {
 
         playerBar()
         val afterlife = Afterlife(screen, gameEvents)
-        this@GameScreen.afterlife = afterlife
-        actor(afterlife.getActor(this@GameScreen)) {
+        this@EncounterScreen.afterlife = afterlife
+        actor(afterlife.getActor(this@EncounterScreen)) {
             y = worldHeight * 0.4f
         }
 
@@ -1085,8 +1085,8 @@ class GameScreen : ScreenCreator() {
         anim?.let { controller.dispatchAnimTimeline(it) }
     }
 
-    companion object {
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = EncounterScreen::class
         const val underDeckGroup: String = "encounter-screen-under-deck"
     }
-
 }

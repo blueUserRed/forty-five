@@ -6,9 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.TitleScreenController
@@ -18,6 +20,7 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.alpha
+import kotlin.reflect.KClass
 
 class TitleScreen : ScreenCreator() {
 
@@ -90,12 +93,12 @@ class TitleScreen : ScreenCreator() {
         box {
             x = 120F
             y = worldHeight * 0.65F
-            addOption("Continue") { MapManager.changeToMapScreen() }
+            addOption("Continue") { FortyFive.toMap() }
             addOption("Abandon Run") {}
             addOption("Reset Game") {}
 
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
-            addOption("View Credits") { MapManager.changeToCreditsScreen() }
+            addOption("View Credits") { FortyFive.screenManager.transitionImmediate(CreditsScreen) }
             addOption("Quit") { Gdx.app.exit() } // TODO: fix popup
 //            addOption("Quit") {handleQuit() }
         }
@@ -230,5 +233,9 @@ class TitleScreen : ScreenCreator() {
         height = worldHeight
         name(name)
         backgroundHandle = name
+    }
+
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = TitleScreen::class
     }
 }

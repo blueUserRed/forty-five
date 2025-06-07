@@ -994,7 +994,6 @@ class GameControllerImpl(
             SaveState.write()
 
             val chooseCardContext = object : ChooseCardScreenContext {
-                override val forwardToScreen: String = encounterContext.forwardToScreen
                 override var seed: Long = TimeUtils.millis()
                 override val nbrOfCards: Int = 3
                 override val types: List<String> = listOf()
@@ -1007,10 +1006,10 @@ class GameControllerImpl(
             }
 
             if (playerGetsCard) {
-                MapManager.changeToChooseCardScreen(chooseCardContext)
-            } else {
-                FortyFive.changeToScreen(MapScreen())
+                TODO()
+//                encounterContext.screenChain.pushScreenToFront()
             }
+            FortyFive.screenManager.screenFinished()
         }
     } }
 

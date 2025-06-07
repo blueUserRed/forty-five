@@ -107,16 +107,16 @@ class DraftScreenController(private val screen: OnjScreen) : ScreenController() 
 //            screen.removeAllStyleManagersOfChildren(actor)
 //            actor.clear()
 //        }
-        val context = object : EncounterContext {
-
-            override val encounterIndex: Int = context.encounterIndex
-            override val forwardToScreen: String = context.forwardToScreen
-
-            override val forceCards: List<String> = chosenCards
-
-            override fun completed() = context.completed()
-        }
-        MapManager.changeToEncounterScreen(context, immediate = true)
+//        val context = object : EncounterContext {
+//
+//            override val encounterIndex: Int = context.encounterIndex
+//            override val forwardToScreen: String = context.forwardToScreen
+//
+//            override val forceCards: List<String> = chosenCards
+//
+//            override fun completed() = context.completed()
+//        }
+//        MapManager.changeToEncounterScreen(context, immediate = true)
     }
 
 //    private fun getDiscardAction(actor: CustomFlexBox): Timeline {

@@ -18,6 +18,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
@@ -32,6 +33,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
+import kotlin.reflect.KClass
 
 class MapScreen : ScreenCreator() {
 
@@ -293,4 +295,8 @@ class MapScreen : ScreenCreator() {
     }
 
     override fun debugMenuPages(): List<String> = listOf("Map")
+
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = MapScreen::class
+    }
 }

@@ -161,7 +161,7 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card)
         context.completed()
         SaveState.write()
-        MapManager.changeToMapScreen()
+        FortyFive.screenManager.screenFinished()
     }
 
     companion object {
@@ -171,7 +171,6 @@ class ChooseCardScreenController(private val screen: OnjScreen, onj: OnjObject) 
 
 interface ChooseCardScreenContext {
 
-    val forwardToScreen: String
     var seed: Long
     val nbrOfCards: Int
     val types: List<String>

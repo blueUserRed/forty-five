@@ -13,6 +13,7 @@ import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -20,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.percent
+import kotlin.reflect.KClass
 
 class ShopScreen : ScreenCreator() {
 
@@ -252,7 +254,7 @@ class ShopScreen : ScreenCreator() {
                     { backgroundHandle = "shop_back_button" }
                 )
                 onInput(GameInputs.interact) {
-                    FortyFive.changeToScreen(MapScreen())
+                    FortyFive.screenManager.screenFinished()
                 }
             }
 
@@ -326,7 +328,9 @@ class ShopScreen : ScreenCreator() {
         it.interpolation = Interpolation.pow2Out
     }
 
-    companion object {
+    companion object : ScreenManager.ScreenCreatorCompanion {
         const val shopDropTargetGroup = "shop-drop-target"
+
+        override val creatorClass: KClass<out ScreenCreator> = ShopScreen::class
     }
 }

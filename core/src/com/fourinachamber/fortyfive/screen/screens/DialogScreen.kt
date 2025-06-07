@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.map.events.dialog.AnimatedAdvancedTextWidget
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
@@ -19,6 +20,8 @@ import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
+import kotlin.reflect.KClass
 
 class DialogScreen : ScreenCreator() {
     override val name: String = "dialogScreen"
@@ -49,19 +52,7 @@ class DialogScreen : ScreenCreator() {
         dialogWidget()
         dialogOptionsParent()
 
-        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-        actor(
-            getSharedNavBar(
-                worldWidth,
-                worldHeight,
-                listOf(settingsObject, settingsObject, settingsObject),
-                screen
-            )
-        ) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
-        }
-        actor(settings)
+        addDefaultOverlays(worldWidth, worldHeight, EventPipeline())
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
@@ -168,4 +159,8 @@ class DialogScreen : ScreenCreator() {
                 x = parent.width - 100F
             }
         }
+
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = DialogScreen::class
+    }
 }
