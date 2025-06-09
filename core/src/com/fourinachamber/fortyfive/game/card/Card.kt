@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
@@ -24,8 +25,9 @@ import com.fourinachamber.fortyfive.keyInput.InputActorImpl
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
@@ -718,7 +720,7 @@ class CardActor(
     val screen: OnjScreen,
     val enableHoverDetails: Boolean // TODO: fix
 ) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
-    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor {
+    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,
@@ -738,11 +740,13 @@ class CardActor(
     override var marginBottom: Float = 0F
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
 
     private var inDestroyAnim: Boolean = false
     private var spawnAnimStart: Long = 0L
     private var spawnAnimDuration: Int = 0
+
+    override var dropShadow: DropShadow? = null
 
     private val lifetime: EndableLifetime = EndableLifetime()
 
@@ -842,7 +846,7 @@ class CardActor(
 //        } else {
 //            x = this.x
 //            y = this.y
-
+        dropShadow?.doDropShadow(batch, screen, textureRegion, this, scaleX, scaleY, rotation)
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,

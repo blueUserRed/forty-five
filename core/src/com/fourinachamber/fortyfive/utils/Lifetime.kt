@@ -1,5 +1,7 @@
 package com.fourinachamber.fortyfive.utils
 
+import com.badlogic.gdx.utils.Disposable
+
 interface Lifetime {
 
     fun onEnd(callback: () -> Unit)
@@ -17,6 +19,10 @@ interface Lifetime {
         onEnd { new.die() }
         lifetime.onEnd { new.die() }
         return new
+    }
+
+    fun tieDisposable(disposable: Disposable) {
+        onEnd { disposable.dispose() }
     }
 
     companion object {

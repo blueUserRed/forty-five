@@ -200,14 +200,13 @@ class EncounterScreen : ScreenCreator() {
         keyboardFocusable = KeyboardFocusable.LEAF
         isVisible = false
 
-        val xAnim = PropertyAnimation(
-            this,
+        val xAnim = propertyAnimation(
             xPositionAbstractProperty(),
-            Float::class,
-            states = arrayOf(
-                AnimState("open", worldWidth - width + 50f, 100, Interpolation.pow2),
-                AnimState("closed", worldWidth - 100f, 100, Interpolation.pow2)
-            )
+            AnimState("open", worldWidth - width + 50f),
+            AnimState("closed", worldWidth - 100f),
+            defaultTime = 100,
+            defaultInterpolation = Interpolation.pow2,
+            initialState = "closed"
         )
 
         observeInputState(
@@ -693,15 +692,19 @@ class EncounterScreen : ScreenCreator() {
             y = 50f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 370f, 100, Interpolation.pow2),
-                AnimState("hover", 360f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 370f),
+                AnimState("hover", 360f),
+                AnimState("closed", 600f),
+                initialState = "open",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
             width = 250f
             height = 250f * (543f / 655f)
             keyboardFocusable = KeyboardFocusable.LEAF
             backgroundHandle = "shoot_button_texture"
-            xAnim.state("open")
             observeInputState(
                 GameInputs.States.focused,
                 {
@@ -740,10 +743,15 @@ class EncounterScreen : ScreenCreator() {
             y = 50f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 370f, 100, Interpolation.pow2),
-                AnimState("hover", 360f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 370f),
+                AnimState("hover", 360f),
+                AnimState("closed", 600f),
+                initialState = "open",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
             width = 250f
             height = 250f * (543f / 655f)
             keyboardFocusable = KeyboardFocusable.LEAF
@@ -796,10 +804,16 @@ class EncounterScreen : ScreenCreator() {
             y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 990f, 100, Interpolation.pow2),
-                AnimState("hover", 1000f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 990f),
+                AnimState("hover", 1000f),
+                AnimState("closed", 600f),
+                initialState = "open",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
+
             width = 250f
             height = 250f * (543f / 655f)
 
@@ -807,7 +821,6 @@ class EncounterScreen : ScreenCreator() {
                 gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
             }
             backgroundHandle = "end_turn_button_texture"
-            xAnim.state("open")
             observeInputState(
                 GameInputs.States.focused,
                 {
@@ -844,10 +857,15 @@ class EncounterScreen : ScreenCreator() {
             y = 50f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 990f, 100, Interpolation.pow2),
-                AnimState("hover", 1000f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 990f),
+                AnimState("hover", 1000f),
+                AnimState("closed", 600f),
+                initialState = "open",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
             width = 250f
             height = 250f * (543f / 655f)
 

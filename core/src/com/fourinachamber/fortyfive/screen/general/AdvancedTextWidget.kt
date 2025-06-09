@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
@@ -79,7 +78,7 @@ open class AdvancedTextWidget(
         children
             .filterIsInstance<Layout>()
             .onEach(Layout::validate)
-            .filter { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+            .filter { it !is KotlinStyledActor || it.positionType == PositionType.RELATIVE }
             .forEach { child ->
                 child as Actor
                 child.width = child.prefWidth

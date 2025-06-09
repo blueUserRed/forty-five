@@ -128,7 +128,7 @@ object GameInputs {
             InputManager.BaseStates.mouseHover
         ))
 
-        val manuallyFocused = InputState("manuallyFocused", arrayOf())
+        val manuallyFocused = InputState("manuallyFocused")
 
         val focused = InputState("focused", arrayOf(
             trueFocused,
@@ -142,6 +142,22 @@ object GameInputs {
                 InputManager.BaseStates.awaitingDropFromKeyboard
             )
         )
-    }
 
+        val inDrag = InputState(
+            "inDrag",
+            arrayOf(
+                InputManager.BaseStates.mouseDrag,
+                InputManager.BaseStates.keyboardDrag,
+            )
+        )
+
+        val awaitingDropFocused = InputState(
+            "awaitingDropFocused",
+            arrayOf(
+                arrayOf(InputManager.BaseStates.awaitingDropFromMouse, InputManager.BaseStates.draggedHover),
+                arrayOf(InputManager.BaseStates.awaitingDropFromKeyboard, InputManager.BaseStates.keyboardFocus)
+            )
+        )
+
+    }
 }

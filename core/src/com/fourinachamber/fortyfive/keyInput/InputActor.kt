@@ -81,6 +81,8 @@ interface InputActor {
 
     fun drawInDrag(batch: Batch)
 
+    fun onRemove()
+
 }
 
 enum class KeyboardFocusable {
@@ -185,7 +187,11 @@ class InputActorImpl : InputActor {
     override fun observeInputState(inputState: InputState) {
         val added = _observedStates.add(inputState)
         if (!added) return
-        inputState.causedByStates.forEach { state -> observeInputState(state) }
+        inputState.causedByStates.forEach { states ->
+            states.forEach { state ->
+                observeInputState(state)
+            }
+        }
     }
 
     override fun observeInputState(state: InputState, onEnter: () -> Unit, onLeave: () -> Unit) {
@@ -235,7 +241,9 @@ class InputActorImpl : InputActor {
         }
         _observedStates.forEach { state ->
             if (state.causedByStates.isEmpty()) return@forEach
-            val shouldBeActive = state.causedByStates.any { isInInputState(it) }
+            val shouldBeActive = state.causedByStates.any { row ->
+                row.all { isInInputState(it) }
+            }
             val isActive = isInInputState(state)
             when {
                 isActive == shouldBeActive -> {}
@@ -317,5 +325,9 @@ class InputActorImpl : InputActor {
 
     override fun drawInDrag(batch: Batch) {
         actor.draw(batch, 1f)
+    }
+
+    override fun onRemove() {
+        screen.inputManager.removeActor(actor as InputActor)
     }
 }

@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -20,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.DebugActorImpl
 import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreen
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
@@ -63,11 +65,24 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-        when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(TitleScreen)
-            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
-            UserPrefs.StartScreen.MAP -> toMap()
+        val context = object : ChooseCardScreenContext {
+            override var seed: Long = 2378949203847
+            override val nbrOfCards: Int = 3
+            override val types: List<String> = listOf()
+            override val enableRerolls: Boolean = true
+            override var amountOfRerolls: Int = 0
+            override val rerollPriceIncrease: Int = 30
+            override val rerollBasePrice: Int = 30
+
+            override fun completed() {
+            }
         }
+        screenManager.transitionImmediate(ChooseCardScreen, context)
+//        when (UserPrefs.startScreen) {
+//            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(TitleScreen)
+//            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
+//            UserPrefs.StartScreen.MAP -> toMap()
+//        }
     }
 
     fun toMap() {

@@ -19,7 +19,11 @@ class Input(val name: String, val causes: Array<Cause>) {
 
 }
 
-class InputState(val name: String, val causedByStates: Array<InputState>) {
+fun InputState(name: String, causedByStates: Array<InputState>): InputState = InputState(
+    name, causedByStates.map { arrayOf(it) }.toTypedArray()
+)
+
+class InputState(val name: String, val causedByStates: Array<Array<InputState>> = arrayOf()) {
 
     override fun toString(): String = "InputState($name)"
 }
