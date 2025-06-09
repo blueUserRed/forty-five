@@ -8,7 +8,7 @@ import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import onj.value.OnjNamedObject
 
-class IntroScreenController(private val screen: OnjScreen, onj: OnjNamedObject) : ScreenController() {
+class IntroScreenController(private val screen: OnjScreen) : ScreenController() {
 
     override fun init(context: Any?) {
         OnjScreen.toggleFullScreen(true)

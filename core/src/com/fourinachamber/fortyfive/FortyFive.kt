@@ -6,30 +6,25 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
-import com.fourinachamber.fortyfive.game.controller.EncounterContext
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
-import com.fourinachamber.fortyfive.onjNamespaces.*
+import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
+import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fortyfive.onjNamespaces.MapNamespace
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.DebugActorImpl
-import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
-import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
-import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
-import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreen
+import com.fourinachamber.fortyfive.screen.screens.IntroScreen
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
 import kotlin.system.measureTimeMillis
 
 object FortyFive : Game() {
@@ -65,24 +60,11 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-        val context = object : ChooseCardScreenContext {
-            override var seed: Long = 2378949203847
-            override val nbrOfCards: Int = 3
-            override val types: List<String> = listOf()
-            override val enableRerolls: Boolean = true
-            override var amountOfRerolls: Int = 0
-            override val rerollPriceIncrease: Int = 30
-            override val rerollBasePrice: Int = 30
-
-            override fun completed() {
-            }
+        when (UserPrefs.startScreen) {
+            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
+            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
+            UserPrefs.StartScreen.MAP -> toMap()
         }
-        screenManager.transitionImmediate(ChooseCardScreen, context)
-//        when (UserPrefs.startScreen) {
-//            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(TitleScreen)
-//            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
-//            UserPrefs.StartScreen.MAP -> toMap()
-//        }
     }
 
     fun toMap() {
