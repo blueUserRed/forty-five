@@ -717,7 +717,12 @@ class CardActor(
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,
         effects = cardDetailEffects,
-        text = { listOf(card.shortDescription, card.flavourText) },
+        text = {
+            val list = card.currentHoverTexts.map { it.second }.toMutableList()
+            list.add(card.shortDescription)
+            list.add(card.flavourText)
+            list
+        },
         subtexts = getEffectTexts()
     )
 

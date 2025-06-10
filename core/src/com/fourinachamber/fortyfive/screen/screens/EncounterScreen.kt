@@ -622,7 +622,6 @@ class EncounterScreen : ScreenCreator() {
                         val card = it.card ?: return@forEach
                         if (card === exclude) return@forEach
                         card.enterTargetSelection(promise)
-                        println("joined")
                         it.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
                     }
                 cardSelectionModal.push()
