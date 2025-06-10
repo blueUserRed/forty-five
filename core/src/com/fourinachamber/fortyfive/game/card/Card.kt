@@ -124,8 +124,8 @@ class Card(
      */
     val actor: CardActor
 
-    var inGame: Boolean = false
-        private set
+    val inGame: Boolean
+        get() = game != null
 
     var isEverlasting: Boolean = false
         private set
@@ -185,6 +185,8 @@ class Card(
         private set
 
     private var game: GameController? = null
+    internal val gameEvents: EventPipeline
+        get() = game!!.gameEvents
 
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
@@ -783,7 +785,8 @@ class CardActor(
             FortyFive.soundPlayer.situation("card_hover", screen)
         }
 
-        onInput(GameInputs.interact) { clickedViaSlot() }
+        onInput(GameInputs.interact) { clicked() }
+        onInput(GameInputs.triggerCard) { rightClicked() }
 
         val dropShadow = DropShadow(
             color = Color.Black,
@@ -811,9 +814,18 @@ class CardActor(
 
     }
 
-    fun clickedViaSlot() {
+    fun clickedViaSlot(rightClick: Boolean) {
+        if (rightClick) rightClicked() else clicked()
+    }
+
+    private fun clicked() {
         val selectionPromise = selectionPromise ?: return
         selectionPromise.resolve(card)
+    }
+
+    private fun rightClicked() {
+        if (!card.inGame) return
+        card.gameEvents.fire(GameControllerImpl.Events.CardRightClickEvent(card))
     }
 
     fun enterSelectionMode(promise: Promise<Card>) {

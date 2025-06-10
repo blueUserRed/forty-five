@@ -44,6 +44,7 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
+import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
@@ -1067,8 +1068,9 @@ class EncounterScreen : ScreenCreator() {
         isReserves: Boolean,
         duration: Int = 300
     ): Timeline = Timeline.timeline {
+        if (target is CardActor) return@timeline // TODO: fix for moving targets
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
-        repeat(amount) {
+        repeat(amount.absoluteValue) {
             action {
                 FortyFive.soundPlayer.situation("orb_anim_playing", screen)
                 renderPipeline.addOrbAnimation(

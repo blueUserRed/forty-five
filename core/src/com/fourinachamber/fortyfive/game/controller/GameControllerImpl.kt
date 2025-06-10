@@ -11,7 +11,6 @@ import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
-import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -25,7 +24,6 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreen
 import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreenContext
-import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
@@ -33,7 +31,7 @@ import kotlin.math.floor
 
 class GameControllerImpl(
     override val screen: OnjScreen,
-    val gameEvents: EventPipeline,
+    override val gameEvents: EventPipeline,
     private val warningParent: WarningParent,
     override val afterlife: Afterlife,
 ) : ScreenController(), GameController, ResourceBorrower {
@@ -275,6 +273,20 @@ class GameControllerImpl(
                     if (timeline != null) include(timeline)
                 }
             }
+        }
+        gameEvents.watchFor<Events.CardRightClickEvent> { (card) ->
+            if (card.rightClickCost == null) return@watchFor
+            if (isUIFrozen) return@watchFor
+            val triggerInformation = createTriggerInfo(card)
+            val situation = GameSituation.CardRightClicked(card)
+            appendMainTimeline(Timeline.timeline { later {
+                val anyEffectTriggers = card.effects.any {
+                    it.checkTrigger(situation, triggerInformation, this@GameControllerImpl, card)
+                }
+                if (anyEffectTriggers && tryPay(card.rightClickCost, card.actor)) {
+                    include(checkTrigger(situation, triggerInformation))
+                }
+            } })
         }
     }
 
@@ -842,7 +854,6 @@ class GameControllerImpl(
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
         if (cost > curReserves) return false
         SaveState.usedReserves += cost
-        FortyFive.logger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
         updateReserves(curReserves - cost, sourceActor = animTarget)
         return true
     }
@@ -1192,6 +1203,7 @@ class GameControllerImpl(
         data object ShootButtonPressed
         data object HolsterButtonPressed
         data object AfterlifeOpenToggle
+        data class CardRightClickEvent(val card: Card)
 
         abstract class TimelineBuildingEvent {
 

@@ -326,7 +326,10 @@ class RevolverSlot(
             { card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused) }
         )
         onInput(GameInputs.interact) {
-            card?.actor?.clickedViaSlot()
+            card?.actor?.clickedViaSlot(false)
+        }
+        onInput(GameInputs.triggerCard) {
+            card?.actor?.clickedViaSlot(true)
         }
         isDropTarget = true
         onDrop { actor ->
