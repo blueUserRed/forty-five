@@ -344,6 +344,7 @@ class GameControllerImpl(
         exclude: Card?
     ): Timeline = Timeline.timeline {
         val event = Events.TargetSelectionEvent(text, exclude)
+        include(afterlife.closeTimeline())
         action { gameEvents.fire(event) }
         delayUntil { event.promise.isResolved }
         action { store("selectedCard", event.promise.getOrError()) }
@@ -695,6 +696,7 @@ class GameControllerImpl(
         val parryEnterEvent = Events.ParryStateChange(true, damage, damageOfCard)
         val parryLeaveEvent = Events.ParryStateChange(false, 0, 0)
         parryEnterEvent.resolutionPromise.then { gameEvents.fire(parryLeaveEvent) }
+        include(afterlife.closeTimeline())
         action { gameEvents.fire(parryEnterEvent) }
         delayUntil { parryEnterEvent.resolutionPromise.isResolved }
         later {

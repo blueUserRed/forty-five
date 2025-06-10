@@ -581,6 +581,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
         marginOuter: Float = 20F,
     ) {
         val bar = CustomImageActor(handle, screen)
+        bar.touchable = Touchable.enabled
         val barBackground = CustomImageActor(handleBackground, screen)
 
         bar.positionType = PositionType.ABSOLUTE
