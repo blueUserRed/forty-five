@@ -23,6 +23,7 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreen
 import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.utils.*
@@ -315,7 +316,6 @@ class GameControllerImpl(
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
                 encounterModifiers.forEach { it.initBullet(card) }
-                card.bindGameEvents(gameEvents, this)
                 card.setGame(this@GameControllerImpl)
             }
             .toMutableList()
@@ -1006,8 +1006,7 @@ class GameControllerImpl(
             }
 
             if (playerGetsCard) {
-                TODO()
-//                encounterContext.screenChain.pushScreenToFront()
+                encounterContext.screenChain.pushScreenToFront(ChooseCardScreen, chooseCardContext)
             }
             FortyFive.screenManager.screenFinished()
         }

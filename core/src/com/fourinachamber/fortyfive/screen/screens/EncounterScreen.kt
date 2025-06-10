@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimState
-import com.fourinachamber.fortyfive.animation.PropertyAnimation
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GraphicsConfig
@@ -595,10 +594,10 @@ class EncounterScreen : ScreenCreator() {
         height = worldWidth * (505f / 1920f)
         backgroundHandle = "player_bar"
 
-        val modal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
+        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
 
         gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-            if (event.inParryMenu) modal.push() else modal.finished()
+            if (event.inParryMenu) buttonModal.push() else buttonModal.finished()
         }
 
         shootButton()
@@ -610,6 +609,28 @@ class EncounterScreen : ScreenCreator() {
             centerX()
             y = -30f
             syncDimensions()
+
+            val cardSelectionModal = InputManager.Modal(
+                listOf(RevolverSlot.revolverSlotWithCardInSelectionMode),
+                screen
+            )
+
+            gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { (_, exclude, promise) ->
+                revolver
+                    .slots
+                    .forEach {
+                        val card = it.card ?: return@forEach
+                        if (card === exclude) return@forEach
+                        card.enterTargetSelection(promise)
+                        println("joined")
+                        it.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+                    }
+                cardSelectionModal.push()
+                promise.then {
+                    cardSelectionModal.finished()
+                    revolver.slots.forEach { it.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode) }
+                }
+            }
         }
 
         actor(cardHand) {

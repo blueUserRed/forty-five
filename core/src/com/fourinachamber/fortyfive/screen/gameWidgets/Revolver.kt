@@ -131,7 +131,6 @@ class Revolver(
         }
         slots.forEach { it.toBack() }
         card.actor.setPosition(revolverSlot.cardPosition())
-
     }
 
     /**
@@ -141,7 +140,6 @@ class Revolver(
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val card = getCardInSlot(slot) ?: return
         removeCard(card)
-        setCard(slot, null)
     }
 
     /**
@@ -170,7 +168,6 @@ class Revolver(
         batch ?: return
         background.getOrNull()?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
-        // This is really ugly but I won't bother with a better solution
         val game = game
         if (game != null && EncounterModifier.Frost in game.encounterModifiers && iceShader.isResolved) {
             val iceShader = iceShader.getOrError()
@@ -323,25 +320,14 @@ class RevolverSlot(
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
         joinGroup(revolverSlotGroup)
-        val dropShadow = DropShadow(
-            color = Color.Black,
-            scale = 1.1f,
-            offX = 3f,
-            offY = -3f
-        )
-        dropShadow.showDropShadow = false
-        this.dropShadow = dropShadow
         observeInputState(
             GameInputs.States.focused,
-            {
-                dropShadow.showDropShadow = true
-                card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused)
-            },
-            {
-                dropShadow.showDropShadow = false
-                card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused)
-            }
+            { card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused) },
+            { card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused) }
         )
+        onInput(GameInputs.interact) {
+            card?.actor?.clickedViaSlot()
+        }
         isDropTarget = true
         onDrop { actor ->
             if (actor !is CardActor) return@onDrop
@@ -446,6 +432,7 @@ class RevolverSlot(
     companion object {
 
         const val revolverSlotGroup: String = "revolverSlot"
+        const val revolverSlotWithCardInSelectionMode = "revolver-slot-with-card-in-selection-mode"
     }
 
 }

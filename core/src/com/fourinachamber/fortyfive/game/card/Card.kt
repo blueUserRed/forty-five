@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -204,18 +205,6 @@ class Card(
         this.game = game
     }
 
-    fun bindGameEvents(gameEvents: EventPipeline, controller: GameController) {
-        var currentTargetSelection: Promise<Card>? = null
-        gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
-            if (!inZone(Zone.REVOLVER)) return@watchFor
-            if (this === event.exclude) return@watchFor
-            TODO()
-//            actor.enterSelectionMode()
-//            event.promise.then { actor.exitSelectionMode() }
-            currentTargetSelection = event.promise
-        }
-    }
-
     fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
 
     fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
@@ -223,7 +212,6 @@ class Card(
     }
 
     fun changeZone(newZone: Zone, controller: GameController) {
-        val oldZone = zone
         zone = newZone
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
@@ -368,6 +356,10 @@ class Card(
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         costModifiers.add(modifier.copy())
         modifiersChanged()
+    }
+
+    fun enterTargetSelection(promise: Promise<Card>) {
+        actor.enterSelectionMode(promise)
     }
 
     private fun addRottenModifier(controller: GameController) {
@@ -742,6 +734,8 @@ class CardActor(
     override var marginRight: Float = 0F
     override var positionType: PositionType = PositionType.RELATIVE
 
+    override val reusableInputActor: Boolean = true
+
     private var inDestroyAnim: Boolean = false
     private var spawnAnimStart: Long = 0L
     private var spawnAnimDuration: Int = 0
@@ -761,7 +755,7 @@ class CardActor(
 
     private var prevPosition: Vector2? = null
 
-    var inSelectionMode: Boolean = false
+    private var selectionPromise: Promise<Card>? = null
 
     var playSoundsOnHover: Boolean = false
 
@@ -778,15 +772,48 @@ class CardActor(
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
         joinGroup(cardGroup)
-        startDragAndDropOn(GameInputs.toDel)
+        startDragAndDropOn(GameInputs.interact)
         onEnterInputState(GameInputs.States.focused) {
             if (!playSoundsOnHover) return@onEnterInputState
             FortyFive.soundPlayer.situation("card_hover", screen)
         }
-        onInput(GameInputs.triggerCard) {
-            TODO()
-//            FortyFive.currentGame?.cardRightClicked(card)
-        }
+
+        onInput(GameInputs.interact) { clickedViaSlot() }
+
+        val dropShadow = DropShadow(
+            color = Color.Black,
+            scale = 1.1f,
+            offX = 3f,
+            offY = -3f
+        )
+        dropShadow.showDropShadow = false
+        observeInputState(
+            GameInputs.States.focused,
+            {
+                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
+                    return@observeInputState
+                }
+                this.dropShadow = dropShadow
+                dropShadow.showDropShadow = true
+            },
+            {
+                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
+                    return@observeInputState
+                }
+                this.dropShadow?.showDropShadow = false
+            }
+        )
+
+    }
+
+    fun clickedViaSlot() {
+        val selectionPromise = selectionPromise ?: return
+        selectionPromise.resolve(card)
+    }
+
+    fun enterSelectionMode(promise: Promise<Card>) {
+        selectionPromise = promise
+        promise.then { selectionPromise = null }
     }
 
     override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
@@ -928,6 +955,10 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
+            if (card.inZone(Zone.REVOLVER)) {
+                println(card.name)
+                touchable = Touchable.enabled
+            }
             FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)
@@ -958,6 +989,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2
         action {
+            if (card.inZone(Zone.REVOLVER)) touchable = Touchable.disabled
             FortyFive.soundPlayer.situation("card_trigger_anim_out", screen)
             addAction(moveAction)
             addAction(scaleAction)
@@ -998,6 +1030,6 @@ class CardActor(
             }
         }
 
-        val cardGroup: String = "card-group"
+        const val cardGroup: String = "card-group"
     }
 }

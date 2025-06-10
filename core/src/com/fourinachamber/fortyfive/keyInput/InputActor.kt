@@ -1,13 +1,11 @@
 package com.fourinachamber.fortyfive.keyInput
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.general.DetailWidget
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
 interface InputActor {
 
@@ -34,6 +32,8 @@ interface InputActor {
     var partOfFocusGrid: InputManager.FocusGrid?
     var focusGridX: Int
     var focusGridY: Int
+
+    val reusableInputActor: Boolean
 
     fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor
 
@@ -157,6 +157,8 @@ class InputActorImpl : InputActor {
     override var partOfFocusGrid: InputManager.FocusGrid? = null
     override var focusGridX: Int = 0
     override var focusGridY: Int = 0
+
+    override val reusableInputActor: Boolean = false
 
     override fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor {
         this._actor = actor
@@ -328,6 +330,7 @@ class InputActorImpl : InputActor {
     }
 
     override fun onRemove() {
+        if ((actor as InputActor).reusableInputActor) return
         screen.inputManager.removeActor(actor as InputActor)
         leaveAllGroups()
     }
