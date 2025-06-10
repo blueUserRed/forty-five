@@ -118,7 +118,7 @@ data class DropShadow(
     companion object : ResourceBorrower {
 
         val dropShadowShader: Promise<BetterShader> by lazy {
-            FortyFive.resourceManager.request(this, Lifetime.endless, "other_drop_shadow_shader")
+            FortyFive.resourceManager.request(this, FortyFive.gameLifetime, "other_drop_shadow_shader")
         }
     }
 

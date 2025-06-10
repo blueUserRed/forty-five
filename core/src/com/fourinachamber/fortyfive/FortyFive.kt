@@ -38,6 +38,10 @@ object FortyFive : Game() {
     val resourceManager = ResourceManager()
     val screenManager = ScreenManager(TitleScreen, null)
 
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val gameLifetime: Lifetime
+        get() = _lifetime
+
     lateinit var steamHandler: SteamHandler
         private set
 
@@ -171,7 +175,10 @@ object FortyFive : Game() {
         PermaSaveState.write()
         SaveState.write()
         UserPrefs.write()
+        _lifetime.die()
+        soundPlayer.end()
         currentScreen?.dispose()
+        currentRenderPipeline?.dispose()
         serviceThread.close()
         resourceManager.end()
         super.dispose()

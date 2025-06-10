@@ -328,6 +328,7 @@ class GameControllerImpl(
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
                 encounterModifiers.forEach { it.initBullet(card) }
+                screen.lifetime.tieDisposable(card)
                 card.setGame(this@GameControllerImpl)
             }
             .toMutableList()

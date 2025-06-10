@@ -170,6 +170,10 @@ class SoundPlayer : ResourceBorrower {
         }
     }
 
+    fun end() {
+        currentMusicLifetime?.die()
+    }
+
     private data class AmbientSound(
         val name: String,
         val sound: ResourceHandle,

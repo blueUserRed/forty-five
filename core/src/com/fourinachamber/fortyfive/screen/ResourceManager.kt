@@ -234,6 +234,7 @@ class ResourceManager {
         for (resource in resources) {
             if (resource.handle.startsWith(Card.cardTexturePrefix)) continue
             if (resource.state == Resource.ResourceState.NOT_LOADED) continue
+            if (resource.stayLoaded) continue
             message.append("resource $resource was still loaded when the Game closed!\n")
             for (borrower in resource.borrowedBy) message.append("is borrowed by: $borrower\n")
         }

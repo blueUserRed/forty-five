@@ -383,7 +383,8 @@ class ChooseCardMapEvent(
         setStandardValuesFromConfig(onj)
     }
 
-    override fun screenChain(): ScreenManager.ScreenChain = ScreenManager.screenChain(TODO())
+    override fun screenChain(): ScreenManager.ScreenChain =
+        ScreenManager.screenChain(ChooseCardScreen to this)
 
     override fun completed() {
         isCompleted = true
