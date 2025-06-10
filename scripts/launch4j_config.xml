@@ -13,7 +13,7 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>./textures/icon.ico</icon>
+  <icon>./blobs/icon.ico</icon>
   <jre>
     <path>./jre</path>
     <requiresJdk>false</requiresJdk>

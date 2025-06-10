@@ -6,15 +6,12 @@ import kotlin.system.exitProcess
 
 val assetDirs = arrayOf(
     "config",
-    "dialog",
     "error_logs",
-    "fonts",
     "imports",
     "logging",
     "maps",
     "onjschemas",
     "saves",
-    "screens",
     "shaders",
     "blobs",
 )
@@ -28,6 +25,7 @@ fun build() {
     val (tag, dirName, tmpDir, convertToExe) = interviewUser()
     debug("running gradle dist task")
     command("./gradlew.bat", "dist")
+    if (tmpDir.exists()) tmpDir.deleteRecursively()
     tmpDir.mkdirs()
     copyJar(tmpDir)
     cleanupJar(tmpDir)
