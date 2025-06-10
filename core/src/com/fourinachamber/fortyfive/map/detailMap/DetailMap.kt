@@ -232,7 +232,7 @@ data class DetailMap(
         private var drawableCache: Promise<Drawable>? = null
 
         fun requestDrawable(screen: OnjScreen, mapWidget: DetailMapWidget) {
-            drawableCache = FortyFive.resourceManager.request<Drawable>(mapWidget, screen, drawableHandle)
+            drawableCache = FortyFive.resourceManager.request<Drawable>(mapWidget, screen.lifetime, drawableHandle)
         }
 
         fun getDrawable(screen: OnjScreen, mapWidget: DetailMapWidget): Promise<Drawable> {

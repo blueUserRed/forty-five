@@ -41,7 +41,7 @@ open class CustomLabel(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     override var marginTop: Float = 0f
     override var marginBottom: Float = 0f
@@ -219,7 +219,7 @@ open class CustomImageActor(
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     /**
@@ -368,7 +368,7 @@ open class CustomHorizontalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         this.x += drawOffsetX
@@ -413,7 +413,7 @@ open class CustomVerticalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         background?.draw(batch, x, y, width, height)
@@ -483,7 +483,7 @@ open class CustomGroup(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
-    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     override var dropShadow: DropShadow? = null
 
     var manualBackground: Drawable? = null

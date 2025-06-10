@@ -28,7 +28,7 @@ class Selector(
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
-    private val arrowTexture: Promise<Texture> = FortyFive.resourceManager.request(this, screen, arrowTextureHandle)
+    private val arrowTexture: Promise<Texture> = FortyFive.resourceManager.request(this, screen.lifetime, arrowTextureHandle)
 
     private val bindTarget: BindTarget<*> = BindTargetFactory.getAnyType(bind)
 

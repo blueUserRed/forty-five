@@ -714,7 +714,7 @@ class CardActor(
     val screen: OnjScreen,
     val enableHoverDetails: Boolean // TODO: fix
 ) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
-    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
+    OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,
@@ -749,16 +749,18 @@ class CardActor(
 
     override var dropShadow: DropShadow? = null
 
-    private val lifetime: EndableLifetime = EndableLifetime()
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val lifetime: Lifetime
+        get() = _lifetime
 
     private val destroyShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "dissolve_shader")
+        FortyFive.resourceManager.request(this, lifetime, "dissolve_shader")
 
     private val spawnShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "card_spawn_shader")
+        FortyFive.resourceManager.request(this, lifetime, "card_spawn_shader")
 
     private val markedSymbol: Promise<TransformDrawable> =
-        FortyFive.resourceManager.request(this, this, "card_symbol_marked")
+        FortyFive.resourceManager.request(this, lifetime, "card_symbol_marked")
 
     private var prevPosition: Vector2? = null
 
@@ -832,8 +834,6 @@ class CardActor(
         selectionPromise = promise
         promise.then { selectionPromise = null }
     }
-
-    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     private fun setupShader(batch: Batch): Boolean {
         val shaderPromise = when {
@@ -914,7 +914,7 @@ class CardActor(
     }
 
     override fun dispose() {
-        lifetime.die()
+        _lifetime.die()
         FortyFive.cardTextureManager.giveTextureBack(card)
     }
 

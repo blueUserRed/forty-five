@@ -671,7 +671,7 @@ object BackpackCreator {
             val proto = cardPrototypes[name]
                 ?: throw RuntimeException("unknown card $name in Backpack")
             val card = proto.create(screen)
-            screen.tieDisposable(card)
+            screen.lifetime.tieDisposable(card)
 
             card.actor.onDrop { actor ->
                 if (actor !is CardActor) return@onDrop

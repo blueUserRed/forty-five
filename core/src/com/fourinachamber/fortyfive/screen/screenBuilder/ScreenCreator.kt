@@ -327,7 +327,7 @@ abstract class ScreenCreator : ResourceBorrower {
         return advancedText
     }
 
-    fun forceLoadFont(handle: String): BitmapFont = FortyFive.resourceManager.forceGet(this, screen, handle)
+    fun forceLoadFont(handle: String): BitmapFont = FortyFive.resourceManager.forceGet(this, screen.lifetime, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
         this.addActor(actor)

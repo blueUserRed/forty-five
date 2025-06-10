@@ -267,7 +267,7 @@ class TextAdvancedTextPart(
     screen,
     TemplateString(rawText),
     LabelStyle(
-        FortyFive.resourceManager.forceGet(object : ResourceBorrower {}, screen, font),
+        FortyFive.resourceManager.forceGet(object : ResourceBorrower {}, screen.lifetime, font),
         fontColor
     ), // TODO: better way to do ResourceBorrowers
     isDistanceFiled
@@ -352,7 +352,7 @@ class IconAdvancedTextPart(
 
     private var calculatedLayout = false
 
-    private val fontPromise: Promise<BitmapFont> = FortyFive.resourceManager.request(this, screen, font)
+    private val fontPromise: Promise<BitmapFont> = FortyFive.resourceManager.request(this, screen.lifetime, font)
 
     init {
         reportDimensionsWithScaling = true
