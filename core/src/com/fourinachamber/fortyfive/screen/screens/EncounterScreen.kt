@@ -711,6 +711,7 @@ class EncounterScreen : ScreenCreator() {
             touchable = Touchable.enabled
             x = 370f
             y = 50f
+            var closed = false
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
                 AnimState("open", 370f),
@@ -729,10 +730,12 @@ class EncounterScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "shoot_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "shoot_button_texture"
                     xAnim.state("open")
                 }
@@ -744,10 +747,12 @@ class EncounterScreen : ScreenCreator() {
                 if (inParryMenu) {
                     xAnim.state("closed")
                     filter.start()
+                    closed = true
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
                     filter.end()
+                    closed = false
                     touchable = Touchable.enabled
                 }
             }
@@ -767,7 +772,7 @@ class EncounterScreen : ScreenCreator() {
                 AnimState("open", 370f),
                 AnimState("hover", 360f),
                 AnimState("closed", 600f),
-                initialState = "open",
+                initialState = "closed",
                 defaultTime = 100,
                 defaultInterpolation = Interpolation.pow2
             )
@@ -781,10 +786,12 @@ class EncounterScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "pass_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "pass_button_texture"
                     xAnim.state(if (closed) "closed" else "open")
                 }
@@ -819,6 +826,7 @@ class EncounterScreen : ScreenCreator() {
             name("holster_button")
             joinGroup("holster-button")
             val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
+            var closed = false
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             x = 990f
@@ -845,10 +853,12 @@ class EncounterScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "end_turn_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "end_turn_button_texture"
                     xAnim.state("open")
                 }
@@ -856,10 +866,12 @@ class EncounterScreen : ScreenCreator() {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
+                    closed = true
                     filter.start()
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
+                    closed = false
                     filter.end()
                     touchable = Touchable.enabled
                 }
@@ -875,13 +887,13 @@ class EncounterScreen : ScreenCreator() {
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.disabled
             x = 990f
-            y = 50f
+            y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 990f),
-                AnimState("hover", 1000f),
+                AnimState("open", 980f),
+                AnimState("hover", 990f),
                 AnimState("closed", 600f),
-                initialState = "open",
+                initialState = "closed",
                 defaultTime = 100,
                 defaultInterpolation = Interpolation.pow2
             )
@@ -900,12 +912,14 @@ class EncounterScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "parry_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "parry_button_texture"
-                    xAnim.state(if (closed) "closed" else "open")
+                    xAnim.state("open")
                 }
             )
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
@@ -1068,7 +1082,7 @@ class EncounterScreen : ScreenCreator() {
         isReserves: Boolean,
         duration: Int = 300
     ): Timeline = Timeline.timeline {
-        if (target is CardActor) return@timeline // TODO: fix for moving targets
+        if (isReserves && target is CardActor) return@timeline // TODO: fix for moving targets
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
         repeat(amount.absoluteValue) {
             action {
