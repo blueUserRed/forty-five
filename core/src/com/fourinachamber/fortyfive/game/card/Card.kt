@@ -955,10 +955,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
-            if (card.inZone(Zone.REVOLVER)) {
-                println(card.name)
-                touchable = Touchable.enabled
-            }
+            if (card.inZone(Zone.REVOLVER)) touchable = Touchable.enabled
             FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)

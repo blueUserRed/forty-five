@@ -1302,6 +1302,7 @@ cards: [
         effects: [
             {
                 trigger: rotation(),
+                inZones: [zone.revolver],
                 effect: buffDmg(
                     (inZone(zone.revolver) and not(isSelf()))#bSelect,
                     1#val
