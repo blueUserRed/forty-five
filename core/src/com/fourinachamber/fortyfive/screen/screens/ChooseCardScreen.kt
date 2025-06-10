@@ -124,7 +124,7 @@ class ChooseCardScreen : ScreenCreator() {
                 setFontScale(0.7f)
                 syncDimensions()
             }
-            if (context.enableRerolls) box {
+            if (context.enableRerolls) box(backgroundHints = buttonBackgroundHints()) {
                 horizontalAlign = CustomAlign.CENTER
                 verticalAlign = CustomAlign.CENTER
                 height = 60f

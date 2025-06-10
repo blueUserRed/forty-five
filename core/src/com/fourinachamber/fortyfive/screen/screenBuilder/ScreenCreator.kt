@@ -267,6 +267,7 @@ abstract class ScreenCreator : ResourceBorrower {
         color: Color = Color.BLACK,
         isTemplate: Boolean = false,
         isDistanceField: Boolean = true,
+        backgroundHints: Array<String> = arrayOf(),
         builder: CustomLabel.() -> Unit = {}
     ): CustomLabel {
         contract {
@@ -277,14 +278,16 @@ abstract class ScreenCreator : ResourceBorrower {
                 screen,
                 TemplateString(text),
                 Label.LabelStyle(forceLoadFont(font), color),
-                isDistanceField = isDistanceField
+                isDistanceField = isDistanceField,
+                backgroundHints = backgroundHints
             )
         } else {
             CustomLabel(
                 screen,
                 text,
                 Label.LabelStyle(forceLoadFont(font), color),
-                isDistanceField = isDistanceField
+                isDistanceField = isDistanceField,
+                backgroundHints = backgroundHints
             )
         }
         this.addActor(label)
@@ -383,6 +386,8 @@ abstract class ScreenCreator : ResourceBorrower {
         )
     }
 
+    fun buttonBackgroundHints() = arrayOf("common_button_default", "common_button_hover" )
+
     fun CustomLabel.defaultButtonBackgrounds() {
         backgroundHandle = "common_button_default"
         observeInputState(
@@ -424,16 +429,18 @@ abstract class ScreenCreator : ResourceBorrower {
             navbarObjects.add(backpackObject)
         }
 
-        val navbar = getSharedNavBar(
-            worldWidth, worldHeight,
-            navbarObjects,
-            screen,
-            isLeft = navbarIsLeft
-        )
 
-        actor(navbar) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
+        if (hasNavbar) {
+            val navbar = getSharedNavBar(
+                worldWidth, worldHeight,
+                navbarObjects,
+                screen,
+                isLeft = navbarIsLeft
+            )
+            actor(navbar) {
+                onLayoutAndNow { y = worldHeight - height }
+                centerX()
+            }
         }
         backpack?.let { actor(it) }
         settings?.let {

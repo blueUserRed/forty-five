@@ -12,12 +12,15 @@ import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
+import com.fourinachamber.fortyfive.screen.components.PopupCreator
+import com.fourinachamber.fortyfive.screen.components.PopupCreator.getSharedPopup
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.TitleScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.alpha
 import kotlin.reflect.KClass
@@ -28,8 +31,6 @@ class TitleScreen : ScreenCreator() {
 
     val worldWidth = 1600f
     val worldHeight = 900f
-
-    val popupWidgetName = "popup_widget"
 
     override val background: String = "background_bewitched_forest"
 
@@ -50,6 +51,8 @@ class TitleScreen : ScreenCreator() {
     }
 
     private var settingsOpen: Boolean = false
+
+    private val events: EventPipeline = EventPipeline()
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -94,30 +97,78 @@ class TitleScreen : ScreenCreator() {
             x = 120F
             y = worldHeight * 0.65F
             addOption("Continue") { FortyFive.toMap() }
-            addOption("Abandon Run") {}
-            addOption("Reset Game") {}
+            addOption("Abandon Run") { handleAbandonRun() }
+            addOption("Reset Game") { handleResetGame() }
 
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
             addOption("View Credits") { FortyFive.screenManager.transitionImmediate(CreditsScreen) }
-            addOption("Quit") { Gdx.app.exit() } // TODO: fix popup
-//            addOption("Quit") {handleQuit() }
+            addOption("Quit") { handleQuit() }
         }
 
         actor(settings) {
             centerX()
             fixedZIndex = 10000
         }
+
+        val popup = getSharedPopup(worldWidth, worldHeight, events)
+        actor(popup)
+
+        addDefaultOverlays(
+            worldWidth,
+            worldHeight,
+            events,
+            hasSettings = false, // added manually
+            hasBackpack = false,
+            hasNavbar = false,
+            hasWarnings = false,
+            hasTutorial = false,
+        )
     }
 
-    private fun CustomBox.handleQuit() {
-        showPopup(
+    private fun handleQuit() {
+
+        val popup = PopupCreator.ShowPopup(
             "Do you want to quit?",
-            "Are you sure you want to leave this game. Without you, the wild west will be unsafe and dangerous for all inhabitants, so choose wisely.",
-            mapOf(
-                "Quit" to { Gdx.app.exit() },
-                "Cancel" to null
+            "Are you sure you want to leave this game. Without you, the wild west will be unsafe and dangerous" +
+                    "for all inhabitants, so choose wisely.",
+            listOf(
+                "Quit" to true,
+                "Cancel" to false
             )
-        )
+        ) { result ->
+            if (result) Gdx.app.exit()
+        }
+        events.fire(popup)
+    }
+
+    private fun handleAbandonRun() {
+
+        val popup = PopupCreator.ShowPopup(
+            "Do you want to abandon you run?",
+            "All the progress you made will be lost",
+            listOf(
+                "Ok" to true,
+                "Cancel" to false
+            )
+        ) { result ->
+            if (result) FortyFive.newRun(false)
+        }
+        events.fire(popup)
+    }
+
+    private fun handleResetGame() {
+
+        val popup = PopupCreator.ShowPopup(
+            "Are you sure you want to reset the game?",
+            "All progress you made will be lost forever",
+            listOf(
+                "Ok" to true,
+                "Cancel" to false
+            )
+        ) { result ->
+            if (result) FortyFive.resetAll()
+        }
+        events.fire(popup)
     }
 
     private fun openSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
@@ -144,71 +195,6 @@ class TitleScreen : ScreenCreator() {
         }.asAction())
     }
 
-    private fun Group.showPopup(title: String, description: String, actions: Map<String, (() -> Unit)?>) {
-        var curParent = parent
-        while (curParent.parent != null) curParent = curParent.parent
-        curParent.box {
-            screen.addNamedActor(popupWidgetName, this)
-            name(popupWidgetName)
-            positionType = PositionType.ABSOLUTE
-            backgroundHandle = "detail_widget_background_big"
-            width = worldWidth * 0.3f
-            height = worldHeight * 0.3f
-            x = (worldWidth - width) / 2
-            y = (worldHeight - height) / 2
-            horizontalAlign = CustomAlign.CENTER
-            verticalAlign = CustomAlign.SPACE_BETWEEN
-            paddingTop = 25f
-            paddingBottom = -20f
-            debug = true
-            label("red_wing", title, color = Color.FortyWhite) {
-                setFontScale(1.4f)
-                syncWidth()
-            }
-            advancedText("red_wing", Color.FortyWhite, 0.8f) {
-                fitContentHeight = true
-                setRawText(description, null)
-                relativeWidth(80f)
-            }
-
-            box {
-                flexDirection = FlexDirection.ROW
-                horizontalAlign = CustomAlign.SPACE_AROUND
-                relativeWidth(100F)
-                relativeHeight(20f)
-
-                val labels = mutableListOf<CustomLabel>()
-                actions.entries.forEach {
-                    labels.add(label("red_wing", it.key) {
-//                        onSelect {
-//                            it.value?.invoke()
-//                            if (it.value == null) removePopup()
-//                        }
-                        onLayoutAndNow {
-                            height = prefHeight * 1.2f
-                            setAlignment(Align.center)
-                        }
-//                        if (it.value == null) screen.focusSpecific(this)
-                    })
-                }
-
-                val curMax = labels.maxOf { it.prefWidth } * 1.2f
-                labels.forEach { it.width = curMax }
-            }
-        }
-
-//        screen.addToSelectionHierarchy(
-//            FocusableParent(listOf(SelectionTransition(groups = listOf(popupFocusGroup))),
-//                onLeave = {
-//                    removePopup()
-//                })
-//        )
-    }
-
-    fun removePopup() {
-        screen.namedActorOrNull(popupWidgetName)?.remove()
-    }
-
     private fun Group.addOption(displayText: String, action: () -> Unit) = label("red_wing_bmp", displayText) {
         setFontScale(0.4f)
         syncWidth()
@@ -227,7 +213,7 @@ class TitleScreen : ScreenCreator() {
         )
     }
 
-    fun Group.addBullet(name: String) = box {
+    private fun Group.addBullet(name: String) = box {
         positionType = PositionType.ABSOLUTE
         width = worldWidth
         height = worldHeight

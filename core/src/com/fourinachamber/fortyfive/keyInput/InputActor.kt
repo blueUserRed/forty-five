@@ -329,5 +329,6 @@ class InputActorImpl : InputActor {
 
     override fun onRemove() {
         screen.inputManager.removeActor(actor as InputActor)
+        leaveAllGroups()
     }
 }
