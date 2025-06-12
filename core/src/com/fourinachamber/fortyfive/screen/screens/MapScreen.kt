@@ -18,12 +18,6 @@ import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.DropShadow
-import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
-import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
-import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*

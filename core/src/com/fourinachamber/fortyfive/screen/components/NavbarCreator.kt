@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
@@ -67,7 +66,14 @@ object NavbarCreator {
         actor(boxWithTimeline) {
             flexDirection = FlexDirection.COLUMN
             if (isLeft) {
-                getSmallerLeftNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
+                getSmallerLeftNavBar(
+                    this@getSharedNavBar,
+                    worldWidth,
+                    worldHeight,
+                    navBarEvents,
+                    objects,
+                    navBarTimeline
+                )
             } else {
                 getNavBar(this@getSharedNavBar, worldWidth, worldHeight, navBarEvents, objects, navBarTimeline)
             }
@@ -251,6 +257,9 @@ object NavbarCreator {
         scale: Float = 1f,
     ) = with(creator) {
         box {
+            val baseLogicalOffsetY = 35F
+            val openOffsetY = -9F
+            val focusedOffsetY = -5F
             height = parent.parent.height * 0.7f * scale
             width = 250f * scale
             backgroundHandle = "statusbar_option"
@@ -259,17 +268,17 @@ object NavbarCreator {
 
             label("red_wing", obj.name) {
                 centerX()
-                y = 15f
+                y = 20f
                 setAlignment(Align.center)
                 positionType = PositionType.ABSOLUTE
                 fontColor = ScreenCreator.fortyWhite
                 setFontScale(0.7f * scale)
             }
 
-            fun createAction(end: Float): PropertyAction<Float> = PropertyAction<Float>(
+            fun createAction(end: Float): PropertyAction<Float> = PropertyAction(
                 this@box,
                 this@box::logicalOffsetY,
-                end,
+                baseLogicalOffsetY + end,
                 invalidateHierarchyOf = this
             ).also {
                 it.duration = 0.12f
@@ -279,7 +288,7 @@ object NavbarCreator {
             var isOpen = false
 
             keyboardFocusable = KeyboardFocusable.LEAF
-            logicalOffsetY = 25f
+            logicalOffsetY = baseLogicalOffsetY
 
             val dropShadow = DropShadow(
                 Color.BLACK, 2f, -2f, 1.1f, blurFactor = 0.5f, showDropShadow = false
@@ -289,14 +298,19 @@ object NavbarCreator {
             observeInputState(
                 GameInputs.States.focused,
                 {
-                    if (isOpen) addAction(createAction(27f)) else addAction(createAction(25f))
+                    if (isOpen) addAction(createAction(openOffsetY + focusedOffsetY))
+                        else addAction(createAction(focusedOffsetY))
+
                     dropShadow.showDropShadow = true
                 },
                 {
-                    if (isOpen) addAction(createAction(32f)) else addAction(createAction(30f))
+                    if (isOpen) addAction(createAction(openOffsetY))
+                        else addAction(createAction(0f))
                     dropShadow.showDropShadow = false
+
                 }
             )
+            this.isInInputState(GameInputs.States.focused)
 
             events.watchFor<CloseNavBarButtons> {
                 if (!isOpen) return@watchFor
@@ -305,14 +319,14 @@ object NavbarCreator {
                 timeline.appendAction(Timeline.timeline {
                     action { screen.leaveState(navbarOpenScreenState) }
                 }.asAction())
-                addAction(createAction(25f))
+                val isFocused = this.observedStates.contains(GameInputs.States.focused)
+                addAction(createAction(if (isFocused) focusedOffsetY else 0f))
             }
 
             onInput(GameInputs.interact) {
                 if (isOpen) {
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))
-                    addAction(createAction(30f))
                 } else {
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(true))
@@ -321,7 +335,7 @@ object NavbarCreator {
                         action { screen.enterState(navbarOpenScreenState) }
                     }.asAction())
                     isOpen = true
-                    addAction(createAction(32f))
+                    addAction(createAction(openOffsetY + focusedOffsetY))
                 }
             }
         }
