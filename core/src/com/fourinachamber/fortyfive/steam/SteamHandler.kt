@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.steam
 
 import com.codedisaster.steamworks.*
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
 
@@ -99,13 +100,13 @@ class SteamHandler {
         try {
             SteamAPI.loadLibraries()
             if (!SteamAPI.init()) {
-                FortyFiveLogger.severe(LOGTAG, "Couldn't load Steam API")
+                FortyFive.logger.severe(LOGTAG, "Couldn't load Steam API")
             }else{
                 userStats = SteamUserStats(statsCallback)
 //                loadUserStats()
             }
         } catch (e: SteamException) {
-            FortyFiveLogger.severe(LOGTAG, "Couldn't load Steam Librarys")
+            FortyFive.logger.severe(LOGTAG, "Couldn't load Steam Librarys")
         }
     }
 

@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.FocusAlignment
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputActorImpl
@@ -22,8 +23,8 @@ import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.alpha
 import com.fourinachamber.fortyfive.utils.between
-import ktx.actors.alpha
 import kotlin.math.max
 
 //TODO (optional):
@@ -94,7 +95,7 @@ open class CustomBox(
             i++
             if (i > 30) break
         }
-        if (i >= 10) FortyFiveLogger.warn("CustomBox", "$i Layout iterations were necessary until needsLayout() was false")
+        if (i >= 10) FortyFive.logger.warn("CustomBox", "$i Layout iterations were necessary until needsLayout() was false")
     }
 
     override fun layout() {
@@ -266,7 +267,7 @@ open class CustomBox(
     private fun layoutSize(children: List<Box>) {
         if (wrap != CustomWrap.NONE) {
             if (flexDirection.isColumn) {
-                layoutPrefHeight = (forcedPrefHeight ?: height)
+                layoutPrefHeight = height
                 layoutPrefWidth = simulateChildrenFast(
                     children,
                     FlexDirection.COLUMN,
@@ -274,7 +275,7 @@ open class CustomBox(
                     minHorizontalDistBetweenElements
                 )
             } else {
-                layoutPrefWidth = (forcedPrefWidth ?: width)
+                layoutPrefWidth = width
                 layoutPrefHeight =
                     simulateChildrenFast(
                         children,
@@ -365,10 +366,6 @@ open class CustomBox(
         super.invalidate()
     }
 
-    override fun getMinWidth(): Float = forcedPrefWidth ?: super.getMinWidth()
-    override fun getMinHeight(): Float = forcedPrefHeight ?: super.getMinHeight()
-    override fun getMaxWidth(): Float = forcedPrefWidth ?: super.getMaxWidth()
-    override fun getMaxHeight(): Float = forcedPrefHeight ?: super.getMaxHeight()
 }
 
 

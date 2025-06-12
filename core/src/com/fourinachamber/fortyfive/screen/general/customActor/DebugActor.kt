@@ -4,13 +4,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
-interface DebugBoundsActor {
+interface DebugActor {
 
     var debugColor: Color
 
-    fun initDebugBounds(actor: Actor)
+    fun initDebugBounds(actor: Actor, screen: OnjScreen)
 
     fun badTexture(
         name: String,
@@ -23,20 +25,42 @@ interface DebugBoundsActor {
 
     fun debug(color: Color)
 
+    fun invalidateCalled()
+
 }
 
-class DebugBoundsActorImpl : DebugBoundsActor {
+class DebugActorImpl : DebugActor {
 
     override var debugColor: Color = Color(0f, 1f, 0f, 0.85f)
 
     private lateinit var actor: Actor
+    private lateinit var screen: OnjScreen
 
     private var badTexture: Boolean = false
 
     private val blinkOffset = (0..500).random()
 
-    override fun initDebugBounds(actor: Actor) {
+    private var invalidateCalls: Int = 0
+    private var lastInvalidateCheckTime: Long = TimeUtils.millis()
+
+    override fun initDebugBounds(actor: Actor, screen: OnjScreen) {
         this.actor = actor
+        this.screen = screen
+    }
+
+    override fun invalidateCalled() {
+        invalidateCalls++
+        val now = TimeUtils.millis()
+        if (now - lastInvalidateCheckTime < 1000) return
+        if (invalidateCalls > 30) {
+            val name = actor.name?.ifBlank { actor.toString() } ?: actor.toString()
+//            FortyFive.logger.warn(
+//                "debugActor",
+//                "actor '$name': invalidate called $invalidateCalls times in the last second"
+//            )
+        }
+        invalidateCalls = 0
+        lastInvalidateCheckTime = now
     }
 
     override fun badTexture(
@@ -59,7 +83,7 @@ class DebugBoundsActorImpl : DebugBoundsActor {
         }
         if (commentBuilder.isEmpty()) commentBuilder.append("no or wrong texture")
 
-        actorsWithBadTextures[name] = commentBuilder.toString()
+        actorsWithWarnings[name] = commentBuilder.toString()
 
         if (!debugHighlightBadTextures) return
         actor.debug()
@@ -93,15 +117,15 @@ class DebugBoundsActorImpl : DebugBoundsActor {
         const val debugHighlightBadTextures: Boolean = false
         const val makeBadTextureHighlightsExtryAnnoying: Boolean = false
 
-        val actorsWithBadTextures: MutableMap<String, String> = mutableMapOf()
+        val actorsWithWarnings: MutableMap<String, String> = mutableMapOf()
 
-        fun dumpActorsWithBadTextures() {
-            if (actorsWithBadTextures.isEmpty()) return
+        fun dumpActorsWithDebugWarnings() {
+            if (actorsWithWarnings.isEmpty()) return
             val builder = StringBuilder()
-            actorsWithBadTextures.forEach { name, comment ->
+            actorsWithWarnings.forEach { (name, comment) ->
                 builder.append("$name: $comment\n")
             }
-            FortyFiveLogger.dump(
+            FortyFive.logger.dump(
                 FortyFiveLogger.LogLevel.MEDIUM,
                 builder.toString(),
                 "Actors with bad textures were shown when playing the game"

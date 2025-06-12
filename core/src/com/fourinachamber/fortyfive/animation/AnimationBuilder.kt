@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.animation
 
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.Either
@@ -19,7 +20,7 @@ class AnimationBuilderDSL {
         animations.add { resourceBorrower, lifetime ->
             // forceGet is not an issue here because the DeferredFrameAnimation doesn't really take any time to load,
             // it just requests other resources
-            ResourceManager.forceGet(resourceBorrower, lifetime, name)
+            FortyFive.resourceManager.forceGet(resourceBorrower, lifetime, name)
         }
         return animations.size - 1
     }

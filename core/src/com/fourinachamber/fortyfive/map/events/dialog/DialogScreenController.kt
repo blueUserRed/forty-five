@@ -1,19 +1,14 @@
 package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
-import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DialogMapEvent
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
-import ktx.actors.alpha
+import com.fourinachamber.fortyfive.utils.alpha
 import onj.value.OnjArray
 import onj.value.OnjObject
 

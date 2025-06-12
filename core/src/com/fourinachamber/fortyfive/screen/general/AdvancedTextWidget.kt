@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -17,7 +18,6 @@ import com.fourinachamber.fortyfive.screen.general.customActor.HasPaddingActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KotlinStyledActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
-import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -28,11 +28,9 @@ open class AdvancedTextWidget(
     private val defaults: Triple<String, Color, Float>,
     screen: OnjScreen,
     private val isDistanceField: Boolean,
-) : CustomGroup(screen), StyledActor, HasPaddingActor {
+) : CustomGroup(screen), HasPaddingActor {
 
     override var fixedZIndex: Int = 0
-
-    override var styleManager: StyleManager? = null
 
     override var paddingTop: Float = 0F
     override var paddingBottom: Float = 0F
@@ -181,10 +179,6 @@ open class AdvancedTextWidget(
     private fun clearText() = advancedText.parts.forEach {
         removeActor(it.actor)
     }
-
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-    }
 }
 
 data class AdvancedText(
@@ -274,7 +268,7 @@ class TextAdvancedTextPart(
     screen,
     TemplateString(rawText),
     LabelStyle(
-        ResourceManager.forceGet(object : ResourceBorrower {}, screen, font),
+        FortyFive.resourceManager.forceGet(object : ResourceBorrower {}, screen, font),
         fontColor
     ), // TODO: better way to do ResourceBorrowers
     isDistanceFiled
@@ -359,7 +353,7 @@ class IconAdvancedTextPart(
 
     private var calculatedLayout = false
 
-    private val fontPromise: Promise<BitmapFont> = ResourceManager.request(this, screen, font)
+    private val fontPromise: Promise<BitmapFont> = FortyFive.resourceManager.request(this, screen, font)
 
     init {
         reportDimensionsWithScaling = true

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.general.DetailWidget
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -209,7 +210,7 @@ class InputActorImpl : InputActor {
 
     private fun notifyInputStateChangedRec(state: InputState, entered: Boolean, depthLimit: Int) {
         if (depthLimit <= 0) {
-            FortyFiveLogger.warn("InputSystem", "input States for actor $actor did not converge after 50 retries")
+            FortyFive.logger.warn("InputSystem", "input States for actor $actor did not converge after 50 retries")
             return
         }
         if (entered) {

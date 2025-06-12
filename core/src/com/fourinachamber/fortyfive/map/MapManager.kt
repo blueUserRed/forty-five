@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.map.detailMap.generation.BaseMapGenerator
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.screens.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -41,7 +42,7 @@ object MapManager {
 
     var currentMapNode: MapNode
         get() = currentDetailMap.uniqueNodes.find { it.index == SaveState.currentNode } ?: run {
-            FortyFiveLogger.warn(logTag, "Player was on node ${SaveState.currentNode} in map $currentDetailMap, which doesn't exist. Reset player to node 0.")
+            FortyFive.logger.warn(logTag, "Player was on node ${SaveState.currentNode} in map $currentDetailMap, which doesn't exist. Reset player to node 0.")
             SaveState.currentNode = 0
             SaveState.lastNode = null
             currentDetailMap.uniqueNodes[0]
@@ -105,6 +106,8 @@ object MapManager {
         currentDetailMap = readDetailMap(map)
     }
 
+    // TODO: we need to come up with a better system for managing screen order anyways
+
     fun changeToEncounterScreen(context: EncounterContext, immediate: Boolean = false) {
         val encounter = GameDirector.encounters[context.encounterIndex]
         val intermediate = encounter
@@ -112,38 +115,39 @@ object MapManager {
             .map { it.intermediateScreen() }
             .find { it != null }
         if (intermediate != null && !immediate) {
-            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(intermediate), context)
+            TODO()
+//            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(intermediate), context)
         } else {
-            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("encounterScreen"), context)
+            FortyFive.changeToScreen(GameScreen(), context)
         }
     }
 
     fun changeToDialogScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("dialogScreen"), event)
+        FortyFive.changeToScreen(DialogScreen(), event)
     }
 
     fun changeToShopScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("shopScreen"), event)
+        FortyFive.changeToScreen(ShopScreen(), event)
     }
 
     fun changeToChooseCardScreen(context: ChooseCardScreenContext) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("chooseCardScreen"), context)
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("chooseCardScreen"), context)
     }
 
     fun changeToHealOrMaxHPScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("healOrMaxHPScreen"), event)
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("healOrMaxHPScreen"), event)
     }
 
     fun changeToAddMaxHPScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("addMaxHPScreen"), event)
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("addMaxHPScreen"), event)
     }
 
     fun changeToTitleScreen() {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("titleScreen"))
+        FortyFive.changeToScreen(TitleScreen())
     }
 
     fun changeToCreditsScreen() {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("creditsScreen"))
+//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("creditsScreen"))
     }
 
     /**
@@ -154,7 +158,7 @@ object MapManager {
     }
 
     fun displayName(internalName: String) = displayNames[internalName] ?: run {
-        FortyFiveLogger.warn(logTag, "no display name for $internalName")
+        FortyFive.logger.warn(logTag, "no display name for $internalName")
         internalName
     }
 
@@ -171,14 +175,14 @@ object MapManager {
             ?.index
             ?: 0
         SaveState.lastNode = null
-        FortyFiveLogger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
+        FortyFive.logger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
         changeToMapScreen()
     }
 
     private fun readDetailMap(map: FileHandle): DetailMap = try {
         DetailMap.readFromFile(map)
     } catch (e: DetailMap.InvalidMapFileException) {
-        FortyFiveLogger.warn(logTag, "Invalid map file found, reloading all maps")
+        FortyFive.logger.warn(logTag, "Invalid map file found, reloading all maps")
         generateMapsSync()
         copyStaticMaps()
         SaveState.currentNode = 0
@@ -213,7 +217,7 @@ object MapManager {
     }
 
     fun changeToMapScreen() {
-        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("mapScreen"))
+        FortyFive.changeToScreen(MapScreen())
     }
 
     fun lookupMapFile(mapName: String): FileHandle =

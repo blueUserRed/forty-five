@@ -46,13 +46,10 @@ abstract class Resource(
 
     var stayLoaded: Boolean = false
 
-    @AllThreadsAllowed
     abstract suspend fun prepareLoadingAllThreads()
 
-    @MainThreadOnly
     abstract fun finishLoadingMainThread()
 
-    @MainThreadOnly
     fun <T> get(variantType: KClass<T>): T? where T : Any {
         if (state != ResourceState.LOADED) {
             runBlocking { load() }
@@ -69,7 +66,7 @@ abstract class Resource(
                 load()
             }
             if (time > warnThreshold) {
-                FortyFiveLogger.warn(logTag, "force resolving $handle blocked the main thread for ${time}ms")
+                FortyFive.logger.warn(logTag, "force resolving $handle blocked the main thread for ${time}ms")
             }
         }
         if (!promise.isResolved) promise.resolve(this)
@@ -82,7 +79,7 @@ abstract class Resource(
                 load()
             }
             if (time > warnThreshold) {
-                FortyFiveLogger.warn(logTag, "force getting $handle blocked the main thread for ${time}ms")
+                FortyFive.logger.warn(logTag, "force getting $handle blocked the main thread for ${time}ms")
             }
         }
         lifetime.onEnd { giveBack(borrower) }
@@ -102,7 +99,7 @@ abstract class Resource(
                 FortyFive.mainThreadTask {
                     val time = measureTimeMillis { runBlocking { load() } }
                     if (time > warnThreshold) {
-                        FortyFiveLogger.warn(
+                        FortyFive.logger.warn(
                             logTag,
                             "Resource $handle took ${time}ms to load on the main thread. Check if there is a way to speed" +
                                     "up the load to avoid blocking the main thread."
@@ -127,7 +124,6 @@ abstract class Resource(
         return variantType.cast(variant)
     }
 
-    @MainThreadOnly
     protected open suspend fun load() = mutex.withLock {
         if (state == ResourceState.NOT_LOADED) {
             prepareLoadingAllThreads()
@@ -138,7 +134,6 @@ abstract class Resource(
         state = ResourceState.LOADED
     }
 
-    @AllThreadsAllowed
     open suspend fun prepare() = mutex.withLock {
         if (state != ResourceState.NOT_LOADED) return
         prepareLoadingAllThreads()
@@ -156,7 +151,6 @@ abstract class Resource(
         if (!stayLoaded && borrowedBy.isEmpty()) dispose()
     }
 
-    @MainThreadOnly
     override fun dispose() = synchronized(this) {
         disposables.forEach(Disposable::dispose)
         variants = listOf()
@@ -297,7 +291,7 @@ class AtlasRegionResource(
 ) : Resource(handle), ResourceBorrower {
 
     private val atlasResource: AtlasResource by lazy {
-        val atlasResource = ResourceManager.resources.find { it.handle == atlasResourceHandle }
+        val atlasResource = FortyFive.resourceManager.resources.find { it.handle == atlasResourceHandle }
             ?: throw RuntimeException("No atlas with handle $atlasResourceHandle")
         atlasResource as? AtlasResource
             ?: throw RuntimeException("resource with handle $atlasResourceHandle is not an atlas")
@@ -307,7 +301,7 @@ class AtlasRegionResource(
     private var atlasPromise: Promise<TextureAtlas>? = null
 
     override fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
-        atlasPromise = ResourceManager.request<TextureAtlas>(borrower, lifetime, atlasResourceHandle)
+        atlasPromise = FortyFive.resourceManager.request<TextureAtlas>(borrower, lifetime, atlasResourceHandle)
         return atlasPromise!!.map {
             loadFromAtlas()
             getVariant(variantType)
@@ -336,7 +330,6 @@ class AtlasRegionResource(
     override fun finishLoadingMainThread() {
     }
 
-    @MainThreadOnly
     override fun dispose() {
         atlasPromise = null
     }

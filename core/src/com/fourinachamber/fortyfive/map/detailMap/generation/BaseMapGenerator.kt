@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap.generation
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
@@ -78,7 +79,7 @@ abstract class BaseMapGenerator {
         var spawned = 0
         while (spawned <= targetAmount) {
             if (iteration > maxIts) {
-                FortyFiveLogger.warn(logTag, "MaxIts reached when spawning decoration ${decoration.decoration} in map $name")
+                FortyFive.logger.warn(logTag, "MaxIts reached when spawning decoration ${decoration.decoration} in map $name")
                 break
             }
             iteration++

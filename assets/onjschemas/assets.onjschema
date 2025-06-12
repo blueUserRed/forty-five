@@ -1,6 +1,5 @@
 
 use Common;
-use Style;
 
 var resourceSharedKeys = {
     stayLoaded?: boolean

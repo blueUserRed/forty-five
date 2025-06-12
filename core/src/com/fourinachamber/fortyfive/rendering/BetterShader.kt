@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -26,7 +27,7 @@ class BetterShader(
 
     private val textures: MutableMap<String, Promise<Texture>> = neededTextures
         .associateWith {
-            ResourceManager.request<Texture>(this, this, uniformResourceNameMapping[it]!!)
+            FortyFive.resourceManager.request<Texture>(this, this, uniformResourceNameMapping[it]!!)
         }
         .toMutableMap()
 
@@ -89,7 +90,7 @@ class BetterShader(
 
     private fun getTexture(name: String): Texture {
         val promise = textures[name]!!
-        if (!promise.isResolved) ResourceManager.forceResolve(promise)
+        if (!promise.isResolved) FortyFive.resourceManager.forceResolve(promise)
         return promise.getOrError()
     }
 

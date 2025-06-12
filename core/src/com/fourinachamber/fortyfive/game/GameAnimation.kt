@@ -14,9 +14,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import ktx.actors.alpha
+import com.fourinachamber.fortyfive.utils.alpha
 import java.lang.Float.min
 
 /**
@@ -32,19 +30,16 @@ abstract class GameAnimation {
     /**
      * updates the animation
      */
-    @MainThreadOnly
     abstract fun update()
 
     /**
      * starts the animation
      */
-    @AllThreadsAllowed
     open fun start() {}
 
     /**
      * called after the animation has finished
      */
-    @AllThreadsAllowed
     open fun end() {}
 
 }

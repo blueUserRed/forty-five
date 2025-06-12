@@ -26,7 +26,7 @@ interface ResourceBorrower
 
 typealias ResourceHandle = String
 
-object ResourceManager {
+class ResourceManager {
 
     lateinit var resources: List<Resource>
         private set
@@ -314,8 +314,6 @@ object ResourceManager {
     }
 
 
-    private const val logTag = "ResourceManager"
-    const val DROP_SHADOW_END = "_drop_shadow"
 
     fun end() {
         val message = StringBuilder()
@@ -326,9 +324,14 @@ object ResourceManager {
             for (borrower in resource.borrowedBy) message.append("is borrowed by: $borrower\n")
         }
         if (message.isEmpty()) return
-        FortyFiveLogger.warn(logTag, "Resources were loaded when the game closed. This could " +
+        FortyFive.logger.warn(logTag, "Resources were loaded when the game closed. This could " +
                 "be indicative of a memory leak. Summary:")
-        FortyFiveLogger.dump(FortyFiveLogger.LogLevel.MEDIUM, message.toString())
+        FortyFive.logger.dump(FortyFiveLogger.LogLevel.MEDIUM, message.toString())
+    }
+
+    companion object {
+        const val DROP_SHADOW_END = "_drop_shadow"
+        private const val logTag = "ResourceManager"
     }
 
 }

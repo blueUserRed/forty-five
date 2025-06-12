@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.controller.GameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
@@ -27,7 +28,7 @@ class GameDirector(private val controller: GameController) {
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         difficulty = SaveState.currentDifficulty
         val encounter = encounters[controller.encounterContext.encounterIndex]
-        FortyFiveLogger.debug(logTag, "chose encounter $encounter")
+        FortyFive.logger.debug(logTag, "chose encounter $encounter")
         enemies = encounter
             .enemies
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
@@ -139,12 +140,12 @@ class GameDirector(private val controller: GameController) {
             if (encounters.isEmpty()) throw RuntimeException("no encounters are defined")
             val encountersInBiome = encounters.filter { biome in it.biomes }
             if (encountersInBiome.isEmpty()) {
-                FortyFiveLogger.warn(logTag, "No encounter found for biome $biome; choosing a random one")
+                FortyFive.logger.warn(logTag, "No encounter found for biome $biome; choosing a random one")
                 return encounters.randomIndex()
             }
             val encountersInRoad = encountersInBiome.filter { progress intersection it.progress }
             if (encountersInRoad.isEmpty()) {
-                FortyFiveLogger.warn(logTag, "No encounter found for progress $progress; choosing a random one")
+                FortyFive.logger.warn(logTag, "No encounter found for progress $progress; choosing a random one")
                 return encountersInBiome.randomIndex()
             }
             val chosen = encountersInRoad

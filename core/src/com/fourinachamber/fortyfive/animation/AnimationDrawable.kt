@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -110,12 +111,12 @@ data class StillFrameAnimationPart(
     override val duration: Int
 ) : AnimationPart, ResourceBorrower {
 
-    private val frame: Promise<Drawable> = ResourceManager.request(borrower, lifetime, frameHandle)
+    private val frame: Promise<Drawable> = FortyFive.resourceManager.request(borrower, lifetime, frameHandle)
 
     override fun getFrame(progress: Int, frameOffset: Int): Drawable? = frame.getOrNull()
 
     override fun dispose() {
-        ResourceManager.giveBack(this, frameHandle)
+        FortyFive.resourceManager.giveBack(this, frameHandle)
     }
 
     override fun width(): Float = frame.getOrNull()?.minWidth ?: 0f

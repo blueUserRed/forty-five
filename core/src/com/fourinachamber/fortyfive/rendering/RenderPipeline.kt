@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -55,16 +56,16 @@ open class RenderPipeline(
     private val orbAnimations: MutableList<OrbAnimation> = mutableListOf()
 
     private val alphaReductionShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "alpha_reduction_shader")
+        FortyFive.resourceManager.request(this, this, "alpha_reduction_shader")
 
     private val screenShakeShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "screen_shake_shader")
+        FortyFive.resourceManager.request(this, this, "screen_shake_shader")
 
     private val screenShakePopoutShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "screen_shake_popout_shader")
+        FortyFive.resourceManager.request(this, this, "screen_shake_popout_shader")
 
     private val gaussianBlurShader: Promise<BetterShader> =
-        ResourceManager.request(this, this, "gaussian_blur_shader")
+        FortyFive.resourceManager.request(this, this, "gaussian_blur_shader")
 
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
@@ -118,7 +119,7 @@ open class RenderPipeline(
     }
 
     fun getScreenShakeTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
-        if (!screenShakeShader.isResolved) ResourceManager.forceResolve(screenShakeShader)
+        if (!screenShakeShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakeShader)
         val screenShakeShader = screenShakeShader.getOrError()
         action { screenShakeShader.resetReferenceTime() }
         action { postPreprocessingSteps.add(screenShakePostProcessingStep) }
@@ -127,7 +128,7 @@ open class RenderPipeline(
     } else Timeline()
 
     fun getScreenShakePopoutTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
-        if (!screenShakePopoutShader.isResolved) ResourceManager.forceResolve(screenShakePopoutShader)
+        if (!screenShakePopoutShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakePopoutShader)
         val screenShakePopoutShader = screenShakeShader.getOrError()
         action { screenShakePopoutShader.resetReferenceTime() }
         action { postPreprocessingSteps.add(screenShakePopoutPostProcessingStep) }
@@ -142,7 +143,7 @@ open class RenderPipeline(
         ScreenUtils.clear(0f, 0f, 0f, 0f)
         batch.begin()
 
-        if (!alphaReductionShader.isResolved) ResourceManager.forceResolve(alphaReductionShader)
+        if (!alphaReductionShader.isResolved) FortyFive.resourceManager.forceResolve(alphaReductionShader)
         val shader = alphaReductionShader.getOrError()
         batch.flush()
         batch.shader = shader.shader
@@ -171,7 +172,7 @@ open class RenderPipeline(
                 return@forEach
             }
 
-            if (!anim.orbTexturePromise.isResolved) ResourceManager.forceResolve(anim.orbTexturePromise)
+            if (!anim.orbTexturePromise.isResolved) FortyFive.resourceManager.forceResolve(anim.orbTexturePromise)
             val drawable = anim.orbTexturePromise.getOrError()
 
             val segments = anim.segments + 1
@@ -198,7 +199,7 @@ open class RenderPipeline(
 
     private fun renderOrbFbo() {
         val (active, inactive) = frameBufferManager.getPingPongFrameBuffers("orb") ?: return
-        if (!gaussianBlurShader.isResolved) ResourceManager.forceResolve(gaussianBlurShader)
+        if (!gaussianBlurShader.isResolved) FortyFive.resourceManager.forceResolve(gaussianBlurShader)
         val shader = gaussianBlurShader.getOrError()
         batch.flush()
         batch.enableBlending()
@@ -233,7 +234,7 @@ open class RenderPipeline(
         batch.flush()
         batch.shader = null
         orbAnimations.forEach { anim ->
-            if (!anim.orbTexturePromise.isResolved) ResourceManager.forceResolve(anim.orbTexturePromise)
+            if (!anim.orbTexturePromise.isResolved) FortyFive.resourceManager.forceResolve(anim.orbTexturePromise)
             val drawable = anim.orbTexturePromise.getOrError()
             val time = TimeUtils.millis() - anim.startTime
             val progress = time.toFloat() / anim.duration.toFloat()
@@ -269,7 +270,7 @@ open class RenderPipeline(
 
     private fun renderDebugMenu(menu: DebugMenu) {
         menu.update()
-        val font = ResourceManager.forceGet<BitmapFont>(this, this, "red_wing_bmp")
+        val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, this, "red_wing_bmp")
         font.data.setScale(0.2f)
 
         val page = menu.currentPage()
@@ -340,7 +341,7 @@ open class RenderPipeline(
     }
 
     protected fun shaderPostProcessingStep(shaderPromise: Promise<BetterShader>): () -> Unit = lambda@{
-        if (!shaderPromise.isResolved) ResourceManager.forceResolve(shaderPromise)
+        if (!shaderPromise.isResolved) FortyFive.resourceManager.forceResolve(shaderPromise)
         val shader = shaderPromise.getOrError()
         val (_, inactive) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return@lambda
         batch.flush()
@@ -389,7 +390,7 @@ open class RenderPipeline(
         val position: (progress: Float) -> Vector2,
     ) {
 
-        val orbTexturePromise: Promise<Drawable> = ResourceManager.request(renderPipeline, renderPipeline, orbTexture)
+        val orbTexturePromise: Promise<Drawable> = FortyFive.resourceManager.request(renderPipeline, renderPipeline, orbTexture)
 
         companion object {
 
@@ -429,13 +430,13 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         shaderPostProcessingStep(shootShader)
     }
 
-    private val parryShader: Promise<BetterShader> = ResourceManager.request(this, this, "parry_shader")
+    private val parryShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, this, "parry_shader")
     private val parryPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(parryShader)
     }
 
     fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
-        if (!shootShader.isResolved) ResourceManager.forceResolve(shootShader)
+        if (!shootShader.isResolved) FortyFive.resourceManager.forceResolve(shootShader)
         val shootShader = shootShader.getOrError()
         val duration = GraphicsConfig.shootPostProcessingDuration()
         action {

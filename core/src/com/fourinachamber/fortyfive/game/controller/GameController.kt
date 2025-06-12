@@ -89,17 +89,13 @@ interface GameController {
 
     fun initEnemyArea(enemies: List<Enemy>)
 
-    fun enemyDefeated(enemy: Enemy)
-
     fun playGameAnimation(anim: GameAnimation)
 
     fun loadBulletFromHandInRevolver(card: Card, slot: Int)
 
-
     fun appendMainTimeline(timeline: Timeline)
 
     fun dispatchAnimTimeline(timeline: Timeline)
-
 
     fun cardsInRevolver(): List<Card>
 

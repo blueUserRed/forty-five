@@ -2,13 +2,13 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.Promise
 import kotlin.math.*
 
@@ -108,24 +108,22 @@ data class MapNode(
         return curBestPos to (distance + curBestDist)
     }
 
-    @MainThreadOnly
     fun getImage(screen: OnjScreen): Promise<Drawable>? {
         if (imageName == null) return null
         if (imageCache != null) return imageCache
         val handle = getImageData()?.resourceHandle
         if (handle == null) {
-            FortyFiveLogger.warn(logTag, "No image data found for $imageName")
+            FortyFive.logger.warn(logTag, "No image data found for $imageName")
             return null
         }
-        imageCache = ResourceManager.request(this, screen, handle)
+        imageCache = FortyFive.resourceManager.request(this, screen, handle)
         return imageCache
     }
 
-    @MainThreadOnly
     fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache
-        nodeTextureCache = ResourceManager.request(this, screen, nodeTexture)
+        nodeTextureCache = FortyFive.resourceManager.request(this, screen, nodeTexture)
         return nodeTextureCache
     }
 
