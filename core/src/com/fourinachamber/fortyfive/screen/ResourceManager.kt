@@ -64,14 +64,12 @@ class ResourceManager {
         return resource.request(borrower, lifetime, type)
     }
 
-    @MainThreadOnly
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         toGiveBack.giveBack(borrower)
     }
 
-    @MainThreadOnly
     fun init() {
         val resources = mutableListOf<Resource>()
         val assets = ConfigFileManager.getConfigFile("assets")
@@ -307,7 +305,7 @@ class ResourceManager {
             PixmapIO.writePNG(FileHandle(File("drop_shadows/${it.first}$DROP_SHADOW_END.png")), pixmap)
             pixmap.dispose()
             giveBack(borrower, it.first)
-            FortyFiveLogger.debug(logTag, "Created DropShadow for ${it.first}")
+            FortyFive.logger.debug(logTag, "Created DropShadow for ${it.first}")
         }
         batch.end()
         giveBack(borrower, "drop_shadow_shader")

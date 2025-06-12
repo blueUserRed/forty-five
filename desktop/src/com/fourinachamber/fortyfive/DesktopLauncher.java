@@ -2,9 +2,9 @@ package com.fourinachamber.fortyfive;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -42,7 +42,7 @@ public class DesktopLauncher {
 			exception.printStackTrace();
 		}
         if (exception != null) try {
-            FortyFiveLogger.INSTANCE.fatal(exception);
+            FortyFive.INSTANCE.getLogger().fatal(exception);
         } catch (Exception ignored) {
             // "more robust logging" failed in this case
             //noinspection CallToPrintStackTrace

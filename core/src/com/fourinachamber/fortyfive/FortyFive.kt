@@ -35,6 +35,7 @@ object FortyFive : Game() {
     val soundPlayer = SoundPlayer()
     val logger = FortyFiveLogger()
     val resourceManager = ResourceManager()
+    var createDropShadows: Boolean = false
 
     lateinit var steamHandler: SteamHandler
         private set
