@@ -319,7 +319,7 @@ object NavbarCreator {
                 timeline.appendAction(Timeline.timeline {
                     action { screen.leaveState(navbarOpenScreenState) }
                 }.asAction())
-                val isFocused = this.observedStates.contains(GameInputs.States.focused)
+                val isFocused = this.observedStates.contains(GameInputs.States.focused) //TODO fix this, its always true
                 addAction(createAction(if (isFocused) focusedOffsetY else 0f))
             }
 

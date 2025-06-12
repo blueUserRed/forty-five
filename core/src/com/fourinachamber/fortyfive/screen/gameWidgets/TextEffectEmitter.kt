@@ -140,7 +140,7 @@ class TextEffectEmitter(
             .associate { it.get<String>("name") to configFromOnj(it, screen) }
 
         fun configFromOnj(onj: OnjObject, screen: OnjScreen): TextAnimationConfig = TextAnimationConfig(
-            FortyFive.resourceManager.forceGet(screen, screen, onj.get<String>("font")),
+            FortyFive.resourceManager.forceGet(screen, screen.lifetime, onj.get<String>("font")),
             onj.get<Color>("color"),
             onj.get<Double>("fontScale").toFloat(),
             onj.get<OnjArray>("speed").toFloatRange(),

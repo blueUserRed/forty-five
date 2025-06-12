@@ -1,13 +1,11 @@
 package com.fourinachamber.fortyfive.keyInput
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.general.DetailWidget
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
 interface InputActor {
 
@@ -34,6 +32,8 @@ interface InputActor {
     var partOfFocusGrid: InputManager.FocusGrid?
     var focusGridX: Int
     var focusGridY: Int
+
+    val reusableInputActor: Boolean
 
     fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor
 
@@ -81,6 +81,8 @@ interface InputActor {
 
     fun drawInDrag(batch: Batch)
 
+    fun onRemove()
+
 }
 
 enum class KeyboardFocusable {
@@ -114,6 +116,7 @@ class InputActorImpl : InputActor {
             // make sure the actors listens to the confirmDragAndDrop Input when it is droppable, or else
             // it wouldn't react when the user selects this as the drop target
             _callbacks.putIfAbsent(GameInputs.confirmDragAndDrop, mutableListOf())
+            observeInputState(GameInputs.States.trueFocused)
             addToInputManagerIfNecessary()
             field = value
         }
@@ -127,6 +130,10 @@ class InputActorImpl : InputActor {
     override var dragY: Float = 0f
 
     override var keyboardFocusable: KeyboardFocusable = KeyboardFocusable.NONE
+        set(value) {
+            field = value
+            if (value == KeyboardFocusable.NONE) throw RuntimeException()
+        }
 
     private val _observedStates: MutableSet<InputState> = mutableSetOf()
 
@@ -150,6 +157,8 @@ class InputActorImpl : InputActor {
     override var partOfFocusGrid: InputManager.FocusGrid? = null
     override var focusGridX: Int = 0
     override var focusGridY: Int = 0
+
+    override val reusableInputActor: Boolean = false
 
     override fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor {
         this._actor = actor
@@ -178,8 +187,13 @@ class InputActorImpl : InputActor {
     }
 
     override fun observeInputState(inputState: InputState) {
-        _observedStates.add(inputState)
-        inputState.causedByStates.forEach { state -> _observedStates.add(state) }
+        val added = _observedStates.add(inputState)
+        if (!added) return
+        inputState.causedByStates.forEach { states ->
+            states.forEach { state ->
+                observeInputState(state)
+            }
+        }
     }
 
     override fun observeInputState(state: InputState, onEnter: () -> Unit, onLeave: () -> Unit) {
@@ -229,7 +243,9 @@ class InputActorImpl : InputActor {
         }
         _observedStates.forEach { state ->
             if (state.causedByStates.isEmpty()) return@forEach
-            val shouldBeActive = state.causedByStates.any { isInInputState(it) }
+            val shouldBeActive = state.causedByStates.any { row ->
+                row.all { isInInputState(it) }
+            }
             val isActive = isInInputState(state)
             when {
                 isActive == shouldBeActive -> {}
@@ -311,5 +327,11 @@ class InputActorImpl : InputActor {
 
     override fun drawInDrag(batch: Batch) {
         actor.draw(batch, 1f)
+    }
+
+    override fun onRemove() {
+        if ((actor as InputActor).reusableInputActor) return
+        screen.inputManager.removeActor(actor as InputActor)
+        leaveAllGroups()
     }
 }

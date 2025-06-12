@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.general.customActor
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -26,6 +27,8 @@ interface DebugActor {
     fun debug(color: Color)
 
     fun invalidateCalled()
+
+    fun debugHierarchy()
 
 }
 
@@ -61,6 +64,14 @@ class DebugActorImpl : DebugActor {
         }
         invalidateCalls = 0
         lastInvalidateCheckTime = now
+    }
+
+    override fun debugHierarchy() {
+        fun rec(actor: Actor) {
+            actor.debug()
+            if (actor is Group) actor.children.forEach { rec(it) }
+        }
+        rec(actor)
     }
 
     override fun badTexture(

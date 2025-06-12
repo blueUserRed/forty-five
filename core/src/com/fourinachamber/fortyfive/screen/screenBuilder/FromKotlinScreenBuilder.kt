@@ -34,7 +34,7 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             previousMenu.newMenuWithPages(debugMenuPages)
         }
         screen.debugMenu = debugMenu
-        creator.start(screen)
+        creator.start(screen, controllerContext)
         val root = creator.getRoot()
         screen.stage.root = root
         screen.background = creator.background

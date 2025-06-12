@@ -44,7 +44,7 @@ open class OnjScreen(
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
-) : ScreenAdapter(), Renderable, Lifetime, ResourceBorrower {
+) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -78,12 +78,14 @@ open class OnjScreen(
     private val makeLaggy: Boolean
         get() = findDebugMenuPage<ScreenDebugMenuPage>()?.makeLaggy?.getValue(this, this::makeLaggy) ?: false
 
-    private val lifetime: EndableLifetime = EndableLifetime()
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val lifetime: Lifetime
+        get() = _lifetime
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var background: String? by backgroundHandleObserver
 
-    private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, this, arrayOf())
+    private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, lifetime, arrayOf())
 
     private val actorsWithActiveHoverDetails: MutableList<InputActor> = mutableListOf()
 
@@ -116,10 +118,6 @@ open class OnjScreen(
     inline fun <reified T : DebugMenuPage> findDebugMenuPage(): T? = debugMenu?.findPage<T>()
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
-
-    override fun onEnd(callback: () -> Unit) {
-        lifetime.onEnd(callback)
-    }
 
     fun afterMs(ms: Int, callback: () -> Unit) {
         callbackAddBuffer.add((TimeUtils.millis() + ms) to callback)
@@ -303,7 +301,7 @@ open class OnjScreen(
         screenControllers.forEach(ScreenController::end)
         stage.dispose()
         additionalDisposables.forEach(Disposable::dispose)
-        lifetime.die()
+        _lifetime.die()
     }
 
 

@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -9,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
@@ -24,8 +26,9 @@ import com.fourinachamber.fortyfive.keyInput.InputActorImpl
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
@@ -121,8 +124,8 @@ class Card(
      */
     val actor: CardActor
 
-    var inGame: Boolean = false
-        private set
+    val inGame: Boolean
+        get() = game != null
 
     var isEverlasting: Boolean = false
         private set
@@ -182,6 +185,8 @@ class Card(
         private set
 
     private var game: GameController? = null
+    internal val gameEvents: EventPipeline
+        get() = game!!.gameEvents
 
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
@@ -202,18 +207,6 @@ class Card(
         this.game = game
     }
 
-    fun bindGameEvents(gameEvents: EventPipeline, controller: GameController) {
-        var currentTargetSelection: Promise<Card>? = null
-        gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
-            if (!inZone(Zone.REVOLVER)) return@watchFor
-            if (this === event.exclude) return@watchFor
-            TODO()
-//            actor.enterSelectionMode()
-//            event.promise.then { actor.exitSelectionMode() }
-            currentTargetSelection = event.promise
-        }
-    }
-
     fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
 
     fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
@@ -221,7 +214,6 @@ class Card(
     }
 
     fun changeZone(newZone: Zone, controller: GameController) {
-        val oldZone = zone
         zone = newZone
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
@@ -356,18 +348,6 @@ class Card(
             .none { it.blocks(this, controller) }
     }
 
-    /**
-     * called when this card was destroyed by the destroy effect
-     */
-    fun onDestroy() {
-        TODO("dont use this function")
-//        if (isUndead) {
-//            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
-//            FortyFive.currentGame!!.cardHand.addCard(this)
-//        }
-//        leaveGame()
-    }
-
     fun addDamageModifier(modifier: CardDamageModifier) {
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         damageModifiers.add(++damageModifierCounter to modifier.copy())
@@ -378,6 +358,10 @@ class Card(
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         costModifiers.add(modifier.copy())
         modifiersChanged()
+    }
+
+    fun enterTargetSelection(promise: Promise<Card>) {
+        actor.enterSelectionMode(promise)
     }
 
     private fun addRottenModifier(controller: GameController) {
@@ -730,12 +714,17 @@ class CardActor(
     val screen: OnjScreen,
     val enableHoverDetails: Boolean // TODO: fix
 ) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
-    OffSettable, Lifetime, Disposable, ResourceBorrower, KotlinStyledActor {
+    OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
         screen,
         effects = cardDetailEffects,
-        text = { listOf(card.shortDescription, card.flavourText) },
+        text = {
+            val list = card.currentHoverTexts.map { it.second }.toMutableList()
+            list.add(card.shortDescription)
+            list.add(card.flavourText)
+            list
+        },
         subtexts = getEffectTexts()
     )
 
@@ -750,26 +739,32 @@ class CardActor(
     override var marginBottom: Float = 0F
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
+
+    override val reusableInputActor: Boolean = true
 
     private var inDestroyAnim: Boolean = false
     private var spawnAnimStart: Long = 0L
     private var spawnAnimDuration: Int = 0
 
-    private val lifetime: EndableLifetime = EndableLifetime()
+    override var dropShadow: DropShadow? = null
+
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val lifetime: Lifetime
+        get() = _lifetime
 
     private val destroyShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "dissolve_shader")
+        FortyFive.resourceManager.request(this, lifetime, "dissolve_shader")
 
     private val spawnShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "card_spawn_shader")
+        FortyFive.resourceManager.request(this, lifetime, "card_spawn_shader")
 
     private val markedSymbol: Promise<TransformDrawable> =
-        FortyFive.resourceManager.request(this, this, "card_symbol_marked")
+        FortyFive.resourceManager.request(this, lifetime, "card_symbol_marked")
 
     private var prevPosition: Vector2? = null
 
-    var inSelectionMode: Boolean = false
+    private var selectionPromise: Promise<Card>? = null
 
     var playSoundsOnHover: Boolean = false
 
@@ -791,13 +786,54 @@ class CardActor(
             if (!playSoundsOnHover) return@onEnterInputState
             FortyFive.soundPlayer.situation("card_hover", screen)
         }
-        onInput(GameInputs.triggerCard) {
-            TODO()
-//            FortyFive.currentGame?.cardRightClicked(card)
-        }
+
+        onInput(GameInputs.interact) { clicked() }
+        onInput(GameInputs.triggerCard) { rightClicked() }
+
+        val dropShadow = DropShadow(
+            color = Color.Black,
+            scale = 1.1f,
+            offX = 3f,
+            offY = -3f
+        )
+        dropShadow.showDropShadow = false
+        observeInputState(
+            GameInputs.States.focused,
+            {
+                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
+                    return@observeInputState
+                }
+                this.dropShadow = dropShadow
+                dropShadow.showDropShadow = true
+            },
+            {
+                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
+                    return@observeInputState
+                }
+                this.dropShadow?.showDropShadow = false
+            }
+        )
+
     }
 
-    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
+    fun clickedViaSlot(rightClick: Boolean) {
+        if (rightClick) rightClicked() else clicked()
+    }
+
+    private fun clicked() {
+        val selectionPromise = selectionPromise ?: return
+        selectionPromise.resolve(card)
+    }
+
+    private fun rightClicked() {
+        if (!card.inGame) return
+        card.gameEvents.fire(GameControllerImpl.Events.CardRightClickEvent(card))
+    }
+
+    fun enterSelectionMode(promise: Promise<Card>) {
+        selectionPromise = promise
+        promise.then { selectionPromise = null }
+    }
 
     private fun setupShader(batch: Batch): Boolean {
         val shaderPromise = when {
@@ -854,7 +890,7 @@ class CardActor(
 //        } else {
 //            x = this.x
 //            y = this.y
-
+        dropShadow?.doDropShadow(batch, screen, textureRegion, this, scaleX, scaleY, rotation)
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,
@@ -878,7 +914,7 @@ class CardActor(
     }
 
     override fun dispose() {
-        lifetime.die()
+        _lifetime.die()
         FortyFive.cardTextureManager.giveTextureBack(card)
     }
 
@@ -936,6 +972,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
+            if (card.inZone(Zone.REVOLVER)) touchable = Touchable.enabled
             FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)
@@ -966,6 +1003,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2
         action {
+            if (card.inZone(Zone.REVOLVER)) touchable = Touchable.disabled
             FortyFive.soundPlayer.situation("card_trigger_anim_out", screen)
             addAction(moveAction)
             addAction(scaleAction)
@@ -1006,6 +1044,6 @@ class CardActor(
             }
         }
 
-        val cardGroup: String = "card-group"
+        const val cardGroup: String = "card-group"
     }
 }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.GameInputs
-import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -31,7 +30,7 @@ class TestScreen : ScreenCreator() {
         name("root")
         width = worldWidth
         height = worldHeight
-        screen.inputManager.enableDragAndDrop("test-drag", "test-drop")
+        screen.inputManager.addDragAndDrop("test-drag", "test-drop")
 
         box {
             name("container")

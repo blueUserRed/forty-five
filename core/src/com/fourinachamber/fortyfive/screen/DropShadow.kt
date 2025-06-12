@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -37,6 +38,32 @@ data class DropShadow(
         val (x, y) = getXY(actor, scaleX2, scaleY2)
         val (sWidth, sHeight) = getWidthHeight(actor, scaleX2, scaleY2)
         doDropShadow(batch, screen, drawer = { drawable.draw(batch, x, y, sWidth, sHeight) })
+    }
+
+    fun doDropShadow(
+        batch: Batch?,
+        screen: OnjScreen,
+        textureRegion: TextureRegion,
+        actor: Actor,
+        scaleX: Float,
+        scaleY: Float,
+        rotation: Float
+    ) {
+        if (!showDropShadow) return
+        val scaleX2 = scale * scaleX
+        val scaleY2 = scale * scaleY
+        val (x, y) = getXY(actor, scaleX2, scaleY2)
+        val (sWidth, sHeight) = getWidthHeight(actor, scaleX2, scaleY2)
+        doDropShadow(batch, screen, drawer = {
+            batch?.draw(
+                textureRegion,
+                x, y,
+                sWidth / 2, sHeight / 2,
+                sWidth, sHeight,
+                1f, 1f,
+                rotation
+            )
+        })
     }
 
     private fun getWidthHeight(
@@ -91,7 +118,7 @@ data class DropShadow(
     companion object : ResourceBorrower {
 
         val dropShadowShader: Promise<BetterShader> by lazy {
-            FortyFive.resourceManager.request(this, Lifetime.endless, "other_drop_shadow_shader")
+            FortyFive.resourceManager.request(this, FortyFive.gameLifetime, "other_drop_shadow_shader")
         }
     }
 

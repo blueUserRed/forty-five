@@ -12,7 +12,6 @@ import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputActor
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
-import com.fourinachamber.fortyfive.screen.components.BackpackCreator.deck
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
@@ -40,6 +39,7 @@ object BackpackCreator {
         worldWidth: Float,
         worldHeight: Float,
         warningEvents: EventPipeline,
+        publicEvents: EventPipeline,
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
 
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
@@ -54,6 +54,7 @@ object BackpackCreator {
             listOf(),
             EventPipeline(),
             warningEvents,
+            publicEvents,
             SortingMode.DAMAGE,
             false,
             InputManager.FocusGrid(),
@@ -77,12 +78,12 @@ object BackpackCreator {
         state.currentDeck.checkDeck()
         state.events.fire(DeckChangedEvent)
         with(screen.inputManager) {
-            enableDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
-            enableDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
-            enableDragAndDrop(backpackCardInDeckGroup, backpackCardInCollectionGroup)
-            enableDragAndDrop(backpackCardInCollectionGroup, backpackCardInDeckGroup)
-            enableDragAndDrop(backpackCardInCollectionGroup, backpackSlotInDeckGroup)
-            enableDragAndDrop(backpackCardInDeckGroup, backpackCollectionBackgroundGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackCardInCollectionGroup)
+            addDragAndDrop(backpackCardInCollectionGroup, backpackCardInDeckGroup)
+            addDragAndDrop(backpackCardInCollectionGroup, backpackSlotInDeckGroup)
+            addDragAndDrop(backpackCardInDeckGroup, backpackCollectionBackgroundGroup)
         }
 
         val deckSide = state.deckParent!!
@@ -172,6 +173,7 @@ object BackpackCreator {
             fire(CollectionChangedEvent)
             fire(DeckChangedEvent)
         }
+        state.publicEvents.fire(DeckChangedEvent)
     }
 
     private fun swapCardsInDeck(firstNum: Int, secondNum: Int, state: BackpackState) {
@@ -651,6 +653,7 @@ object BackpackCreator {
         var cardsInCollection: List<String>,
         val events: EventPipeline,
         val warningEvents: EventPipeline,
+        val publicEvents: EventPipeline,
         var sortingMode: SortingMode,
         var isSortingReverse: Boolean,
         var deckFocusGrid: InputManager.FocusGrid,
@@ -668,6 +671,7 @@ object BackpackCreator {
             val proto = cardPrototypes[name]
                 ?: throw RuntimeException("unknown card $name in Backpack")
             val card = proto.create(screen)
+            screen.lifetime.tieDisposable(card)
 
             card.actor.onDrop { actor ->
                 if (actor !is CardActor) return@onDrop
@@ -710,10 +714,11 @@ object BackpackCreator {
 
     private data class CardInfoObject(val isBackpack: Boolean, val slot: Int)
 
-    private data object DeckChangedEvent
     private data object CollectionChangedEvent
-
     private data class GiveCardBackEvent(val slot: Int, val backpack: Boolean)
+
     private data class SlotChangedEvent(val slot: Int, val backpack: Boolean)
+
+    data object DeckChangedEvent
 
 }

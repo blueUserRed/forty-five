@@ -5,15 +5,16 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Vector2
-import com.fourinachamber.fortyfive.utils.between
 import java.util.Stack
 
 class InputManager(val screen: OnjScreen) : InputProcessor {
 
-    private val actorBuffer: MutableList<InputActor> = mutableListOf()
+    private val actorBuffer: MutableList<Pair<Boolean, InputActor>> = mutableListOf()
     private val actors: MutableSet<InputActor> = mutableSetOf()
         get() {
-            field.addAll(actorBuffer)
+            actorBuffer.forEach { (added, actor) ->
+                if (added) field.add(actor) else field.remove(actor)
+            }
             actorBuffer.clear()
             return field
         }
@@ -22,7 +23,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     private var currentlyDraggedActor: InputActor? = null
 
-    private val dragAndDrops: MutableList<Pair<String, String>> = mutableListOf()
+    private val dragAndDrops: MutableList<DragAndDrop> = mutableListOf()
 
     private var keyboardFocused: InputActor? = null
 
@@ -37,6 +38,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     private var currentDragAndDropModal: Modal? = null
     private var currentKeyboardDragAndDropActor: InputActor? = null
     private var awaitingDrop: List<InputActor>? = null
+    private var lastDraggedOver: InputActor? = null
 
     init {
         onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
@@ -59,10 +61,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         recheckFocused()
     }
 
-    fun popModal(modal: Modal) {
-        val current = modals.peek()
-        if (current !== modal) throw RuntimeException("tried to pop modal $modal that isn't at the top of the stack")
-        modals.pop()
+    fun checkModals() {
+        while (modals.isNotEmpty() && modals.peek().finished) modals.pop()
     }
 
     private fun activeModal(): Modal? = if (modals.isEmpty()) null else modals.peek()
@@ -93,7 +93,11 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     }
 
     fun addActor(actor: InputActor) {
-        actorBuffer.add(actor)
+        actorBuffer.add(true to actor)
+    }
+
+    fun removeActor(actor: InputActor) {
+        actorBuffer.add(false to actor)
     }
 
     fun addActorToGroup(actor: InputActor, group: String) {
@@ -106,12 +110,22 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         group.remove(actor)
     }
 
-    fun enableDragAndDrop(source: String, target: String) {
-        dragAndDrops.add(source to target)
+    fun addDragAndDrop(source: String, target: String): DragAndDrop {
+        val dragAndDrop = DragAndDrop(source, target, screen)
+        dragAndDrops.add(dragAndDrop)
+        return dragAndDrop
+    }
+
+    fun enableDragAndDrop(dragAndDrop: DragAndDrop) {
+        dragAndDrops.add(dragAndDrop)
     }
 
     fun disableDragAndDrop(source: String, target: String) {
-        dragAndDrops.removeIf { it.first == source && it.second == target }
+        dragAndDrops.removeIf { it.source == source && it.target == target }
+    }
+
+    fun disableDragAndDrop(dragAndDrop: DragAndDrop) {
+        dragAndDrops.remove(dragAndDrop)
     }
 
     fun focusNext(direction: FocusChangeDirection) {
@@ -263,7 +277,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (currentDragAndDropModal != null || currentlyDraggedActor != null) return
         if (!actor.isDraggable) return
         val targets = dragAndDrops.mapNotNull {
-            if (actor.inGroup(it.first)) it.second else null
+            if (actor.inGroup(it.source)) it.target else null
         }
         val modal = Modal(targets, screen)
         currentDragAndDropModal = modal
@@ -292,8 +306,9 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val modal = currentDragAndDropModal
         if (modal == null) return
         if (activeModal() !== modal) return
-        popModal(modal)
+        modal.finished()
         val actor = currentKeyboardDragAndDropActor
+        actor?.leaveInputStateManually(BaseStates.keyboardDrag)
         currentKeyboardDragAndDropActor?.leaveInputStateManually(BaseStates.keyboardFocus)
         currentKeyboardDragAndDropActor = null
         currentDragAndDropModal = null
@@ -425,8 +440,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     }
 
     override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
+        val hit = hit(screenX, screenY)
         if (currentlyDraggedActor == null) {
-            val hit = hit(screenX, screenY)
             if (hit !is InputActor) return false
             if (!hit.isDraggable) return false
             hit.isDragged = true
@@ -444,6 +459,12 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
             this.awaitingDrop = awaitingDrop
         }
         val actor = currentlyDraggedActor!!
+        val newDraggedOver = hit as? InputActor
+        if (newDraggedOver != lastDraggedOver) {
+            lastDraggedOver?.leaveInputStateManually(BaseStates.draggedHover)
+            newDraggedOver?.enterInputStateManually(BaseStates.draggedHover)
+            lastDraggedOver = newDraggedOver
+        }
         val worldSpace = screen.viewport.unproject(Vector2(screenX, screenY))
         val transformed = worldSpace
 //        val transformed = actor.actor.parent.stageToLocalCoordinates(worldSpace)
@@ -457,13 +478,15 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         screen.mouseDraggedActor = null
         currentlyDraggedActor = null
         actor.isDragged = false
+        lastDraggedOver?.leaveInputStateManually(BaseStates.draggedHover)
+        lastDraggedOver = null
         actor.leaveInputStateManually(BaseStates.mouseDrag)
         awaitingDrop?.forEach { it.leaveInputStateManually(BaseStates.awaitingDropFromMouse) }
         awaitingDrop = null
         if (hitResult !is InputActor) return
         if (!hitResult.isDropTarget) return
         val dragAndDrop =
-            dragAndDrops.find { actor.inGroup(it.first) && hitResult.inGroup(it.second) }
+            dragAndDrops.find { actor.inGroup(it.source) && hitResult.inGroup(it.target) }
         if (dragAndDrop == null) return
         hitResult.notifyDropped(actor)
     }
@@ -478,7 +501,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         if (lastHovered is InputActor) {
             lastHovered.leaveInputStateManually(BaseStates.mouseHover)
         }
-        if (hit is InputActor && canBeFocused(hit)) {
+        if (hit is InputActor && canBeFocused(hit, enforceLeaf = false)) {
             this@InputManager.changeKeyboardFocusedActor(null, true)
             hit.enterInputStateManually(BaseStates.mouseHover)
         }
@@ -492,12 +515,13 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     object BaseStates {
 
-        val mouseHover = InputState("mouseHover", arrayOf())
-        val keyboardFocus = InputState("keyboardFocus", arrayOf())
-        val mouseDrag = InputState("mouseDrag", arrayOf())
-        val keyboardDrag = InputState("keyboardDrag", arrayOf())
-        val awaitingDropFromKeyboard = InputState("awaitingDropFromKeyboard", arrayOf())
-        val awaitingDropFromMouse = InputState("awaitingDropFromMouse", arrayOf())
+        val mouseHover = InputState("mouseHover")
+        val keyboardFocus = InputState("keyboardFocus")
+        val mouseDrag = InputState("mouseDrag")
+        val keyboardDrag = InputState("keyboardDrag")
+        val awaitingDropFromKeyboard = InputState("awaitingDropFromKeyboard")
+        val awaitingDropFromMouse = InputState("awaitingDropFromMouse")
+        val draggedHover = InputState("draggedHover")
     }
 
     class FocusFilter(val groups: List<String>, private val screen: OnjScreen) {
@@ -513,12 +537,28 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     class Modal(val allowGroups: List<String>, private val screen: OnjScreen) {
 
+        var finished: Boolean = false
+            private set
+
         fun push() {
+            finished = false
             screen.inputManager.pushModal(this)
         }
 
         fun finished() {
-            screen.inputManager.popModal(this)
+            finished = true
+            screen.inputManager.checkModals()
+        }
+    }
+
+    data class DragAndDrop(val source: String, val target: String, val screen: OnjScreen) {
+
+        fun enable() {
+            screen.inputManager.enableDragAndDrop(this)
+        }
+
+        fun disable() {
+            screen.inputManager.disableDragAndDrop(this)
         }
     }
 

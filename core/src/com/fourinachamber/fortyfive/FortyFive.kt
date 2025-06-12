@@ -6,23 +6,25 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.onjNamespaces.*
+import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
+import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fortyfive.onjNamespaces.MapNamespace
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.DebugActorImpl
-import com.fourinachamber.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
-import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenBuilder
-import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
+import com.fourinachamber.fortyfive.screen.screens.IntroScreen
+import com.fourinachamber.fortyfive.screen.screens.MapScreen
+import com.fourinachamber.fortyfive.screen.screens.TitleScreen
 import com.fourinachamber.fortyfive.steam.SteamHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
 
@@ -35,6 +37,11 @@ object FortyFive : Game() {
     val soundPlayer = SoundPlayer()
     val logger = FortyFiveLogger()
     val resourceManager = ResourceManager()
+    val screenManager = ScreenManager(TitleScreen, null)
+
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val gameLifetime: Lifetime
+        get() = _lifetime
     var createDropShadows: Boolean = false
 
     lateinit var steamHandler: SteamHandler
@@ -43,51 +50,37 @@ object FortyFive : Game() {
     var currentRenderPipeline: RenderPipeline? = null
         private set
 
-    private var currentScreen: OnjScreen? = null
-    private var nextScreen: OnjScreen? = null
+    var currentScreen: OnjScreen? = null
 
     var cleanExit: Boolean = true
-
-    private var inScreenTransition: Boolean = false
 
     private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
 
     private var renderCounter: Long = 0L
     val renderTimes: IntArray = IntArray(15 * 60)
 
-    private var screenTransitionCount: Long = 0L
+//    private var screenTransitionCount: Long = 0L
     val screenTransitionTimes: IntArray = IntArray(5)
 
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
-    private val tutorialEncounterContext = object : EncounterContext {
-
-        override val encounterIndex: Int = 0 // = first tutorial encounter
-
-        override val forwardToScreen: String
-            get() = "mapScreen"
-
-        override fun completed() {
-            SaveState.playerCompletedFirstTutorialEncounter = true
-        }
-    }
-
     override fun create() {
         init()
-        UserPrefs.startScreen = UserPrefs.StartScreen.MAP
         when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> TODO()
-            UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
-            UserPrefs.StartScreen.MAP -> changeToInitialScreen()
+            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
+            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
+            UserPrefs.StartScreen.MAP -> toMap()
         }
     }
 
-    fun changeToInitialScreen() {
-        if (!SaveState.playerCompletedFirstTutorialEncounter) {
-            MapManager.changeToEncounterScreen(tutorialEncounterContext)
-        } else {
-            MapManager.changeToMapScreen()
-        }
+    fun toMap() {
+        screenManager.newBaseScreen(MapScreen)
+        screenManager.screenFinished()
+    }
+
+    fun toTitleScreen() {
+        screenManager.newBaseScreen(TitleScreen)
+        screenManager.screenFinished()
     }
 
     fun <T> mainThreadTask(task: () -> T): Promise<T> {
@@ -118,47 +111,6 @@ object FortyFive : Game() {
         }
         renderTimes[(renderCounter % renderTimes.size).toInt()] = renderTime.toInt()
         renderCounter++
-    }
-
-    fun changeToScreen(screenCreator: ScreenCreator, controllerContext: Any? = null) {
-        val builder = FromKotlinScreenBuilder(screenCreator)
-        changeToScreen(builder, controllerContext)
-    }
-
-    fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
-        if (inScreenTransition) return@postRunnable
-        inScreenTransition = true
-        val currentScreen = currentScreen
-        if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
-        val screen = screenBuilder.build(controllerContext, currentScreen)
-        nextScreen = screen
-
-        fun onScreenChange() {
-            logger.title("changing screen to ${screenBuilder.name}")
-            currentScreen?.dispose()
-            this.currentScreen = screen
-            nextScreen = null
-            currentRenderPipeline?.dispose()
-            currentRenderPipeline = RenderPipeline(screen, screen)
-            setScreen(screen)
-            // TODO: not 100% clean, this function is sometimes called when it isn't necessary
-            MapManager.invalidateCachedAssets()
-            inScreenTransition = false
-            inMs(100) {
-                val lagSpike = renderTimes.max()
-                screenTransitionTimes[(screenTransitionCount % screenTransitionTimes.size).toInt()] = lagSpike
-                screenTransitionCount++
-            }
-        }
-
-        val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
-            it[screenBuilder.name] ?: it["*"]
-        } ?: 0
-        if (currentScreen == null) {
-            onScreenChange()
-        } else currentScreen.afterMs(transitionAwayTime) {
-            onScreenChange()
-        }
     }
 
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
@@ -225,7 +177,10 @@ object FortyFive : Game() {
         PermaSaveState.write()
         SaveState.write()
         UserPrefs.write()
+        _lifetime.die()
+        soundPlayer.end()
         currentScreen?.dispose()
+        currentRenderPipeline?.dispose()
         serviceThread.close()
         resourceManager.end()
         super.dispose()

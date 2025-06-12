@@ -114,7 +114,7 @@ object GraphicsConfig {
     }
 
     fun cardFont(borrower: ResourceBorrower, screen: OnjScreen): Promise<PixmapFont> =
-        FortyFive.resourceManager.request(borrower, screen, cardFont)
+        FortyFive.resourceManager.request(borrower, screen.lifetime, cardFont)
 
     fun cardFontScale(): Float = cardFontScale
 

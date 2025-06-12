@@ -166,7 +166,7 @@ class ShopScreenController(
             card.actor.setSize(fl, fl)
         }
 
-        val forceGet = FortyFive.resourceManager.forceGet<BitmapFont>(screen, screen, "red_wing")
+        val forceGet = FortyFive.resourceManager.forceGet<BitmapFont>(screen, screen.lifetime, "red_wing")
         val label =
             CustomLabel(screen, "${card.price}$", Label.LabelStyle(forceGet, Color.DarkBrown), isDistanceField = true)
         curParent.addActor(label)

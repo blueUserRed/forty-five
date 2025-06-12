@@ -45,7 +45,6 @@ project(":desktop") {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "java")
 
-
     val gdxVersion = rootProject.extra["gdxVersion"]
     dependencies {
         implementation(project(":core"))

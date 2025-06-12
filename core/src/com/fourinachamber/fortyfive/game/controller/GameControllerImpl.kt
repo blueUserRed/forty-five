@@ -11,8 +11,6 @@ import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
-import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
@@ -24,7 +22,8 @@ import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.Inject
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.screens.MapScreen
+import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreen
+import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
@@ -32,7 +31,7 @@ import kotlin.math.floor
 
 class GameControllerImpl(
     override val screen: OnjScreen,
-    val gameEvents: EventPipeline,
+    override val gameEvents: EventPipeline,
     private val warningParent: WarningParent,
     override val afterlife: Afterlife,
 ) : ScreenController(), GameController, ResourceBorrower {
@@ -57,14 +56,15 @@ class GameControllerImpl(
         get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
-        get() = _encounterModifiers.any { it.disableEverlasting() }
+        get() = _encounterModifiers.any { it.second.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
 
-    private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
+    private val _encounterModifiers: MutableList<Pair<((GameController) -> Boolean)?, EncounterModifier>> = mutableListOf()
+
     override val encounterModifiers: List<EncounterModifier>
-        get() = _encounterModifiers
+        get() = _encounterModifiers.map { it.second }
 
     override var curPlayerLives: Int
         get() = SaveState.playerLives
@@ -112,10 +112,10 @@ class GameControllerImpl(
         get() = allEnemies.all { it.isDefeated }
 
     private val enemyBannerPromise: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, this.screen, "enemy_turn_banner")
+        FortyFive.resourceManager.request(this, this.screen.lifetime, "enemy_turn_banner")
 
     private val playerBannerPromise: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, this.screen, "player_turn_banner")
+        FortyFive.resourceManager.request(this, this.screen.lifetime, "player_turn_banner")
 
     private val softMaxCardsWarning = warningParent.Warning(
         "Maximum Card Number Reached\nAfter this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
@@ -137,6 +137,9 @@ class GameControllerImpl(
 
         encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
             ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
+        encounter.encounterModifier.forEach {
+            addEncounterModifier(it)
+        }
 
         bindGameEventListeners()
 
@@ -149,6 +152,9 @@ class GameControllerImpl(
         appendMainTimeline(Timeline.timeline {
             delay(300)
             updateReserves(Config.baseReserves)
+            action {
+                _encounterModifiers.forEach { it.second.onStart(this@GameControllerImpl) }
+            }
             action { chooseEnemyActions() }
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
@@ -184,7 +190,15 @@ class GameControllerImpl(
             targetedEnemy = enemy
         }
         gameEvents.watchFor<Events.CardChangeZoneEvent> { event ->
-            if (!event.before) event.card.changeZone(event.newZone, this)
+            if (!event.before) {
+                event.card.changeZone(event.newZone, this)
+                if (event.newZone == Zone.REVOLVER) event.append {
+                    _encounterModifiers.forEach { (_, modifier) ->
+                        val timeline = modifier.executeAfterBulletWasPlacedInRevolver(event.card, this@GameControllerImpl)
+                        if (timeline != null) include(timeline)
+                    }
+                }
+            }
             val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
@@ -223,6 +237,10 @@ class GameControllerImpl(
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
             val situation = GameSituation.RevolverRotation(event.rotation)
             event.append {
+                _encounterModifiers.forEach { (_, modifier) ->
+                    val timeline = modifier.executeAfterRevolverRotated(event.rotation, this@GameControllerImpl)
+                    if (timeline != null) include(timeline)
+                }
                 include(checkTrigger(situation, event.triggerInformation))
                 activeEnemies
                     .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
@@ -248,6 +266,28 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.AfterShotEvent> { event ->
+            event.append {
+                _encounterModifiers.forEach { (_, modifier) ->
+                    val timeline = modifier.executeAfterRevolverWasShot(event.card, this@GameControllerImpl)
+                    if (timeline != null) include(timeline)
+                }
+            }
+        }
+        gameEvents.watchFor<Events.CardRightClickEvent> { (card) ->
+            if (card.rightClickCost == null) return@watchFor
+            if (isUIFrozen) return@watchFor
+            val triggerInformation = createTriggerInfo(card)
+            val situation = GameSituation.CardRightClicked(card)
+            appendMainTimeline(Timeline.timeline { later {
+                val anyEffectTriggers = card.effects.any {
+                    it.checkTrigger(situation, triggerInformation, this@GameControllerImpl, card)
+                }
+                if (anyEffectTriggers && tryPay(card.rightClickCost, card.actor)) {
+                    include(checkTrigger(situation, triggerInformation))
+                }
+            } })
+        }
     }
 
     private fun checkTrigger(situation: GameSituation, triggerInformation: TriggerInformation): Timeline = createdCards
@@ -263,6 +303,10 @@ class GameControllerImpl(
 
     override fun update() {
         TemplateString.updateGlobalParam("game.cardsInStack", cardStack.size())
+
+        _encounterModifiers.removeIf { (predicate, _) -> predicate != null && !predicate(this@GameControllerImpl) }
+        _encounterModifiers.forEach { it.second.update(this@GameControllerImpl) }
+
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
@@ -283,8 +327,8 @@ class GameControllerImpl(
         cardPrototypes = Card
             .getFrom(cardsArray) { card ->
                 createdCards.add(card)
-                _encounterModifiers.forEach { it.initBullet(card) }
-                card.bindGameEvents(gameEvents, this)
+                encounterModifiers.forEach { it.initBullet(card) }
+                screen.lifetime.tieDisposable(card)
                 card.setGame(this@GameControllerImpl)
             }
             .toMutableList()
@@ -313,6 +357,7 @@ class GameControllerImpl(
         exclude: Card?
     ): Timeline = Timeline.timeline {
         val event = Events.TargetSelectionEvent(text, exclude)
+        include(afterlife.closeTimeline())
         action { gameEvents.fire(event) }
         delayUntil { event.promise.isResolved }
         action { store("selectedCard", event.promise.getOrError()) }
@@ -402,7 +447,7 @@ class GameControllerImpl(
         var newRotation = if (ignoreEncounterModifiers) {
             rotation
         } else {
-            _encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
+            encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
         }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
         include(revolver.rotate(newRotation))
@@ -532,7 +577,7 @@ class GameControllerImpl(
         statusEffect: StatusEffect,
         enemy: Enemy
     ): Timeline = Timeline.timeline { later {
-        if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
+        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
         action { enemy.applyEffect(statusEffect, this@GameControllerImpl) }
     } }
 
@@ -585,10 +630,10 @@ class GameControllerImpl(
     } }
 
     private val shieldIconPromise: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, this.screen, "shield_icon_large")
+        FortyFive.resourceManager.request(this, this.screen.lifetime, "shield_icon_large")
 
     private val shieldShaderPromise: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this.screen, "glow_shader_shield")
+        FortyFive.resourceManager.request(this, this.screen.lifetime, "glow_shader_shield")
 
     private fun shieldAnimationTimeline(): Timeline {
         val shieldIcon = shieldIconPromise.getOrNull() ?: return Timeline()
@@ -664,6 +709,7 @@ class GameControllerImpl(
         val parryEnterEvent = Events.ParryStateChange(true, damage, damageOfCard)
         val parryLeaveEvent = Events.ParryStateChange(false, 0, 0)
         parryEnterEvent.resolutionPromise.then { gameEvents.fire(parryLeaveEvent) }
+        include(afterlife.closeTimeline())
         action { gameEvents.fire(parryEnterEvent) }
         delayUntil { parryEnterEvent.resolutionPromise.isResolved }
         later {
@@ -742,7 +788,7 @@ class GameControllerImpl(
 
     private fun shootTimeline(): Timeline = Timeline.timeline { later {
 
-        if (_encounterModifiers.any { !it.canShootRevolver(this@GameControllerImpl) }) return@later
+        if (encounterModifiers.any { !it.canShootRevolver(this@GameControllerImpl) }) return@later
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
 
@@ -795,11 +841,11 @@ class GameControllerImpl(
     } }
 
     override fun shoot() {
-//        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
-//        appendMainTimeline(Timeline.timeline {
-//            parallelActions(shootTimeline().asAction(), postProcessor)
-//        })
-        appendMainTimeline(shootTimeline())
+        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
+        appendMainTimeline(Timeline.timeline {
+            parallelActions(shootTimeline().asAction(), postProcessor)
+        })
+//        appendMainTimeline(shootTimeline())
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -809,7 +855,6 @@ class GameControllerImpl(
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
         if (cost > curReserves) return false
         SaveState.usedReserves += cost
-        FortyFive.logger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
         updateReserves(curReserves - cost, sourceActor = animTarget)
         return true
     }
@@ -836,11 +881,13 @@ class GameControllerImpl(
         modifier: EncounterModifier,
         validityChecker: (GameController) -> Boolean
     ) {
-        TODO("Not yet implemented")
+        _encounterModifiers.add(validityChecker to modifier)
+        // No event in this case, because temporary encounter modifiers aren't displayed
     }
 
     override fun addEncounterModifier(modifier: EncounterModifier) {
-        TODO("Not yet implemented")
+        _encounterModifiers.add(null to modifier)
+        gameEvents.fire(Events.EncounterModifierAdded(modifier))
     }
 
     override fun addTutorialText(textParts: List<GameDirector.GameTutorialTextPart>) {
@@ -961,7 +1008,6 @@ class GameControllerImpl(
             SaveState.write()
 
             val chooseCardContext = object : ChooseCardScreenContext {
-                override val forwardToScreen: String = encounterContext.forwardToScreen
                 override var seed: Long = TimeUtils.millis()
                 override val nbrOfCards: Int = 3
                 override val types: List<String> = listOf()
@@ -974,10 +1020,9 @@ class GameControllerImpl(
             }
 
             if (playerGetsCard) {
-                MapManager.changeToChooseCardScreen(chooseCardContext)
-            } else {
-                FortyFive.changeToScreen(MapScreen())
+                encounterContext.screenChain.pushScreenToFront(ChooseCardScreen, chooseCardContext)
             }
+            FortyFive.screenManager.screenFinished()
         }
     } }
 
@@ -1005,7 +1050,6 @@ class GameControllerImpl(
                 gameEvents.fire(event)
                 cardHand.removeCard(card)
                 checkCardMaximums()
-                action { println("hi") }
             }
             val event = Events.PutCardsUnderStack(cardHand.amountOfCards - Config.softMaxCards, callback)
             action { gameEvents.fire(event) }
@@ -1015,6 +1059,7 @@ class GameControllerImpl(
                     val selectedCards = event.selectedCards.getOrError()
                     selectedCards.forEach { card ->
                         val info = createTriggerInfo(card)
+                        // TODO: figure out how to do the early action
                         val zoneChangeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, false, info)
                         includeLater({
                             gameEvents.fire(zoneChangeEvent)
@@ -1116,8 +1161,8 @@ class GameControllerImpl(
         const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-        const val cardsToDrawInFirstRound = 20
-//        const val cardsToDrawInFirstRound = 6
+//        const val cardsToDrawInFirstRound = 20
+        const val cardsToDrawInFirstRound = 6
 //        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
@@ -1142,6 +1187,7 @@ class GameControllerImpl(
         )
         data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
         data class SetupEnemies(val enemies: List<Enemy>)
+        data class EncounterModifierAdded(val modifier: EncounterModifier)
         data class EnemySelected(val selected: Enemy)
         data class PutCardsUnderStack(
             val amount: Int,
@@ -1158,6 +1204,7 @@ class GameControllerImpl(
         data object ShootButtonPressed
         data object HolsterButtonPressed
         data object AfterlifeOpenToggle
+        data class CardRightClickEvent(val card: Card)
 
         abstract class TimelineBuildingEvent {
 

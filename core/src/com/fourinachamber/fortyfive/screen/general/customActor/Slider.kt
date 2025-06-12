@@ -36,9 +36,9 @@ class Slider(
         renderer
     }
 
-    private val sliderDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, sliderBackground)
+    private val sliderDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen.lifetime, sliderBackground)
 
-    private val sliderShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, screen, "slider_shader")
+    private val sliderShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, screen.lifetime, "slider_shader")
 
     private val inputListener = object : DragListener() {
 
