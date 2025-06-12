@@ -7,13 +7,13 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
+import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -24,7 +24,7 @@ import com.fourinachamber.fortyfive.game.enemy.StatusBar
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
-import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
@@ -44,9 +44,11 @@ import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.plus
+import kotlin.math.absoluteValue
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
-class GameScreen : ScreenCreator() {
+class EncounterScreen : ScreenCreator() {
 
     override val name: String = "gameScreen"
 
@@ -102,6 +104,9 @@ class GameScreen : ScreenCreator() {
         HorizontalStatusEffectDisplay(screen, forceLoadFont("red_wing"), Color.Black, 1.4f)
     }
 
+    private lateinit var cardRevolverDragAndDrop: InputManager.DragAndDrop
+    private lateinit var cardUnderDeckDragAndDrop: InputManager.DragAndDrop
+
     init {
         bindEventHandlers()
     }
@@ -113,8 +118,10 @@ class GameScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight
 
-        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
-        screen.inputManager.enableDragAndDrop(CardActor.cardGroup, underDeckGroup)
+        cardRevolverDragAndDrop =
+            screen.inputManager.addDragAndDrop(CardActor.cardGroup, RevolverSlot.revolverSlotGroup)
+        cardUnderDeckDragAndDrop =
+            screen.inputManager.addDragAndDrop(CardActor.cardGroup, underDeckGroup)
 
         image {
             backgroundHandle = "game_screen_player"
@@ -132,13 +139,14 @@ class GameScreen : ScreenCreator() {
             height = 600f
         }
 
+        encounterModifierDisplay()
         parryPopup()
         targetSelectionPopup()
 
         playerBar()
         val afterlife = Afterlife(screen, gameEvents)
-        this@GameScreen.afterlife = afterlife
-        actor(afterlife.getActor(this@GameScreen)) {
+        this@EncounterScreen.afterlife = afterlife
+        actor(afterlife.getActor(this@EncounterScreen)) {
             y = worldHeight * 0.4f
         }
 
@@ -180,6 +188,75 @@ class GameScreen : ScreenCreator() {
         )
     }
 
+    private fun CustomGroup.encounterModifierDisplay() = box {
+        width = 500f
+        x = worldWidth - 100f
+        onLayoutAndNow { height = children.sumOf { it.height.toDouble() }.toFloat() + 50f }
+        onLayoutAndNow { y = worldHeight * 0.8f - height }
+        backgroundHandle = "encounter_modifier_background"
+        flexDirection = FlexDirection.COLUMN
+        verticalAlign = CustomAlign.SPACE_AROUND
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        isVisible = false
+
+        val xAnim = propertyAnimation(
+            xPositionAbstractProperty(),
+            AnimState("open", worldWidth - width + 50f),
+            AnimState("closed", worldWidth - 100f),
+            defaultTime = 100,
+            defaultInterpolation = Interpolation.pow2,
+            initialState = "closed"
+        )
+
+        observeInputState(
+            GameInputs.States.focused,
+            { xAnim.state("open") },
+            { xAnim.state("closed") },
+        )
+
+        fun encounterModifier(encounterModifier: EncounterModifier) = box {
+            flexDirection = FlexDirection.ROW
+            relativeWidth(100f)
+            height = 80f
+            verticalAlign = CustomAlign.CENTER
+            horizontalSpacer(30f)
+            box {
+                width = 50f
+                height = 50f
+                backgroundHandle = encounterModifier.iconHandle
+            }
+            horizontalSpacer(20f)
+            box {
+                onLayoutAndNow { width = parent.width - 50f - 160f }
+                syncHeight()
+                flexDirection = FlexDirection.COLUMN
+
+                label("roadgeek", encounterModifier.displayName) {
+                    syncDimensions()
+                    setFontScale(0.9f)
+                }
+                box {
+                    backgroundHandle = "black_texture"
+                    height = 1f
+                    relativeWidth(100f)
+                }
+                label("roadgeek", encounterModifier.description) {
+                    wrap = true
+                    setFontScale(0.6f)
+                    relativeWidth(100f)
+                    syncHeight()
+                }
+            }
+        }
+
+        gameEvents.watchFor<GameControllerImpl.Events.EncounterModifierAdded> { (modifier) ->
+            isVisible = true
+            encounterModifier(modifier)
+        }
+
+    }
+
     private fun CustomGroup.putCardsUnderStackPopup() = group {
 
         x = 0f
@@ -187,8 +264,9 @@ class GameScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight
 
-        touchable = Touchable.disabled
+        touchable = Touchable.childrenOnly
         isVisible = false
+        cardUnderDeckDragAndDrop.disable()
 
         val filter = InputManager.FocusFilter(listOf(underDeckGroup), screen)
         val modal = InputManager.Modal(listOf(underDeckGroup, CardActor.cardGroup), screen)
@@ -206,6 +284,7 @@ class GameScreen : ScreenCreator() {
         }
 
         val underDeck = group {
+            name("underDeck")
             width = worldWidth * 0.5f
             height = worldHeight * 0.48f
             centerX()
@@ -231,9 +310,13 @@ class GameScreen : ScreenCreator() {
                 cards = mutableListOf()
                 currentPromise = promise
                 cardAddedCallback = callback
+                cardUnderDeckDragAndDrop.enable()
+                cardRevolverDragAndDrop.disable()
                 promise.then {
                     children.filterIsInstance<CardActor>().forEach { it.rotation = 0f }
                     clearChildren()
+                    cardUnderDeckDragAndDrop.disable()
+                    cardRevolverDragAndDrop.enable()
                 }
             }
 
@@ -244,14 +327,14 @@ class GameScreen : ScreenCreator() {
                 cardAddedCallback?.invoke(card)
                 cards.add(card)
                 actor(actor) {
-                    width = 100f
-                    height = 100f
+                    width = 150f
+                    height = 150f
                     touchable = Touchable.disabled
                     isDraggable = false
-                    x = 40f + cardCount * 20f
+                    x = 40f + cardCount * 50f
                     val heightOffset = random.nextDouble(-10.0, 10.0).toFloat()
-                    onLayoutAndNow { y = parent.height / 2 - height / 2 + heightOffset }
-                    rotation = random.nextDouble(-20.0, 20.0).toFloat()
+                    y = parent.height / 2 - height / 2 + heightOffset
+                    rotation = random.nextDouble(-15.0, 15.0).toFloat()
                 }
                 cardCount++
                 if (cardCount >= targetAmount) currentPromise?.resolve(cards)
@@ -263,50 +346,6 @@ class GameScreen : ScreenCreator() {
             onLayoutAndNow { y = underDeck.y + underDeck.height - height - 40f }
             centerX()
         }
-
-//        val putCardsUnderDeckPopup = PutCardsUnderDeckWidget(screen, 596f * 0.22f, 10f, gameEvents)
-//        group {
-//            x = 0f
-//            y = 0f
-//            relativeWidth(100f)
-//            relativeHeight(100f)
-//            touchable = Touchable.childrenOnly
-//            isVisible = false
-//            gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
-//                isVisible = true
-//                event.selectedCards.then { isVisible = false }
-//            }
-//            actor(putCardsUnderDeckPopup) {
-//                backgroundHandle = "under_deck_background"
-//                width = worldWidth * 0.5f
-//                height = worldHeight * 0.48f
-//                touchable = Touchable.disabled
-//                centerX()
-//                centerY()
-//                gameEvents.watchFor<GameControllerImpl.Events.PutCardsUnderStack> { event ->
-//                    touchable = Touchable.enabled
-//                    event.selectedCards.then { touchable = Touchable.disabled }
-//                }
-//            }
-//            label(
-//                "red_wing",
-//                "Put {game.remainingCardsToPutUnderStack} Cards back under your stack",
-//                color = Color.FortyWhite,
-//                isTemplate = true
-//            ) {
-//                centerX()
-//                y = worldHeight * 0.63f
-//            }
-//            image {
-//                backgroundHandle = "draw_bullet"
-//                width = 300f
-//                height = 300f
-//                centerY()
-//                onLayoutAndNow { x = parent.width / 2 - width / 2 - 500f }
-//                touchable = Touchable.disabled
-//                rotation = -10f
-//            }
-//        }
     }
 
     private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {
@@ -324,11 +363,6 @@ class GameScreen : ScreenCreator() {
             height = enemyHeight
 
             keyboardFocusable = KeyboardFocusable.LEAF
-            observeInputState(
-                GameInputs.States.focused,
-                { debug = true },
-                { debug = false },
-            )
 
             onInput(GameInputs.interact) {
                 if (enemySelected) return@onInput
@@ -561,10 +595,10 @@ class GameScreen : ScreenCreator() {
         height = worldWidth * (505f / 1920f)
         backgroundHandle = "player_bar"
 
-        val modal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
+        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
 
         gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-            if (event.inParryMenu) modal.push() else modal.finished()
+            if (event.inParryMenu) buttonModal.push() else buttonModal.finished()
         }
 
         shootButton()
@@ -576,6 +610,27 @@ class GameScreen : ScreenCreator() {
             centerX()
             y = -30f
             syncDimensions()
+
+            val cardSelectionModal = InputManager.Modal(
+                listOf(RevolverSlot.revolverSlotWithCardInSelectionMode),
+                screen
+            )
+
+            gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { (_, exclude, promise) ->
+                revolver
+                    .slots
+                    .forEach {
+                        val card = it.card ?: return@forEach
+                        if (card === exclude) return@forEach
+                        card.enterTargetSelection(promise)
+                        it.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+                    }
+                cardSelectionModal.push()
+                promise.then {
+                    cardSelectionModal.finished()
+                    revolver.slots.forEach { it.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode) }
+                }
+            }
         }
 
         actor(cardHand) {
@@ -656,24 +711,31 @@ class GameScreen : ScreenCreator() {
             touchable = Touchable.enabled
             x = 370f
             y = 50f
+            var closed = false
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 370f, 100, Interpolation.pow2),
-                AnimState("hover", 360f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 370f),
+                AnimState("hover", 360f),
+                AnimState("closed", 600f),
+                initialState = "open",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
             width = 250f
             height = 250f * (543f / 655f)
             keyboardFocusable = KeyboardFocusable.LEAF
             backgroundHandle = "shoot_button_texture"
-            xAnim.state("open")
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "shoot_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "shoot_button_texture"
                     xAnim.state("open")
                 }
@@ -685,10 +747,12 @@ class GameScreen : ScreenCreator() {
                 if (inParryMenu) {
                     xAnim.state("closed")
                     filter.start()
+                    closed = true
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
                     filter.end()
+                    closed = false
                     touchable = Touchable.enabled
                 }
             }
@@ -705,10 +769,15 @@ class GameScreen : ScreenCreator() {
             y = 50f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 370f, 100, Interpolation.pow2),
-                AnimState("hover", 360f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 370f),
+                AnimState("hover", 360f),
+                AnimState("closed", 600f),
+                initialState = "closed",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
             width = 250f
             height = 250f * (543f / 655f)
             keyboardFocusable = KeyboardFocusable.LEAF
@@ -717,10 +786,12 @@ class GameScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "pass_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "pass_button_texture"
                     xAnim.state(if (closed) "closed" else "open")
                 }
@@ -755,16 +826,23 @@ class GameScreen : ScreenCreator() {
             name("holster_button")
             joinGroup("holster-button")
             val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
+            var closed = false
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             x = 990f
             y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 990f, 100, Interpolation.pow2),
-                AnimState("hover", 1000f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 990f),
+                AnimState("hover", 1000f),
+                AnimState("closed", 600f),
+                initialState = "open",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
+
             width = 250f
             height = 250f * (543f / 655f)
 
@@ -772,14 +850,15 @@ class GameScreen : ScreenCreator() {
                 gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
             }
             backgroundHandle = "end_turn_button_texture"
-            xAnim.state("open")
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "end_turn_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "end_turn_button_texture"
                     xAnim.state("open")
                 }
@@ -787,10 +866,12 @@ class GameScreen : ScreenCreator() {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
+                    closed = true
                     filter.start()
                     touchable = Touchable.disabled
                 } else {
                     xAnim.state("open")
+                    closed = false
                     filter.end()
                     touchable = Touchable.enabled
                 }
@@ -806,13 +887,18 @@ class GameScreen : ScreenCreator() {
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.disabled
             x = 990f
-            y = 50f
+            y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(
                 xPositionAbstractProperty(),
-                AnimState("open", 990f, 100, Interpolation.pow2),
-                AnimState("hover", 1000f, 100, Interpolation.pow2),
-                AnimState("closed", 600f, 400),
+                AnimState("open", 980f),
+                AnimState("hover", 990f),
+                AnimState("closed", 600f),
+                initialState = "closed",
+                defaultTime = 100,
+                defaultInterpolation = Interpolation.pow2
             )
+            xAnim.transition("*", "closed", 400, Interpolation.linear)
+            xAnim.transition("closed", "*", 400, Interpolation.linear)
             width = 250f
             height = 250f * (543f / 655f)
 
@@ -826,12 +912,14 @@ class GameScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "parry_button_hover_texture"
                     xAnim.state("hover")
                 },
                 {
+                    if (closed) return@observeInputState
                     backgroundHandle = "parry_button_texture"
-                    xAnim.state(if (closed) "closed" else "open")
+                    xAnim.state("open")
                 }
             )
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
@@ -994,8 +1082,9 @@ class GameScreen : ScreenCreator() {
         isReserves: Boolean,
         duration: Int = 300
     ): Timeline = Timeline.timeline {
+        if (isReserves && target is CardActor) return@timeline // TODO: fix for moving targets
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
-        repeat(amount) {
+        repeat(amount.absoluteValue) {
             action {
                 FortyFive.soundPlayer.situation("orb_anim_playing", screen)
                 renderPipeline.addOrbAnimation(
@@ -1050,8 +1139,8 @@ class GameScreen : ScreenCreator() {
         anim?.let { controller.dispatchAnimTimeline(it) }
     }
 
-    companion object {
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = EncounterScreen::class
         const val underDeckGroup: String = "encounter-screen-under-deck"
     }
-
 }

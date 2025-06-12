@@ -8,6 +8,7 @@ import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.contains
 import kotlin.math.pow
 
 class CardHand(
@@ -44,14 +45,14 @@ class CardHand(
             card.actor.observeInputState(
                 GameInputs.States.focused,
                 {
-                    if (!card.inZone(GameControllerImpl.Zone.HAND)) return@observeInputState
+                    if (card.actor !in this) return@observeInputState
                     actor.width = cardSize * 1.2f
                     actor.height = cardSize * 1.2f
                     actor.fixedZIndex = 100
                     resortZIndices()
                 },
                 {
-                    if (!card.inZone(GameControllerImpl.Zone.HAND)) return@observeInputState
+                    if (card.actor !in this) return@observeInputState
                     actor.width = cardSize
                     actor.height = cardSize
                     actor.fixedZIndex = zIndexFor(card)

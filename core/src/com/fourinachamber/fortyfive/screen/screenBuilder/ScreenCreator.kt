@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.screenBuilder
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -13,8 +14,8 @@ import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.DefaultInterpolators
 import com.fourinachamber.fortyfive.animation.Interpolator
 import com.fourinachamber.fortyfive.animation.PropertyAnimation
+import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
@@ -48,17 +49,19 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract val transitionAwayTimes: Map<String, Int>
 
-//    val addWidgetData: (Map<String, (Map<String, Any?>, Group?, OnjScreen, Actor, Boolean) -> Unit>)? = null
-
     lateinit var screen: OnjScreen
         private set
+
+    var _context: Any? = null
 
     private val _namedActors: MutableMap<String, Actor> = mutableMapOf()
     val namedActors: Map<String, Actor>
         get() = _namedActors
 
-    fun start(screen: OnjScreen) {
+
+    fun start(screen: OnjScreen, context: Any?) {
         this.screen = screen
+        this._context = context
     }
 
     open fun update() { }
@@ -68,6 +71,16 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract fun getScreenControllers(): List<ScreenController>
 
     open fun debugMenuPages(): List<String> = emptyList()
+
+    inline fun <reified T> context(): T {
+        val context = _context
+            ?: throw RuntimeException("screen $name expects a context, but context was null")
+        if (context !is T) {
+            throw RuntimeException("screen $name expected context of type ${T::class.simpleName} but received" +
+                    "${context::class.simpleName}")
+        }
+        return context
+    }
 
     inline fun newGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
         contract {
@@ -254,6 +267,7 @@ abstract class ScreenCreator : ResourceBorrower {
         color: Color = Color.BLACK,
         isTemplate: Boolean = false,
         isDistanceField: Boolean = true,
+        backgroundHints: Array<String> = arrayOf(),
         builder: CustomLabel.() -> Unit = {}
     ): CustomLabel {
         contract {
@@ -264,14 +278,16 @@ abstract class ScreenCreator : ResourceBorrower {
                 screen,
                 TemplateString(text),
                 Label.LabelStyle(forceLoadFont(font), color),
-                isDistanceField = isDistanceField
+                isDistanceField = isDistanceField,
+                backgroundHints = backgroundHints
             )
         } else {
             CustomLabel(
                 screen,
                 text,
                 Label.LabelStyle(forceLoadFont(font), color),
-                isDistanceField = isDistanceField
+                isDistanceField = isDistanceField,
+                backgroundHints = backgroundHints
             )
         }
         this.addActor(label)
@@ -311,12 +327,20 @@ abstract class ScreenCreator : ResourceBorrower {
         return advancedText
     }
 
-    fun forceLoadFont(handle: String): BitmapFont = FortyFive.resourceManager.forceGet(this, screen, handle)
+    fun forceLoadFont(handle: String): BitmapFont = FortyFive.resourceManager.forceGet(this, screen.lifetime, handle)
 
     inline fun <T : Actor> Group.actor(actor: T, builder: T.() -> Unit = {}): T {
         this.addActor(actor)
         builder(actor)
         return actor
+    }
+
+    inline fun <T : Actor> Group.allActors(actors: Iterable<T>, builder: T.() -> Unit = {}): Iterable<T> {
+        actors.forEach { actor ->
+            this.addActor(actor)
+            builder(actor)
+        }
+        return actors
     }
 
     fun <T> T.relativeWidth(percent: Float) where T : Actor, T : OnLayoutActor {
@@ -353,10 +377,30 @@ abstract class ScreenCreator : ResourceBorrower {
         onLayoutAndNow { y = parent.height / 2 - height / 2 }
     }
 
+    fun CustomBox.defaultButtonBackgrounds() {
+        backgroundHandle = "common_button_default"
+        observeInputState(
+            GameInputs.States.focused,
+            { backgroundHandle = "common_button_hover" },
+            { backgroundHandle = "common_button_default" }
+        )
+    }
+
+    fun buttonBackgroundHints() = arrayOf("common_button_default", "common_button_hover" )
+
+    fun CustomLabel.defaultButtonBackgrounds() {
+        backgroundHandle = "common_button_default"
+        observeInputState(
+            GameInputs.States.focused,
+            { backgroundHandle = "common_button_hover" },
+            { backgroundHandle = "common_button_default" }
+        )
+    }
+
     fun CustomGroup.addDefaultOverlays(
         worldWidth: Float,
         worldHeight: Float,
-        warningEvents: EventPipeline,
+        events: EventPipeline,
         hasSettings: Boolean = true,
         hasBackpack: Boolean = true,
         hasNavbar: Boolean = true,
@@ -366,7 +410,7 @@ abstract class ScreenCreator : ResourceBorrower {
         hasTitleScreenInNavbar: Boolean = true,
     ): WarningParent? {
 
-        val warningParent = WarningParent(this@ScreenCreator, screen, warningEvents)
+        val warningParent = WarningParent(this@ScreenCreator, screen, events)
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
         if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
@@ -380,21 +424,23 @@ abstract class ScreenCreator : ResourceBorrower {
 
         var backpack: CustomGroup? = null
         if (hasBackpack) {
-            val (_backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, warningEvents)
+            val (_backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events)
             backpack = _backpack
             navbarObjects.add(backpackObject)
         }
 
-        val navbar = getSharedNavBar(
-            worldWidth, worldHeight,
-            navbarObjects,
-            screen,
-            isLeft = navbarIsLeft
-        )
 
-        actor(navbar) {
-            onLayoutAndNow { y = worldHeight - height }
-            centerX()
+        if (hasNavbar) {
+            val navbar = getSharedNavBar(
+                worldWidth, worldHeight,
+                navbarObjects,
+                screen,
+                isLeft = navbarIsLeft
+            )
+            actor(navbar) {
+                onLayoutAndNow { y = worldHeight - height }
+                centerX()
+            }
         }
         backpack?.let { actor(it) }
         settings?.let {
@@ -440,24 +486,48 @@ abstract class ScreenCreator : ResourceBorrower {
     inline fun <A, reified P> A.propertyAnimation(
         property: KMutableProperty<P>,
         vararg states: AnimState<P>,
+        initialState: String,
+        defaultTime: Int,
+        defaultInterpolation: Interpolation,
+        invalidate: Boolean = false,
+        invalidateHierarchy: Boolean = false,
+        invalidateParent: Boolean = false,
         interpolator: Interpolator<P>? = DefaultInterpolators.getDefaultInterpolator(P::class)
     ): PropertyAnimation<P> where A : Actor, P : Any = PropertyAnimation(
         this,
         AbstractProperty.fromKotlin(property),
         P::class,
+        defaultTime,
+        defaultInterpolation,
+        initialState,
         interpolator,
+        invalidate,
+        invalidateHierarchy,
+        invalidateParent,
         *states
     )
 
     inline fun <A, reified P> A.propertyAnimation(
         property: AbstractProperty<P>,
         vararg states: AnimState<P>,
+        initialState: String,
+        defaultTime: Int,
+        defaultInterpolation: Interpolation,
+        invalidate: Boolean = false,
+        invalidateHierarchy: Boolean = false,
+        invalidateParent: Boolean = false,
         interpolator: Interpolator<P>? = DefaultInterpolators.getDefaultInterpolator(P::class)
     ): PropertyAnimation<P> where A : Actor, P : Any = PropertyAnimation(
         this,
         property,
         P::class,
+        defaultTime,
+        defaultInterpolation,
+        initialState,
         interpolator,
+        invalidate,
+        invalidateHierarchy,
+        invalidateParent,
         *states
     )
 

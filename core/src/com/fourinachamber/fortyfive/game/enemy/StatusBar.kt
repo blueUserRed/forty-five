@@ -34,15 +34,15 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
 
     private val resourceManager = FortyFive.resourceManager
 
-    private val mainBar: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_main_bar")
-    private val hpLabel: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_hp_label")
-    private val shieldOverlay: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_shield_overlay")
-    private val effectBox: Promise<Drawable> = resourceManager.request(this, screen, "enemy_status_bar_effect_box")
-    private val whiteTexture: Promise<TextureRegion> = resourceManager.request(this, screen, "white_texture")
-    private val sliderShader: Promise<BetterShader> = resourceManager.request(this, screen, "enemy_status_bar_shader")
+    private val mainBar: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_main_bar")
+    private val hpLabel: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_hp_label")
+    private val shieldOverlay: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_shield_overlay")
+    private val effectBox: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_effect_box")
+    private val whiteTexture: Promise<TextureRegion> = resourceManager.request(this, screen.lifetime, "white_texture")
+    private val sliderShader: Promise<BetterShader> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_shader")
 
     // TODO: add a smaller version of roadgeek
-    private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen, "roadgeek")
+    private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen.lifetime, "roadgeek")
 
     private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Color.FortyWhite, 100f, Align.center, false)
 
@@ -58,7 +58,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     private var lastKnownHealth: Int = enemy.health
 
     init {
-        screen.onEnd { polygonBatch.dispose() }
+        screen.lifetime.tieDisposable(polygonBatch)
         enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { hpChanged() }
         enemy.enemyEvents.watchFor<Enemy.StatusEffectsChangedEvent> { statusEffectsChanged() }
     }
@@ -67,7 +67,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         enemy.statusEffects.forEach { effect ->
             if (statusEffectIcons.containsKey(effect.name)) return@forEach
             val iconHandle = GraphicsConfig.iconName(effect.name)
-            val promise = resourceManager.request<Drawable>(this, screen, iconHandle)
+            val promise = resourceManager.request<Drawable>(this, screen.lifetime, iconHandle)
             statusEffectIcons[effect.name] = promise
         }
     }
@@ -96,7 +96,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         val barX = x + (width - barWidth) / 2
         val barY = y + height - barHeight
 
-        val firstHeight = barHeight * 0.74f
+        val firstHeight = barHeight * 0.72f
         val secondHeight = barHeight * 0.91f
 
         batch.end()

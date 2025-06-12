@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.components.Afterlife
 import com.fourinachamber.fortyfive.screen.gameWidgets.Revolver
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Timeline
 
 interface GameController {
@@ -37,6 +38,8 @@ interface GameController {
     val revolver: Revolver
     val cardStack: CardStack
     val afterlife: Afterlife
+
+    val gameEvents: EventPipeline
 
     fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline
 

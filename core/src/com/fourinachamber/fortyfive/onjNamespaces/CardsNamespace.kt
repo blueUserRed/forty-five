@@ -305,6 +305,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun rightClicked(
+        whichCardTriggers: OnjString
+    ): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardRightClicked> { situation, card, _, _ ->
+            WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+        }
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
     fun enterZone(newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->

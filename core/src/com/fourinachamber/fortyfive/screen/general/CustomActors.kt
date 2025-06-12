@@ -41,13 +41,13 @@ open class CustomLabel(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     override var marginTop: Float = 0f
     override var marginBottom: Float = 0f
     override var marginLeft: Float = 0f
     override var marginRight: Float = 0f
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
 
     override var drawOffsetX: Float = 0f
     override var drawOffsetY: Float = 0f
@@ -202,7 +202,7 @@ open class CustomImageActor(
     override var marginBottom: Float = 0f
     override var marginLeft: Float = 0f
     override var marginRight: Float = 0f
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -219,7 +219,7 @@ open class CustomImageActor(
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
     /**
@@ -361,14 +361,14 @@ open class CustomHorizontalGroup(
     override var marginBottom: Float = 0F
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
 
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         this.x += drawOffsetX
@@ -413,7 +413,7 @@ open class CustomVerticalGroup(
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
-    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         background?.draw(batch, x, y, width, height)
@@ -461,7 +461,7 @@ open class CustomGroup(
     override var marginBottom: Float = 0f
     override var marginLeft: Float = 0f
     override var marginRight: Float = 0f
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
 
     override var fixedZIndex: Int = 0
 
@@ -483,7 +483,7 @@ open class CustomGroup(
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
-    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen, backgroundHints)
+    protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     override var dropShadow: DropShadow? = null
 
     var manualBackground: Drawable? = null
@@ -596,6 +596,7 @@ open class CustomGroup(
         if (index == -1) return false
         invalidate()
         removeActorAt(_originalChildren.indexOf(actor), unfocus)
+        if (actor is InputActor) actor.onRemove()
         return true
     }
 
@@ -603,23 +604,33 @@ open class CustomGroup(
         sortedChildrenDirty = true
         val actor = _originalChildren.removeAt(index)
         invalidate()
+        if (actor is InputActor) actor.onRemove()
         return super.removeActorAt(children.indexOf(actor), unfocus)
     }
 
     override fun clearChildren(unfocus: Boolean) {
         sortedChildrenDirty = true
         invalidate()
+        children.forEach { actor ->
+            if (actor is InputActor) actor.onRemove()
+        }
         super.clearChildren(unfocus)
     }
 
     override fun clear() {
         _originalChildren.clear()
+        children.forEach { actor ->
+            if (actor is InputActor) actor.onRemove()
+        }
         super.clear()
         invalidate()
     }
 
     override fun clearChildren() {
         _originalChildren.clear()
+        children.forEach { actor ->
+            if (actor is InputActor) actor.onRemove()
+        }
         invalidate()
         super.clearChildren()
     }

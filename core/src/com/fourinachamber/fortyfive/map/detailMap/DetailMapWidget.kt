@@ -85,8 +85,8 @@ class DetailMapWidget(
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
-    private val nodeDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, defaultNodeDrawableHandle)
-    private val playerDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen, playerDrawableHandle)
+    private val nodeDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen.lifetime, defaultNodeDrawableHandle)
+    private val playerDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen.lifetime, playerDrawableHandle)
 
     var backgroundHandle: ResourceHandle? = null
         set(value) {
@@ -95,7 +95,7 @@ class DetailMapWidget(
             background = if (value == null) {
                 null
             } else {
-                FortyFive.resourceManager.request(this, screen, value)
+                FortyFive.resourceManager.request(this, screen.lifetime, value)
             }
         }
 
@@ -108,8 +108,8 @@ class DetailMapWidget(
             }
         }
 
-    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen, edgeTextureHandle)
-    private val directionIndicator: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen, directionIndicatorHandle)
+    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, edgeTextureHandle)
+    private val directionIndicator: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, directionIndicatorHandle)
 
     private var moveScreenToPoint: Vector2? = null
 
@@ -248,7 +248,7 @@ class DetailMapWidget(
 
     private fun createDecorationAnimation(name: String): AnimationDrawable = when (name) {
 
-        "sheep" -> createAnimation(this, screen) {
+        "sheep" -> createAnimation(this, screen.lifetime) {
             val anim = deferredAnimation("map_decoration_sheep_animation")
             val still = stillFrame("map_decoration_bewitched_forest_sheep_1", 500)
             order {
@@ -257,7 +257,7 @@ class DetailMapWidget(
             }
         }
 
-        "tree" -> createAnimation(this, screen) {
+        "tree" -> createAnimation(this, screen.lifetime) {
             val anim = deferredAnimation("map_decoration_tree_animation")
             val still = stillFrame("map_decoration_bewitched_forest_tree1", 100)
             val cycleOffset = (0..30).random()
@@ -275,7 +275,7 @@ class DetailMapWidget(
             }
         }
 
-        "grass" -> createAnimation(this, screen) {
+        "grass" -> createAnimation(this, screen.lifetime) {
             val anim = deferredAnimation("map_decoration_grass_animation")
             order {
                 loop(anim)
@@ -530,7 +530,7 @@ class DetailMapWidget(
         MapManager.currentMapNode = movePlayerTo
         MapManager.lastMapNode = playerNode
         playerPos = scaledNodePos(movePlayerTo)
-        events.fire(PlayerChangedNodeEvent(playerNode))
+        events.fire(PlayerChangedNodeEvent(movePlayerTo))
         this.movePlayerTo = null
         updateDirectionIndicator(lastPointerPosition)
     }
@@ -557,9 +557,9 @@ class DetailMapWidget(
     }
 
     private val visitedNodeShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, screen, "grayscale_shader")
+        FortyFive.resourceManager.request(this, screen.lifetime, "grayscale_shader")
     private val edgeShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, screen, "map_edge_shader")
+        FortyFive.resourceManager.request(this, screen.lifetime, "map_edge_shader")
 
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges

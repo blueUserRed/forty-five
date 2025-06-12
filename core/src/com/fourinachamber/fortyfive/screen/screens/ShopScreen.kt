@@ -8,14 +8,12 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -23,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.percent
+import kotlin.reflect.KClass
 
 class ShopScreen : ScreenCreator() {
 
@@ -78,7 +77,7 @@ class ShopScreen : ScreenCreator() {
         height = worldHeight
 
         dropTargetFilter.start()
-        screen.inputManager.enableDragAndDrop(ShopScreenController.availableCardGroup, shopDropTargetGroup)
+        screen.inputManager.addDragAndDrop(ShopScreenController.availableCardGroup, shopDropTargetGroup)
 
         image {
             x = 0f
@@ -255,7 +254,7 @@ class ShopScreen : ScreenCreator() {
                     { backgroundHandle = "shop_back_button" }
                 )
                 onInput(GameInputs.interact) {
-                    FortyFive.changeToScreen(MapScreen())
+                    FortyFive.screenManager.screenFinished()
                 }
             }
 
@@ -329,7 +328,9 @@ class ShopScreen : ScreenCreator() {
         it.interpolation = Interpolation.pow2Out
     }
 
-    companion object {
+    companion object : ScreenManager.ScreenCreatorCompanion {
         const val shopDropTargetGroup = "shop-drop-target"
+
+        override val creatorClass: KClass<out ScreenCreator> = ShopScreen::class
     }
 }

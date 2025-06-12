@@ -44,13 +44,6 @@ class AutomaticResourceGetter<T : Any>(
     init {
         handleProperty.subscribe(::onHandleChange)
         onHandleChange(null, handleProperty.getValue())
-        hints.forEach { handle ->
-            val lifetime = EndableLifetime()
-            val guardedLifetime = lifetime.shorter(guardLifetime)
-            val promise = FortyFive.resourceManager.request(this, guardedLifetime, handle, resourceType)
-            val resource = Resource(handle, promise, lifetime, alwaysLoaded = true)
-            resources.add(resource)
-        }
     }
 
     fun onResourceChange(callback: (newResource: T) -> Unit) {
@@ -88,7 +81,7 @@ class AutomaticResourceGetter<T : Any>(
         val lifetime = EndableLifetime()
         val guardedLifetime = lifetime.shorter(guardLifetime)
         val promise = FortyFive.resourceManager.request(this, guardedLifetime, new, resourceType)
-        val newResource = Resource(new, promise, lifetime)
+        val newResource = Resource(new, promise, lifetime, alwaysLoaded = new in hints)
         resources.add(newResource)
 
         promise.then { result ->

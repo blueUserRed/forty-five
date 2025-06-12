@@ -14,20 +14,20 @@ class DeferredFrameAnimation(
     val previewHandle: ResourceHandle,
     val atlasHandle: ResourceHandle,
     val frameTime: Int,
-) : AnimationPart, ResourceBorrower, Lifetime {
+) : AnimationPart, ResourceBorrower {
 
     private var loadedFrameAnimation: FrameAnimation? = null
 
-    private val lifetime: EndableLifetime = EndableLifetime()
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val lifetime: Lifetime
+        get() = _lifetime
 
-    private val previewDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, this, previewHandle)
+    private val previewDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, lifetime, previewHandle)
 
     private var hasBeenDisposed: Boolean = false
 
     override val duration: Int
         get() = loadedFrameAnimation?.duration ?: Int.MAX_VALUE
-
-    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     override fun getFrame(progress: Int, frameOffset: Int): Drawable? {
         return loadedFrameAnimation?.getFrame(progress, frameOffset) ?: previewDrawable.getOrNull()
@@ -36,7 +36,7 @@ class DeferredFrameAnimation(
     private fun load() {
         FortyFive
             .resourceManager
-            .request<TextureAtlas>(this, this, atlasHandle)
+            .request<TextureAtlas>(this, lifetime, atlasHandle)
             .then(::createFrameAnimation)
     }
 
@@ -68,6 +68,6 @@ class DeferredFrameAnimation(
     override fun dispose() {
         if (hasBeenDisposed) return
         hasBeenDisposed = true
-        lifetime.die()
+        _lifetime.die()
     }
 }

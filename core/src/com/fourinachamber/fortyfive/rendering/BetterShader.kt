@@ -19,19 +19,19 @@ class BetterShader(
     val shader: ShaderProgram,
     val uniformsToBind: List<String>,
     private val neededTextures: List<String>,
-) : Disposable, ResourceBorrower, Lifetime {
+) : Disposable, ResourceBorrower {
 
     private var referenceTime = TimeUtils.millis()
 
-    private val lifetime: EndableLifetime = EndableLifetime()
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val lifetime: Lifetime
+        get() = _lifetime
 
     private val textures: MutableMap<String, Promise<Texture>> = neededTextures
         .associateWith {
-            FortyFive.resourceManager.request<Texture>(this, this, uniformResourceNameMapping[it]!!)
+            FortyFive.resourceManager.request<Texture>(this, lifetime, uniformResourceNameMapping[it]!!)
         }
         .toMutableMap()
-
-    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     fun resetReferenceTime() {
         referenceTime = TimeUtils.millis()
@@ -95,7 +95,7 @@ class BetterShader(
     }
 
     override fun dispose() {
-        lifetime.die()
+        _lifetime.die()
         shader.dispose()
     }
 

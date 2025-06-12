@@ -5,8 +5,8 @@ import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.screen.ScreenManager
+import com.fourinachamber.fortyfive.screen.screens.*
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -122,12 +122,18 @@ abstract class MapEvent {
     /**
      * called when the start button was clicked
      */
-    abstract fun start()
+    open fun start() {
+        val chain = screenChain()
+            ?: throw RuntimeException("MapEvent must either override start() or provide a screenChain")
+        FortyFive.screenManager.addChainAndTransition(chain)
+    }
 
     /**
      * returns a representation of this event (and its state) as an OnjObject
      */
     abstract fun asOnjObject(): OnjObject
+
+    open fun screenChain(): ScreenManager.ScreenChain? = null
 
     /**
      * utility function that reads and sets the [currentlyBlocks], [canBeStarted], [isCompleted] fields from an
@@ -188,17 +194,13 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
-    override val forwardToScreen: String = "mapScreen"
+    override val screenChain: ScreenManager.ScreenChain = ScreenManager.screenChain(EncounterScreen to this)
 
     override val buttonText: String = "Fight!"
 
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
-    }
-
-    override fun start() {
-        MapManager.changeToEncounterScreen(this)
     }
 
     override fun completed() {
@@ -215,6 +217,8 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
         "encounterIndex" with encounterIndex
 
     }
+
+    override fun screenChain(): ScreenManager.ScreenChain = screenChain
 
 }
 
@@ -242,6 +246,7 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 
     override fun start() {
         MapManager.changeToMap(targetMap)
+        FortyFive.screenManager.addChainAndTransition(screenChain())
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
@@ -249,6 +254,7 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
         "targetMap" with targetMap
     }
 
+    override fun screenChain(): ScreenManager.ScreenChain = ScreenManager.screenChain(MapScreen to this)
 }
 
 /**
@@ -283,9 +289,7 @@ class DialogMapEvent(onj: OnjObject) : MapEvent() {
         setStandardValuesFromConfig(onj)
     }
 
-    override fun start() {
-        MapManager.changeToDialogScreen(this)
-    }
+    override fun screenChain(): ScreenManager.ScreenChain? = ScreenManager.screenChain(DialogScreen to this)
 
     fun completed() {
         currentlyBlocks = false
@@ -331,9 +335,7 @@ class ShopMapEvent(
     val currentRerollPrice: Int
         get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
-    override fun start() {
-        MapManager.changeToShopScreen(this)
-    }
+    override fun screenChain(): ScreenManager.ScreenChain = ScreenManager.screenChain(ShopScreen to this)
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
@@ -373,8 +375,6 @@ class ChooseCardMapEvent(
     override var seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     override val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
 
-    override val forwardToScreen: String = "mapScreen"
-
     override val descriptionText: String =
         if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
     override val displayName: String = "Ominous person"
@@ -383,9 +383,8 @@ class ChooseCardMapEvent(
         setStandardValuesFromConfig(onj)
     }
 
-    override fun start() {
-        MapManager.changeToChooseCardScreen(this)
-    }
+    override fun screenChain(): ScreenManager.ScreenChain =
+        ScreenManager.screenChain(ChooseCardScreen to this)
 
     override fun completed() {
         isCompleted = true
@@ -426,7 +425,8 @@ class HealOrMaxHPMapEvent(
     override val displayName: String = "Restoration Point"
 
     override fun start() {
-        MapManager.changeToHealOrMaxHPScreen(this)
+        TODO("I don't know if it will be possible to increase max hp in future versions of the game")
+//        MapManager.changeToHealOrMaxHPScreen(this)
     }
 
     init {
@@ -438,7 +438,6 @@ class HealOrMaxHPMapEvent(
         isCompleted = true
         canBeStarted = false
         currentlyBlocks = false
-        MapManager.changeToMapScreen()
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
@@ -468,7 +467,8 @@ class AddMaxHPMapEvent(
     override val displayName: String = "Restoration Point"
 
     override fun start() {
-        MapManager.changeToAddMaxHPScreen(this)
+        TODO("I don't know if it will be possible to increase max hp in future versions of the game")
+//        MapManager.changeToAddMaxHPScreen(this)
     }
 
     init {
@@ -478,7 +478,6 @@ class AddMaxHPMapEvent(
     override fun completed() {
         isCompleted = true
         canBeStarted = false
-        MapManager.changeToMapScreen()
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
@@ -510,6 +509,7 @@ class FinishTutorialMapEvent(
         PermaSaveState.playerHasCompletedTutorial = true
         PermaSaveState.write()
         MapManager.changeToMap(goToMap)
+        FortyFive.screenManager.screenFinished()
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {

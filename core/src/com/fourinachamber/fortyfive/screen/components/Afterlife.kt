@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.components
 
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.card.Card
@@ -35,6 +36,9 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
     val isClosed: Boolean
         get() = !isOpen
+
+    var afterlifeIsVisible: Boolean = false
+        private set
 
     private val openFilter = InputManager.FocusFilter(listOf(afterliveSlotGroup), screen)
 
@@ -72,6 +76,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         action.duration = 0.1f
         action.interpolation = Interpolation.pow2
         later {
+            if (!afterlifeIsVisible) afterlifeEvents.fire(Events.MakeVisible)
             if (isOpen) return@later
             isOpen = true
             openFilter.end()
@@ -203,9 +208,17 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
         horizontalAlign = CustomAlign.END
         verticalAlign = CustomAlign.CENTER
 
+        isVisible = false
+        afterlifeIsVisible = false
+
+        afterlifeEvents.watchFor<Events.MakeVisible> {
+            isVisible = true
+            afterlifeIsVisible = true
+        }
+
         image(backgroundHints = arrayOf("afterlife_arrow_right", "afterlife_arrow_left")) {
             backgroundHandle = "afterlife_arrow_left"
-            badTexture("afterlife arrow", lowRes = true)
+            badTexture("afterlife arrow", lowRes = true, missingFocusTexture = true)
             afterlifeEvents.watchFor<Events.ChangeArrow> { (open) ->
                 backgroundHandle = if (open) "afterlife_arrow_right" else "afterlife_arrow_left"
             }
@@ -213,6 +226,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             width = 60f
             marginRight = 30f
             keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
             observeInputState(
                 GameInputs.States.focused,
                 { debug = true },
@@ -252,6 +266,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
     private object Events {
         data class ChangeArrow(val open: Boolean)
         data object CardPushed
+        data object MakeVisible
     }
 
 }

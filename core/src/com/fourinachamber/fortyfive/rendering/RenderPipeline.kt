@@ -37,9 +37,11 @@ interface Renderable {
 open class RenderPipeline(
     protected val screen: OnjScreen,
     private val baseRenderable: Renderable
-) : Disposable, ResourceBorrower, Lifetime {
+) : Disposable, ResourceBorrower {
 
-    private val lifetime: EndableLifetime = EndableLifetime()
+    private val _lifetime: EndableLifetime = EndableLifetime()
+    val lifetime: Lifetime
+        get() = _lifetime
 
     protected val frameBufferManager: FrameBufferManager = FrameBufferManager()
 
@@ -56,16 +58,16 @@ open class RenderPipeline(
     private val orbAnimations: MutableList<OrbAnimation> = mutableListOf()
 
     private val alphaReductionShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "alpha_reduction_shader")
+        FortyFive.resourceManager.request(this, lifetime, "alpha_reduction_shader")
 
     private val screenShakeShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "screen_shake_shader")
+        FortyFive.resourceManager.request(this, lifetime, "screen_shake_shader")
 
     private val screenShakePopoutShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "screen_shake_popout_shader")
+        FortyFive.resourceManager.request(this, lifetime, "screen_shake_popout_shader")
 
     private val gaussianBlurShader: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this, "gaussian_blur_shader")
+        FortyFive.resourceManager.request(this, lifetime, "gaussian_blur_shader")
 
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
@@ -103,8 +105,6 @@ open class RenderPipeline(
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
     }
-
-    override fun onEnd(callback: () -> Unit) = lifetime.onEnd(callback)
 
     fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
         action {
@@ -270,7 +270,7 @@ open class RenderPipeline(
 
     private fun renderDebugMenu(menu: DebugMenu) {
         menu.update()
-        val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, this, "red_wing_bmp")
+        val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, lifetime, "red_wing_bmp")
         font.data.setScale(0.2f)
 
         val page = menu.currentPage()
@@ -375,7 +375,7 @@ open class RenderPipeline(
         frameBufferManager.dispose()
         shapeRenderer.dispose()
         batch.dispose()
-        lifetime.die()
+        _lifetime.die()
     }
 
     data class OrbAnimation(
@@ -390,7 +390,7 @@ open class RenderPipeline(
         val position: (progress: Float) -> Vector2,
     ) {
 
-        val orbTexturePromise: Promise<Drawable> = FortyFive.resourceManager.request(renderPipeline, renderPipeline, orbTexture)
+        val orbTexturePromise: Promise<Drawable> = FortyFive.resourceManager.request(renderPipeline, renderPipeline.lifetime, orbTexture)
 
         companion object {
 
@@ -425,12 +425,12 @@ open class RenderPipeline(
 
 class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
 
-    private val shootShader: Promise<BetterShader> = GraphicsConfig.shootShader(this, this)
+    private val shootShader: Promise<BetterShader> = GraphicsConfig.shootShader(this, lifetime)
     private val shootPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(shootShader)
     }
 
-    private val parryShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, this, "parry_shader")
+    private val parryShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, lifetime, "parry_shader")
     private val parryPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(parryShader)
     }

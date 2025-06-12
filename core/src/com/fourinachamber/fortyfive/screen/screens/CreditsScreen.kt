@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
@@ -17,6 +18,7 @@ import onj.value.OnjObject
 import kotlin.collections.map
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.reflect.KClass
 
 class CreditsScreen : ScreenCreator() {
 
@@ -160,5 +162,8 @@ class CreditsScreen : ScreenCreator() {
         }
     }
 
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = CreditsScreen::class
+    }
 
 }

@@ -57,12 +57,12 @@ tasks.register<Jar>("dist") {
         attributes["Main-Class"] = mainClassName
     }
     dependsOn(configurations.runtimeClasspath)
-    configurations.runtimeClasspath.get().map {
-        if (it.isDirectory) it else zipTree(it)
-    }
+    from(
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    )
     with(tasks.getByName("jar") as CopySpec)
 }
 
-tasks.named("dist") {
+tasks.named<Jar>("dist") {
     dependsOn("classes")
 }

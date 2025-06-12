@@ -23,7 +23,7 @@ class TutorialInfoActor(
 ) : CustomBox(screen), ResourceBorrower {
 
     private val loadedBackground: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, screen, maskedBackgroundTextureName)
+        FortyFive.resourceManager.request(this, screen.lifetime, maskedBackgroundTextureName)
 
     private var positionProvider: (() -> Circle)? = null
 

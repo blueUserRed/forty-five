@@ -122,14 +122,14 @@ class SoundPlayer : ResourceBorrower {
             FortyFive.logger.warn(logTag, "No sound config for situation $name")
             return
         }
-        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen, situation.sound ?: return)
+        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, situation.sound ?: return)
         soundPromise.then { sound ->
             sound.play(situation.volume * soundEffectVolume * masterVolume)
         }
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
-        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen, soundHandle)
+        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, soundHandle)
         soundPromise.then { sound ->
             sound.play(soundEffectVolume * masterVolume)
         }
@@ -155,7 +155,7 @@ class SoundPlayer : ResourceBorrower {
         }
         ambientSounds.filter { it.key.name in sounds }.forEach { (ambient, nextPlayTime) ->
             if (nextPlayTime > now) return@forEach
-            val sound = ambient.getSoundPromise(screen).getOrNull() ?: return@forEach
+            val sound = ambient.getSoundPromise(screen.lifetime).getOrNull() ?: return@forEach
             val id = sound.play()
             sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume * masterVolume)
             ambientSounds[ambient] = now + ambient.delay.random()
@@ -163,11 +163,15 @@ class SoundPlayer : ResourceBorrower {
     }
 
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
-        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen, musicHandle)
+        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen.lifetime, musicHandle)
         musicPromise.then { music ->
             music.play()
             music.volume = musicVolume * masterVolume
         }
+    }
+
+    fun end() {
+        currentMusicLifetime?.die()
     }
 
     private data class AmbientSound(

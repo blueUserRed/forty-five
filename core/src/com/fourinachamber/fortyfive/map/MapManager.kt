@@ -9,10 +9,8 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.map.detailMap.generation.BaseMapGenerator
-import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.screens.*
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -96,7 +94,7 @@ object MapManager {
             .value
             .map { it as OnjObject }
             .map { it.get<String>("name") to it.get<String>("eventText") }
-            .forEach {displayNames[it.first] = it.second }
+            .forEach { displayNames[it.first] = it.second }
         this.displayNames = displayNames
     }
 
@@ -104,50 +102,6 @@ object MapManager {
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
         currentDetailMap = readDetailMap(map)
-    }
-
-    // TODO: we need to come up with a better system for managing screen order anyways
-
-    fun changeToEncounterScreen(context: EncounterContext, immediate: Boolean = false) {
-        val encounter = GameDirector.encounters[context.encounterIndex]
-        val intermediate = encounter
-            .encounterModifier
-            .map { it.intermediateScreen() }
-            .find { it != null }
-        if (intermediate != null && !immediate) {
-            TODO()
-//            FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(intermediate), context)
-        } else {
-            FortyFive.changeToScreen(GameScreen(), context)
-        }
-    }
-
-    fun changeToDialogScreen(event: MapEvent) {
-        FortyFive.changeToScreen(DialogScreen(), event)
-    }
-
-    fun changeToShopScreen(event: MapEvent) {
-        FortyFive.changeToScreen(ShopScreen(), event)
-    }
-
-    fun changeToChooseCardScreen(context: ChooseCardScreenContext) {
-//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("chooseCardScreen"), context)
-    }
-
-    fun changeToHealOrMaxHPScreen(event: MapEvent) {
-//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("healOrMaxHPScreen"), event)
-    }
-
-    fun changeToAddMaxHPScreen(event: MapEvent) {
-//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("addMaxHPScreen"), event)
-    }
-
-    fun changeToTitleScreen() {
-        FortyFive.changeToScreen(TitleScreen())
-    }
-
-    fun changeToCreditsScreen() {
-//        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor("creditsScreen"))
     }
 
     /**
@@ -176,7 +130,6 @@ object MapManager {
             ?: 0
         SaveState.lastNode = null
         FortyFive.logger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
-        changeToMapScreen()
     }
 
     private fun readDetailMap(map: FileHandle): DetailMap = try {
@@ -214,10 +167,6 @@ object MapManager {
     fun resetAllSync() {
         newRunSync()
 //        read()
-    }
-
-    fun changeToMapScreen() {
-        FortyFive.changeToScreen(MapScreen())
     }
 
     fun lookupMapFile(mapName: String): FileHandle =

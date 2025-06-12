@@ -9,20 +9,16 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.keyInput.FocusAlignment
 import com.fourinachamber.fortyfive.keyInput.InputActor
-import com.fourinachamber.fortyfive.keyInput.InputActorImpl
-import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.alpha
 import com.fourinachamber.fortyfive.utils.between
 import kotlin.math.max
@@ -35,7 +31,7 @@ open class CustomBox(
 ) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor, DisableActor, HasPaddingActor
 {
 
-    override var positionType: PositionType = PositionType.RELATIV
+    override var positionType: PositionType = PositionType.RELATIVE
     override var isDisabled: Boolean = false
 
     var verticalAlign: CustomAlign = CustomAlign.START      // top
@@ -340,7 +336,7 @@ open class CustomBox(
         var cachedChildren1 = cachedChildren
         if (cachedChildren1 != null) return cachedChildren1
         val lists =
-            _originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIV }
+            _originalChildren.partition { it !is KotlinStyledActor || it.positionType == PositionType.RELATIVE }
         cachedChildren1 = lists.first.map {
             var w = it.width
             var h = it.height
@@ -442,7 +438,7 @@ enum class CustomDirection(val isHorizontal: Boolean) {
 }
 
 enum class PositionType {
-    ABSOLUTE, RELATIV
+    ABSOLUTE, RELATIVE
 }
 
 
@@ -585,6 +581,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
         marginOuter: Float = 20F,
     ) {
         val bar = CustomImageActor(handle, screen)
+        bar.touchable = Touchable.enabled
         val barBackground = CustomImageActor(handleBackground, screen)
 
         bar.positionType = PositionType.ABSOLUTE
