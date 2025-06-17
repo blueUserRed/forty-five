@@ -309,16 +309,16 @@ class ShopScreen : ScreenCreator() {
             },
         )
 
-        fun updateState(){
+        fun updateState() {
             when {
-                isInInputState(GameInputs.States.focused) -> addAction(getAction(0f, y))
+                isInInputState(GameInputs.States.awaitingDropFocused) -> addAction(getAction(0f, y))
                 isInInputState(GameInputs.States.awaitingDrop) -> addAction(getAction(distanceNotSelected, y))
                 else -> addAction(getAction(-width, y))
             }
         }
 
         observeInputState(GameInputs.States.awaitingDrop, ::updateState, ::updateState)
-        observeInputState(GameInputs.States.focused, ::updateState, ::updateState)
+        observeInputState(GameInputs.States.awaitingDropFocused, ::updateState, ::updateState)
     }
 
     private fun getAction(to: Float, y: Float) = MoveToAction().also {

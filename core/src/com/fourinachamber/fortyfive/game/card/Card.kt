@@ -781,7 +781,7 @@ class CardActor(
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
 
         joinGroup(cardGroup)
-        startDragAndDropOn(GameInputs.interact)
+        startDragAndDropOn(GameInputs.initDragAndDrop)
         onEnterInputState(GameInputs.States.focused) {
             if (!playSoundsOnHover) return@onEnterInputState
             FortyFive.soundPlayer.situation("card_hover", screen)

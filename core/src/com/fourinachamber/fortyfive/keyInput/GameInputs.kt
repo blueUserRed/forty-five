@@ -97,7 +97,7 @@ object GameInputs {
     )
 
     val initDragAndDrop = Input("initDragAndDrop", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused))
+        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(InputManager.BaseStates.keyboardFocus))
     ))
 
     val confirmDragAndDrop = Input("confirmDragAndDrop", arrayOf(
