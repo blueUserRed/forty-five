@@ -35,11 +35,13 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
         }
         screen.debugMenu = debugMenu
         creator.start(screen, controllerContext)
+        val controllers = creator.getScreenControllers()
+        controllers.forEach { it.preInit(controllerContext) }
         val root = creator.getRoot()
         screen.stage.root = root
         screen.background = creator.background
         namedActors.putAll(creator.namedActors)
-        creator.getScreenControllers().forEach { screen.addScreenController(it) }
+        controllers.forEach { screen.addScreenController(it) }
         return screen
     }
 

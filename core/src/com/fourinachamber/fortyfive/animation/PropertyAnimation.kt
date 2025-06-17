@@ -79,7 +79,7 @@ class PropertyAnimation<T : Any>(
     private val invalidate: Boolean = false,
     private val invalidateHierarchy: Boolean = false,
     private val invalidateParent: Boolean = false,
-    private vararg val states: AnimState<T>,
+    vararg states: AnimState<T>,
 ) {
 
     private val interpolator: Interpolator<T> = interpolator
@@ -90,6 +90,8 @@ class PropertyAnimation<T : Any>(
     private var currentState: String = initialState
 
     private val defaultTransition = AnimTransition("", "", defaultTime, defaultInterpolation)
+
+    private val states: MutableMap<String, AnimState<T>> = states.associateBy { it.name }.toMutableMap()
 
     init {
         property.set(findState(initialState).value)
@@ -120,6 +122,13 @@ class PropertyAnimation<T : Any>(
         action.interpolation = transition.interpolation
         actor.addAction(action)
         currentState = state
+    }
+
+    fun replaceState(state: AnimState<T>) {
+        if (states[state.name] == null) {
+            throw RuntimeException("state with name ${state.name} does not exist")
+        }
+        states[state.name] = state
     }
 
     private fun doInvalidate(actor: Actor?) {
@@ -158,7 +167,7 @@ class PropertyAnimation<T : Any>(
     }
 
     private fun findState(state: String) =
-        states.find { it.name == state } ?: throw RuntimeException("Unknown state: $state")
+        states[state] ?: throw RuntimeException("Unknown state: $state")
 
     private data class AnimTransition(
         val from: String,

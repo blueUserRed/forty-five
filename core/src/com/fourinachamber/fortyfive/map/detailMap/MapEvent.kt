@@ -5,6 +5,7 @@ import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenContext
 import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.screens.*
 import com.fourinachamber.fortyfive.utils.toIntRange
@@ -260,7 +261,7 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 /**
  * event that opens a dialog box and allows talking to an NPC
  */
-class DialogMapEvent(onj: OnjObject) : MapEvent() {
+class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -279,7 +280,7 @@ class DialogMapEvent(onj: OnjObject) : MapEvent() {
     private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
     private val onlyIfPlayerDoesntHaveCard: String? = onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null)
 
-    val dialog: String = onj.get<String>("dialog")
+    override val dialog: String = onj.get<String>("dialog")
 
     override val descriptionText: String = ""
     override val displayName: String = MapManager.displayName(dialog)
@@ -291,7 +292,7 @@ class DialogMapEvent(onj: OnjObject) : MapEvent() {
 
     override fun screenChain(): ScreenManager.ScreenChain? = ScreenManager.screenChain(DialogScreen to this)
 
-    fun completed() {
+    override fun completed() {
         currentlyBlocks = false
         if (canOnlyBeStartedOnce) canBeStarted = false
         isCompleted = true

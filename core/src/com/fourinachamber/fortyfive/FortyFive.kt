@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
+import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenContext
 import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.MapNamespace
@@ -18,6 +19,7 @@ import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.DebugActorImpl
+import com.fourinachamber.fortyfive.screen.screens.DialogScreen
 import com.fourinachamber.fortyfive.screen.screens.IntroScreen
 import com.fourinachamber.fortyfive.screen.screens.MapScreen
 import com.fourinachamber.fortyfive.screen.screens.TitleScreen
@@ -64,6 +66,16 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
+
+        val dialogContext = object : DialogScreenContext {
+            override val dialog: String = "testing_dialog"
+            override fun completed() {}
+        }
+
+        screenManager.transitionImmediate(DialogScreen, dialogContext)
+
+        return
+
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
             UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)

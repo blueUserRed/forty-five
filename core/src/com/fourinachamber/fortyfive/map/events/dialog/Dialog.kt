@@ -31,16 +31,23 @@ data class Dialog(
                 defaults
             )
             val nextSelector = onj.get<OnjNamedObject>("next")
-            val leftNpcChangeTo = onj.get<String?>("npcLeftChangeTo")
-            val rightNpcChangeTo = onj.get<String?>("npcRightChangeTo")
+            val leftNpc = onj.get<String?>("leftNpc")
+            val rightNpc = onj.get<String?>("rightNpc")
             val talkingNpc = onj.get<String>("talkingNpc")
+
+            if (talkingNpc != leftNpc && talkingNpc != rightNpc) {
+                throw RuntimeException("talkingNpc $talkingNpc is neither the left or the right npc")
+            }
+
+            val leftNpcTalking = talkingNpc == leftNpc
+
             val next = when (nextSelector.name) {
 
                 "Continue" -> NextDialogPartSelector.Continue
 
                 "ToCreditScreenEnd" -> NextDialogPartSelector.ToCreditScreenEnd
 
-                "EndOfDialog" -> NextDialogPartSelector.End(nextSelector.get<String>("changeToScreen"))
+                "EndOfDialog" -> NextDialogPartSelector.End
 
                 "FixedNextPart" -> NextDialogPartSelector.Fixed(nextSelector.get<Long>("next").toInt())
 
@@ -56,12 +63,11 @@ data class Dialog(
 
                 "GiftCardEnd" -> NextDialogPartSelector.GiftCardEnd(
                     nextSelector.get<String>("card"),
-                    nextSelector.get<String>("changeToScreen"),
                 )
 
                 else -> throw RuntimeException("unknown next dialog part selector: ${nextSelector.name}")
             }
-            return DialogPart(text, next, leftNpcChangeTo, rightNpcChangeTo, talkingNpc)
+            return DialogPart(text, next, leftNpc, rightNpc, leftNpcTalking)
         }
     }
 }
@@ -69,14 +75,14 @@ data class Dialog(
 data class DialogPart(
     val text: AdvancedText,
     val nextDialogPartSelector: NextDialogPartSelector,
-    val leftNpcNameChangeTo: String?,
-    val rightNpcNameChangeTo: String?,
-    val talkingNpcName: String,
+    val leftNpc: String?,
+    val rightNpc: String?,
+    val leftNpcTalking: Boolean,
 )
 
 sealed class NextDialogPartSelector {
 
-    object Continue : NextDialogPartSelector()
+    data object Continue : NextDialogPartSelector()
 
     class Fixed(val next: Int) : NextDialogPartSelector()
 
@@ -84,10 +90,10 @@ sealed class NextDialogPartSelector {
         val choices: Map<String, Int>
     ) : NextDialogPartSelector()
 
-    class End(val nextScreen: String) : NextDialogPartSelector()
+    data object End : NextDialogPartSelector()
 
-    class GiftCardEnd(val card: String, val nextScreen: String) : NextDialogPartSelector()
+    class GiftCardEnd(val card: String) : NextDialogPartSelector()
 
-    object ToCreditScreenEnd : NextDialogPartSelector()
+    data object ToCreditScreenEnd : NextDialogPartSelector()
 
 }

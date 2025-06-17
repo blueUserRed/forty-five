@@ -1,45 +1,54 @@
 package com.fourinachamber.fortyfive.screen.screens
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.utils.Align
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.animation.AnimState
+import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
+import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.events.dialog.AnimatedAdvancedTextWidget
+import com.fourinachamber.fortyfive.map.events.dialog.DialogNpc
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.screen.ScreenManager
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
-import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
+import com.fourinachamber.fortyfive.screen.gameWidgets.TimelineController
 import com.fourinachamber.fortyfive.screen.general.CustomGroup
 import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.general.TemplateStringLabel
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomBox
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
 import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.alpha
 import kotlin.reflect.KClass
 
 class DialogScreen : ScreenCreator() {
+
     override val name: String = "dialogScreen"
+
     val worldWidth = 1600f
     val worldHeight = 900f
+
     override val background: String = "background_bewitched_forest"
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
     override val playAmbientSounds: Boolean = false
     override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 100)
 
-    private val dialogWidgetName = "dialog_widget"
-    private val optionsParentName = "options_parent"
-    private val npcLeftImageWidgetName = "npc_left"
-    private val npcRightImageWidgetName = "npc_right"
-    private val continueWidgetName = "continue_widget"
+    private val events: EventPipeline = EventPipeline()
 
-    val dialogFocusGroup = "dialog_element"
-    val dialogOptionFocusGroup = "dialog_option"
+    private val timelines = TimelineController()
+
+    private val dialogController: DialogScreenController by lazy {
+        DialogScreenController(
+            screen,
+            events
+        )
+    }
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -47,85 +56,81 @@ class DialogScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight
 
-        npcImageWidgets(name = npcLeftImageWidgetName, offset = 130F)
-        npcImageWidgets(name = npcRightImageWidgetName, offset = 980F)
-        dialogWidget()
-        dialogOptionsParent()
+        npc(true)
+        npc(false)
 
-        addDefaultOverlays(worldWidth, worldHeight, EventPipeline())
+        textWidget()
+
+        addDefaultOverlays(worldWidth, worldHeight, events, hasNavbar = false)
     }
 
-    override fun getScreenControllers(): List<ScreenController> = listOf(
-        DialogScreenController(
-            screen,
-            dialogWidgetName,
-            continueWidgetName,
-            npcLeftImageWidgetName,
-            npcRightImageWidgetName,
-            optionsParentName
-        ) { addOption() },
-        BiomeBackgroundScreenController(screen, true)
-    )
+    private fun CustomGroup.npc(isLeft: Boolean) {
+        var currentNpc: DialogNpc? = null
+        val animTime = 150
 
-    private fun addOption(): AdvancedTextWidget =
-        (screen.namedActorOrError(optionsParentName) as CustomBox).advancedText(
-            "roadgeek",
-            Color.FortyWhite,
-            1.0f
-        ) {
-            relativeWidth(100F)
-            fitContentHeight = true
-            setPadding(20F)
-        }
+        image {
 
-    private fun CustomGroup.npcImageWidgets(name: String, offset: Float) {
-        box {
-            relativeWidth(30F)
-            debug = true
-            x = offset
-            verticalAlign = CustomAlign.END
-            y = -1F
-            height = 1F //this is needed, since otherwise the vertical align breaks
-            image {
-                this.name(name)
-                this.relativeWidth(100F)
-                this.height = worldHeight * 0.8F
-                onLayoutAndNow { this.y = height }
-            }
-        }
-    }
+            val xAnimation = propertyAnimation(
+                xPositionAbstractProperty(),
+                AnimState("hidden", if (isLeft) -400f else worldWidth + 600f),
+                AnimState("shown", if (isLeft) 0f else worldWidth - width),
+                initialState = "hidden",
+                defaultTime = animTime,
+                defaultInterpolation = Interpolation.pow2
+            )
 
-    private fun CustomGroup.npcNameWidget(templateString: String) {
-        label(font = "red_wing", text = templateString, isTemplate = true) {
-            backgroundHandle = "dialog_name_field"
-            setFontScale(0.9f)
+            val alphaAnimation = propertyAnimation(
+                this::alpha,
+                AnimState("talking", 1f),
+                AnimState("listening", 0.8f),
+                initialState = "talking",
+                defaultTime = 60,
+                defaultInterpolation = Interpolation.linear
+            )
+
             onLayoutAndNow {
-                setText((this as TemplateStringLabel).templateString.string)
-                width = prefWidth * 1.3F
-                height = prefHeight * 1.4F
-                isVisible = text.isNotBlank() && (text.toString() != "{}")
+                y = currentNpc?.offset?.y ?: 0f
             }
-            setAlignment(Align.center)
-            y = 300F
-            x = 200F
+
+            events.watchFor<DialogScreenController.ChangeToNewDialogPart> { (part) ->
+                val state = if (part.leftNpcTalking == isLeft) "talking" else "listening"
+                alphaAnimation.state(state)
+            }
+
+            events.watchFor<DialogScreenController.ChangeNpcEvent> { (npc, eventAffectsLeft) ->
+                if (isLeft != eventAffectsLeft) return@watchFor
+
+                val timeline = Timeline.timeline {
+                    action { xAnimation.state("hidden") }
+                    delay(animTime)
+                    action {
+                        currentNpc = npc
+                        backgroundHandle = npc?.textureName
+                        invalidate()
+                        println(npc)
+                        npc ?: return@action
+                        width = npc.width
+                        height = npc.height
+                        var x = if (isLeft) 0f else worldWidth - width
+                        x += npc.offset.x
+                        xAnimation.replaceState(AnimState("shown", x))
+                        xAnimation.state("shown")
+                    }
+                }
+
+                timelines.dispatchTimeline(timeline)
+            }
         }
     }
 
-    private fun CustomGroup.dialogOptionsParent() = box {
-        verticalAlign = CustomAlign.END
-        horizontalAlign = CustomAlign.CENTER
-//        flexDirection = FlexDirection.COLUMN_REVERSE
-        minVerticalDistBetweenElements = 20F
-        x = worldWidth - 500
-        y = worldHeight * 0.32F
-        width = 400F
-        fitContentInFlexDirection = true
-        name(optionsParentName)
-    }
 
-    private fun CustomGroup.dialogWidget() =
-        actor(AnimatedAdvancedTextWidget(Triple("red_wing", Color.FortyWhite, 0.5f), screen, true)) {
-            name(dialogWidgetName)
+    private fun CustomGroup.textWidget() {
+        val advTextWidget = AnimatedAdvancedTextWidget(
+            Triple("red_wing", Color.FortyWhite, 0.5f),
+            screen,
+            true
+        )
+        actor(advTextWidget) {
             relativeWidth(75F)
             relativeHeight(30F)
             centerX()
@@ -145,20 +150,41 @@ class DialogScreen : ScreenCreator() {
                 horizontalAlign = CustomAlign.SPACE_AROUND
                 flexDirection = FlexDirection.ROW
                 minHorizontalDistBetweenElements = 350F
-                npcNameWidget("{map.cur_event.person_left.displayName}")
-                npcNameWidget("{map.cur_event.person_right.displayName}")
             }
 
-            image {
-                name(continueWidgetName)
+            val continueButton = image {
                 positionType = PositionType.ABSOLUTE
                 backgroundHandle = "common_symbol_arrow_right"
                 width = 40F
                 height = 40F
                 y = (parent.height - height) / 2
                 x = parent.width - 100F
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                onInput(GameInputs.interact) {
+                    if (!advTextWidget.isFinished) return@onInput
+                    events.fire(DialogScreenController.NextClicked)
+                }
             }
+
+            events.watchFor<DialogScreenController.ChangeToNewDialogPart> { (part) ->
+                continueButton.alpha = 0.5f
+                advTextWidget.advancedText = part.text
+            }
+
+            onPartFinished {
+                continueButton.alpha = 1f
+            }
+
         }
+    }
+
+
+    override fun getScreenControllers(): List<ScreenController> = listOf(
+        dialogController,
+        BiomeBackgroundScreenController(screen, true),
+        timelines
+    )
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = DialogScreen::class

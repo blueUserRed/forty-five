@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.Event
  */
 abstract class ScreenController {
 
+    open fun preInit(context: Any?) {}
+
     /**
      * called when this is set as a controller for a screen
      */

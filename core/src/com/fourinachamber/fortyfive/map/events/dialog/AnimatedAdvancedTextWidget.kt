@@ -15,9 +15,12 @@ class AnimatedAdvancedTextWidget(
 
     var progressTimeMs: Int = 10
 
-    var lastProgressTime: Long = Long.MIN_VALUE
+    private var lastProgressTime: Long = Long.MIN_VALUE
+
     var isFinished: Boolean = true
-    var onNextFinish: MutableList<() -> Unit> = mutableListOf()
+        private set
+
+    private var onPartFinished: MutableList<() -> Unit> = mutableListOf()
 
     override var advancedText: AdvancedText
         get() = super.advancedText
@@ -26,6 +29,10 @@ class AnimatedAdvancedTextWidget(
             value.resetProgress()
             isFinished = false
         }
+
+    fun onPartFinished(callback: () -> Unit) {
+        onPartFinished.add(callback)
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
@@ -36,9 +43,7 @@ class AnimatedAdvancedTextWidget(
         if (curTime < lastProgressTime + progressTimeMs) return
         isFinished = advancedText.progress()
         if (isFinished) {
-            val oldOnNextFinish = onNextFinish.toMutableList().toList()
-            this.onNextFinish.clear()
-            oldOnNextFinish.forEach { it.invoke() }
+            onPartFinished.forEach { it.invoke() }
         }
         lastProgressTime = curTime
     }

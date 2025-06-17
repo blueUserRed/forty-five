@@ -17,13 +17,10 @@ $NextDialogPartSelector {
         }[]
     }
 
-    $EndOfDialog {
-        changeToScreen: string
-    }
+    $EndOfDialog { }
 
     $GiftCardEnd {
-        card: string,
-        changeToScreen: string
+        card: string
     }
 
     $ToCreditScreenEnd { }
@@ -35,9 +32,9 @@ var dialog = {
     eventText: string,
     parts: {
         rawText: string,
-        npcLeftChangeTo?: string,
-        npcRightChangeTo?: string,
-        talkingNpc: string, //on purpose, if you want it to be null, you have to specifically set it
+        leftNpc: string?,
+        rightNpc: string?,
+        talkingNpc: string,
         effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
@@ -52,11 +49,12 @@ dialogs: dialog[]
 
 
 var image = {
-        textureName: string,
-        offsetX?: float,
-        offsetY?: float,
-        flipOnRightSide?: boolean,
-        scale: float,
+    textureName: string,
+    offsetX?: float,
+    offsetY?: float,
+    flipOnRightSide?: boolean,
+    width: float,
+    height: float,
 };
 
 npcs: {
