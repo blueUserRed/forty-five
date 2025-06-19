@@ -3,15 +3,18 @@ package com.fourinachamber.fortyfive.screen.screens
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.animation.AnimState
 import com.fourinachamber.fortyfive.animation.xPositionAbstractProperty
 import com.fourinachamber.fortyfive.keyInput.GameInputs
+import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.events.dialog.AnimatedAdvancedTextWidget
 import com.fourinachamber.fortyfive.map.events.dialog.DialogNpc
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
+import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameWidgets.TimelineController
@@ -21,10 +24,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomAlign
 import com.fourinachamber.fortyfive.screen.general.customActor.FlexDirection
 import com.fourinachamber.fortyfive.screen.general.customActor.PositionType
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
-import com.fourinachamber.fortyfive.utils.Color
-import com.fourinachamber.fortyfive.utils.EventPipeline
-import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.alpha
+import com.fourinachamber.fortyfive.utils.*
 import kotlin.reflect.KClass
 
 class DialogScreen : ScreenCreator() {
@@ -60,8 +60,103 @@ class DialogScreen : ScreenCreator() {
         npc(false)
 
         textWidget()
+        choiceBox()
 
         addDefaultOverlays(worldWidth, worldHeight, events, hasNavbar = false)
+    }
+
+    private fun CustomGroup.choiceBox() = box {
+        val optionGroup = "dialog-screen-choice-option"
+        val optionModal = InputManager.Modal(listOf(optionGroup), screen)
+
+        flexDirection = FlexDirection.COLUMN
+        width = 240f
+        height = 400f
+        debug()
+        x = worldWidth / 2 - width / 2
+//        x = worldWidth * (3.5f / 4f) - width
+        y = worldHeight * 0.33f
+
+        var currentPromise: Promise<String>? = null
+
+        events.watchFor<DialogScreenController.Choice> { (choices, promise) ->
+            currentPromise = promise
+            choices.forEach { choice ->
+                box(backgroundHints = arrayOf("dialog_answer_option", "dialog_answer_option_hover")) {
+                    relativeWidth(100f)
+                    syncHeight()
+                    verticalAlign = CustomAlign.CENTER
+                    horizontalAlign = CustomAlign.CENTER
+                    touchable = Touchable.enabled
+                    keyboardFocusable = KeyboardFocusable.LEAF
+                    backgroundHandle = "dialog_answer_option"
+                    joinGroup(optionGroup)
+                    observeInputState(
+                        GameInputs.States.focused,
+                        { backgroundHandle = "dialog_answer_option_hover" },
+                        { backgroundHandle = "dialog_answer_option" },
+                    )
+                    onInput(GameInputs.interact) { currentPromise?.resolve(choice) }
+                    label("roadgeek", choice, Color.FortyWhite) {
+                        wrap = true
+                        setFontScale(1.1f)
+                        relativeWidth(90f)
+                        syncHeight()
+                    }
+                    verticalSpacer(8f)
+                }
+            }
+            optionModal.push()
+            promise.then {
+                clearChildren()
+                optionModal.finished()
+                currentPromise = null
+            }
+        }
+    }
+
+    private fun CustomGroup.nameLabels() {
+
+        val left = label(font = "red_wing", text = "") {
+            backgroundHandle = "dialog_name_field"
+            setFontScale(0.9f)
+            onLayoutAndNow {
+                width = prefWidth * 1.3F
+                height = prefHeight * 1.4F
+            }
+            setAlignment(Align.center)
+            y = 300F
+            x = 390F
+            isVisible = false
+        }
+
+        val right = label(font = "red_wing", text = "") {
+            backgroundHandle = "dialog_name_field"
+            setFontScale(0.9f)
+            onLayoutAndNow {
+                width = prefWidth * 1.3F
+                height = prefHeight * 1.4F
+            }
+            setAlignment(Align.center)
+            y = 300F
+            x = 10F
+            isVisible = false
+        }
+
+        events.watchFor<DialogScreenController.ChangeToNewDialogPart> { (part) ->
+            if (part.leftNpcTalking) {
+                left.isVisible = left.text.isNotBlank()
+                right.isVisible = false
+            } else {
+                left.isVisible = false
+                right.isVisible = right.text.isNotBlank()
+            }
+        }
+
+        events.watchFor<DialogScreenController.ChangeNpcEvent> { (npc, isLeft) ->
+            val label = if (isLeft) left else right
+            label.setText(npc?.displayName)
+        }
     }
 
     private fun CustomGroup.npc(isLeft: Boolean) {
@@ -150,6 +245,7 @@ class DialogScreen : ScreenCreator() {
                 horizontalAlign = CustomAlign.SPACE_AROUND
                 flexDirection = FlexDirection.ROW
                 minHorizontalDistBetweenElements = 350F
+                nameLabels()
             }
 
             val continueButton = image {

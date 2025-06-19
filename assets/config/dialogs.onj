@@ -86,20 +86,84 @@ npcs: [
 ],
 
 dialogs: [
+//    {
+//        name: "testing_dialog",
+//        eventText: "This is a test, hihihi",
+//        parts: [
+//            {
+//                rawText: "Hello, this is just an example text because i am awesome... Hello, this is just an example text because i am awesome...Hello, this is just an example text because i am awesome...",
+//                rightNpc: "priest_of_aqua_balle",
+//                leftNpc: "brother",
+//                talkingNpc: "priest_of_aqua_balle",
+//                next: $Continue {
+//                },
+//            },
+//            {
+//                rawText: "Bye",
+//                rightNpc: "priest_of_aqua_balle",
+//                leftNpc: "brother",
+//                talkingNpc: "brother",
+//                next: $EndOfDialog { }
+//            },
+//        ],
+//        defaults: {
+//            font: "red_wing",
+//            fontScale: 1.0,
+//            color: color.forty_white
+//        }
+//    },
     {
         name: "testing_dialog",
         eventText: "This is a test, hihihi",
         parts: [
             {
-                rawText: "Hello, this is just an example text because i am awesome... Hello, this is just an example text because i am awesome...Hello, this is just an example text because i am awesome...",
+                rawText: "1",
                 rightNpc: "priest_of_aqua_balle",
                 leftNpc: "brother",
                 talkingNpc: "priest_of_aqua_balle",
-                next: $Continue {
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "e1",
+                            next: "e1"
+                        },
+                        {
+                            name: "e2",
+                            next: "e2"
+                        },
+                        {
+                            name: "e3",
+                            next: "e3"
+                        },
+                    ]
                 },
             },
             {
-                rawText: "Bye",
+                rawText: "2",
+                rightNpc: "priest_of_aqua_balle",
+                leftNpc: "brother",
+                talkingNpc: "brother",
+                next: $Continue { }
+            },
+            {
+                rawText: "e1",
+                label: "e1",
+                rightNpc: "priest_of_aqua_balle",
+                leftNpc: "brother",
+                talkingNpc: "brother",
+                next: $EndOfDialog { }
+            },
+            {
+                rawText: "e2",
+                label: "e2",
+                rightNpc: "priest_of_aqua_balle",
+                leftNpc: "brother",
+                talkingNpc: "brother",
+                next: $EndOfDialog { }
+            },
+            {
+                rawText: "e3",
+                label: "e3",
                 rightNpc: "priest_of_aqua_balle",
                 leftNpc: "brother",
                 talkingNpc: "brother",

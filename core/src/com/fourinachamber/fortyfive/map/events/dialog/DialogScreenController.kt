@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.EventPipeline
+import com.fourinachamber.fortyfive.utils.Promise
 import onj.value.OnjArray
 import onj.value.OnjObject
 
@@ -22,7 +23,9 @@ class DialogScreenController(
     private lateinit var dialog: Dialog
 
     private var currentDialogPartIndex: Int = 0
+    private var lastPart: DialogPart? = null
 
+    private var inChoice: Boolean = false
 
     override fun preInit(context: Any?) {
         if (context !is DialogScreenContext) {
@@ -49,9 +52,12 @@ class DialogScreenController(
             return
         }
 
-        events.watchFor<NextClicked> { advanceDialog() }
+        events.watchFor<NextClicked> {
+            if (!inChoice) advanceDialog()
+        }
 
         val currentPart = dialog.parts.first()
+        lastPart = currentPart
 
         val leftNpc = npcs[currentPart.leftNpc]
         val rightNpc = npcs[currentPart.rightNpc]
@@ -63,8 +69,45 @@ class DialogScreenController(
 
     private fun advanceDialog() {
         val lastPart = dialog.parts[currentDialogPartIndex]
+        val selector = lastPart.nextDialogPartSelector
+        when (selector) {
 
-        currentDialogPartIndex++
+            is NextDialogPartSelector.Continue -> {
+                currentDialogPartIndex++
+                updateToNewDialog()
+            }
+
+            is NextDialogPartSelector.End -> {
+                FortyFive.screenManager.screenFinished()
+            }
+
+            is NextDialogPartSelector.ToCreditScreenEnd -> TODO()
+
+            is NextDialogPartSelector.Fixed -> {
+                val part = dialog.partWithLabel(selector.next)
+                currentDialogPartIndex = dialog.parts.indexOf(part)
+                updateToNewDialog()
+            }
+
+            is NextDialogPartSelector.GiftCardEnd -> TODO()
+
+            is NextDialogPartSelector.Choice -> {
+                val promise = Promise<String>()
+                val event = Choice(selector.choices.keys, promise)
+                inChoice = true
+                events.fire(event)
+                promise.then { chosen ->
+                    val label = selector.choices[chosen]!!
+                    val part = dialog.partWithLabel(label)
+                    currentDialogPartIndex = dialog.parts.indexOf(part)
+                    inChoice = false
+                    updateToNewDialog()
+                }
+            }
+        }
+    }
+
+    private fun updateToNewDialog() {
         if (currentDialogPartIndex >= dialog.parts.size) {
             FortyFive.logger.warn(
                 logTag,
@@ -76,18 +119,18 @@ class DialogScreenController(
 
         val currentPart = dialog.parts[currentDialogPartIndex]
 
-        if (lastPart.leftNpc != currentPart.leftNpc) {
+        if (lastPart?.leftNpc != currentPart.leftNpc) {
             val npc = npcs[currentPart.leftNpc]
             events.fire(ChangeNpcEvent(npc, true))
         }
 
-        if (lastPart.rightNpc != currentPart.rightNpc) {
+        if (lastPart?.rightNpc != currentPart.rightNpc) {
             val npc = npcs[currentPart.rightNpc]
             events.fire(ChangeNpcEvent(npc, false))
         }
 
+        lastPart = currentPart
         events.fire(ChangeToNewDialogPart(currentPart))
-
     }
 
     override fun end() {
@@ -123,6 +166,7 @@ class DialogScreenController(
     data class ChangeNpcEvent(val newNpc: DialogNpc?, val isLeft: Boolean)
     data object NextClicked
     data class ChangeToNewDialogPart(val part: DialogPart)
+    data class Choice(val choices: Set<String>, val promise: Promise<String>)
 
 }
 

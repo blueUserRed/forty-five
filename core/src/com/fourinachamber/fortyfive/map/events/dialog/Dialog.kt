@@ -12,6 +12,8 @@ data class Dialog(
     val name: String
 ) {
 
+    fun partWithLabel(label: String): DialogPart? = parts.find { it.label == label }
+
     companion object {
 
         fun readFromOnj(onj: OnjObject, screen: OnjScreen): Dialog {
@@ -30,6 +32,7 @@ data class Dialog(
                 screen,
                 defaults
             )
+            val label = onj.getOr<String?>("label", null)
             val nextSelector = onj.get<OnjNamedObject>("next")
             val leftNpc = onj.get<String?>("leftNpc")
             val rightNpc = onj.get<String?>("rightNpc")
@@ -49,7 +52,7 @@ data class Dialog(
 
                 "EndOfDialog" -> NextDialogPartSelector.End
 
-                "FixedNextPart" -> NextDialogPartSelector.Fixed(nextSelector.get<Long>("next").toInt())
+                "FixedNextPart" -> NextDialogPartSelector.Fixed(nextSelector.get<String>("next"))
 
                 "ChooseNextPart" -> NextDialogPartSelector.Choice(
                     nextSelector
@@ -57,7 +60,7 @@ data class Dialog(
                         .value
                         .map { it as OnjObject }
                         .associate {
-                            it.get<String>("name") to it.get<Long>("next").toInt()
+                            it.get<String>("name") to it.get<String>("next")
                         }
                 )
 
@@ -67,7 +70,7 @@ data class Dialog(
 
                 else -> throw RuntimeException("unknown next dialog part selector: ${nextSelector.name}")
             }
-            return DialogPart(text, next, leftNpc, rightNpc, leftNpcTalking)
+            return DialogPart(text, next, leftNpc, rightNpc, label, leftNpcTalking)
         }
     }
 }
@@ -77,6 +80,7 @@ data class DialogPart(
     val nextDialogPartSelector: NextDialogPartSelector,
     val leftNpc: String?,
     val rightNpc: String?,
+    val label: String?,
     val leftNpcTalking: Boolean,
 )
 
@@ -84,10 +88,10 @@ sealed class NextDialogPartSelector {
 
     data object Continue : NextDialogPartSelector()
 
-    class Fixed(val next: Int) : NextDialogPartSelector()
+    class Fixed(val next: String) : NextDialogPartSelector()
 
     class Choice(
-        val choices: Map<String, Int>
+        val choices: Map<String, String>
     ) : NextDialogPartSelector()
 
     data object End : NextDialogPartSelector()

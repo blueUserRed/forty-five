@@ -7,13 +7,13 @@ $NextDialogPartSelector {
     $Continue { }
 
     $FixedNextPart {
-        next: int
+        next: string
     }
 
     $ChooseNextPart {
         choices: {
             name: string,
-            next: int
+            next: string
         }[]
     }
 
@@ -35,6 +35,7 @@ var dialog = {
         leftNpc: string?,
         rightNpc: string?,
         talkingNpc: string,
+        label?: string,
         effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
