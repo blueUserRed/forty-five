@@ -67,20 +67,12 @@ object FortyFive : Game() {
     override fun create() {
         init()
 
-        val dialogContext = object : DialogScreenContext {
-            override val dialog: String = "testing_dialog"
-            override fun completed() {}
-        }
-
-        screenManager.transitionImmediate(DialogScreen, dialogContext)
-
-        return
-
         when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
-            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
+            UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
+            UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
             UserPrefs.StartScreen.MAP -> toMap()
         }
+        screenManager.screenFinished()
     }
 
     fun toMap() {

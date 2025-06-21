@@ -1020,7 +1020,7 @@ class GameControllerImpl(
             }
 
             if (playerGetsCard) {
-                encounterContext.screenChain.pushScreenToFront(ChooseCardScreen, chooseCardContext)
+                FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, chooseCardContext)
             }
             FortyFive.screenManager.screenFinished()
         }

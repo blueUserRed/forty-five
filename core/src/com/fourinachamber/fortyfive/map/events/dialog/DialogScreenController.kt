@@ -6,6 +6,9 @@ import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreen
+import com.fourinachamber.fortyfive.screen.screens.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.screen.screens.CreditsScreen
 import com.fourinachamber.fortyfive.utils.EventPipeline
 import com.fourinachamber.fortyfive.utils.Promise
 import onj.value.OnjArray
@@ -81,7 +84,10 @@ class DialogScreenController(
                 FortyFive.screenManager.screenFinished()
             }
 
-            is NextDialogPartSelector.ToCreditScreenEnd -> TODO()
+            is NextDialogPartSelector.ToCreditScreenEnd -> {
+                FortyFive.screenManager.appendScreen(CreditsScreen)
+                FortyFive.screenManager.screenFinished()
+            }
 
             is NextDialogPartSelector.Fixed -> {
                 val part = dialog.partWithLabel(selector.next)
@@ -89,7 +95,22 @@ class DialogScreenController(
                 updateToNewDialog()
             }
 
-            is NextDialogPartSelector.GiftCardEnd -> TODO()
+            is NextDialogPartSelector.GiftCardEnd -> {
+                val context = object : ChooseCardScreenContext {
+                    override var seed: Long = 0
+                    override val nbrOfCards: Int = 1
+                    override val types: List<String> = listOf()
+                    override val enableRerolls: Boolean = false
+                    override var amountOfRerolls: Int = 0
+                    override val rerollPriceIncrease: Int = 0
+                    override val rerollBasePrice: Int = 0
+
+                    override val forceCards: List<String> = listOf(selector.card)
+
+                    override fun completed() {}
+                }
+                FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, context)
+            }
 
             is NextDialogPartSelector.Choice -> {
                 val promise = Promise<String>()

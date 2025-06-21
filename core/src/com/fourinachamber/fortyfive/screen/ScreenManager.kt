@@ -16,7 +16,7 @@ class ScreenManager(
     private var baseScreen: Pair<() -> ScreenBuilder, Any?>
 ) {
 
-    private val chains: MutableList<ScreenChain> = mutableListOf()
+    private val chain: ScreenChain = ScreenChain(listOf())
 
     constructor(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) : this(
         { FromKotlinScreenBuilder(creatorFromClass(creatorCompanion.creatorClass)) } to context
@@ -34,33 +34,26 @@ class ScreenManager(
     }
 
     fun screenFinished() {
-        var next: Pair<ScreenBuilder, Any?>? = null
-        while (next == null && chains.isNotEmpty()) {
-            val chain = chains.first()
-            next = chain.next()
-            if (next == null) chains.removeFirst()
-        }
-        if (next == null) next = baseScreen.first() to baseScreen.second
+        val next = chain.next() ?: (baseScreen.first() to baseScreen.second)
         changeToScreen(next.first, next.second)
     }
 
-    fun addChain(chain: ScreenChain) {
-        chains.add(chain)
+    fun appendScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
+        chain.append(screenBuilder, context)
     }
 
-    fun addChainAndTransition(chain: ScreenChain) {
-        addChain(chain)
-        screenFinished()
-    }
-
-    fun transitionImmediate(screenBuilder: ScreenBuilder, context: Any? = null) {
-        addChainAndTransition(ScreenChain(listOf(screenBuilder to context)))
-    }
-
-    fun transitionImmediate(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+    fun appendScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
         val creator = creatorFromClass(creatorCompanion.creatorClass)
-        val builder = FromKotlinScreenBuilder(creator)
-        transitionImmediate(builder, context)
+        chain.append(FromKotlinScreenBuilder(creator), context)
+    }
+
+    fun ensureNextScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
+        chain.pushScreenToFront(screenBuilder, context)
+    }
+
+    fun ensureNextScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+        val creator = creatorFromClass(creatorCompanion.creatorClass)
+        chain.pushScreenToFront(FromKotlinScreenBuilder(creator), context)
     }
 
     private var inScreenTransition: Boolean = false
@@ -102,7 +95,7 @@ class ScreenManager(
         }
     }
 
-    class ScreenChain(screens: List<Pair<ScreenBuilder, Any?>>) {
+    private class ScreenChain(screens: List<Pair<ScreenBuilder, Any?>>) {
 
         private val screens: MutableList<Pair<ScreenBuilder, Any?>> = screens.toMutableList()
 
@@ -112,19 +105,10 @@ class ScreenManager(
             screens.add(builder to context)
         }
 
-        fun append(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
-            val creator = creatorFromClass(creatorCompanion.creatorClass)
-            append(FromKotlinScreenBuilder(creator), context)
-        }
-
         fun pushScreenToFront(builder: ScreenBuilder, context: Any? = null) {
             screens.add(0, builder to context)
         }
 
-        fun pushScreenToFront(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
-            val creator = creatorFromClass(creatorCompanion.creatorClass)
-            pushScreenToFront(FromKotlinScreenBuilder(creator), context)
-        }
     }
 
     interface ScreenCreatorCompanion {
@@ -132,13 +116,6 @@ class ScreenManager(
     }
 
     companion object {
-
-        // can't be a secondary constructor because it would have the same function signature as the primary constructor
-        fun screenChain(vararg screens: Pair<ScreenCreatorCompanion, Any?>) = ScreenChain(
-            screens.map { (companion, context) ->
-                FromKotlinScreenBuilder(creatorFromClass(companion.creatorClass)) to context
-            }
-        )
 
         private fun creatorFromClass(creatorClass: KClass<out ScreenCreator>): ScreenCreator {
             val constructor = creatorClass.constructors.find { constructor ->

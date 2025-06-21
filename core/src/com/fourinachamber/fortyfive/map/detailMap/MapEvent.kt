@@ -123,18 +123,12 @@ abstract class MapEvent {
     /**
      * called when the start button was clicked
      */
-    open fun start() {
-        val chain = screenChain()
-            ?: throw RuntimeException("MapEvent must either override start() or provide a screenChain")
-        FortyFive.screenManager.addChainAndTransition(chain)
-    }
+    abstract fun start()
 
     /**
      * returns a representation of this event (and its state) as an OnjObject
      */
     abstract fun asOnjObject(): OnjObject
-
-    open fun screenChain(): ScreenManager.ScreenChain? = null
 
     /**
      * utility function that reads and sets the [currentlyBlocks], [canBeStarted], [isCompleted] fields from an
@@ -195,13 +189,16 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
-    override val screenChain: ScreenManager.ScreenChain = ScreenManager.screenChain(EncounterScreen to this)
-
     override val buttonText: String = "Fight!"
 
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
+    }
+
+    override fun start() {
+        FortyFive.screenManager.appendScreen(EncounterScreen, this)
+        FortyFive.screenManager.screenFinished()
     }
 
     override fun completed() {
@@ -218,8 +215,6 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
         "encounterIndex" with encounterIndex
 
     }
-
-    override fun screenChain(): ScreenManager.ScreenChain = screenChain
 
 }
 
@@ -247,15 +242,14 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 
     override fun start() {
         MapManager.changeToMap(targetMap)
-        FortyFive.screenManager.addChainAndTransition(screenChain())
+        FortyFive.screenManager.appendScreen(MapScreen, this)
+        FortyFive.screenManager.screenFinished()
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EnterMapMapEvent")
         "targetMap" with targetMap
     }
-
-    override fun screenChain(): ScreenManager.ScreenChain = ScreenManager.screenChain(MapScreen to this)
 }
 
 /**
@@ -290,7 +284,10 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
         setStandardValuesFromConfig(onj)
     }
 
-    override fun screenChain(): ScreenManager.ScreenChain? = ScreenManager.screenChain(DialogScreen to this)
+    override fun start() {
+        FortyFive.screenManager.appendScreen(DialogScreen, this)
+        FortyFive.screenManager.screenFinished()
+    }
 
     override fun completed() {
         currentlyBlocks = false
@@ -336,7 +333,10 @@ class ShopMapEvent(
     val currentRerollPrice: Int
         get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
-    override fun screenChain(): ScreenManager.ScreenChain = ScreenManager.screenChain(ShopScreen to this)
+    override fun start() {
+        FortyFive.screenManager.appendScreen(ShopScreen, this)
+        FortyFive.screenManager.screenFinished()
+    }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
@@ -384,8 +384,10 @@ class ChooseCardMapEvent(
         setStandardValuesFromConfig(onj)
     }
 
-    override fun screenChain(): ScreenManager.ScreenChain =
-        ScreenManager.screenChain(ChooseCardScreen to this)
+    override fun start() {
+        FortyFive.screenManager.appendScreen(ChooseCardScreen, this)
+        FortyFive.screenManager.screenFinished()
+    }
 
     override fun completed() {
         isCompleted = true

@@ -101,7 +101,7 @@ class TitleScreen : ScreenCreator() {
             addOption("Reset Game") { handleResetGame() }
 
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
-            addOption("View Credits") { FortyFive.screenManager.transitionImmediate(CreditsScreen) }
+            addOption("View Credits") { FortyFive.screenManager.appendScreen(CreditsScreen) }
             addOption("Quit") { handleQuit() }
         }
 
