@@ -14,13 +14,12 @@ precision mediump float;
 in LOWP vec4 v_color;
 in vec2 v_texCoords;
 uniform sampler2D u_texture;
+out vec4 outColor;
+
+uniform vec2 u_resolution;
 uniform float u_multiplier;
 uniform vec4 u_color;
 uniform float u_maxOpacity;
-out vec4 outColor;
-
-%uniform u_time
-%uniform u_resolution
 
 //%include shaders/includes/noise_utils.glsl
 
@@ -29,39 +28,63 @@ out vec4 outColor;
 //    //    return pow(2.7182,-float(i*i+j*j)/4.5); //gauss but already simplified with sigma=1.5
 //}
 
-void main() {
-    int depthPerDist = 200;
-    int maxSum = int(float(depthPerDist) * 1.6);
-
-    float distancePerDirection = u_multiplier/(u_multiplier * 2.0 + 1.0);
-    float stepDist = distancePerDirection/float(depthPerDist);
-
-    float alpha = 0.0;
-
-    float multi = (1.0 + u_multiplier * 2.0);
-    vec2 startPos = (v_texCoords.xy + vec2(float(-depthPerDist) * stepDist, float(-depthPerDist) * stepDist)) * multi  - u_multiplier;
-    vec2 endPos = (v_texCoords.xy + vec2(float(depthPerDist) * stepDist, float(depthPerDist) * stepDist)) * multi  - u_multiplier;
-    vec2 transformedStep = (endPos - startPos) / (depthPerDist * 2.0);
-    startPos = max(startPos, vec2(0.0));
-    endPos = min(endPos, vec2(1.0));
-    for (float i = startPos.x; i <= endPos.x; i += transformedStep.x){
-        for (float j = startPos.y; j <= endPos.y; j += transformedStep.y){
-            alpha += texture2D(u_texture, vec2(i, j)).a;
-        }
-    }
-    //    for (int i=-depthPerDist;i<=depthPerDist;i++){ //THIS IS THE OLD VERSION
-    //        for (int j=-depthPerDist;j<=depthPerDist;j++){
-    //            vec2 calcPos = (v_texCoords.xy + vec2(float(i) * stepDist, float(j) * stepDist)) * multi  - u_multiplier;
-    //            if (calcPos.x >= 0.0 && calcPos.y >= 0.0 && calcPos.x <= 1.0 && calcPos.y <= 1.0) alpha += texture2D(u_texture, calcPos).a;
-    //        }
-    //    }
-    float totalSum = float((depthPerDist * 2) * (depthPerDist * 2));
-    float alphaNew = alpha / totalSum * 2.0  * u_maxOpacity;
-    if (alphaNew >= 1.0){
-        alphaNew = 1.0;
-    }
-    outColor = vec4(u_color.xyz, alphaNew);
+vec4 adjustedSample(vec2 at) {
+    float multiplier = 1.0 + u_multiplier;
+    float x = 1.0 /  multiplier;
+    float off = (1.0 - x) / 2.0;
+    float newX = (at.x - off) * multiplier;
+    float newY = (at.y - off) * multiplier;
+    vec2 coords = vec2(newX, newY);
+    return texture2D(u_texture, coords);
 }
+
+void main() {
+
+    float maxRadius = 10.0;
+    float radiusStep = 1.0;
+    float pointsInCircle = 10.0;
+
+    float cirlceStep
+    for (float r = radiusStep; r < maxRadius; r += radiusStep) {
+
+    }
+
+}
+
+
+//void main() {
+//    int depthPerDist = 50;
+//    int maxSum = int(float(depthPerDist) * 1.6);
+//
+//    float distancePerDirection = u_multiplier/(u_multiplier * 2.0 + 1.0);
+//    float stepDist = distancePerDirection/float(depthPerDist);
+//
+//    float alpha = 0.0;
+//
+//    float multi = (1.0 + u_multiplier * 2.0);
+//    vec2 startPos = (v_texCoords.xy + vec2(float(-depthPerDist) * stepDist, float(-depthPerDist) * stepDist)) * multi  - u_multiplier;
+//    vec2 endPos = (v_texCoords.xy + vec2(float(depthPerDist) * stepDist, float(depthPerDist) * stepDist)) * multi  - u_multiplier;
+//    vec2 transformedStep = (endPos - startPos) / (depthPerDist * 2.0);
+//    startPos = max(startPos, vec2(0.0));
+//    endPos = min(endPos, vec2(1.0));
+//    for (float i = startPos.x; i <= endPos.x; i += transformedStep.x){
+//        for (float j = startPos.y; j <= endPos.y; j += transformedStep.y){
+//            alpha += texture2D(u_texture, vec2(i, j)).a;
+//        }
+//    }
+//    //    for (int i=-depthPerDist;i<=depthPerDist;i++){ //THIS IS THE OLD VERSION
+//    //        for (int j=-depthPerDist;j<=depthPerDist;j++){
+//    //            vec2 calcPos = (v_texCoords.xy + vec2(float(i) * stepDist, float(j) * stepDist)) * multi  - u_multiplier;
+//    //            if (calcPos.x >= 0.0 && calcPos.y >= 0.0 && calcPos.x <= 1.0 && calcPos.y <= 1.0) alpha += texture2D(u_texture, calcPos).a;
+//    //        }
+//    //    }
+//    float totalSum = float((depthPerDist * 2) * (depthPerDist * 2));
+//    float alphaNew = alpha / totalSum * 2.0  * u_maxOpacity;
+//    if (alphaNew >= 1.0){
+//        alphaNew = 1.0;
+//    }
+//    outColor = vec4(u_color.xyz, alphaNew);
+//}
 
 
 //--------------------OLD CODE FOR TESTING AND WASN'T SO BAD AS A BACKUP

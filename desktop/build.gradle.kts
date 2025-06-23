@@ -41,9 +41,6 @@ tasks.register<JavaExec>("run") {
     }
 }
 
-val ffArgs: String by project
-
-
 tasks.register<JavaExec>("createDropShadows") {
     dependsOn("classes")
     mainClass.set(mainClassName)

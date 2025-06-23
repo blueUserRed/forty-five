@@ -13,6 +13,8 @@ import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.MapNamespace
+import com.fourinachamber.fortyfive.oven.DropShadowBakeTask
+import com.fourinachamber.fortyfive.oven.Oven
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.ScreenManager
@@ -42,7 +44,6 @@ object FortyFive : Game() {
     private val _lifetime: EndableLifetime = EndableLifetime()
     val gameLifetime: Lifetime
         get() = _lifetime
-    var createDropShadows: Boolean = false
 
     lateinit var steamHandler: SteamHandler
         private set
@@ -66,11 +67,12 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-        when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
-            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
-            UserPrefs.StartScreen.MAP -> toMap()
-        }
+        Oven().bake(listOf(DropShadowBakeTask(false)))
+//        when (UserPrefs.startScreen) {
+//            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
+//            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
+//            UserPrefs.StartScreen.MAP -> toMap()
+//        }
     }
 
     fun toMap() {

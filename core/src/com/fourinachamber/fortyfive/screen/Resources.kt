@@ -179,6 +179,7 @@ class TextureResource(
     val tileable: Boolean,
     val tileScale: Float,
     val useMipMaps: Boolean,
+    val dropShadowColor: Color?
 ) : Resource(handle) {
 
     private var pixmap: Pixmap? = null

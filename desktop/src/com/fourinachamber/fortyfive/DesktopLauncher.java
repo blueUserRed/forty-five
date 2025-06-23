@@ -23,7 +23,6 @@ public class DesktopLauncher {
         Exception exception = null;
 
         if (arg.length > 0 && arg[0].equals("createDropShadows")) {
-            FortyFive.INSTANCE.setCreateDropShadows(true);
             config.setWindowedMode(10000, 10000);
         }else{
             config.setWindowedMode(900, (900 * 9) / 16);

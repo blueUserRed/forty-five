@@ -74,33 +74,32 @@ class ResourceManager {
         val resources = mutableListOf<Resource>()
         val assets = ConfigFileManager.getConfigFile("assets")
 
-        val dropShadowsToDraw = mutableListOf<Pair<String, Color>>()
-
         assets.get<OnjArray>("textures").value.forEach {
             it as OnjObject
             val name = it.get<String>("name")
+            val dropShadowColor = it.get<Color?>("dropShadowColor")
             val resource = TextureResource(
                 name,
                 it.get<String>("file"),
                 it.getOr("tileable", false),
                 it.getOr("tileScale", 1.0).toFloat(),
-                it.getOr("useMipMaps", false)
+                it.getOr("useMipMaps", false),
+                dropShadowColor
             )
             resource.stayLoaded = it.getOr("stayLoaded", false)
             resources.add(resource)
 
-            val color = it.get<Color?>("dropShadowColor") ?: return@forEach
+            dropShadowColor ?: return@forEach
             val resourceDropShadow = TextureResource(
                 name + DROP_SHADOW_END,
                 "drop_shadows/$name$DROP_SHADOW_END.png",
                 false,
                 1f,
                 false,
+                null
             )
             resourceDropShadow.stayLoaded = it.getOr("stayLoaded", false)
             resources.add(resourceDropShadow)
-            if (FortyFive.createDropShadows)
-                dropShadowsToDraw.add(name to color)
         }
 
         assets.get<OnjArray>("fonts").value.forEach {
@@ -248,70 +247,13 @@ class ResourceManager {
                     it.path,
                     false,
                     1f,
-                    false
+                    false,
+                    null
                 ))
             }
 
         this.resources = resources
-        createDropShadows(dropShadowsToDraw)
-        if (FortyFive.createDropShadows) exitProcess(0)
     }
-
-    fun createDropShadows(dropShadowsToDraw: List<Pair<String, Color>>) {
-        if (dropShadowsToDraw.isEmpty()) return
-        val borrower = object : ResourceBorrower {}
-        val dropShadowShader = forceGet<BetterShader>(borrower, Lifetime.endless, "drop_shadow_shader")
-
-        val batch = SpriteBatch()
-
-        batch.begin()
-        batch.setBlendFunction(-1, -1)
-        Gdx.gl.glBlendFuncSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_ONE, GL20.GL_ONE)
-        val shader = dropShadowShader
-        batch.shader = shader.shader
-        val multiplier = 0.3f
-        shader.shader.setUniformf("u_multiplier", multiplier)
-        shader.shader.setUniformf("u_maxOpacity", 0.3f)
-        val scale = (1 + multiplier)
-        val maxWidth = Gdx.app.graphics.width.toFloat() - 100f
-        val maxHeight = Gdx.app.graphics.height.toFloat() - 100f
-        dropShadowsToDraw.forEach {
-            Gdx.gl.glClearColor(0f, 0f, 0f, 0f)
-            Gdx.gl.glClear(GL_COLOR_BUFFER_BIT)
-
-            val drawable = forceGet<Drawable>(borrower, Lifetime.endless, it.first)
-            shader.shader.setUniformf("u_color", it.second)
-            val prefWidth = drawable.minWidth * scale
-            val prefHeight = drawable.minHeight * scale
-
-            val aspectRatio = prefWidth / prefHeight
-            var width = prefWidth
-            var height = prefHeight
-            if (prefWidth > maxWidth) {
-                width = maxWidth
-                height = width / aspectRatio
-            }
-            if (prefHeight > maxHeight) {
-                height = maxHeight
-                width = height * aspectRatio
-            }
-
-            drawable.draw(batch, 0f, 0f, width, height)
-            batch.flush()
-
-            val pixels = ScreenUtils.getFrameBufferPixels(0, 0, width.toInt(), height.toInt(), true)
-            val pixmap = Pixmap(width.toInt(), height.toInt(), Pixmap.Format.RGBA8888)
-            BufferUtils.copy(pixels, 0, pixmap.getPixels(), pixels.size)
-            PixmapIO.writePNG(FileHandle(File("drop_shadows/${it.first}$DROP_SHADOW_END.png")), pixmap)
-            pixmap.dispose()
-            giveBack(borrower, it.first)
-            FortyFive.logger.debug(logTag, "Created DropShadow for ${it.first}")
-        }
-        batch.end()
-        giveBack(borrower, "drop_shadow_shader")
-    }
-
-
 
     fun end() {
         val message = StringBuilder()
