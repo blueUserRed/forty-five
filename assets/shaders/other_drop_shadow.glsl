@@ -24,8 +24,6 @@ uniform vec4 u_color;
 uniform float u_scale;
 uniform float u_blurFactor;
 
-#define SQRT_TWO 1.41421
-
 void main() {
 
     float squareScale = (1.0 / u_scale) * u_blurFactor;

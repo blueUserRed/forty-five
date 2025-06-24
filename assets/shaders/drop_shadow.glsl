@@ -30,25 +30,63 @@ uniform float u_maxOpacity;
 
 vec4 adjustedSample(vec2 at) {
     float multiplier = 1.0 + u_multiplier;
-    float x = 1.0 /  multiplier;
-    float off = (1.0 - x) / 2.0;
-    float newX = (at.x - off) * multiplier;
-    float newY = (at.y - off) * multiplier;
+    float invMultiplier = 1.0 / multiplier;
+    float offset = (1.0 - invMultiplier) / 2.0;
+    float newX = (at.x - offset) * multiplier;
+    float newY = (at.y - offset) * multiplier;
     vec2 coords = vec2(newX, newY);
-    return texture2D(u_texture, coords);
+    vec4 color = texture2D(u_texture, coords);
+    float mask = step(0.0, newX) * step(newX, 1.0) *
+                 step(0.0, newY) * step(newY, 1.0);
+    return color * mask;
 }
 
 void main() {
 
-    float maxRadius = 10.0;
+    float maxRadius = 100.0;
     float radiusStep = 1.0;
-    float pointsInCircle = 10.0;
+    float pointsInCircle = 100.0;
+    float originalColor = 0.5;
+    vec4 shadowColor = vec4(0.0, 0.0, 1.0, 1.0);
 
-    float cirlceStep
+//    float maxRadius = 20.0;
+//    float radiusStep = 1.0;
+//    float pointsInCircle = 30.0;
+
+    vec4 middle = adjustedSample(v_texCoords);
+
+    vec3 colorAcc = middle.rgb;
+    float colorContrib = 1.0;
+
+    float alphaAcc = middle.a;
+    float alphaContrib = 1.0;
+
+    float cirlceStep = TWO_PI / pointsInCircle;
     for (float r = radiusStep; r < maxRadius; r += radiusStep) {
-
+        float contrib = 1.0 - (r / maxRadius);
+        for (float a = 0.0; a < TWO_PI; a += cirlceStep) {
+            vec2 coords = vec2(
+                gl_FragCoord.x + sin(a) * r,
+                gl_FragCoord.y + cos(a) * r
+            );
+            coords /= u_resolution;
+            vec4 color = adjustedSample(coords);
+            float contribWithAlpha = contrib * color.a;
+            colorAcc += color.rgb * contribWithAlpha;
+            colorContrib += contribWithAlpha;
+            alphaAcc += color.a * contrib;
+            alphaContrib += contrib;
+        }
     }
 
+    colorAcc /= colorContrib;
+    alphaAcc /= alphaContrib;
+    vec4 blurred = vec4(colorAcc, alphaAcc);
+
+    vec4 inShadowColor = ((blurred.r + blurred.g + blurred.b) / 3) * shadowColor;
+    inShadowColor.a = blurred.a;
+
+    outColor = originalColor * blurred + (1.0 - originalColor) * inShadowColor;
 }
 
 
