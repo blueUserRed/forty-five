@@ -2,8 +2,8 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.tasks.Jar
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_18
+    targetCompatibility = JavaVersion.VERSION_18
 }
 
 sourceSets {
@@ -34,10 +34,33 @@ tasks.register<JavaExec>("run") {
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         // Required to run on macOS
-        val list = mutableListOf<String>("-XstartOnFirstThread")
+        val list = mutableListOf<String>()
         list.addAll(jvmArgs as Collection<String>)
+        list.add("-XstartOnFirstThread")
         jvmArgs = list
     }
+}
+
+tasks.register<JavaExec>("createDropShadows") {
+    dependsOn("classes")
+    mainClass.set(mainClassName)
+    classpath = sourceSets["main"].runtimeClasspath
+    standardInput = System.`in`
+    workingDir = assetsDir
+    isIgnoreExitValue = true
+
+    args = mutableListOf("-bake", "dropShadows")
+}
+
+tasks.register<JavaExec>("createDropShadowsIncremental") {
+    dependsOn("classes")
+    mainClass.set(mainClassName)
+    classpath = sourceSets["main"].runtimeClasspath
+    standardInput = System.`in`
+    workingDir = assetsDir
+    isIgnoreExitValue = true
+
+    args = mutableListOf("-bake", "dropShadows", "incremental")
 }
 
 

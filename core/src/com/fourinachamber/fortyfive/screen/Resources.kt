@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.utils.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import onj.value.OnjObject
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.system.measureTimeMillis
@@ -179,6 +180,7 @@ class TextureResource(
     val tileable: Boolean,
     val tileScale: Float,
     val useMipMaps: Boolean,
+    val dropShadowData: DropShadowData?
 ) : Resource(handle) {
 
     private var pixmap: Pixmap? = null
@@ -201,6 +203,27 @@ class TextureResource(
         pixmap?.dispose()
         pixmap = null
         super.dispose()
+    }
+
+    data class DropShadowData(
+        val shadowColor: Color,
+        val originalColor: Float,
+        val maxRadius: Float,
+        val radiusStep: Float,
+        val pointsOnCircle: Float,
+        val brighten: Float,
+    ) {
+        companion object {
+
+            fun fromOnj(onj: OnjObject): DropShadowData = DropShadowData(
+                onj.get<Color>("shadowColor"),
+                onj.get<Double>("originalColor").toFloat(),
+                onj.get<Double>("maxRadius").toFloat(),
+                onj.get<Double>("radiusStep").toFloat(),
+                onj.get<Double>("pointsOnCircle").toFloat(),
+                onj.get<Double>("brighten").toFloat(),
+            )
+        }
     }
 
 }

@@ -1,16 +1,26 @@
 package com.fourinachamber.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.PixmapIO
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.BufferUtils
+import com.badlogic.gdx.utils.ScreenUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.utils.*
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import java.io.File
 import kotlin.reflect.KClass
+import kotlin.system.exitProcess
 
 interface ResourceBorrower
 
@@ -64,17 +74,34 @@ class ResourceManager {
         val resources = mutableListOf<Resource>()
         val assets = ConfigFileManager.getConfigFile("assets")
 
-        assets.get<OnjArray>("textures").value.forEach {
-            it as OnjObject
+        assets.get<OnjArray>("textures").value.forEach { texture ->
+            texture as OnjObject
+            val name = texture.get<String>("name")
+            val dropShadowData = texture
+                .getOr<OnjObject?>("dropShadow", null)
+                ?.let { TextureResource.DropShadowData.fromOnj(it) }
             val resource = TextureResource(
-                it.get<String>("name"),
-                it.get<String>("file"),
-                it.getOr("tileable", false),
-                it.getOr("tileScale", 1.0).toFloat(),
-                it.getOr("useMipMaps", false)
+                name,
+                texture.get<String>("file"),
+                texture.getOr("tileable", false),
+                texture.getOr("tileScale", 1.0).toFloat(),
+                texture.getOr("useMipMaps", false),
+                dropShadowData
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = texture.getOr("stayLoaded", false)
             resources.add(resource)
+
+            dropShadowData ?: return@forEach
+            val resourceDropShadow = TextureResource(
+                name + DROP_SHADOW_END,
+                "drop_shadows/$name$DROP_SHADOW_END.png",
+                false,
+                1f,
+                false,
+                null
+            )
+            resourceDropShadow.stayLoaded = texture.getOr("stayLoaded", false)
+            resources.add(resourceDropShadow)
         }
 
         assets.get<OnjArray>("fonts").value.forEach {
@@ -222,7 +249,8 @@ class ResourceManager {
                     it.path,
                     false,
                     1f,
-                    false
+                    false,
+                    null
                 ))
             }
 
@@ -245,6 +273,7 @@ class ResourceManager {
     }
 
     companion object {
+        const val DROP_SHADOW_END = "_drop_shadow"
         private const val logTag = "ResourceManager"
     }
 

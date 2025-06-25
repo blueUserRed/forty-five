@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -27,6 +26,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.onjNamespaces.OnjZone
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.SquareDropShadow
 import com.fourinachamber.fortyfive.screen.DropShadowActor
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.general.*
@@ -790,7 +790,7 @@ class CardActor(
         onInput(GameInputs.interact) { clicked() }
         onInput(GameInputs.triggerCard) { rightClicked() }
 
-        val dropShadow = DropShadow(
+        val dropShadow = SquareDropShadow(
             color = Color.Black,
             scale = 1.1f,
             offX = 3f,
@@ -890,7 +890,7 @@ class CardActor(
 //        } else {
 //            x = this.x
 //            y = this.y
-        dropShadow?.doDropShadow(batch, screen, textureRegion, this, scaleX, scaleY, rotation)
+        dropShadow?.doDropShadow(batch, screen, TextureRegionDrawable(textureRegion), this, scaleX, scaleY, rotation)
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,

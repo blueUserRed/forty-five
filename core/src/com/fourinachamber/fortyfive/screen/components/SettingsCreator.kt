@@ -161,10 +161,10 @@ object SettingsCreator {
             box {
                 flexDirection = FlexDirection.ROW
                 relativeHeight(100f)
-                width = 210f
+                width = 250f
                 selector = selector("red_wing", bindTarget, fontScale = 0.8f) {
                     onLayoutAndNow { height = parent.height }
-                    width = 200f
+                    width = 240f
                 }
                 horizontalSpacer(10f)
             }

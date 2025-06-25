@@ -13,6 +13,7 @@ assets/logging/forty-five.log
 assets/maps/roads/*
 assets/maps/areas/*
 assets/large_assets/*
+assets/drop_shadows/*
 /onj/build
 assets/error_logs/*
 website/out/*

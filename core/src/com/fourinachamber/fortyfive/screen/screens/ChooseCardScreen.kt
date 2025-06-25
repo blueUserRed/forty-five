@@ -16,7 +16,7 @@ import com.fourinachamber.fortyfive.keyInput.InputManager
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.SquareDropShadow
 import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.components.BackpackCreator
 import com.fourinachamber.fortyfive.screen.gameWidgets.BiomeBackgroundScreenController
@@ -104,7 +104,7 @@ class ChooseCardScreen : ScreenCreator() {
                         logicalOffsetY = yPos * 10f
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
-                        val dropShadow = DropShadow(Color.GOLD, scale = 1.2f, blurFactor = 0.8f, showDropShadow = false)
+                        val dropShadow = SquareDropShadow(Color.GOLD, scale = 1.2f, blurFactor = 0.8f, showDropShadow = false)
                         this.dropShadow = dropShadow
                         observeInputState(
                             GameInputs.States.inDrag,
