@@ -38,7 +38,7 @@ open class CustomLabel(
 
     var underline: Boolean = false
 
-    private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
+    val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: String? by backgroundHandleObserver
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
@@ -283,7 +283,7 @@ open class CustomImageActor(
                     "attempted to rotate an image, but the " +
                             "drawable does not implement TransformDrawable"
                 )
-                dropShadow?.doDropShadowRotated(batch, screen, drawable, this)
+                dropShadow?.doDropShadow(batch, screen, drawable, this, 1f, 1f, rotation)
                 drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
                 dropShadow?.doDropShadow(batch, screen, drawable, this)

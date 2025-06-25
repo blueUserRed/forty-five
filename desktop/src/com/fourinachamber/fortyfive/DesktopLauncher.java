@@ -21,12 +21,11 @@ public class DesktopLauncher {
 
         ArgParser argParser = new ArgParser(args);
         FortyFive.AppArguments arguments = argParser.parse();
-
+        FortyFive.INSTANCE.setAppArguments(arguments);
 
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 
         if (arguments.getBakeRun()) {
-            FortyFive.INSTANCE.setAppArguments(arguments);
             config.setInitialVisible(false);
         } else {
             config.setForegroundFPS(60);

@@ -86,11 +86,16 @@ textureAtlases: [
 ],
 
 var sharedDropShadowConfig = {
-    shadowColor: color.black,
     originalColor: 0.0,
-    maxRadius: 100.0,
-    radiusStep: 1.0,
+    maxRadius: 180.0,
+    radiusStep: 4.0,
     pointsOnCircle: 100.0,
+};
+
+var defaultDropShadowConfig = {
+    shadowColor: color.black,
+    brighten: 0.0,
+    ...sharedDropShadowConfig
 };
 
 textures: [
@@ -381,7 +386,11 @@ textures: [
     {
         name: "map_detail_encounter_button_hover",
         file: "blobs/map/detail/encounter_button_hover.png",
-        dropShadow: sharedDropShadowConfig,
+        dropShadow: {
+            shadowColor: color("#F02618"),
+            brighten: 0.2,
+            ...sharedDropShadowConfig
+        },
     },
     {
         name: "map_detail_encounter_button_disabled",

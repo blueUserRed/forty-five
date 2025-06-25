@@ -3,35 +3,99 @@ package com.fourinachamber.fortyfive.screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.rendering.BetterShader
-import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Lifetime
 import com.fourinachamber.fortyfive.utils.Promise
+import com.fourinachamber.fortyfive.utils.SubscribeableObserver
+import com.fourinachamber.fortyfive.utils.automaticResourceGetter
+import kotlin.properties.ObservableProperty
 
 interface DropShadowActor {
 
     var dropShadow: DropShadow?
+}
+
+interface DropShadow {
+
+    var showDropShadow: Boolean
+
+    fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor)
+
+    fun doDropShadow(
+        batch: Batch?,
+        screen: OnjScreen,
+        drawable: TransformDrawable,
+        actor: Actor,
+        scaleX: Float,
+        scaleY: Float,
+        rotation: Float
+    )
+}
+
+class BakedDropShadow(
+    background: ResourceHandle,
+    private val screen: OnjScreen,
+    val offX: Float = 0f,
+    val offY: Float = 0f,
+    var scaleX: Float = 2.0f,
+    var scaleY: Float = 2.0f,
+    override var showDropShadow: Boolean = true
+) : DropShadow, ResourceBorrower {
+
+    private val dropShadow: Promise<TextureRegion> =
+        FortyFive.resourceManager.request(
+            this,
+            screen.lifetime,
+            "$background${ResourceManager.DROP_SHADOW_END}"
+        )
+
+    override fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) =
+        doDropShadow(batch, actor, 1f, 1f, 0f)
+
+    override fun doDropShadow(
+        batch: Batch?,
+        screen: OnjScreen,
+        drawable: TransformDrawable,
+        actor: Actor,
+        scaleX: Float,
+        scaleY: Float,
+        rotation: Float
+    ) = doDropShadow(batch, actor, scaleX, scaleY, rotation)
+
+    private fun doDropShadow(
+        batch: Batch?,
+        actor: Actor,
+        scaleX: Float,
+        scaleY: Float,
+        rotation: Float
+    ) {
+        if (!showDropShadow) return
+        val dropShadow = dropShadow.getOrNull() ?: return
+        val width = actor.width * scaleX * this.scaleX
+        val height = actor.height * scaleY * this.scaleY
+        val x = actor.x - (width - actor.width) / 2 + offX
+        val y = actor.y - (height - actor.height) / 2 + offY
+        batch ?: return
+        batch.draw(dropShadow, x, y, width / 2, height / 2, width, height, scaleX, scaleY, rotation)
+    }
 
 }
 
-data class DropShadow(
+class SquareDropShadow(
     var color: Color,
     val offX: Float = 0f,
     val offY: Float = 0f,
     var scale: Float = 1f,
     var blurFactor: Float = 0.9f,
-    var showDropShadow: Boolean = true
-) {
+    override var showDropShadow: Boolean = true
+) : DropShadow {
 
-    fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) {
+    override fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) {
         if (!showDropShadow) return
         val scaleX2 = scale
         val scaleY2 = scale
@@ -40,10 +104,10 @@ data class DropShadow(
         doDropShadow(batch, screen, drawer = { drawable.draw(batch, x, y, sWidth, sHeight) })
     }
 
-    fun doDropShadow(
+    override fun doDropShadow(
         batch: Batch?,
         screen: OnjScreen,
-        textureRegion: TextureRegion,
+        drawable: TransformDrawable,
         actor: Actor,
         scaleX: Float,
         scaleY: Float,
@@ -55,13 +119,8 @@ data class DropShadow(
         val (x, y) = getXY(actor, scaleX2, scaleY2)
         val (sWidth, sHeight) = getWidthHeight(actor, scaleX2, scaleY2)
         doDropShadow(batch, screen, drawer = {
-            batch?.draw(
-                textureRegion,
-                x, y,
-                sWidth / 2, sHeight / 2,
-                sWidth, sHeight,
-                1f, 1f,
-                rotation
+            drawable.draw(
+                batch, x, y, sWidth / 2, sHeight / 2, sWidth, sHeight, 1f, 1f, rotation
             )
         })
     }
@@ -89,20 +148,6 @@ data class DropShadow(
         drawer()
         batch.flush()
         batch.shader = prev
-    }
-
-    /**
-     * this is untested and might not work
-     */
-    fun doDropShadowRotated(batch: Batch, screen: OnjScreen, drawable: TransformDrawable, actor: CustomImageActor) {
-        if (!showDropShadow) return
-        val scaleX2 = scale
-        val scaleY2 = scale
-        val (x, y) = getXY(actor, scaleX2, scaleY2)
-        val (sWidth, sHeight) = getWidthHeight(actor, scaleX2, scaleY2)
-        doDropShadow(batch, screen, drawer = {
-            drawable.draw(batch, x, y, sWidth / 2, sHeight / 2, sWidth, sHeight, 1f, 1f, actor.rotation)
-        })
     }
 
     private fun getXY(

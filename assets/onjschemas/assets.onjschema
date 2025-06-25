@@ -11,6 +11,7 @@ var dropShadowData = {
     maxRadius: float,
     radiusStep: float,
     pointsOnCircle: float,
+    brighten: float,
 };
 
 textures: {

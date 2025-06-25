@@ -73,6 +73,7 @@ class DropShadowBakeTask(private val incremental: Boolean, private val specific:
             dropShadowShader.shader.setUniformf("u_maxRadius", data.maxRadius)
             dropShadowShader.shader.setUniformf("u_radiusStep", data.radiusStep)
             dropShadowShader.shader.setUniformf("u_pointsOnCircle", data.pointsOnCircle)
+            dropShadowShader.shader.setUniformf("u_brighten", data.brighten)
 
             val fbo = FrameBuffer(Pixmap.Format.RGBA8888, width, height, false)
             dropShadowLifetime.tieDisposable(fbo)

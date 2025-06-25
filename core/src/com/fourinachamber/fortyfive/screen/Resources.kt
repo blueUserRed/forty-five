@@ -211,6 +211,7 @@ class TextureResource(
         val maxRadius: Float,
         val radiusStep: Float,
         val pointsOnCircle: Float,
+        val brighten: Float,
     ) {
         companion object {
 
@@ -220,6 +221,7 @@ class TextureResource(
                 onj.get<Double>("maxRadius").toFloat(),
                 onj.get<Double>("radiusStep").toFloat(),
                 onj.get<Double>("pointsOnCircle").toFloat(),
+                onj.get<Double>("brighten").toFloat(),
             )
         }
     }

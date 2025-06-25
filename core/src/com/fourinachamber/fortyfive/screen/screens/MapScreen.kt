@@ -14,7 +14,8 @@ import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
-import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.BakedDropShadow
+import com.fourinachamber.fortyfive.screen.SquareDropShadow
 import com.fourinachamber.fortyfive.screen.ScreenManager
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -195,10 +196,11 @@ class MapScreen : ScreenCreator() {
                 }
             }
 
-            val dropShadow = DropShadow(
-                Color.Red,
-                scale = 1.3f,
-                blurFactor = 0.8f
+            val dropShadow = BakedDropShadow(
+                "map_detail_encounter_button_hover",
+                screen,
+                0f, 0f,
+                1.6f, 1.8f
             )
             dropShadow.showDropShadow = false
             this.dropShadow = dropShadow

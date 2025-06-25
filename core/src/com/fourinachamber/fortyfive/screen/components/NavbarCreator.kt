@@ -9,7 +9,7 @@ import com.fourinachamber.fortyfive.keyInput.GameInputs
 import com.fourinachamber.fortyfive.keyInput.KeyboardFocusable
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
-import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.SquareDropShadow
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -290,7 +290,7 @@ object NavbarCreator {
             keyboardFocusable = KeyboardFocusable.LEAF
             logicalOffsetY = baseLogicalOffsetY
 
-            val dropShadow = DropShadow(
+            val dropShadow = SquareDropShadow(
                 Color.BLACK, 2f, -2f, 1.1f, blurFactor = 0.5f, showDropShadow = false
             )
             this.dropShadow = dropShadow

@@ -4,14 +4,7 @@
 
 ~~~section fragment
 
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP
-#endif
-
-in LOWP vec4 v_color;
+in vec4 v_color;
 in vec2 v_texCoords;
 uniform sampler2D u_texture;
 out vec4 outColor;
@@ -23,9 +16,10 @@ uniform float u_originalColor;
 uniform float u_maxRadius;
 uniform float u_radiusStep;
 uniform float u_pointsOnCircle;
+uniform float u_brighten;
 
 
-//%include shaders/includes/noise_utils.glsl
+%include shaders/includes/color_utils.glsl
 
 //float getGauss(int i, int j){
 //    return 1.0;
@@ -52,6 +46,7 @@ void main() {
     float pointsOnCircle = u_pointsOnCircle; //100.0;
     float originalColor = u_originalColor;
     vec4 shadowColor = u_shadowColor;
+    float brighten = u_brighten;
 
     vec4 middle = adjustedSample(v_texCoords);
 
@@ -86,7 +81,18 @@ void main() {
     vec4 inShadowColor = ((blurred.r + blurred.g + blurred.b) / 3) * shadowColor;
     inShadowColor.a = blurred.a;
 
-    outColor = originalColor * blurred + (1.0 - originalColor) * inShadowColor;
+    vec4 mixed = originalColor * blurred + (1.0 - originalColor) * inShadowColor;
+    mixed = brightenColor(mixed, brighten);
+
+    vec2 coords = v_texCoords;
+    // really should be pythagoras but doesn't matter much in this case
+    float distToEdge = min(coords.x, min(1.0 - coords.x, min(coords.y, 1.0 - coords.y)));
+    float dropOff = distToEdge + 0.89;
+    dropOff = pow(dropOff, 10.0);
+    dropOff = clamp(dropOff, 0.0, 1.0);
+    mixed.a *= dropOff;
+
+    outColor = mixed;
 }
 
 
