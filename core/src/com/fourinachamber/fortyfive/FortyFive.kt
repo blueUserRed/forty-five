@@ -7,13 +7,12 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.CardTextureManager
-import com.fourinachamber.fortyfive.game.controller.EncounterContext
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.MapNamespace
-import com.fourinachamber.fortyfive.oven.DropShadowBakeTask
+import com.fourinachamber.fortyfive.oven.BakeTask
 import com.fourinachamber.fortyfive.oven.Oven
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -54,6 +53,7 @@ object FortyFive : Game() {
     var currentScreen: OnjScreen? = null
 
     var cleanExit: Boolean = true
+    lateinit var appArguments: AppArguments
 
     private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
 
@@ -67,12 +67,15 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-        Oven().bake(listOf(DropShadowBakeTask(false)))
-//        when (UserPrefs.startScreen) {
-//            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
-//            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
-//            UserPrefs.StartScreen.MAP -> toMap()
-//        }
+        if (appArguments.bakeRun) {
+            Oven().bake(appArguments.bakeTasks)
+            return
+        }
+        when (UserPrefs.startScreen) {
+            UserPrefs.StartScreen.INTRO -> screenManager.transitionImmediate(IntroScreen)
+            UserPrefs.StartScreen.TITLE -> screenManager.transitionImmediate(TitleScreen)
+            UserPrefs.StartScreen.MAP -> toMap()
+        }
     }
 
     fun toMap() {
@@ -187,4 +190,8 @@ object FortyFive : Game() {
         resourceManager.end()
         super.dispose()
     }
+
+
+    data class AppArguments(val bakeRun: Boolean, val bakeTasks: List<BakeTask>)
+
 }

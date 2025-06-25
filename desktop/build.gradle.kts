@@ -2,8 +2,8 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.tasks.Jar
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_18
+    targetCompatibility = JavaVersion.VERSION_18
 }
 
 sourceSets {
@@ -49,8 +49,18 @@ tasks.register<JavaExec>("createDropShadows") {
     workingDir = assetsDir
     isIgnoreExitValue = true
 
-    args = mutableListOf("createDropShadows")
-    delete("../assets/drop_shadows")
+    args = mutableListOf("-bake", "dropShadows")
+}
+
+tasks.register<JavaExec>("createDropShadowsIncremental") {
+    dependsOn("classes")
+    mainClass.set(mainClassName)
+    classpath = sourceSets["main"].runtimeClasspath
+    standardInput = System.`in`
+    workingDir = assetsDir
+    isIgnoreExitValue = true
+
+    args = mutableListOf("-bake", "dropShadows", "incremental")
 }
 
 

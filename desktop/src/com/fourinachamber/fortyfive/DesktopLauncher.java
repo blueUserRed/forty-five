@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.fourinachamber.fortyfive.oven.Oven;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,18 +16,25 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class DesktopLauncher {
-    public static void main(String[] arg) {
-        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setForegroundFPS(60);
-        config.setTitle(".Forty-Five");
-        config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "blobs/icon.png");
-        Exception exception = null;
 
-        if (arg.length > 0 && arg[0].equals("createDropShadows")) {
-            config.setWindowedMode(10000, 10000);
-        }else{
-            config.setWindowedMode(900, (900 * 9) / 16);
+    public static void main(String[] args) {
+
+        ArgParser argParser = new ArgParser(args);
+        FortyFive.AppArguments arguments = argParser.parse();
+
+
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+
+        if (arguments.getBakeRun()) {
+            FortyFive.INSTANCE.setAppArguments(arguments);
+            config.setInitialVisible(false);
+        } else {
+            config.setForegroundFPS(60);
+            config.setTitle(".Forty-Five");
+            config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "blobs/icon.png");
         }
+
+        Exception exception = null;
         try {
             new Lwjgl3Application(FortyFive.INSTANCE, config);
         } catch (Exception e) {

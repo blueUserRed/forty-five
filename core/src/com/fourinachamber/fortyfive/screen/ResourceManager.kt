@@ -74,22 +74,24 @@ class ResourceManager {
         val resources = mutableListOf<Resource>()
         val assets = ConfigFileManager.getConfigFile("assets")
 
-        assets.get<OnjArray>("textures").value.forEach {
-            it as OnjObject
-            val name = it.get<String>("name")
-            val dropShadowColor = it.get<Color?>("dropShadowColor")
+        assets.get<OnjArray>("textures").value.forEach { texture ->
+            texture as OnjObject
+            val name = texture.get<String>("name")
+            val dropShadowData = texture
+                .getOr<OnjObject?>("dropShadow", null)
+                ?.let { TextureResource.DropShadowData.fromOnj(it) }
             val resource = TextureResource(
                 name,
-                it.get<String>("file"),
-                it.getOr("tileable", false),
-                it.getOr("tileScale", 1.0).toFloat(),
-                it.getOr("useMipMaps", false),
-                dropShadowColor
+                texture.get<String>("file"),
+                texture.getOr("tileable", false),
+                texture.getOr("tileScale", 1.0).toFloat(),
+                texture.getOr("useMipMaps", false),
+                dropShadowData
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = texture.getOr("stayLoaded", false)
             resources.add(resource)
 
-            dropShadowColor ?: return@forEach
+            dropShadowData ?: return@forEach
             val resourceDropShadow = TextureResource(
                 name + DROP_SHADOW_END,
                 "drop_shadows/$name$DROP_SHADOW_END.png",
@@ -98,7 +100,7 @@ class ResourceManager {
                 false,
                 null
             )
-            resourceDropShadow.stayLoaded = it.getOr("stayLoaded", false)
+            resourceDropShadow.stayLoaded = texture.getOr("stayLoaded", false)
             resources.add(resourceDropShadow)
         }
 

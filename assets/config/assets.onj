@@ -85,6 +85,14 @@ textureAtlases: [
 
 ],
 
+var sharedDropShadowConfig = {
+    shadowColor: color.black,
+    originalColor: 0.0,
+    maxRadius: 100.0,
+    radiusStep: 1.0,
+    pointsOnCircle: 100.0,
+};
+
 textures: [
     {
         name: "revolver_slot_texture",
@@ -373,7 +381,7 @@ textures: [
     {
         name: "map_detail_encounter_button_hover",
         file: "blobs/map/detail/encounter_button_hover.png",
-        dropShadowColor: color.red,
+        dropShadow: sharedDropShadowConfig,
     },
     {
         name: "map_detail_encounter_button_disabled",

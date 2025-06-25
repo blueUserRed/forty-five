@@ -1,9 +1,6 @@
 package com.fourinachamber.fortyfive.screen.screens
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.scenes.scene2d.Action
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
@@ -19,12 +16,6 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.DropShadow
 import com.fourinachamber.fortyfive.screen.ScreenManager
-import com.fourinachamber.fortyfive.screen.components.BackpackCreator.getSharedBackpack
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator
-import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
-import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
-import com.fourinachamber.fortyfive.screen.components.ToTitleScreenCreator.getSharedTitleScreen
-import com.fourinachamber.fortyfive.screen.components.WarningParent
 import com.fourinachamber.fortyfive.screen.gameWidgets.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.screen.general.*

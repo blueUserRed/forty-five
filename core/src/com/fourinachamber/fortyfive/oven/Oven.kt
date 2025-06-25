@@ -15,5 +15,3 @@ sealed interface BakeTask {
 
     fun bake()
 }
-
-

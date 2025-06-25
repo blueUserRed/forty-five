@@ -18,8 +18,12 @@ out vec4 outColor;
 
 uniform vec2 u_resolution;
 uniform float u_multiplier;
-uniform vec4 u_color;
-uniform float u_maxOpacity;
+uniform vec4 u_shadowColor;
+uniform float u_originalColor;
+uniform float u_maxRadius;
+uniform float u_radiusStep;
+uniform float u_pointsOnCircle;
+
 
 //%include shaders/includes/noise_utils.glsl
 
@@ -43,15 +47,11 @@ vec4 adjustedSample(vec2 at) {
 
 void main() {
 
-    float maxRadius = 100.0;
-    float radiusStep = 1.0;
-    float pointsInCircle = 100.0;
-    float originalColor = 0.5;
-    vec4 shadowColor = vec4(0.0, 0.0, 1.0, 1.0);
-
-//    float maxRadius = 20.0;
-//    float radiusStep = 1.0;
-//    float pointsInCircle = 30.0;
+    float maxRadius = u_maxRadius; //100.0;
+    float radiusStep = u_radiusStep; //1.0;
+    float pointsOnCircle = u_pointsOnCircle; //100.0;
+    float originalColor = u_originalColor;
+    vec4 shadowColor = u_shadowColor;
 
     vec4 middle = adjustedSample(v_texCoords);
 
@@ -61,9 +61,9 @@ void main() {
     float alphaAcc = middle.a;
     float alphaContrib = 1.0;
 
-    float cirlceStep = TWO_PI / pointsInCircle;
+    float cirlceStep = TWO_PI / pointsOnCircle;
     for (float r = radiusStep; r < maxRadius; r += radiusStep) {
-        float contrib = 1.0 - (r / maxRadius);
+        float contrib = 1.0 - (r / (maxRadius + radiusStep));
         for (float a = 0.0; a < TWO_PI; a += cirlceStep) {
             vec2 coords = vec2(
                 gl_FragCoord.x + sin(a) * r,

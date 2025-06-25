@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.oven
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT
 import com.badlogic.gdx.graphics.Pixmap
@@ -19,19 +18,22 @@ import com.fourinachamber.fortyfive.screen.TextureResource
 import com.fourinachamber.fortyfive.utils.EndableLifetime
 import java.io.File
 
-class DropShadowBakeTask(private val incremental: Boolean) : BakeTask, ResourceBorrower {
+class DropShadowBakeTask(private val incremental: Boolean, private val specific: String?) : BakeTask, ResourceBorrower {
 
     override fun bake() {
         val dropShadows = FortyFive
             .resourceManager
             .resources
             .filterIsInstance<TextureResource>()
-            .filter { it.dropShadowColor != null }
-            .map { it.handle to it.dropShadowColor!! }
+            .filter { it.dropShadowData != null }
+            .map { it.handle to it.dropShadowData!! }
         createDropShadows(dropShadows, incremental)
     }
 
-    private fun createDropShadows(dropShadowsToDraw: List<Pair<String, Color>>, incremental: Boolean) {
+    private fun createDropShadows(
+        dropShadowsToDraw: List<Pair<String, TextureResource.DropShadowData>>,
+        incremental: Boolean
+    ) {
         if (dropShadowsToDraw.isEmpty()) return
 
         val taskLifetime = EndableLifetime()
@@ -50,22 +52,27 @@ class DropShadowBakeTask(private val incremental: Boolean) : BakeTask, ResourceB
         batch.shader = dropShadowShader.shader
         dropShadowShader.shader.bind()
         dropShadowShader.shader.setUniformf("u_multiplier", multiplier)
-        dropShadowShader.shader.setUniformf("u_maxOpacity", 0.3f)
         val scale = (1 + multiplier)
 
-        dropShadowsToDraw.forEach { (textureHandle, color) ->
+        dropShadowsToDraw.forEach { (textureHandle, data) ->
+            if (specific != null && textureHandle != specific) return@forEach
             val fileHandle = FileHandle(File("drop_shadows/$textureHandle${ResourceManager.DROP_SHADOW_END}.png"))
             if (incremental && fileHandle.exists()) return@forEach
 
             val dropShadowLifetime = EndableLifetime()
 
             val texture = FortyFive.resourceManager.forceGet<Texture>(this, dropShadowLifetime, textureHandle)
-            dropShadowShader.shader.setUniformf("u_color", color)
             val baseWidth = texture.width
             val baseHeight = texture.height
             val width = (baseWidth * scale).toInt()
             val height = (baseHeight * scale).toInt()
+
             dropShadowShader.shader.setUniformf("u_resolution", width.toFloat(), height.toFloat())
+            dropShadowShader.shader.setUniformf("u_shadowColor", data.shadowColor)
+            dropShadowShader.shader.setUniformf("u_originalColor", data.originalColor)
+            dropShadowShader.shader.setUniformf("u_maxRadius", data.maxRadius)
+            dropShadowShader.shader.setUniformf("u_radiusStep", data.radiusStep)
+            dropShadowShader.shader.setUniformf("u_pointsOnCircle", data.pointsOnCircle)
 
             val fbo = FrameBuffer(Pixmap.Format.RGBA8888, width, height, false)
             dropShadowLifetime.tieDisposable(fbo)
