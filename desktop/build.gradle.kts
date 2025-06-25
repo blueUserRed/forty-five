@@ -13,7 +13,7 @@ sourceSets {
     }
 }
 
-val mainClassName by extra("com.fourinachamber.fortyfive.DesktopLauncher")
+val mainClassName by extra("com.microwavestudios.fortyfive.DesktopLauncher")
 val assetsDir: File by extra(file("../assets"))
 
 
@@ -25,6 +25,7 @@ eclipse {
 
 
 tasks.register<JavaExec>("run") {
+    group = "development"
     dependsOn("classes")
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
@@ -42,6 +43,7 @@ tasks.register<JavaExec>("run") {
 }
 
 tasks.register<JavaExec>("createDropShadows") {
+    group = "bake"
     dependsOn("classes")
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
@@ -53,6 +55,7 @@ tasks.register<JavaExec>("createDropShadows") {
 }
 
 tasks.register<JavaExec>("createDropShadowsIncremental") {
+    group = "bake"
     dependsOn("classes")
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
@@ -65,6 +68,7 @@ tasks.register<JavaExec>("createDropShadowsIncremental") {
 
 
 tasks.register<JavaExec>("debug") {
+    group = "development"
     dependsOn("classes")
     mainClass.set(mainClassName)
     classpath = sourceSets["main"].runtimeClasspath
