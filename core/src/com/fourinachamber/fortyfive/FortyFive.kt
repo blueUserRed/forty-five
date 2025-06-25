@@ -13,6 +13,8 @@ import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenContext
 import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.MapNamespace
+import com.fourinachamber.fortyfive.oven.BakeTask
+import com.fourinachamber.fortyfive.oven.Oven
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.ScreenManager
@@ -53,6 +55,7 @@ object FortyFive : Game() {
     var currentScreen: OnjScreen? = null
 
     var cleanExit: Boolean = true
+    lateinit var appArguments: AppArguments
 
     private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
 
@@ -66,6 +69,10 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
+        if (appArguments.bakeRun) {
+            Oven().bake(appArguments.bakeTasks)
+            return
+        }
 
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
@@ -187,4 +194,8 @@ object FortyFive : Game() {
         resourceManager.end()
         super.dispose()
     }
+
+
+    data class AppArguments(val bakeRun: Boolean, val bakeTasks: List<BakeTask>)
+
 }

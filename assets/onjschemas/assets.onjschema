@@ -5,10 +5,20 @@ var resourceSharedKeys = {
     stayLoaded?: boolean
 };
 
+var dropShadowData = {
+    shadowColor: Color,
+    originalColor: float,
+    maxRadius: float,
+    radiusStep: float,
+    pointsOnCircle: float,
+    brighten: float,
+};
+
 textures: {
     name: string,
     file: string,
     tileable?: boolean,
+    dropShadow?: dropShadowData,
     tileScale?: float,
     useMipMaps?: boolean,
     ...resourceSharedKeys

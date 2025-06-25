@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
-import com.fourinachamber.fortyfive.screen.DropShadow
+import com.fourinachamber.fortyfive.screen.SquareDropShadow
 import com.fourinachamber.fortyfive.screen.components.NavbarCreator.getSharedNavBar
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.components.SettingsCreator.getSharedSettingsMenu
@@ -15,7 +15,6 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.screenBuilder.ScreenCreator
 import com.fourinachamber.fortyfive.utils.Color
-import com.fourinachamber.fortyfive.utils.interpolate
 import com.fourinachamber.fortyfive.utils.percent
 
 class HealOrMaxHPScreen : ScreenCreator() {
@@ -170,7 +169,7 @@ class HealOrMaxHPScreen : ScreenCreator() {
         backgroundHandle = "heal_or_max_selector_background"
         touchable = Touchable.enabled
 
-        dropShadow = DropShadow(Color.Yellow, scale = 1f, showDropShadow = false)
+        dropShadow = SquareDropShadow(Color.Yellow, scale = 1f, showDropShadow = false)
 //        onSelectChange { _, new ->
 //            if (isSelected) {
 //                screen.enterState("healOrMaxHP_optionSelected")

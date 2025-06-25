@@ -100,7 +100,7 @@ class BetterShaderPreProcessor(
         }
         .joinToString(
             separator = "\n",
-            prefix = "#version ${majorVersion * 100 + minorVersion}\n"
+            prefix = codePrefix
         )
 
     private fun include(toInclude: String): String {
@@ -181,6 +181,13 @@ class BetterShaderPreProcessor(
             "u_perlin512x512" to "sampler2D",
             "u_iceTexture" to "sampler2D",
         )
+
+        const val codePrefix: String = """
+            #version ${majorVersion * 100 + minorVersion}
+            #define PI 3.141
+            #define TWO_PI 6.282
+            #define SQRT_TWO 1.41421
+        """
 
     }
 
