@@ -406,12 +406,11 @@ abstract class ScreenCreator : ResourceBorrower {
         hasBackpack: Boolean = true,
         hasNavbar: Boolean = true,
         navbarIsLeft: Boolean = false,
-        hasWarnings: Boolean = true,
+        warnings: WarningParent? = null,
         hasTutorial: Boolean = true,
         hasTitleScreenInNavbar: Boolean = true,
-    ): WarningParent? {
+    ) {
 
-        val warningParent = WarningParent(this@ScreenCreator, screen, events)
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
         if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
@@ -476,11 +475,8 @@ abstract class ScreenCreator : ResourceBorrower {
             }
         }
 
-        if (hasWarnings) {
-            actor(warningParent.getActor())
-            return warningParent
-        } else {
-            return null
+        warnings?.let {
+            actor(warnings.getActor())
         }
     }
 

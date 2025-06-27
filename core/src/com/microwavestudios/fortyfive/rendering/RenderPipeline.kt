@@ -70,8 +70,7 @@ open class RenderPipeline(
 
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
-        get() = TimeUtils.millis() <= orbFinisesAt
-
+        get() = orbAnimations.isNotEmpty() || TimeUtils.millis() <= orbFinisesAt
 
     private val shapeRenderer: ShapeRenderer = ShapeRenderer()
 
@@ -163,23 +162,19 @@ open class RenderPipeline(
         batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val toRemove = mutableListOf<OrbAnimation>()
         orbAnimations.forEach { anim ->
-            val time = TimeUtils.millis() - anim.startTime
-            val progress = time.toFloat() / anim.duration.toFloat()
-            val lastProgress = anim.lastProgress
-            if (progress >= 1f) {
-                toRemove.add(anim)
-                return@forEach
-            }
+            anim.newFrame()
 
             if (!anim.orbTexturePromise.isResolved) FortyFive.resourceManager.forceResolve(anim.orbTexturePromise)
             val drawable = anim.orbTexturePromise.getOrError()
 
-            val segments = anim.segments + 1
-            var curProgress = lastProgress
-            repeat(segments) {
-                if (it == segments - 1) return@repeat
-                curProgress += (progress - lastProgress) / segments
-                val position = anim.position(curProgress)
+            repeat(anim.segments) {
+                if (anim.isFinished()) return@repeat
+                anim.update()
+                if (anim.isFinished()) {
+                    toRemove.add(anim)
+                    orbFinisesAt = TimeUtils.millis() + 500
+                }
+                val position = anim.position
                 drawable.draw(
                     batch,
                     position.x, position.y,
@@ -187,7 +182,6 @@ open class RenderPipeline(
                 )
             }
 
-            anim.lastProgress = progress
         }
         orbAnimations.removeAll(toRemove)
 
@@ -235,9 +229,7 @@ open class RenderPipeline(
         orbAnimations.forEach { anim ->
             if (!anim.orbTexturePromise.isResolved) FortyFive.resourceManager.forceResolve(anim.orbTexturePromise)
             val drawable = anim.orbTexturePromise.getOrError()
-            val time = TimeUtils.millis() - anim.startTime
-            val progress = time.toFloat() / anim.duration.toFloat()
-            val position = anim.position(progress)
+            val position = anim.position
             drawable.draw(
                 batch,
                 position.x, position.y,
@@ -360,9 +352,7 @@ open class RenderPipeline(
     }
 
     fun addOrbAnimation(orbAnimation: OrbAnimation) {
-        orbAnimation.startTime = TimeUtils.millis()
         orbAnimations.add(orbAnimation)
-        orbFinisesAt = max(orbFinisesAt, TimeUtils.millis() + orbAnimation.duration + 500L)
     }
 
     open fun sizeChanged() {
@@ -377,49 +367,104 @@ open class RenderPipeline(
         _lifetime.die()
     }
 
-    data class OrbAnimation(
-        var startTime: Long = 0L,
-        var lastProgress: Float = 0f,
+
+    class OrbAnimation(
         val orbTexture: ResourceHandle,
         val width: Float,
         val height: Float,
-        val duration: Int,
-        val segments: Int,
         val renderPipeline: RenderPipeline,
-        val position: (progress: Float) -> Vector2,
+        initialPosition: Vector2,
+        initialVelocity: Vector2,
+        val acceleration: Float,
+        val speedCap: Float,
+        val segments: Int,
+        val velocityRampStart: Int,
+        val velocityRamp: Float,
+        val target: () -> Vector2
     ) {
 
-        val orbTexturePromise: Promise<Drawable> = FortyFive.resourceManager.request(renderPipeline, renderPipeline.lifetime, orbTexture)
+        val orbTexturePromise: Promise<Drawable> =
+            FortyFive.resourceManager.request(renderPipeline, renderPipeline.lifetime, orbTexture)
 
-        companion object {
+        var position: Vector2 = initialPosition
+            private set
 
-            fun linear(start: Vector2, end: Vector2): (progress: Float) -> Vector2 = { progress ->
-                Vector2(
-                    start.x + (end.x - start.x) * progress,
-                    start.y + (end.y - start.y) * progress,
-                )
-            }
+        private var velocity: Vector2 = initialVelocity
 
-            fun curvedPath(start: Vector2, end: Vector2, curveOffsetMultiplier: Float = 1f): (progress: Float) -> Vector2 {
-                val midpoint = start midPoint end
-                val length = (end - start).len().absoluteValue
-                val controlPoints = arrayOf(
-                    start,
-                    start,
-                    midpoint + midpoint.normal.withMag(length * 0.15f * curveOffsetMultiplier),
-                    end,
-                    end,
-                )
-                val spline = CatmullRomSpline(controlPoints, false)
-                return { progress ->
-                    val result = Vector2()
-                    spline.valueAt(result, progress)
-                    result
-                }
-            }
+        private val currentTarget: Vector2 = Vector2(0, 0)
+        private var currentDelta: Float = 0f
+        private var finished: Boolean = false
 
+        private var maxTime: Long = -1
+        private var currentAcceleration: Float = acceleration
+
+        fun newFrame() {
+            if (maxTime == -1L) maxTime = TimeUtils.millis() + velocityRampStart
+            currentTarget.set(target())
+            currentDelta = Gdx.graphics.deltaTime
+            if (TimeUtils.millis() > maxTime) currentAcceleration *= velocityRamp
         }
+
+        fun update() {
+            val delta = currentDelta / segments
+            val targetDirection = (currentTarget - position).unit
+            val accel = targetDirection.withMag(currentAcceleration)
+            velocity += accel
+            velocity.clamp(-speedCap, speedCap)
+            val scaledVelocity = velocity * delta
+            position += scaledVelocity
+            val dist = (position - currentTarget).len()
+            if (dist <= 50) {
+                finished = true
+            }
+        }
+
+        fun isFinished(): Boolean = finished
     }
+
+//    data class OrbAnimation(
+//        var startTime: Long = 0L,
+//        var lastProgress: Float = 0f,
+//        val orbTexture: ResourceHandle,
+//        val width: Float,
+//        val height: Float,
+//        val duration: Int,
+//        val segments: Int,
+//        val renderPipeline: RenderPipeline,
+//        val position: (progress: Float) -> Vector2,
+//    ) {
+//
+//        val orbTexturePromise: Promise<Drawable> = FortyFive.resourceManager.request(renderPipeline, renderPipeline.lifetime, orbTexture)
+//
+//        companion object {
+//
+//            fun linear(start: Vector2, end: Vector2): (progress: Float) -> Vector2 = { progress ->
+//                Vector2(
+//                    start.x + (end.x - start.x) * progress,
+//                    start.y + (end.y - start.y) * progress,
+//                )
+//            }
+//
+//            fun curvedPath(start: Vector2, end: Vector2, curveOffsetMultiplier: Float = 1f): (progress: Float) -> Vector2 {
+//                val midpoint = start midPoint end
+//                val length = (end - start).len().absoluteValue
+//                val controlPoints = arrayOf(
+//                    start,
+//                    start,
+//                    midpoint + midpoint.normal.withMag(length * 0.15f * curveOffsetMultiplier),
+//                    end,
+//                    end,
+//                )
+//                val spline = CatmullRomSpline(controlPoints, false)
+//                return { progress ->
+//                    val result = Vector2()
+//                    spline.valueAt(result, progress)
+//                    result
+//                }
+//            }
+//
+//        }
+//    }
 }
 
 class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {

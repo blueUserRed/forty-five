@@ -49,38 +49,40 @@ object GraphicsConfig {
         }
     }
 
-    fun orbAnimation(
-        source: Vector2,
-        target: Vector2,
-        isReserves: Boolean,
-        renderPipeline: RenderPipeline,
-        duration: Int = 300,
-    ) = RenderPipeline.OrbAnimation(
-        orbTexture = if (isReserves) "reserves_orb" else "card_orb",
-        width = 10f,
-        height = 10f,
-        duration = duration,
-        segments = 20,
-        renderPipeline = renderPipeline,
-        position = RenderPipeline.OrbAnimation.curvedPath(
-            source,
-            target,
-            curveOffsetMultiplier = (-1.5f..1.5f).random()
-        )
-    )
+//    fun orbAnimation(
+//        source: Vector2,
+//        target: () -> Vector2,
+//        isReserves: Boolean,
+//        renderPipeline: RenderPipeline,
+//    ) = RenderPipeline.OrbAnimation(
+//        orbTexture = if (isReserves) "reserves_orb" else "card_orb",
+//        width = 10f,
+//        height = 10f,
+//        segments = 20,
+//        renderPipeline = renderPipeline,
+//        initialPosition = source,
+//        target = target,
+//        acceleration = 30f,
+//        speedCap = 100f
+//    )
 
     fun cashOrbAnimation(
         start: Vector2,
-        end: Vector2,
+        end: () -> Vector2,
         renderPipeline: RenderPipeline
     ) = RenderPipeline.OrbAnimation(
         orbTexture = "cash_symbol",
         width = 30f,
         height = 30f,
-        duration = 600,
         segments = 20,
         renderPipeline = renderPipeline,
-        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+        initialPosition = start,
+        target = end,
+        acceleration = 200f,
+        speedCap = 2500f,
+        initialVelocity = Vector2(0, 0),
+        velocityRampStart = 500,
+        velocityRamp = 1.2f
     )
 
     fun iconName(name: String): String = iconConfig[name]!!.first

@@ -21,6 +21,7 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -100,7 +101,12 @@ class MapScreen : ScreenCreator() {
             }
         }
         getInfoPopup()
-        addDefaultOverlays(worldWidth, worldHeight, warningEvents)
+        addDefaultOverlays(
+            worldWidth,
+            worldHeight,
+            warningEvents,
+            warnings = WarningParent(this@MapScreen, screen, warningEvents)
+        )
     }
 
     private fun Group.getInfoPopup() = box {

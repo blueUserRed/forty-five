@@ -32,16 +32,13 @@ import com.microwavestudios.fortyfive.game.widgets.HorizontalStatusEffectDisplay
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.utils.*
 import com.microwavestudios.fortyfive.utils.AdvancedTextParser.*
-import com.microwavestudios.fortyfive.utils.Color
-import com.microwavestudios.fortyfive.utils.EventPipeline
-import com.microwavestudios.fortyfive.utils.Promise
-import com.microwavestudios.fortyfive.utils.Timeline
-import com.microwavestudios.fortyfive.utils.plus
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -68,10 +65,15 @@ class EncounterScreen : ScreenCreator() {
     private lateinit var reservesAnimationTarget: Actor
     private lateinit var deckAnimationTarget: Actor
 
-    private var warningParent: WarningParent? = null
+    private val warningParent: WarningParent by lazy {
+        WarningParent(this, screen, gameEvents)
+    }
 
     private lateinit var enemyParent: CustomGroup
-    private lateinit var afterlife: Afterlife
+
+    private val afterlife: Afterlife by lazy {
+        Afterlife(screen, gameEvents)
+    }
 
     private val revolver by lazy {
         Revolver(
@@ -142,8 +144,6 @@ class EncounterScreen : ScreenCreator() {
         targetSelectionPopup()
 
         playerBar()
-        val afterlife = Afterlife(screen, gameEvents)
-        this@EncounterScreen.afterlife = afterlife
         actor(afterlife.getActor(this@EncounterScreen)) {
             y = worldHeight * 0.4f
         }
@@ -178,11 +178,12 @@ class EncounterScreen : ScreenCreator() {
 
         winPopup()
 
-        warningParent = addDefaultOverlays(
+        addDefaultOverlays(
             worldWidth, worldHeight,
             gameEvents,
             navbarIsLeft = true,
-            hasTitleScreenInNavbar = false
+            hasTitleScreenInNavbar = false,
+            warnings = warningParent
         )
     }
 
@@ -1056,10 +1057,12 @@ class EncounterScreen : ScreenCreator() {
                             winPopupSymbol.width / 2,
                             winPopupSymbol.height / 2
                         )),
-                        navBarSymbol.localToStageCoordinates(Vector2(
-                            navBarSymbol.width / 2,
-                            navBarSymbol.height / 2
-                        )),
+                        {
+                            navBarSymbol.localToStageCoordinates(Vector2(
+                                navBarSymbol.width / 2,
+                                navBarSymbol.height / 2
+                            ))
+                        },
                         renderPipeline
                     )
                     renderPipeline.addOrbAnimation(moneyAnim)
@@ -1070,47 +1073,93 @@ class EncounterScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, false),
-        GameControllerImpl(screen, gameEvents, warningParent!!, afterlife)
+        GameControllerImpl(screen, gameEvents, warningParent, afterlife)
     )
 
-    private fun orbAnimationTimeline(
+    private fun reserveAnimationTimeline(
         source: Actor,
         target: Actor,
         amount: Int,
-        isReserves: Boolean,
-        duration: Int = 300
     ): Timeline = Timeline.timeline {
-        if (isReserves && target is CardActor) return@timeline // TODO: fix for moving targets
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
         repeat(amount.absoluteValue) {
-            action {
+            later {
                 FortyFive.soundPlayer.situation("orb_anim_playing", screen)
-                renderPipeline.addOrbAnimation(
-                    GraphicsConfig.orbAnimation(
-                        source.localToStageCoordinates(Vector2(0f, 0f)) +
-                                Vector2(source.width / 2, source.height / 2),
-                        target.localToStageCoordinates(Vector2(0f, 0f)) +
-                                Vector2(target.width / 2, target.height / 2),
-                        isReserves,
-                        renderPipeline,
-                        duration = duration
-                    ))
+                val sourcePosition =
+                    source.localToStageCoordinates(Vector2(0f, 0f)) + Vector2(source.width / 2, source.height / 2)
+                val targetCallback = {
+                    target.localToStageCoordinates(Vector2(0f, 0f)) +
+                            Vector2(target.width / 2, target.height / 2)
+                }
+                val startVelocity = Vector2(
+                    (-1000f..2500f).random(),
+                    (-4000f..8100f).random()
+                )
+                val orbAnimation = RenderPipeline.OrbAnimation(
+                    "reserves_orb",
+                    10f, 10f,
+                    renderPipeline,
+                    sourcePosition,
+                    startVelocity,
+                    40f,
+                    2500f,
+                    20,
+                    500,
+                    1.2f,
+                    targetCallback
+                )
+                renderPipeline.addOrbAnimation(orbAnimation)
+                delay(50)
             }
-            delay(50)
+        }
+    }
+
+    private fun cardAnimationTimeline(
+        source: Actor,
+        target: Actor,
+    ): Timeline = Timeline.timeline {
+        val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
+        later {
+            FortyFive.soundPlayer.situation("orb_anim_playing", screen)
+            val sourcePosition =
+                source.localToStageCoordinates(Vector2(0f, 0f)) + Vector2(source.width / 2, source.height / 2)
+            val targetCallback = {
+                target.localToStageCoordinates(Vector2(0f, 0f)) +
+                        Vector2(target.width / 2, target.height / 2)
+            }
+            val startVelocity = Vector2(0f, 0f)
+            val orbAnimation = RenderPipeline.OrbAnimation(
+                "card_orb",
+                10f, 10f,
+                renderPipeline,
+                sourcePosition,
+                startVelocity,
+                1000f,
+                4000f,
+                20,
+                5_000,
+                2.0f,
+                targetCallback
+            )
+            renderPipeline.addOrbAnimation(orbAnimation)
+            delayUntil { orbAnimation.isFinished() }
         }
     }
 
     private fun reservesPaidAnim(amount: Int, animTarget: Actor): Timeline =
-        orbAnimationTimeline(reservesAnimationTarget, animTarget, amount = amount, isReserves = true)
+        reserveAnimationTimeline(reservesAnimationTarget, animTarget, amount = amount)
 
     private fun reservesGainedAnim(amount: Int, animSource: Actor): Timeline =
-        orbAnimationTimeline(animSource, reservesAnimationTarget, amount = amount, isReserves = true)
+        reserveAnimationTimeline(animSource, reservesAnimationTarget, amount = amount)
 
 
     private fun bindEventHandlers() {
         gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged>(::reservesChangedAnim)
         gameEvents.watchFor<GameControllerImpl.Events.PlayCardOrbAnimation> { event ->
-            event.orbAnimationTimeline = orbAnimationTimeline(deckAnimationTarget, event.targetActor, 1, false, duration = 200)
+            event.orbAnimationTimeline = cardAnimationTimeline(
+                deckAnimationTarget,
+                event.targetActor,
+            )
         }
         gameEvents.watchFor<GameControllerImpl.Events.SetupEnemies>(::setupEnemies)
     }

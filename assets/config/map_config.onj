@@ -180,14 +180,14 @@ var decorations = {
     },
     magentaMountain: {
         distribution: $FadeX {
-            start: 100.0,
+            start: 80.0,
             end: 300.0,
             interpolation: interpolation.pow2InInverse
         },
         decoration: "map_decoration_magenta_mountains_mountain",
         baseWidth: 80.0,
         baseHeight: 80.0 * (1080.0 / 1610.0),
-        density: 0.0008,
+        density: 0.001,
         checkNodeCollisions: true,
         checkLineCollisions: true,
         checkDecorationCollisions: true,
@@ -208,7 +208,7 @@ var decorations = {
         decoration: "map_decoration_magenta_mountains_mountain_small_1",
         baseWidth: 60.0,
         baseHeight: 60.0 * (837.0 / 967.0),
-        density: 0.0008,
+        density: 0.001,
         checkNodeCollisions: true,
         checkLineCollisions: true,
         checkDecorationCollisions: true,
@@ -229,7 +229,7 @@ var decorations = {
         decoration: "map_decoration_magenta_mountains_mountain_small_2",
         baseWidth: 60.0,
         baseHeight: 60.0 * (1033.0 / 1453.0),
-        density: 0.0008,
+        density: 0.001,
         checkNodeCollisions: true,
         checkLineCollisions: true,
         checkDecorationCollisions: true,
@@ -261,8 +261,8 @@ var decorations = {
     magentaTree: {
         distribution: $FadeX {
             start: -100.0,
-            end: 100.0,
-            interpolation: interpolation.pow4In
+            end: 140.0,
+            interpolation: interpolation.linear
         },
         decoration: "map_decoration_magenta_mountains_tree",
         baseWidth: 20.0,
@@ -339,7 +339,7 @@ var roadBetweenSalemAndSpire = $Radial {
     exitNodeTexture: "map_node_exit",
     locationSignProtectedAreaWidth: 25.0,
     locationSignProtectedAreaHeight: 30.0,
-    decorations: [],
+    decorations: magentaMountainsDecorations,
     circles: [
         {
             radius: 20.0,

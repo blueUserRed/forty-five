@@ -560,7 +560,6 @@ class GameControllerImpl(
         }
         includeLater({ Timeline.timeline {
             include(orbAnimationTimeline!!)
-            delay(140)
             action { card.actor.alpha = 1f }
             include(card.actor.spawnAnimation())
         } }, { orbAnimationTimeline != null })

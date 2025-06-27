@@ -117,7 +117,6 @@ class TitleScreen : ScreenCreator() {
             hasSettings = false, // added manually
             hasBackpack = false,
             hasNavbar = false,
-            hasWarnings = false,
             hasTutorial = false,
         )
     }
