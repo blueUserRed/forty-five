@@ -64,7 +64,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
+            targetMap: "tabu_letter_outpost",
         }
     },
 ],

@@ -14,7 +14,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_salem_and_spire_outpost",
+            targetMap: "salem",
         }
     },
     {

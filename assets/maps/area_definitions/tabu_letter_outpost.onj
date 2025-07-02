@@ -14,7 +14,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
+            targetMap: "aqua_balle",
         }
     },
     {
@@ -95,7 +95,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_tabu_letter_outpost_and_salem",
+            targetMap: "salem",
         }
     },
 
