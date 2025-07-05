@@ -1,0 +1,4 @@
+
+cardCollection: string[],
+playerHealth: int,
+playerMoney: int,

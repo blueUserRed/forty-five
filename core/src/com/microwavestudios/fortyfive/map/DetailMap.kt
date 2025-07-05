@@ -16,6 +16,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.schema.OnjSchemaException
 import onj.value.*
+import java.io.File
 
 /**
  * represents a detailMap
@@ -118,9 +119,9 @@ data class DetailMap(
         /**
          * reads a DetailMap from an onj-file
          */
-        fun readFromFile(file: FileHandle): DetailMap {
+        fun readFromFile(file: File): DetailMap {
             val onj = try {
-                val onj = OnjParser.parseFile(file.file())
+                val onj = OnjParser.parseFile(file)
                 mapOnjSchema.assertMatches(onj)
                 onj
             } catch (e: OnjParserException) {
@@ -183,7 +184,7 @@ data class DetailMap(
                 .value
                 .map { MapDecoration.fromOnj(it as OnjObject) }
             return DetailMap(
-                file.nameWithoutExtension(),
+                file.nameWithoutExtension,
                 nodes[startNodeIndex].build(),
                 endNode.asNode!!,
                 decorations,

@@ -1,6 +1,6 @@
 version: 0,
 startNode: 0,
-endNode: 3,
+endNode: 5,
 biome: "wasteland",
 progress: [
     0.0, 0.1
@@ -15,6 +15,7 @@ nodes: [
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "aqua_balle",
+            fromEnd: true,
         }
     },
     {
@@ -96,6 +97,7 @@ nodes: [
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "salem",
+            fromEnd: false,
         }
     },
 

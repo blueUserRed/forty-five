@@ -1,0 +1,100 @@
+package com.microwavestudios.fortyfive.game
+
+import onj.builder.buildOnjObject
+import onj.value.*
+
+data class Run(
+    val length: RunLength,
+    val type: RunType,
+    val difficulty: Int,
+    val rewards: List<RunReward>,
+    val biome: String,
+    val mapGeneratorData: OnjNamedObject
+) {
+
+    fun asOnj(): OnjObject = buildOnjObject {
+        "length" with length.asOnj()
+        "type" with type.asOnj()
+        "difficulty" with difficulty
+        "rewards" with rewards.map { it.asOnj() }
+        "biome" with biome
+        "mapGenerator" with mapGeneratorData
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): Run = Run(
+            RunLength.fromOnj(onj.get<OnjString>("length")),
+            RunType.fromOnj(onj.get<OnjString>("type")),
+            onj.get<Long>("difficulty").toInt(),
+            onj.get<OnjArray>("rewards").value.map {
+                it as OnjNamedObject
+                RunReward.fromOnj(it)
+            },
+            onj.get<String>("biome"),
+            onj.get<OnjNamedObject>("mapGenerator")
+        )
+    }
+}
+
+enum class RunLength(private val onjName: String) {
+
+    SHORT("short"),
+    MEDIUM("medium"),
+    LONG("long")
+    ;
+
+    fun asOnj(): OnjValue = OnjString(onjName)
+
+    companion object {
+
+        fun fromOnj(onj: OnjString): RunLength = when (onj.value) {
+            "short" -> SHORT
+            "medium" -> MEDIUM
+            "long" -> LONG
+            else -> throw RuntimeException("unknown runlength: ${onj.value}")
+        }
+    }
+}
+
+enum class RunType(private val onjName: String) {
+
+    LIMITED("limited"),
+    CONSTRUCTED("constructed")
+    ;
+
+    fun asOnj(): OnjValue = OnjString(onjName)
+
+    companion object {
+
+        fun fromOnj(onj: OnjString): RunType = when (onj.value) {
+            "limited" -> LIMITED
+            "constructed" -> CONSTRUCTED
+            else -> throw RuntimeException("unknown runtype: ${onj.value}")
+        }
+    }
+}
+
+sealed class RunReward {
+
+    data class Cash(val amount: Int) : RunReward() {
+
+        override fun asOnj(): OnjValue = buildOnjObject {
+            name("CashReward")
+            "amount" with amount
+        }
+    }
+
+
+    abstract fun asOnj(): OnjValue
+
+
+    companion object {
+
+        fun fromOnj(onj: OnjNamedObject): RunReward = when (onj.name) {
+            "CashReward" -> Cash(onj.get<Long>("amount").toInt())
+            else -> throw RuntimeException("unknown RunReward: ${onj.name}")
+        }
+    }
+
+}

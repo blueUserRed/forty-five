@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimationDrawable
 import com.microwavestudios.fortyfive.animation.createAnimation
+import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.MapDebugMenuPage
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
@@ -34,7 +35,7 @@ import kotlin.math.sin
  */
 class DetailMapWidget(
     private val screen: OnjScreen,
-    private val map: DetailMap,
+    private val mapSaver: MapSaver,
     private val defaultNodeDrawableHandle: ResourceHandle,
     private val edgeTextureHandle: ResourceHandle,
     private val playerDrawableHandle: ResourceHandle,
@@ -53,6 +54,8 @@ class DetailMapWidget(
 ) : Widget(), ZIndexActor, ResourceBorrower {
 
     override var fixedZIndex: Int = 0
+
+    private val map = mapSaver.currentMap
 
     private val mapBounds: Rectangle by lazy {
         val nodes = map.uniqueNodes.map { scaledNodePos(it) }
@@ -76,7 +79,7 @@ class DetailMapWidget(
             )
         }
 
-    var playerNode: MapNode = MapManager.currentMapNode
+    var playerNode: MapNode = mapSaver.currentNode
         private set
 
     private var playerPos: Vector2 = scaledNodePos(playerNode)
@@ -288,7 +291,7 @@ class DetailMapWidget(
             finishMovement()
             return
         }
-        val lastMapNode = MapManager.lastMapNode
+        val lastMapNode = mapSaver.lastNode
         if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
             FortyFive.logger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
         }
@@ -303,7 +306,7 @@ class DetailMapWidget(
     }
 
     private fun canGoTo(node: MapNode): Boolean {
-        val lastNode = MapManager.lastMapNode
+        val lastNode = mapSaver.lastNode
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // trap player ? idk
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
@@ -525,8 +528,8 @@ class DetailMapWidget(
         val movePlayerTo = movePlayerTo ?: return
         val playerNode = playerNode
         this.playerNode = movePlayerTo
-        MapManager.currentMapNode = movePlayerTo
-        MapManager.lastMapNode = playerNode
+        mapSaver.currentNode = movePlayerTo
+        mapSaver.lastNode = playerNode
         playerPos = scaledNodePos(movePlayerTo)
         events.fire(PlayerChangedNodeEvent(movePlayerTo))
         this.movePlayerTo = null

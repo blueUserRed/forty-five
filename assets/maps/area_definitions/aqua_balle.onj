@@ -1,6 +1,6 @@
 version: 0,
 startNode: 0,
-endNode: 2,
+endNode: 4,
 biome: "wasteland",
 scrollable: false,
 camPosOffset: [480.0, -790.0],
@@ -65,6 +65,7 @@ nodes: [
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "tabu_letter_outpost",
+            fromEnd: false,
         }
     },
 ],

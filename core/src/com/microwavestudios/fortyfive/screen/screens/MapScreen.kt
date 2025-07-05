@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameDirector
 import com.microwavestudios.fortyfive.game.GraphicsConfig
@@ -14,8 +15,8 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.DetailMapWidget
 import com.microwavestudios.fortyfive.map.EncounterMapEvent
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.map.MapNode
+import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
@@ -47,10 +48,13 @@ class MapScreen : ScreenCreator() {
         "*" to 200 //TODO maybe change back to 1000
     )
 
+    private val mapSaver: MapSaver by lazy {
+        FortyFive.profileManager.currentProfile!!.currentMapSaver
+    }
+
     private val mapWidget by lazy {
         DetailMapWidget(
             screen = screen,
-            map = MapManager.currentDetailMap,
             defaultNodeDrawableHandle = "map_node_default",
             edgeTextureHandle = "map_path",
             playerDrawableHandle = "map_player",
@@ -65,6 +69,7 @@ class MapScreen : ScreenCreator() {
             screenSpeed = 25f,
             scrollMargin = 0f,
             disabledDirectionIndicatorAlpha = 0.5f,
+            mapSaver = mapSaver,
             mapScale = 10f
         )
     }
@@ -93,7 +98,7 @@ class MapScreen : ScreenCreator() {
             y = 0f
             width = worldWidth
             height = worldHeight
-            backgroundHandle = when (MapManager.currentDetailMap.biome) {
+            backgroundHandle = when (mapSaver.currentMap.biome) {
                 "wasteland" -> "map_background_wasteland_tileable"
                 "bewitched_forest" -> "map_background_bewitched_forest_tileable"
                 "magenta_mountains" -> "map_background_magenta_mountains_tileable"

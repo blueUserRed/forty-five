@@ -108,15 +108,16 @@ data class MapNode(
     }
 
     fun getImage(screen: OnjScreen): Promise<Drawable>? {
-        if (imageName == null) return null
-        if (imageCache != null) return imageCache
-        val handle = getImageData()?.resourceHandle
-        if (handle == null) {
-            FortyFive.logger.warn(logTag, "No image data found for $imageName")
-            return null
-        }
-        imageCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
-        return imageCache
+        return null
+//        if (imageName == null) return null
+//        if (imageCache != null) return imageCache
+//        val handle = getImageData()?.resourceHandle
+//        if (handle == null) {
+//            FortyFive.logger.warn(logTag, "No image data found for $imageName")
+//            return null
+//        }
+//        imageCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
+//        return imageCache
     }
 
     fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {

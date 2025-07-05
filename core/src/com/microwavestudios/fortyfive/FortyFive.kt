@@ -14,6 +14,8 @@ import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
+import com.microwavestudios.fortyfive.profile.Profile
+import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -38,6 +40,7 @@ object FortyFive : Game() {
     val soundPlayer = SoundPlayer()
     val logger = FortyFiveLogger()
     val resourceManager = ResourceManager()
+    val profileManager = ProfileManager()
     val screenManager = ScreenManager(TitleScreen, null)
 
     private val _lifetime: EndableLifetime = EndableLifetime()
@@ -66,11 +69,14 @@ object FortyFive : Game() {
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
     override fun create() {
+
         init()
         if (appArguments.bakeRun) {
             Oven().bake(appArguments.bakeTasks)
             return
         }
+
+        profileManager.currentProfile = Profile.loadProfile("A")
 
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
@@ -169,7 +175,6 @@ object FortyFive : Game() {
         }
         PermaSaveState.read()
         SaveState.read()
-        MapManager.read()
         GraphicsConfig.init()
         resourceManager.init()
         serviceThread.start()
@@ -180,7 +185,6 @@ object FortyFive : Game() {
     override fun dispose() {
         logger.debug(logTag, "game closing")
         DebugActorImpl.dumpActorsWithDebugWarnings()
-        MapManager.write()
         PermaSaveState.write()
         SaveState.write()
         UserPrefs.write()

@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.MapManager
@@ -341,7 +342,8 @@ object NavbarCreator {
     }
 
     private fun CustomBox.locationIndicator(creator: ScreenCreator) = with(creator) {
-        val map = MapManager.currentDetailMap
+        val profile = FortyFive.profileManager.currentProfile ?: return@with
+        val map = profile.currentMapSaver.currentMap
         minHorizontalDistBetweenElements = 10f
         if (map.isArea) {
             image {
@@ -349,32 +351,14 @@ object NavbarCreator {
                 setupDimensionsForAreaName(this@locationIndicator)
             }
         } else {
-            val enterMap = (map.startNode.event as? EnterMapMapEvent)?.targetMap
-            val exitMap = (map.endNode.event as? EnterMapMapEvent)?.targetMap
-            if (enterMap == null || exitMap == null) {
-                label("red_wing", "You are on a road", color = Color.WHITE) {
-                    syncDimensions()
-                }
-            } else {
-                label("red_wing", "Road between", color = Color.WHITE) {
-                    setFontScale(0.8f)
-                    syncWidth()
-                }
-                image {
-                    backgroundHandle = nameTextureForMap(enterMap)
-                    setupDimensionsForAreaName(this@locationIndicator)
-                }
-                label("red_wing", "and", color = Color.WHITE) { setFontScale(0.8f) }
-                image {
-                    backgroundHandle = nameTextureForMap(exitMap)
-                    setupDimensionsForAreaName(this@locationIndicator)
-                }
+            label("red_wing", "You are on a road", color = Color.WHITE) {
+                syncDimensions()
             }
         }
     }
 
-    private fun nameTextureForMap(mapName: String) =
-        MapManager.mapImages.find { it.name == mapName && it.type == "name" }?.resourceHandle
+    private fun nameTextureForMap(mapName: String) = null
+//        MapManager.mapImages.find { it.name == mapName && it.type == "name" }?.resourceHandle
 
 
     private fun CustomImageActor.setupDimensionsForAreaName(parent: CustomBox) {

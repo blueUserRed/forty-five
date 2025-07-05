@@ -158,7 +158,7 @@ abstract class BaseMapGenerator {
     }
 
     protected fun setupExitNode(node: MapNodeBuilder, area: String) {
-        node.event = EnterMapMapEvent(area)
+        node.event = EnterMapMapEvent(area, true)
         node.imageName = area
         node.nodeTexture = data.exitNodeTexture
     }

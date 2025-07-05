@@ -60,39 +60,39 @@ object MapManager {
         private set
 
     fun init() {
-        val onj = ConfigFileManager.getConfigFile("mapConfig")
-        mapImages = onj
-            .get<OnjArray>("mapImages")
-            .value
-            .map { it as OnjObject }
-            .map {
-                MapImageData(
-                    it.get<String>("name"),
-                    it.get<String>("image"),
-                    it.get<Double>("width").toFloat(),
-                    it.get<Double>("height").toFloat(),
-                    it.get<String>("type"),
-                )
-            }
-        val paths = onj.get<OnjObject>("paths")
-        areaMapsPath = paths.get<String>("areas")
-        roadMapsPath = paths.get<String>("roads")
-        areaDefinitionsMapsPath = paths.get<String>("areaDefinitions")
-        staticRoadMapsPath = paths.get<String>("staticRoadDefinitions")
-        val displayNames = onj
-            .get<OnjArray>("displayNames")
-            .value
-            .map { it as OnjObject }
-            .associate { it.get<String>("name") to it.get<String>("display") }
-            .toMutableMap()
-        val dialogs = ConfigFileManager.getConfigFile("dialogConfig")
-        dialogs
-            .get<OnjArray>("dialogs")
-            .value
-            .map { it as OnjObject }
-            .map { it.get<String>("name") to it.get<String>("eventText") }
-            .forEach { displayNames[it.first] = it.second }
-        this.displayNames = displayNames
+//        val onj = ConfigFileManager.getConfigFile("mapConfig")
+//        mapImages = onj
+//            .get<OnjArray>("mapImages")
+//            .value
+//            .map { it as OnjObject }
+//            .map {
+//                MapImageData(
+//                    it.get<String>("name"),
+//                    it.get<String>("image"),
+//                    it.get<Double>("width").toFloat(),
+//                    it.get<Double>("height").toFloat(),
+//                    it.get<String>("type"),
+//                )
+//            }
+//        val paths = onj.get<OnjObject>("paths")
+//        areaMapsPath = paths.get<String>("areas")
+//        roadMapsPath = paths.get<String>("roads")
+//        areaDefinitionsMapsPath = paths.get<String>("areaDefinitions")
+//        staticRoadMapsPath = paths.get<String>("staticRoadDefinitions")
+//        val displayNames = onj
+//            .get<OnjArray>("displayNames")
+//            .value
+//            .map { it as OnjObject }
+//            .associate { it.get<String>("name") to it.get<String>("display") }
+//            .toMutableMap()
+//        val dialogs = ConfigFileManager.getConfigFile("dialogConfig")
+//        dialogs
+//            .get<OnjArray>("dialogs")
+//            .value
+//            .map { it as OnjObject }
+//            .map { it.get<String>("name") to it.get<String>("eventText") }
+//            .forEach { displayNames[it.first] = it.second }
+//        this.displayNames = displayNames
     }
 
     fun read() {
@@ -130,14 +130,14 @@ object MapManager {
     }
 
     private fun readDetailMap(map: FileHandle): DetailMap = try {
-        DetailMap.readFromFile(map)
+        DetailMap.readFromFile(map.file())
     } catch (e: DetailMap.InvalidMapFileException) {
         FortyFive.logger.warn(logTag, "Invalid map file found, reloading all maps")
         generateMapsSync()
         copyStaticMaps()
         SaveState.currentNode = 0
         SaveState.lastNode = null
-        DetailMap.readFromFile(map)
+        DetailMap.readFromFile(map.file())
     }
 
     fun write() {

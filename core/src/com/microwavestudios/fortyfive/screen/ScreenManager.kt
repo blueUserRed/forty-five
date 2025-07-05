@@ -70,7 +70,6 @@ class ScreenManager(
         fun onScreenChange() {
             FortyFive.logger.title("changing screen to ${screenBuilder.name}")
             currentScreen?.dispose()
-            MapManager.invalidateCachedAssets()
             this.currentScreen = screen
             FortyFive.currentScreen = screen
             nextScreen = null

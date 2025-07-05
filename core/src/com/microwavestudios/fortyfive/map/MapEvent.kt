@@ -19,7 +19,9 @@ object MapEventFactory {
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
-        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) },
+        "EnterMapMapEvent" to {
+            EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("fromEnd"))
+        },
         "DialogMapEvent" to { DialogMapEvent(it) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
@@ -216,12 +218,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
 
 }
 
-/**
- * MapEvent that opens another map when started
- * @param targetMap the name of the map to be opened
- * @param placeAtEnd if true, the player is placed at last node of the map instead of the first
- */
-class EnterMapMapEvent(val targetMap: String) : MapEvent() {
+class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -232,14 +229,14 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 
     // lazy so it doesn't crash when the event is instanced
     override val displayName: String by lazy {
-        "Enter ${MapManager.displayName(targetMap)}"
+        "Enter $targetMap"
     }
     override val descriptionText: String by lazy {
-        "Have fun exploring ${MapManager.displayName(targetMap)}"
+        "Have fun exploring $targetMap"
     }
 
     override fun start() {
-        MapManager.changeToMap(targetMap)
+        FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)
         FortyFive.screenManager.appendScreen(MapScreen, this)
         FortyFive.screenManager.screenFinished()
     }
@@ -247,6 +244,7 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EnterMapMapEvent")
         "targetMap" with targetMap
+        "fromEnd" with fromEnd
     }
 }
 
@@ -275,7 +273,6 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
     override val dialog: String = onj.get<String>("dialog")
 
     override val descriptionText: String = ""
-    override val displayName: String = MapManager.displayName(dialog)
     override val buttonText: String = "Talk"
 
     init {

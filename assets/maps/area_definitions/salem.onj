@@ -1,6 +1,6 @@
 version: 0,
 startNode: 0,
-endNode: 3,
+endNode: 4,
 biome: "bewitched_forest",
 progress: [
     0.0, 0.1
@@ -15,6 +15,7 @@ nodes: [
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "tabu_letter_outpost",
+            fromEnd: true,
         }
     },
     {
@@ -79,6 +80,7 @@ nodes: [
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "spire_outpost",
+            fromEnd: false,
         }
     },
 ],

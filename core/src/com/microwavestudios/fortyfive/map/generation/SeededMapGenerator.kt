@@ -179,8 +179,8 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
-        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea)
-        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea)
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
         mainLine.lineNodes.first().nodeTexture = restrictions.exitNodeTexture
         mainLine.lineNodes.last().nodeTexture = restrictions.exitNodeTexture
         for (areaName in restrictions.otherAreas) {
@@ -205,7 +205,7 @@ class SeededMapGenerator(
                 newPos.y,
                 imagePos = MapNode.ImagePosition.valueOf(direction.name),
                 imageName = areaName,
-                event = EnterMapMapEvent(areaName),
+                event = EnterMapMapEvent(areaName, false),
             )
             borderNodes.random(rnd).connect(newArea, direction)
             connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))

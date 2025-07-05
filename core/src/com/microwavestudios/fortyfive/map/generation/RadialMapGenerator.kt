@@ -66,7 +66,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val fixedEvents = events.filter { it.fixedAmount != null }.toMutableList()
         fixedEvents.add(
             RadialMapGeneratorEventSpawner(
-            { EnterMapMapEvent(data.endArea) },
+            { EnterMapMapEvent(data.endArea, false) },
             data.exitNodeCircle,
             0,
             data.exitNodeTexture,
