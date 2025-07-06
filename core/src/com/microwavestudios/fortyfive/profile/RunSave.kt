@@ -1,13 +1,12 @@
 package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.Gdx
-import com.microwavestudios.fortyfive.game.Run
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjObject
-import java.io.File
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
@@ -32,9 +31,16 @@ class RunSave(val run: Run, val profile: Profile) {
         }
     }
 
-    var currentNode: Int by DataDelegate(RunSaveData::currentNode)
-    var lastNode: Int? by DataDelegate(RunSaveData::lastNode)
+    var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
+    var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
     var playerHealth: Int by DataDelegate(RunSaveData::playerHealth)
+
+    val mapSaver: MapSaver = object : MapSaver {
+        override var currentNodeIndex: Int by this@RunSave::currentNodeIndex
+        override var lastNodeIndex: Int? by this@RunSave::lastNodeIndex
+        override val currentMapName: String = "run_map"
+        override val currentMap: DetailMap by this@RunSave::map
+    }
 
     private var _backpack: MutableList<String> by DataDelegate(RunSaveData::backpack)
     val backpack: List<String>
@@ -43,6 +49,8 @@ class RunSave(val run: Run, val profile: Profile) {
     fun dirty() {
         profile.dirty()
     }
+
+    fun asOnj(): OnjObject = data.asOnj()
 
     private data class RunSaveData(
         var currentNode: Int,

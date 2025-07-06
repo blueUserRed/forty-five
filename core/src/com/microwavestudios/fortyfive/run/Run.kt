@@ -1,5 +1,6 @@
-package com.microwavestudios.fortyfive.game
+package com.microwavestudios.fortyfive.run
 
+import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import onj.builder.buildOnjObject
 import onj.value.*
 
@@ -9,7 +10,7 @@ data class Run(
     val difficulty: Int,
     val rewards: List<RunReward>,
     val biome: String,
-    val mapGeneratorData: OnjNamedObject
+    val mapGenerator: BaseMapGenerator
 ) {
 
     fun asOnj(): OnjObject = buildOnjObject {
@@ -18,7 +19,7 @@ data class Run(
         "difficulty" with difficulty
         "rewards" with rewards.map { it.asOnj() }
         "biome" with biome
-        "mapGenerator" with mapGeneratorData
+        "mapGenerator" with mapGenerator.asOnj()
     }
 
     companion object {
@@ -32,7 +33,7 @@ data class Run(
                 RunReward.fromOnj(it)
             },
             onj.get<String>("biome"),
-            onj.get<OnjNamedObject>("mapGenerator")
+            BaseMapGenerator.fromOnj(onj.get<OnjNamedObject>("mapGenerator"))
         )
     }
 }

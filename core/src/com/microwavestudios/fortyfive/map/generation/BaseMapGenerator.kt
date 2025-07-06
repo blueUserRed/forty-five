@@ -8,7 +8,10 @@ import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.map.EnterMapMapEvent
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
+import com.microwavestudios.fortyfive.onjNamespaces.OnjInterpolation
 import com.microwavestudios.fortyfive.utils.*
+import onj.builder.OnjObjectBuilderDSL
+import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -61,7 +64,7 @@ abstract class BaseMapGenerator {
     }
 
     protected fun generateDecoration(decoration: MapGeneratorDecoration): DetailMap.MapDecoration {
-        val dist = decoration.distribution(bounds, random).iterator()
+        val dist = decoration.distribution.get(bounds, random).iterator()
         val instances = mutableListOf<Pair<Vector2, Float>>()
         val targetAmount = (decoration.density * bounds.area()).toInt()
 
@@ -168,6 +171,8 @@ abstract class BaseMapGenerator {
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
     }
 
+    abstract fun asOnj(): OnjObject
+
     interface BaseMapGeneratorData {
         val seed: Long
         val nodeProtectedArea: Float
@@ -175,11 +180,21 @@ abstract class BaseMapGenerator {
         val locationSignProtectedAreaHeight: Float
         val startArea: String
         val exitNodeTexture: String
-        val progress: ClosedFloatingPointRange<Float>
+
+        fun asOnj(): OnjObject
+
+        fun OnjObjectBuilderDSL.includeBaseData() {
+            "seed" with seed
+            "nodeProtectedArea" with nodeProtectedArea
+            "locationSignProtectedAreaWidth" with locationSignProtectedAreaWidth
+            "locationSignProtectedAreaHeight" with locationSignProtectedAreaHeight
+            "startArea" with startArea
+            "exitNodeTexture" with exitNodeTexture
+        }
     }
 
     data class MapGeneratorDecoration(
-        val distribution: (bounds: Rectangle, random: Random) -> Sequence<Vector2>,
+        val distribution: DecorationDistribution,
         val decoration: String,
         val baseWidth: Float,
         val baseHeight: Float,
@@ -195,6 +210,24 @@ abstract class BaseMapGenerator {
         val sortByY: Boolean,
         val animated: Boolean,
     ) {
+
+        fun asOnj(): OnjObject = buildOnjObject {
+            "distribution" with distribution.asOnj()
+            "decoration" with decoration
+            "baseWidth" with baseWidth
+            "baseHeight" with baseHeight
+            "density" with density
+            "checkNodeCollisions" with checkNodeCollisions
+            "checkLineCollisions" with checkLineCollisions
+            "checkDecorationCollisions" with checkDecorationCollisions
+            "generateDecorationCollisions" with generateDecorationCollisions
+            "onlyCheckCollisionsAtSpawnPoints" with onlyCheckCollisionsAtSpawnPoints
+            "scale" with arrayOf(scale.start, scale.endInclusive)
+            "shrinkBoundsWidth" with shrinkBoundsWidth
+            "shrinkBoundsHeight" with shrinkBoundsHeight
+            "sortByY" with sortByY
+            "animated" with animated
+        }
 
         companion object {
 
@@ -218,36 +251,65 @@ abstract class BaseMapGenerator {
         }
     }
 
-    object DecorationDistribution {
+    sealed class DecorationDistribution {
 
-        fun random(bounds: Rectangle, random: Random): Sequence<Vector2> = repeatingSequenceOf { Vector2(
-            (bounds.x..(bounds.x + bounds.width)).random(random),
-            (bounds.y..(bounds.y + bounds.height)).random(random),
-        ) }
+        abstract fun get(bounds: Rectangle, random: Random): Sequence<Vector2>
 
-        fun fadeX(
-            bounds: Rectangle,
-            random: Random,
-            start: Float,
-            end: Float,
-            interpolation: Interpolation
-        ): Sequence<Vector2> = repeatingSequenceOf {
-            val x = interpolation.apply(start, end, random.nextFloat())
-            val y = (bounds.y..(bounds.y + bounds.height)).random(random)
-            Vector2(x, y)
+        abstract fun asOnj(): OnjObject
+
+        data object RandomDistribution : DecorationDistribution() {
+
+            override fun asOnj(): OnjObject = buildOnjObject {
+                name("Random")
+            }
+
+            override fun get(bounds: Rectangle, random: Random): Sequence<Vector2> = repeatingSequenceOf {
+                Vector2(
+                    (bounds.x..(bounds.x + bounds.width)).random(random),
+                    (bounds.y..(bounds.y + bounds.height)).random(random),
+                )
+            }
+
         }
 
-        fun fromOnj(
-            onj: OnjNamedObject
-        ): (bounds: Rectangle, random: Random) -> Sequence<Vector2> = when (val name = onj.name) {
-            "Random" -> DecorationDistribution::random
-            "FadeX" -> { bounds, random -> fadeX(
-                bounds, random,
-                onj.get<Double>("start").toFloat(),
-                onj.get<Double>("end").toFloat(),
-                onj.get<Interpolation>("interpolation")
-            ) }
-            else -> throw RuntimeException("unknown decoration distribution function $name")
+        data class FadeX(
+            val start: Float,
+            val end: Float,
+            val interpolation: Interpolation
+        ) : DecorationDistribution() {
+
+            override fun asOnj(): OnjObject = buildOnjObject {
+                name("FadeX")
+                "start" with start
+                "end" with end
+                "interpolation" with OnjInterpolation(interpolation)
+            }
+
+            override fun get(bounds: Rectangle, random: Random): Sequence<Vector2> = repeatingSequenceOf {
+                val x = interpolation.apply(start, end, random.nextFloat())
+                val y = (bounds.y..(bounds.y + bounds.height)).random(random)
+                Vector2(x, y)
+            }
+
+            companion object {
+
+                fun fromOnj(onj: OnjObject): FadeX = FadeX(
+                    onj.get<Double>("start").toFloat(),
+                    onj.get<Double>("end").toFloat(),
+                    onj.get<Interpolation>("interpolation")
+                )
+            }
+        }
+
+        companion object {
+
+            fun fromOnj(
+                onj: OnjNamedObject
+            ): DecorationDistribution = when (val name = onj.name) {
+                "Random" -> RandomDistribution
+                "FadeX" -> FadeX.fromOnj(onj)
+                else -> throw RuntimeException("unknown decoration distribution function $name")
+            }
         }
     }
 

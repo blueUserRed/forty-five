@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.utils.*
+import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -42,7 +43,6 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
             biome = data.biome,
-            progress = data.progress,
             scrollable = true,
             camPosOffset = Vector2(0f, 0f)
         )
@@ -161,11 +161,23 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         y = cos(angle) * radius
     )
 
+    override fun asOnj(): OnjObject = buildOnjObject {
+        name("Radial")
+        includeAll(data.asOnj())
+    }
+
     data class Circle(
         val radius: Float,
         val numNodes: Int,
         val angleVariance: Float
     ) {
+
+        fun asOnj(): OnjObject = buildOnjObject {
+            "radius" with radius
+            "numNodes" with numNodes
+            "angleVariance" with angleVariance
+        }
+
         companion object {
 
             fun fromOnj(onj: OnjObject) = Circle(
@@ -190,9 +202,18 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         override val startArea: String,
         val endArea: String,
         override val exitNodeTexture: String,
-        override val progress: ClosedFloatingPointRange<Float>,
         val exitNodeCircle: Int,
     ) : BaseMapGeneratorData {
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            "biome" with biome
+            "circles" with circles.map { it.asOnj() }
+            "horizontalExtension" with horizontalExtension
+            "verticalExtension" with verticalExtension
+            "decorations" with decorations.map { it.asOnj() }
+            "events" with events.map { it.asOnj() }
+            includeBaseData()
+        }
 
         companion object {
 
@@ -208,7 +229,6 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 endArea = onj.get<String>("endArea"),
                 exitNodeCircle = onj.get<Long>("exitNodeCircle").toInt(),
                 exitNodeTexture = onj.get<String>("exitNodeTexture"),
-                progress = onj.get<OnjArray>("progress").toFloatRange(),
                 circles = onj
                     .get<OnjArray>("circles")
                     .value
@@ -232,6 +252,15 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val nodeTexture: String,
         val fixedAmount: Int?,
     ) {
+
+        fun asOnj(): OnjObject = buildOnjObject {
+            "event" with eventCreator().asOnjObject()
+            "circle" with circle
+            "weight" with weight
+            "nodeTexture" with nodeTexture
+            "fixedAmount" with fixedAmount
+        }
+
         companion object {
 
             fun fromOnj(onj: OnjObject) = RadialMapGeneratorEventSpawner(

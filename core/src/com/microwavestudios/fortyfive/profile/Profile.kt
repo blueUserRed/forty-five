@@ -47,11 +47,7 @@ class Profile private constructor(val name: String) {
     var runSave: RunSave? by DataDelegate(ProfileData::runSave)
 
     val currentMapSaver: MapSaver
-        get() = if (runSave == null) {
-            areaMapSaver
-        } else {
-            TODO()
-        }
+        get() = runSave?.mapSaver ?: areaMapSaver
 
     lateinit var currentAreaMap: DetailMap
         private set
@@ -93,8 +89,7 @@ class Profile private constructor(val name: String) {
         dirty = true
     }
 
-    fun sync() {
-        if (!dirty) return
+    fun readFromDisk() {
         dirty = false
         if (!dataFile.exists()) {
             dataFile.createNewFile()
@@ -105,6 +100,16 @@ class Profile private constructor(val name: String) {
         dataFileSchema.check(onj)
         onj as OnjObject
         data = ProfileData.fromOnj(onj)
+    }
+
+    fun write() {
+        if (!dirty) return
+        if (!dataFile.exists()) {
+            dataFile.createNewFile()
+            dataFile.writeText(data.asOnj().toString())
+            return
+        }
+        dataFile.writeText(data.asOnj().toString())
     }
 
     fun writeMap() {
@@ -127,7 +132,7 @@ class Profile private constructor(val name: String) {
             "currentMap" with currentMap
             "currentNode" with currentNode
             "lastNode" with lastNode
-            // TODO: runSave
+            "runSave" with runSave?.asOnj()
         }
 
         companion object {
@@ -167,7 +172,7 @@ class Profile private constructor(val name: String) {
             Gdx.files.internal("maps/area_definitions")
                 .file()
                 .copyRecursively(profile.profilePath, true)
-            profile.sync()
+            profile.readFromDisk()
             profile.loadMap(profile._currentMapName)
             return profile
         }
@@ -175,7 +180,7 @@ class Profile private constructor(val name: String) {
         fun loadProfile(profileName: String): Profile {
             val profile = Profile(profileName)
             if (!profile.profilePath.exists()) return createNewProfile(profileName)
-            profile.sync()
+            profile.readFromDisk()
             profile.loadMap(profile._currentMapName)
             return profile
         }

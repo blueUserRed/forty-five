@@ -33,7 +33,6 @@ data class DetailMap(
     val animatedDecorations: List<MapDecoration>,
     val isArea: Boolean,
     val biome: String,
-    val progress: ClosedFloatingPointRange<Float>,
     val scrollable: Boolean,
     val camPosOffset: Vector2
 ) {
@@ -82,7 +81,6 @@ data class DetailMap(
         "animatedDecorations" with animatedDecorations.map { it.asOnjObject() }
         "isArea" with isArea
         "biome" with biome
-        "progress" with progress.asArray()
         "tutorialText" with listOf<Nothing>()
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
@@ -191,7 +189,6 @@ data class DetailMap(
                 animatedDecorations,
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
-                onj.get<OnjArray>("progress").toFloatRange(),
 //                onj.getOr<OnjArray?>("tutorialText", null)
 //                    ?.value
 //                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
