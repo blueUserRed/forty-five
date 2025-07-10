@@ -1,4 +1,4 @@
-version: 0,
+majorDifficulty: 1,
 startNode: 0,
 endNode: 4,
 biome: "wasteland",

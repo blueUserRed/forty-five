@@ -193,17 +193,17 @@ object MapManager {
     }
 
     private fun generateMap(onj: OnjNamedObject, outputDir: File) {
-        val name = onj.get<String>("name")
-
-        val generator = BaseMapGenerator.fromOnj(onj)
-        val map = generator.generate(name)
-
-        GameDirector.assignEncounters(map)
-        val path = "${outputDir.toPath()}/$name.onj"
-        val file = File(path)
-        if (!File(file.parent).exists()) File(file.parent).mkdirs()
-        file.createNewFile()
-        file.writeText(map.asOnjObject().toMinifiedString())
+//        val name = onj.get<String>("name")
+//
+//        val generator = BaseMapGenerator.fromOnj(onj)
+//        val map = generator.generate(name)
+//
+//        GameDirector.assignEncounters(map)
+//        val path = "${outputDir.toPath()}/$name.onj"
+//        val file = File(path)
+//        if (!File(file.parent).exists()) File(file.parent).mkdirs()
+//        file.createNewFile()
+//        file.writeText(map.asOnjObject().toMinifiedString())
     }
 
     data class MapImageData(

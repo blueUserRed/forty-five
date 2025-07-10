@@ -26,6 +26,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.ge
 import com.microwavestudios.fortyfive.screen.commonComponents.ToTitleScreenCreator.getSharedTitleScreen
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
+import com.microwavestudios.fortyfive.screen.commonComponents.RunBoardCreator.getSharedRunBoard
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.TemplateString
@@ -413,7 +414,7 @@ abstract class ScreenCreator : ResourceBorrower {
 
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
-        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
+//        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
 
         var settings: CustomGroup? = null
         if (hasSettings) {
@@ -429,6 +430,8 @@ abstract class ScreenCreator : ResourceBorrower {
             navbarObjects.add(backpackObject)
         }
 
+        val (runBoard, runBoardObj) = getSharedRunBoard(worldWidth, worldHeight, events)
+        navbarObjects.add(runBoardObj)
 
         if (hasNavbar) {
             val navbar = getSharedNavBar(
@@ -442,6 +445,7 @@ abstract class ScreenCreator : ResourceBorrower {
                 centerX()
             }
         }
+        actor(runBoard)
         backpack?.let { actor(it) }
         settings?.let {
             actor(it) {

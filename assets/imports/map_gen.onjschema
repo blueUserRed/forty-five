@@ -34,7 +34,7 @@ var decoration = {
 
 var mapGeneratorSharedKeys = {
     name: string,
-    seed: int,
+    majorDifficulty: int,
     progress: float[2],
     biome: string,
     startArea: string,
@@ -90,44 +90,3 @@ $MapGenerator {
     }
 
 }
-
-generatorConfig: {
-    outputDirectory: string,
-    maps: $MapGenerator[]
-},
-
-paths: {
-    roads: string,
-    areas: string,
-    areaDefinitions: string,
-    staticRoadDefinitions: string,
-},
-
-mapImages: {
-    name: string,
-    image: string,
-    width: float,
-    height: float,
-    type: string,
-}[],
-
-displayNames: {
-    name: string,
-    display: string
-}[],
-
-worldView: {
-    backgroundHandle: string,
-    locationIndicatorHandle: string,
-    locationIndicatorWidth: float,
-    locationIndicatorHeight: float,
-    locations: {
-        name: string,
-        x: int,
-        y: int,
-        image?: string,
-        width?: int,
-        height?: int
-    }[]
-}
-

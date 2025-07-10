@@ -13,8 +13,8 @@ import kotlin.math.sin
 
 class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String): DetailMap {
-        setup(name, data)
+    override fun generate(name: String, seed: Long): DetailMap {
+        setup(name, data, seed)
         val startNode = newNode(0f, 0f)
         setupExitNode(startNode, data.startArea)
         doNodeImage(startNode, MapNode.ImagePosition.LEFT)
@@ -44,6 +44,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             isArea = false,
             biome = data.biome,
             scrollable = true,
+            majorDifficulty = data.majorDifficulty,
             camPosOffset = Vector2(0f, 0f)
         )
     }
@@ -189,7 +190,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
     }
 
     data class RadialMapGeneratorData(
-        override val seed: Long,
+        override val majorDifficulty: Int,
         override val nodeProtectedArea: Float,
         val biome: String,
         val circles: List<Circle>,
@@ -218,7 +219,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         companion object {
 
             fun fromOnj(onj: OnjObject) = RadialMapGeneratorData(
-                seed = onj.get<Long>("seed"),
+                majorDifficulty = onj.get<Long>("majorDifficulty").toInt(),
                 nodeProtectedArea = onj.get<Double>("nodeProtectedArea").toFloat(),
                 biome = onj.get<String>("biome"),
                 horizontalExtension = onj.get<Double>("horizontalExtension").toFloat(),

@@ -1,39 +1,29 @@
 package com.microwavestudios.fortyfive.profile
 
-import com.badlogic.gdx.Gdx
-import com.microwavestudios.fortyfive.run.Run
+import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
+import com.microwavestudios.fortyfive.profile.Profile.Companion.dataFileSchema
+import com.microwavestudios.fortyfive.run.Run
 import onj.builder.buildOnjObject
+import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
+import java.io.File
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
-class RunSave(val run: Run, val profile: Profile) {
+class RunSave private constructor(val profile: Profile) {
 
-    private var data: RunSaveData = RunSaveData(
-        0, null, 100, mutableListOf()
-    )
+    private lateinit var data: RunSaveData
 
-    val mapGenerator: BaseMapGenerator = BaseMapGenerator.fromOnj(run.mapGeneratorData)
-
-    private val map: DetailMap
-
-    init {
-        val mapFileHandle = Gdx.files.internal(profile.profilePath.path + "/run_map.onj")
-        if (mapFileHandle.exists()) {
-            map = DetailMap.readFromFile(mapFileHandle.file())
-        } else {
-            map = mapGenerator.generate("todo")
-            val file = mapFileHandle.file()
-            file.writeText(map.asOnjObject().toString())
-        }
-    }
+    private var dirty: Boolean = false
 
     var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
     var playerHealth: Int by DataDelegate(RunSaveData::playerHealth)
+
+    var run: Run by DataDelegate(RunSaveData::run)
+        private set
 
     val mapSaver: MapSaver = object : MapSaver {
         override var currentNodeIndex: Int by this@RunSave::currentNodeIndex
@@ -42,21 +32,56 @@ class RunSave(val run: Run, val profile: Profile) {
         override val currentMap: DetailMap by this@RunSave::map
     }
 
+    val runMapFile: File = File(profile.profilePath.path + "/runMap.onj")
+    val runDataFile: File = File(profile.profilePath.path + "/run_data.onj")
+
     private var _backpack: MutableList<String> by DataDelegate(RunSaveData::backpack)
     val backpack: List<String>
         get() = _backpack
 
+    private lateinit var map: DetailMap
+
     fun dirty() {
-        profile.dirty()
+        dirty = true
     }
 
-    fun asOnj(): OnjObject = data.asOnj()
+    private fun loadMap() {
+        map = DetailMap.readFromFile(runMapFile)
+    }
 
-    private data class RunSaveData(
+    fun readFromDisc() {
+        dirty = false
+        if (!runDataFile.exists()) {
+            runDataFile.createNewFile()
+            runDataFile.writeText(data.asOnj().toString())
+            return
+        }
+        val onj = OnjParser.parseFile(runDataFile)
+        dataFileSchema.check(onj)
+        onj as OnjObject
+        data = RunSaveData.fromOnj(onj)
+    }
+
+    fun write() {
+        if (!dirty) return
+        if (!runDataFile.exists()) {
+            runDataFile.createNewFile()
+            runDataFile.writeText(data.asOnj().toString())
+            return
+        }
+        runDataFile.writeText(data.asOnj().toString())
+    }
+
+    fun writeRunMap() {
+        runMapFile.writeText(map.asOnjObject().toMinifiedString())
+    }
+
+    data class RunSaveData(
         var currentNode: Int,
         var lastNode: Int?,
         var playerHealth: Int,
-        var backpack: MutableList<String>
+        var backpack: MutableList<String>,
+        var run: Run
     ) {
 
         fun asOnj(): OnjObject = buildOnjObject {
@@ -64,6 +89,7 @@ class RunSave(val run: Run, val profile: Profile) {
             "lastNode" with lastNode
             "playerHealth" with playerHealth
             "backpack" with backpack
+            "run" with run.asOnj()
         }
 
         companion object {
@@ -72,7 +98,8 @@ class RunSave(val run: Run, val profile: Profile) {
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),
                 onj.get<Long>("playerHealth").toInt(),
-                onj.get<OnjArray>("backpack").value.map { it.value as String }.toMutableList()
+                onj.get<OnjArray>("backpack").value.map { it.value as String }.toMutableList(),
+                Run.fromOnj(onj.get<OnjObject>("run"))
             )
         }
     }
@@ -87,6 +114,33 @@ class RunSave(val run: Run, val profile: Profile) {
             property.setter.call(data, value)
             dirty()
         }
+    }
+
+    companion object {
+
+        fun load(profile: Profile): RunSave? {
+            val dataFile = File(profile.profilePath.path + "/run_data.onj")
+            if (!dataFile.exists()) return null
+            val save = RunSave(profile)
+            save.readFromDisc()
+            save.loadMap()
+            return save
+        }
+
+        fun newRun(profile: Profile, run: Run): RunSave {
+            val mapGenerator = run.mapGenerator
+            val map = mapGenerator.generate("run_map", TimeUtils.millis())
+            val save = RunSave(profile)
+            save.data = RunSaveData(0, null, 100, mutableListOf(), run)
+            save.write()
+            val runMapFile = save.runMapFile
+            if (runMapFile.exists()) runMapFile.delete()
+            runMapFile.createNewFile()
+            runMapFile.writeText(map.asOnjObject().toMinifiedString())
+            save.map = map
+            return save
+        }
+
     }
 
 }

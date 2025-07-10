@@ -2,6 +2,9 @@ package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.map.DetailMap
+import com.microwavestudios.fortyfive.run.Run
+import com.microwavestudios.fortyfive.run.RunGenerator
+import com.microwavestudios.fortyfive.run.RunType
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -13,7 +16,7 @@ import kotlin.io.path.createDirectories
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
-class Profile private constructor(val name: String) {
+class Profile private constructor(val name: String, private var runSave: RunSave?) {
 
     private var data: ProfileData = ProfileData(
         mutableListOf("bullet", "bigBullet"),
@@ -21,14 +24,14 @@ class Profile private constructor(val name: String) {
         "aqua_balle",
         0,
         null,
-        null
+        mutableMapOf()
     )
 
     val profilePath: File = File("profiles/$name")
 
     private var dirty: Boolean = true
 
-    private val dataFile: File = File(profilePath.absolutePath + "/data.onj")
+    private val dataFile: File = File(profilePath.absolutePath + "/profile_data.onj")
 
     var playerMoney: Int by DataDelegate(ProfileData::playerMoney)
 
@@ -40,11 +43,11 @@ class Profile private constructor(val name: String) {
     val currentAreaMapName: String
         get() = _currentMapName
 
+    private var runBoards: MutableMap<String, Pair<Run, Run>> by DataDelegate(ProfileData::runBoards)
+
     var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
     var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
-
-    var runSave: RunSave? by DataDelegate(ProfileData::runSave)
 
     val currentMapSaver: MapSaver
         get() = runSave?.mapSaver ?: areaMapSaver
@@ -53,6 +56,12 @@ class Profile private constructor(val name: String) {
         private set
 
     private var currentMapFile: File? = null
+
+    val activeRun: Run?
+        get() = runSave?.run
+
+    val isRunActive: Boolean
+        get() = runSave != null
 
     val areaMapSaver: MapSaver = object : MapSaver {
         override var currentNodeIndex: Int by this@Profile::currentNodeIndex
@@ -63,8 +72,8 @@ class Profile private constructor(val name: String) {
 
     fun changeToMap(map: String, fromEnd: Boolean = false) {
         if (map == _currentMapName) return
-        writeMap()
-        loadMap(map)
+        writeMaps()
+        loadAreaMap(map)
         lastNodeIndex = null
         currentNodeIndex = if (fromEnd) {
             currentAreaMap.endNode.index
@@ -73,7 +82,24 @@ class Profile private constructor(val name: String) {
         }
     }
 
-    private fun loadMap(map: String) {
+    fun runBoardForArea(area: DetailMap): Pair<Run, Run> {
+        runBoards[area.name]?.let { return it }
+        val runGenerator = RunGenerator()
+        val runs = Pair(
+            runGenerator.generateRun(area.majorDifficulty, area.biome, RunType.CONSTRUCTED),
+            runGenerator.generateRun(area.majorDifficulty, area.biome, RunType.LIMITED),
+        )
+        runBoards[area.name] = runs
+        dirty()
+        return runs
+    }
+
+    fun startRun(run: Run) {
+        if (runSave != null) throw RuntimeException("cant start new run when old run wasn't completed yet")
+        runSave = RunSave.newRun(this, run)
+    }
+
+    private fun loadAreaMap(map: String) {
         val newMapFile = lookupAreaFile(map) ?: throw RuntimeException("no file for area: $map")
         this.currentMapFile = newMapFile
         currentAreaMap = DetailMap.readFromFile(newMapFile)
@@ -91,6 +117,7 @@ class Profile private constructor(val name: String) {
 
     fun readFromDisk() {
         dirty = false
+        runSave?.readFromDisc()
         if (!dataFile.exists()) {
             dataFile.createNewFile()
             dataFile.writeText(data.asOnj().toString())
@@ -103,6 +130,7 @@ class Profile private constructor(val name: String) {
     }
 
     fun write() {
+        runSave?.write()
         if (!dirty) return
         if (!dataFile.exists()) {
             dataFile.createNewFile()
@@ -112,7 +140,8 @@ class Profile private constructor(val name: String) {
         dataFile.writeText(data.asOnj().toString())
     }
 
-    fun writeMap() {
+    fun writeMaps() {
+        runSave?.writeRunMap()
         val currentFile = currentMapFile ?: return
         currentFile.writeText(currentAreaMap.asOnjObject().toMinifiedString())
     }
@@ -123,7 +152,7 @@ class Profile private constructor(val name: String) {
         var currentMap: String,
         var currentNode: Int,
         var lastNode: Int?,
-        var runSave: RunSave?,
+        var runBoards: MutableMap<String, Pair<Run, Run>>
     ) {
 
         fun asOnj(): OnjObject = buildOnjObject {
@@ -132,17 +161,28 @@ class Profile private constructor(val name: String) {
             "currentMap" with currentMap
             "currentNode" with currentNode
             "lastNode" with lastNode
-            "runSave" with runSave?.asOnj()
+            "runBoards" with runBoards.map { (area, runs) ->
+                buildOnjObject {
+                    "forArea" with area
+                    "runs" with arrayOf(runs.first.asOnj(), runs.second.asOnj())
+                }
+            }
         }
 
         companion object {
+
             fun fromOnj(onj: OnjObject): ProfileData = ProfileData(
                 onj.get<OnjArray>("cardCollection").value.map { it.value as String }.toMutableList(),
                 onj.get<Long>("playerMoney").toInt(),
                 onj.get<String>("currentMap"),
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),
-                null
+                onj.get<OnjArray>("runBoards").value.associate { board ->
+                    board as OnjObject
+                    val area = board.get<String>("forArea")
+                    val runs = onj.get<OnjArray>("runs")
+                    area to (Run.fromOnj(runs.get<OnjObject>(0)) to Run.fromOnj(runs.get<OnjObject>(1)))
+                }.toMutableMap()
             )
         }
     }
@@ -166,22 +206,23 @@ class Profile private constructor(val name: String) {
         }
 
         fun createNewProfile(profileName: String): Profile {
-            val profile = Profile(profileName)
+            val profile = Profile(profileName, null)
             profile.profilePath.deleteRecursively()
             profile.profilePath.toPath().createDirectories()
             Gdx.files.internal("maps/area_definitions")
                 .file()
                 .copyRecursively(profile.profilePath, true)
             profile.readFromDisk()
-            profile.loadMap(profile._currentMapName)
+            profile.loadAreaMap(profile._currentMapName)
             return profile
         }
 
         fun loadProfile(profileName: String): Profile {
-            val profile = Profile(profileName)
+            val profile = Profile(profileName, null)
+            profile.runSave = RunSave.load(profile)
             if (!profile.profilePath.exists()) return createNewProfile(profileName)
             profile.readFromDisk()
-            profile.loadMap(profile._currentMapName)
+            profile.loadAreaMap(profile._currentMapName)
             return profile
         }
     }

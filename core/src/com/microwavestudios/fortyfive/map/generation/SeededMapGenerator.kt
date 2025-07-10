@@ -64,9 +64,9 @@ class SeededMapGenerator(
             animatedDecos,
             false,
             biome,
-            restrictions.progress,
             true,
-            Vector2()
+            Vector2(),
+            0
         )
     }
 

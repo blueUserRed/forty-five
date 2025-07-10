@@ -38,11 +38,11 @@ data class Run(
     }
 }
 
-enum class RunLength(private val onjName: String) {
+enum class RunLength(private val onjName: String, val displayName: String) {
 
-    SHORT("short"),
-    MEDIUM("medium"),
-    LONG("long")
+    SHORT("short", "Short"),
+    MEDIUM("medium", "Medium"),
+    LONG("long", "Long")
     ;
 
     fun asOnj(): OnjValue = OnjString(onjName)
@@ -58,10 +58,11 @@ enum class RunLength(private val onjName: String) {
     }
 }
 
-enum class RunType(private val onjName: String) {
+enum class RunType(private val onjName: String, val displayName: String) {
 
-    LIMITED("limited"),
-    CONSTRUCTED("constructed")
+    LIMITED("limited", "Limited"),
+    PROGRESS("progress", "Progress"),
+    CONSTRUCTED("constructed", "Constructed")
     ;
 
     fun asOnj(): OnjValue = OnjString(onjName)
@@ -70,6 +71,7 @@ enum class RunType(private val onjName: String) {
 
         fun fromOnj(onj: OnjString): RunType = when (onj.value) {
             "limited" -> LIMITED
+            "progress" -> PROGRESS
             "constructed" -> CONSTRUCTED
             else -> throw RuntimeException("unknown runtype: ${onj.value}")
         }
@@ -80,6 +82,8 @@ sealed class RunReward {
 
     data class Cash(val amount: Int) : RunReward() {
 
+        override fun displayText(): String = "Cash: $amount$"
+
         override fun asOnj(): OnjValue = buildOnjObject {
             name("CashReward")
             "amount" with amount
@@ -87,8 +91,9 @@ sealed class RunReward {
     }
 
 
-    abstract fun asOnj(): OnjValue
+    abstract fun displayText(): String
 
+    abstract fun asOnj(): OnjValue
 
     companion object {
 

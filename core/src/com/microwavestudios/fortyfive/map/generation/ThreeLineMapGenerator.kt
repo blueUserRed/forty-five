@@ -14,8 +14,8 @@ import onj.value.OnjObject
 
 class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String): DetailMap {
-        setup(name, data)
+    override fun generate(name: String, seed: Long): DetailMap {
+        setup(name, data, seed)
 
         val startNode = newNode(x = 0f, y = 0f)
         setupExitNode(startNode, data.startArea)
@@ -62,6 +62,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
             isArea = false,
             biome = data.biome,
             scrollable = true,
+            majorDifficulty = data.majorDifficulty,
             camPosOffset = Vector2(0f, 0f)
         )
     }
@@ -143,7 +144,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
     }
 
     data class ThreeLineMapGeneratorData(
-        override val seed: Long,
+        override val majorDifficulty: Int,
         val biome: String,
         override val exitNodeTexture: String,
         val roadLength: Float,
@@ -187,7 +188,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         companion object {
 
             fun fromOnj(onj: OnjObject): ThreeLineMapGeneratorData = ThreeLineMapGeneratorData(
-                onj.get<Long>("seed"),
+                onj.get<Long>("majorDifficulty").toInt(),
                 onj.get<String>("biome"),
                 onj.get<String>("exitNodeTexture"),
                 onj.get<Double>("roadLength").toFloat(),
@@ -230,7 +231,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
 
         fun asOnj(): OnjObject = buildOnjObject {
             "event" with eventCreator().asOnjObject()
-            "offset" with offset
+            "offset" with arrayOf(offset.first, offset.last)
             "nodeTexture" with nodeTexture
             "line" with line
         }

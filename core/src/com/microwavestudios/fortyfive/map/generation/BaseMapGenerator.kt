@@ -15,6 +15,7 @@ import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.properties.Delegates
 import kotlin.random.Random
 
 abstract class BaseMapGenerator {
@@ -31,14 +32,16 @@ abstract class BaseMapGenerator {
     protected lateinit var bounds: Rectangle
         private set
 
+    protected var majorDifficulty by Delegates.notNull<Int>()
+
     private val nodeColliders: MutableList<Rectangle> = mutableListOf()
     private val decorationColliders: MutableList<Rectangle> = mutableListOf()
     private val lineColliders: MutableList<Line2D> = mutableListOf()
 
-    abstract fun generate(name: String): DetailMap
+    abstract fun generate(name: String, seed: Long): DetailMap
 
-    protected fun setup(name: String, data: BaseMapGeneratorData) {
-        this.random = Random(data.seed)
+    protected fun setup(name: String, data: BaseMapGeneratorData, seed: Long) {
+        this.random = Random(seed)
         this.data = data
         this.name = name
         nodeColliders.clear()
@@ -174,22 +177,22 @@ abstract class BaseMapGenerator {
     abstract fun asOnj(): OnjObject
 
     interface BaseMapGeneratorData {
-        val seed: Long
         val nodeProtectedArea: Float
         val locationSignProtectedAreaWidth: Float
         val locationSignProtectedAreaHeight: Float
         val startArea: String
         val exitNodeTexture: String
+        val majorDifficulty: Int
 
         fun asOnj(): OnjObject
 
         fun OnjObjectBuilderDSL.includeBaseData() {
-            "seed" with seed
             "nodeProtectedArea" with nodeProtectedArea
             "locationSignProtectedAreaWidth" with locationSignProtectedAreaWidth
             "locationSignProtectedAreaHeight" with locationSignProtectedAreaHeight
             "startArea" with startArea
             "exitNodeTexture" with exitNodeTexture
+            "majorDifficulty" with majorDifficulty
         }
     }
 

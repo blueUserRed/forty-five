@@ -8,7 +8,7 @@ var tutorialText = {
     highlightObject?: string,
 };
 
-version: int,
+majorDifficulty: int,
 tutorialText?: tutorialText[],
 startNode: int,
 endNode: int,

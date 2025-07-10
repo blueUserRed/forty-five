@@ -113,23 +113,23 @@ class GameDirector(private val controller: GameController) {
         }
 
         fun assignEncounters(map: DetailMap) {
-            val startNode = map.startNode
-            val endNode = map.endNode
-            val allNodes = map.uniqueNodes
-            val progress = map.progress
-            val roadDirection = Vector2(endNode.x, endNode.y) - Vector2(startNode.x, startNode.y)
-            val difficultyVariance = 0f
-            allNodes.forEach { node ->
-                if (node === startNode || node === endNode) return@forEach
-                if (node.event !is EncounterMapEvent) return@forEach
-                val nodeDirection = Vector2(node.x, node.y) - Vector2(startNode.x, startNode.y)
-                val distance = (nodeDirection dot roadDirection) / roadDirection.len()
-                val normalDistance = distance / roadDirection.len()
-                val difficulty = progress.start + (progress.endInclusive - progress.start) * normalDistance
-                val difficultyRange = (difficulty - difficultyVariance)..(difficulty + difficultyVariance)
-                val encounterIndex = chooseEncounter(map, difficultyRange)
-                node.event.encounterIndex = encounterIndex
-            }
+//            val startNode = map.startNode
+//            val endNode = map.endNode
+//            val allNodes = map.uniqueNodes
+////            val progress = map.progress
+//            val roadDirection = Vector2(endNode.x, endNode.y) - Vector2(startNode.x, startNode.y)
+//            val difficultyVariance = 0f
+//            allNodes.forEach { node ->
+//                if (node === startNode || node === endNode) return@forEach
+//                if (node.event !is EncounterMapEvent) return@forEach
+//                val nodeDirection = Vector2(node.x, node.y) - Vector2(startNode.x, startNode.y)
+//                val distance = (nodeDirection dot roadDirection) / roadDirection.len()
+//                val normalDistance = distance / roadDirection.len()
+//                val difficulty = progress.start + (progress.endInclusive - progress.start) * normalDistance
+//                val difficultyRange = (difficulty - difficultyVariance)..(difficulty + difficultyVariance)
+//                val encounterIndex = chooseEncounter(map, difficultyRange)
+//                node.event.encounterIndex = encounterIndex
+//            }
         }
 
         private fun chooseEncounter(map: DetailMap, progress: ClosedFloatingPointRange<Float>): Int {

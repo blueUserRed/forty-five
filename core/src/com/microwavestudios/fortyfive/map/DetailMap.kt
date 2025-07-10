@@ -34,7 +34,8 @@ data class DetailMap(
     val isArea: Boolean,
     val biome: String,
     val scrollable: Boolean,
-    val camPosOffset: Vector2
+    val camPosOffset: Vector2,
+    val majorDifficulty: Int,
 ) {
 
     /**
@@ -73,7 +74,6 @@ data class DetailMap(
      * returns a representation of this map as an OnjObject
      */
     fun asOnjObject(): OnjObject = buildOnjObject {
-        "version" with mapVersion
         "nodes" with nodesAsOnjArray()
         "startNode" with startNode.index
         "endNode" with endNode.index
@@ -84,6 +84,7 @@ data class DetailMap(
         "tutorialText" with listOf<Nothing>()
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
+        "majorDifficulty" with majorDifficulty
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -111,7 +112,6 @@ data class DetailMap(
 
     companion object {
 
-        const val mapVersion: Int = 0
         const val logTag = "Map"
 
         /**
@@ -132,10 +132,6 @@ data class DetailMap(
                 throw InvalidMapFileException()
             }
             onj as OnjObject
-            if (onj.get<Long>("version").toInt() != mapVersion) {
-                FortyFive.logger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
-                throw InvalidMapFileException()
-            }
             val nodes = mutableListOf<MapNodeBuilder>()
             val nodesOnj = onj.get<OnjArray>("nodes")
             nodesOnj
@@ -199,7 +195,8 @@ data class DetailMap(
                     onj.get<OnjArray>("camPosOffset").toVector2()
                 } else {
                     Vector2()
-                }
+                },
+                onj.get<Long>("majorDifficulty").toInt()
             )
         }
 

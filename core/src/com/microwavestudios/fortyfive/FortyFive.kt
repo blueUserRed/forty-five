@@ -185,6 +185,8 @@ object FortyFive : Game() {
     override fun dispose() {
         logger.debug(logTag, "game closing")
         DebugActorImpl.dumpActorsWithDebugWarnings()
+        profileManager.currentProfile?.write()
+        profileManager.currentProfile?.writeMaps()
         PermaSaveState.write()
         SaveState.write()
         UserPrefs.write()

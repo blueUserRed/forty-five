@@ -1,9 +1,33 @@
 
+import "imports/map_gen.onjschema" as _;
+
+$RunReward {
+
+    $CashReward {
+        amount: int
+    }
+
+}
+
 var runSave = {
     currentNode: int,
     lastNode: int?,
     playerHealth: int,
     backpack: string[],
+};
+
+var run = {
+    length: string,
+    type: string,
+    difficulty: int,
+    rewards: $RunReward[],
+    biome: string,
+    mapGenerator: $MapGenerator
+};
+
+var runBoard = {
+    forArea: string,
+    runs: run[2],
 };
 
 cardCollection: string[],
@@ -12,3 +36,4 @@ currentMap: string,
 currentNode: int,
 lastNode: int?,
 runSave: runSave?,
+runBoards: runBoard[],
