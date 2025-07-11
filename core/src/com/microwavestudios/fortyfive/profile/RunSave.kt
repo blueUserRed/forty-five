@@ -66,8 +66,6 @@ class RunSave private constructor(val profile: Profile) {
         if (!dirty) return
         if (!runDataFile.exists()) {
             runDataFile.createNewFile()
-            runDataFile.writeText(data.asOnj().toString())
-            return
         }
         runDataFile.writeText(data.asOnj().toString())
     }

@@ -19,12 +19,14 @@ import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
+import com.microwavestudios.fortyfive.screen.screens.RunLostScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
@@ -128,11 +130,15 @@ class GameControllerImpl(
         WarningParent.Level.HIGH
     )
 
+    private lateinit var profile: Profile
+
     override fun init(context: Any?) {
         if (context !is EncounterContext) {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
         encounterContext = context
+
+        profile = FortyFive.profileManager.currentProfile!!
 
         FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.BATTLE)
 
@@ -664,9 +670,14 @@ class GameControllerImpl(
             animTimelines.forEach(Timeline::stopTimeline)
         }
         include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
-        action { mainTimeline.stopTimeline() }
         delay(500)
-        action { FortyFive.newRun(true) }
+        action {
+            if (profile.isRunActive) {
+                profile.loseRun()
+                FortyFive.screenManager.ensureNextScreen(RunLostScreen)
+            }
+            FortyFive.screenManager.screenFinished()
+        }
     }
 
     override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline = Timeline.timeline {

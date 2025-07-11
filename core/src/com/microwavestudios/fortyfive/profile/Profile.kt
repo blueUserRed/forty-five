@@ -99,6 +99,17 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         runSave = RunSave.newRun(this, run)
     }
 
+    fun loseRun() {
+        val runSave = runSave ?: throw RuntimeException("cant lose run if no run is active")
+        endRun(runSave)
+    }
+
+    private fun endRun(runSave: RunSave) {
+        runSave.runMapFile.delete()
+        runSave.runDataFile.delete()
+        this.runSave = null
+    }
+
     private fun loadAreaMap(map: String) {
         val newMapFile = lookupAreaFile(map) ?: throw RuntimeException("no file for area: $map")
         this.currentMapFile = newMapFile
