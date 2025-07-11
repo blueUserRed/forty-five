@@ -80,8 +80,6 @@ class SeededMapGenerator(
                 newNodes.addAll(it.edgesTo)
                 visitedNodes.add(it)
                 val curEvent = it.event
-                if (curEvent !is ScaledByDistance) return@forEach
-                curEvent.distanceToEnd = curSteps
             }
             curNodes = newNodes
             if (curNodes.isEmpty()) return

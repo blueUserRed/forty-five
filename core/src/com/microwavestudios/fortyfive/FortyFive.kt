@@ -167,7 +167,6 @@ object FortyFive : Game() {
         steamHandler = SteamHandler()
         UserPrefs.read()
         soundPlayer.init()
-        GameDirector.init()
         MapManager.init()
 
         if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {

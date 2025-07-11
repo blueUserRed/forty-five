@@ -149,7 +149,8 @@ class SoundPlayer : ResourceBorrower {
 
     private fun updateAmbientSounds(screen: OnjScreen) {
         val now = TimeUtils.millis()
-        val biome = MapManager.currentDetailMap.biome
+        val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
+            ?: return
         val sounds = biomeAmbience[biome] ?: run {
             FortyFive.logger.warn(logTag, "No ambience defined for biome $biome")
             return

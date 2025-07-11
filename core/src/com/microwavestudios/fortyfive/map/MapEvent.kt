@@ -4,6 +4,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.PermaSaveState
 import com.microwavestudios.fortyfive.game.SaveState
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.utils.toIntRange
@@ -18,11 +19,11 @@ object MapEventFactory {
 
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
-        "EncounterMapEvent" to { EncounterMapEvent(it) },
+        "EncounterMapEvent" to { EncounterMapEvent.fromOnj(it) },
         "EnterMapMapEvent" to {
             EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("fromEnd"))
         },
-        "DialogMapEvent" to { DialogMapEvent(it) },
+        "DialogMapEvent" to { DialogMapEvent.fromOnj(it) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
                 onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
@@ -36,29 +37,12 @@ object MapEventFactory {
                 onjObject.get<Long>("rerollBasePrice").toInt(),
             )
         },
-        "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
-        "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
-        "AddMaxHPEvent" to { AddMaxHPMapEvent(it) },
-        "FinishTutorialMapEvent" to { FinishTutorialMapEvent(it) },
+        "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
+        "FinishTutorialMapEvent" to { FinishTutorialMapEvent.fromOnj(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
         mapEventCreators[onj.name]?.invoke(onj) ?: throw RuntimeException("unknown map event ${onj.name}")
-}
-
-/**
- * for those events that need to know the distance till the end of the next road
- */
-interface ScaledByDistance {
-    var distanceToEnd: Int
-
-    fun setDistanceFromConfig(onj: OnjObject) {
-        distanceToEnd = onj.get<Long?>("distanceToEnd")?.toInt() ?: -1
-    }
-
-    fun OnjObjectBuilderDSL.includeDistanceFromEnd() {
-        "distanceToEnd" with distanceToEnd
-    }
 }
 
 interface Completable {
@@ -74,19 +58,16 @@ abstract class MapEvent {
      * when this is true, the player can't progress past the node
      */
     abstract var currentlyBlocks: Boolean
-        protected set
 
     /**
      * when this is true, a start button for this event is displayed and the start function can be called
      */
     abstract var canBeStarted: Boolean
-        protected set
 
     /**
      * when this is true, the event was already completed
      */
     abstract var isCompleted: Boolean
-        protected set
 
     /**
      * when this is true, the sidebar with the description is displayed
@@ -99,11 +80,6 @@ abstract class MapEvent {
      * currently unused
      */
     open val icon: String? = null
-
-    /**
-     * currently unused
-     */
-    open val additionalIcons: List<String> = listOf()
 
     /**
      * Short text describing the event
@@ -130,11 +106,8 @@ abstract class MapEvent {
      */
     abstract fun asOnjObject(): OnjObject
 
-    /**
-     * utility function that reads and sets the [currentlyBlocks], [canBeStarted], [isCompleted] fields from an
-     * OnjObject
-     */
-    protected fun setStandardValuesFromConfig(config: OnjObject) {
+
+    fun setStandardValuesFromConfig(config: OnjObject) {
         currentlyBlocks = config.get<Boolean>("currentlyBlocks")
         canBeStarted = config.get<Boolean>("canBeStarted")
         isCompleted = config.get<Boolean>("isCompleted")
@@ -173,16 +146,15 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledByDistance, Completable {
+class EncounterMapEvent(
+    override var encounter: Encounter,
+) : MapEvent(), EncounterContext, Completable {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
     override var isCompleted: Boolean = false
-    override var distanceToEnd: Int = -1
 
     override val displayDescription: Boolean = true
-
-    override var encounterIndex: Int = obj.get<Long>("encounterIndex").toInt()
 
     override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
@@ -191,18 +163,12 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
 
     override val buttonText: String = "Fight!"
 
-    init {
-        setStandardValuesFromConfig(obj)
-        setDistanceFromConfig(obj)
-    }
-
     override fun start() {
         FortyFive.screenManager.appendScreen(EncounterScreen, this)
         FortyFive.screenManager.screenFinished()
     }
 
     override fun completed() {
-        FortyFive.logger.debug("EncounterMapEvent", "Encounter with $encounterIndex is completed")
         currentlyBlocks = false
         canBeStarted = false
         isCompleted = true
@@ -211,11 +177,15 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterMapEvent")
         includeStandardConfig()
-        includeDistanceFromEnd()
-        "encounterIndex" with encounterIndex
-
+        "encounter" with encounter.asOnj()
     }
 
+    companion object {
+
+        fun fromOnj(onj: OnjObject): EncounterMapEvent = EncounterMapEvent(
+            Encounter.fromOnj(onj.get<OnjObject>("encounter"))
+        ).apply { setStandardValuesFromConfig(onj) }
+    }
 }
 
 class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {
@@ -251,7 +221,11 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 /**
  * event that opens a dialog box and allows talking to an NPC
  */
-class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
+class DialogMapEvent(
+    private val canOnlyBeStartedOnce: Boolean,
+    private val onlyIfPlayerDoesntHaveCard: String?,
+    override val dialog: String,
+) : MapEvent(), DialogScreenContext {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -267,17 +241,8 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
 
     override val displayDescription: Boolean = true
 
-    private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
-    private val onlyIfPlayerDoesntHaveCard: String? = onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null)
-
-    override val dialog: String = onj.get<String>("dialog")
-
     override val descriptionText: String = ""
     override val buttonText: String = "Talk"
-
-    init {
-        setStandardValuesFromConfig(onj)
-    }
 
     override fun start() {
         FortyFive.screenManager.appendScreen(DialogScreen, this)
@@ -296,6 +261,15 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
         "dialog" with dialog
         "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
         onlyIfPlayerDoesntHaveCard?.let { "onlyIfPlayerDoesntHaveCard" to it }
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): DialogMapEvent = DialogMapEvent(
+            onj.get<Boolean>("canOnlyBeStartedOnce"),
+            onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null),
+            onj.get<String>("dialog")
+        ).apply { setStandardValuesFromConfig(onj) }
     }
 }
 
@@ -352,7 +326,13 @@ class ShopMapEvent(
  * @param types which type the restrictions are
  */
 class ChooseCardMapEvent(
-    onj: OnjObject
+    override val types: List<String>,
+    override val enableRerolls: Boolean,
+    override var amountOfRerolls: Int,
+    override val rerollPriceIncrease: Int,
+    override val rerollBasePrice: Int,
+    override var seed: Long,
+    override val nbrOfCards: Int,
 ) : MapEvent(), ChooseCardScreenContext, Completable {
 
     override var currentlyBlocks: Boolean = false
@@ -361,23 +341,9 @@ class ChooseCardMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
-
-    override val enableRerolls: Boolean = onj.get<Boolean>("enableRerolls")
-    override var amountOfRerolls: Int = onj.get<Long>("amountOfRerolls").toInt()
-    override val rerollPriceIncrease: Int = onj.get<Long>("rerollPriceIncrease").toInt()
-    override val rerollBasePrice: Int = onj.get<Long>("rerollBasePrice").toInt()
-
-    override var seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    override val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
-
     override val descriptionText: String =
         if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
     override val displayName: String = "Ominous person"
-
-    init {
-        setStandardValuesFromConfig(onj)
-    }
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ChooseCardScreen, this)
@@ -401,93 +367,23 @@ class ChooseCardMapEvent(
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice
     }
-}
 
+    companion object {
 
-class HealOrMaxHPMapEvent(
-    onj: OnjObject
-) : MapEvent(), ScaledByDistance, Completable {
-
-    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    val healthRange: IntRange = onj.get<OnjArray>("healRange").toIntRange()
-    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
-
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
-    override var isCompleted: Boolean = false
-    override var distanceToEnd = -1
-
-    override val displayDescription: Boolean = true
-
-    override val descriptionText: String = "You can choose to either heal yourself or obtain a higher Max HP."
-    override val displayName: String = "Restoration Point"
-
-    override fun start() {
-        TODO("I don't know if it will be possible to increase max hp in future versions of the game")
-//        MapManager.changeToHealOrMaxHPScreen(this)
-    }
-
-    init {
-        setDistanceFromConfig(onj)
-        setStandardValuesFromConfig(onj)
-    }
-
-    override fun completed() {
-        isCompleted = true
-        canBeStarted = false
-        currentlyBlocks = false
-    }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("HealOrMaxHPEvent")
-        includeStandardConfig()
-        includeDistanceFromEnd()
-        "seed" with seed
-        "healRange" with arrayOf(healthRange.first, healthRange.last)
-        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
-    }
-}
-
-class AddMaxHPMapEvent(
-    onj: OnjObject
-) : MapEvent(), Completable {
-
-    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
-
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
-    override var isCompleted: Boolean = false
-
-    override val displayDescription: Boolean = true
-
-    override val descriptionText: String = "You obtain higher Max HP."
-    override val displayName: String = "Restoration Point"
-
-    override fun start() {
-        TODO("I don't know if it will be possible to increase max hp in future versions of the game")
-//        MapManager.changeToAddMaxHPScreen(this)
-    }
-
-    init {
-        setStandardValuesFromConfig(onj)
-    }
-
-    override fun completed() {
-        isCompleted = true
-        canBeStarted = false
-    }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("AddMaxHPEvent")
-        includeStandardConfig()
-        "seed" with seed
-        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
+        fun fromOnj(onj: OnjObject): ChooseCardMapEvent = ChooseCardMapEvent(
+            onj.get<OnjArray>("types").value.map { (it as OnjString).value },
+            onj.get<Boolean>("enableRerolls"),
+            onj.get<Long>("amountOfRerolls").toInt(),
+            onj.get<Long>("rerollPriceIncrease").toInt(),
+            onj.get<Long>("rerollBasePrice").toInt(),
+            onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+            onj.get<Long>("nbrOfCards").toInt(),
+        ).apply { setStandardValuesFromConfig(onj) }
     }
 }
 
 class FinishTutorialMapEvent(
-    onj: OnjObject,
+    private val goToMap: String
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -497,8 +393,6 @@ class FinishTutorialMapEvent(
 
     override val displayName: String = "Exit"
     override val descriptionText: String = "Start your Journey"
-
-    private val goToMap: String = onj.get<String>("goToMap")
 
     override fun start() {
         SaveState.playerLives = SaveState.maxPlayerLives
@@ -515,4 +409,10 @@ class FinishTutorialMapEvent(
         "goToMap" with goToMap
     }
 
+    companion object {
+
+        fun fromOnj(onj: OnjObject): FinishTutorialMapEvent = FinishTutorialMapEvent(
+            onj.get<String>("goToMap")
+        )
+    }
 }

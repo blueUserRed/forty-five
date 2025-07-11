@@ -6,6 +6,16 @@ use Cards; // include Card namespace for status effects
 enemies: [
 
     {
+        name: "Outlaw_test",
+        title: "Outlaw",
+        baseHealth: 5,
+        texture: "enemy_outlaw",
+        brain: $ScriptedEnemyBrain {
+            actions: [],
+        },
+    },
+
+    {
         name: "Outlaw_lvl1_alone",
         title: "Outlaw",
         baseHealth: 80,

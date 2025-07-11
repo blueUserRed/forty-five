@@ -287,7 +287,7 @@ class MapScreen : ScreenCreator() {
             clearChildren()
             isVisible = false
             val event = node.event as? EncounterMapEvent ?: return@watchFor
-            val encounter = GameDirector.encounters[event.encounterIndex]
+            val encounter = event.encounter
             val modifiers = encounter.encounterModifier
             if (modifiers.isEmpty()) return@watchFor
             isVisible = true

@@ -5,6 +5,14 @@ var mapEventStandardConfig = {
     isCompleted: boolean
 };
 
+var encounter = {
+    enemies: string[],
+    encounterModifier: string[],
+    forceCards: string[],
+    shuffleCards: boolean,
+    special: boolean,
+};
+
 $MapEvent {
 
     $EmptyMapEvent { }
@@ -25,8 +33,7 @@ $MapEvent {
 
     $EncounterMapEvent {
         ...mapEventStandardConfig,
-        distanceToEnd: int,
-        encounterIndex: int,
+        encounterIndex: encounter,
     }
 
     $EnterMapMapEvent {

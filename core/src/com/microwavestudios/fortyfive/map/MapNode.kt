@@ -124,6 +124,7 @@ data class MapNode(
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
+        screen.lifetime.onEnd { nodeTextureCache = null }
         return nodeTextureCache
     }
 

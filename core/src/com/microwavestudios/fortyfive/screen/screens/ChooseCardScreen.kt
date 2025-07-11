@@ -309,12 +309,14 @@ class ChooseCardScreen : ScreenCreator() {
                 allProtos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
             }
         } else {
+            val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
+                ?: return listOf()
             RandomCardSelection.getRandomCards(
                 screen,
                 context.types,
                 context.nbrOfCards,
                 Random(context.seed),
-                MapManager.currentDetailMap.biome,
+                biome,
                 "chooseCard",
                 unique = true
             )

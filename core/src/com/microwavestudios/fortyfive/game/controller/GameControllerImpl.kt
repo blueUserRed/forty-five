@@ -19,6 +19,7 @@ import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -92,7 +93,7 @@ class GameControllerImpl(
     override lateinit var encounterContext: EncounterContext
         private set
 
-    private lateinit var encounter: GameDirector.Encounter
+    private lateinit var encounter: Encounter
 
     private var cardPrototypes: List<CardPrototype> = listOf()
 
@@ -104,8 +105,6 @@ class GameControllerImpl(
 
     private val mainTimeline: Timeline = Timeline().also { it.startTimeline() }
     private val animTimelines: MutableList<Timeline> = mutableListOf()
-
-    private val tutorialText: MutableList<GameDirector.GameTutorialTextPart> = mutableListOf()
 
     var cardsDrawn: Int = 0
         private set
@@ -137,15 +136,14 @@ class GameControllerImpl(
 
         FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.BATTLE)
 
-        encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
-            ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
+        encounter = encounterContext.encounter
         encounter.encounterModifier.forEach {
             addEncounterModifier(it)
         }
 
         bindGameEventListeners()
 
-        allEnemies = encounter.createdEnemies
+        allEnemies = encounter.createEnemies()
         gameEvents.fire(Events.SetupEnemies(allEnemies))
         gameEvents.fire(Events.EnemySelected(allEnemies.first()))
 
@@ -889,10 +887,6 @@ class GameControllerImpl(
     override fun addEncounterModifier(modifier: EncounterModifier) {
         _encounterModifiers.add(null to modifier)
         gameEvents.fire(Events.EncounterModifierAdded(modifier))
-    }
-
-    override fun addTutorialText(textParts: List<GameDirector.GameTutorialTextPart>) {
-        tutorialText.addAll(textParts)
     }
 
     override fun initEnemyArea(enemies: List<Enemy>) {
