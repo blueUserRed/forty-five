@@ -86,8 +86,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         runBoards[area.name]?.let { return it }
         val runGenerator = RunGenerator()
         val runs = Pair(
-            runGenerator.generateRun(area.majorDifficulty, area.biome, RunType.CONSTRUCTED),
-            runGenerator.generateRun(area.majorDifficulty, area.biome, RunType.LIMITED),
+            runGenerator.generateRun(area.majorDifficulty, area.biome, area.name, RunType.CONSTRUCTED),
+            runGenerator.generateRun(area.majorDifficulty, area.biome, area.name, RunType.LIMITED),
         )
         runBoards[area.name] = runs
         dirty()
@@ -104,10 +104,32 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         endRun(runSave)
     }
 
+    fun winRun() {
+        val runSave = runSave ?: throw RuntimeException("cant win run if no run is active")
+        val run = runSave.run
+        val area = run.fromArea
+        val runGenerator = RunGenerator()
+        val runBoard = runBoards[area] ?: throw RuntimeException("won run that doesn't exist in runBoard")
+        val newRunBoard = when (run.type) {
+            RunType.LIMITED -> Pair(
+                runBoard.first,
+                runGenerator.generateRun(run.difficulty, run.biome, area, RunType.LIMITED),
+            )
+            RunType.CONSTRUCTED -> Pair(
+                runGenerator.generateRun(run.difficulty, run.biome, area, RunType.CONSTRUCTED),
+                runBoard.second
+            )
+            RunType.PROGRESS -> runBoard
+        }
+        runBoards[area] = newRunBoard
+        endRun(runSave)
+    }
+
     private fun endRun(runSave: RunSave) {
         runSave.runMapFile.delete()
         runSave.runDataFile.delete()
         this.runSave = null
+        dirty()
     }
 
     private fun loadAreaMap(map: String) {
@@ -191,7 +213,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
                 onj.get<OnjArray>("runBoards").value.associate { board ->
                     board as OnjObject
                     val area = board.get<String>("forArea")
-                    val runs = onj.get<OnjArray>("runs")
+                    val runs = board.get<OnjArray>("runs")
                     area to (Run.fromOnj(runs.get<OnjObject>(0)) to Run.fromOnj(runs.get<OnjObject>(1)))
                 }.toMutableMap()
             )

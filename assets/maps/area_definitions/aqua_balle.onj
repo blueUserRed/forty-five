@@ -4,9 +4,6 @@ endNode: 4,
 biome: "wasteland",
 scrollable: false,
 camPosOffset: [480.0, -790.0],
-progress: [
-    0.0, 0.1
-],
 nodes: [
     {
         x: -40.0,

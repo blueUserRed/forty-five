@@ -37,19 +37,21 @@ var mapGeneratorSharedKeys = {
     majorDifficulty: int,
     progress: float[2],
     biome: string,
-    startArea: string,
     exitNodeTexture: string,
     horizontalExtension: float,
     verticalExtension: float,
     locationSignProtectedAreaWidth: float,
     locationSignProtectedAreaHeight: float,
     nodeProtectedArea: float,
+    firstNodeEvent: $MapEvent,
+    firstNodeTexture: string,
+    lastNodeEvent: $MapEvent,
+    lastNodeTexture: string,
 };
 
 $MapGenerator {
 
     $ThreeLine {
-        endArea: string,
         roadLength: float,
         mainLineNodes: int,
         altLinesPadding: int[2],
@@ -72,7 +74,6 @@ $MapGenerator {
 
     $Radial {
         decorations: decoration[],
-        endArea: string,
         exitNodeCircle: int,
         circles: {
             radius: float,

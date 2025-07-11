@@ -2,9 +2,6 @@ majorDifficulty: 4,
 startNode: 0,
 endNode: 2,
 biome: "bewitched_forest",
-progress: [
-    99.0, 100.0
-],
 nodes: [
     {
         x: 20.0,

@@ -4,10 +4,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.map.EnterMapMapEvent
-import com.microwavestudios.fortyfive.map.MapNode
-import com.microwavestudios.fortyfive.map.MapNodeBuilder
+import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.onjNamespaces.OnjInterpolation
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.OnjObjectBuilderDSL
@@ -163,10 +160,14 @@ abstract class BaseMapGenerator {
         nodeColliders.add(Rectangle(x - halfWidth, y - halfWidth, width, width))
     }
 
-    protected fun setupExitNode(node: MapNodeBuilder, area: String) {
-        node.event = EnterMapMapEvent(area, true)
-        node.imageName = area
-        node.nodeTexture = data.exitNodeTexture
+    protected fun setupLastNode(node: MapNodeBuilder) {
+        node.event = data.lastNodeEvent()
+        node.nodeTexture = data.lastNodeTexture
+    }
+
+    protected fun setupFirstNode(node: MapNodeBuilder) {
+        node.event = data.firstNodeEvent()
+        node.nodeTexture = data.firstNodeTexture
     }
 
     protected fun connectNodes(node1: MapNodeBuilder, node2: MapNodeBuilder) {
@@ -180,8 +181,10 @@ abstract class BaseMapGenerator {
         val nodeProtectedArea: Float
         val locationSignProtectedAreaWidth: Float
         val locationSignProtectedAreaHeight: Float
-        val startArea: String
-        val exitNodeTexture: String
+        val firstNodeEvent: () -> MapEvent
+        val firstNodeTexture: String
+        val lastNodeEvent: () -> MapEvent
+        val lastNodeTexture: String
         val majorDifficulty: Int
 
         fun asOnj(): OnjObject
@@ -190,8 +193,10 @@ abstract class BaseMapGenerator {
             "nodeProtectedArea" with nodeProtectedArea
             "locationSignProtectedAreaWidth" with locationSignProtectedAreaWidth
             "locationSignProtectedAreaHeight" with locationSignProtectedAreaHeight
-            "startArea" with startArea
-            "exitNodeTexture" with exitNodeTexture
+            "firstNodeEvent" with firstNodeEvent().asOnjObject()
+            "firstNodeTexture" with firstNodeTexture
+            "lastNodeEvent" with lastNodeEvent().asOnjObject()
+            "lastNodeTexture" with lastNodeTexture
             "majorDifficulty" with majorDifficulty
         }
     }

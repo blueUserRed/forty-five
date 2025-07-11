@@ -77,14 +77,11 @@ abstract class MapEvent {
     open val buttonText: String = "Start"
 
     /**
-     * currently unused
-     */
-    open val icon: String? = null
-
-    /**
      * Short text describing the event
      */
     open val descriptionText: String = ""
+
+    open val warningText: String? = null
 
     /**
      * Short text that is displayed instead of [descriptionText] when the event was completed
@@ -148,6 +145,7 @@ class EmptyMapEvent : MapEvent() {
  */
 class EncounterMapEvent(
     override var encounter: Encounter,
+    override val isExtraction: Boolean
 ) : MapEvent(), EncounterContext, Completable {
 
     override var currentlyBlocks: Boolean = true
@@ -156,12 +154,18 @@ class EncounterMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
     override val buttonText: String = "Fight!"
+
+    override val warningText: String? = if (isExtraction) {
+        "Last encounter:\nAfter this Encounter, all cards in your current deck will be added to your collection. All" +
+                "other cards will be lost!"
+    } else {
+        null
+    }
 
     override fun start() {
         FortyFive.screenManager.appendScreen(EncounterScreen, this)
@@ -178,12 +182,14 @@ class EncounterMapEvent(
         name("EncounterMapEvent")
         includeStandardConfig()
         "encounter" with encounter.asOnj()
+        "isExtraction" with isExtraction
     }
 
     companion object {
 
         fun fromOnj(onj: OnjObject): EncounterMapEvent = EncounterMapEvent(
-            Encounter.fromOnj(onj.get<OnjObject>("encounter"))
+            Encounter.fromOnj(onj.get<OnjObject>("encounter")),
+            onj.get<Boolean>("isExtraction")
         ).apply { setStandardValuesFromConfig(onj) }
     }
 }

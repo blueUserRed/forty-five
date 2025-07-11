@@ -990,7 +990,9 @@ class GameControllerImpl(
 
     private fun winTimeline(): Timeline = Timeline.timeline { later {
         val money = -allEnemies.sumOf { it.currentHealth }
-        val playerGetsCard = !encounter.special && Utils.coinFlip(Config.playerGetsRewardCardChance)
+        val playerGetsCard = !encounter.special &&
+                !encounterContext.isExtraction &&
+                Utils.coinFlip(Config.playerGetsRewardCardChance)
         val event = Events.ShowPlayerWonPopup(
             gotCard = playerGetsCard,
             cashAmount = money
@@ -1028,6 +1030,11 @@ class GameControllerImpl(
             if (playerGetsCard) {
                 FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, chooseCardContext)
             }
+
+            if (encounterContext.isExtraction) {
+                profile.winRun()
+            }
+
             FortyFive.screenManager.screenFinished()
         }
     } }

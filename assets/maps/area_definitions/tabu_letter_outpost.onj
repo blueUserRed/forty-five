@@ -2,9 +2,6 @@ majorDifficulty: 2,
 startNode: 0,
 endNode: 5,
 biome: "wasteland",
-progress: [
-    0.0, 0.1
-],
 nodes: [
     {
         x: -7.0,

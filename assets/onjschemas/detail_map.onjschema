@@ -39,6 +39,5 @@ animatedDecorations: {
 }[],
 biome: string,
 isArea: boolean,
-progress: float[2],
 scrollable?: boolean,
 camPosOffset?: float[2]

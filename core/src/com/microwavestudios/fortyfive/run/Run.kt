@@ -10,6 +10,7 @@ data class Run(
     val difficulty: Int,
     val rewards: List<RunReward>,
     val biome: String,
+    val fromArea: String,
     val mapGenerator: BaseMapGenerator
 ) {
 
@@ -19,6 +20,7 @@ data class Run(
         "difficulty" with difficulty
         "rewards" with rewards.map { it.asOnj() }
         "biome" with biome
+        "fromArea" with fromArea
         "mapGenerator" with mapGenerator.asOnj()
     }
 
@@ -33,6 +35,7 @@ data class Run(
                 RunReward.fromOnj(it)
             },
             onj.get<String>("biome"),
+            onj.get<String>("fromArea"),
             BaseMapGenerator.fromOnj(onj.get<OnjNamedObject>("mapGenerator"))
         )
     }

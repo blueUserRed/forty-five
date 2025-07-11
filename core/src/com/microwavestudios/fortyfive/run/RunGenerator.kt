@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.run
 
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
+import com.microwavestudios.fortyfive.map.EmptyMapEvent
 import com.microwavestudios.fortyfive.map.EncounterMapEvent
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
@@ -8,13 +9,14 @@ import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
 
 class RunGenerator {
 
-    fun generateRun(forDifficulty: Int, forBiome: String, type: RunType): Run {
+    fun generateRun(forDifficulty: Int, forBiome: String, forArea: String, type: RunType): Run {
         return Run(
             RunLength.MEDIUM,
             type,
             forDifficulty,
             listOf(RunReward.Cash(100)),
             forBiome,
+            forArea,
             mapGen()
         )
     }
@@ -30,8 +32,6 @@ class RunGenerator {
     private fun mapGen(): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
         majorDifficulty = 1,
         biome = "wasteland",
-        startArea = "salem",
-        endArea = "salem",
         nodeProtectedArea = 20f,
         altLinesOffset = 40f,
         mainLineNodes = 8,
@@ -39,13 +39,16 @@ class RunGenerator {
         varianceX = 15f,
         varianceY = 15f,
         roadLength = 270f,
-        exitNodeTexture = "map_node_exit",
         horizontalExtension = 80f,
         verticalExtension = 50f,
         locationSignProtectedAreaWidth = 25f,
         locationSignProtectedAreaHeight = 30f,
+        firstNodeTexture = "map_node_default",
+        firstNodeEvent = { EmptyMapEvent() },
+        lastNodeTexture = "map_node_fight",
+        lastNodeEvent = { EncounterMapEvent(encounter(), true) },
         mainEvent = ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-            { EncounterMapEvent(encounter()) },
+            { EncounterMapEvent(encounter(), false) },
             offset = 0..1,
             nodeTexture = "map_node_fight",
             line = -1,

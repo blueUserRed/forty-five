@@ -314,7 +314,14 @@ class DetailMapWidget(
         return true
     }
 
+    private var firstFrame: Boolean = true
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (firstFrame) {
+            firstFrame = false
+            events.fire(PlayerChangedNodeEvent(playerNode))
+        }
+
         validate()
         updatePlayerMovement()
         updateScreenMovement()

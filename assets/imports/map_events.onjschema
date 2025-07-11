@@ -8,7 +8,7 @@ var mapEventStandardConfig = {
 var encounter = {
     enemies: string[],
     encounterModifier: string[],
-    forceCards: string[],
+    forceCards: string[]?,
     shuffleCards: boolean,
     special: boolean,
 };
@@ -33,7 +33,8 @@ $MapEvent {
 
     $EncounterMapEvent {
         ...mapEventStandardConfig,
-        encounterIndex: encounter,
+        encounter: encounter,
+        isExtraction: boolean
     }
 
     $EnterMapMapEvent {

@@ -22,6 +22,8 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -123,9 +125,9 @@ class MapScreen : ScreenCreator() {
         val normalX = worldWidth - width + 10f
         val closedX = normalX + 300f
         x = normalX
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.CENTER
+        verticalAlign = CustomAlign.SPACE_BETWEEN
 
         fun getAction(to: Float) = MoveToAction().also {
             it.x = to
@@ -148,9 +150,9 @@ class MapScreen : ScreenCreator() {
         val eventDescription: CustomLabel
 
         box {
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+            flexDirection = FlexDirection.COLUMN
             relativeWidth(100f)
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            horizontalAlign = CustomAlign.CENTER
             marginTop = 20f
             height = 500f
 
@@ -172,6 +174,7 @@ class MapScreen : ScreenCreator() {
                 syncHeight()
             }
 
+            warningLabel()
             encounterModifiers()
         }
 
@@ -231,18 +234,47 @@ class MapScreen : ScreenCreator() {
         }
     }
 
+    private fun Group.warningLabel() = box {
+        backgroundHandle = "red_texture"
+        width = 320f
+        height = 140f
+
+        verticalAlign = CustomAlign.CENTER
+        horizontalAlign = CustomAlign.CENTER
+
+        isVisible = false
+
+        val label = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.6f)
+            setAlignment(Align.center)
+            badTexture("map info popup warning label")
+            wrap = true
+            width = 320f
+            height = 140f
+        }
+
+        mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
+            println(node)
+            val warning = node.event?.warningText
+            label.setText(warning)
+            isVisible = warning != null
+            println(isVisible)
+            println(label.text)
+        }
+    }
+
     private fun Group.encounterModifiers() = box {
         backgroundHandle = "map_detail_encounter_modifier_background"
         width = 320f
         height = 320f
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+        flexDirection = FlexDirection.COLUMN
+        verticalAlign = CustomAlign.CENTER
+        horizontalAlign = CustomAlign.SPACE_AROUND
 
         fun encounterModifierDisplay(modifier: EncounterModifier) = box {
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.SPACE_AROUND
             val icon = GraphicsConfig.encounterModifierIcon(modifier)
             val name = GraphicsConfig.encounterModifierDisplayName(modifier)
             val description = GraphicsConfig.encounterModifierDescription(modifier)
@@ -258,7 +290,7 @@ class MapScreen : ScreenCreator() {
 
             box {
 
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+                flexDirection = FlexDirection.COLUMN
                 width = parent.width - iconImage.width - 40f
                 syncHeight()
 
