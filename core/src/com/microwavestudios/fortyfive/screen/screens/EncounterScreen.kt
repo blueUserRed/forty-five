@@ -36,6 +36,8 @@ import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import com.microwavestudios.fortyfive.utils.AdvancedTextParser.*
@@ -182,7 +184,7 @@ class EncounterScreen : ScreenCreator() {
             worldWidth, worldHeight,
             gameEvents,
             navbarIsLeft = true,
-            hasTitleScreenInNavbar = false,
+            hasTitleScreen = false,
             warnings = warningParent
         )
     }
@@ -193,8 +195,8 @@ class EncounterScreen : ScreenCreator() {
         onLayoutAndNow { height = children.sumOf { it.height.toDouble() }.toFloat() + 50f }
         onLayoutAndNow { y = worldHeight * 0.8f - height }
         backgroundHandle = "encounter_modifier_background"
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+        flexDirection = FlexDirection.COLUMN
+        verticalAlign = CustomAlign.SPACE_AROUND
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
         isVisible = false
@@ -215,10 +217,10 @@ class EncounterScreen : ScreenCreator() {
         )
 
         fun encounterModifier(encounterModifier: EncounterModifier) = box {
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
+            flexDirection = FlexDirection.ROW
             relativeWidth(100f)
             height = 80f
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            verticalAlign = CustomAlign.CENTER
             horizontalSpacer(30f)
             box {
                 width = 50f
@@ -229,7 +231,7 @@ class EncounterScreen : ScreenCreator() {
             box {
                 onLayoutAndNow { width = parent.width - 50f - 160f }
                 syncHeight()
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+                flexDirection = FlexDirection.COLUMN
 
                 label("roadgeek", encounterModifier.displayName) {
                     syncDimensions()
@@ -355,7 +357,7 @@ class EncounterScreen : ScreenCreator() {
         var enemySelected = false
 
         box {
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+            flexDirection = FlexDirection.COLUMN
             this.x = x
             this.y = y
             width = enemyWidth
@@ -432,9 +434,9 @@ class EncounterScreen : ScreenCreator() {
                     frequency = 0.3f,
                     amplitude = 6f
                 )
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                flexDirection = FlexDirection.ROW
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
                 height = enemyHeight * 0.15f
                 enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->
                     this.clear()
@@ -516,9 +518,9 @@ class EncounterScreen : ScreenCreator() {
         height = width * (1057f / 1845f)
         centerX()
         y = 340f
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.SPACE_AROUND
+        verticalAlign = CustomAlign.CENTER
         color.a = 0f
         touchable = Touchable.disabled
         gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
@@ -559,9 +561,9 @@ class EncounterScreen : ScreenCreator() {
         height = width * (1057f / 1845f)
         centerX()
         y = 340f
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.SPACE_AROUND
+        verticalAlign = CustomAlign.CENTER
         color.a = 0f
         touchable = Touchable.disabled
 
@@ -948,13 +950,13 @@ class EncounterScreen : ScreenCreator() {
         var continuePromise: Promise<Unit>? = null
         box {
             backgroundHandle = "win_popup_background"
-            relativeHeight(120f)
+            relativeHeight(110f)
             onLayoutAndNow { width = height * (850f / 973f) }
             centerX()
             centerY()
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            flexDirection = FlexDirection.COLUMN
+            verticalAlign = CustomAlign.SPACE_BETWEEN
+            horizontalAlign = CustomAlign.CENTER
             isVisible = false
 
             gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { event ->
@@ -965,7 +967,7 @@ class EncounterScreen : ScreenCreator() {
             }
 
             box {
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
                 relativeWidth(100f)
                 // TODO: randomize text
                 label("red_wing_bmp", "You survived", Color.FortyWhite, isDistanceField = false) {
@@ -976,8 +978,8 @@ class EncounterScreen : ScreenCreator() {
 
                 box {
                     relativeWidth(62f)
-                    flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                    verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                    flexDirection = FlexDirection.ROW
+                    verticalAlign = CustomAlign.CENTER
                     height = 70f
                     backgroundHandle = "win_popup_item_cash"
 
@@ -1003,8 +1005,8 @@ class EncounterScreen : ScreenCreator() {
 
                 box {
                     relativeWidth(62f)
-                    flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                    verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                    flexDirection = FlexDirection.ROW
+                    verticalAlign = CustomAlign.CENTER
                     height = 70f
                     backgroundHandle = "win_popup_item_card"
                     marginTop = 10f
@@ -1031,8 +1033,8 @@ class EncounterScreen : ScreenCreator() {
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 joinGroup(winPopupGroup)
-                verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
                 backgroundHandle = "common_button_default"
                 observeInputState(
                     GameInputs.States.focused,

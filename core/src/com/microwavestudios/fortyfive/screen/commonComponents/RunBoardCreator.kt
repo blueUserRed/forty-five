@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.PositionType
 import com.microwavestudios.fortyfive.screen.commonComponents.RunCardCreator.getSharedRunCard
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screens.MapScreen
@@ -66,6 +67,7 @@ object RunBoardCreator {
         width = worldWidth
         height = worldHeight
         touchable = Touchable.childrenOnly
+        positionType = PositionType.ABSOLUTE
 
         val profile = FortyFive.profileManager.currentProfile ?: return@newGroup
         val runBoard = profile.runBoardForArea(profile.currentAreaMap)

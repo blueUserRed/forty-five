@@ -26,7 +26,8 @@ import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
-import com.microwavestudios.fortyfive.screen.screens.RunLostScreen
+import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
+import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
@@ -674,7 +675,7 @@ class GameControllerImpl(
         action {
             if (profile.isRunActive) {
                 profile.loseRun()
-                FortyFive.screenManager.ensureNextScreen(RunLostScreen)
+                FortyFive.screenManager.ensureNextScreen(LoseRunScreen)
             }
             FortyFive.screenManager.screenFinished()
         }
@@ -1032,7 +1033,7 @@ class GameControllerImpl(
             }
 
             if (encounterContext.isExtraction) {
-                profile.winRun()
+                FortyFive.screenManager.ensureNextScreen(WinRunScreen)
             }
 
             FortyFive.screenManager.screenFinished()

@@ -33,7 +33,9 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     private val dataFile: File = File(profilePath.absolutePath + "/profile_data.onj")
 
-    var playerMoney: Int by DataDelegate(ProfileData::playerMoney)
+    private var _playerMoney: Int by DataDelegate(ProfileData::playerMoney)
+    val playerMoney: Int
+        get() = _playerMoney
 
     private var _cardCollection: MutableList<String> by DataDelegate(ProfileData::cardCollection)
     val cardCollection: List<String>
@@ -130,6 +132,10 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         runSave.runDataFile.delete()
         this.runSave = null
         dirty()
+    }
+
+    fun earnMoney(amount: Int) {
+        _playerMoney += amount
     }
 
     private fun loadAreaMap(map: String) {

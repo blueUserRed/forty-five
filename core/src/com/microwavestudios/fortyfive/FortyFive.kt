@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
 import com.microwavestudios.fortyfive.screen.screens.IntroScreen
 import com.microwavestudios.fortyfive.screen.screens.MapScreen
 import com.microwavestudios.fortyfive.screen.screens.TitleScreen
+import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.steam.SteamHandler
 import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig

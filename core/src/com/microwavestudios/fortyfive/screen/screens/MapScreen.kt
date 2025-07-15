@@ -112,6 +112,7 @@ class MapScreen : ScreenCreator() {
             worldWidth,
             worldHeight,
             warningEvents,
+            canHaveRunBoard = true,
             warnings = WarningParent(this@MapScreen, screen, warningEvents)
         )
     }

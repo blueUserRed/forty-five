@@ -16,7 +16,7 @@ class RunSave private constructor(val profile: Profile) {
 
     private lateinit var data: RunSaveData
 
-    private var dirty: Boolean = false
+    private var dirty: Boolean = true
 
     var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)

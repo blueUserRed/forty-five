@@ -11,13 +11,12 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.screen.screenController.IntroScreenController
 import com.microwavestudios.fortyfive.utils.Color
 import kotlin.reflect.KClass
 
-class RunLostScreen : ScreenCreator() {
+class LoseRunScreen : ScreenCreator() {
 
-    override val name: String = "runLostScreen"
+    override val name: String = "LoseRunScreen"
 
     val worldWidth = 1600f
     val worldHeight = 900f
@@ -62,6 +61,6 @@ class RunLostScreen : ScreenCreator() {
     override fun getScreenControllers(): List<ScreenController> = listOf()
 
     companion object : ScreenManager.ScreenCreatorCompanion {
-        override val creatorClass: KClass<out ScreenCreator> = RunLostScreen::class
+        override val creatorClass: KClass<out ScreenCreator> = LoseRunScreen::class
     }
 }

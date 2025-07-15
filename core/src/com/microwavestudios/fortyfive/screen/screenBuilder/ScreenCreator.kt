@@ -23,7 +23,6 @@ import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator.ge
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator.getSharedNavBar
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.getSharedSettingsMenu
-import com.microwavestudios.fortyfive.screen.commonComponents.ToTitleScreenCreator.getSharedTitleScreen
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.commonComponents.RunBoardCreator.getSharedRunBoard
@@ -409,29 +408,37 @@ abstract class ScreenCreator : ResourceBorrower {
         navbarIsLeft: Boolean = false,
         warnings: WarningParent? = null,
         hasTutorial: Boolean = true,
-        hasTitleScreenInNavbar: Boolean = true,
+        hasTitleScreen: Boolean = true,
+        canHaveRunBoard: Boolean = false,
     ) {
 
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
 //        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
 
-        var settings: CustomGroup? = null
-        if (hasSettings) {
-            val (_settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-            settings = _settings
+        val settings: CustomGroup? = if (hasSettings) {
+            val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
             navbarObjects.add(settingsObject)
+            settings
+        } else {
+            null
         }
 
-        var backpack: CustomGroup? = null
-        if (hasBackpack) {
-            val (_backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events)
-            backpack = _backpack
+        val backpack = if (hasBackpack) {
+            val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events)
             navbarObjects.add(backpackObject)
+            backpack
+        } else {
+            null
         }
 
-        val (runBoard, runBoardObj) = getSharedRunBoard(worldWidth, worldHeight, events)
-        navbarObjects.add(runBoardObj)
+        val runBoard = if (canHaveRunBoard) {
+            val (runBoard, runBoardObj) = getSharedRunBoard(worldWidth, worldHeight, events)
+            navbarObjects.add(runBoardObj)
+            runBoard
+        } else {
+            null
+        }
 
         if (hasNavbar) {
             val navbar = getSharedNavBar(
@@ -445,7 +452,7 @@ abstract class ScreenCreator : ResourceBorrower {
                 centerX()
             }
         }
-        actor(runBoard)
+        runBoard?.let { actor(it) }
         backpack?.let { actor(it) }
         settings?.let {
             actor(it) {

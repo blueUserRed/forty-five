@@ -99,7 +99,7 @@ class TextEffectEmitter(
             // Ugly, but fine because fonts stay loaded all the time anyway
             val roadgeek = FortyFive.resourceManager.forceGet<BitmapFont>(
                 object : ResourceBorrower {},
-                Lifetime.endless,
+                FortyFive.gameLifetime,
                 "roadgeek"
             )
             mapOf(

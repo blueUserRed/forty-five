@@ -22,6 +22,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -71,8 +72,8 @@ class ChooseCardScreen : ScreenCreator() {
             centerX()
             onLayoutAndNow { y = parent.height / 2 - height / 2 + 80f }
             flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.SPACE_AROUND
 
             label("red_wing", "", color = Color.FortyWhite) {
                 syncDimensions()
@@ -86,8 +87,8 @@ class ChooseCardScreen : ScreenCreator() {
                 height = 200f
                 relativeWidth(80f)
                 flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.SPACE_AROUND
                 debug()
                 events.watchFor<CardsChangedEvent> { (cards) ->
                     clearChildren()
@@ -123,8 +124,8 @@ class ChooseCardScreen : ScreenCreator() {
                 syncDimensions()
             }
             if (context.enableRerolls) box(backgroundHints = buttonBackgroundHints()) {
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
                 height = 60f
                 width = 140f
                 logicalOffsetY = -30f
@@ -167,7 +168,7 @@ class ChooseCardScreen : ScreenCreator() {
         centerX()
         y = 0f
         flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+        horizontalAlign = CustomAlign.SPACE_AROUND
 
         box {
             backgroundHandle = "choose_card_add_to_deck"
