@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.profile.Profile.Companion.dataFileSchema
+import com.microwavestudios.fortyfive.profile.Profile.ProfileData
 import com.microwavestudios.fortyfive.run.Run
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
@@ -74,6 +75,39 @@ class RunSave private constructor(val profile: Profile) {
         runMapFile.writeText(map.asOnjObject().toMinifiedString())
     }
 
+    class Preview(val dataFile: File) {
+
+        private lateinit var data: RunSaveData
+
+        val playerHealth: Int
+            get() = data.playerHealth
+
+        val run: Run
+            get() = data.run
+
+        val backpack: List<String>
+            get() = data.backpack
+
+        fun read() {
+            val onj = OnjParser.parseFile(dataFile)
+            dataFileSchema.check(onj)
+            onj as OnjObject
+            data = RunSaveData.fromOnj(onj)
+        }
+
+        companion object {
+
+            fun loadPreview(profilePreview: Profile.Preview): Preview? {
+                val dataFile = File("profiles/${profilePreview.name}/run_data.onj")
+                if (!dataFile.exists()) return null
+                val preview = Preview(dataFile)
+                preview.read()
+                return preview
+            }
+        }
+
+    }
+
     data class RunSaveData(
         var currentNode: Int,
         var lastNode: Int?,
@@ -124,6 +158,8 @@ class RunSave private constructor(val profile: Profile) {
             save.loadMap()
             return save
         }
+
+        fun loadPreview(profilePreview: Profile.Preview): Preview? = Preview.loadPreview(profilePreview)
 
         fun newRun(profile: Profile, run: Run): RunSave {
             val mapGenerator = run.mapGenerator

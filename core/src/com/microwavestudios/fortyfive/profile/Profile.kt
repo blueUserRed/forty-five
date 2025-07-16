@@ -185,6 +185,47 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         currentFile.writeText(currentAreaMap.asOnjObject().toMinifiedString())
     }
 
+    class Preview(val name: String, val dataFile: File) {
+
+        private var data: ProfileData? = null
+
+        var runPreview: RunSave.Preview? = null
+            private set
+
+        val exists: Boolean
+            get() = data != null
+
+        val collection: List<String>?
+            get() = data?.cardCollection
+
+        val currentArea: String?
+            get() = data?.currentMap
+
+        val money: Int?
+            get() = data?.playerMoney
+
+        fun read() {
+            if (dataFile.exists()) {
+                val onj = OnjParser.parseFile(dataFile)
+                dataFileSchema.check(onj)
+                onj as OnjObject
+                data = ProfileData.fromOnj(onj)
+            } else {
+                data = null
+            }
+        }
+
+        companion object {
+
+            fun loadPreview(name: String): Preview {
+                val preview = Preview(name, File("profiles/$name/profile_data.onj"))
+                preview.runPreview = RunSave.loadPreview(preview)
+                preview.read()
+                return preview
+            }
+        }
+    }
+
     data class ProfileData(
         var cardCollection: MutableList<String>,
         var playerMoney: Int,
@@ -243,6 +284,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         val dataFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/profile_data.onjschema").file())
         }
+
+        fun loadPreview(name: String): Preview = Preview.loadPreview(name)
 
         fun createNewProfile(profileName: String): Profile {
             val profile = Profile(profileName, null)

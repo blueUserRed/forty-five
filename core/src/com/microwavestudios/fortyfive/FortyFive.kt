@@ -77,8 +77,6 @@ object FortyFive : Game() {
             return
         }
 
-        profileManager.currentProfile = Profile.loadProfile("A")
-
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
             UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
@@ -165,6 +163,7 @@ object FortyFive : Game() {
         ConfigFileManager.init()
         TemplateString.init()
         logger.init()
+        profileManager.init()
         steamHandler = SteamHandler()
         UserPrefs.read()
         soundPlayer.init()
