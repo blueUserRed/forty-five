@@ -108,11 +108,15 @@ class MapScreen : ScreenCreator() {
             }
         }
         getInfoPopup()
+
+        val inRun = FortyFive.profileManager.currentProfile!!.isRunActive
         addDefaultOverlays(
             worldWidth,
             worldHeight,
             warningEvents,
             canHaveRunBoard = true,
+            hasBackpack = inRun,
+            hasCollection = !inRun,
             warnings = WarningParent(this@MapScreen, screen, warningEvents)
         )
     }

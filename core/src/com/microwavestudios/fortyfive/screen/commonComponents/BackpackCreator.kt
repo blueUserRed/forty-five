@@ -34,6 +34,7 @@ object BackpackCreator {
         worldHeight: Float,
         warningEvents: EventPipeline,
         publicEvents: EventPipeline,
+        isCollection: Boolean,
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
 
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
@@ -42,7 +43,6 @@ object BackpackCreator {
             .associate { it.name to it }
 
         val profile = FortyFive.profileManager.currentProfile!!
-        val isCollection = !profile.isRunActive
 
         val state = BackpackState(
             if (isCollection) profile.currentCollectionDeck else profile.currentRunDeck!!,
@@ -100,7 +100,7 @@ object BackpackCreator {
         filter.start()
 
         val navbarObject = NavbarCreator.NavBarObject(
-            "Backpack",
+            if (isCollection) "Collection" else "Backpack",
             { Timeline.timeline {
 
                 action {

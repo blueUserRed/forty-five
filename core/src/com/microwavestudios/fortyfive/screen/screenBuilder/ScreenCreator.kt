@@ -403,7 +403,8 @@ abstract class ScreenCreator : ResourceBorrower {
         worldHeight: Float,
         events: EventPipeline,
         hasSettings: Boolean = true,
-        hasBackpack: Boolean = true,
+        hasBackpack: Boolean = false,
+        hasCollection: Boolean = false,
         hasNavbar: Boolean = true,
         navbarIsLeft: Boolean = false,
         warnings: WarningParent? = null,
@@ -425,9 +426,17 @@ abstract class ScreenCreator : ResourceBorrower {
         }
 
         val backpack = if (hasBackpack) {
-            val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events)
+            val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events, false)
             navbarObjects.add(backpackObject)
             backpack
+        } else {
+            null
+        }
+
+        val collection = if (hasCollection) {
+            val (collection, collectionObject) = getSharedBackpack(worldWidth, worldHeight, events, events, true)
+            navbarObjects.add(collectionObject)
+            collection
         } else {
             null
         }
@@ -454,6 +463,7 @@ abstract class ScreenCreator : ResourceBorrower {
         }
         runBoard?.let { actor(it) }
         backpack?.let { actor(it) }
+        collection?.let { actor(it) }
         settings?.let {
             actor(it) {
                 centerX()
@@ -477,7 +487,7 @@ abstract class ScreenCreator : ResourceBorrower {
             }
             advancedText("red_wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 1f) {
                 name("tutorial_info_text")
-                horizontalTextAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                horizontalTextAlign = CustomAlign.CENTER
                 centerX()
                 onLayout { y = worldHeight - prefHeight }
                 syncHeight()

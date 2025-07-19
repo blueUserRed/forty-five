@@ -58,7 +58,15 @@ class DialogScreen : ScreenCreator() {
         textWidget()
         choiceBox()
 
-        addDefaultOverlays(worldWidth, worldHeight, events, hasNavbar = false)
+        addDefaultOverlays(
+            worldWidth,
+            worldHeight,
+            events,
+            hasNavbar = false,
+            hasSettings = false,
+            hasTutorial = false,
+            hasTitleScreen = false
+        )
     }
 
     private fun CustomGroup.choiceBox() = box {

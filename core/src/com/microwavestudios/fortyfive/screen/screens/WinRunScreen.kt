@@ -96,7 +96,6 @@ class WinRunScreen : ScreenCreator() {
             worldWidth,
             worldHeight,
             events,
-            hasBackpack = false,
             hasTutorial = false,
             hasTitleScreen = false,
             hasSettings = false

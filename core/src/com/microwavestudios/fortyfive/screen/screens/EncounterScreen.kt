@@ -185,6 +185,7 @@ class EncounterScreen : ScreenCreator() {
             gameEvents,
             navbarIsLeft = true,
             hasTitleScreen = false,
+            hasBackpack = true,
             warnings = warningParent
         )
     }

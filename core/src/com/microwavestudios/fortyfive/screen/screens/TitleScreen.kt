@@ -126,7 +126,6 @@ class TitleScreen : ScreenCreator() {
             worldHeight,
             events,
             hasSettings = false, // added manually
-            hasBackpack = false,
             hasNavbar = false,
             hasTutorial = false,
         )

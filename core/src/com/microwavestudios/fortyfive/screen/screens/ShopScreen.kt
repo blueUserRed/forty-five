@@ -15,6 +15,9 @@ import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.events.shop.ShopScreenController
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.CustomBox
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -95,9 +98,9 @@ class ShopScreen : ScreenCreator() {
             x = worldWidth.percent(36)
             y = 1f
             backgroundHandle = "shop_background"
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.SPACE_AROUND
             wrap = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomWrap.NONE
             paddingTop = worldWidth.percent(3)
             paddingLeft = 25f
@@ -188,11 +191,13 @@ class ShopScreen : ScreenCreator() {
             }
         }
 
-        addDefaultOverlays(worldHeight, worldHeight, EventPipeline())
+        val profile = FortyFive.profileManager.currentProfile!!
+        val inRun = profile.isRunActive
+        addDefaultOverlays(worldHeight, worldHeight, EventPipeline(), hasBackpack = inRun, hasCollection = !inRun)
     }
 
     private fun Group.addTestChildren() {
-        fun _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomBox.addBasicStyles() {
+        fun CustomBox.addBasicStyles() {
             val size = 150f
             val listOf = listOf("shop_targets")
             width = size
@@ -215,12 +220,12 @@ class ShopScreen : ScreenCreator() {
         syncHeight()
         box {
             height = 90F
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            flexDirection = FlexDirection.ROW
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            verticalAlign = CustomAlign.CENTER
             relativeWidth(100F)
             box { //name and icon
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
+                flexDirection = FlexDirection.ROW
                 relativeHeight(100F)
 
                 image {
