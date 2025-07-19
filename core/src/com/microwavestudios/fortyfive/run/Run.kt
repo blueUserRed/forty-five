@@ -11,6 +11,8 @@ data class Run(
     val rewards: List<RunReward>,
     val biome: String,
     val fromArea: String,
+    val maxPlayerHealth: Int,
+    val initialPlayerHealth: Int,
     val mapGenerator: BaseMapGenerator
 ) {
 
@@ -21,6 +23,8 @@ data class Run(
         "rewards" with rewards.map { it.asOnj() }
         "biome" with biome
         "fromArea" with fromArea
+        "maxPlayerLives" with maxPlayerHealth
+        "initialPlayerLives" with initialPlayerHealth
         "mapGenerator" with mapGenerator.asOnj()
     }
 
@@ -36,6 +40,8 @@ data class Run(
             },
             onj.get<String>("biome"),
             onj.get<String>("fromArea"),
+            onj.get<Long>("maxPlayerLives").toInt(),
+            onj.get<Long>("initialPlayerLives").toInt(),
             BaseMapGenerator.fromOnj(onj.get<OnjNamedObject>("mapGenerator"))
         )
     }

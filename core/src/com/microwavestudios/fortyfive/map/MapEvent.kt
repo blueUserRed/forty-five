@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.PermaSaveState
-import com.microwavestudios.fortyfive.game.SaveState
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -38,7 +37,6 @@ object MapEventFactory {
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
-        "FinishTutorialMapEvent" to { FinishTutorialMapEvent.fromOnj(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -236,10 +234,11 @@ class DialogMapEvent(
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
         get() {
-            if (onlyIfPlayerDoesntHaveCard != null) {
-                val card = onlyIfPlayerDoesntHaveCard
-                return card !in SaveState.cards
-            }
+//            if (onlyIfPlayerDoesntHaveCard != null) {
+//                val card = onlyIfPlayerDoesntHaveCard
+//                return card !in SaveState.cards
+//            }
+            // TODO: fix
             return field
         }
 
@@ -385,40 +384,5 @@ class ChooseCardMapEvent(
             onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             onj.get<Long>("nbrOfCards").toInt(),
         ).apply { setStandardValuesFromConfig(onj) }
-    }
-}
-
-class FinishTutorialMapEvent(
-    private val goToMap: String
-) : MapEvent() {
-
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
-    override var isCompleted: Boolean = false
-    override val displayDescription: Boolean = true
-
-    override val displayName: String = "Exit"
-    override val descriptionText: String = "Start your Journey"
-
-    override fun start() {
-        SaveState.playerLives = SaveState.maxPlayerLives
-        SaveState.extract()
-        SaveState.write()
-        PermaSaveState.playerHasCompletedTutorial = true
-        PermaSaveState.write()
-        MapManager.changeToMap(goToMap)
-        FortyFive.screenManager.screenFinished()
-    }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("FinishTutorialMapEvent")
-        "goToMap" with goToMap
-    }
-
-    companion object {
-
-        fun fromOnj(onj: OnjObject): FinishTutorialMapEvent = FinishTutorialMapEvent(
-            onj.get<String>("goToMap")
-        )
     }
 }

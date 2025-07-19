@@ -71,9 +71,9 @@ class GameControllerImpl(
         get() = _encounterModifiers.map { it.second }
 
     override var curPlayerLives: Int
-        get() = SaveState.playerLives
+        get() = profile.healthInRun!!
         private set(value) {
-            SaveState.playerLives = value
+            profile.healthInRun = value
         }
 
     override val activeEnemies: List<Enemy>
@@ -268,7 +268,7 @@ class GameControllerImpl(
             }
         }
         gameEvents.watchFor<Events.PlayerLivesChanged> { event ->
-            val situation = GameSituation.PlayerHealthChanged(event.oldValue, event.newValue, SaveState.maxPlayerLives)
+            val situation = GameSituation.PlayerHealthChanged(event.oldValue, event.newValue, profile.maxHealthInRun!!)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
             }
@@ -325,7 +325,7 @@ class GameControllerImpl(
 
         val cards = encounter.forceCards
             ?: encounterContext.forceCards
-            ?: SaveState.curDeck.cards
+            ?: profile.currentRunDeck!!.cards
 
         val cardsArray = onj.get<OnjArray>("cards")
 
@@ -828,7 +828,6 @@ class GameControllerImpl(
             dispatchAnimTimeline(postProcessor)
         }
         cardToShoot?.let { card ->
-            action { SaveState.bulletsShot++ }
             targetedEnemies
                 .map { it.damage(cardToShoot.curDamage(this@GameControllerImpl)) }
                 .collectTimeline()
@@ -865,7 +864,6 @@ class GameControllerImpl(
 
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
         if (cost > curReserves) return false
-        SaveState.usedReserves += cost
         updateReserves(curReserves - cost, sourceActor = animTarget)
         return true
     }
@@ -1001,20 +999,19 @@ class GameControllerImpl(
         action {
             gameEvents.fire(event)
             FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
-            SaveState.encountersWon++
         }
         delayUntil { event.popupPromise.isResolved }
         if (money > 0) {
             delay(600)
             action {
                 FortyFive.soundPlayer.situation("money_earned", this@GameControllerImpl.screen)
-                SaveState.earnMoney(money)
+                profile.earnMoney(money)
             }
         }
         delay(300)
         action {
             encounterContext.completed()
-            SaveState.write()
+            profile.write()
 
             val chooseCardContext = object : ChooseCardScreenContext {
                 override var seed: Long = TimeUtils.millis()

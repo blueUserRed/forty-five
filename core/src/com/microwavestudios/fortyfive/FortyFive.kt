@@ -130,27 +130,10 @@ object FortyFive : Game() {
         currentRenderPipeline = renderPipeline
     }
 
-    fun newRun(forwardToLooseScreen: Boolean) {
-        logger.title("newRun called; forwardToLooseScreen = $forwardToLooseScreen")
-        PermaSaveState.newRun()
-        if (forwardToLooseScreen) SaveState.copyStats()
-        SaveState.reset()
-        MapManager.newRunSync()
-        if (forwardToLooseScreen) TODO()
-    }
-
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         currentRenderPipeline?.sizeChanged()
         if (UserPrefs.windowMode == UserPrefs.WindowMode.Window) UserPrefs.windowWidth = width
-    }
-
-    fun resetAll() {
-        PermaSaveState.reset()
-        SaveState.reset()
-        MapManager.resetAllSync()
-        UserPrefs.reset()
-        newRun(false)
     }
 
     private fun init() {
@@ -168,12 +151,7 @@ object FortyFive : Game() {
         UserPrefs.read()
         soundPlayer.init()
         MapManager.init()
-
-        if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
-            resetAll()
-        }
         PermaSaveState.read()
-        SaveState.read()
         GraphicsConfig.init()
         resourceManager.init()
         serviceThread.start()
@@ -187,7 +165,6 @@ object FortyFive : Game() {
         profileManager.currentProfile?.write()
         profileManager.currentProfile?.writeMaps()
         PermaSaveState.write()
-        SaveState.write()
         UserPrefs.write()
         _lifetime.die()
         soundPlayer.end()

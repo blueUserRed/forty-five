@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.Gdx
+import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
@@ -20,6 +21,14 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     private var data: ProfileData = ProfileData(
         mutableListOf("bullet", "bigBullet"),
+        mutableListOf(
+            Deck("1", 100, mutableMapOf()),
+            Deck("2", 101, mutableMapOf()),
+            Deck("3", 102, mutableMapOf()),
+            Deck("4", 103, mutableMapOf()),
+            Deck("5", 104, mutableMapOf()),
+        ),
+        100,
         0,
         "aqua_balle",
         0,
@@ -41,11 +50,38 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     val cardCollection: List<String>
         get() = _cardCollection
 
+    private var _collectionDecks: MutableList<Deck> by DataDelegate(ProfileData::collectionDecks)
+    val collectionDecks: List<Deck>
+        get() = _collectionDecks
+
     private var _currentMapName: String by DataDelegate(ProfileData::currentMap)
     val currentAreaMapName: String
         get() = _currentMapName
 
     private var runBoards: MutableMap<String, Pair<Run, Run>> by DataDelegate(ProfileData::runBoards)
+
+    private var currentCollectionDeckId: Int by DataDelegate(ProfileData::currentDeckId)
+
+    var currentCollectionDeck: Deck
+        get() = data.collectionDecks.find { it.id == currentCollectionDeckId }!!
+        set(value) {
+            currentCollectionDeckId = value.id
+        }
+
+    var currentRunDeck: Deck?
+        get() = runSave?.let { run ->
+            run.backpackDecks[run.currentDeckId]
+        }
+        set(value) {
+            val runSave = runSave ?: return
+            runSave.currentDeckId = value?.id ?: throw RuntimeException("can't set currentRunDeck to 'null'")
+        }
+
+    val backpack: List<String>?
+        get() = runSave?.backpack
+
+    val backpackDecks: List<Deck>?
+        get() = runSave?.backpackDecks
 
     var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
@@ -65,11 +101,25 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     val isRunActive: Boolean
         get() = runSave != null
 
+    var healthInRun: Int?
+        get() = runSave?.playerHealth
+        set(value) {
+            value ?: throw RuntimeException("cant set healthInRun to null")
+            runSave?.playerHealth = value
+        }
+
+    val maxHealthInRun: Int?
+        get() = runSave?.run?.maxPlayerHealth
+
     val areaMapSaver: MapSaver = object : MapSaver {
         override var currentNodeIndex: Int by this@Profile::currentNodeIndex
         override var lastNodeIndex: Int? by this@Profile::lastNodeIndex
         override val currentMapName: String by this@Profile::currentAreaMapName
         override val currentMap: DetailMap by this@Profile::currentAreaMap
+    }
+
+    init {
+        data.collectionDecks.forEach { it.checkDeck(data.cardCollection) }
     }
 
     fun changeToMap(map: String, fromEnd: Boolean = false) {
@@ -138,6 +188,20 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         _playerMoney += amount
     }
 
+    fun payMoney(amount: Int) {
+        _playerMoney -= amount
+    }
+
+    fun getCardForRun(card: String) {
+        val runSave = runSave ?: throw RuntimeException("not in a run")
+        runSave.addCardToBackpack(card)
+    }
+
+    fun checkDecks() {
+        collectionDecks.forEach { it.checkDeck(cardCollection) }
+        runSave?.checkDecks()
+    }
+
     private fun loadAreaMap(map: String) {
         val newMapFile = lookupAreaFile(map) ?: throw RuntimeException("no file for area: $map")
         this.currentMapFile = newMapFile
@@ -166,11 +230,15 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         dataFileSchema.check(onj)
         onj as OnjObject
         data = ProfileData.fromOnj(onj)
+        checkDecks()
     }
 
     fun write() {
+        checkDecks()
         runSave?.write()
-        if (!dirty) return
+        if (!dirty && !data.collectionDecks.any { it.deckDirty }) return
+        dirty = false
+        data.collectionDecks.forEach { it.resetDeckDirty() }
         if (!dataFile.exists()) {
             dataFile.createNewFile()
             dataFile.writeText(data.asOnj().toString())
@@ -228,6 +296,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     data class ProfileData(
         var cardCollection: MutableList<String>,
+        var collectionDecks: MutableList<Deck>,
+        var currentDeckId: Int,
         var playerMoney: Int,
         var currentMap: String,
         var currentNode: Int,
@@ -237,6 +307,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
         fun asOnj(): OnjObject = buildOnjObject {
             "cardCollection" with cardCollection
+            "collectionDecks" with collectionDecks.map { it.asOnjObject() }
+            "currentDeckId" with currentDeckId
             "playerMoney" with playerMoney
             "currentMap" with currentMap
             "currentNode" with currentNode
@@ -253,7 +325,9 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
             fun fromOnj(onj: OnjObject): ProfileData = ProfileData(
                 onj.get<OnjArray>("cardCollection").value.map { it.value as String }.toMutableList(),
+                onj.get<OnjArray>("collectionDecks").value.map { Deck.getFromOnj(it as OnjObject) }.toMutableList(),
                 onj.get<Long>("playerMoney").toInt(),
+                onj.get<Long>("currentDeckId").toInt(),
                 onj.get<String>("currentMap"),
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),

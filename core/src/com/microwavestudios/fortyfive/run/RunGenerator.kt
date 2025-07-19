@@ -17,6 +17,8 @@ class RunGenerator {
             listOf(RunReward.Cash(100)),
             forBiome,
             forArea,
+            100,
+            100,
             mapGen()
         )
     }

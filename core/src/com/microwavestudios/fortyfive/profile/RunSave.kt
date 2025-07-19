@@ -1,9 +1,9 @@
 package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.profile.Profile.Companion.dataFileSchema
-import com.microwavestudios.fortyfive.profile.Profile.ProfileData
 import com.microwavestudios.fortyfive.run.Run
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
@@ -22,6 +22,8 @@ class RunSave private constructor(val profile: Profile) {
     var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
     var playerHealth: Int by DataDelegate(RunSaveData::playerHealth)
+    var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
+    var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
 
     var run: Run by DataDelegate(RunSaveData::run)
         private set
@@ -50,6 +52,12 @@ class RunSave private constructor(val profile: Profile) {
         map = DetailMap.readFromFile(runMapFile)
     }
 
+    fun addCardToBackpack(card: String) {
+        _backpack.add(card)
+        backpackDecks.forEach { it.checkDeck(_backpack) }
+        dirty()
+    }
+
     fun readFromDisc() {
         dirty = false
         if (!runDataFile.exists()) {
@@ -61,10 +69,13 @@ class RunSave private constructor(val profile: Profile) {
         dataFileSchema.check(onj)
         onj as OnjObject
         data = RunSaveData.fromOnj(onj)
+        data.backpackDecks.forEach { it.checkDeck(data.backpack) }
     }
 
     fun write() {
-        if (!dirty) return
+        if (!dirty && !data.backpackDecks.any { it.deckDirty }) return
+        data.backpackDecks.forEach { it.resetDeckDirty() }
+        dirty = false
         if (!runDataFile.exists()) {
             runDataFile.createNewFile()
         }
@@ -73,6 +84,10 @@ class RunSave private constructor(val profile: Profile) {
 
     fun writeRunMap() {
         runMapFile.writeText(map.asOnjObject().toMinifiedString())
+    }
+
+    fun checkDecks() {
+        backpackDecks.forEach { it.checkDeck(backpack) }
     }
 
     class Preview(val dataFile: File) {
@@ -113,6 +128,8 @@ class RunSave private constructor(val profile: Profile) {
         var lastNode: Int?,
         var playerHealth: Int,
         var backpack: MutableList<String>,
+        var backpackDecks: MutableList<Deck>,
+        var currentDeckId: Int,
         var run: Run
     ) {
 
@@ -121,6 +138,8 @@ class RunSave private constructor(val profile: Profile) {
             "lastNode" with lastNode
             "playerHealth" with playerHealth
             "backpack" with backpack
+            "backpackDecks" with backpackDecks.map { it.asOnjObject() }
+            "currentDeckId" with currentDeckId
             "run" with run.asOnj()
         }
 
@@ -131,6 +150,8 @@ class RunSave private constructor(val profile: Profile) {
                 onj.get<Long?>("lastNode")?.toInt(),
                 onj.get<Long>("playerHealth").toInt(),
                 onj.get<OnjArray>("backpack").value.map { it.value as String }.toMutableList(),
+                onj.get<OnjArray>("backpackDecks").value.map { Deck.getFromOnj(it as OnjObject) }.toMutableList(),
+                onj.get<Long>("currentDeckId").toInt(),
                 Run.fromOnj(onj.get<OnjObject>("run"))
             )
         }
@@ -165,7 +186,21 @@ class RunSave private constructor(val profile: Profile) {
             val mapGenerator = run.mapGenerator
             val map = mapGenerator.generate("run_map", TimeUtils.millis())
             val save = RunSave(profile)
-            save.data = RunSaveData(0, null, 100, mutableListOf(), run)
+            save.data = RunSaveData(
+                0,
+                null,
+                run.initialPlayerHealth,
+                mutableListOf(),
+                mutableListOf(
+                    Deck("1", 0, mutableMapOf()),
+                    Deck("2", 1, mutableMapOf()),
+                    Deck("3", 2, mutableMapOf()),
+                    Deck("4", 3, mutableMapOf()),
+                    Deck("5", 4, mutableMapOf()),
+                ),
+                0,
+                run
+            )
             save.write()
             val runMapFile = save.runMapFile
             if (runMapFile.exists()) runMapFile.delete()

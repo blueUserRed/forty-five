@@ -17,8 +17,8 @@ import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator.getSharedPopup
 import com.microwavestudios.fortyfive.screen.commonComponents.ProfileCardCreator.getSharedProfileCard
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.getSharedSettingsMenu
-import com.microwavestudios.fortyfive.screen.screenController.TitleScreenController
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -42,19 +42,13 @@ class TitleScreen : ScreenCreator() {
         "*" to 800 //800 fits good with the animation
     )
 
-    override fun getScreenControllers(): List<ScreenController> = listOf(
-        TitleScreenController(screen)
-    )
-
-    private val controller: TitleScreenController by lazy {
-        screen.screenControllers.filterIsInstance<TitleScreenController>().first()
-    }
-
     private var settingsOpen: Boolean = false
 
     private val events: EventPipeline = EventPipeline()
 
     private var currentlySelectedProfile: Profile.Preview? = null
+
+    private val timelines: TimelineController = TimelineController()
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -193,25 +187,25 @@ class TitleScreen : ScreenCreator() {
     private fun openSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
         if (settingsOpen) return
         settingsOpen = true
-        controller.timeline.appendAction(Timeline.timeline {
+        timelines.appendMainTimeline(Timeline.timeline {
             include(settingsObject.openTimelineCreator())
             action {
                 blackOverlay.isVisible = true
                 blackOverlay.touchable = Touchable.enabled
             }
-        }.asAction())
+        })
     }
 
     private fun closeSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
         if (!settingsOpen) return
         settingsOpen = false
-        controller.timeline.appendAction(Timeline.timeline {
+        timelines.appendMainTimeline(Timeline.timeline {
             include(settingsObject.closeTimelineCreator())
             action {
                 blackOverlay.isVisible = false
                 blackOverlay.touchable = Touchable.disabled
             }
-        }.asAction())
+        })
     }
 
     private fun Group.addOption(
@@ -248,6 +242,10 @@ class TitleScreen : ScreenCreator() {
         name(name)
         backgroundHandle = name
     }
+
+    override fun getScreenControllers(): List<ScreenController> = listOf(
+        timelines
+    )
 
     private class SelectedProfileChanged(val newProfile: Profile.Preview?)
 
