@@ -156,7 +156,6 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             box(isScrollable = true) {
                 this as CustomScrollableBox
                 flexDirection = FlexDirection.ROW_REVERSE
-//                relativeHeight(100f)
                 height = 200f
                 width = 400f
                 horizontalAlign = CustomAlign.END

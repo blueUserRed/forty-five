@@ -82,6 +82,8 @@ object FortyFive : Game() {
             UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
             UserPrefs.StartScreen.MAP -> toMap()
         }
+//        profileManager.selectProfile(profileManager.availableProfiles.first())
+//        screenManager.appendScreen(WinRunScreen)
         screenManager.screenFinished()
     }
 

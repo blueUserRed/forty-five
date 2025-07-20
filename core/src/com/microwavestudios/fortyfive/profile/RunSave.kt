@@ -24,6 +24,7 @@ class RunSave private constructor(val profile: Profile) {
     var playerHealth: Int by DataDelegate(RunSaveData::playerHealth)
     var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
+    var cardsTakenAlong: List<String> by DataDelegate(RunSaveData::cardsTakenAlong)
 
     var run: Run by DataDelegate(RunSaveData::run)
         private set
@@ -130,6 +131,7 @@ class RunSave private constructor(val profile: Profile) {
         var backpack: MutableList<String>,
         var backpackDecks: MutableList<Deck>,
         var currentDeckId: Int,
+        var cardsTakenAlong: List<String>,
         var run: Run
     ) {
 
@@ -140,6 +142,7 @@ class RunSave private constructor(val profile: Profile) {
             "backpack" with backpack
             "backpackDecks" with backpackDecks.map { it.asOnjObject() }
             "currentDeckId" with currentDeckId
+            "cardsTakenAlong" with cardsTakenAlong
             "run" with run.asOnj()
         }
 
@@ -152,6 +155,7 @@ class RunSave private constructor(val profile: Profile) {
                 onj.get<OnjArray>("backpack").value.map { it.value as String }.toMutableList(),
                 onj.get<OnjArray>("backpackDecks").value.map { Deck.getFromOnj(it as OnjObject) }.toMutableList(),
                 onj.get<Long>("currentDeckId").toInt(),
+                onj.get<OnjArray>("cardsTakenAlong").value.map { it.value as String },
                 Run.fromOnj(onj.get<OnjObject>("run"))
             )
         }
@@ -182,7 +186,7 @@ class RunSave private constructor(val profile: Profile) {
 
         fun loadPreview(profilePreview: Profile.Preview): Preview? = Preview.loadPreview(profilePreview)
 
-        fun newRun(profile: Profile, run: Run): RunSave {
+        fun newRun(profile: Profile, run: Run, cardsToTakeAlong: List<String>): RunSave {
             val mapGenerator = run.mapGenerator
             val map = mapGenerator.generate("run_map", TimeUtils.millis())
             val save = RunSave(profile)
@@ -190,7 +194,7 @@ class RunSave private constructor(val profile: Profile) {
                 0,
                 null,
                 run.initialPlayerHealth,
-                mutableListOf(),
+                cardsToTakeAlong.toMutableList(),
                 mutableListOf(
                     Deck("1", 0, mutableMapOf()),
                     Deck("2", 1, mutableMapOf()),
@@ -199,6 +203,7 @@ class RunSave private constructor(val profile: Profile) {
                     Deck("5", 4, mutableMapOf()),
                 ),
                 0,
+                cardsToTakeAlong,
                 run
             )
             save.write()

@@ -161,6 +161,12 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             })
         }
 
+        fun waitForPromise(promise: Promise<*>) {
+            timelineActions.add(object : TimelineAction() {
+                override fun isFinished(timeline: Timeline): Boolean = promise.isResolved
+            })
+        }
+
         /**
          * delays the timeline for a number of milliseconds
          */

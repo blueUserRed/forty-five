@@ -63,7 +63,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     private var currentCollectionDeckId: Int by DataDelegate(ProfileData::currentDeckId)
 
     var currentCollectionDeck: Deck
-        get() = data.collectionDecks.find { it.id == currentCollectionDeckId }!!
+        get() =
+            data.collectionDecks.find { it.id == currentCollectionDeckId }!!
         set(value) {
             currentCollectionDeckId = value.id
         }
@@ -148,7 +149,12 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     fun startRun(run: Run) {
         if (runSave != null) throw RuntimeException("cant start new run when old run wasn't completed yet")
-        runSave = RunSave.newRun(this, run)
+        val cardsToTakeAlong = if (run.type == RunType.LIMITED) {
+            listOf()
+        } else {
+            currentCollectionDeck.cards
+        }
+        runSave = RunSave.newRun(this, run, cardsToTakeAlong)
     }
 
     fun loseRun() {
@@ -174,6 +180,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             RunType.PROGRESS -> runBoard
         }
         runBoards[area] = newRunBoard
+        val cardsToExtraxt = extractableCards()
+        _cardCollection.addAll(cardsToExtraxt)
         endRun(runSave)
     }
 
@@ -200,6 +208,17 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     fun checkDecks() {
         collectionDecks.forEach { it.checkDeck(cardCollection) }
         runSave?.checkDecks()
+    }
+
+    fun extractableCards(): List<String> {
+        val runSave = runSave
+            ?: throw RuntimeException("Profile.extractableCards() can only be called when a run is active")
+        if (runSave.run.type == RunType.LIMITED) return currentRunDeck!!.cards
+        val cardsToExtract = currentRunDeck!!.cards.toMutableList()
+        runSave.cardsTakenAlong.forEach { card ->
+            cardsToExtract.remove(card)
+        }
+        return cardsToExtract
     }
 
     private fun loadAreaMap(map: String) {
@@ -326,8 +345,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             fun fromOnj(onj: OnjObject): ProfileData = ProfileData(
                 onj.get<OnjArray>("cardCollection").value.map { it.value as String }.toMutableList(),
                 onj.get<OnjArray>("collectionDecks").value.map { Deck.getFromOnj(it as OnjObject) }.toMutableList(),
-                onj.get<Long>("playerMoney").toInt(),
                 onj.get<Long>("currentDeckId").toInt(),
+                onj.get<Long>("playerMoney").toInt(),
                 onj.get<String>("currentMap"),
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),

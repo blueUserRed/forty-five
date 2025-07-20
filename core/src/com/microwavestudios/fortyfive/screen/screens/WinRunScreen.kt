@@ -16,6 +16,7 @@ import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.animation.yPositionAbstractProperty
 import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.widgets.TextEffectEmitter
 import com.microwavestudios.fortyfive.game.widgets.textEffectEmitter
@@ -29,10 +30,7 @@ import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.commonComponents.RunCardCreator.getSharedRunCard
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
-import com.microwavestudios.fortyfive.utils.Color
-import com.microwavestudios.fortyfive.utils.EventPipeline
-import com.microwavestudios.fortyfive.utils.Timeline
-import com.microwavestudios.fortyfive.utils.alpha
+import com.microwavestudios.fortyfive.utils.*
 import kotlin.reflect.KClass
 
 class WinRunScreen : ScreenCreator() {
@@ -59,6 +57,10 @@ class WinRunScreen : ScreenCreator() {
     private val modal: InputManager.Modal by lazy {
         InputManager.Modal(listOf(), screen)
     }
+
+    private val profile = FortyFive.profileManager.currentProfile!!
+
+    private val cardsToExtract: List<String> = FortyFive.profileManager.currentProfile!!.extractableCards()
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -90,6 +92,7 @@ class WinRunScreen : ScreenCreator() {
             isVisible = false
         }
 
+        extractionPopup()
         cashPopup()
 
         addDefaultOverlays(
@@ -102,9 +105,132 @@ class WinRunScreen : ScreenCreator() {
         )
     }
 
-    private fun CustomGroup.cashPopup() {
+    private fun CustomGroup.extractionPopup() {
 
-        val profile = FortyFive.profileManager.currentProfile!!
+        val allCardProtos = RandomCardSelection.allCardPrototypes
+        val cardProtos = cardsToExtract.map { name -> allCardProtos.find { it.name == name }!! }
+        val cards = cardProtos.map { it.create(screen) }
+        cards.forEach { screen.lifetime.tieDisposable(it) }
+
+        val popupWidth = worldWidth * 0.6f
+        val popupHeight = worldHeight * 0.7f
+
+        val modal = InputManager.Modal(listOf("extract-cards-popup-button"), screen)
+        val filter = InputManager.FocusFilter(listOf("extract-cards-popup-button"), screen)
+        filter.start()
+
+        val finishedPromise: Promise<Unit> = Promise()
+
+        val popup = group {
+            width = popupWidth
+            height = popupHeight
+            backgroundHandle = "map_extraction_background"
+            centerX()
+
+            label("red_wing", "Cards that will be added to your collection", Color.FortyWhite) {
+                relativeWidth(100f)
+                setAlignment(Align.center)
+                centerX()
+                onLayoutAndNow { y = parent.height - height - 30f }
+            }
+
+            group {
+                backgroundHandle = "map_extraction_card_background_blue"
+                relativeWidth(90f)
+                relativeHeight(90f)
+                centerX()
+                centerY()
+            }
+
+            box(isScrollable = true) {
+                this as CustomScrollableBox
+                debug()
+                backgroundHandle = "map_extraction_card_background_white"
+                relativeWidth(75f)
+                relativeHeight(70f)
+                centerX()
+                centerY()
+                paddingTop = 15f
+                paddingLeft = 15f
+                paddingRight = 15f
+                val widthPerCard = (popupWidth * 0.75f - 30f) / 5f
+                scrollDirectionStart = CustomDirection.TOP
+                flexDirection = FlexDirection.ROW
+                wrap = CustomWrap.WRAP
+                addScrollbarFromDefaults(
+                    CustomDirection.RIGHT,
+                    "backpack_scrollbar",
+                    "backpack_scrollbar_background",
+                )
+                cards.forEach { card ->
+                    box {
+                        debug()
+                        width = widthPerCard
+                        height = widthPerCard
+                        verticalAlign = CustomAlign.CENTER
+                        horizontalAlign = CustomAlign.CENTER
+                        actor(card.actor) {
+                            width = widthPerCard * 0.9f
+                            height = widthPerCard * 0.9f
+                        }
+                    }
+                }
+            }
+
+            box(backgroundHints = buttonBackgroundHints()) {
+                centerX()
+                y = 20f
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
+                height = 50f
+                width = 110f
+                keyboardFocusable = KeyboardFocusable.LEAF
+                touchable = Touchable.enabled
+                joinGroup("extract-cards-popup-button")
+                defaultButtonBackgrounds()
+
+                label("red_wing", "Ok", color = Color.FortyWhite)
+
+                onInput(GameInputs.interact) {
+                    finishedPromise.resolve(Unit)
+                }
+            }
+        }
+
+        val yAnim = PropertyAnimation(
+            popup,
+            popup.yPositionAbstractProperty(),
+            Float::class,
+            360,
+            Interpolation.pow4,
+            "hidden",
+            states = arrayOf(
+                AnimState("hidden", -700f),
+                AnimState("shown", popup.parent.height / 2 - popup.height / 2),
+                AnimState("finished", worldHeight + 700)
+            )
+        )
+
+        fun createTimeline() = Timeline.timeline {
+            includeAction(yAnim.stateAction("shown"))
+            action {
+                filter.end()
+                modal.push()
+            }
+            waitForPromise(finishedPromise)
+            action {
+                filter.start()
+                modal.finished()
+            }
+            includeAction(yAnim.stateAction("finished"))
+        }
+
+        events.watchFor<ExtractionPopup> { event ->
+            event.timeline = createTimeline()
+        }
+    }
+
+    private fun CustomGroup.cashPopup() {
 
         lateinit var cashLabel: CustomLabel
         lateinit var cashGroup: CustomGroup
@@ -257,6 +383,7 @@ class WinRunScreen : ScreenCreator() {
             relativeHeight(50f)
 
             label("red_wing", "rewards:", Color.FortyWhite)
+            if (cardsToExtract.isNotEmpty()) extractCardsReward()
             rewards(run.rewards)
         }
     }
@@ -265,6 +392,33 @@ class WinRunScreen : ScreenCreator() {
         when (reward) {
             is RunReward.Cash -> cashReward(reward)
         }
+    }
+
+    private fun CustomBox.extractCardsReward() {
+        box {
+            width = 400f
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            height = 70f
+            backgroundHandle = "win_popup_item_card"
+
+            image {
+                backgroundHandle = "map_node_get_card"
+                width = 40f
+                height = 30f
+                marginLeft = 10f
+                marginRight = 10f
+            }
+
+            label("red_wing", "You can keep cards!", Color.FortyWhite)
+        }
+        events.watchFor<ClaimRewardsEvent> { event -> event.append {
+            later {
+                val popupEvent = ExtractionPopup()
+                events.fire(popupEvent)
+                include(popupEvent.timeline!!)
+            }
+        } }
     }
 
     private fun CustomBox.cashReward(reward: RunReward.Cash) {
@@ -311,6 +465,7 @@ class WinRunScreen : ScreenCreator() {
     }
 
     private class CashPopup(var timeline: Timeline? = null, val cashAmount: Int)
+    private class ExtractionPopup(var timeline: Timeline? = null)
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = WinRunScreen::class
