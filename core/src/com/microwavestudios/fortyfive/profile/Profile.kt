@@ -6,6 +6,7 @@ import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
 import com.microwavestudios.fortyfive.run.RunType
+import com.microwavestudios.fortyfive.utils.EventPipeline
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -36,13 +37,20 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         mutableMapOf()
     )
 
+    val events: EventPipeline = EventPipeline()
+
     val profilePath: File = File("profiles/$name")
 
     private var dirty: Boolean = true
 
     private val dataFile: File = File(profilePath.absolutePath + "/profile_data.onj")
 
-    private var _playerMoney: Int by DataDelegate(ProfileData::playerMoney)
+    private var _playerMoney: Int by DataDelegate(
+        ProfileData::playerMoney,
+        onSet = { value ->
+            events.fire(MoneyChangedEvent(value))
+        }
+    )
     val playerMoney: Int
         get() = _playerMoney
 
@@ -360,17 +368,27 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         }
     }
 
-    private inner class DataDelegate<T>(val property: KMutableProperty<T>) {
+    private inner class DataDelegate<T>(
+        val property: KMutableProperty<T>,
+        val onGet: ((T) -> Unit)? = null,
+        val onSet: ((T) -> Unit)? = null
+    ) {
 
-        operator fun getValue(thisRef: Any?, p: KProperty<*>): T = property.getter.call(data)
+        operator fun getValue(thisRef: Any?, p: KProperty<*>): T {
+            return property.getter.call(data).also { onGet?.invoke(it) }
+        }
 
         operator fun setValue(thisRef: Any?, p: KProperty<*>, value: T) {
             val old = getValue(thisRef, p)
             if (old === value) return
+            onSet?.invoke(value)
             property.setter.call(data, value)
             dirty()
         }
     }
+
+    data class HealthChangedEvent(val newHealth: Int)
+    data class MoneyChangedEvent(val newMoney: Int)
 
     companion object {
 

@@ -21,10 +21,16 @@ class RunSave private constructor(val profile: Profile) {
 
     var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
-    var playerHealth: Int by DataDelegate(RunSaveData::playerHealth)
     var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
     var cardsTakenAlong: List<String> by DataDelegate(RunSaveData::cardsTakenAlong)
+
+    var playerHealth: Int by DataDelegate(
+        RunSaveData::playerHealth,
+        onSet = { value ->
+            profile.events.fire(Profile.HealthChangedEvent(value))
+        }
+    )
 
     var run: Run by DataDelegate(RunSaveData::run)
         private set
@@ -161,13 +167,20 @@ class RunSave private constructor(val profile: Profile) {
         }
     }
 
-    private inner class DataDelegate<T>(val property: KMutableProperty<T>) {
+    private inner class DataDelegate<T>(
+        val property: KMutableProperty<T>,
+        val onGet: ((T) -> Unit)? = null,
+        val onSet: ((T) -> Unit)? = null
+    ) {
 
-        operator fun getValue(thisRef: Any?, p: KProperty<*>): T = property.getter.call(data)
+        operator fun getValue(thisRef: Any?, p: KProperty<*>): T {
+            return property.getter.call(data).also { onGet?.invoke(it) }
+        }
 
         operator fun setValue(thisRef: Any?, p: KProperty<*>, value: T) {
             val old = getValue(thisRef, p)
             if (old === value) return
+            onSet?.invoke(value)
             property.setter.call(data, value)
             dirty()
         }
