@@ -113,6 +113,13 @@ class TitleScreen : ScreenCreator() {
             currentlySelectedProfile = event.newProfile
         }
 
+        label("red_wing", "rework stage 1 - alpha", Color.Black) {
+            onLayoutAndNow {
+                x = worldWidth - width - 10
+                y = worldHeight - height - 10
+            }
+        }
+
         actor(settings) {
             centerX()
             fixedZIndex = 10000
