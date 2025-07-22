@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameDirector
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.keyInput.GameInputs
+import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.DetailMapWidget
 import com.microwavestudios.fortyfive.map.EncounterMapEvent
@@ -134,6 +135,9 @@ class MapScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.CENTER
         verticalAlign = CustomAlign.SPACE_BETWEEN
 
+        val startButtonGroup = "map-popup-start-button"
+        val startButtonFilter = InputManager.FocusFilter(listOf(startButtonGroup), screen)
+
         fun getAction(to: Float) = MoveToAction().also {
             it.x = to
             it.y = y
@@ -149,6 +153,11 @@ class MapScreen : ScreenCreator() {
             open = shouldBeOpen
             val action = getAction(if (shouldBeOpen) normalX else closedX)
             addAction(action)
+            if (shouldBeOpen) {
+                startButtonFilter.end()
+            } else {
+                startButtonFilter.start()
+            }
         }
 
         val eventName: CustomLabel
@@ -207,6 +216,7 @@ class MapScreen : ScreenCreator() {
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             marginBottom = 27f
+            joinGroup(startButtonGroup)
             onInput(GameInputs.interact) {
                 if (mapWidget.playerNode.event?.canBeStarted == true) {
                     mapWidget.onStartButtonClicked(this@label)

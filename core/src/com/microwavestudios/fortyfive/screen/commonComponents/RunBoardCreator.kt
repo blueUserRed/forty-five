@@ -25,6 +25,8 @@ import com.microwavestudios.fortyfive.utils.Timeline
 
 object RunBoardCreator {
 
+    private val runBoardGroup: String = "run-board"
+
     fun ScreenCreator.getSharedRunBoard(
         worldWidth: Float,
         worldHeight: Float,
@@ -53,12 +55,24 @@ object RunBoardCreator {
             )
         )
 
+        val modal = InputManager.Modal(listOf(runBoardGroup, NavbarCreator.navbarButtonGroup), screen)
+        val filter = InputManager.FocusFilter(listOf(runBoardGroup), screen)
+        filter.start()
+
         val openTimeline: () -> Timeline = { Timeline.timeline {
             includeAction(animation.stateAction("open"))
+            action {
+                modal.push()
+                filter.end()
+            }
         } }
 
         val closeTimeline: () -> Timeline = { Timeline.timeline {
             includeAction(animation.stateAction("close"))
+            action {
+                modal.finished()
+                filter.start()
+            }
         } }
 
         val navBarObject = NavbarCreator.NavBarObject(
@@ -204,11 +218,13 @@ object RunBoardCreator {
                 actor(getSharedRunCard(runBoard.first)) {
                     touchable = Touchable.enabled
                     keyboardFocusable = KeyboardFocusable.LEAF
+                    joinGroup(runBoardGroup)
                     onInput(GameInputs.interact, runSelectCallback(runBoard.first))
                 }
                 actor(getSharedRunCard(runBoard.second)) {
                     touchable = Touchable.enabled
                     keyboardFocusable = KeyboardFocusable.LEAF
+                    joinGroup(runBoardGroup)
                     onInput(GameInputs.interact, runSelectCallback(runBoard.second))
                 }
             } else box {

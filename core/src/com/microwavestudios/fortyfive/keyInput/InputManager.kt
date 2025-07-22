@@ -21,11 +21,13 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     private val groups: MutableMap<String, MutableList<InputActor>> = mutableMapOf()
 
-    private var currentlyDraggedActor: InputActor? = null
+    var currentlyDraggedActor: InputActor? = null
+        private set
 
     private val dragAndDrops: MutableList<DragAndDrop> = mutableListOf()
 
-    private var keyboardFocused: InputActor? = null
+    var keyboardFocused: InputActor? = null
+        private set
 
     private val inputCallbacks: MutableMap<Input, MutableList<() -> Unit>> = mutableMapOf()
 

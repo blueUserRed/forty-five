@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input.Keys
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.actors.DebugActor
 import kotlin.reflect.KProperty
 
 class DebugMenu(val pages: List<DebugMenuPage>) {
@@ -120,8 +121,17 @@ class ScreenDebugMenuPage : DebugMenuPage("Performance infos") {
         version: ${FortyFive.logger.versionTag}
         15s render lagSpike: ${FortyFive.renderTimes.max()}ms
         15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
-        screen transition max lagSpike: ${FortyFive.screenTransitionTimes.max()}ms
-        screen transition avg. lagSpike: ${FortyFive.screenTransitionTimes.average().toInt()}ms
+        
+        focused with keyboard: ${
+            screen.inputManager.keyboardFocused?.actor?.let {
+                if (it is DebugActor) it.getDebugName() else it.toString()
+            }
+        }
+        currently dragged: ${
+            screen.inputManager.currentlyDraggedActor?.actor?.let {
+                if (it is DebugActor) it.getDebugName() else it.toString()
+            }
+        }
         
         $makeLaggy
     """.trimIndent()
