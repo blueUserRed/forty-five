@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("eclipse")
     id("java")
@@ -65,6 +67,9 @@ project(":onj") {
 project(":core") {
     apply(plugin = "kotlin")
     kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
         sourceSets.all {
             languageSettings.enableLanguageFeature("ExplicitBackingFields")
         }

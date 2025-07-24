@@ -31,8 +31,8 @@ object MapManager {
     lateinit var currentMapFile: FileHandle
         private set
 
-    lateinit var mapImages: List<MapImageData>
-        private set
+//    lateinit var mapImages: List<MapImageData>
+//        private set
 
 //    var currentMapNode: MapNode
 //        get() = currentDetailMap.uniqueNodes.find { it.index == SaveState.currentNode } ?: run {
@@ -205,12 +205,12 @@ object MapManager {
 //        file.writeText(map.asOnjObject().toMinifiedString())
     }
 
-    data class MapImageData(
-        val name: String,
-        val resourceHandle: ResourceHandle,
-        val width: Float,
-        val height: Float,
-        val type: String, // TODO: why is this not an enum
-    )
+//    data class MapImageData(
+//        val name: String,
+//        val resourceHandle: ResourceHandle,
+//        val width: Float,
+//        val height: Float,
+//        val type: String, // TODO: why is this not an enum
+//    )
 
 }

@@ -1,0 +1,13 @@
+
+mapImages: {
+    name: string,
+    type: string,
+    image: string,
+    width: float,
+    height: float
+}[],
+
+displayNames: {
+    name: string,
+    display: string,
+}[]

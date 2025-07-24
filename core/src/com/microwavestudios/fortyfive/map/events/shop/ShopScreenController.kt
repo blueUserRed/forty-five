@@ -8,7 +8,6 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.profile.Profile
@@ -111,7 +110,7 @@ class ShopScreenController(
                 contextTypes.toList(),
                 amount,
                 random,
-                MapManager.currentDetailMap.biome,
+                FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap.biome,
                 "shop",
                 unique = true
             )
@@ -223,9 +222,8 @@ class ShopScreenController(
         this.personWidget = shopPersonWidget
 
         personWidget.backgroundHandle = imgData.get<String>("textureName")
-        val scale = imgData.get<Double>("scale").toFloat()
-        personWidget.scaleX = scale
-        personWidget.scaleY = scale
+        personWidget.width = imgData.get<Double>("width").toFloat()
+        personWidget.height = imgData.get<Double>("height").toFloat()
         personWidget.drawOffsetX = imgData.getOr<Double>("offsetX", 0.0).toFloat()
         personWidget.drawOffsetY = imgData.getOr<Double>("offsetY", 0.0).toFloat()
 

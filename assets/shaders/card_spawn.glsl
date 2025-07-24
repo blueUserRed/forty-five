@@ -23,20 +23,20 @@ out vec4 outColor;
 
 void main() {
     float progress = u_progress;
-    vec2 center = vec2(0.5f, 0.5f);
+    vec2 center = vec2(0.5, 0.5);
     float dist = abs(length(center - v_texCoords));
-    float alpha = 1.0f - dist;
-    alpha *= 1f;
+    float alpha = 1.0 - dist;
+    alpha *= 1.0;
     alpha = alpha * alpha * alpha * alpha * alpha * alpha * alpha * alpha * alpha * alpha;
-    alpha *= 1.0f;
-    alpha = min(alpha, 1.0f);
-    alpha = alpha * (1.0f - progress) + progress;
+    alpha *= 1.0;
+    alpha = min(alpha, 1.0);
+    alpha = alpha * (1.0 - progress) + progress;
 
     vec4 texColor = texture(u_texture, v_texCoords);
 
     vec3 color = texColor.rgb;
-    float invAlpha = 1.0f - alpha;
-    color = mix(color, vec3(0.3f, 1.0f, 0.3f), (invAlpha * invAlpha) * 1.0f);
+    float invAlpha = 1.0 - alpha;
+    color = mix(color, vec3(0.3, 1.0, 0.3), (invAlpha * invAlpha) * 1.0);
 
     outColor = vec4(color.r, color.g, color.b, alpha * texColor.a);
 }

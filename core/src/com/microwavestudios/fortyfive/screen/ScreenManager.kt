@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenBuilder

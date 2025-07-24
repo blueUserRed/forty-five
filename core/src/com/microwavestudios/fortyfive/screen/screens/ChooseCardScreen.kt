@@ -67,6 +67,7 @@ class ChooseCardScreen : ScreenCreator() {
         x = 0f
         y = 0f
 
+        currentDeck = profile.currentRunDeck!!
         events.watchFor<BackpackCreator.DeckChangedEvent> {
             currentDeck = profile.currentRunDeck!!
             events.fire(RecheckAddToDeck)

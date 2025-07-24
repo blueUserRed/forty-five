@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.map
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.map.generation.Direction
 import com.microwavestudios.fortyfive.map.generation.Line
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
@@ -26,6 +27,8 @@ data class MapNode(
     private var imageCache: Promise<Drawable>? = null
     private var nodeTextureCache: Promise<Drawable>? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
+
+    private val mapConfig: ConfigFileManager.MapConfig = ConfigFileManager.mapConfig
 
     fun getEdge(dir: Direction): MapNode? {
         if (nodePositionsForDirection.size != edgesTo.size) initNodeDirections()
@@ -108,16 +111,15 @@ data class MapNode(
     }
 
     fun getImage(screen: OnjScreen): Promise<Drawable>? {
-        return null
-//        if (imageName == null) return null
-//        if (imageCache != null) return imageCache
-//        val handle = getImageData()?.resourceHandle
-//        if (handle == null) {
-//            FortyFive.logger.warn(logTag, "No image data found for $imageName")
-//            return null
-//        }
-//        imageCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
-//        return imageCache
+        if (imageName == null) return null
+        if (imageCache != null) return imageCache
+        val handle = getImageData()?.resourceHandle
+        if (handle == null) {
+            FortyFive.logger.warn(logTag, "No image data found for $imageName")
+            return null
+        }
+        imageCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
+        return imageCache
     }
 
     fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {
@@ -133,8 +135,8 @@ data class MapNode(
         nodeTextureCache = null
     }
 
-    fun getImageData(): MapManager.MapImageData? =
-        MapManager.mapImages.find { it.name == imageName && it.type == "sign" }
+    fun getImageData(): ConfigFileManager.MapImageData? =
+        mapConfig.images.find { it.name == imageName && it.type == ConfigFileManager.MapImageData.Type.SIGN }
 
     fun isLinkedTo(node: MapNode): Boolean {
         for (linkedNode in node.edgesTo) {

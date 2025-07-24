@@ -11,10 +11,8 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.run.Run
-import com.microwavestudios.fortyfive.screen.actors.CustomAlign
-import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.actors.FlexDirection
-import com.microwavestudios.fortyfive.screen.actors.PositionType
+import com.microwavestudios.fortyfive.run.RunType
+import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.commonComponents.RunCardCreator.getSharedRunCard
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screens.MapScreen
@@ -103,6 +101,8 @@ object RunBoardCreator {
 
         isVisible = false
 
+        lateinit var bodyLabel: CustomLabel
+
         box {
             width = 600f
             height = 300f
@@ -118,7 +118,7 @@ object RunBoardCreator {
                 setAlignment(Align.center)
                 setFontScale(1.3f)
             }
-            label("roadgeek", "You will take deck 2 with you", Color.FortyWhite) {
+            bodyLabel = label("roadgeek", "", Color.FortyWhite) {
                 setAlignment(Align.center)
                 setFontScale(0.8f)
             }
@@ -170,6 +170,12 @@ object RunBoardCreator {
             promise = event.result
             filter.end()
             modal.push()
+            val profile = FortyFive.profileManager.currentProfile!!
+            if (event.run.type == RunType.LIMITED) {
+                bodyLabel.setText("")
+            } else {
+                bodyLabel.setText("You will take deck ${profile.currentCollectionDeck.name} with you")
+            }
             event.result.then {
                 isVisible = false
                 filter.start()
@@ -204,7 +210,7 @@ object RunBoardCreator {
             centerY()
 
             fun runSelectCallback(run: Run): () -> Unit = {
-                val event = ShowPopup()
+                val event = ShowPopup(run)
                 events.fire(event)
                 event.result.then { startRun ->
                     if (!startRun) return@then
@@ -241,6 +247,6 @@ object RunBoardCreator {
         }
     }
 
-    private data class ShowPopup(val result: Promise<Boolean> = Promise())
+    private data class ShowPopup(val run: Run, val result: Promise<Boolean> = Promise())
 
 }

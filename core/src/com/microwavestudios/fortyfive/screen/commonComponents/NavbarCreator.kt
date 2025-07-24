@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.profile.Profile
@@ -341,8 +342,12 @@ object NavbarCreator {
         }
     }
 
-    private fun nameTextureForMap(mapName: String) = null
-//        MapManager.mapImages.find { it.name == mapName && it.type == "name" }?.resourceHandle
+    private fun nameTextureForMap(mapName: String) =
+        ConfigFileManager
+            .mapConfig
+            .images
+            .find { it.name == mapName && it.type == ConfigFileManager.MapImageData.Type.NAME }
+            ?.resourceHandle
 
 
     private fun CustomImageActor.setupDimensionsForAreaName(parent: CustomBox) {

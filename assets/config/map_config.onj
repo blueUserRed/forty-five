@@ -1,6 +1,129 @@
 use Map;
 use Common;
 
+
+var images = {
+    aquaBalle: {
+        image: "location_sign_aqua_balle",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0,
+    },
+    aquaBalleName: {
+        image: "location_name_aqua_balle",
+        width: 90.0 * (156.0 / 326.0),
+        height: 90.0,
+    },
+    salem: {
+        image: "location_sign_salem",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0
+    },
+    salemName: {
+        image: "location_name_salem",
+        width: 90.0,
+        height: 90.0 * (163.0 / 270.0)
+    },
+    tabuletter: {
+        image: "location_sign_tabu_letter_outpost",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0
+    },
+    tabuletterName: {
+        image: "location_name_tabuletter_outpost",
+        width: 90.0,
+        height: 90.0 * (163.0 / 625.0)
+    },
+    spire: {
+        image: "location_sign_spire_outpost",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0
+    },
+    underConstruction: {
+        image: "location_sign_under_construction",
+        width: 359.0 * 0.7,
+        height: 222.0 * 0.7
+    },
+    spireName: {
+        image: "location_name_spire_outpost",
+        width: 90.0,
+        height: 90.0 * (184.0 / 540.0)
+    }
+};
+
+mapImages: [
+    {
+        name: "aqua_balle",
+        type: "sign",
+        ...(images.aquaBalle),
+    },
+    {
+        name: "tabu_letter_outpost",
+        type: "sign",
+        ...(images.tabuletter),
+    },
+    {
+        name: "salem",
+        image: images.salem.image,
+        width: images.salem.width,
+        height: images.salem.height,
+        type: "sign",
+    },
+    {
+        name: "spire_outpost",
+        type: "sign",
+        ...(images.spire),
+    },
+    {
+        name: "under_construction",
+        type: "sign",
+        ...(images.underConstruction),
+    },
+    {
+        name: "aqua_balle",
+        type: "name",
+        ...(images.aquaBalleName),
+    },
+    {
+        name: "tabu_letter_outpost",
+        type: "name",
+        ...(images.tabuletterName),
+    },
+    {
+        name: "salem",
+        image: images.salemName.image,
+        width: images.salemName.width,
+        height: images.salemName.height,
+        type: "name",
+    },
+    {
+        name: "spire_outpost",
+        type: "name",
+        ...(images.spireName),
+    }
+],
+
+displayNames: [
+    {
+        name: "aqua_balle",
+        display: "Aqua Balle"
+    },
+    {
+        name: "tabu_letter_outpost",
+        display: "Tabu Letter Outpost"
+    },
+    {
+        name: "salem",
+        display: "salem"
+    },
+    {
+        name: "spire_outpost",
+        display: "Spire Outpost"
+    },
+],
+
+
+/*
+
 var mapSharedConfig = {
     mainLineNodes: 8,
     altLinesPadding: [0, 2],

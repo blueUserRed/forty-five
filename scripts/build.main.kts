@@ -38,12 +38,18 @@ fun build() {
         debug("removing jar")
         (tmpDir / "forty-five.jar").delete()
     }
+
     debug("compressing build")
     shellCommand(tmpDir, "7z", "a", "$dirName.zip", "./*")
+
     debug("copying archive")
-    (tmpDir / "$dirName.zip").copyTo(File("build/script/$dirName.zip"))
+    val outputFile = File("build/script/$dirName.zip")
+    if (outputFile.exists()) outputFile.delete()
+    (tmpDir / "$dirName.zip").copyTo(outputFile)
+
     debug("removing tmp directories")
     tmpDir.deleteRecursively()
+
     println("\u001B[34mBuild successful. Finished Build can be found at: build/script/$dirName.zip\u001B[0m")
 }
 
@@ -79,10 +85,11 @@ fun cleanupAssets(tmpDir: File) {
     (tmpDir / "error_logs")
         .listFiles()?.forEach { it.delete() }
 
-//    debug("removing raw animation frames")
-//    (tmpDir / "large_assets")
-//        .listFiles()?.filter { it.name.endsWith("_animation") }
-//        ?.forEach { it.deleteRecursively() }
+    debug("removing raw animation frames")
+    (tmpDir / "blobs/animations")
+        .listFiles()
+        ?.filter { it.name != "packed" }
+        ?.forEach { it.deleteRecursively() }
 
     debug("removing log file")
     (tmpDir / "logging/forty-five.log").delete()
@@ -100,6 +107,11 @@ fun cleanupAssets(tmpDir: File) {
         .listFiles()!!
         .filter { !it.name.startsWith("default_") }
         .forEach { it.delete() }
+
+    debug("removing profiles")
+    (tmpDir / "profiles")
+        .listFiles()!!
+        .forEach { it.deleteRecursively() }
 }
 
 fun changeLoggingVersionTag(tmpDir: File, newTag: String) {

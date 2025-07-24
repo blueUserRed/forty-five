@@ -7,14 +7,12 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
-import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
@@ -152,7 +150,6 @@ object FortyFive : Game() {
         steamHandler = SteamHandler()
         UserPrefs.read()
         soundPlayer.init()
-        MapManager.init()
         PermaSaveState.read()
         GraphicsConfig.init()
         resourceManager.init()

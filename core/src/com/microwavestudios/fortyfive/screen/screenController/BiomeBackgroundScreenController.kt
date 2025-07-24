@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.screen.screenController
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 
