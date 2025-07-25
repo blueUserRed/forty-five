@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.PermaSaveState
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
@@ -201,12 +202,15 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 
     override val buttonText: String = "Enter"
 
+    private val mapConfig: ConfigFileManager.MapConfig = ConfigFileManager.mapConfig
+    private val targetMapDisplayName: String = mapConfig.displayNames[targetMap]!!
+
     // lazy so it doesn't crash when the event is instanced
     override val displayName: String by lazy {
-        "Enter $targetMap"
+        "Enter $targetMapDisplayName"
     }
     override val descriptionText: String by lazy {
-        "Have fun exploring $targetMap"
+        ""
     }
 
     override fun start() {
@@ -234,11 +238,10 @@ class DialogMapEvent(
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
         get() {
-//            if (onlyIfPlayerDoesntHaveCard != null) {
-//                val card = onlyIfPlayerDoesntHaveCard
-//                return card !in SaveState.cards
-//            }
-            // TODO: fix
+            val card = onlyIfPlayerDoesntHaveCard ?: return field
+            val profile = FortyFive.profileManager.currentProfile ?: return field
+            val cards = if (profile.isRunActive) profile.backpack!! else profile.cardCollection
+            if (card !in cards) return false
             return field
         }
 

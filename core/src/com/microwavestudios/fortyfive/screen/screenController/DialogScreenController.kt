@@ -169,7 +169,6 @@ class DialogScreenController(
             val img = it.get<OnjObject>("image")
             DialogNpc(
                 it.get<String>("name"),
-                it.get<String>("displayName"),
                 img.get<String>("textureName"),
                 Vector2(
                     img.getOr<Double>("offsetX", 0.0).toFloat(),
@@ -196,7 +195,6 @@ class DialogScreenController(
 
 data class DialogNpc(
     val name: String,
-    val displayName: String,
     val textureName: String,
     val offset: Vector2,
     val width: Float,

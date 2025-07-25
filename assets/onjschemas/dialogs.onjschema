@@ -60,6 +60,5 @@ var image = {
 
 npcs: {
     name: string,
-    displayName: string,
     image: image,
 }[]

@@ -119,6 +119,34 @@ displayNames: [
         name: "spire_outpost",
         display: "Spire Outpost"
     },
+    {
+        name: "to_be_continued_npc",
+        display: "Developers"
+    },
+    {
+        name: "brother",
+        display: "Your Brother"
+    },
+    {
+        name: "traveling_merchant",
+        display: "Traveling Merchant"
+    },
+    {
+        name: "priest_of_aqua_balle",
+        display: "Priest of Aqua Balle"
+    },
+    {
+        name: "not_yet_implemented_npc",
+        display: "Stranger"
+    },
+    {
+        name: "witch",
+        display: "Witch"
+    },
+    {
+        name: "traveler_in_salem_npc",
+        display: "Traveller"
+    },
 ],
 
 

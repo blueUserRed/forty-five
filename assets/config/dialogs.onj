@@ -49,37 +49,30 @@ var images = {
 npcs: [
     {
         name: "to_be_continued_npc",
-        displayName: "Developers",
         image: images.traveler,
     },
     {
         name: "brother",
-        displayName: "Your Brother",
         image: images.stranger
     },
     {
         name: "traveling_merchant",
-        displayName: "Traveling Merchant",
         image: images.merchant
     },
     {
         name: "priest_of_aqua_balle",
-        displayName: "Priest of Aqua Balle",
         image: images.priest
     },
     {
         name: "not_yet_implemented_npc",
-        displayName: "Stranger",
         image: images.stranger
     },
     {
         name: "witch",
-        displayName: "Witch",
         image: images.witch
     },
     {
         name: "traveler_in_salem_npc",
-        displayName: "Traveller",
         image: images.traveler
     },
 

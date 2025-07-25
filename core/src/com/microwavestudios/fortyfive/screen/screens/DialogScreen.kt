@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
+import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
@@ -19,6 +20,8 @@ import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScr
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.reflect.KClass
@@ -38,6 +41,8 @@ class DialogScreen : ScreenCreator() {
     private val events: EventPipeline = EventPipeline()
 
     private val timelines = TimelineController()
+
+    private val mapConfig: ConfigFileManager.MapConfig = ConfigFileManager.mapConfig
 
     private val dialogController: DialogScreenController by lazy {
         DialogScreenController(
@@ -73,7 +78,7 @@ class DialogScreen : ScreenCreator() {
         val optionGroup = "dialog-screen-choice-option"
         val optionModal = InputManager.Modal(listOf(optionGroup), screen)
 
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+        flexDirection = FlexDirection.COLUMN
         width = 240f
         height = 400f
         debug()
@@ -89,8 +94,8 @@ class DialogScreen : ScreenCreator() {
                 box(backgroundHints = arrayOf("dialog_answer_option", "dialog_answer_option_hover")) {
                     relativeWidth(100f)
                     syncHeight()
-                    verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                    horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                    verticalAlign = CustomAlign.CENTER
+                    horizontalAlign = CustomAlign.CENTER
                     touchable = Touchable.enabled
                     keyboardFocusable = KeyboardFocusable.LEAF
                     backgroundHandle = "dialog_answer_option"
@@ -159,7 +164,7 @@ class DialogScreen : ScreenCreator() {
 
         events.watchFor<DialogScreenController.ChangeNpcEvent> { (npc, isLeft) ->
             val label = if (isLeft) left else right
-            label.setText(npc?.displayName)
+            label.setText(npc?.name?.let { mapConfig.displayNames[it] })
         }
     }
 
@@ -238,7 +243,7 @@ class DialogScreen : ScreenCreator() {
             paddingBottom = 50F
             paddingLeft = 80F
             paddingRight = 150F
-            verticalTextAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            verticalTextAlign = CustomAlign.CENTER
             backgroundHandle = "dialog_background"
 
             box {
@@ -246,8 +251,8 @@ class DialogScreen : ScreenCreator() {
                 relativeWidth(100F)
                 height = 40F
                 y = parent.height - height
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
+                horizontalAlign = CustomAlign.SPACE_AROUND
+                flexDirection = FlexDirection.ROW
                 minHorizontalDistBetweenElements = 350F
                 nameLabels()
             }
