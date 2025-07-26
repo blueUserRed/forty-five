@@ -1,8 +1,21 @@
 
+$MapPredicate {
+
+    $PlayerHasCard {
+        card: string
+    }
+
+    $Not {
+        negate: $MapPredicate
+    }
+
+}
+
 var mapEventStandardConfig = {
     currentlyBlocks: boolean,
-    canBeStarted: boolean,
-    isCompleted: boolean
+    startable: boolean,
+    isCompleted: boolean,
+    startConditions: $MapPredicate[]?
 };
 
 var encounter = {

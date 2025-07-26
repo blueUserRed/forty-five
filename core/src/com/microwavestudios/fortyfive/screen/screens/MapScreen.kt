@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.EncounterModifier
-import com.microwavestudios.fortyfive.game.GameDirector
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
@@ -218,7 +217,7 @@ class MapScreen : ScreenCreator() {
             marginBottom = 27f
             joinGroup(startButtonGroup)
             onInput(GameInputs.interact) {
-                if (mapWidget.playerNode.event?.canBeStarted == true) {
+                if (mapWidget.playerNode.event?.startable == true) {
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
                 }

@@ -227,7 +227,7 @@ class DetailMapWidget(
     fun onStartButtonClicked(startButton: Actor? = null) {
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
-        if (playerNode.event?.canBeStarted?.not() ?: true) return
+        if (playerNode.event?.canBeStarted(map)?.not() ?: true) return
         playerNode.event?.start()
     }
 
@@ -551,7 +551,7 @@ class DetailMapWidget(
             val drawable = node.getNodeTexture(screen) ?: nodeDrawable
             drawable.getOrNull()?.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
-        val (grayNodes, normalNodes) = uniqueNodes.splitInTwo { it.event?.canBeStarted?.not() ?: false }
+        val (grayNodes, normalNodes) = uniqueNodes.splitInTwo { it.event?.canBeStarted(map)?.not() ?: false }
         batch.flush()
         shaderPromise.getOrNull()?.let { shader ->
             shader.shader.bind()

@@ -24,7 +24,7 @@ nodes: [
             dialog: "tavelling_merchant_welcome",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: false
         }
     },
@@ -47,9 +47,15 @@ nodes: [
         event: $DialogMapEvent {
             dialog: "priest_of_aqua_balle_warning",
             canOnlyBeStartedOnce: true,
-            onlyIfPlayerDoesntHaveCard: "guardianAngelBullet",
+            startConditions: [
+                $Not {
+                    negate: $PlayerHasCard {
+                        card: "guardianAngelBullet"
+                    }
+                }
+            ],
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: false
         }
     },

@@ -26,7 +26,7 @@ nodes: [
             dialog: "traveler_in_salem_dialog",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: false
         }
     },
@@ -58,15 +58,7 @@ nodes: [
             2, 4
         ],
         nodeTexture: "map_node_heal",
-        event: $AddMaxHPEvent {
-            maxHPRange: [
-                10, 15
-            ],
-            seed: null,
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-        }
+        event: $EmptyMapEvent {}
     },
     {
         x: 65.0,

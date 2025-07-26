@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.game.PermaSaveState
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -61,7 +60,7 @@ abstract class MapEvent {
     /**
      * when this is true, a start button for this event is displayed and the start function can be called
      */
-    abstract var canBeStarted: Boolean
+    abstract var startable: Boolean
 
     /**
      * when this is true, the event was already completed
@@ -92,6 +91,10 @@ abstract class MapEvent {
      */
     open val displayName: String = ""
 
+    private val _startConditions: MutableList<MapPredicate> = mutableListOf()
+    val startConditions: List<MapPredicate>
+        get() = _startConditions
+
     /**
      * called when the start button was clicked
      */
@@ -102,21 +105,30 @@ abstract class MapEvent {
      */
     abstract fun asOnjObject(): OnjObject
 
+    fun canBeStarted(map: DetailMap): Boolean =
+        startable && _startConditions.all { it.check(map) }
 
     fun setStandardValuesFromConfig(config: OnjObject) {
         currentlyBlocks = config.get<Boolean>("currentlyBlocks")
-        canBeStarted = config.get<Boolean>("canBeStarted")
+        startable = config.get<Boolean>("startable")
         isCompleted = config.get<Boolean>("isCompleted")
+        val startConditions = config
+            .getOr<OnjArray?>("startConditions", null)
+            ?.value
+            ?.map { MapPredicate.fromOnj(it as OnjNamedObject) }
+        _startConditions.clear()
+        startConditions?.let { _startConditions.addAll(it) }
     }
 
     /**
      * utility function that can be called from the [asOnjObject] function and includes the [currentlyBlocks],
-     * [canBeStarted], [isCompleted] fields in the onjObject.
+     * [startable], [isCompleted] fields in the onjObject.
      */
     protected fun OnjObjectBuilderDSL.includeStandardConfig() {
         "currentlyBlocks" with currentlyBlocks
-        "canBeStarted" with canBeStarted
+        "startable" with startable
         "isCompleted" with isCompleted
+        "startConditions" with _startConditions.map { it.asOnj() }
     }
 
 }
@@ -127,7 +139,7 @@ abstract class MapEvent {
 class EmptyMapEvent : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = false
+    override var startable: Boolean = false
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = false
@@ -148,7 +160,7 @@ class EncounterMapEvent(
 ) : MapEvent(), EncounterContext, Completable {
 
     override var currentlyBlocks: Boolean = true
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
@@ -173,7 +185,7 @@ class EncounterMapEvent(
 
     override fun completed() {
         currentlyBlocks = false
-        canBeStarted = false
+        startable = false
         isCompleted = true
     }
 
@@ -196,7 +208,7 @@ class EncounterMapEvent(
 class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
 
@@ -236,7 +248,7 @@ class DialogMapEvent(
 ) : MapEvent(), DialogScreenContext {
 
     override var currentlyBlocks: Boolean = true
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
         get() {
             val card = onlyIfPlayerDoesntHaveCard ?: return field
             val profile = FortyFive.profileManager.currentProfile ?: return field
@@ -245,7 +257,7 @@ class DialogMapEvent(
             return field
         }
 
-    override var isCompleted: Boolean = !canBeStarted
+    override var isCompleted: Boolean = !startable
 
     override val displayDescription: Boolean = true
 
@@ -259,7 +271,7 @@ class DialogMapEvent(
 
     override fun completed() {
         currentlyBlocks = false
-        if (canOnlyBeStartedOnce) canBeStarted = false
+        if (canOnlyBeStartedOnce) startable = false
         isCompleted = true
     }
 
@@ -298,7 +310,7 @@ class ShopMapEvent(
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
@@ -344,7 +356,7 @@ class ChooseCardMapEvent(
 ) : MapEvent(), ChooseCardScreenContext, Completable {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
@@ -361,7 +373,7 @@ class ChooseCardMapEvent(
     override fun completed() {
         isCompleted = true
         currentlyBlocks = false
-        canBeStarted = false
+        startable = false
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
