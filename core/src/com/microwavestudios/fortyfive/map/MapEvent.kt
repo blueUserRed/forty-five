@@ -37,6 +37,7 @@ object MapEventFactory {
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
+        "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -104,6 +105,9 @@ abstract class MapEvent {
      * returns a representation of this event (and its state) as an OnjObject
      */
     abstract fun asOnjObject(): OnjObject
+
+    open fun onMapLoad(map: DetailMap) {}
+    open fun onPlayerMovedToNode(map: DetailMap) {}
 
     fun canBeStarted(map: DetailMap): Boolean =
         startable && _startConditions.all { it.check(map) }
@@ -249,13 +253,6 @@ class DialogMapEvent(
 
     override var currentlyBlocks: Boolean = true
     override var startable: Boolean = true
-        get() {
-            val card = onlyIfPlayerDoesntHaveCard ?: return field
-            val profile = FortyFive.profileManager.currentProfile ?: return field
-            val cards = if (profile.isRunActive) profile.backpack!! else profile.cardCollection
-            if (card !in cards) return false
-            return field
-        }
 
     override var isCompleted: Boolean = !startable
 
@@ -400,4 +397,62 @@ class ChooseCardMapEvent(
             onj.get<Long>("nbrOfCards").toInt(),
         ).apply { setStandardValuesFromConfig(onj) }
     }
+}
+
+class LockNodeMapEvent(
+    val conditions: List<MapPredicate>,
+    initialLocked: Boolean,
+    val lockedDescription: String,
+    val openDescription: String,
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean
+        get() = locked
+        set(_) {}
+
+    override var startable: Boolean = false
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String
+        get() = if (locked) lockedDescription else openDescription
+
+    var locked: Boolean = initialLocked
+        private set
+
+    override fun start() {
+    }
+
+    override fun onMapLoad(map: DetailMap) {
+        checkLocked(map)
+    }
+
+    override fun onPlayerMovedToNode(map: DetailMap) {
+        checkLocked(map)
+    }
+
+    private fun checkLocked(map: DetailMap) {
+        if (!locked) return
+        if (conditions.all { it.check(map) }) locked = false
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("LockNodeMapEvent")
+        "conditions" with conditions.map { it.asOnj() }
+        "locked" with locked
+        "lockedDescription" with lockedDescription
+        "openDescription" with openDescription
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): LockNodeMapEvent = LockNodeMapEvent(
+            onj.get<OnjArray>("conditions").value.map { MapPredicate.fromOnj(it as OnjNamedObject) },
+            onj.get<Boolean>("locked"),
+            onj.get<String>("lockedDescription"),
+            onj.get<String>("openDescription"),
+        )
+    }
+
 }

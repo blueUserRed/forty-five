@@ -207,6 +207,10 @@ class DetailMapWidget(
         mapOffset.set(
             if (map.scrollable) idealPos else map.camPosOffset
         )
+
+        events.watchFor<PlayerChangedNodeEvent> { event ->
+            event.newNode.event?.onPlayerMovedToNode(map)
+        }
     }
 
     fun moveToNextNode(mapNode: MapNode) {
@@ -319,6 +323,7 @@ class DetailMapWidget(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (firstFrame) {
             firstFrame = false
+            map.uniqueNodes.forEach { it.event?.onMapLoad(map) }
             events.fire(PlayerChangedNodeEvent(playerNode))
         }
 

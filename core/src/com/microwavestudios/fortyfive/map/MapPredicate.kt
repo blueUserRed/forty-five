@@ -12,8 +12,6 @@ interface MapPredicate {
 
     fun asOnj(): OnjObject
 
-    fun getMessage(): String
-
     class PlayerHasCard(val card: String) : MapPredicate {
 
         override fun check(currentMap: DetailMap): Boolean {
@@ -26,15 +24,6 @@ interface MapPredicate {
             name("PlayerHasCard")
             "card" with card
         }
-
-        override fun getMessage(): String {
-            val proto = RandomCardSelection
-                .allCardPrototypes
-                .find { it.name == card }
-                ?: throw RuntimeException("unknown card: $card")
-            val name = proto.title
-            return "You must have the card: $name"
-        }
     }
 
     class Not(val negate: MapPredicate) : MapPredicate {
@@ -45,8 +34,15 @@ interface MapPredicate {
             name("Not")
             "negate" with negate.asOnj()
         }
+    }
 
-        override fun getMessage(): String = "The following must be false: ${negate.getMessage()}"
+    object Never : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean = false
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("Never")
+        }
     }
 
     companion object {
@@ -56,6 +52,8 @@ interface MapPredicate {
             "PlayerHasCard" -> PlayerHasCard(onj.get<String>("card"))
 
             "Not" -> Not(fromOnj(onj.get<OnjNamedObject>("negate")))
+
+            "Never" -> Never
 
             else -> throw RuntimeException("unknown MapPredicate: ${onj.name}")
         }

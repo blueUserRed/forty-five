@@ -9,13 +9,15 @@ $MapPredicate {
         negate: $MapPredicate
     }
 
+    $Never {}
+
 }
 
 var mapEventStandardConfig = {
     currentlyBlocks: boolean,
     startable: boolean,
     isCompleted: boolean,
-    startConditions: $MapPredicate[]?
+    startConditions?: $MapPredicate[]
 };
 
 var encounter = {
@@ -29,20 +31,6 @@ var encounter = {
 $MapEvent {
 
     $EmptyMapEvent { }
-
-    $HealOrMaxHPEvent {
-        ...mapEventStandardConfig,
-        healRange: int[2],
-        maxHPRange: int[2],
-        seed: int?,
-        distanceToEnd?: int,
-    }
-
-    $AddMaxHPEvent {
-        ...mapEventStandardConfig,
-        maxHPRange: int[2],
-        seed: int?,
-    }
 
     $EncounterMapEvent {
         ...mapEventStandardConfig,
@@ -85,8 +73,11 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
-    $FinishTutorialMapEvent {
-        goToMap: string
+    $LockNodeMapEvent {
+        conditions: $MapPredicate[],
+        locked: boolean,
+        lockedDescription: string,
+        openDescription: string,
     }
 
 }
