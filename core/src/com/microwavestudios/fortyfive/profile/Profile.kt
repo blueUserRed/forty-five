@@ -174,22 +174,25 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         val runSave = runSave ?: throw RuntimeException("cant win run if no run is active")
         val run = runSave.run
         val area = run.fromArea
-        val runGenerator = RunGenerator()
-        val runBoard = runBoards[area] ?: throw RuntimeException("won run that doesn't exist in runBoard")
-        val newRunBoard = when (run.type) {
-            RunType.LIMITED -> Pair(
-                runBoard.first,
-                runGenerator.generateRun(run.difficulty, run.biome, area, RunType.LIMITED),
-            )
-            RunType.CONSTRUCTED -> Pair(
-                runGenerator.generateRun(run.difficulty, run.biome, area, RunType.CONSTRUCTED),
-                runBoard.second
-            )
-            RunType.PROGRESS -> runBoard
+        if (run.type != RunType.PROGRESS) {
+            val runGenerator = RunGenerator()
+            val runBoard = runBoards[area] ?: throw RuntimeException("won run that doesn't exist in runBoard")
+            val newRunBoard = when (run.type) {
+                RunType.LIMITED -> Pair(
+                    runBoard.first,
+                    runGenerator.generateRun(run.difficulty, run.biome, area, RunType.LIMITED),
+                )
+                RunType.CONSTRUCTED -> Pair(
+                    runGenerator.generateRun(run.difficulty, run.biome, area, RunType.CONSTRUCTED),
+                    runBoard.second
+                )
+                else -> throw RuntimeException("unreachable")
+            }
+            runBoards[area] = newRunBoard
         }
-        runBoards[area] = newRunBoard
         val cardsToExtraxt = extractableCards()
         _cardCollection.addAll(cardsToExtraxt)
+        currentAreaMap.completedProgressRun = true
         endRun(runSave)
     }
 
@@ -254,7 +257,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             return
         }
         val onj = OnjParser.parseFile(dataFile)
-        dataFileSchema.check(onj)
+        dataFileSchema.assertMatches(onj)
         onj as OnjObject
         data = ProfileData.fromOnj(onj)
         checkDecks()
@@ -302,7 +305,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         fun read() {
             if (dataFile.exists()) {
                 val onj = OnjParser.parseFile(dataFile)
-                dataFileSchema.check(onj)
+                dataFileSchema.assertMatches(onj)
                 onj as OnjObject
                 data = ProfileData.fromOnj(onj)
             } else {

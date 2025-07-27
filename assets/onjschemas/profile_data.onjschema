@@ -1,29 +1,5 @@
-
-import "imports/map_gen.onjschema" as _;
-
-$RunReward {
-
-    $CashReward {
-        amount: int
-    }
-
-}
-
-var runSave = {
-    currentNode: int,
-    lastNode: int?,
-    playerHealth: int,
-    backpack: string[],
-};
-
-var run = {
-    length: string,
-    type: string,
-    difficulty: int,
-    rewards: $RunReward[],
-    biome: string,
-    mapGenerator: $MapGenerator
-};
+import "imports/run.onjschema" as run;
+import "imports/deck.onjschema" as deck;
 
 var runBoard = {
     forArea: string,
@@ -31,9 +7,10 @@ var runBoard = {
 };
 
 cardCollection: string[],
+collectionDecks: deck[],
+currentDeckId: int,
 playerMoney: int,
 currentMap: string,
 currentNode: int,
 lastNode: int?,
-runSave: runSave?,
 runBoards: runBoard[],

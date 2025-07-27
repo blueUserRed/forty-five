@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.buildOnjObject
@@ -36,6 +37,8 @@ data class DetailMap(
     val scrollable: Boolean,
     val camPosOffset: Vector2,
     val majorDifficulty: Int,
+    val progressRun: Run?,
+    var completedProgressRun: Boolean
 ) {
 
     /**
@@ -79,12 +82,15 @@ data class DetailMap(
         "endNode" with endNode.index
         "decorations" with decorations.map { it.asOnjObject() }
         "animatedDecorations" with animatedDecorations.map { it.asOnjObject() }
-        "isArea" with isArea
         "biome" with biome
         "tutorialText" with listOf<Nothing>()
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
         "majorDifficulty" with majorDifficulty
+        if (isArea) "areaConfig" with buildOnjObject {
+            progressRun?.let { "progressRun" with it.asOnj() }
+            "completedProgressRun" with completedProgressRun
+        }
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -177,26 +183,29 @@ data class DetailMap(
                 .get<OnjArray>("animatedDecorations")
                 .value
                 .map { MapDecoration.fromOnj(it as OnjObject) }
+            val areaConfig = onj.getOr<OnjObject?>("areaConfig", null)
+            val isArea = areaConfig != null
+            val progressRun = areaConfig?.let { config ->
+                config.getOr<OnjObject?>("progressRun", null)?.let { Run.fromOnj(it) }
+            }
+            val completedProgressRun = areaConfig?.get<Boolean>("completedProgressRun") ?: false
             return DetailMap(
                 file.nameWithoutExtension,
                 nodes[startNodeIndex].build(),
                 endNode.asNode!!,
                 decorations,
                 animatedDecorations,
-                onj.get<Boolean>("isArea"),
+                isArea,
                 onj.get<String>("biome"),
-//                onj.getOr<OnjArray?>("tutorialText", null)
-//                    ?.value
-//                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
-//                    ?.toMutableList()
-//                    ?: mutableListOf(),
                 onj.getOr("scrollable", true),
                 if (onj.hasKey<OnjArray>("camPosOffset")) {
                     onj.get<OnjArray>("camPosOffset").toVector2()
                 } else {
                     Vector2()
                 },
-                onj.get<Long>("majorDifficulty").toInt()
+                onj.get<Long>("majorDifficulty").toInt(),
+                progressRun,
+                completedProgressRun
             )
         }
 

@@ -33,11 +33,8 @@ var decoration = {
 };
 
 var mapGeneratorSharedKeys = {
-    name: string,
     majorDifficulty: int,
-    progress: float[2],
     biome: string,
-    exitNodeTexture: string,
     horizontalExtension: float,
     verticalExtension: float,
     locationSignProtectedAreaWidth: float,

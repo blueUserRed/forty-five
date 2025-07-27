@@ -96,4 +96,6 @@ decorations: [
         ]
     }
 ],
-isArea: true,
+areaConfig: {
+    completedProgressRun: false
+},

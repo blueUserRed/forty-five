@@ -66,7 +66,9 @@ class SeededMapGenerator(
             biome,
             true,
             Vector2(),
-            0
+            0,
+            progressRun = null,
+            completedProgressRun = false
         )
     }
 

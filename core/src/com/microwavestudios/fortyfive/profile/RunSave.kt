@@ -3,10 +3,11 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.profile.Profile.Companion.dataFileSchema
 import com.microwavestudios.fortyfive.run.Run
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.io.File
@@ -73,7 +74,7 @@ class RunSave private constructor(val profile: Profile) {
             return
         }
         val onj = OnjParser.parseFile(runDataFile)
-        dataFileSchema.check(onj)
+        dataFileSchema.assertMatches(onj)
         onj as OnjObject
         data = RunSaveData.fromOnj(onj)
         data.backpackDecks.forEach { it.checkDeck(data.backpack) }
@@ -112,7 +113,7 @@ class RunSave private constructor(val profile: Profile) {
 
         fun read() {
             val onj = OnjParser.parseFile(dataFile)
-            dataFileSchema.check(onj)
+            dataFileSchema.assertMatches(onj)
             onj as OnjObject
             data = RunSaveData.fromOnj(onj)
         }
@@ -187,6 +188,10 @@ class RunSave private constructor(val profile: Profile) {
     }
 
     companion object {
+
+        val dataFileSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile("onjschemas/run_data.onjschema")
+        }
 
         fun load(profile: Profile): RunSave? {
             val dataFile = File(profile.profilePath.path + "/run_data.onj")

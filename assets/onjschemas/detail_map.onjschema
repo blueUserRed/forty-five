@@ -1,4 +1,6 @@
-import "imports/map_events.onjschema" as _;
+//import "imports/map_events.onjschema" as _;
+// TODO: ^ this needs to be fixed in onj
+import "imports/run.onjschema" as run;
 
 var tutorialText = {
     text: string,
@@ -38,6 +40,10 @@ animatedDecorations: {
     drawInBackground?: boolean, // TODO: workaround, this key doesn't actually do anything
 }[],
 biome: string,
-isArea: boolean,
 scrollable?: boolean,
-camPosOffset?: float[2]
+camPosOffset?: float[2],
+
+areaConfig?: {
+    progressRun?: run,
+    completedProgressRun: boolean
+}

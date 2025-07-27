@@ -61,7 +61,9 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
             biome = data.biome,
             scrollable = true,
             majorDifficulty = data.majorDifficulty,
-            camPosOffset = Vector2(0f, 0f)
+            camPosOffset = Vector2(0f, 0f),
+            progressRun = null,
+            completedProgressRun = false,
         )
     }
 

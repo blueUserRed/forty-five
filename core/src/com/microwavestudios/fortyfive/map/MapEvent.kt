@@ -37,7 +37,8 @@ object MapEventFactory {
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
-        "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) }
+        "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
+        "ProgressRunMapEvent" to { ProgressRunMapEvent.fromOnj(it) }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -453,6 +454,46 @@ class LockNodeMapEvent(
             onj.get<String>("lockedDescription"),
             onj.get<String>("openDescription"),
         )
+    }
+
+}
+
+class ProgressRunMapEvent : MapEvent(), Completable {
+
+    override var currentlyBlocks: Boolean = true
+    override var startable: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override fun start() {
+        val map = FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap
+        if (!map.isArea) throw RuntimeException("cant start progress run when not in an area")
+        val run = map.progressRun ?: throw RuntimeException("map ${map.name} doesn't define a progress run")
+        FortyFive.profileManager.currentProfile!!.startRun(run)
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun onMapLoad(map: DetailMap) {
+        if (isCompleted) return
+        if (map.completedProgressRun) completed()
+    }
+
+    override fun completed() {
+        currentlyBlocks = false
+        startable = false
+        isCompleted = true
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("ProgressRunMapEvent")
+        includeStandardConfig()
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): ProgressRunMapEvent =
+            ProgressRunMapEvent().also { it.setStandardValuesFromConfig(onj) }
     }
 
 }

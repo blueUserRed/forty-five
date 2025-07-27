@@ -1,0 +1,6 @@
+index: int,
+name?: string,
+cards: {
+    positionId: int,
+    cardName: string,
+}[]
