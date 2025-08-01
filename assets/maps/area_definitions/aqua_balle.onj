@@ -66,10 +66,13 @@ nodes: [
             3, 5
         ],
         nodeTexture: "map_node_default",
-        event: $ProgressRunMapEvent {
-            currentlyBlocks: true,
-            startable: true,
-            isCompleted: false,
+        event: $LockNodeMapEvent {
+            conditions: [
+                $ProgressRunCompleted {}
+            ],
+            locked: true,
+            lockedDescription: "Complete the Progress run to pass",
+            openDescription: ""
         }
     },
     {

@@ -192,7 +192,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         }
         val cardsToExtraxt = extractableCards()
         _cardCollection.addAll(cardsToExtraxt)
-        currentAreaMap.completedProgressRun = true
+        if (run.type == RunType.PROGRESS) currentAreaMap.completedProgressRun = true
         endRun(runSave)
     }
 

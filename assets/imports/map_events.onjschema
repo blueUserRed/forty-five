@@ -11,6 +11,8 @@ $MapPredicate {
 
     $Never {}
 
+    $ProgressRunCompleted {}
+
 }
 
 var mapEventStandardConfig = {

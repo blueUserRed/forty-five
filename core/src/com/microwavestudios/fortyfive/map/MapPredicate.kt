@@ -36,6 +36,15 @@ interface MapPredicate {
         }
     }
 
+    object ProgressRunCompleted : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean = currentMap.completedProgressRun
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("ProgressRunCompleted")
+        }
+    }
+
     object Never : MapPredicate {
 
         override fun check(currentMap: DetailMap): Boolean = false
@@ -54,6 +63,8 @@ interface MapPredicate {
             "Not" -> Not(fromOnj(onj.get<OnjNamedObject>("negate")))
 
             "Never" -> Never
+
+            "ProgressRunCompleted" -> ProgressRunCompleted
 
             else -> throw RuntimeException("unknown MapPredicate: ${onj.name}")
         }

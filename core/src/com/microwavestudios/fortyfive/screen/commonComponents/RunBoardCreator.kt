@@ -233,6 +233,14 @@ object RunBoardCreator {
                     joinGroup(runBoardGroup)
                     onInput(GameInputs.interact, runSelectCallback(runBoard.second))
                 }
+                val map = profile.currentAreaMap
+                val run = map.progressRun
+                if (!map.completedProgressRun && run != null) actor(getSharedRunCard(run)) {
+                    touchable = Touchable.enabled
+                    keyboardFocusable = KeyboardFocusable.LEAF
+                    joinGroup(runBoardGroup)
+                    onInput(GameInputs.interact, runSelectCallback(run))
+                }
             } else box {
                 relativeWidth(100f)
                 relativeHeight(100f)
