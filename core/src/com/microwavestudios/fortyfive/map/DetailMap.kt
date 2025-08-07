@@ -1,7 +1,6 @@
 package com.microwavestudios.fortyfive.map
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
@@ -102,6 +101,7 @@ data class DetailMap(
                     "y" with node.y
                     "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
                     "event" with node.event?.asOnjObject()
+                    "distance" with node.distance
                     node.nodeTexture?.let { "nodeTexture" with node.nodeTexture }
                     node.imageName?.let {
                         "image" with it
@@ -153,6 +153,7 @@ data class DetailMap(
                             nodeOnj.getOr<String?>("image", null),
                             MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
                             nodeOnj.getOr<String?>("nodeTexture", null),
+                            nodeOnj.getOr<Long?>("distance", null)?.toInt() ?: -1,
                             if (nodeOnj.hasKey<OnjNull>("event")) {
                                 EmptyMapEvent()
                             } else {

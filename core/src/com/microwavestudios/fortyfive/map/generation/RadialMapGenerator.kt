@@ -21,6 +21,8 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val nodes = generateNodes(data.circles)
         generateNodeConnections(startNode, nodes)
 
+        calculateDistances(startNode)
+
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
         val (animatedDecorations, decorations) = data

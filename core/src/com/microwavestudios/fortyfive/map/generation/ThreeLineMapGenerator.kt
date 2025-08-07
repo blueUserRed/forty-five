@@ -29,6 +29,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         val addLine1 = addAdditionalLine(mainLine, data.altLinesOffset)
         val addLine2 = addAdditionalLine(mainLine, -data.altLinesOffset)
 
+        calculateDistances(startNode)
+
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
         val sharedEvents = data.events.filter { it.line == -1 }

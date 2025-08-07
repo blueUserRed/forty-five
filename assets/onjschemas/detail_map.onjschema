@@ -21,6 +21,7 @@ nodes: {
     image?: string,
     imagePos?: string,
     event: $MapEvent?,
+    distance?: int,
     nodeTexture?: string,
 }[],
 

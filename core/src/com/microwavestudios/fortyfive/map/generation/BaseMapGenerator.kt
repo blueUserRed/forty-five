@@ -170,6 +170,20 @@ abstract class BaseMapGenerator {
         node.nodeTexture = data.firstNodeTexture
     }
 
+    protected fun calculateDistances(startNode: MapNodeBuilder) {
+        var currentNodes = listOf(startNode)
+        var dist = 0
+        while (currentNodes.isNotEmpty()) {
+            val newNodes = mutableListOf<MapNodeBuilder>()
+            currentNodes.forEach { node ->
+                node.distance = dist
+                node.edgesTo.filter { it.distance != -1 }.let { newNodes.addAll(it) }
+            }
+            currentNodes = newNodes
+            dist++
+        }
+    }
+
     protected fun connectNodes(node1: MapNodeBuilder, node2: MapNodeBuilder) {
         node1.connect(node2)
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))

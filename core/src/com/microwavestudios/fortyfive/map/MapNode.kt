@@ -20,6 +20,7 @@ data class MapNode(
     val imageName: String?,
     val imagePos: ImagePosition?,
     val nodeTexture: ResourceHandle?,
+    val distance: Int,
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
 ) : ResourceBorrower {
 
@@ -217,6 +218,7 @@ data class MapNodeBuilder(
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
     var nodeTexture: ResourceHandle? = null,
+    var distance: Int = -1,
     var event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -255,6 +257,7 @@ data class MapNodeBuilder(
             imageName,
             imagePos,
             nodeTexture,
+            distance,
             event
         )
         for (edge in edgesTo) {
