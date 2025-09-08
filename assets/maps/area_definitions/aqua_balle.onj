@@ -202,15 +202,13 @@ var run = {
                     types: [
                     ],
                     person: 'traveling_merchant',
-                    seed: 20348920200,
                     amountCards: [
                         3,
                         5,
                     ],
                     boughtIndices: [
                     ],
-                    selectedCards: [
-                    ],
+                    currentCards: null,
                     amountOfRerolls: 0,
                     rerollPriceIncrease: 20,
                     rerollBasePrice: 20,

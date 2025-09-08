@@ -23,8 +23,7 @@ nodes: [
         ],
         nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
-            seed: null,
-            selectedCards: [],
+            currentCards: null,
             amountCards: [3, 5],
             amountOfRerolls: 0,
             rerollPriceIncrease: 10,

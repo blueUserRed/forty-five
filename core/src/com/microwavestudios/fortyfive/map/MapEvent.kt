@@ -27,10 +27,9 @@ object MapEventFactory {
             ShopMapEvent(
                 onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
                 onjObject.get<String>("person"),
-                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
                 onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
                 onjObject.get<OnjArray>("amountCards").toIntRange(),
-                onjObject.get<OnjArray>("selectedCards").value.map { it.value as String }.toMutableList(),
+                onjObject.get<OnjArray?>("currentCards")?.value?.map { it.value as String },
                 onjObject.get<Long>("amountOfRerolls").toInt(),
                 onjObject.get<Long>("rerollPriceIncrease").toInt(),
                 onjObject.get<Long>("rerollBasePrice").toInt(),
@@ -298,10 +297,9 @@ class DialogMapEvent(
 class ShopMapEvent(
     val types: Set<String>,
     val person: String,
-    var seed: Long,
     val boughtIndices: MutableSet<Int>,
     val amountCards: IntRange,
-    val selectedCards: MutableList<String>,
+    var currentCards: List<String>?,
     var amountOfRerolls: Int,
     val rerollPriceIncrease: Int,
     val rerollBasePrice: Int,
@@ -329,10 +327,9 @@ class ShopMapEvent(
         name("ShopMapEvent")
         "types" with types
         "person" with person
-        "seed" with seed
         "amountCards" with arrayOf(amountCards.first, amountCards.last)
         "boughtIndices" with boughtIndices
-        "selectedCards" with selectedCards
+        "currentCards" with currentCards
         "amountOfRerolls" with amountOfRerolls
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice

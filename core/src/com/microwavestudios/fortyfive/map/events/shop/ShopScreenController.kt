@@ -73,7 +73,7 @@ class ShopScreenController(
         val messageWidget = screen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = personData.get<OnjArray>("texts").value
 
-        random = Random(context.seed)
+        random = Random
         addCards(context.types)
 //
         val textToShow = text[(random.nextDouble() * text.size).toInt()] as OnjObject
@@ -94,8 +94,7 @@ class ShopScreenController(
         profile.payMoney(rerollPrice)
         context.amountOfRerolls++
         context.boughtIndices.clear()
-        context.selectedCards.clear()
-        context.seed = Random(context.seed).nextLong()
+//        context.currentCards!!.clear()
         cardsParentWidget.children.filterIsInstance<CustomBox>().forEach { it.remove() }
         cardWidgets.clear()
         labels.clear()
@@ -103,7 +102,7 @@ class ShopScreenController(
     }
 
     private fun addCards(contextTypes: Set<String>) {
-        if (context.selectedCards.isEmpty()) {
+        if (context.currentCards!!.isEmpty()) {
             val amount = context.amountCards.random(random)
             val cards = RandomCardSelection.getRandomCards(
                 screen,
@@ -114,12 +113,12 @@ class ShopScreenController(
                 "shop",
                 unique = true
             )
-            context.selectedCards.addAll(cards.map { it.name })
+//            context.currentCards!!.addAll(cards.map { it.name })
         }
         val allPrototypes = RandomCardSelection.allCardPrototypes
         val availableCards = RandomCardSelection.availableCards(allPrototypes).toMutableList()
         val cardsToAdd = context
-            .selectedCards
+            .currentCards!!
             .map { name -> allPrototypes.find { it.name == name }!! }
         cardsToAdd.forEach { cardProto ->
             val card = cardProto.create(screen)

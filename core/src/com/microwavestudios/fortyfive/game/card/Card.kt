@@ -763,6 +763,9 @@ class CardActor(
     private val spawnShader: Promise<BetterShader> =
         FortyFive.resourceManager.request(this, lifetime, "card_spawn_shader")
 
+    private val grayScaleShader: Promise<BetterShader> =
+        FortyFive.resourceManager.request(this, lifetime, "grayscale_shader")
+
     private val markedSymbol: Promise<TransformDrawable> =
         FortyFive.resourceManager.request(this, lifetime, "card_symbol_marked")
 
@@ -773,6 +776,8 @@ class CardActor(
     var playSoundsOnHover: Boolean = false
 
     var isMarked: Boolean = false
+
+    var isGrayScale: Boolean = false
 
     private var cardTexturePromise: Promise<Texture>? = null
     private var texture: Texture? = null
@@ -843,6 +848,7 @@ class CardActor(
         val shaderPromise = when {
             inDestroyAnim -> destroyShader
             spawnAnimStart != 0L -> spawnShader
+            isGrayScale -> grayScaleShader
             else -> return false
         }
         if (shaderPromise.isNotResolved) FortyFive.resourceManager.forceResolve(shaderPromise)

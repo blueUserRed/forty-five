@@ -77,7 +77,6 @@ class RunGenerator {
                     ShopMapEvent(
                         setOf(),
                         "traveling_merchant",
-                        20348920200L,
                         mutableSetOf(),
                         3..5,
                         mutableListOf(),
