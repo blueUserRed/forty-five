@@ -32,9 +32,6 @@ import kotlin.reflect.KClass
 
 class ShopScreen : ScreenCreator() {
 
-    //TODO  children in CustomFocusableBox autoscroll + bar drag and drop
-    //TODO check reroll
-
     override val name: String = "shopScreen"
 
     val worldWidth = 1600f
@@ -152,36 +149,33 @@ class ShopScreen : ScreenCreator() {
 
             cardContainer(childrenSize)
 
+            box(backgroundHints = buttonBackgroundHints()) {
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
+                height = 60f
+                width = 140f
+                defaultButtonBackgrounds()
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                logicalOffsetY = 55f
+                val label = label("roadgeek", "", color = Color.FortyWhite) {
+                    setText("reroll: ${context.currentRerollPrice}\$")
+                    syncDimensions()
+                }
+                onInput(GameInputs.interact) {
+                    reroll()
+                    label.setText("reroll: ${context.currentRerollPrice}\$")
+                }
+            }
+
             label(
                 "red_wing",
                 "drag to the merchant to confirm your purchase and add it to your backpack",
                 color = Color.FortyWhite
             ) {
                 setFontScale(0.7f)
-                syncWidth()
-            }
-
-            label(
-                "red_wing",
-                "reroll Shop: {shop.currentRerollPrice}\$",
-                isTemplate = true,
-                color = Color.FortyWhite
-            ) {
-                name(rerollWidgetName)
-                setFontScale(0.7f)
-                width = 200F
-                setAlignment(Align.center)
-                positionType = PositionType.ABSOLUTE
-                badTexture("reroll shop button", missingFocusTexture = true)
-                touchable = Touchable.enabled
-                keyboardFocusable = KeyboardFocusable.LEAF
-                onInput(GameInputs.interact) {
-                    screen.findController<ShopScreenController>()?.rerollShop()
-                }
-                onLayoutAndNow {
-                    x = (parent.width - width) / 2
-                    y = 70F
-                }
+                logicalOffsetY = 55f
+                syncDimensions()
             }
         }
 
@@ -195,6 +189,21 @@ class ShopScreen : ScreenCreator() {
             cards
         }
         updateCards(cards)
+    }
+
+    private fun reroll() {
+        val profile = FortyFive.profileManager.currentProfile!!
+        val price = context.currentRerollPrice
+        if (profile.playerMoney < price) {
+            FortyFive.soundPlayer.situation("not_allowed", screen)
+            return
+        }
+        profile.payMoney(price)
+        context.amountOfRerolls++
+        val newCards = generateRandomCards()
+        context.boughtIndices.clear()
+        context.currentCards = newCards
+        updateCards(newCards)
     }
 
     private fun generateRandomCards(): List<String> {
@@ -215,7 +224,6 @@ class ShopScreen : ScreenCreator() {
         val protos = RandomCardSelection.allCardPrototypes
         val newLifetime = EndableLifetime()
         val guardedLifetime = newLifetime.shorter(screen.lifetime)
-        println(cards)
         val createdCards = cards.map { name ->
             val proto = protos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
             val card = proto.create(screen)
@@ -323,7 +331,7 @@ class ShopScreen : ScreenCreator() {
                     label.alpha = 1f
                     actor.isGrayScale = false
                     actor.joinGroup("buyable")
-                    actor.infoObject = CardDragAndDropInfo(card, card.price)
+                    actor.infoObject = CardDragAndDropInfo(card, card.price, index)
                 }
                 else -> {
                     actor.isDraggable = false
@@ -454,6 +462,8 @@ class ShopScreen : ScreenCreator() {
             if (addToDeck && deck.canAddCards()) {
                 deck.addToDeck(deck.nextFreeSlot(), info.card.name)
             }
+            context.boughtIndices.add(info.index)
+            updateCardStates()
             events.fire(BackpackCreator.CardsModifiedEvent)
         }
 
@@ -486,6 +496,6 @@ class ShopScreen : ScreenCreator() {
     private data class CardsChangedEvent(val cards: List<Card>, val lifetime: Lifetime)
     private data object RecheckAddToDeck
 
-    private data class CardDragAndDropInfo(val card: Card, val price: Int)
+    private data class CardDragAndDropInfo(val card: Card, val price: Int, val index: Int)
 
 }
