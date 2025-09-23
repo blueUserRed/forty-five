@@ -8,7 +8,7 @@ enemies: [
     {
         name: "Outlaw_test",
         title: "Outlaw",
-        baseHealth: 5,
+        baseHealth: 50,
         texture: "enemy_outlaw",
         brain: $ScriptedEnemyBrain {
             actions: [

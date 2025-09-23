@@ -222,12 +222,8 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
     private val targetMapDisplayName: String = displayName(targetMap)
 
     // lazy so it doesn't crash when the event is instanced
-    override val displayName: String by lazy {
-        "Enter $targetMapDisplayName"
-    }
-    override val descriptionText: String by lazy {
-        ""
-    }
+    override val displayName: String = "Enter $targetMapDisplayName"
+    override val descriptionText: String = ""
 
     override fun start() {
         FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)

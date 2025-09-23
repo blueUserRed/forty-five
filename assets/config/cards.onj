@@ -1182,7 +1182,7 @@ cards: [
     {
         name: "longLostBullet",
         title: "Long Lost Bullet",
-        flavourText: "I guess we should rename it now since the name dosen’t really fit anymore. Finally Found Bullet or something like that.",
+        flavourText: "I guess we should rename it now since the name doesn't really fit anymore. Finally Found Bullet or something like that.",
         description: "$trigger$While in Revolver:$trigger$\nAs long as the enemy has the Statuseffect $status$POISON$status$:\n$trigger$On-Turn-Begin:$trigger$\nYou gain 1 reserve and draw 1 card",
         baseDamage: 3,
         effects: [

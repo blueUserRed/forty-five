@@ -6,8 +6,3 @@ mapImages: {
     width: float,
     height: float
 }[],
-
-displayNames: {
-    name: string,
-    display: string,
-}[]
