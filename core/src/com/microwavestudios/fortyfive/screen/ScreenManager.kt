@@ -75,6 +75,8 @@ class ScreenManager(
             FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
             FortyFive.setScreen(screen)
             inScreenTransition = false
+            FortyFive.profileManager.currentProfile?.write()
+            FortyFive.profileManager.currentProfile?.writeMaps()
 //            FortyFive.inMs(100) {
 //                val lagSpike = renderTimes.max()
 //                screenTransitionTimes[(screenTransitionCount % screenTransitionTimes.size).toInt()] = lagSpike

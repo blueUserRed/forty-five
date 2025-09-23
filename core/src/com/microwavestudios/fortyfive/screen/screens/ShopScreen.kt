@@ -237,7 +237,6 @@ class ShopScreen : ScreenCreator() {
     private fun Group.personImage() = image {
         name(shopPersonWidgetName)
 
-        fixedZIndex = 100
         touchable = Touchable.disabled
 
         val imgData = personImageData
@@ -310,6 +309,7 @@ class ShopScreen : ScreenCreator() {
             val buyable = profile.playerMoney >= card.price
             val bought = index in context.boughtIndices
             actor.leaveGroup("buyable")
+            actor.infoObject = null
             when {
                 bought -> {
                     actor.isDraggable = false
@@ -323,6 +323,7 @@ class ShopScreen : ScreenCreator() {
                     label.alpha = 1f
                     actor.isGrayScale = false
                     actor.joinGroup("buyable")
+                    actor.infoObject = CardDragAndDropInfo(card, card.price)
                 }
                 else -> {
                     actor.isDraggable = false
@@ -330,14 +331,6 @@ class ShopScreen : ScreenCreator() {
                     label.alpha = 0.5f
                     actor.isGrayScale = false
                 }
-            }
-            if (buyable) {
-                actor.isDraggable = true
-                label.alpha = 1f
-                actor.joinGroup("buyable")
-            } else {
-                actor.isDraggable = false
-                label.alpha = 0.5f
             }
         }
         cardStateChangedCallbacks.add(stateChangeCallback)
@@ -451,9 +444,17 @@ class ShopScreen : ScreenCreator() {
         )
 
         onDrop { actor ->
-            if (actor !is CardActor) return@onDrop
-            val card = actor.card
-
+            val info = actor.infoObject as? CardDragAndDropInfo ?: return@onDrop
+            val profile = FortyFive.profileManager.currentProfile!!
+            if (profile.playerMoney < info.price) return@onDrop
+            profile.payMoney(info.price)
+            val deck = currentDeck
+            if (profile.isRunActive) profile.addCardToBackpack(info.card.name)
+            else profile.addCardToCollection(info.card.name)
+            if (addToDeck && deck.canAddCards()) {
+                deck.addToDeck(deck.nextFreeSlot(), info.card.name)
+            }
+            events.fire(BackpackCreator.CardsModifiedEvent)
         }
 
         fun updateState() {

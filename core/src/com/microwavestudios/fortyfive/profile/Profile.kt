@@ -131,6 +131,15 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         data.collectionDecks.forEach { it.checkDeck(data.cardCollection) }
     }
 
+    fun addCardToBackpack(card: String) {
+        if (!isRunActive) throw RuntimeException("not in run")
+        runSave!!.addCardToBackpack(card)
+    }
+
+    fun addCardToCollection(card: String) {
+        _cardCollection.add(card)
+    }
+
     fun changeToMap(map: String, fromEnd: Boolean = false) {
         if (map == _currentMapName) return
         writeMaps()

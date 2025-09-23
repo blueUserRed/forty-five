@@ -77,6 +77,9 @@ object BackpackCreator {
         state.currentDeck.checkDeck(if (isCollection) profile.cardCollection else profile.backpack!!)
         state.events.fire(DeckChangedEvent)
         state.publicEvents.fire(DeckChangedEvent)
+        state.publicEvents.watchFor<CardsModifiedEvent> {
+            switchToDeck(state.currentDeck.id, state)
+        }
         with(screen.inputManager) {
             addDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
             addDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
@@ -746,5 +749,7 @@ object BackpackCreator {
 
     data object DeckChangedEvent
     data object CardsChangedEvent
+
+    data object CardsModifiedEvent
 
 }

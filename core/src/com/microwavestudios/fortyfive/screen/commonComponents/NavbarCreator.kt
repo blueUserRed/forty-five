@@ -129,7 +129,7 @@ object NavbarCreator {
                 height = 30f
             }
 
-            val cashLabel = label("red_wing", "\$${profile.playerMoney}", isTemplate = true) {
+            val cashLabel = label("red_wing", "\$${profile.playerMoney}") {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
