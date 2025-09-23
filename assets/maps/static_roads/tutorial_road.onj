@@ -170,11 +170,11 @@ nodes: [
         edgesTo: [
             8
         ],
-        image: "aqua_balle",
+        image: "location.aqua_balle",
         imagePos: "RIGHT",
         nodeTexture: "map_node_exit",
         event: $FinishTutorialMapEvent {
-            goToMap: "aqua_balle",
+            goToMap: "location.aqua_balle",
         }
     },
 ],

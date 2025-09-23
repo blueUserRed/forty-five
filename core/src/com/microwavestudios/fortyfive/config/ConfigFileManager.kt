@@ -19,11 +19,14 @@ object ConfigFileManager {
     }
 
     private lateinit var configFiles: List<ConfigFile>
+    private lateinit var displayNames: Map<String, String>
 
     val mapConfig: MapConfig by lazy {
         val onj = getConfigFile("mapConfig")
         MapConfig.fromOnj(onj)
     }
+
+    val npcConfig: NpcConfig = NpcConfig()
 
     fun init() {
         val onj = OnjParser.parseFile(path)
@@ -41,6 +44,20 @@ object ConfigFileManager {
                     null
                 )
             }
+        displayNames = onj
+            .get<OnjArray>("displayNames")
+            .value
+            .associate { names ->
+                names as OnjArray
+                names.get<String>(0) to names.get<String>(1)
+            }
+    }
+
+    fun getDisplayName(internalName: String): String {
+        val name = displayNames[internalName]
+        if (name != null) return name
+        FortyFive.logger.warn(logTag, "No display name for '$internalName' found")
+        return internalName
     }
 
     fun getConfigFile(configFile: String): OnjObject {
@@ -77,19 +94,19 @@ object ConfigFileManager {
 
 
     data class MapConfig(
-        val displayNames: Map<String, String>,
+//        val displayNames: Map<String, String>,
         val images: List<MapImageData>
     ) {
         companion object {
 
             fun fromOnj(onj: OnjObject) = MapConfig(
-                onj
-                    .get<OnjArray>("displayNames")
-                    .value
-                    .associate {
-                        it as OnjObject
-                        it.get<String>("name") to it.get<String>("display")
-                    },
+//                onj
+//                    .get<OnjArray>("displayNames")
+//                    .value
+//                    .associate {
+//                        it as OnjObject
+//                        it.get<String>("name") to it.get<String>("display")
+//                    },
                 onj
                     .get<OnjArray>("mapImages")
                     .value
@@ -127,3 +144,6 @@ object ConfigFileManager {
     }
 
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun displayName(internalName: String): String = ConfigFileManager.getDisplayName(internalName)

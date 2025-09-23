@@ -1,0 +1,72 @@
+
+
+var images = {
+
+    traveler: {
+        textureName: "npc_traveler",
+        width: 1_402 * 1.1,
+        height: 1_885 * 1.1,
+    },
+
+    stranger: {
+        textureName: "npc_stranger",
+        width: 809 * 0.39,
+        height: 2_018 * 0.39,
+        offsetY: 40.0
+    },
+
+    merchant: {
+        textureName: "npc_merchant",
+        width: 1_294 * 0.5,
+        height: 1_728 * 0.5,
+        offsetX: -35.0,
+    },
+
+    priest: {
+        textureName: "npc_priest",
+        width: 1_289 * 0.46,
+        height: 1_814 * 0.46,
+        offsetX: 30.0,
+    },
+
+    witch: {
+        textureName: "npc_witch",
+        width: 389 * 1.6,
+        height: 925 * 1.6,
+        offsetY: -450.0,
+        offsetX: 50.0,
+    }
+
+};
+
+npcs: [
+    {
+        name: "npc.to_be_continued",
+        image: images.traveler,
+    },
+    {
+        name: "npc.brother",
+        image: images.stranger
+    },
+    {
+        name: "npc.traveling_merchant",
+        image: images.merchant
+    },
+    {
+        name: "npc.priest_of_aqua_balle",
+        image: images.priest
+    },
+    {
+        name: "npc.not_yet_implemented",
+        image: images.stranger
+    },
+    {
+        name: "npc.witch",
+        image: images.witch
+    },
+    {
+        name: "npc.traveler_in_salem",
+        image: images.traveler
+    },
+
+],

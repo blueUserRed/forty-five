@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -218,8 +219,7 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 
     override val buttonText: String = "Enter"
 
-    private val mapConfig: ConfigFileManager.MapConfig = ConfigFileManager.mapConfig
-    private val targetMapDisplayName: String = mapConfig.displayNames[targetMap]!!
+    private val targetMapDisplayName: String = displayName(targetMap)
 
     // lazy so it doesn't crash when the event is instanced
     override val displayName: String by lazy {

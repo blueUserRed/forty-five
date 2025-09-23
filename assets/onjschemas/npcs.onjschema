@@ -1,0 +1,14 @@
+
+var image = {
+    textureName: string,
+    offsetX?: float,
+    offsetY?: float,
+    flipOnRightSide?: boolean,
+    width: float,
+    height: float,
+};
+
+npcs: {
+    name: string,
+    image: image,
+}[]

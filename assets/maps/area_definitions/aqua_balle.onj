@@ -83,7 +83,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "tabu_letter_outpost",
+            targetMap: "location.tabu_letter_outpost",
             fromEnd: false,
         }
     },

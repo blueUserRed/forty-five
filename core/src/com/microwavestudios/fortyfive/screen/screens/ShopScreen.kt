@@ -9,6 +9,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.Npc
+import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
@@ -17,7 +19,6 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.ShopMapEvent
-import com.microwavestudios.fortyfive.map.events.shop.ShopScreenController
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.*
@@ -25,8 +26,6 @@ import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
-import onj.value.OnjArray
-import onj.value.OnjObject
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
@@ -45,15 +44,8 @@ class ShopScreen : ScreenCreator() {
 
     private val context: ShopMapEvent by lazy { context() }
 
-    private val personImageData: OnjObject by lazy {
-        val npcsFile = ConfigFileManager.getConfigFile("dialogConfig")
-        val imgData = (npcsFile
-            .get<OnjArray>("npcs")
-            .value
-            .map { it as OnjObject }
-            .find { it.get<String>("name") == context.person }
-            ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        imgData
+    private val npc: Npc by lazy {
+        ConfigFileManager.npcConfig.npcs[context.person] ?: throw RuntimeException("unknown npc: ${context.person}")
     }
 
     private val random = Random
@@ -63,13 +55,6 @@ class ShopScreen : ScreenCreator() {
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "*" to 100
     )
-
-    private val messageWidgetName: String = "shop_messageWidget"
-    private val cardsParentName: String = "shop_cardsParent"
-    private val addToDeckWidgetName: String = "shop_addToDeck"
-    private val addToBackpackWidgetName: String = "shop_addToBackpack"
-    private val shopPersonWidgetName: String = "shop_personWidget"
-    private val rerollWidgetName: String = "shop_rerollWidget"
 
     private val dropTargetFilter: InputManager.FocusFilter by lazy {
         InputManager.FocusFilter(
@@ -87,15 +72,6 @@ class ShopScreen : ScreenCreator() {
     private lateinit var currentDeck: Deck
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-//        ShopScreenController(
-//            screen,
-//            messageWidgetName,
-//            cardsParentName,
-//            addToDeckWidgetName,
-//            addToBackpackWidgetName,
-//            shopPersonWidgetName,
-//            rerollWidgetName,
-//        ),
         BiomeBackgroundScreenController(screen, true)
     )
 
@@ -126,8 +102,8 @@ class ShopScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
 
-        dropTarget(worldHeight * 0.5F, "shop_add_to_deck", true, addToDeckWidgetName)
-        dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", false, addToBackpackWidgetName)
+        dropTarget(worldHeight * 0.5F, "shop_add_to_deck", true)
+        dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", false)
 
         box {
             width = worldWidth.percent(63)
@@ -243,27 +219,20 @@ class ShopScreen : ScreenCreator() {
     }
 
     private fun Group.personImage() = image {
-        name(shopPersonWidgetName)
-
         touchable = Touchable.disabled
 
-        val imgData = personImageData
-        backgroundHandle = imgData.get<String>("textureName")
-        width = imgData.get<Double>("width").toFloat()
-        height = imgData.get<Double>("height").toFloat()
-        imgData.getOr<Double?>("offsetX", null)?.toFloat()?.let {
-            drawOffsetX = it
-        }
-        imgData.getOr<Double?>("offsetY", null)?.toFloat()?.let {
-            drawOffsetY = it
-        }
+        val npc = npc
+        backgroundHandle = npc.texture
+        width = npc.drawWidth
+        height = npc.drawHeight
+        drawOffsetX = npc.offsetX
+        drawOffsetY = npc.offsetY
     }
 
     private fun Group.cardContainer(childrenSize: Float) = box(isScrollable = true) {
         this as CustomScrollableBox
         relativeWidth(childrenSize)
         relativeHeight(59f)
-        name(cardsParentName)
         backgroundHandle = "shop_items_background"
         minVerticalDistBetweenElements = 15F
         minHorizontalDistBetweenElements = 15F
@@ -288,7 +257,6 @@ class ShopScreen : ScreenCreator() {
                 }
             }
         }
-
 
         addScrollbarFromDefaults(
             CustomDirection.RIGHT,
@@ -365,7 +333,7 @@ class ShopScreen : ScreenCreator() {
                 }
                 label(
                     "red_wing",
-                    personImageData.get<String>("textureName"),
+                    npc.displayName,
                     isTemplate = true,
                     color = Color.FortyWhite
                 ) {
@@ -407,7 +375,6 @@ class ShopScreen : ScreenCreator() {
             defaultColor = Color.FortyWhite,
             defaultFontScale = 0.8f,
         ) {//subtext
-            name(messageWidgetName)
             relativeWidth(100f)
             syncHeight()
             fitContentHeight = true
@@ -415,9 +382,7 @@ class ShopScreen : ScreenCreator() {
     }
 
 
-    private fun Group.dropTarget(yStart: Float, textureName: String, addToDeck: Boolean, actorName: String) = image {
-
-        name(actorName)
+    private fun Group.dropTarget(yStart: Float, textureName: String, addToDeck: Boolean) = image {
         relativeHeight(40F)
         relativeWidth(30F)
         y = yStart

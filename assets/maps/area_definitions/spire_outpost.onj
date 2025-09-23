@@ -11,7 +11,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "salem",
+            targetMap: "location.salem",
             fromEnd: true,
         }
     },
