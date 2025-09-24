@@ -19,19 +19,20 @@ class RunGenerator {
             forArea,
             100,
             100,
-            mapGen()
+            mapGen(forDifficulty.toFloat())
         )
     }
 
-    private fun encounter(): Encounter = Encounter(
+    private fun encounter(difficulty: Float): Encounter = Encounter(
         enemies = listOf("Outlaw_test"),
         encounterModifierNames = setOf(),
         forceCards = null,
         shuffleCards = true,
+        minorDifficulty = 0f,
         special = false
     )
 
-    private fun mapGen(): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
+    private fun mapGen(difficulty: Float): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
         majorDifficulty = 1,
         biome = "wasteland",
         nodeProtectedArea = 20f,
@@ -48,9 +49,9 @@ class RunGenerator {
         firstNodeTexture = "map_node_default",
         firstNodeEvent = { EmptyMapEvent() },
         lastNodeTexture = "map_node_fight",
-        lastNodeEvent = { EncounterMapEvent(encounter(), true) },
+        lastNodeEvent = { EncounterMapEvent(encounter(difficulty), true) },
         mainEvent = ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-            { EncounterMapEvent(encounter(), false) },
+            { EncounterMapEvent(encounter(difficulty), false) },
             offset = 0..1,
             nodeTexture = "map_node_fight",
             line = -1,

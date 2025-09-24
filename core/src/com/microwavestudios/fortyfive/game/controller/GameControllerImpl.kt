@@ -131,6 +131,8 @@ class GameControllerImpl(
         WarningParent.Level.HIGH
     )
 
+    private val enemyDifficulty = 1f + (encounter.minorDifficulty * Config.enemyAggressiveDifficultyAdjustment)
+
     private lateinit var profile: Profile
 
     override fun init(context: Any?) {
@@ -1115,7 +1117,7 @@ class GameControllerImpl(
     private fun chooseEnemyActions() {
         val otherActions = mutableListOf<NextEnemyAction>()
         activeEnemies.forEach { enemy ->
-            val action = enemy.chooseNewAction(this, 1.0, otherActions)
+            val action = enemy.chooseNewAction(this, enemyDifficulty.toDouble(), otherActions)
             otherActions.add(action)
         }
     }
@@ -1182,6 +1184,8 @@ class GameControllerImpl(
         const val playerGetsRewardCardChance = 1f
         const val rewardRerollPriceIncrease = 30
         const val rewardRerollBasePrice = 30
+        const val enemyHealthDifficultyAdjustment = 0.4f
+        const val enemyAggressiveDifficultyAdjustment = 0.2f
     }
 
     object Events {

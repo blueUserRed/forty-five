@@ -27,6 +27,7 @@ var encounter = {
     encounterModifier: string[],
     forceCards: string[]?,
     shuffleCards: boolean,
+    minorDifficulty: float,
     special: boolean,
 };
 
