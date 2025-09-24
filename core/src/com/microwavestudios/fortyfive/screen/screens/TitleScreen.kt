@@ -159,6 +159,7 @@ class TitleScreen : ScreenCreator() {
                 keyboardFocusable = KeyboardFocusable.LEAF
 
                 onInput(GameInputs.interact) {
+                    if (!preview.loadedSuccessfully) return@onInput
                     events.fire(SelectedProfileChanged(preview))
                 }
 
@@ -170,8 +171,20 @@ class TitleScreen : ScreenCreator() {
     }
 
     private fun handleContinue() {
-        FortyFive.profileManager.selectProfile(currentlySelectedProfile!!)
-        FortyFive.toMap()
+        val selected = currentlySelectedProfile!!
+        if (!selected.loadedSuccessfully) {
+            FortyFive.soundPlayer.situation("not_allowed", screen)
+            return
+        }
+        val success = FortyFive.profileManager.selectProfile(selected)
+        if (success) {
+            FortyFive.toMap()
+        } else {
+            // a bit ugly, but shouldn't really happen
+            FortyFive.profileManager.reloadPreviews()
+            FortyFive.screenManager.ensureNextScreen(TitleScreen)
+            FortyFive.screenManager.screenFinished()
+        }
     }
 
     private fun handleQuit() {

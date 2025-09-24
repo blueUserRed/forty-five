@@ -1,12 +1,14 @@
 package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.Gdx
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
 import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -292,15 +294,20 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         currentFile.writeText(currentAreaMap.asOnjObject().toMinifiedString())
     }
 
-    class Preview(val name: String, val dataFile: File) {
+    class Preview(
+        val name: String,
+        val dataFile: File,
+        val loadFailure: LoadFailure?,
+        val exists: Boolean
+    ) {
+
+        val loadedSuccessfully: Boolean
+            get() = loadFailure == null
 
         private var data: ProfileData? = null
 
         var runPreview: RunSave.Preview? = null
             private set
-
-        val exists: Boolean
-            get() = data != null
 
         val collection: List<String>?
             get() = data?.cardCollection
@@ -312,23 +319,70 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             get() = data?.playerMoney
 
         fun read() {
-            if (dataFile.exists()) {
-                val onj = OnjParser.parseFile(dataFile)
-                dataFileSchema.assertMatches(onj)
-                onj as OnjObject
-                data = ProfileData.fromOnj(onj)
-            } else {
-                data = null
-            }
+            if (!loadedSuccessfully || !exists) return
+            val onj = OnjParser.parseFile(dataFile)
+            dataFileSchema.assertMatches(onj)
+            onj as OnjObject
+            data = ProfileData.fromOnj(onj)
         }
 
         companion object {
 
             fun loadPreview(name: String): Preview {
-                val preview = Preview(name, File("profiles/$name/profile_data.onj"))
-                preview.runPreview = RunSave.loadPreview(preview)
-                preview.read()
-                return preview
+                return try {
+                    tryLoadPreview(name)
+                } catch (e: ProfileLoadException) {
+                    Preview(name, File("profiles/$name/profile_data.onj"), e.failure, true)
+                }
+            }
+
+            private fun tryLoadPreview(name: String): Preview {
+                val folder = File("profiles/$name")
+                if (!folder.exists()) {
+                    return Preview(name, File("profiles/$name/profile_data.onj"), null, false)
+                }
+                var markedCorrupted = false
+                val version: Int = try {
+                    val versionFile = File("profiles/$name/version.txt")
+                    val text = versionFile.readText()
+                    val lines = text.lines()
+                    if (lines.getOrNull(1)?.contains("corrupted") ?: false) {
+                        markedCorrupted = true
+                    }
+                    Integer.parseInt(lines.first())
+                } catch (e: Exception) {
+                    FortyFive.logger.warn(logTag, "Error loading version file for profile $name")
+                    FortyFive.logger.stackTrace(e)
+                    throw ProfileLoadException(LoadFailure.CORRUPTED_FILES)
+                }
+                if (markedCorrupted) {
+                    FortyFive.logger.warn(logTag, "Profile $name marked corrupted")
+                    throw ProfileLoadException(LoadFailure.MARKED_CORRUPTED)
+                }
+                if (version > profileVersion) {
+                    FortyFive.logger.warn(
+                        logTag,
+                        "Version mismatch in profile $name: profile: $version, game: $profileVersion"
+                    )
+                    throw ProfileLoadException(LoadFailure.VERSION_TOO_NEW)
+                }
+                if (version < profileVersion) {
+                    FortyFive.logger.warn(
+                        logTag,
+                        "Version mismatch in profile $name: profile: $version, game: $profileVersion"
+                    )
+                    throw ProfileLoadException(LoadFailure.VERSION_TOO_OLD)
+                }
+                try {
+                    val preview = Preview(name, File("profiles/$name/profile_data.onj"), null, true)
+                    preview.runPreview = RunSave.loadPreview(preview)
+                    preview.read()
+                    return preview
+                } catch (e: Exception) {
+                    FortyFive.logger.warn(logTag, "Failure loading profile $name")
+                    FortyFive.logger.stackTrace(e)
+                    throw ProfileLoadException(LoadFailure.CORRUPTED_FILES)
+                }
             }
         }
     }
@@ -404,6 +458,10 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     companion object {
 
+        const val profileVersion: Int = 0
+
+        const val logTag: String = "Profile"
+
         val dataFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/profile_data.onjschema").file())
         }
@@ -419,16 +477,49 @@ class Profile private constructor(val name: String, private var runSave: RunSave
                 .copyRecursively(profile.profilePath, true)
             profile.readFromDisk()
             profile.loadAreaMap(profile._currentMapName)
+            val versionFile = File(profile.profilePath.absolutePath + "/version.txt")
+            versionFile.createNewFile()
+            versionFile.writeText(profileVersion.toString())
             return profile
         }
 
-        fun loadProfile(profileName: String): Profile {
-            val profile = Profile(profileName, null)
-            profile.runSave = RunSave.load(profile)
-            if (!profile.profilePath.exists()) return createNewProfile(profileName)
-            profile.readFromDisk()
-            profile.loadAreaMap(profile._currentMapName)
-            return profile
+        fun loadProfile(profileName: String): Profile? {
+            try {
+                val profile = Profile(profileName, null)
+                profile.runSave = RunSave.load(profile)
+                if (!profile.profilePath.exists()) return createNewProfile(profileName)
+                profile.readFromDisk()
+                profile.loadAreaMap(profile._currentMapName)
+                return profile
+            } catch (e: Exception) {
+                markVersionFileCorrupted(profileName)
+                return null
+            }
+        }
+
+        private fun markVersionFileCorrupted(name: String) {
+            try {
+                val versionFile = File("profiles/$name/version.txt")
+                val text = versionFile.readText()
+                val lines = text.lines()
+                val newText = when {
+                    lines.isEmpty() -> "$profileVersion\ncorrupted"
+                    lines.size == 1 -> "${lines.first()}\ncorrupted"
+                    else -> {
+                        val mut = lines.toMutableList()
+                        mut[1] = "corrupted"
+                        mut.joinToString(separator = "\n")
+                    }
+                }
+                versionFile.writeText(newText)
+            } catch (_: Exception) {}
         }
     }
+
+    enum class LoadFailure {
+        VERSION_TOO_OLD, VERSION_TOO_NEW, CORRUPTED_FILES, MARKED_CORRUPTED
+    }
+
+    private class ProfileLoadException(val failure: LoadFailure) : Exception()
+
 }

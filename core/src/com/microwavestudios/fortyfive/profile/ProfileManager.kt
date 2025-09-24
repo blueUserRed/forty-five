@@ -26,13 +26,27 @@ class ProfileManager {
         rereadPreviews()
     }
 
-    fun selectProfile(preview: Profile.Preview) {
+    /**
+     * @return true when the profile was loaded successfully
+     */
+    fun selectProfile(preview: Profile.Preview): Boolean {
+        if (!preview.loadedSuccessfully) return false
         deselectProfile()
-        currentProfile = Profile.loadProfile(preview.name)
+        val loaded = Profile.loadProfile(preview.name)
+        currentProfile = loaded
+        return loaded != null
     }
 
     fun rereadPreviews() {
-        availableProfiles.forEach { it.read() }
+        availableProfiles.filter { it.loadedSuccessfully }.forEach { it.read() }
+    }
+
+    fun reloadPreviews() {
+        availableProfiles = listOf(
+            Profile.loadPreview("A"),
+            Profile.loadPreview("B"),
+            Profile.loadPreview("C"),
+        )
     }
 
 }

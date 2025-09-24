@@ -2,9 +2,11 @@ package com.microwavestudios.fortyfive.screen.commonComponents
 
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Run
+import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.utils.Color
 
 object ProfileCardCreator {
 
@@ -18,6 +20,32 @@ object ProfileCardCreator {
         flexDirection = FlexDirection.COLUMN
         backgroundHandle = "white_texture"
 
+        if (profile.loadedSuccessfully) {
+            normalCard(this@getSharedProfileCard, profile)
+        } else {
+            failedCard(this@getSharedProfileCard, profile)
+        }
+    }
+
+    private fun CustomBox.failedCard(creator: ScreenCreator, profile: Profile.Preview) = with(creator) {
+        label("red_wing", "Profile ${profile.name}") {
+            setFontScale(1.3f)
+        }
+        val message = when (profile.loadFailure) {
+            null -> ""
+            Profile.LoadFailure.MARKED_CORRUPTED, Profile.LoadFailure.CORRUPTED_FILES -> "Profile is corrupted!"
+            Profile.LoadFailure.VERSION_TOO_NEW -> "Profile was created by a newer version of the game; try upgrading the game"
+            Profile.LoadFailure.VERSION_TOO_OLD -> "Profile was created by an older version of the game; try downgrading the game"
+        }
+        label("red_wing", message, Color.Red) {
+            setFontScale(0.8f)
+            wrap = true
+            relativeWidth(100f)
+            syncHeight()
+        }
+    }
+
+    private fun CustomBox.normalCard(creator: ScreenCreator, profile: Profile.Preview) = with(creator) {
         label("red_wing", "Profile ${profile.name}") {
             setFontScale(1.3f)
         }
@@ -38,6 +66,5 @@ object ProfileCardCreator {
             label("red_wing", "no save yet")
         }
     }
-
 
 }
