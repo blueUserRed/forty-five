@@ -945,6 +945,7 @@ class EncounterScreen : ScreenCreator() {
         val winPopupGroup = "encounter-screen-win-popup"
         val modal = InputManager.Modal(listOf(winPopupGroup), screen)
         val filter = InputManager.FocusFilter(listOf(winPopupGroup), screen)
+        var gotCash = true
 
         filter.start()
 
@@ -995,6 +996,7 @@ class EncounterScreen : ScreenCreator() {
 
                     gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, money, _) ->
                         isVisible = money > 0
+                        gotCash = money > 0
                     }
 
                     label("red_wing", "", Color.FortyWhite) {
@@ -1068,7 +1070,7 @@ class EncounterScreen : ScreenCreator() {
                         },
                         renderPipeline
                     )
-                    renderPipeline.addOrbAnimation(moneyAnim)
+                    if (gotCash) renderPipeline.addOrbAnimation(moneyAnim)
                 }
             }
         }

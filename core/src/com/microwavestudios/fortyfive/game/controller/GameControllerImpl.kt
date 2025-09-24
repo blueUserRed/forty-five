@@ -911,6 +911,7 @@ class GameControllerImpl(
     }
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
+        if (isUIFrozen) return
         var cardInSlot: Card? = null
         val info = createTriggerInfo(card, sourceCard = card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)

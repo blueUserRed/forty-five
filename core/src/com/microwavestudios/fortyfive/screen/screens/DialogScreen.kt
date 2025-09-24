@@ -210,7 +210,6 @@ class DialogScreen : ScreenCreator() {
                         currentNpc = npc
                         backgroundHandle = npc?.texture
                         invalidate()
-                        println(npc)
                         npc ?: return@action
                         width = npc.drawWidth
                         height = npc.drawHeight

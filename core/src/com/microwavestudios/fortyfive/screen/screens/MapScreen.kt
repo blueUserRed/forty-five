@@ -268,12 +268,9 @@ class MapScreen : ScreenCreator() {
         }
 
         mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
-            println(node)
             val warning = node.event?.warningText
             label.setText(warning)
             isVisible = warning != null
-            println(isVisible)
-            println(label.text)
         }
     }
 
