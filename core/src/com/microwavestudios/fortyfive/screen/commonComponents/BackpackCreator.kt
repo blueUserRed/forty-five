@@ -358,9 +358,9 @@ object BackpackCreator {
     private fun CustomBox.collection(state: BackpackState, creator: ScreenCreator) = with(creator) {
         box(isScrollable = true) scrollableBox@{
             this as CustomScrollableBox
-            relativeWidth(88f)
+            relativeWidth(95f)
             height = 680f
-            x = 20f
+            x = 80f
             scrollDirectionStart = CustomDirection.TOP
             horizontalAlign = CustomAlign.START
             wrap = CustomWrap.WRAP

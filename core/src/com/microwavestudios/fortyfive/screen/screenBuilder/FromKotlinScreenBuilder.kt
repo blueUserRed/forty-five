@@ -11,7 +11,7 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
 
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
-    private val commonDebugMenuPages: List<String> = listOf("Performance infos", "Card Textures", "Resources")
+    private val commonDebugMenuPages: List<String> = listOf("Basic infos", "Screen/Input", "Card Textures", "Resources")
 
     override fun build(controllerContext: Any?, previousScreen: OnjScreen?): OnjScreen {
         val screen = OnjScreen(

@@ -55,7 +55,8 @@ class DebugMenu(val pages: List<DebugMenuPage>) {
         private val knownDebugMenuPages: MutableMap<String, () -> DebugMenuPage> = mutableMapOf()
 
         init {
-            registerDebugMenuPage("Performance infos") { ScreenDebugMenuPage() }
+            registerDebugMenuPage("Basic infos") { BaseInfosDebugMenuPage() }
+            registerDebugMenuPage("Screen/Input") { ScreenDebugMenuPage() }
             registerDebugMenuPage("Card Textures") { CardTextureDebugMenuPage() }
             registerDebugMenuPage("Resources") { ResourceDebugMenuPage() }
             registerDebugMenuPage("Map") { MapDebugMenuPage() }
@@ -112,18 +113,28 @@ abstract class DebugMenuPage(val name: String) {
 
 }
 
-class ScreenDebugMenuPage : DebugMenuPage("Performance infos") {
-
-    val makeLaggy = debugButton("make laggy", Keys.L, false)
+class BaseInfosDebugMenuPage : DebugMenuPage("Basic infos") {
 
     override fun getText(screen: OnjScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
         version: ${FortyFive.logger.versionTag}
         15s render lagSpike: ${FortyFive.renderTimes.max()}ms
         15s avg. render time: ${FortyFive.renderTimes.average().toInt()}ms
-        
+    """.trimIndent()
+}
+
+class ScreenDebugMenuPage : DebugMenuPage("Screen/Input") {
+
+    val makeLaggy = debugButton("make laggy", Keys.L, false)
+
+    override fun getText(screen: OnjScreen): String = """
         focused with keyboard: ${
             screen.inputManager.keyboardFocused?.actor?.let {
+                if (it is DebugActor) it.getDebugName() else it.toString()
+            }
+        }
+        hovered: ${
+            screen.inputManager.lastHovered?.let {
                 if (it is DebugActor) it.getDebugName() else it.toString()
             }
         }

@@ -85,14 +85,14 @@ object GameInputs {
     val nextDebugMenuPage = Input(
         "nextDebugMenuPage",
         arrayOf(
-            Input.Cause.Keyboard(Keys.J)
+            Input.Cause.Keyboard(Keys.K)
         )
     )
 
     val previousDebugMenuPage = Input(
         "previousDebugMenuPage",
         arrayOf(
-            Input.Cause.Keyboard(Keys.K)
+            Input.Cause.Keyboard(Keys.J)
         )
     )
 

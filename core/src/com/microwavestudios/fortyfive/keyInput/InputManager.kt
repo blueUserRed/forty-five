@@ -429,7 +429,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         actors.forEach { inputActor ->
             val isHit = inputActor.actor === hit
             val callbacksForInputs = inputActor.inputCallbacks
-            if (!canBeFocused(inputActor)) return@forEach
+            if (!canBeFocused(inputActor, false)) return@forEach
             callbacksForInputs.forEach { input, callbacks ->
                 checkInput(input, isHit, callbacks)
             }
@@ -494,7 +494,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         hitResult.notifyDropped(actor)
     }
 
-    private var lastHovered: Actor? = null
+    var lastHovered: Actor? = null
+        private set
 
     override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
         cancelKeyboardDragAndDrop()
