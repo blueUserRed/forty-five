@@ -1,6 +1,5 @@
 package com.microwavestudios.fortyfive.screen.screenController
 
-import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.Npc
@@ -8,6 +7,7 @@ import com.microwavestudios.fortyfive.map.Completable
 import com.microwavestudios.fortyfive.map.events.dialog.Dialog
 import com.microwavestudios.fortyfive.map.events.dialog.DialogPart
 import com.microwavestudios.fortyfive.map.events.dialog.NextDialogPartSelector
+import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
@@ -99,6 +99,16 @@ class DialogScreenController(
                 updateToNewDialog()
             }
 
+            is NextDialogPartSelector.StartSpecialRunEnd -> {
+                val run = ConfigFileManager.runConfig.loadRun(selector.run)
+                require(run.type == RunType.SPECIAL_NOT_IN_BOARD) {
+                    "run started via Dialog must be of type SPECIAL_NOT_IN_BOARD"
+                }
+                val profile = FortyFive.profileManager.currentProfile!!
+                profile.startRun(run)
+                FortyFive.screenManager.screenFinished()
+            }
+
             is NextDialogPartSelector.GiftCardEnd -> {
                 val context = object : ChooseCardScreenContext {
                     override var seed: Long = 0
@@ -114,6 +124,7 @@ class DialogScreenController(
                     override fun completed() {}
                 }
                 FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, context)
+                FortyFive.screenManager.screenFinished()
             }
 
             is NextDialogPartSelector.Choice -> {

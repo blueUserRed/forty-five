@@ -29,11 +29,21 @@ nodes: [
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            dialog: "tavelling_merchant_welcome",
+            dialog: "tutorial_dialog",
             canOnlyBeStartedOnce: false,
-            currentlyBlocks: false,
+            currentlyBlocks: true,
             startable: true,
-            isCompleted: false
+            isCompleted: false,
+            startConditions: [
+                $Not {
+                    negate: $RunCompleted { runName: "tutorial_run" }
+                }
+            ],
+            blockConditions: [
+                $Not {
+                    negate: $RunCompleted { runName: "tutorial_run" }
+                }
+            ]
         }
     },
     {
@@ -51,21 +61,23 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        nodeTexture: "map_node_dialog",
-        event: $DialogMapEvent {
-            dialog: "priest_of_aqua_balle_warning",
-            canOnlyBeStartedOnce: true,
-            startConditions: [
-                $Not {
-                    negate: $PlayerHasCard {
-                        card: "guardianAngelBullet"
-                    }
-                }
-            ],
-            currentlyBlocks: false,
-            startable: true,
-            isCompleted: false
+//        nodeTexture: "map_node_dialog",
+        event: $EmptyMapEvent {
         }
+//        event: $DialogMapEvent {
+//            dialog: "priest_of_aqua_balle_warning",
+//            canOnlyBeStartedOnce: true,
+//            startConditions: [
+//                $Not {
+//                    negate: $PlayerHasCard {
+//                        card: "guardianAngelBullet"
+//                    }
+//                }
+//            ],
+//            currentlyBlocks: false,
+//            startable: true,
+//            isCompleted: false
+//        }
     },
     {
         x: 50.0,

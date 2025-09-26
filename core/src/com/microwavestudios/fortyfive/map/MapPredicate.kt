@@ -26,6 +26,20 @@ interface MapPredicate {
         }
     }
 
+    class RunCompleted(val runName: String) : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean {
+            val profile = FortyFive.profileManager.currentProfile ?: return false
+            return profile.isSpecialRunCompleted(runName)
+        }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("RunCompleted")
+            "runName" with runName
+        }
+
+    }
+
     class Not(val negate: MapPredicate) : MapPredicate {
 
         override fun check(currentMap: DetailMap): Boolean = !negate.check(currentMap)
@@ -50,6 +64,8 @@ interface MapPredicate {
         fun fromOnj(onj: OnjNamedObject): MapPredicate = when (onj.name) {
 
             "PlayerHasCard" -> PlayerHasCard(onj.get<String>("card"))
+
+            "RunCompleted" -> RunCompleted(onj.get<String>("runName"))
 
             "Not" -> Not(fromOnj(onj.get<OnjNamedObject>("negate")))
 

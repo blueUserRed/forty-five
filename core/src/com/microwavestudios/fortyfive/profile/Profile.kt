@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.run.RunGenerator
 import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
+import com.microwavestudios.fortyfive.utils.requireNull
 import com.microwavestudios.fortyfive.utils.unreachable
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
@@ -174,8 +175,12 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     }
 
     fun startRun(run: Run) {
-        requireNotNull(runSave) { "cant start new run when old run wasn't completed yet" }
-        if (run.type == RunType.SPECIAL || run.type == RunType.PROGRESS) {
+        requireNull(runSave) { "cant start new run when old run wasn't completed yet" }
+        if (
+            run.type == RunType.SPECIAL ||
+            run.type == RunType.PROGRESS ||
+            run.type == RunType.SPECIAL_NOT_IN_BOARD
+        ) {
             require(run.name !in data.completedSpecialRuns) { "cant start completed special/progress run again" }
         }
 
@@ -198,6 +203,14 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         val run = runSave.run
         val area = run.fromArea
 
+        if (run.type == RunType.SPECIAL_NOT_IN_BOARD) {
+            data.completedSpecialRuns.add(run.name)
+            val cardsToExtraxt = extractableCards()
+            _cardCollection.addAll(cardsToExtraxt)
+            endRun(runSave)
+            return
+        }
+
         val runGenerator = RunGenerator()
         val runBoard = runBoards[area]
         requireNotNull(runBoard) { "won run that doesn't exist in runBoard" }
@@ -216,6 +229,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
                 data.completedSpecialRuns.add(run.name)
                 runBoard.copy(progressRun = null)
             }
+            else -> unreachable()
         }
         runBoards[area] = newRunBoard
 

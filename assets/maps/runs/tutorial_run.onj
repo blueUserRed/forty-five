@@ -1,0 +1,14 @@
+name: "tutorial_run",
+length: 'medium',
+type: 'special_not_in_board',
+difficulty: 1,
+rewards: [
+    $CashReward {
+        amount: 100,
+    },
+],
+biome: 'wasteland',
+fromArea: 'aqua_balle',
+maxPlayerLives: 100,
+initialPlayerLives: 100,
+mapGenerator: $StaticMap { name: "tutorial_road" }

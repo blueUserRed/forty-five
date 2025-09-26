@@ -73,9 +73,10 @@ enum class RunLength(private val onjName: String, val displayName: String) {
 enum class RunType(private val onjName: String, val displayName: String) {
 
     LIMITED("limited", "Limited"),
+    CONSTRUCTED("constructed", "Constructed"),
     PROGRESS("progress", "Progress"),
     SPECIAL("special", "Special"),
-    CONSTRUCTED("constructed", "Constructed")
+    SPECIAL_NOT_IN_BOARD("special_not_in_board", "Special")
     ;
 
     fun asOnj(): OnjValue = OnjString(onjName)
@@ -86,6 +87,7 @@ enum class RunType(private val onjName: String, val displayName: String) {
             "limited" -> LIMITED
             "progress" -> PROGRESS
             "special" -> SPECIAL
+            "special_not_in_board" -> SPECIAL_NOT_IN_BOARD
             "constructed" -> CONSTRUCTED
             else -> throw RuntimeException("unknown runtype: ${onj.value}")
         }

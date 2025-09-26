@@ -5,6 +5,10 @@ $MapPredicate {
         card: string
     }
 
+    $RunCompleted {
+        runName: string
+    }
+
     $Not {
         negate: $MapPredicate
     }
@@ -19,7 +23,8 @@ var mapEventStandardConfig = {
     currentlyBlocks: boolean,
     startable: boolean,
     isCompleted: boolean,
-    startConditions?: $MapPredicate[]
+    startConditions?: $MapPredicate[],
+    blockConditions?: $MapPredicate[],
 };
 
 var encounter = {
@@ -49,7 +54,6 @@ $MapEvent {
     $DialogMapEvent {
         dialog: string,
         canOnlyBeStartedOnce: boolean,
-        onlyIfPlayerDoesntHaveCard?: string,
         ...mapEventStandardConfig
     }
 

@@ -314,7 +314,7 @@ class DetailMapWidget(
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // trap player ? idk
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
-        if (playerNode.event?.currentlyBlocks == true) return false
+        if (playerNode.event?.isBlocking(map) == true) return false
         return true
     }
 

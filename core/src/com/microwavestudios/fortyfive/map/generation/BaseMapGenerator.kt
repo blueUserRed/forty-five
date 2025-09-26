@@ -342,6 +342,7 @@ abstract class BaseMapGenerator {
         fun fromOnj(onj: OnjNamedObject): BaseMapGenerator = when (val name = onj.name) {
             "ThreeLine" -> ThreeLineMapGenerator(ThreeLineMapGenerator.ThreeLineMapGeneratorData.fromOnj(onj))
             "Radial" -> RadialMapGenerator(RadialMapGenerator.RadialMapGeneratorData.fromOnj(onj))
+            "StaticMap" -> StaticMapGenerator(onj.get<String>("name"))
             else -> throw RuntimeException("unknown MapGenerator: $name")
         }
 

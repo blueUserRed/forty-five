@@ -64,6 +64,10 @@ data class Dialog(
                         }
                 )
 
+                "StartSpecialRunEnd" -> NextDialogPartSelector.StartSpecialRunEnd(
+                    nextSelector.get<String>("run")
+                )
+
                 "GiftCardEnd" -> NextDialogPartSelector.GiftCardEnd(
                     nextSelector.get<String>("card"),
                 )
@@ -97,6 +101,8 @@ sealed class NextDialogPartSelector {
     data object End : NextDialogPartSelector()
 
     class GiftCardEnd(val card: String) : NextDialogPartSelector()
+
+    class StartSpecialRunEnd(val run: String) : NextDialogPartSelector()
 
     data object ToCreditScreenEnd : NextDialogPartSelector()
 

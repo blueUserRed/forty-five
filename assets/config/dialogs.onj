@@ -9,6 +9,38 @@ var shake = $ShakeTextAction {
 
 dialogs: [
     {
+        name: "tutorial_dialog",
+        eventText: "",
+        parts: [
+            {
+                rawText: "Hello, I've heard you want to try your luck in the frontier?",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                rawText: "But before I let you go, you will have to complete a small trial run I prepared for you, to make sure you know how to use a revolver",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                rawText: "Ready? Go!",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $StartSpecialRunEnd { run: "tutorial_run" },
+            }
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
         name: "testing_dialog",
         eventText: "hi",
         parts: [

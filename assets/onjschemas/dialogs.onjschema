@@ -23,6 +23,10 @@ $NextDialogPartSelector {
         card: string
     }
 
+    $StartSpecialRunEnd {
+        run: string,
+    }
+
     $ToCreditScreenEnd { }
 
 }

@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.config.RunConfig
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
@@ -98,6 +97,10 @@ abstract class MapEvent {
     val startConditions: List<MapPredicate>
         get() = _startConditions
 
+    private val _blockConditions: MutableList<MapPredicate> = mutableListOf()
+    val blockConditions: List<MapPredicate>
+        get() = _blockConditions
+
     /**
      * called when the start button was clicked
      */
@@ -114,6 +117,9 @@ abstract class MapEvent {
     fun canBeStarted(map: DetailMap): Boolean =
         startable && _startConditions.all { it.check(map) }
 
+    fun isBlocking(map: DetailMap): Boolean =
+        currentlyBlocks || _blockConditions.any { it.check(map) }
+
     fun setStandardValuesFromConfig(config: OnjObject) {
         currentlyBlocks = config.get<Boolean>("currentlyBlocks")
         startable = config.get<Boolean>("startable")
@@ -124,6 +130,12 @@ abstract class MapEvent {
             ?.map { MapPredicate.fromOnj(it as OnjNamedObject) }
         _startConditions.clear()
         startConditions?.let { _startConditions.addAll(it) }
+        val blockConditions = config
+            .getOr<OnjArray?>("blockConditions", null)
+            ?.value
+            ?.map { MapPredicate.fromOnj(it as OnjNamedObject) }
+        _blockConditions.clear()
+        blockConditions?.let { _blockConditions.addAll(it) }
     }
 
     /**
@@ -244,7 +256,6 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
  */
 class DialogMapEvent(
     private val canOnlyBeStartedOnce: Boolean,
-    private val onlyIfPlayerDoesntHaveCard: String?,
     override val dialog: String,
 ) : MapEvent(), DialogScreenContext {
 
@@ -274,14 +285,12 @@ class DialogMapEvent(
         includeStandardConfig()
         "dialog" with dialog
         "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
-        onlyIfPlayerDoesntHaveCard?.let { "onlyIfPlayerDoesntHaveCard" to it }
     }
 
     companion object {
 
         fun fromOnj(onj: OnjObject): DialogMapEvent = DialogMapEvent(
             onj.get<Boolean>("canOnlyBeStartedOnce"),
-            onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null),
             onj.get<String>("dialog")
         ).apply { setStandardValuesFromConfig(onj) }
     }
