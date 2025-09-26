@@ -2,8 +2,11 @@ import "imports/run.onjschema" as run;
 import "imports/deck.onjschema" as deck;
 
 var runBoard = {
-    forArea: string,
-    runs: run[2],
+    areaName: string,
+    limitedRun: run?,
+    constructedRun: run?,
+    progressRun: run?,
+    specialRuns: run[],
 };
 
 cardCollection: string[],
@@ -14,3 +17,4 @@ currentMap: string,
 currentNode: int,
 lastNode: int?,
 runBoards: runBoard[],
+completedSpecialRuns: string[],

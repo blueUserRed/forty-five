@@ -5,6 +5,7 @@ import onj.builder.buildOnjObject
 import onj.value.*
 
 data class Run(
+    val name: String,
     val length: RunLength,
     val type: RunType,
     val difficulty: Int,
@@ -17,6 +18,7 @@ data class Run(
 ) {
 
     fun asOnj(): OnjObject = buildOnjObject {
+        "name" with name
         "length" with length.asOnj()
         "type" with type.asOnj()
         "difficulty" with difficulty
@@ -31,6 +33,7 @@ data class Run(
     companion object {
 
         fun fromOnj(onj: OnjObject): Run = Run(
+            onj.get<String>("name"),
             RunLength.fromOnj(onj.get<OnjString>("length")),
             RunType.fromOnj(onj.get<OnjString>("type")),
             onj.get<Long>("difficulty").toInt(),
@@ -71,6 +74,7 @@ enum class RunType(private val onjName: String, val displayName: String) {
 
     LIMITED("limited", "Limited"),
     PROGRESS("progress", "Progress"),
+    SPECIAL("special", "Special"),
     CONSTRUCTED("constructed", "Constructed")
     ;
 
@@ -81,6 +85,7 @@ enum class RunType(private val onjName: String, val displayName: String) {
         fun fromOnj(onj: OnjString): RunType = when (onj.value) {
             "limited" -> LIMITED
             "progress" -> PROGRESS
+            "special" -> SPECIAL
             "constructed" -> CONSTRUCTED
             else -> throw RuntimeException("unknown runtype: ${onj.value}")
         }

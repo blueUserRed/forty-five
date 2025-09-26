@@ -85,9 +85,7 @@ class MapScreen : ScreenCreator() {
         )
     }
 
-    override fun getScreenControllers(): List<ScreenController> = listOf(
-//        MapScreenController(screen)
-    )
+    override fun getScreenControllers(): List<ScreenController> = listOf()
 
     override fun getRoot(): Group = newGroup {
         x = 0f

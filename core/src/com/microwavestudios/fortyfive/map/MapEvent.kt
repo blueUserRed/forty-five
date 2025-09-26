@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.RunConfig
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
@@ -38,7 +39,7 @@ object MapEventFactory {
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
-        "ProgressRunMapEvent" to { ProgressRunMapEvent.fromOnj(it) }
+        "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -451,7 +452,12 @@ class LockNodeMapEvent(
 
 }
 
-class ProgressRunMapEvent : MapEvent(), Completable {
+class CompleteRunMapEvent(
+    val runName: String,
+    override val displayName: String,
+    override val descriptionText: String,
+    override val completedDescriptionText: String,
+) : MapEvent(), Completable {
 
     override var currentlyBlocks: Boolean = true
     override var startable: Boolean = true
@@ -462,14 +468,16 @@ class ProgressRunMapEvent : MapEvent(), Completable {
     override fun start() {
         val map = FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap
         if (!map.isArea) throw RuntimeException("cant start progress run when not in an area")
-        val run = map.progressRun ?: throw RuntimeException("map ${map.name} doesn't define a progress run")
+        val run = ConfigFileManager.runConfig.loadRun(runName)
         FortyFive.profileManager.currentProfile!!.startRun(run)
         FortyFive.screenManager.screenFinished()
     }
 
     override fun onMapLoad(map: DetailMap) {
-        if (isCompleted) return
-        if (map.completedProgressRun) completed()
+        val profile = FortyFive.profileManager.currentProfile!!
+        if (profile.isSpecialRunCompleted(runName)) {
+            completed()
+        }
     }
 
     override fun completed() {
@@ -479,14 +487,22 @@ class ProgressRunMapEvent : MapEvent(), Completable {
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("ProgressRunMapEvent")
+        name("CompleteRunMapEvent")
+        "runName" with runName
+        "displayName" with displayName
+        "descriptionText" with descriptionText
+        "completedDescriptionText" with completedDescriptionText
         includeStandardConfig()
     }
 
     companion object {
 
-        fun fromOnj(onj: OnjObject): ProgressRunMapEvent =
-            ProgressRunMapEvent().also { it.setStandardValuesFromConfig(onj) }
+        fun fromOnj(onj: OnjObject): CompleteRunMapEvent = CompleteRunMapEvent(
+            onj.get<String>("runName"),
+            onj.get<String>("displayName"),
+            onj.get<String>("descriptionText"),
+            onj.get<String>("completedDescriptionText"),
+        ).also { it.setStandardValuesFromConfig(onj) }
     }
 
 }

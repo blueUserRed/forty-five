@@ -11,6 +11,7 @@ class RunGenerator {
 
     fun generateRun(forDifficulty: Int, forBiome: String, forArea: String, type: RunType): Run {
         return Run(
+            "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,

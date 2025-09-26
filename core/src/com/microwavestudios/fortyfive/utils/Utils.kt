@@ -361,6 +361,8 @@ fun Color.interpolate(other: Color): Color {
     )
 }
 
+fun unreachable(): Nothing = throw RuntimeException("unreachable reached")
+
 object Utils {
 
     fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability

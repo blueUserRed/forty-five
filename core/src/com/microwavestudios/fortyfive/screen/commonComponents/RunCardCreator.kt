@@ -4,7 +4,6 @@ import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.EventPipeline
 
 object RunCardCreator {
 
@@ -13,7 +12,7 @@ object RunCardCreator {
     ): CustomGroup = newBox {
 
         width = 250f
-        height = 400f
+        height = 370f
 
         flexDirection = FlexDirection.COLUMN
         backgroundHandle = "white_texture"

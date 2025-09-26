@@ -36,8 +36,6 @@ data class DetailMap(
     val scrollable: Boolean,
     val camPosOffset: Vector2,
     val majorDifficulty: Int,
-    val progressRun: Run?,
-    var completedProgressRun: Boolean
 ) {
 
     /**
@@ -86,10 +84,6 @@ data class DetailMap(
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
         "majorDifficulty" with majorDifficulty
-        if (isArea) "areaConfig" with buildOnjObject {
-            progressRun?.let { "progressRun" with it.asOnj() }
-            "completedProgressRun" with completedProgressRun
-        }
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -186,10 +180,6 @@ data class DetailMap(
                 .map { MapDecoration.fromOnj(it as OnjObject) }
             val areaConfig = onj.getOr<OnjObject?>("areaConfig", null)
             val isArea = areaConfig != null
-            val progressRun = areaConfig?.let { config ->
-                config.getOr<OnjObject?>("progressRun", null)?.let { Run.fromOnj(it) }
-            }
-            val completedProgressRun = areaConfig?.get<Boolean>("completedProgressRun") ?: false
             return DetailMap(
                 file.nameWithoutExtension,
                 nodes[startNodeIndex].build(),
@@ -205,8 +195,6 @@ data class DetailMap(
                     Vector2()
                 },
                 onj.get<Long>("majorDifficulty").toInt(),
-                progressRun,
-                completedProgressRun
             )
         }
 

@@ -46,8 +46,6 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             biome = data.biome,
             scrollable = true,
             majorDifficulty = data.majorDifficulty,
-            progressRun = null,
-            completedProgressRun = false,
             camPosOffset = Vector2(0f, 0f)
         )
     }

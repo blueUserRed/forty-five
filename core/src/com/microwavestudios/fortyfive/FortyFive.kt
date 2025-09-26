@@ -68,7 +68,6 @@ object FortyFive : Game() {
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
     override fun create() {
-
         init()
         if (appArguments.bakeRun) {
             Oven().bake(appArguments.bakeTasks)

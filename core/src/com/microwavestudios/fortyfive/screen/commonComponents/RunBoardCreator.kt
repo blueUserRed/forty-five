@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.animation.yPositionAbstractProperty
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.screen.actors.*
@@ -197,50 +198,17 @@ object RunBoardCreator {
         positionType = PositionType.ABSOLUTE
 
         val profile = FortyFive.profileManager.currentProfile ?: return@newGroup
-        val runBoard = profile.runBoardForArea(profile.currentAreaMap)
 
         box {
-            flexDirection = FlexDirection.ROW
-            verticalAlign = CustomAlign.CENTER
-            horizontalAlign = CustomAlign.SPACE_AROUND
-            width = worldWidth * 0.8f
-            height = worldHeight * 0.65f
+            flexDirection = FlexDirection.COLUMN
+            width = worldWidth * 0.85f
+            height = worldHeight * 0.85f
             backgroundHandle = "microwave_studios_brown_texture"
             centerX()
             centerY()
 
-            fun runSelectCallback(run: Run): () -> Unit = {
-                val event = ShowPopup(run)
-                events.fire(event)
-                event.result.then { startRun ->
-                    if (!startRun) return@then
-                    profile.startRun(run)
-                    FortyFive.screenManager.appendScreen(MapScreen)
-                    FortyFive.screenManager.screenFinished()
-                }
-            }
-
             if (!profile.isRunActive) {
-                actor(getSharedRunCard(runBoard.first)) {
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    joinGroup(runBoardGroup)
-                    onInput(GameInputs.interact, runSelectCallback(runBoard.first))
-                }
-                actor(getSharedRunCard(runBoard.second)) {
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    joinGroup(runBoardGroup)
-                    onInput(GameInputs.interact, runSelectCallback(runBoard.second))
-                }
-                val map = profile.currentAreaMap
-                val run = map.progressRun
-                if (!map.completedProgressRun && run != null) actor(getSharedRunCard(run)) {
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    joinGroup(runBoardGroup)
-                    onInput(GameInputs.interact, runSelectCallback(run))
-                }
+                noRunActiveBoard(this@runBoard, profile, events)
             } else box {
                 relativeWidth(100f)
                 relativeHeight(100f)
@@ -255,6 +223,54 @@ object RunBoardCreator {
         }
     }
 
-    private data class ShowPopup(val run: Run, val result: Promise<Boolean> = Promise())
+    private fun CustomGroup.noRunActiveBoard(
+        creator: ScreenCreator,
+        profile: Profile,
+        events: EventPipeline
+    ) = with(creator) {
 
+        val runBoard = profile.runBoardForArea(profile.currentAreaMap)
+
+        fun runSelectCallback(run: Run): () -> Unit = {
+            val event = ShowPopup(run)
+            events.fire(event)
+            event.result.then { startRun ->
+                if (!startRun) return@then
+                profile.startRun(run)
+                FortyFive.screenManager.appendScreen(MapScreen)
+                FortyFive.screenManager.screenFinished()
+            }
+        }
+
+        fun runCard(run: Run, box: CustomBox) = box.actor(getSharedRunCard(run)) {
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            joinGroup(runBoardGroup)
+            onInput(GameInputs.interact, runSelectCallback(run))
+        }
+
+        box {
+            val box = this@box
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            relativeWidth(100f)
+            relativeHeight(50f)
+            runBoard.limitedRun?.let { runCard(it, box) }
+            runBoard.constructedRun?.let { runCard(it, box) }
+            runBoard.progressRun?.let { runCard(it, box) }
+        }
+        if (runBoard.specialRuns.isNotEmpty()) box {
+            val box = this@box
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            relativeWidth(100f)
+            relativeHeight(50f)
+            runBoard.specialRuns.forEach { run -> runCard(run, box) }
+        }
+
+    }
+
+    private data class ShowPopup(val run: Run, val result: Promise<Boolean> = Promise())
 }

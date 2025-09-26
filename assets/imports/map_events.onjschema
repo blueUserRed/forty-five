@@ -82,7 +82,11 @@ $MapEvent {
         openDescription: string,
     }
 
-    $ProgressRunMapEvent {
+    $CompleteRunMapEvent {
+        runName: string,
+        displayName: string,
+        descriptionText: string,
+        completedDescriptionText: string,
         ...mapEventStandardConfig
     }
 

@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.MapConfig
+import com.microwavestudios.fortyfive.config.MapImageData
 import com.microwavestudios.fortyfive.map.generation.Direction
 import com.microwavestudios.fortyfive.map.generation.Line
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
@@ -29,7 +31,7 @@ data class MapNode(
     private var nodeTextureCache: Promise<Drawable>? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
 
-    private val mapConfig: ConfigFileManager.MapConfig = ConfigFileManager.mapConfig
+    private val mapConfig: MapConfig = ConfigFileManager.mapConfig
 
     fun getEdge(dir: Direction): MapNode? {
         if (nodePositionsForDirection.size != edgesTo.size) initNodeDirections()
@@ -136,8 +138,8 @@ data class MapNode(
         nodeTextureCache = null
     }
 
-    fun getImageData(): ConfigFileManager.MapImageData? =
-        mapConfig.images.find { it.name == imageName && it.type == ConfigFileManager.MapImageData.Type.SIGN }
+    fun getImageData(): MapImageData? =
+        mapConfig.images.find { it.name == imageName && it.type == MapImageData.Type.SIGN }
 
     fun isLinkedTo(node: MapNode): Boolean {
         for (linkedNode in node.edgesTo) {

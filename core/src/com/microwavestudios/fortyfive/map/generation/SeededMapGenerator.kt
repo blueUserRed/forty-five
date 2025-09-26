@@ -67,8 +67,6 @@ class SeededMapGenerator(
             true,
             Vector2(),
             0,
-            progressRun = null,
-            completedProgressRun = false
         )
     }
 

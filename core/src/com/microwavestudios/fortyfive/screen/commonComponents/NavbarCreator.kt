@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.MapImageData
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.profile.Profile
@@ -346,7 +347,7 @@ object NavbarCreator {
         ConfigFileManager
             .mapConfig
             .images
-            .find { it.name == mapName && it.type == ConfigFileManager.MapImageData.Type.NAME }
+            .find { it.name == mapName && it.type == MapImageData.Type.NAME }
             ?.resourceHandle
 
 

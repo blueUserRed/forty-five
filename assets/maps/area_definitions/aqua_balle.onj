@@ -14,10 +14,18 @@ nodes: [
         event: $EmptyMapEvent { }
     },
     {
+        x: -27.5,
+        y: 110.0,
+        edgesTo: [
+            0, 2
+        ],
+        event: $EmptyMapEvent { }
+    },
+    {
         x: -15.0,
         y: 115.0,
         edgesTo: [
-            0, 2
+            1, 3
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
@@ -32,7 +40,7 @@ nodes: [
         x: 20.0,
         y: 107.0,
         edgesTo: [
-            1, 3
+            2, 4
         ],
         event: $EmptyMapEvent {
         }
@@ -41,7 +49,7 @@ nodes: [
         x: 40.0,
         y: 115.0,
         edgesTo: [
-            2, 4
+            3, 5
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
@@ -63,23 +71,24 @@ nodes: [
         x: 50.0,
         y: 110.0,
         edgesTo: [
-            3, 5
+            4, 6
         ],
         nodeTexture: "map_node_default",
-        event: $LockNodeMapEvent {
-            conditions: [
-                $ProgressRunCompleted {}
-            ],
-            locked: true,
-            lockedDescription: "Complete the Progress run to pass",
-            openDescription: ""
+        event: $CompleteRunMapEvent {
+            runName: "aqua_balle_progress_run",
+            displayName: "Progress Run",
+            descriptionText: "To progress past this point, you must complete the progress run. Are you prepared?",
+            completedDescriptionText: "You completed the run!",
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false
         }
     },
     {
         x: 65.0,
         y: 105.0,
         edgesTo: [
-            4
+            5
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
@@ -125,218 +134,3 @@ decorations: [
         ]
     }
 ],
-
-var run = {
-    length: 'medium',
-    type: 'progress',
-    difficulty: 1,
-    rewards: [
-        $CashReward {
-            amount: 100,
-        },
-    ],
-    biome: 'wasteland',
-    fromArea: 'aqua_balle',
-    maxPlayerLives: 100,
-    initialPlayerLives: 100,
-    mapGenerator: $ThreeLine {
-        biome: 'wasteland',
-        roadLength: 270.0,
-        mainLineNodes: 8,
-        altLinesPadding: [
-            0,
-            2,
-        ],
-        altLinesOffset: 40.0,
-        varianceX: 15.0,
-        varianceY: 15.0,
-        horizontalExtension: 80.0,
-        verticalExtension: 50.0,
-        mainEvent: {
-            event: $EncounterMapEvent {
-                currentlyBlocks: true,
-                startable: true,
-                isCompleted: false,
-                startConditions: [
-                ],
-                encounter: {
-                    enemies: [
-                        'Outlaw_test',
-                    ],
-                    encounterModifier: [
-                    ],
-                    forceCards: null,
-                    shuffleCards: true,
-                    special: false,
-                },
-                isExtraction: false,
-            },
-            nodeTexture: 'map_node_fight',
-        },
-        events: [
-            {
-                event: $ChooseCardMapEvent {
-                    currentlyBlocks: false,
-                    startable: true,
-                    isCompleted: false,
-                    startConditions: [
-                    ],
-                    types: [
-                    ],
-                    seed: 30478934789,
-                    nbrOfCards: 3,
-                    enableRerolls: true,
-                    amountOfRerolls: 0,
-                    rerollPriceIncrease: 20,
-                    rerollBasePrice: 10,
-                },
-                offset: [
-                    2,
-                    2,
-                ],
-                nodeTexture: 'map_node_choose_card',
-                line: 2,
-            },
-            {
-                event: $ShopMapEvent {
-                    types: [
-                    ],
-                    person: 'traveling_merchant',
-                    amountCards: [
-                        3,
-                        5,
-                    ],
-                    boughtIndices: [
-                    ],
-                    currentCards: null,
-                    amountOfRerolls: 0,
-                    rerollPriceIncrease: 20,
-                    rerollBasePrice: 20,
-                },
-                offset: [
-                    2,
-                    2,
-                ],
-                nodeTexture: 'map_node_choose_card',
-                line: 2,
-            },
-        ],
-        decorations: [
-            {
-                distribution: $Random {
-                },
-                decoration: 'map_decoration_wasteland_cactus_1',
-                baseWidth: 2.0,
-                baseHeight: 4.0,
-                density: 0.0024000001139939,
-                checkNodeCollisions: true,
-                checkLineCollisions: false,
-                checkDecorationCollisions: true,
-                generateDecorationCollisions: true,
-                onlyCheckCollisionsAtSpawnPoints: true,
-                scale: [
-                    2.75,
-                    3.25,
-                ],
-                shrinkBoundsWidth: 0.0,
-                shrinkBoundsHeight: 0.0,
-                sortByY: true,
-                animated: false,
-            },
-            {
-                distribution: $Random {
-                },
-                decoration: 'map_decoration_wasteland_cactus_2',
-                baseWidth: 2.0,
-                baseHeight: 4.0,
-                density: 0.0007999999797903,
-                checkNodeCollisions: true,
-                checkLineCollisions: false,
-                checkDecorationCollisions: true,
-                generateDecorationCollisions: true,
-                onlyCheckCollisionsAtSpawnPoints: false,
-                scale: [
-                    2.75,
-                    3.25,
-                ],
-                shrinkBoundsWidth: 0.0,
-                shrinkBoundsHeight: 0.0,
-                sortByY: false,
-                animated: false,
-            },
-            {
-                distribution: $Random {
-                },
-                decoration: 'map_decoration_wasteland_skull_1',
-                baseWidth: 3.0,
-                baseHeight: 3.0,
-                density: 0.0003999999898952,
-                checkNodeCollisions: true,
-                checkLineCollisions: false,
-                checkDecorationCollisions: true,
-                generateDecorationCollisions: true,
-                onlyCheckCollisionsAtSpawnPoints: false,
-                scale: [
-                    1.100000023841858,
-                    1.7000000476837158,
-                ],
-                shrinkBoundsWidth: 0.0,
-                shrinkBoundsHeight: 0.0,
-                sortByY: false,
-                animated: false,
-            },
-            {
-                distribution: $Random {
-                },
-                decoration: 'map_decoration_wasteland_skull_2',
-                baseWidth: 3.0,
-                baseHeight: 3.0,
-                density: 0.0003999999898952,
-                checkNodeCollisions: true,
-                checkLineCollisions: false,
-                checkDecorationCollisions: true,
-                generateDecorationCollisions: true,
-                onlyCheckCollisionsAtSpawnPoints: false,
-                scale: [
-                    1.100000023841858,
-                    1.7000000476837158,
-                ],
-                shrinkBoundsWidth: 0.0,
-                shrinkBoundsHeight: 0.0,
-                sortByY: false,
-                animated: false,
-            },
-        ],
-        nodeProtectedArea: 20.0,
-        locationSignProtectedAreaWidth: 25.0,
-        locationSignProtectedAreaHeight: 30.0,
-        firstNodeEvent: $EmptyMapEvent {
-        },
-        firstNodeTexture: 'map_node_default',
-        lastNodeEvent: $EncounterMapEvent {
-            currentlyBlocks: true,
-            startable: true,
-            isCompleted: false,
-            startConditions: [
-            ],
-            encounter: {
-                enemies: [
-                    'Outlaw_test',
-                ],
-                encounterModifier: [
-                ],
-                forceCards: null,
-                shuffleCards: true,
-                special: false,
-            },
-            isExtraction: true,
-        },
-        lastNodeTexture: 'map_node_fight',
-        majorDifficulty: 1,
-    },
-};
-
-areaConfig: {
-    progressRun: run,
-    completedProgressRun: false
-},
