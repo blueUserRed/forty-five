@@ -99,6 +99,29 @@ class DialogScreenController(
                 updateToNewDialog()
             }
 
+            is NextDialogPartSelector.ByPredicate -> {
+                val profile = FortyFive.profileManager.currentProfile!!
+                val map = profile.currentMapSaver.currentMap
+                val condition = selector.predicate.check(map)
+                val partName = if (condition) selector.ifTrue else selector.ifFalse
+                val part = dialog.partWithLabel(partName)
+                currentDialogPartIndex = dialog.parts.indexOf(part)
+                updateToNewDialog()
+            }
+
+            is NextDialogPartSelector.MatchPredicate -> {
+                val profile = FortyFive.profileManager.currentProfile!!
+                val map = profile.currentMapSaver.currentMap
+                var chosen: String? = null
+                selector.options.forEach { (predicate, label) ->
+                    if (chosen != null) return@forEach
+                    if (predicate.check(map)) chosen = label
+                }
+                val part = dialog.partWithLabel(chosen ?: selector.default)
+                currentDialogPartIndex = dialog.parts.indexOf(part)
+                updateToNewDialog()
+            }
+
             is NextDialogPartSelector.StartSpecialRunEnd -> {
                 val run = ConfigFileManager.runConfig.loadRun(selector.run)
                 require(run.type == RunType.SPECIAL_NOT_IN_BOARD) {
@@ -106,6 +129,16 @@ class DialogScreenController(
                 }
                 val profile = FortyFive.profileManager.currentProfile!!
                 profile.startRun(run)
+                FortyFive.screenManager.screenFinished()
+            }
+
+            is NextDialogPartSelector.AddSpecialRunEnd -> {
+                val run = ConfigFileManager.runConfig.loadRun(selector.run)
+                require(run.type == RunType.SPECIAL || run.type == RunType.PROGRESS) {
+                    "dialogs can only add special or progress runs to the runBoard"
+                }
+                val profile = FortyFive.profileManager.currentProfile!!
+                profile.addRunToRunBoard(profile.currentAreaMapName, run)
                 FortyFive.screenManager.screenFinished()
             }
 

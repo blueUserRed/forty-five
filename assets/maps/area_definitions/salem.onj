@@ -24,6 +24,9 @@ nodes: [
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "traveler_in_salem_dialog",
+            displayName: "Random Traveler"
+            descriptionText: ""
+            completedDescriptionText: "",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             startable: true,

@@ -3,8 +3,10 @@ package com.microwavestudios.fortyfive.map
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import onj.builder.buildOnjObject
+import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.math.min
 
 interface MapPredicate {
 
@@ -40,6 +42,35 @@ interface MapPredicate {
 
     }
 
+    class RunInCurrentBoard(val runName: String) : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean {
+            val profile = FortyFive.profileManager.currentProfile ?: return false
+            val runBoard = profile.runBoardForArea(profile.currentAreaMap)
+            return runBoard.progressRun?.name == runName ||
+                    runBoard.specialRuns.any { it.name == runName }
+        }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("RunInCurrentBoard")
+            "runName" with runName
+        }
+
+    }
+
+    class MinimumRunsWon(val minimum: Int) : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean {
+            val profile = FortyFive.profileManager.currentProfile ?: return false
+            return profile.wonRuns >= minimum
+        }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("MinimumRunsWon")
+            "minimum" with minimum
+        }
+    }
+
     class Not(val negate: MapPredicate) : MapPredicate {
 
         override fun check(currentMap: DetailMap): Boolean = !negate.check(currentMap)
@@ -47,6 +78,26 @@ interface MapPredicate {
         override fun asOnj(): OnjObject = buildOnjObject {
             name("Not")
             "negate" with negate.asOnj()
+        }
+    }
+
+    class Or(val predicates: List<MapPredicate>) : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean = predicates.any { it.check(currentMap) }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("Or")
+            "predicates" with predicates.map { it.asOnj() }
+        }
+    }
+
+    class And(val predicates: List<MapPredicate>) : MapPredicate {
+
+        override fun check(currentMap: DetailMap): Boolean = predicates.all { it.check(currentMap) }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("And")
+            "predicates" with predicates.map { it.asOnj() }
         }
     }
 
@@ -67,7 +118,15 @@ interface MapPredicate {
 
             "RunCompleted" -> RunCompleted(onj.get<String>("runName"))
 
+            "MinimumRunsWon" -> MinimumRunsWon(onj.get<Long>("minimum").toInt())
+
+            "RunInCurrentBoard" -> RunInCurrentBoard(onj.get<String>("runName"))
+
             "Not" -> Not(fromOnj(onj.get<OnjNamedObject>("negate")))
+
+            "Or" -> Or(onj.get<OnjArray>("predicates").value.map { fromOnj(it as OnjNamedObject) })
+
+            "And" -> And(onj.get<OnjArray>("predicates").value.map { fromOnj(it as OnjNamedObject) })
 
             "Never" -> Never
 

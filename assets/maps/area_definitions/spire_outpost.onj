@@ -41,6 +41,9 @@ nodes: [
         imagePos: "RIGHT",
         event: $DialogMapEvent {
             dialog: "to_be_continued_dialog",
+            displayName: "Developers",
+            descriptionText: ""
+            completedDescriptionText: "",
             currentlyBlocks: false,
             startable: true,
             canOnlyBeStartedOnce: false,

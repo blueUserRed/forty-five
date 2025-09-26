@@ -131,7 +131,8 @@ class GameControllerImpl(
         WarningParent.Level.HIGH
     )
 
-    private val enemyDifficulty = 1f + (encounter.minorDifficulty * Config.enemyAggressiveDifficultyAdjustment)
+    private val enemyDifficulty
+        get() = 1f + (encounter.minorDifficulty * Config.enemyAggressiveDifficultyAdjustment)
 
     private lateinit var profile: Profile
 

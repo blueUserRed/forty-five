@@ -30,6 +30,9 @@ nodes: [
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "tutorial_dialog",
+            displayName: "Your Brother",
+            descriptionText: "Your Brother wants to talk to you before you go on your journey",
+            completedDescriptionText: "You completed the tutorial run",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: true,
             startable: true,
@@ -61,23 +64,17 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-//        nodeTexture: "map_node_dialog",
-        event: $EmptyMapEvent {
+        nodeTexture: "map_node_dialog",
+        event: $DialogMapEvent {
+            dialog: "aqua_balle_progress_dialog",
+            displayName: "Stranger",
+            descriptionText: "A stranger has a mission for you",
+            completedDescriptionText: "",
+            canOnlyBeStartedOnce: false,
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
         }
-//        event: $DialogMapEvent {
-//            dialog: "priest_of_aqua_balle_warning",
-//            canOnlyBeStartedOnce: true,
-//            startConditions: [
-//                $Not {
-//                    negate: $PlayerHasCard {
-//                        card: "guardianAngelBullet"
-//                    }
-//                }
-//            ],
-//            currentlyBlocks: false,
-//            startable: true,
-//            isCompleted: false
-//        }
     },
     {
         x: 50.0,
@@ -86,14 +83,17 @@ nodes: [
             4, 6
         ],
         nodeTexture: "map_node_default",
-        event: $CompleteRunMapEvent {
-            runName: "aqua_balle_progress_run",
+        event: $SimpleMapEvent {
             displayName: "Progress Run",
-            descriptionText: "To progress past this point, you must complete the progress run. Are you prepared?",
-            completedDescriptionText: "You completed the run!",
-            currentlyBlocks: true,
-            startable: true,
-            isCompleted: false
+            descriptionText: "To progress beyond this point, you must complete the progress run",
+            currentlyBlocks: false,
+            startable: false,
+            isCompleted: false,
+            blockConditions: [
+                $Not {
+                    negate: $RunCompleted { runName: "aqua_balle_progress_run" }
+                }
+            ]
         }
     },
     {

@@ -1,7 +1,7 @@
 
 var encounter = [
     {
-        enemies: ["tutorial_enemy_1"],
+        enemies: ["tutorial_enemy_1"], // currently unused
         encounterModifier: [],
         special: true,
         shuffleCards: false,
@@ -212,12 +212,7 @@ nodes: [
             1, 2,
         ],
         nodeTexture: "map_node_fight",
-        event: $EncounterMapEvent {
-            currentlyBlocks: false,
-            startable: false,
-            isCompleted: true,
-            encounter: encounter.0,
-            isExtraction: false,
+        event: $EmptyMapEvent {
         }
     },
     {
@@ -333,6 +328,9 @@ nodes: [
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "talk_with_brother",
+            displayName: "Your Brother",
+            descriptionText: "Your Brother wants to talk to you",
+            completedDescriptionText: "",
             canOnlyBeStartedOnce: true,
             currentlyBlocks: true,
             startable: true,
@@ -348,11 +346,8 @@ nodes: [
         image: "location.aqua_balle",
         imagePos: "RIGHT",
         nodeTexture: "map_node_exit",
-        event: $EmptyMapEvent {
+        event: $FinishTutorialRunMapEvent {
         },
-//        event: $FinishTutorialMapEvent {
-//            goToMap: "location.aqua_balle",
-//        }
     },
 ],
 decorations: [

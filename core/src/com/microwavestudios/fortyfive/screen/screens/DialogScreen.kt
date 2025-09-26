@@ -80,7 +80,6 @@ class DialogScreen : ScreenCreator() {
         flexDirection = FlexDirection.COLUMN
         width = 240f
         height = 400f
-        debug()
         x = worldWidth / 2 - width / 2
 //        x = worldWidth * (3.5f / 4f) - width
         y = worldHeight * 0.33f

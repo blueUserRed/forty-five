@@ -19,6 +19,7 @@ object MapEventFactory {
 
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
+        "SimpleMapEvent" to { SimpleMapEvent.fromOnj(it) },
         "EncounterMapEvent" to { EncounterMapEvent.fromOnj(it) },
         "EnterMapMapEvent" to {
             EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("fromEnd"))
@@ -38,7 +39,8 @@ object MapEventFactory {
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
-        "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) }
+        "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
+        "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -169,6 +171,40 @@ class EmptyMapEvent : MapEvent() {
     }
 }
 
+class SimpleMapEvent(
+    override val displayDescription: Boolean,
+    override val descriptionText: String,
+    override val displayName: String
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var startable: Boolean = false
+    override var isCompleted: Boolean = false
+
+    constructor() : this(false, "", "")
+
+    override fun start() {
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("SimpleMapEvent")
+        "displayDescription" with displayDescription
+        "descriptionText" with descriptionText
+        "displayName" with displayName
+        includeStandardConfig()
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): SimpleMapEvent = SimpleMapEvent(
+            onj.getOr<Boolean>("displayDescription", false),
+            onj.getOr<String>("descriptionText", ""),
+            onj.getOr<String>("displayName", ""),
+        ).apply { setStandardValuesFromConfig(onj) }
+    }
+
+}
+
 /**
  * Map Event that represents an encounter with an enemy
  */
@@ -257,6 +293,9 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 class DialogMapEvent(
     private val canOnlyBeStartedOnce: Boolean,
     override val dialog: String,
+    override val displayName: String,
+    override val descriptionText: String,
+    override val completedDescriptionText: String
 ) : MapEvent(), DialogScreenContext {
 
     override var currentlyBlocks: Boolean = true
@@ -266,7 +305,6 @@ class DialogMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = ""
     override val buttonText: String = "Talk"
 
     override fun start() {
@@ -284,6 +322,9 @@ class DialogMapEvent(
         name("DialogMapEvent")
         includeStandardConfig()
         "dialog" with dialog
+        "displayName" with displayName
+        "descriptionText" with descriptionText
+        "completedDescriptionText" with completedDescriptionText
         "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
     }
 
@@ -291,7 +332,10 @@ class DialogMapEvent(
 
         fun fromOnj(onj: OnjObject): DialogMapEvent = DialogMapEvent(
             onj.get<Boolean>("canOnlyBeStartedOnce"),
-            onj.get<String>("dialog")
+            onj.get<String>("dialog"),
+            onj.get<String>("displayName"),
+            onj.get<String>("descriptionText"),
+            onj.get<String>("completedDescriptionText"),
         ).apply { setStandardValuesFromConfig(onj) }
     }
 }
@@ -512,6 +556,29 @@ class CompleteRunMapEvent(
             onj.get<String>("descriptionText"),
             onj.get<String>("completedDescriptionText"),
         ).also { it.setStandardValuesFromConfig(onj) }
+    }
+
+}
+
+class FinishTutorialRunMapEvent : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var startable: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val displayName: String = "Finish"
+    override val descriptionText: String = "You completed the Tutorial!"
+
+    override fun start() {
+        val profile = FortyFive.profileManager.currentProfile!!
+        profile.winRun()
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("FinishTutorialRunMapEvent")
     }
 
 }

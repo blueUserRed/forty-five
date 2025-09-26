@@ -41,6 +41,88 @@ dialogs: [
         }
     },
     {
+        name: "aqua_balle_progress_dialog",
+        eventText: "",
+        parts: [
+            {
+                rawText: "Hello.",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $MatchPredicate {
+                    options: [
+                        {
+                            predicate: $RunCompleted { runName: "aqua_balle_progress_run" },
+                            label: "runCompleted"
+                        },
+                        {
+                            predicate: $RunInCurrentBoard { runName: "aqua_balle_progress_run" },
+                            label: "runGiven"
+                        },
+                        {
+                            predicate: $MinimumRunsWon { minimum: 3 },
+                            label: "giveRun"
+                        }
+                    ],
+                    default: "dontGiveRun"
+                }
+            },
+            {
+                label: "runGiven",
+                rawText: "When you feel ready, you start the mission by clicking on 'Run Board' and selecting the run in the second row",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $EndOfDialog {},
+            },
+            {
+                label: "runCompleted",
+                rawText: "You showed these Outlaws! Good work!",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $EndOfDialog {},
+            },
+            {
+                label: "giveRun",
+                rawText: "I have a mission for you. The road to tabu letter outpost is full of all kinds of outlaws and needs to be cleared.",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                label: "giveRun",
+                rawText: "I'll add it to your Run Board. When the road is cleared we will finally be able to go to tabu letter outpost again",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $AddSpecialRunEnd { run: "aqua_balle_progress_run" },
+            },
+            {
+                label: "dontGiveRun",
+                rawText: "I'm looking for someone to help me on an important mission. It looks like you're still quite inexperienced though",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                label: "dontGiveRun",
+                rawText: "Complete a few runs from you run board first, and when you feel ready, you can come back",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $EndOfDialog {},
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
         name: "testing_dialog",
         eventText: "hi",
         parts: [

@@ -46,6 +46,9 @@ nodes: [
         imagePos: "LEFT",
         event: $DialogMapEvent {
             dialog: "not_yet_implemented_dialog",
+            displayName: "Not yet implemented",
+            descriptionText: "",
+            completedDescriptionText: "",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             startable: true,

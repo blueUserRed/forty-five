@@ -1,23 +1,4 @@
-
-$MapPredicate {
-
-    $PlayerHasCard {
-        card: string
-    }
-
-    $RunCompleted {
-        runName: string
-    }
-
-    $Not {
-        negate: $MapPredicate
-    }
-
-    $Never {}
-
-    $ProgressRunCompleted {}
-
-}
+import "imports/map_predicates.onjschema" as _;
 
 var mapEventStandardConfig = {
     currentlyBlocks: boolean,
@@ -40,6 +21,13 @@ $MapEvent {
 
     $EmptyMapEvent { }
 
+    $SimpleMapEvent {
+        ...mapEventStandardConfig,
+        displayDescription?: boolean,
+        descriptionText?: string,
+        displayName?: string
+    }
+
     $EncounterMapEvent {
         ...mapEventStandardConfig,
         encounter: encounter,
@@ -53,6 +41,9 @@ $MapEvent {
 
     $DialogMapEvent {
         dialog: string,
+        displayName: string,
+        descriptionText: string,
+        completedDescriptionText: string,
         canOnlyBeStartedOnce: boolean,
         ...mapEventStandardConfig
     }
@@ -93,5 +84,7 @@ $MapEvent {
         completedDescriptionText: string,
         ...mapEventStandardConfig
     }
+
+    $FinishTutorialRunMapEvent { }
 
 }

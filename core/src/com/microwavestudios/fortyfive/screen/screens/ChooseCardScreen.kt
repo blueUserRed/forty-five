@@ -101,7 +101,6 @@ class ChooseCardScreen : ScreenCreator() {
                 flexDirection = FlexDirection.ROW
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.SPACE_AROUND
-                debug()
                 events.watchFor<CardsChangedEvent> { (cards) ->
                     clearChildren()
                     val data = getDataForCards(cards.size)

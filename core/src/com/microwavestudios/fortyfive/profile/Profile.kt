@@ -7,10 +7,7 @@ import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
 import com.microwavestudios.fortyfive.run.RunType
-import com.microwavestudios.fortyfive.utils.EventPipeline
-import com.microwavestudios.fortyfive.utils.FortyFiveLogger
-import com.microwavestudios.fortyfive.utils.requireNull
-import com.microwavestudios.fortyfive.utils.unreachable
+import com.microwavestudios.fortyfive.utils.*
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -39,6 +36,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         "aqua_balle",
         0,
         null,
+        0,
         mutableMapOf()
     )
 
@@ -70,6 +68,10 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     private var _currentMapName: String by DataDelegate(ProfileData::currentMap)
     val currentAreaMapName: String
         get() = _currentMapName
+
+    private var _wonRuns: Int by DataDelegate(ProfileData::wonRuns)
+    val wonRuns: Int
+        get() = _wonRuns
 
     private var runBoards: MutableMap<String, RunBoard> by DataDelegate(ProfileData::runBoards)
 
@@ -160,18 +162,54 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     }
 
     fun runBoardForArea(area: DetailMap): RunBoard {
-        runBoards[area.name]?.let { return it }
-        val runGenerator = RunGenerator()
-        val runBoard = RunBoard(
+        var runBoard = runBoards[area.name] ?: RunBoard(
             areaName = area.name,
-            limitedRun = runGenerator.generateRun(area.majorDifficulty, area.biome, area.name, RunType.LIMITED),
-            constructedRun = runGenerator.generateRun(area.majorDifficulty, area.biome, area.name, RunType.CONSTRUCTED),
-            progressRun = null,
-            specialRuns = listOf()
+            null, null, null,
+            listOf()
         )
-        runBoards[area.name] = runBoard
-        dirty()
+        val runGenerator by lazy { RunGenerator() }
+        var somethingChanged = false
+        if (runBoard.limitedRun == null) {
+            runBoard = runBoard.copy(
+                limitedRun = runGenerator.generateRun(area.majorDifficulty, area.biome, area.name, RunType.LIMITED),
+            )
+            somethingChanged = true
+        }
+        if (runBoard.constructedRun == null) {
+            runBoard = runBoard.copy(
+                constructedRun = runGenerator.generateRun(area.majorDifficulty, area.biome, area.name, RunType.CONSTRUCTED),
+            )
+            somethingChanged = true
+        }
+        if (somethingChanged) {
+            runBoards[area.name] = runBoard
+            dirty()
+        }
         return runBoard
+    }
+
+    fun addRunToRunBoard(areaName: String, run: Run) {
+        requireNot(run.type == RunType.LIMITED || run.type == RunType.CONSTRUCTED) {
+            "limited or constructed runs cant be manually added to the run board"
+        }
+        requireNot(run.type == RunType.SPECIAL_NOT_IN_BOARD) {
+            "cant add run with type 'SPECIAL_NOT_IN_BOARD' to run board"
+        }
+        var runBoard = runBoards[areaName] ?: run {
+            val board = RunBoard(areaName, null, null, null, listOf())
+            runBoards[areaName] = board
+            board
+        }
+        when (run.type) {
+            RunType.PROGRESS -> {
+                requireNull(runBoard.progressRun) { "cant add a progress run when one already exists" }
+                runBoard = runBoard.copy(progressRun = run)
+            }
+            RunType.SPECIAL -> runBoard = runBoard.copy(specialRuns = runBoard.specialRuns.with(run))
+            else -> unreachable()
+        }
+        runBoards[areaName] = runBoard
+        dirty()
     }
 
     fun startRun(run: Run) {
@@ -200,6 +238,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     fun winRun() {
         val runSave = runSave
         requireNotNull(runSave) { "cant win run if no run is active" }
+        _wonRuns++
         val run = runSave.run
         val area = run.fromArea
 
@@ -427,6 +466,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         var currentMap: String,
         var currentNode: Int,
         var lastNode: Int?,
+        var wonRuns: Int,
         var runBoards: MutableMap<String, RunBoard>
     ) {
 
@@ -439,6 +479,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             "currentMap" with currentMap
             "currentNode" with currentNode
             "lastNode" with lastNode
+            "wonRuns" with wonRuns
             "runBoards" with runBoards.map { it.value.asOnj() }
         }
 
@@ -453,6 +494,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
                 onj.get<String>("currentMap"),
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),
+                onj.get<Long>("wonRuns").toInt(),
                 onj.get<OnjArray>("runBoards").value.associate { boardOnj ->
                     boardOnj as OnjObject
                     val board = RunBoard.fromOnj(boardOnj)
