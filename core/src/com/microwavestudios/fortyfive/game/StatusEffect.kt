@@ -241,7 +241,7 @@ class Poison(
         var actualTurns: Int? = null
         action {
             actualTurns = min(turns, turnOnEffectStart + duration - controller.turnCounter)
-            damage = actualTurns * this@Poison.damage
+            damage = actualTurns!! * this@Poison.damage
         }
         includeLater(
             { target.damage(damage!!, controller) },

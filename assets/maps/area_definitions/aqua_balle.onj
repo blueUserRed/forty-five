@@ -71,7 +71,7 @@ nodes: [
             descriptionText: "A stranger has a mission for you",
             completedDescriptionText: "",
             canOnlyBeStartedOnce: false,
-            currentlyBlocks: true,
+            currentlyBlocks: false,
             startable: true,
             isCompleted: false,
         }
@@ -84,8 +84,9 @@ nodes: [
         ],
         nodeTexture: "map_node_default",
         event: $SimpleMapEvent {
+            displayDescription: true,
             displayName: "Progress Run",
-            descriptionText: "To progress beyond this point, you must complete the progress run",
+            descriptionText: "To progress beyond this point, you must complete a mission. Talk to the person behind you",
             currentlyBlocks: false,
             startable: false,
             isCompleted: false,
@@ -104,7 +105,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "location.tabu_letter_outpost",
+            targetMap: "tabu_letter_outpost",
             fromEnd: false,
         }
     },

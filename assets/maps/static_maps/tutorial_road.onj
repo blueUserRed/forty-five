@@ -211,7 +211,6 @@ nodes: [
         edgesTo: [
             1, 2,
         ],
-        nodeTexture: "map_node_fight",
         event: $EmptyMapEvent {
         }
     },

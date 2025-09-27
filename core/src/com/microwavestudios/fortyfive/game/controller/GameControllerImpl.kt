@@ -321,6 +321,7 @@ class GameControllerImpl(
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
+        allEnemies.forEach { it.update() }
     }
 
     private fun initCards() {

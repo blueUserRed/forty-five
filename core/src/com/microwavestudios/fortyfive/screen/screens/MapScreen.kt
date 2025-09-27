@@ -193,7 +193,11 @@ class MapScreen : ScreenCreator() {
             val event = node.event ?: return
             if (!event.displayDescription) return
             eventName.setText(event.displayName)
-            eventDescription.setText(event.descriptionText)
+            if (event.isCompleted) {
+                eventDescription.setText(event.completedDescriptionText)
+            } else {
+                eventDescription.setText(event.descriptionText)
+            }
         }
 
         updateDescription(mapWidget.playerNode)
@@ -219,6 +223,10 @@ class MapScreen : ScreenCreator() {
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
                 }
+            }
+
+            mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
+                isVisible = node.event?.canBeStarted(mapSaver.currentMap) ?: false
             }
 
             val dropShadow = BakedDropShadow(

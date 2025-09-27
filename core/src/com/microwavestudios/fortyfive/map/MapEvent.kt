@@ -149,6 +149,7 @@ abstract class MapEvent {
         "startable" with startable
         "isCompleted" with isCompleted
         "startConditions" with _startConditions.map { it.asOnj() }
+        "blockConditions" with _blockConditions.map { it.asOnj() }
     }
 
 }
