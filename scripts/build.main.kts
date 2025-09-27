@@ -94,14 +94,6 @@ fun cleanupAssets(tmpDir: File) {
     debug("removing log file")
     (tmpDir / "logging/forty-five.log").delete()
 
-    debug("removing generated map files")
-    (tmpDir / "maps/areas")
-        .listFiles()!!
-        .forEach { it.delete() }
-    (tmpDir / "maps/roads")
-        .listFiles()!!
-        .forEach { it.delete() }
-
     debug("removing save files")
     (tmpDir / "saves")
         .listFiles()!!

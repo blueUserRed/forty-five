@@ -143,10 +143,12 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     fun addCardToBackpack(card: String) {
         if (!isRunActive) throw RuntimeException("not in run")
         runSave!!.addCardToBackpack(card)
+        checkDecks()
     }
 
     fun addCardToCollection(card: String) {
         _cardCollection.add(card)
+        checkDecks()
     }
 
     fun changeToMap(map: String, fromEnd: Boolean = false) {
@@ -295,6 +297,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     fun getCardForRun(card: String) {
         val runSave = runSave ?: throw RuntimeException("not in a run")
         runSave.addCardToBackpack(card)
+        checkDecks()
     }
 
     fun checkDecks() {
