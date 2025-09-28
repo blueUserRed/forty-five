@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
@@ -20,10 +21,7 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
-import com.microwavestudios.fortyfive.screen.screens.IntroScreen
-import com.microwavestudios.fortyfive.screen.screens.MapScreen
-import com.microwavestudios.fortyfive.screen.screens.TitleScreen
-import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
+import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
 import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -73,6 +71,12 @@ object FortyFive : Game() {
             Oven().bake(appArguments.bakeTasks)
             return
         }
+
+        screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
+            override val map: DetailMap? = null
+        })
+        screenManager.screenFinished()
+        return
 
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)

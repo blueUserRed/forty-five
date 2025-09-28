@@ -218,11 +218,11 @@ data class MapNodeBuilder(
     var y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     var imageName: String? = null,
-    var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
+    var imagePos: MapNode.ImagePosition? = null,
     var nodeTexture: ResourceHandle? = null,
     var distance: Int = -1,
     var event: MapEvent? = null // TODO: this will be non-nullable in the future
-) {
+) : ResourceBorrower {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
 
@@ -231,8 +231,17 @@ data class MapNodeBuilder(
     var asNode: MapNode? = null
         private set
 
+    private var nodeTextureCache: Promise<Drawable>? = null
+
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
+    fun getNodeTexture(screen: OnjScreen): Promise<Drawable>? {
+        val nodeTexture = nodeTexture ?: return null
+        if (nodeTextureCache != null) return nodeTextureCache
+        nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
+        screen.lifetime.onEnd { nodeTextureCache = null }
+        return nodeTextureCache
+    }
 
     fun scale(xScale: Float, yScale: Float) {
         x *= xScale
@@ -291,14 +300,14 @@ data class MapNodeBuilder(
 
     override fun equals(other: Any?): Boolean {
         return other != null &&
-                (other is MapNodeBuilder || other is MapNode) &&
                 other is MapNodeBuilder &&
                 other.x == this.x &&
-                other.y == this.y
+                other.y == this.y &&
+                other.index == this.index
     }
 
     override fun hashCode(): Int {
-        return (x * 100 + y).hashCode()
+        return (x * 1000 + y * 20).toInt() + index * 222
     }
 
     fun posAsVec(): Vector2 {
@@ -307,5 +316,47 @@ data class MapNodeBuilder(
 
     fun sizeAsVec(): Vector2 {
         return Vector2(5F, 5F)
+    }
+
+    companion object {
+
+        /**
+         * @return Pair<StartNode, EndNode>
+         */
+        fun fromNode(node: MapNode, map: DetailMap): Pair<MapNodeBuilder, MapNodeBuilder> {
+
+            fun convertSingle(node: MapNode): MapNodeBuilder = MapNodeBuilder(
+                node.index,
+                node.x, node.y,
+                imageName = node.imageName,
+                imagePos = node.imagePos,
+                nodeTexture = node.nodeTexture,
+                distance = node.distance,
+                event = node.event
+            )
+
+            val nodes = node.getUniqueNodes()
+            val builders = nodes.map { convertSingle(it) }
+
+            nodes.forEachIndexed { i, n ->
+                val builder = builders[i]
+                n.edgesTo.forEach { edge ->
+                    val edgeIndex = nodes.indexOf(edge)
+                    require(edgeIndex > 0)
+                    val edgeBuilder = builders[edgeIndex]
+                    builder.edgesTo.add(edgeBuilder)
+                }
+            }
+
+            val startIndex = nodes.indexOf(map.startNode)
+            require(startIndex > 0) { "startNode in node graph" }
+            val startNode = builders[startIndex]
+
+            val endIndex = nodes.indexOf(map.endNode)
+            require(endIndex > 0) { "endNode in node graph" }
+            val endNode = builders[endIndex]
+
+            return startNode to endNode
+        }
     }
 }
