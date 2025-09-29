@@ -22,7 +22,6 @@ import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
-import com.microwavestudios.fortyfive.screen.screens.MapEditorScreen
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.asin
 import kotlin.math.ceil
@@ -112,14 +111,30 @@ class MapEditorWidget(
     private val nodes: MutableList<MapNodeBuilder> = mutableListOf()
     private val edges: MutableList<Pair<MapNodeBuilder, MapNodeBuilder>> = mutableListOf()
 
-    private var selectedNode: MapNodeBuilder? = null
+    private var mode: Mode = Mode.NODE
+        set(value) {
+            field = value
+            events.fire(ModeChangedEvent(value))
+        }
+
     private var tool: Tool? = null
+
+    private var scaleOriginalMousePos: Vector2 = Vector2()
+    private var originalScale: Float = 0f
+
+    private var selectedNode: MapNodeBuilder? = null
+    private var selectedDecoration: Pair<MapDecorationBuilder, MapDecorationBuilderInstance>? = null
+        set(value) {
+            field = value
+            events.fire(DisplayDecorationEvent(value?.first))
+        }
 
     init {
         initInput(this, screen)
         addListener(dragListener)
         addListener(clickListener)
         eventHandlers()
+        mode = Mode.NODE
 
         val biome = MapEditorBiome.entries.find { it.internalName == mapBuilder.biome }!!
         backgroundHandle = biome.background
@@ -141,7 +156,22 @@ class MapEditorWidget(
         }
         onInput(GameInputs.mapEditorMove) {
             tool = null
-            if (selectedNode != null) tool = Tool.MOVE
+            if (selectedNode != null || selectedDecoration != null) tool = Tool.MOVE
+        }
+        onInput(GameInputs.mapEditorScale) {
+            tool = null
+            val selectedDecoration = selectedDecoration
+            if (selectedDecoration != null) {
+                tool = Tool.SCALE
+                scaleOriginalMousePos = lastMousePos.cpy()
+                originalScale = selectedDecoration.second.scale
+            }
+        }
+        onInput(GameInputs.mapEditorSwitchMode) {
+            tool = null
+            selectedNode = null
+            selectedDecoration = null
+            mode = if (mode == Mode.NODE) Mode.DECORATION else Mode.NODE
         }
     }
 
@@ -158,17 +188,28 @@ class MapEditorWidget(
     }
 
     private fun handleLeftClick(x: Float, y: Float) {
-        val clickedNode = findNodeAtPosition(x, y)
-        if (tool == Tool.CONNECT) {
-            val selectedNode = selectedNode
-            if (clickedNode != null && selectedNode != null && clickedNode != selectedNode) {
-                connect(selectedNode, clickedNode)
+        if (mode == Mode.NODE) {
+            val clickedNode = findNodeAtPosition(x, y)
+            when (tool) {
+                Tool.CONNECT -> {
+                    val selectedNode = selectedNode
+                    if (clickedNode != null && selectedNode != null && clickedNode != selectedNode) {
+                        connect(selectedNode, clickedNode)
+                    }
+                    tool = null
+                    return
+                }
+                Tool.MOVE -> {
+                    tool = null
+                    return
+                }
+                else -> {
+                    selectedNode = clickedNode
+                }
             }
-            tool = null
-        } else if (tool == Tool.MOVE) {
-            tool = null
         } else {
-            selectedNode = clickedNode
+            tool = null
+            selectedDecoration = findDecorationAtPosition(x, y)
         }
     }
 
@@ -191,6 +232,22 @@ class MapEditorWidget(
         return null
     }
 
+    private fun findDecorationAtPosition(x: Float, y: Float): Pair<MapDecorationBuilder, MapDecorationBuilderInstance>? {
+        mapBuilder.decorations.forEach { decoration ->
+            val baseWidth = decoration.baseWidth
+            val baseHeight = decoration.baseHeight
+            decoration.instances.forEach instanceTest@{ instance ->
+                val width = baseWidth * instance.scale * mapScale
+                val height = baseHeight * instance.scale * mapScale
+                val (iX, iY) = instance.position * mapScale + mapOffset
+                if (x < iX || x > iX + width) return@instanceTest
+                if (y < iY || y > iY + height) return@instanceTest
+                return decoration to instance
+            }
+        }
+        return null
+    }
+
     private fun delete() {
         selectedNode?.let {
             selectedNode = null
@@ -199,6 +256,10 @@ class MapEditorWidget(
     }
 
     private fun deleteNode(toDelete: MapNodeBuilder) {
+        if (toDelete == mapBuilder.startNode || toDelete == mapBuilder.endNode) {
+            FortyFive.soundPlayer.situation("not_allowed", screen)
+            return
+        }
         if (!nodes.remove(toDelete)) return
         nodes.forEachIndexed { i, node -> node.index = i }
         toDelete.edgesTo.forEach { edgeNode ->
@@ -214,17 +275,36 @@ class MapEditorWidget(
         nodes.add(node)
     }
 
+    private fun updateScaleTool() {
+        if (tool != Tool.SCALE) return
+        val (_, instance) = selectedDecoration ?: return
+        val startPos = scaleOriginalMousePos
+        val mousePos = lastMousePos
+        val dist = mousePos.x - startPos.x
+        instance.scale = (originalScale + (dist * 0.0002f)).coerceAtLeast(0f)
+    }
+
     private fun updateMoveTool() {
         if (tool != Tool.MOVE) return
-        val selectedNode = selectedNode ?: return
-        val pos = screenToMapSpace(lastMousePos - Vector2(nodeSize / 2, nodeSize / 2))
-        selectedNode.x = pos.x
-        selectedNode.y = pos.y
+        val selectedNode = selectedNode
+        val selectedDecoration = selectedDecoration
+        if (selectedNode != null) {
+            val pos = screenToMapSpace(lastMousePos - Vector2(nodeSize / 2, nodeSize / 2))
+            selectedNode.x = pos.x
+            selectedNode.y = pos.y
+        } else if (selectedDecoration != null) {
+            val (deco, instance) = selectedDecoration
+            val width = deco.baseWidth * instance.scale * mapScale
+            val height = deco.baseHeight * instance.scale * mapScale
+            val pos = screenToMapSpace(lastMousePos - Vector2(width / 2, height / 2))
+            instance.position = pos
+        }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         updateMoveTool()
+        updateScaleTool()
 
         batch ?: return
         val viewport = screen.stage.viewport
@@ -236,8 +316,11 @@ class MapEditorWidget(
         if (!ScissorStack.pushScissors(scissor)) return
 
         drawBackground(batch)
+        drawBackgroundDecorations(batch)
         drawEdges(batch)
         drawNodes(batch)
+        drawForegroundDecorations(batch)
+
         drawConnectingEdge(batch)
 
         batch.end()
@@ -245,19 +328,79 @@ class MapEditorWidget(
         viewport.apply()
         shapeRenderer.projectionMatrix = viewport.camera.combined
 
+        drawStartEndNodeIndicators()
         drawSelectedNodeIndicator()
+        drawSelectedDecorationIndicator()
 
         shapeRenderer.flush()
         shapeRenderer.end()
         batch.begin()
     }
 
+    private fun drawStartEndNodeIndicators() {
+        val start = scaledNodePos(mapBuilder.startNode) + mapOffset
+        val end = scaledNodePos(mapBuilder.endNode) + mapOffset
+        shapeRenderer.flush()
+        Gdx.gl.glLineWidth(4f)
+        shapeRenderer.color = Color.Green
+        shapeRenderer.rect(start.x, start.y, nodeSize, nodeSize)
+        shapeRenderer.flush()
+        shapeRenderer.color = Color.Red
+        shapeRenderer.rect(end.x, end.y, nodeSize, nodeSize)
+    }
+
+    private fun drawSelectedDecorationIndicator() {
+        val (decoration, instance) = selectedDecoration ?: return
+        val width = decoration.baseWidth * instance.scale * mapScale
+        val height = decoration.baseHeight * instance.scale * mapScale
+        val (x, y) = instance.position * mapScale + mapOffset
+        shapeRenderer.flush()
+        shapeRenderer.color = Color.Blue
+        Gdx.gl.glLineWidth(20f)
+        shapeRenderer.rect(x, y, width, height)
+    }
+
     private fun drawSelectedNodeIndicator() {
         val node = selectedNode ?: return
         val coords = scaledNodePos(node) + mapOffset
         shapeRenderer.color = Color.Blue
+        shapeRenderer.flush()
         Gdx.gl.glLineWidth(20f)
         shapeRenderer.circle(x + coords.x + nodeSize / 2, y + coords.y + nodeSize / 2, nodeSize / 2)
+    }
+
+    private fun drawForegroundDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        val decorations = mapBuilder.decorations.filter { !it.drawInBackground }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawBackgroundDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        val decorations = mapBuilder.decorations.filter { it.drawInBackground }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawDecoration(
+        decoration: MapDecorationBuilder,
+        batch: Batch,
+        offX: Float,
+        offY: Float
+    ) {
+        val drawable = decoration.getDrawable(screen, this)
+        val width = decoration.baseWidth
+        val height = decoration.baseHeight
+        decoration.instances.forEach { instance ->
+            drawable.getOrNull()?.draw(
+                batch,
+                x + offX + instance.position.x * mapScale, y + offY + instance.position.y * mapScale,
+                width * instance.scale * mapScale, height * instance.scale * mapScale
+            )
+        }
     }
 
     private fun drawBackground(batch: Batch) {
@@ -354,6 +497,12 @@ class MapEditorWidget(
     enum class Tool(val displayName: String) {
         CONNECT("Connect"),
         MOVE("Move"),
+        SCALE("scale")
+    }
+
+    enum class Mode(val displayName: String) {
+        NODE("Node"),
+        DECORATION("Decoration"),
     }
 
     enum class MapEditorBiome(val internalName: String, val displayName: String, val background: String) {
@@ -361,4 +510,7 @@ class MapEditorWidget(
         BEWITCHED_FOREST("bewitched_forest", "Bewitched Forest","map_background_bewitched_forest_tileable"),
         MAGENTA_MOUNTAINS("magenta_mountains", "Magenta Mountains","map_background_magenta_mountains_tileable",)
     }
+
+    data class DisplayDecorationEvent(val display: MapDecorationBuilder?)
+    data class ModeChangedEvent(val newMode: Mode)
 }

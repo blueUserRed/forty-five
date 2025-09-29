@@ -342,18 +342,18 @@ data class MapNodeBuilder(
                 val builder = builders[i]
                 n.edgesTo.forEach { edge ->
                     val edgeIndex = nodes.indexOf(edge)
-                    require(edgeIndex > 0)
+                    require(edgeIndex >= 0)
                     val edgeBuilder = builders[edgeIndex]
                     builder.edgesTo.add(edgeBuilder)
                 }
             }
 
             val startIndex = nodes.indexOf(map.startNode)
-            require(startIndex > 0) { "startNode in node graph" }
+            require(startIndex >= 0) { "startNode in node graph" }
             val startNode = builders[startIndex]
 
             val endIndex = nodes.indexOf(map.endNode)
-            require(endIndex > 0) { "endNode in node graph" }
+            require(endIndex >= 0) { "endNode in node graph" }
             val endNode = builders[endIndex]
 
             return startNode to endNode

@@ -74,6 +74,7 @@ object FortyFive : Game() {
 
         screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
             override val map: DetailMap? = null
+            override val mapPath: String? = "maps/area_definitions/aqua_balle.onj"
         })
         screenManager.screenFinished()
         return

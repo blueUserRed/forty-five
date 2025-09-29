@@ -114,20 +114,6 @@ object GameInputs {
     ))
 
 
-    val mapEditorNextMode = Input("mapEditorNextMode", arrayOf(
-        Input.Cause.Keyboard(Keys.RIGHT)
-    ))
-
-    val mapEditorPreviousMode = Input("mapEditorPreviousMode", arrayOf(
-        Input.Cause.Keyboard(Keys.LEFT)
-    ))
-
-    val mapEditorPlaceNodeMode = Input("mapEditorPlaceNodeMode", arrayOf(
-        Input.Cause.Keyboard(Keys.P)
-    ))
-    val mapEditorSelectMode = Input("mapEditorSelectMode", arrayOf(
-        Input.Cause.Keyboard(Keys.S)
-    ))
     val mapEditorDelete = Input("mapEditorDelete", arrayOf(
         Input.Cause.Keyboard(Keys.DEL),
         Input.Cause.Keyboard(Keys.BACKSPACE),
@@ -137,6 +123,12 @@ object GameInputs {
     ))
     val mapEditorMove = Input("mapEditorMove", arrayOf(
         Input.Cause.Keyboard(Keys.M),
+    ))
+    val mapEditorScale = Input("mapEditorScale", arrayOf(
+        Input.Cause.Keyboard(Keys.S),
+    ))
+    val mapEditorSwitchMode = Input("mapEditorSwitchMode", arrayOf(
+        Input.Cause.Keyboard(Keys.X),
     ))
 
     object States {
