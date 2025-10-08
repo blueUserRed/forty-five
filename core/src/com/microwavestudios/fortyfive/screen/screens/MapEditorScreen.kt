@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.screen.screens
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
@@ -41,6 +42,7 @@ class MapEditorScreen : ScreenCreator() {
 
     private val context: MapEditorContext by lazy { context() }
 
+    private lateinit var map: DetailMapBuilder
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -57,6 +59,7 @@ class MapEditorScreen : ScreenCreator() {
                 startNode.connect(endNode)
                 DetailMapBuilder(startNode = startNode, endNode = endNode)
             }
+        this@MapEditorScreen.map = map
 
         val widget = MapEditorWidget(
             mapBuilder = map,
@@ -88,7 +91,56 @@ class MapEditorScreen : ScreenCreator() {
         y = (worldHeight / 2 - height / 2)
         x = worldWidth - width + 10f
 
+        nodePage()
         decorationPage()
+    }
+
+    private fun CustomGroup.nodePage() = box {
+        width = worldWidth * 0.2f
+        height = worldHeight * 0.8f
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.START
+        verticalAlign = CustomAlign.START
+        isVisible = false
+        centerX()
+        y = -20f
+
+        val index = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.7f)
+            syncDimensions()
+        }
+        val nodeTexture = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.7f)
+            syncDimensions()
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            onInput(GameInputs.interact) { events.fire(CycleNodeTextureEvent) }
+        }
+        val makeStart = label("roadgeek", "make start node", Color.FortyWhite) {
+            setFontScale(0.7f)
+            syncDimensions()
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            onInput(GameInputs.interact) { events.fire(MakeStartNodeEvent) }
+        }
+        val makeEnd = label("roadgeek", "make end node", Color.FortyWhite) {
+            setFontScale(0.7f)
+            syncDimensions()
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            onInput(GameInputs.interact) { events.fire(MakeEndNodeEvent) }
+        }
+
+        events.watchFor<MapEditorWidget.DisplayDecorationEvent> { isVisible = false }
+        events.watchFor<MapEditorWidget.DisplayNodePageEvent> { (node) ->
+            isVisible = node != null
+            node ?: return@watchFor
+            index.setText("index: ${node.index}")
+            nodeTexture.setText("texture: ${node.nodeTexture ?: "null"}")
+            val startEndNodeVisible = map.startNode != node && map.endNode != node
+            makeStart.isVisible = startEndNodeVisible
+            makeEnd.isVisible = startEndNodeVisible
+        }
     }
 
     private fun CustomGroup.decorationPage() = box {
@@ -110,6 +162,7 @@ class MapEditorScreen : ScreenCreator() {
             syncDimensions()
         }
 
+        events.watchFor<MapEditorWidget.DisplayNodePageEvent> { isVisible = false }
         events.watchFor<MapEditorWidget.DisplayDecorationEvent> { (decoration) ->
             isVisible = decoration != null
             decoration ?: return@watchFor
@@ -240,6 +293,9 @@ class MapEditorScreen : ScreenCreator() {
     )
 
     private data object SaveLocationChangedEvent
+    data object MakeStartNodeEvent
+    data object MakeEndNodeEvent
+    data object CycleNodeTextureEvent
     data class BuildMapEvent(var map: DetailMap? = null)
 
     companion object : ScreenManager.ScreenCreatorCompanion {

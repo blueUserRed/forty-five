@@ -126,6 +126,12 @@ class MapEditorWidget(
     private var originalScale: Float = 0f
 
     private var selectedNode: MapNodeBuilder? = null
+        set(value) {
+            field = value
+            if (mode != Mode.NODE) return
+            events.fire(DisplayNodePageEvent(value))
+        }
+
     private var selectedDecoration: Pair<MapDecorationBuilder, MapDecorationBuilderInstance>? = null
         set(value) {
             field = value
@@ -216,13 +222,35 @@ class MapEditorWidget(
             if (mode == Mode.DECORATION) {
                 mode = Mode.NODE
                 events.fire(DisplayDecorationEvent(null))
+                events.fire(DisplayNodePageEvent(selectedNode))
             } else {
                 mode = Mode.DECORATION
+                events.fire(DisplayNodePageEvent(null))
                 events.fire(DisplayDecorationEvent(decorationPrototypes[currentDecoProtoIndex]))
             }
         }
         events.watchFor<MapEditorScreen.BuildMapEvent> { event ->
             event.map = mapBuilder.build()
+        }
+        events.watchFor<MapEditorScreen.MakeStartNodeEvent> {
+            val node = selectedNode ?: return@watchFor
+            if (mapBuilder.endNode == node) return@watchFor
+            mapBuilder.startNode = node
+        }
+        events.watchFor<MapEditorScreen.MakeEndNodeEvent> {
+            val node = selectedNode ?: return@watchFor
+            if (mapBuilder.startNode == node) return@watchFor
+            mapBuilder.endNode = node
+        }
+        events.watchFor<MapEditorScreen.CycleNodeTextureEvent> {
+            val node = selectedNode ?: return@watchFor
+            var index = nodeTextures.indexOf(node.nodeTexture)
+            if (index < 0) return@watchFor
+            index++
+            if (index >= nodeTextures.size) index = 0
+            node.nodeTexture = nodeTextures[index]
+            node.invalidateCaches()
+            events.fire(DisplayNodePageEvent(selectedNode))
         }
     }
 
@@ -638,5 +666,21 @@ class MapEditorWidget(
     }
 
     data class DisplayDecorationEvent(val display: MapDecorationPrototype?)
+    data class DisplayNodePageEvent(val node: MapNodeBuilder?)
     data class ModeChangedEvent(val newMode: Mode)
+
+    companion object {
+        val nodeTextures: Array<String?> = arrayOf(
+            null,
+            "map_node_default",
+            "map_node_heal",
+            "map_node_exit",
+            "map_node_fight",
+            "map_node_shop",
+            "map_node_get_card",
+            "map_node_choose_card",
+            "map_node_dialog"
+        )
+    }
+
 }

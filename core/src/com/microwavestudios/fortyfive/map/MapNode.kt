@@ -243,6 +243,10 @@ data class MapNodeBuilder(
         return nodeTextureCache
     }
 
+    fun invalidateCaches() {
+        nodeTextureCache = null
+    }
+
     fun isLinkedTo(node: MapNodeBuilder): Boolean {
         for (linkedNode in node.edgesTo) {
             if (linkedNode == this) return true
