@@ -11,6 +11,8 @@ public class ArgParser {
 
     private int current = 0;
     private ArrayList<BakeTask> parsedBakeTasks = new ArrayList<>();
+    private boolean isMapEditor = false;
+    private String providedMapEditorPath = null;
 
     public ArgParser(String[] args) {
         this.args = args;
@@ -26,13 +28,28 @@ public class ArgParser {
                     current++;
                     parseBake();
                 }
+                case "-mapEditor" -> {
+                    current++;
+                    parseMapEditor();
+                }
                 default -> throw new ArgumentParseException("unknown argument: " + curArg);
             }
         }
         return new FortyFive.AppArguments(
             !parsedBakeTasks.isEmpty(),
-            parsedBakeTasks
+            parsedBakeTasks,
+            isMapEditor,
+            providedMapEditorPath
         );
+    }
+
+    private void parseMapEditor() {
+        isMapEditor = true;
+        if (current >= args.length) return;
+        String curArg = args[current];
+        if (curArg.startsWith("-")) return;
+        current++;
+        providedMapEditorPath = curArg;
     }
 
     private void parseBake() {
