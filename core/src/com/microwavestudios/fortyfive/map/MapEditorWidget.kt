@@ -281,7 +281,7 @@ class MapEditorWidget(
             val reasonableScale = if (mapDecoration.instances.isNotEmpty()) {
                 mapDecoration.instances.map { it.scale }.average().toFloat()
             } else {
-                1f
+                decorationProto.recommendScale
             }
             val mapCoords = screenToMapSpace(Vector2(x, y) - Vector2(nodeSize / 2, nodeSize / 2))
             mapDecoration.instances.add(MapDecorationBuilderInstance(mapCoords, reasonableScale))
@@ -363,9 +363,15 @@ class MapEditorWidget(
     }
 
     private fun delete() {
-        selectedNode?.let {
-            selectedNode = null
-            deleteNode(it)
+        if (mode == Mode.NODE) {
+            selectedNode?.let {
+                selectedNode = null
+                deleteNode(it)
+            }
+        } else {
+            val (deco, instance) = selectedDecoration ?: return
+            deco.instances.remove(instance)
+            selectedDecoration = null
         }
     }
 
@@ -614,6 +620,7 @@ class MapEditorWidget(
         val baseWidth: Float,
         val baseHeight: Float,
         val drawInBackground: Boolean,
+        val recommendScale: Float = 1f
     ) {
 
         override fun equals(other: Any?): Boolean {
@@ -644,7 +651,62 @@ class MapEditorWidget(
         )
 
         companion object {
-            val standardDecorations: Set<MapDecorationPrototype> = setOf()
+            val standardDecorations: Array<MapDecorationPrototype> = arrayOf(
+                MapDecorationPrototype(
+                    "map_decoration_wasteland_cactus_1",
+                    2f, 4f,
+                    false,
+                    3f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_wasteland_cactus_2",
+                    2f, 4f,
+                    false,
+                    3f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_wasteland_skull_1",
+                    3f, 3f,
+                    false,
+                    1.5f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_wasteland_skull_2",
+                    3f, 3f,
+                    false,
+                    1.5f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_magenta_mountains_mountain",
+                    80f, 53.664597f,
+                    false,
+                    1f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_magenta_mountains_mountain_small_1",
+                    60f, 51.933815f,
+                    false,
+                    1f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_magenta_mountains_mountain_small_2",
+                    60f, 42.656574f,
+                    false,
+                    1f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_magenta_mountains_fog",
+                    80f, 52.987015f,
+                    false,
+                    1f
+                ),
+                MapDecorationPrototype(
+                    "map_decoration_magenta_mountains_tree",
+                    20f, 20f,
+                    false,
+                    0.7f
+                ),
+            )
         }
     }
 

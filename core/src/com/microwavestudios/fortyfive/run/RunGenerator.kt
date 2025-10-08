@@ -78,7 +78,7 @@ class RunGenerator {
                 {
                     ShopMapEvent(
                         setOf(),
-                        "traveling_merchant",
+                        "npc.traveling_merchant",
                         mutableSetOf(),
                         3..5,
                         mutableListOf(),
@@ -89,7 +89,7 @@ class RunGenerator {
                 },
                 offset = 2..2,
                 line = 2,
-                nodeTexture = "map_node_choose_card"
+                nodeTexture = "map_node_shop"
             ),
         ),
         decorations = listOf(

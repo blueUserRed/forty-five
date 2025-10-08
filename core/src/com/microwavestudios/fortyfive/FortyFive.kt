@@ -84,7 +84,6 @@ object FortyFive : Game() {
             return
         }
 
-
         screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
     }
