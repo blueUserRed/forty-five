@@ -71,21 +71,23 @@ object FortyFive : Game() {
             Oven().bake(appArguments.bakeTasks)
             return
         }
+        UserPrefs.windowMode = UserPrefs.WindowMode.Window
 
         screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
             override val map: DetailMap? = null
-            override val mapPath: String? = "maps/area_definitions/aqua_balle.onj"
+            override var mapPath: String? = "maps/static_maps/tutorial_road.onj"
         })
         screenManager.screenFinished()
         return
 
-        when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
-            UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
-            UserPrefs.StartScreen.MAP -> toMap()
-        }
+//        when (UserPrefs.startScreen) {
+//            UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
+//            UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
+//            UserPrefs.StartScreen.MAP -> toMap()
+//        }
 //        profileManager.selectProfile(profileManager.availableProfiles.first())
 //        screenManager.appendScreen(WinRunScreen)
+        screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
     }
 

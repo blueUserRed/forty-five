@@ -130,6 +130,12 @@ object GameInputs {
     val mapEditorSwitchMode = Input("mapEditorSwitchMode", arrayOf(
         Input.Cause.Keyboard(Keys.X),
     ))
+    val mapEditorNext = Input("mapEditorNext", arrayOf(
+        Input.Cause.Keyboard(Keys.J),
+    ))
+    val mapEditorPrevious = Input("mapEditorPrevious", arrayOf(
+        Input.Cause.Keyboard(Keys.H),
+    ))
 
     object States {
 

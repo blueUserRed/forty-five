@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.map
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -20,8 +21,10 @@ import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.keyInput.MouseButton
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
+import com.microwavestudios.fortyfive.screen.screens.MapEditorScreen
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.asin
 import kotlin.math.ceil
@@ -126,8 +129,22 @@ class MapEditorWidget(
     private var selectedDecoration: Pair<MapDecorationBuilder, MapDecorationBuilderInstance>? = null
         set(value) {
             field = value
-            events.fire(DisplayDecorationEvent(value?.first))
+            if (value == null) return
+            val (decoration, _) = value
+            val protoIndex = decorationPrototypes.indexOfFirst {
+                it.drawInBackground == decoration.drawInBackground &&
+                it.baseWidth == decoration.baseWidth &&
+                it.baseHeight == decoration.baseHeight &&
+                it.drawableHandle == decoration.drawableHandle
+            }
+            require(protoIndex >= 0) { "Selected decoration has no matching prototype" }
+            val proto = decorationPrototypes[protoIndex]
+            currentDecoProtoIndex = protoIndex
+            events.fire(DisplayDecorationEvent(proto))
         }
+
+    private var currentDecoProtoIndex: Int = 0
+    private val decorationPrototypes: MutableList<MapDecorationPrototype> = mutableListOf()
 
     init {
         initInput(this, screen)
@@ -135,6 +152,19 @@ class MapEditorWidget(
         addListener(clickListener)
         eventHandlers()
         mode = Mode.NODE
+
+        decorationPrototypes.addAll(MapDecorationPrototype.standardDecorations)
+        mapBuilder
+            .decorations
+            .map { MapDecorationPrototype(
+                it.drawableHandle,
+                it.baseWidth,
+                it.baseHeight,
+                it.drawInBackground
+            ) }
+            .forEach {
+                if (it !in decorationPrototypes) decorationPrototypes.add(it)
+            }
 
         val biome = MapEditorBiome.entries.find { it.internalName == mapBuilder.biome }!!
         backgroundHandle = biome.background
@@ -167,11 +197,32 @@ class MapEditorWidget(
                 originalScale = selectedDecoration.second.scale
             }
         }
+        onInput(GameInputs.mapEditorNext) {
+            if (mode != Mode.DECORATION) return@onInput
+            currentDecoProtoIndex++
+            if (currentDecoProtoIndex >= decorationPrototypes.size) currentDecoProtoIndex = 0
+            events.fire(DisplayDecorationEvent(decorationPrototypes[currentDecoProtoIndex]))
+        }
+        onInput(GameInputs.mapEditorPrevious) {
+            if (mode != Mode.DECORATION) return@onInput
+            currentDecoProtoIndex--
+            if (currentDecoProtoIndex < 0) currentDecoProtoIndex = decorationPrototypes.size - 1
+            events.fire(DisplayDecorationEvent(decorationPrototypes[currentDecoProtoIndex]))
+        }
         onInput(GameInputs.mapEditorSwitchMode) {
             tool = null
             selectedNode = null
             selectedDecoration = null
-            mode = if (mode == Mode.NODE) Mode.DECORATION else Mode.NODE
+            if (mode == Mode.DECORATION) {
+                mode = Mode.NODE
+                events.fire(DisplayDecorationEvent(null))
+            } else {
+                mode = Mode.DECORATION
+                events.fire(DisplayDecorationEvent(decorationPrototypes[currentDecoProtoIndex]))
+            }
+        }
+        events.watchFor<MapEditorScreen.BuildMapEvent> { event ->
+            event.map = mapBuilder.build()
         }
     }
 
@@ -183,8 +234,30 @@ class MapEditorWidget(
     }
 
     private fun handleRightClick(x: Float, y: Float) {
-        val mapCoords = screenToMapSpace(Vector2(x, y) - Vector2(nodeSize / 2, nodeSize / 2))
-        placeNode(mapCoords)
+        if (mode == Mode.NODE) {
+            val mapCoords = screenToMapSpace(Vector2(x, y) - Vector2(nodeSize / 2, nodeSize / 2))
+            placeNode(mapCoords)
+        } else {
+            val decorationProto = decorationPrototypes[currentDecoProtoIndex]
+            var mapDecoration = mapBuilder.decorations.find {
+                it.drawInBackground == decorationProto.drawInBackground &&
+                it.baseWidth == decorationProto.baseWidth &&
+                it.baseHeight == decorationProto.baseHeight &&
+                it.drawableHandle == decorationProto.drawableHandle
+            }
+            if (mapDecoration == null) {
+                val decoration = decorationProto.generateDecorationBuilder()
+                mapBuilder.decorations.add(decoration)
+                mapDecoration = decoration
+            }
+            val reasonableScale = if (mapDecoration.instances.isNotEmpty()) {
+                mapDecoration.instances.map { it.scale }.average().toFloat()
+            } else {
+                1f
+            }
+            val mapCoords = screenToMapSpace(Vector2(x, y) - Vector2(nodeSize / 2, nodeSize / 2))
+            mapDecoration.instances.add(MapDecorationBuilderInstance(mapCoords, reasonableScale))
+        }
     }
 
     private fun handleLeftClick(x: Float, y: Float) {
@@ -194,7 +267,11 @@ class MapEditorWidget(
                 Tool.CONNECT -> {
                     val selectedNode = selectedNode
                     if (clickedNode != null && selectedNode != null && clickedNode != selectedNode) {
-                        connect(selectedNode, clickedNode)
+                        if (selectedNode.isLinkedTo(clickedNode)) {
+                            disconnect(selectedNode, clickedNode)
+                        } else {
+                            connect(selectedNode, clickedNode)
+                        }
                     }
                     tool = null
                     return
@@ -219,6 +296,15 @@ class MapEditorWidget(
         require(node1.index != node2.index)
         val edge = if (node1.index > node2.index) node1 to node2 else node2 to node1
         edges.add(edge)
+    }
+
+    private fun disconnect(node1: MapNodeBuilder, node2: MapNodeBuilder) {
+        if (node2 !in node1.edgesTo) return
+        require(node1.index != node2.index)
+        node1.edgesTo.remove(node2)
+        node2.edgesTo.remove(node1)
+        val edge = if (node1.index > node2.index) node1 to node2 else node2 to node1
+        edges.removeIf { it == edge }
     }
 
     private fun findNodeAtPosition(x: Float, y: Float): MapNodeBuilder? {
@@ -335,6 +421,7 @@ class MapEditorWidget(
         shapeRenderer.flush()
         shapeRenderer.end()
         batch.begin()
+        ScissorStack.popScissors()
     }
 
     private fun drawStartEndNodeIndicators() {
@@ -494,6 +581,45 @@ class MapEditorWidget(
 
     private fun scaledNodePos(node: MapNodeBuilder): Vector2 = Vector2(node.x, node.y) * mapScale
 
+    data class MapDecorationPrototype(
+        val drawableHandle: ResourceHandle,
+        val baseWidth: Float,
+        val baseHeight: Float,
+        val drawInBackground: Boolean,
+    ) {
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as MapDecorationPrototype
+            if (baseWidth != other.baseWidth) return false
+            if (baseHeight != other.baseHeight) return false
+            if (drawInBackground != other.drawInBackground) return false
+            if (drawableHandle != other.drawableHandle) return false
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = baseWidth.hashCode()
+            result = 31 * result + baseHeight.hashCode()
+            result = 31 * result + drawInBackground.hashCode()
+            result = 31 * result + drawableHandle.hashCode()
+            return result
+        }
+
+        fun generateDecorationBuilder(): MapDecorationBuilder = MapDecorationBuilder(
+            drawableHandle,
+            baseWidth,
+            baseHeight,
+            drawInBackground,
+            mutableListOf()
+        )
+
+        companion object {
+            val standardDecorations: Set<MapDecorationPrototype> = setOf()
+        }
+    }
+
     enum class Tool(val displayName: String) {
         CONNECT("Connect"),
         MOVE("Move"),
@@ -511,6 +637,6 @@ class MapEditorWidget(
         MAGENTA_MOUNTAINS("magenta_mountains", "Magenta Mountains","map_background_magenta_mountains_tileable",)
     }
 
-    data class DisplayDecorationEvent(val display: MapDecorationBuilder?)
+    data class DisplayDecorationEvent(val display: MapDecorationPrototype?)
     data class ModeChangedEvent(val newMode: Mode)
 }

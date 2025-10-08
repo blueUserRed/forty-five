@@ -243,6 +243,13 @@ data class MapNodeBuilder(
         return nodeTextureCache
     }
 
+    fun isLinkedTo(node: MapNodeBuilder): Boolean {
+        for (linkedNode in node.edgesTo) {
+            if (linkedNode == this) return true
+        }
+        return false
+    }
+
     fun scale(xScale: Float, yScale: Float) {
         x *= xScale
         y *= yScale

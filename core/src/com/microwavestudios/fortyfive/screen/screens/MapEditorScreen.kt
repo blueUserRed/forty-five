@@ -1,11 +1,18 @@
 package com.microwavestudios.fortyfive.screen.screens
 
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.UserPrefs
+import com.microwavestudios.fortyfive.keyInput.GameInputs
+import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
+import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
@@ -13,6 +20,9 @@ import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import java.io.File
+import java.nio.file.Paths
+import javax.swing.JFileChooser
+import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.reflect.KClass
 
 class MapEditorScreen : ScreenCreator() {
@@ -65,7 +75,10 @@ class MapEditorScreen : ScreenCreator() {
 
         popup()
 
+        topBar()
         toolBar()
+
+        events.fire(SaveLocationChangedEvent)
     }
 
     private fun CustomGroup.popup() = group {
@@ -79,17 +92,21 @@ class MapEditorScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.decorationPage() = box {
-        width = worldWidth * 0.23f
+        width = worldWidth * 0.2f
         height = worldHeight * 0.8f
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.START
         verticalAlign = CustomAlign.START
         isVisible = false
+        centerX()
+        y = -20f
 
-        val handle = label("red_wing", "", Color.FortyWhite) {
+        val handle = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.7f)
             syncDimensions()
         }
-        val isBackground = label("red_wing", "", Color.FortyWhite) {
+        val isBackground = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.7f)
             syncDimensions()
         }
 
@@ -99,6 +116,101 @@ class MapEditorScreen : ScreenCreator() {
             handle.setText(decoration.drawableHandle)
             isBackground.setText("background: ${decoration.drawInBackground}")
         }
+    }
+
+    private fun CustomGroup.topBar() = box {
+        height = 60f
+        width = worldWidth
+        x = 0f
+        onLayout { y = worldHeight - height }
+        flexDirection = FlexDirection.ROW
+        verticalAlign = CustomAlign.START
+        horizontalAlign = CustomAlign.START
+
+        horizontalSpacer(20f)
+        label("roadgeek", "Load", Color.FortyWhite) {
+            backgroundHandle = "transparent_black_texture"
+            height = 50f
+            syncWidth()
+            setAlignment(Align.center)
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            onInput(GameInputs.interact) { loadMap() }
+        }
+        horizontalSpacer(20f)
+        label("roadgeek", "Save", Color.FortyWhite) {
+            backgroundHandle = "transparent_black_texture"
+            height = 50f
+            syncWidth()
+            setAlignment(Align.center)
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            onInput(GameInputs.interact) { save() }
+        }
+        horizontalSpacer(20f)
+        label("roadgeek", "Save To", Color.FortyWhite) {
+            backgroundHandle = "transparent_black_texture"
+            height = 50f
+            syncWidth()
+            setAlignment(Align.center)
+            keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
+            onInput(GameInputs.interact) { saveTo() }
+        }
+        horizontalSpacer(20f)
+        label("roadgeek", "") {
+            backgroundHandle = "white_texture"
+            setFontScale(0.7f)
+            height = 30f
+            syncWidth()
+
+            events.watchFor<SaveLocationChangedEvent> {
+                val path = context.mapPath
+                setText(path ?: "<no file>")
+            }
+        }
+    }
+
+    private fun save() {
+        val path = context.mapPath ?: run {
+            FortyFive.soundPlayer.situation("not_allowed", screen)
+            return
+        }
+        val file = File(path)
+        val event = BuildMapEvent()
+        events.fire(event)
+        file.writeText(event.map!!.asOnjObject().toString())
+    }
+
+    private fun saveTo() {
+        val fileChooser = JFileChooser()
+        val filter = FileNameExtensionFilter("Forty-Five map", "onj")
+        fileChooser.currentDirectory = Paths.get("").toFile().canonicalFile
+        fileChooser.fileFilter = filter
+        val result = fileChooser.showOpenDialog(null)
+        if (result != JFileChooser.APPROVE_OPTION) return
+        val file = fileChooser.selectedFile
+        if (!file.exists()) file.createNewFile()
+        val event = BuildMapEvent()
+        events.fire(event)
+        file.writeText(event.map!!.asOnjObject().toString())
+        context.mapPath = file.canonicalPath
+        events.fire(SaveLocationChangedEvent)
+    }
+
+    private fun loadMap() {
+        val fileChooser = JFileChooser()
+        val filter = FileNameExtensionFilter("Forty-Five map", "onj")
+        fileChooser.currentDirectory = Paths.get("").toFile().canonicalFile
+        fileChooser.fileFilter = filter
+        val result = fileChooser.showOpenDialog(null)
+        if (result != JFileChooser.APPROVE_OPTION) return
+        val file = fileChooser.selectedFile
+        FortyFive.screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
+            override val map: DetailMap? = null
+            override var mapPath: String? = file.canonicalPath
+        })
+        FortyFive.screenManager.screenFinished()
     }
 
     private fun CustomGroup.toolBar() = box {
@@ -127,6 +239,9 @@ class MapEditorScreen : ScreenCreator() {
     override fun getScreenControllers(): List<ScreenController> = listOf(
     )
 
+    private data object SaveLocationChangedEvent
+    data class BuildMapEvent(var map: DetailMap? = null)
+
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = MapEditorScreen::class
     }
@@ -135,5 +250,5 @@ class MapEditorScreen : ScreenCreator() {
 
 interface MapEditorContext {
     val map: DetailMap?
-    val mapPath: String?
+    var mapPath: String?
 }
