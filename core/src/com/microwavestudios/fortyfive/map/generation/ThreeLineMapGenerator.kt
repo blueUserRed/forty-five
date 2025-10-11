@@ -1,7 +1,6 @@
 package com.microwavestudios.fortyfive.map.generation
 
 import com.badlogic.gdx.math.Vector2
-import com.microwavestudios.fortyfive.main
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.splitInTwo

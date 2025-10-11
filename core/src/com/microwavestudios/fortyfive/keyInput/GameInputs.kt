@@ -113,6 +113,10 @@ object GameInputs {
         )
     ))
 
+    val skipCredits = Input("skipCredits", arrayOf(
+        Input.Cause.Keyboard(Keys.ENTER)
+    ))
+
 
     val mapEditorDelete = Input("mapEditorDelete", arrayOf(
         Input.Cause.Keyboard(Keys.DEL),

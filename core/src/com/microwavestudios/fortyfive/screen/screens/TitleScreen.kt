@@ -94,7 +94,10 @@ class TitleScreen : ScreenCreator() {
             y = worldHeight * 0.65F
             addOption("Start", true) { handleContinue() }
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
-            addOption("View Credits") { FortyFive.screenManager.appendScreen(CreditsScreen) }
+            addOption("View Credits") {
+                FortyFive.screenManager.appendScreen(CreditsScreen)
+                FortyFive.screenManager.screenFinished()
+            }
             addOption("Quit") { handleQuit() }
         }
 
