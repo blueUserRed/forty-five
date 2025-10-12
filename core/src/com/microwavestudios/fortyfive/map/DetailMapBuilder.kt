@@ -14,7 +14,6 @@ class DetailMapBuilder(
     var startNode: MapNodeBuilder,
     var endNode: MapNodeBuilder,
     val decorations: MutableList<MapDecorationBuilder> = mutableListOf(),
-    val animatedDecorations: MutableList<MapDecoration> = mutableListOf(),
     var isArea: Boolean = false,
     var biome: String = "wasteland",
     var scrollable: Boolean = true,
@@ -52,8 +51,8 @@ class DetailMapBuilder(
             name,
             startNode.asNode!!,
             endNode.asNode!!,
-            decorations.map { it.build() },
-            animatedDecorations,
+            decorations.filter { !it.animated }.map { it.build() },
+            decorations.filter { it.animated }.map { it.build() },
             isArea,
             biome,
             scrollable,
@@ -66,12 +65,14 @@ class DetailMapBuilder(
 
         fun from(map: DetailMap): DetailMapBuilder {
             val (startNode, endNode) = MapNodeBuilder.fromNode(map.startNode, map)
+            val decorations =
+                map.decorations.map { MapDecorationBuilder.fromMapDecoration(it, false) } +
+                map.animatedDecorations.map { MapDecorationBuilder.fromMapDecoration(it, true) }
             return DetailMapBuilder(
                 map.name,
                 startNode,
                 endNode,
-                map.decorations.map { MapDecorationBuilder.fromMapDecoration(it) }.toMutableList(),
-                map.animatedDecorations.toMutableList(),
+                decorations.toMutableList(),
                 map.isArea,
                 map.biome,
                 map.scrollable,
@@ -88,13 +89,19 @@ data class MapDecorationBuilder(
     val baseWidth: Float,
     val baseHeight: Float,
     val drawInBackground: Boolean,
+    val animated: Boolean,
     val instances: MutableList<MapDecorationBuilderInstance>
 ) {
 
     private var drawableCache: Promise<Drawable>? = null
 
     fun requestDrawable(screen: OnjScreen, borrower: ResourceBorrower) {
-        drawableCache = FortyFive.resourceManager.request<Drawable>(borrower, screen.lifetime, drawableHandle)
+        val handle = if (animated) {
+            MapEditorWidget.animatedDecoPreviewDrawables[drawableHandle]!!
+        } else {
+            drawableHandle
+        }
+        drawableCache = FortyFive.resourceManager.request<Drawable>(borrower, screen.lifetime, handle)
     }
 
     fun getDrawable(screen: OnjScreen, borrower: ResourceBorrower): Promise<Drawable> {
@@ -135,10 +142,11 @@ data class MapDecorationBuilder(
 
     companion object {
 
-        fun fromMapDecoration(decoration: MapDecoration): MapDecorationBuilder = MapDecorationBuilder(
+        fun fromMapDecoration(decoration: MapDecoration, animated: Boolean): MapDecorationBuilder = MapDecorationBuilder(
             decoration.drawableHandle,
             decoration.baseWidth, decoration.baseHeight,
             decoration.drawInBackground,
+            animated,
             decoration.instances.map { MapDecorationBuilderInstance(it.first, it.second) }.toMutableList()
         )
     }

@@ -157,6 +157,10 @@ class MapEditorScreen : ScreenCreator() {
             setFontScale(0.7f)
             syncDimensions()
         }
+        val isAnimated = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.7f)
+            syncDimensions()
+        }
         val isBackground = label("roadgeek", "", Color.FortyWhite) {
             setFontScale(0.7f)
             syncDimensions()
@@ -166,7 +170,9 @@ class MapEditorScreen : ScreenCreator() {
         events.watchFor<MapEditorWidget.DisplayDecorationEvent> { (decoration) ->
             isVisible = decoration != null
             decoration ?: return@watchFor
-            handle.setText(decoration.drawableHandle)
+            val drawableHandle = decoration.drawableHandle.removePrefix("map_decoration_")
+            handle.setText(drawableHandle)
+            isAnimated.setText("animated: ${decoration.animated}")
             isBackground.setText("background: ${decoration.drawInBackground}")
         }
     }

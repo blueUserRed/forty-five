@@ -440,6 +440,7 @@ class MapEditorWidget(
         drawEdges(batch)
         drawNodes(batch)
         drawForegroundDecorations(batch)
+        drawAnimatedDecorations(batch)
 
         drawConnectingEdge(batch)
 
@@ -477,7 +478,7 @@ class MapEditorWidget(
         val (x, y) = instance.position * mapScale + mapOffset
         shapeRenderer.flush()
         shapeRenderer.color = Color.Blue
-        Gdx.gl.glLineWidth(20f)
+        Gdx.gl.glLineWidth(10f)
         shapeRenderer.rect(x, y, width, height)
     }
 
@@ -486,13 +487,13 @@ class MapEditorWidget(
         val coords = scaledNodePos(node) + mapOffset
         shapeRenderer.color = Color.Blue
         shapeRenderer.flush()
-        Gdx.gl.glLineWidth(20f)
+        Gdx.gl.glLineWidth(10f)
         shapeRenderer.circle(x + coords.x + nodeSize / 2, y + coords.y + nodeSize / 2, nodeSize / 2)
     }
 
     private fun drawForegroundDecorations(batch: Batch) {
         val (offX, offY) = mapOffset
-        val decorations = mapBuilder.decorations.filter { !it.drawInBackground }
+        val decorations = mapBuilder.decorations.filter { !it.drawInBackground && !it.animated }
         decorations.forEach { decoration ->
             drawDecoration(decoration, batch, offX, offY)
         }
@@ -500,7 +501,15 @@ class MapEditorWidget(
 
     private fun drawBackgroundDecorations(batch: Batch) {
         val (offX, offY) = mapOffset
-        val decorations = mapBuilder.decorations.filter { it.drawInBackground }
+        val decorations = mapBuilder.decorations.filter { it.drawInBackground && !it.animated }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawAnimatedDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        val decorations = mapBuilder.decorations.filter { it.animated }
         decorations.forEach { decoration ->
             drawDecoration(decoration, batch, offX, offY)
         }
@@ -510,7 +519,7 @@ class MapEditorWidget(
         decoration: MapDecorationBuilder,
         batch: Batch,
         offX: Float,
-        offY: Float
+        offY: Float,
     ) {
         val drawable = decoration.getDrawable(screen, this)
         val width = decoration.baseWidth
@@ -620,6 +629,7 @@ class MapEditorWidget(
         val baseWidth: Float,
         val baseHeight: Float,
         val drawInBackground: Boolean,
+        val animated: Boolean = false,
         val recommendScale: Float = 1f
     ) {
 
@@ -647,6 +657,7 @@ class MapEditorWidget(
             baseWidth,
             baseHeight,
             drawInBackground,
+            animated,
             mutableListOf()
         )
 
@@ -656,55 +667,76 @@ class MapEditorWidget(
                     "map_decoration_wasteland_cactus_1",
                     2f, 4f,
                     false,
-                    3f
+                    recommendScale = 3f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_wasteland_cactus_2",
                     2f, 4f,
                     false,
-                    3f
+                    recommendScale = 3f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_wasteland_skull_1",
                     3f, 3f,
                     false,
-                    1.5f
+                    recommendScale = 1.5f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_wasteland_skull_2",
                     3f, 3f,
                     false,
-                    1.5f
+                    recommendScale = 1.5f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_magenta_mountains_mountain",
                     80f, 53.664597f,
                     false,
-                    1f
+                    recommendScale = 1f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_magenta_mountains_mountain_small_1",
                     60f, 51.933815f,
                     false,
-                    1f
+                    recommendScale = 1f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_magenta_mountains_mountain_small_2",
                     60f, 42.656574f,
                     false,
-                    1f
+                    recommendScale = 1f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_magenta_mountains_fog",
                     80f, 52.987015f,
                     false,
-                    1f
+                    recommendScale = 1f
                 ),
                 MapDecorationPrototype(
                     "map_decoration_magenta_mountains_tree",
                     20f, 20f,
                     false,
-                    0.7f
+                    recommendScale = 0.7f
+                ),
+                MapDecorationPrototype(
+                    "sheep",
+                    8f, 8f,
+                    false,
+                    animated = true,
+                    recommendScale = 1f
+                ),
+                MapDecorationPrototype(
+                    "tree",
+                    5f, 10f,
+                    false,
+                    animated = true,
+                    recommendScale = 1.5f
+                ),
+                MapDecorationPrototype(
+                    "grass",
+                    5f, 5f * (34f / 18f),
+                    false,
+                    animated = true,
+                    recommendScale = 1.5f
                 ),
             )
         }
@@ -742,6 +774,11 @@ class MapEditorWidget(
             "map_node_get_card",
             "map_node_choose_card",
             "map_node_dialog"
+        )
+        val animatedDecoPreviewDrawables: Map<String, String> = mapOf(
+            "sheep" to "map_decoration_bewitched_forest_sheep_1",
+            "tree" to "map_decoration_bewitched_forest_tree1",
+            "grass" to "map_decoration_grass",
         )
     }
 
