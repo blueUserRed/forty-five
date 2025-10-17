@@ -47,6 +47,8 @@ open class OnjScreen(
     private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
     private val additionalEarlyRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
 
+    val screenEvents: EventPipeline = EventPipeline()
+
     var isVisible: Boolean = false
         private set
 
@@ -262,6 +264,8 @@ open class OnjScreen(
 
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
+        println("hi")
+        screenEvents.fire(ScreenResizedEvent(width, height))
     }
 
     fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction = TODO()
@@ -317,4 +321,6 @@ open class OnjScreen(
             }
         }
     }
+
+    data class ScreenResizedEvent(val width: Int, val height: Int)
 }

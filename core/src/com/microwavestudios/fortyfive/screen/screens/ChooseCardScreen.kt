@@ -24,6 +24,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -87,12 +88,11 @@ class ChooseCardScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.SPACE_AROUND
 
-            label("red_wing", "", color = Color.FortyWhite) {
+            label("red wing", "", Color.FortyWhite, (32 * 1.3).toInt()) {
                 syncDimensions()
                 events.watchFor<CardsChangedEvent> { (cards) ->
                     setText(if (cards.size == 1) "You get a card!" else "Choose a card!")
                 }
-                setFontScale(1.3f)
             }
             box {
                 name("chooseCardCardParent")
@@ -130,8 +130,7 @@ class ChooseCardScreen : ScreenCreator() {
                     }
                 }
             }
-            label("red_wing", "Drag to add to your deck or backpack", color = Color.FortyWhite) {
-                setFontScale(0.7f)
+            label("red wing", "Drag to add to your deck or backpack", Color.FortyWhite, (32 * 0.7).toInt()) {
                 syncDimensions()
             }
             if (context.enableRerolls) box(backgroundHints = buttonBackgroundHints()) {
@@ -143,7 +142,7 @@ class ChooseCardScreen : ScreenCreator() {
                 defaultButtonBackgrounds()
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
-                val label = label("roadgeek", "", color = Color.FortyWhite) {
+                val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
                     syncDimensions()
                 }

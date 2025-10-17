@@ -105,7 +105,7 @@ object NavbarCreator {
                 backgroundHandle = "statusbar_lives"
             }
 
-            val healthLabel = label("red_wing", "${profile.healthInRun}", isTemplate = true) {
+            val healthLabel = label("red wing", "${profile.healthInRun}", isTemplate = true, fontSize = 32) {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
@@ -130,7 +130,7 @@ object NavbarCreator {
                 height = 30f
             }
 
-            val cashLabel = label("red_wing", "\$${profile.playerMoney}") {
+            val cashLabel = label("red wing", "\$${profile.playerMoney}", fontSize = 32) {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
@@ -252,13 +252,13 @@ object NavbarCreator {
             joinGroup(navbarButtonGroup)
             touchable = Touchable.enabled
 
-            label("red_wing", obj.name) {
+            label("red wing", obj.name, fontSize = (32 * 0.7 * scale).toInt()) {
                 centerX()
                 y = 20f
                 setAlignment(Align.center)
                 positionType = PositionType.ABSOLUTE
                 fontColor = ScreenCreator.fortyWhite
-                setFontScale(0.7f * scale)
+                syncHeight()
             }
 
             fun createAction(end: Float): PropertyAction<Float> = PropertyAction(
@@ -337,7 +337,7 @@ object NavbarCreator {
                 setupDimensionsForAreaName(this@locationIndicator)
             }
         } else {
-            label("red_wing", "You are on a road", color = Color.WHITE) {
+            label("red wing", "You are on a road", color = Color.WHITE, fontSize = 32) {
                 syncDimensions()
             }
         }

@@ -279,7 +279,7 @@ object BackpackCreator {
                 relativeWidth(100f)
                 syncHeight()
 
-                label("red_wing", "Backpack", Color.White) {
+                label("red wing", "Backpack", Color.White, 32) {
                     width = 200f
                     syncHeight()
                 }
@@ -294,12 +294,12 @@ object BackpackCreator {
                     paddingLeft = 10f
                     paddingRight = 10f
 
-                    label("red_wing", "Sort by: ", Color.FortyWhite) {
+                    label("red wing", "Sort by: ", Color.FortyWhite, 32) {
                         syncHeight()
                         relativeWidth(22f)
                     }
 
-                    label("red_wing", state.sortingMode.displayName, Color.Red) {
+                    label("red wing", state.sortingMode.displayName, Color.Red, 32) {
                         syncHeight()
                         relativeWidth(40f)
                         val modes = SortingMode.entries
@@ -607,9 +607,10 @@ object BackpackCreator {
             syncHeight()
 
             label(
-                "red_wing",
+                "red wing",
                 if (state.functionsAsCollection) "Collection" else "Backpack",
-                Color.White
+                Color.White,
+                fontSize = 32
             ) {
                 width = 200f
                 height = 40f

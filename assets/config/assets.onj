@@ -3,6 +3,56 @@ import "imports/colors.onj" as color;
 use Common;
 
 fonts: [
+    {
+        name: "red wing",
+        variants: [
+            {
+                size: 200,
+                resourceHandle: "redwing200",
+                fontFile: "blobs/fonts2/redwing200.fnt",
+                imageFile: "blobs/fonts2/redwing200.png",
+            },
+            {
+                size: 100,
+                resourceHandle: "redwing100",
+                fontFile: "blobs/fonts2/redwing100.fnt",
+                imageFile: "blobs/fonts2/redwing100.png",
+            },
+            {
+                size: 60,
+                resourceHandle: "redwing60",
+                fontFile: "blobs/fonts2/redwing60.fnt",
+                imageFile: "blobs/fonts2/redwing60.png",
+            }
+        ]
+    },
+    {
+        name: "roadgeek",
+        variants: [
+            {
+                size: 200,
+                resourceHandle: "roadgeek200",
+                fontFile: "blobs/fonts2/roadgeek200.fnt",
+                imageFile: "blobs/fonts2/roadgeek200.png"
+            },
+            {
+                size: 100,
+                resourceHandle: "roadgeek100",
+                fontFile: "blobs/fonts2/roadgeek100.fnt",
+                imageFile: "blobs/fonts2/roadgeek100.png"
+            },
+            {
+                size: 60,
+                resourceHandle: "roadgeek60",
+                fontFile: "blobs/fonts2/roadgeek60.fnt",
+                imageFile: "blobs/fonts2/roadgeek60.png"
+            }
+        ]
+    },
+],
+
+/*
+fonts: [
 
     {
         name: "red_wing",
@@ -48,6 +98,7 @@ fonts: [
     },
 
 ],
+*/
 
 pixmapFonts: [
     {
@@ -1412,6 +1463,11 @@ shaders: [
         constantArgs: {
         }
     },
+    {
+        name: "text_shader",
+        file: "shaders/text.glsl",
+        constantArgs: {}
+    }
 ],
 
 animations: [

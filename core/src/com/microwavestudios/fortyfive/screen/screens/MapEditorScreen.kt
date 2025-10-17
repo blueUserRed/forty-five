@@ -17,6 +17,7 @@ import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -105,26 +106,22 @@ class MapEditorScreen : ScreenCreator() {
         centerX()
         y = -20f
 
-        val index = label("roadgeek", "", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val index = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val nodeTexture = label("roadgeek", "", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val nodeTexture = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
             onInput(GameInputs.interact) { events.fire(CycleNodeTextureEvent) }
         }
-        val makeStart = label("roadgeek", "make start node", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val makeStart = label("roadgeek", "make start node", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
             onInput(GameInputs.interact) { events.fire(MakeStartNodeEvent) }
         }
-        val makeEnd = label("roadgeek", "make end node", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val makeEnd = label("roadgeek", "make end node", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
@@ -153,16 +150,13 @@ class MapEditorScreen : ScreenCreator() {
         centerX()
         y = -20f
 
-        val handle = label("roadgeek", "", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val handle = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val isAnimated = label("roadgeek", "", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val isAnimated = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val isBackground = label("roadgeek", "", Color.FortyWhite) {
-            setFontScale(0.7f)
+        val isBackground = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
 
@@ -187,7 +181,7 @@ class MapEditorScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.START
 
         horizontalSpacer(20f)
-        label("roadgeek", "Load", Color.FortyWhite) {
+        label("roadgeek", "Load", Color.FortyWhite, 24) {
             backgroundHandle = "transparent_black_texture"
             height = 50f
             syncWidth()
@@ -197,7 +191,7 @@ class MapEditorScreen : ScreenCreator() {
             onInput(GameInputs.interact) { loadMap() }
         }
         horizontalSpacer(20f)
-        label("roadgeek", "Save", Color.FortyWhite) {
+        label("roadgeek", "Save", Color.FortyWhite, 24) {
             backgroundHandle = "transparent_black_texture"
             height = 50f
             syncWidth()
@@ -207,7 +201,7 @@ class MapEditorScreen : ScreenCreator() {
             onInput(GameInputs.interact) { save() }
         }
         horizontalSpacer(20f)
-        label("roadgeek", "Save To", Color.FortyWhite) {
+        label("roadgeek", "Save To", Color.FortyWhite, 24) {
             backgroundHandle = "transparent_black_texture"
             height = 50f
             syncWidth()
@@ -217,9 +211,8 @@ class MapEditorScreen : ScreenCreator() {
             onInput(GameInputs.interact) { saveTo() }
         }
         horizontalSpacer(20f)
-        label("roadgeek", "") {
+        label("roadgeek", "", fontSize = (24 * 0.7).toInt()) {
             backgroundHandle = "white_texture"
-            setFontScale(0.7f)
             height = 30f
             syncWidth()
 
@@ -280,15 +273,13 @@ class MapEditorScreen : ScreenCreator() {
         backgroundHandle = "white_texture"
         flexDirection = FlexDirection.ROW
 
-        label("roadgeek", "Mode:") {
-            setFontScale(0.7f)
+        label("roadgeek", "Mode:", fontSize = (24 * 0.7).toInt()) {
             height = 30f
             syncWidth()
         }
         horizontalSpacer(10f)
 
-        label("roadgeek", "Node") {
-            setFontScale(0.7f)
+        label("roadgeek", "Node", fontSize = (24 * 0.7).toInt()) {
             height = 30f
             syncWidth()
             events.watchFor<MapEditorWidget.ModeChangedEvent> { (newMode) -> setText(newMode.displayName) }

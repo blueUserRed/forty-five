@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -65,8 +66,7 @@ object PopupCreator {
 
             verticalSpacer(50f)
 
-            val title = label("red_wing", "", Color.FortyWhite) {
-                setFontScale(1.4f)
+            val title = label("red wing", "", Color.FortyWhite, (32 * 1.4).toInt()) {
                 setAlignment(Align.center)
                 relativeWidth(90f)
                 syncHeight()
@@ -77,7 +77,8 @@ object PopupCreator {
             val body = label(
                 "roadgeek",
                 "",
-                Color.FortyWhite
+                Color.FortyWhite,
+                28
             ) {
                 wrap = true
                 relativeWidth(90f)
@@ -107,11 +108,10 @@ object PopupCreator {
             event as ShowPopup<Any?>
             clearChildren()
             event.options.forEach { (text, value) ->
-                label("roadgeek", text, Color.FortyWhite, backgroundHints = buttonBackgroundHints()) {
+                label("roadgeek", text, Color.FortyWhite, 35, backgroundHints = buttonBackgroundHints()) {
                     height = 50f
                     width = 200f
                     setAlignment(Align.center)
-                    setFontScale(0.9f)
                     touchable = Touchable.enabled
                     keyboardFocusable = KeyboardFocusable.LEAF
                     joinGroup("shared-popup-button")

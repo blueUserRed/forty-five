@@ -14,6 +14,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.NewLabel
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -40,7 +41,7 @@ class CreditsScreen : ScreenCreator() {
     private val scrollSpeed = 3f
 
     private lateinit var contentBox: CustomBox
-    private lateinit var backToTitleScreen: CustomLabel
+    private lateinit var backToTitleScreen: NewLabel
     private var enterEndsImmediately: Boolean = false
     private var animFinished: Boolean = false
 
@@ -52,7 +53,7 @@ class CreditsScreen : ScreenCreator() {
         delay(900)
         delayUntil {
             contentBox.drawOffsetY += scrollSpeed
-            contentBox.drawOffsetY >= 6380f
+            contentBox.drawOffsetY >= 6180f
         }
         delay(500)
 
@@ -104,8 +105,7 @@ class CreditsScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.END
 
-            backToTitleScreen = label("roadgeek", "Press enter to end credits", Color.Red) {
-                setFontScale(1.2f)
+            backToTitleScreen = label("roadgeek", "Press enter to end credits", Color.Red, (28 * 1.2).toInt()) {
                 backgroundHandle = "transparent_black_texture"
                 setAlignment(Align.center)
                 alpha = 0f
@@ -190,8 +190,7 @@ class CreditsScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.SPACE_AROUND
 
-        label("red_wing_bmp", name, Color.Red) {
-            setFontScale(0.7f)
+        label("red wing", name, Color.Red, (128 * 0.7).toInt()) {
             relativeWidth(45f)
             setAlignment(Align.right)
         }
@@ -199,8 +198,7 @@ class CreditsScreen : ScreenCreator() {
         box {
             relativeWidth(45f)
             flexDirection = FlexDirection.COLUMN
-            titles.forEach { title -> label("roadgeek", title, Color.FortyWhite) {
-                setFontScale(1.3f)
+            titles.forEach { title -> label("roadgeek", title, Color.FortyWhite, (28 * 1.3).toInt()) {
                 syncHeight()
             } }
             syncHeight()
@@ -212,28 +210,25 @@ class CreditsScreen : ScreenCreator() {
         syncHeight()
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.CENTER
-        label("red_wing_bmp", header, Color.Red) {
-            setFontScale(0.45f)
+        label("red wing", header, Color.Red, (128 * 0.45).toInt()) {
             relativeWidth(100f)
             setAlignment(Align.center)
             syncHeight()
         }
         verticalSpacer(30f)
         subHeader?.let { subHeader ->
-            label("roadgeek", subHeader, Color.Red) {
+            label("roadgeek", subHeader, Color.Red, (28 * 1.3).toInt()) {
                 relativeWidth(100f)
                 wrap = true
                 setAlignment(Align.center)
-                setFontScale(1.3f)
                 syncHeight()
             }
             verticalSpacer(30f)
         }
-        label("roadgeek", text, Color.FortyWhite) {
+        label("roadgeek", text, Color.FortyWhite, (28 * 1.3).toInt()) {
             relativeWidth(100f)
             wrap = true
             setAlignment(Align.center)
-            setFontScale(1.3f)
             syncHeight()
         }
     }
@@ -243,8 +238,7 @@ class CreditsScreen : ScreenCreator() {
         syncHeight()
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.CENTER
-        label("red_wing_bmp", "developed by", Color.FortyWhite) {
-            setFontScale(0.4f)
+        label("red wing", "developed by", Color.FortyWhite, (128 * 0.4).toInt()) {
             relativeWidth(100f)
             setAlignment(Align.center)
             syncHeight()
@@ -256,8 +250,7 @@ class CreditsScreen : ScreenCreator() {
             onLayoutAndNow { height = width * (528f / 2030f) }
         }
         verticalSpacer(90f)
-        label("red_wing_bmp", "Thank you for playing!", Color.FortyWhite) {
-            setFontScale(0.5f)
+        label("red wing", "Thank you for playing!", Color.FortyWhite, (128 * 0.5).toInt()) {
             relativeWidth(100f)
             setAlignment(Align.center)
             syncHeight()

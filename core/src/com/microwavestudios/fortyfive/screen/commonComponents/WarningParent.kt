@@ -159,7 +159,7 @@ class WarningParent(
                 relativeHeight(100f)
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
-                label("red_wing", level.symbol, level.fontColor)
+                label("red wing", level.symbol, level.fontColor, 32)
             }
             box {
                 relativeHeight(90f)
@@ -171,9 +171,7 @@ class WarningParent(
                 relativeWidth(72f)
                 marginLeft = 8f
 
-                // TODO: add smaller variant of roadgeek
-                label("roadgeek", text, level.fontColor) {
-                    setFontScale(0.5f)
+                label("roadgeek", text, level.fontColor, 12) {
                     relativeWidth(100f)
                     relativeHeight(100f)
                     wrap = true

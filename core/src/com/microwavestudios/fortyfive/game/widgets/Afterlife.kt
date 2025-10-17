@@ -240,7 +240,7 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             onLayoutAndNow { width = parent.width - 60f - 30f }
             relativeHeight(100f)
             flexDirection = FlexDirection.COLUMN
-            label("red_wing", "Afterlife", color = Color.FortyWhite) {
+            label("red wing", "Afterlife", Color.FortyWhite, 32) {
                 relativeWidth(100f)
                 relativeHeight(20f)
                 setAlignment(Align.center)

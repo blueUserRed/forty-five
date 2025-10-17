@@ -24,6 +24,8 @@ import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.NewLabel
+import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -157,8 +159,8 @@ class MapScreen : ScreenCreator() {
             }
         }
 
-        val eventName: CustomLabel
-        val eventDescription: CustomLabel
+        val eventName: NewLabel
+        val eventDescription: NewLabel
 
         box {
             flexDirection = FlexDirection.COLUMN
@@ -167,18 +169,16 @@ class MapScreen : ScreenCreator() {
             marginTop = 20f
             height = 500f
 
-            eventName = label("red_wing", "") {
+            eventName = label("red wing", "", fontSize = (32 * 1.3).toInt()) {
                 wrap = true
                 fontColor = Color.White
-                setFontScale(1.3f)
                 setAlignment(Align.center)
                 relativeWidth(90f)
                 syncHeight()
             }
 
-            eventDescription = label("red_wing", "") {
+            eventDescription = label("red wing", "", fontSize = (32 * 0.7).toInt()) {
                 wrap = true
-                setFontScale(0.7f)
                 setAlignment(Align.center)
                 fontColor = Color.White
                 relativeWidth(90f)
@@ -207,7 +207,7 @@ class MapScreen : ScreenCreator() {
             updateDescription(node)
         }
 
-        label("red_wing", "Start") {
+        label("red wing", "Start", fontSize = 32) {
             name("StartButton")
             setAlignment(Align.center)
             width = 200f * 0.8f
@@ -264,8 +264,7 @@ class MapScreen : ScreenCreator() {
 
         isVisible = false
 
-        val label = label("roadgeek", "", Color.FortyWhite) {
-            setFontScale(0.6f)
+        val label = label("roadgeek", "", Color.FortyWhite, fontSize = (32 * 0.6).toInt()) {
             setAlignment(Align.center)
             badTexture("map info popup warning label")
             wrap = true
@@ -311,19 +310,17 @@ class MapScreen : ScreenCreator() {
                 width = parent.width - iconImage.width - 40f
                 syncHeight()
 
-                label("red_wing", name) {
+                label("red wing", name, fontSize = (32 * 0.6).toInt()) {
                     fontColor = Color.Red
                     setAlignment(Align.left)
-                    setFontScale(0.6f)
                     relativeWidth(100f)
                     syncHeight()
                 }
 
-                label("red_wing", description) {
+                label("red wing", description, fontSize = 16) {
                     fontColor = Color.Black
                     wrap = true
                     setAlignment(Align.left)
-                    setFontScale(0.5f)
                     relativeWidth(100f)
                     syncHeight()
                 }

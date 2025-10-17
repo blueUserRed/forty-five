@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.utils
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
@@ -33,6 +34,9 @@ class AutomaticResourceGetter<T : Any>(
 ) : ResourceBorrower {
 
     private var backingField: T? = null
+    var currentResourceHandle: ResourceHandle? = null
+        private set
+
     private var activeResource: Resource<T>? = null
     private var wantedResource: String? = null
 
@@ -65,6 +69,7 @@ class AutomaticResourceGetter<T : Any>(
         wantedResource = new
         if (new == null) {
             backingField = null
+            currentResourceHandle = null
             activeResource = null
             cleanupUnused()
             return
@@ -73,6 +78,7 @@ class AutomaticResourceGetter<T : Any>(
         val wanted = resources.find { it.handle == new }
         if (wanted != null && wanted.promise.isResolved) {
             backingField = wanted.promise.getOrError()
+            currentResourceHandle = wanted.handle
             activeResource = wanted
         }
         if (wanted != null) return
@@ -89,6 +95,7 @@ class AutomaticResourceGetter<T : Any>(
                 return@then
             }
             backingField = result
+            currentResourceHandle = new
             activeResource = newResource
             cleanupUnused()
             onResolveCallbacks.forEach { it(result) }

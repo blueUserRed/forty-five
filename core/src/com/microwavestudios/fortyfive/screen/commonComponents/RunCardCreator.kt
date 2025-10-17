@@ -17,13 +17,13 @@ object RunCardCreator {
         flexDirection = FlexDirection.COLUMN
         backgroundHandle = "white_texture"
 
-        label("red_wing", "difficulty: ${run.difficulty}")
-        label("red_wing", "biome: ${run.biome}")
-        label("red_wing", "type: ${run.type.displayName}")
-        label("red_wing", "length: ${run.length.displayName}")
-        label("red_wing", "rewards:")
+        label("red wing", "difficulty: ${run.difficulty}", fontSize = 32)
+        label("red wing", "biome: ${run.biome}", fontSize = 32)
+        label("red wing", "type: ${run.type.displayName}", fontSize = 32)
+        label("red wing", "length: ${run.length.displayName}", fontSize = 32)
+        label("red wing", "rewards:", fontSize = 32)
         run.rewards.forEach { reward ->
-            label("red_wing", "    -${reward.displayText()}")
+            label("red wing", "    -${reward.displayText()}", fontSize = 32)
         }
     }
 
