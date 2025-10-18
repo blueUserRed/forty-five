@@ -101,7 +101,6 @@ class TestScreen : ScreenCreator() {
     private fun CustomBox.newLabels() {
 
         label("red wing", "AVWXY hello world", Color.FortyWhite, fontSize = 100) {
-            useShader = false
             wrap = false
             relativeWidth(100f)
             syncHeight()

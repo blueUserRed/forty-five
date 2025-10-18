@@ -212,8 +212,8 @@ class NewLabel(
         }
         val shader = shaderPromise.getOrNull() ?: return
         batch.flush()
-        shader.prepare(screen)
         batch.shader = shader.shader
+        shader.prepare(screen)
         font.draw(batch, layout, x, textY)
         batch.flush()
         batch.shader = null

@@ -75,20 +75,18 @@ object FortyFive : Game() {
 
 //        UserPrefs.windowMode = UserPrefs.WindowMode.Window
 
+        if (appArguments.mapEditor) {
+            screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
+                override val map: DetailMap? = null
+                override var mapPath: String? = appArguments.providedMapPath
+            })
+            screenManager.screenFinished()
+            return
+        }
+
+//        screenManager.appendScreen(TestScreen)
         screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
-
-//        if (appArguments.mapEditor) {
-//            screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
-//                override val map: DetailMap? = null
-//                override var mapPath: String? = appArguments.providedMapPath
-//            })
-//            screenManager.screenFinished()
-//            return
-//        }
-//
-//        screenManager.appendScreen(TitleScreen)
-//        screenManager.screenFinished()
     }
 
     fun toMap() {

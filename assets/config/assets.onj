@@ -245,22 +245,18 @@ textures: [
     {
         name: "burning_icon",
         file: "blobs/status_effects/burning_icon.png",
-        useMipMaps: true
     },
     {
         name: "shield_icon",
         file: "blobs/status_effects/shield_icon.png",
-        useMipMaps: true
     },
     {
         name: "poison_icon",
         file: "blobs/status_effects/poison_icon.png",
-        useMipMaps: true
     },
     {
         name: "bewitched_icon",
         file: "blobs/status_effects/bewitched_icon.png",
-        useMipMaps: true
     },
     {
         name: "draw_bullet",
@@ -698,57 +694,46 @@ textures: [
     {
         name: "warning_label_close",
         file: "blobs/ui_elements/warning_label/close_btn.png",
-        useMipMaps: true,
     },
     {
         name: "collection_icon",
         file: "blobs/ui_elements/card_collection/collection_icon.png",
-        useMipMaps: true,
     },
     {
         name: "collection_next",
         file: "blobs/ui_elements/card_collection/collection_next.png",
-        useMipMaps: true,
     },
     {
         name: "collection_next_hover",
         file: "blobs/ui_elements/card_collection/collection_next_hover.png",
-        useMipMaps: true,
     },
     {
         name: "collection_prev",
         file: "blobs/ui_elements/card_collection/collection_prev.png",
-        useMipMaps: true,
     },
     {
         name: "collection_prev_hover",
         file: "blobs/ui_elements/card_collection/collection_prev_hover.png",
-        useMipMaps: true,
     },
     {
         name: "collection_slot_empty",
         file: "blobs/ui_elements/card_collection/collection_slot_empty.png",
-        useMipMaps: true,
     },
     {
         name: "collection_slot_glow",
         file: "blobs/ui_elements/card_collection/collection_slot_glow.png",
-        useMipMaps: true,
     },
     {
         name: "collection_slot_locked",
         file: "blobs/ui_elements/card_collection/collection_slot_locked.png",
-        useMipMaps: true,
     },
     {
         name: "collection_slot_missing",
         file: "blobs/ui_elements/card_collection/collection_slot_missing.png",
-        useMipMaps: true,
     },
     {
         name: "collection_background",
         file: "blobs/ui_elements/card_collection/collection_bg.png",
-        useMipMaps: true,
     },
     {
         name: "choose_card_cards_background",
@@ -781,87 +766,70 @@ textures: [
     {
         name: "enemy_status_bar_main_bar",
         file: "blobs/game_screen/status_bar/main_bar.png",
-        useMipMaps: true,
     },
     {
         name: "enemy_status_bar_hp_label",
         file: "blobs/game_screen/status_bar/hp_label.png",
-        useMipMaps: true,
     },
     {
         name: "enemy_status_bar_shield_overlay",
         file: "blobs/game_screen/status_bar/shield_overlay.png",
-        useMipMaps: true,
     },
     {
         name: "enemy_status_bar_effect_box",
         file: "blobs/game_screen/status_bar/effect_box.png",
-        useMipMaps: true,
     },
     {
         name: "enemy_action_burning",
         file: "blobs/enemies/action_symbols/burning.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_cover",
         file: "blobs/enemies/action_symbols/cover.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_damage",
         file: "blobs/enemies/action_symbols/damage.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_fire_resistance",
         file: "blobs/enemies/action_symbols/fire_resistance.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_hot_potato",
         file: "blobs/enemies/action_symbols/hot_potato.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_inferno",
         file: "blobs/enemies/action_symbols/inferno.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_bewitched",
         file: "blobs/enemies/action_symbols/bewitched.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_left_turn",
         file: "blobs/enemies/action_symbols/left_turn.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_and_its_gone",
         file: "blobs/enemies/action_symbols/and_its_gone.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_goodbyes",
         file: "blobs/enemies/action_symbols/goodbyes.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_heads_up",
         file: "blobs/enemies/action_symbols/heads_up.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_piercing",
         file: "blobs/enemies/action_symbols/piercing.png",
-        useMipMaps: true
     },
     {
         name: "enemy_action_unknown",
         file: "blobs/enemies/action_symbols/unknown.png",
-        useMipMaps: true
     },
     {
         name: "enemy_pyro_action_comic_common_panel_1",
@@ -1038,12 +1006,10 @@ textures: [
     {
         name: "card_symbol_marked",
         file: "blobs/cards/symbols/marked.png",
-        useMipMaps: true,
     },
     {
         name: "microwave_studios_logo",
         file: "blobs/microwave_studios.png",
-        useMipMaps: true
     },
     {
         name: "logo_red",
@@ -1052,12 +1018,10 @@ textures: [
     {
         name: "logo_htl3r",
         file: "blobs/htl3r.png",
-        useMipMaps: true
     },
     {
         name: "logo_htl3r_white_background",
         file: "blobs/htl3r_white_background.png",
-        useMipMaps: true
     },
     {
         name: "map_extraction_background",
@@ -1078,106 +1042,102 @@ textures: [
     {
         name: "revolver_slot_icon_1",
         file: "blobs/revolver_slot_icons/1.png",
-        useMipMaps: true
     },
     {
         name: "revolver_slot_icon_2",
         file: "blobs/revolver_slot_icons/2.png",
-        useMipMaps: true
     },
     {
         name: "revolver_slot_icon_3",
         file: "blobs/revolver_slot_icons/3.png",
-        useMipMaps: true
     },
     {
         name: "revolver_slot_icon_4",
         file: "blobs/revolver_slot_icons/4.png",
-        useMipMaps: true
     },
     {
         name: "revolver_slot_icon_5",
         file: "blobs/revolver_slot_icons/5.png",
-        useMipMaps: true
     },
     {
         name: "title_screen_background",
         file: "blobs/title_screen/background.png",
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_1",
         file: "blobs/title_screen/b1.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_2",
         file: "blobs/title_screen/b2.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_3",
         file: "blobs/title_screen/b3.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_4",
         file: "blobs/title_screen/b4.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_5",
         file: "blobs/title_screen/b5.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_6",
         file: "blobs/title_screen/b6.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_7",
         file: "blobs/title_screen/b7.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_8",
         file: "blobs/title_screen/b8.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_9",
         file: "blobs/title_screen/b9.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_10",
         file: "blobs/title_screen/b10.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_11",
         file: "blobs/title_screen/b11.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_12",
         file: "blobs/title_screen/b12.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_13",
         file: "blobs/title_screen/b13.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_14",
         file: "blobs/title_screen/b14.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "title_screen_bullet_15",
         file: "blobs/title_screen/b15.png",
-        useMipMaps: true
+        useMipMaps: false
     },
     {
         name: "common_popup_background_black",
@@ -1238,7 +1198,6 @@ textures: [
     {
         name: "common_slider_background",
         file: "blobs/common/slider/slider.png",
-        useMipMaps: true,
     },
     {
         name: "single_setting_background",
@@ -1263,32 +1222,26 @@ textures: [
     {
         name: "wood_box",
         file: "blobs/game_screen/wood_box.png",
-        useMipMaps: true,
     },
     {
         name: "deck_icon",
         file: "blobs/game_screen/deck_icon.png",
-        useMipMaps: true,
     },
     {
         name: "reserves_texture",
         file: "blobs/game_screen/reserves.png",
-        useMipMaps: true,
     },
     {
         name: "card_symbol_text_a_equals",
         file: "blobs/cards/symbols/text/a_equals.png",
-        useMipMaps: true,
     },
     {
         name: "card_symbol_text_i_equals",
         file: "blobs/cards/symbols/text/i_equals.png",
-        useMipMaps: true,
     },
     {
         name: "card_symbol_text_t_equals",
         file: "blobs/cards/symbols/text/t_equals.png",
-        useMipMaps: true,
     },
 ],
 

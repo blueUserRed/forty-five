@@ -28,6 +28,11 @@ vec2 magnify(vec2 uv, vec2 resolution) {
 }
 
 void main() {
-    vec2 resolution = vec2(textureSize(u_texture, 0));
-    outColor = texture2D(u_texture, magnify(v_texCoords, resolution)) * v_color;
+    vec4 texture = texture2D(u_texture, v_texCoords);
+//    float gray = abs(color.r + color.g + color.b) / 3.0;
+//    gray *= color.a;
+//    float diff = fwidth(gray);
+//    outColor = vec4(diff, diff, diff, 1.0);
+    vec3 color = texture * v_color;
+    outColor = vec4(color.r, color.g, color.b, texture.a);
 }

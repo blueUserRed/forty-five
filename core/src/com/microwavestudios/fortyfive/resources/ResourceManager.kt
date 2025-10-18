@@ -77,7 +77,7 @@ class ResourceManager {
                 texture.get<String>("file"),
                 texture.getOr("tileable", false),
                 texture.getOr("tileScale", 1.0).toFloat(),
-                texture.getOr("useMipMaps", false),
+                texture.getOr("useMipMaps", true),
                 dropShadowData
             )
             resource.stayLoaded = texture.getOr("stayLoaded", false)
