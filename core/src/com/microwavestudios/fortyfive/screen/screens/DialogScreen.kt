@@ -23,6 +23,7 @@ import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.PositionType
+import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.reflect.KClass
@@ -104,9 +105,8 @@ class DialogScreen : ScreenCreator() {
                         { backgroundHandle = "dialog_answer_option" },
                     )
                     onInput(GameInputs.interact) { currentPromise?.resolve(choice) }
-                    label("roadgeek", choice, Color.FortyWhite) {
+                    label("roadgeek", choice, Color.FortyWhite, (24 * 1.1).toInt()) {
                         wrap = true
-                        setFontScale(1.1f)
                         relativeWidth(90f)
                         syncHeight()
                     }
@@ -124,9 +124,8 @@ class DialogScreen : ScreenCreator() {
 
     private fun CustomGroup.nameLabels() {
 
-        val left = label(font = "red_wing", text = "") {
+        val left = label("red wing", "", fontSize = (32 * 0.9).toInt()) {
             backgroundHandle = "dialog_name_field"
-            setFontScale(0.9f)
             onLayoutAndNow {
                 width = prefWidth * 1.3F
                 height = prefHeight * 1.4F
@@ -137,7 +136,7 @@ class DialogScreen : ScreenCreator() {
             isVisible = false
         }
 
-        val right = label(font = "red_wing", text = "") {
+        val right = label("red wing", "", fontSize = (32 * 0.9).toInt()) {
             backgroundHandle = "dialog_name_field"
             setFontScale(0.9f)
             onLayoutAndNow {
@@ -227,9 +226,8 @@ class DialogScreen : ScreenCreator() {
 
     private fun CustomGroup.textWidget() {
         val advTextWidget = AnimatedAdvancedTextWidget(
-            Triple("red_wing", Color.FortyWhite, 0.5f),
+            Triple("red wing", Color.FortyWhite, 16),
             screen,
-            true
         )
         actor(advTextWidget) {
             relativeWidth(75F)

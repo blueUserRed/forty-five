@@ -19,7 +19,6 @@ buildscript {
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("com.badlogicgames.gdx:gdx-tools:$gdxVersion")
     }
 }
 
@@ -82,5 +81,6 @@ project(":core") {
         implementation("org.jetbrains.kotlin:kotlin-stdlib")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("com.code-disaster.steamworks4j:steamworks4j:1.9.0")
+        implementation("com.badlogicgames.gdx:gdx-tools:$gdxVersion")
     }
 }

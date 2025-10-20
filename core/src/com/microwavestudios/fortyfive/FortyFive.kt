@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
@@ -20,10 +21,7 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
-import com.microwavestudios.fortyfive.screen.screens.IntroScreen
-import com.microwavestudios.fortyfive.screen.screens.MapScreen
-import com.microwavestudios.fortyfive.screen.screens.TitleScreen
-import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
+import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
 import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -69,18 +67,25 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
+
         if (appArguments.bakeRun) {
             Oven().bake(appArguments.bakeTasks)
             return
         }
 
-        when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> screenManager.appendScreen(IntroScreen)
-            UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
-            UserPrefs.StartScreen.MAP -> toMap()
+//        UserPrefs.windowMode = UserPrefs.WindowMode.Window
+
+        if (appArguments.mapEditor) {
+            screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
+                override val map: DetailMap? = null
+                override var mapPath: String? = appArguments.providedMapPath
+            })
+            screenManager.screenFinished()
+            return
         }
-//        profileManager.selectProfile(profileManager.availableProfiles.first())
-//        screenManager.appendScreen(WinRunScreen)
+
+//        screenManager.appendScreen(TestScreen)
+        screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
     }
 
@@ -174,6 +179,11 @@ object FortyFive : Game() {
     }
 
 
-    data class AppArguments(val bakeRun: Boolean, val bakeTasks: List<BakeTask>)
+    data class AppArguments(
+        val bakeRun: Boolean,
+        val bakeTasks: List<BakeTask>,
+        val mapEditor: Boolean,
+        val providedMapPath: String?,
+    )
 
 }

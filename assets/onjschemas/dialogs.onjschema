@@ -64,7 +64,7 @@ var dialog = {
     }[],
     defaults: {
         font: string,
-        fontScale: float,
+        fontSize: int,
         color: Color
     },
 };

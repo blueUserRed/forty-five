@@ -21,9 +21,8 @@ import onj.value.OnjObject
 import kotlin.math.sin
 
 open class AdvancedTextWidget(
-    private val defaults: Triple<String, Color, Float>,
+    private val defaults: Triple<String, Color, Int>,
     screen: OnjScreen,
-    private val isDistanceField: Boolean,
 ) : CustomGroup(screen), HasPaddingActor {
 
     override var fixedZIndex: Int = 0
@@ -62,11 +61,10 @@ open class AdvancedTextWidget(
     constructor(
         defaults: OnjObject,
         screen: OnjScreen,
-        isDistanceFiled: Boolean
-    ) : this(AdvancedText.defaultsFromOnj(defaults), screen, isDistanceFiled)
+    ) : this(AdvancedText.defaultsFromOnj(defaults), screen)
 
     open fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
-        advancedText = AdvancedTextParser(text, screen, defaults, isDistanceField, effects ?: listOf()).parse()
+        advancedText = AdvancedTextParser(text, screen, defaults, effects ?: listOf()).parse()
     }
 
     override fun layout() {
@@ -203,27 +201,23 @@ data class AdvancedText(
 
         fun readFromOnj(
             rawText: String,
-            isDistanceField: Boolean,
             effects: OnjArray?,
             screen: OnjScreen,
             defaults: OnjObject
-        ): AdvancedText {
-            return AdvancedTextParser(
-                rawText,
-                screen,
-                defaultsFromOnj(defaults),
-                isDistanceField,
-                effects
-                    ?.value
-                    ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject) }
-                    ?: listOf()
-            ).parse()
-        }
+        ): AdvancedText = AdvancedTextParser(
+            rawText,
+            screen,
+            defaultsFromOnj(defaults),
+            effects
+                ?.value
+                ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject) }
+                ?: listOf()
+        ).parse()
 
-        fun defaultsFromOnj(onj: OnjObject): Triple<String, Color, Float> = Triple(
+        fun defaultsFromOnj(onj: OnjObject): Triple<String, Color, Int> = Triple(
             onj.get<String>("font"),
             onj.get<Color>("color"),
-            onj.get<Double>("fontScale").toFloat()
+            onj.get<Long>("fontSize").toInt()
         )
     }
 
@@ -253,34 +247,28 @@ interface AdvancedTextPart : OffSettable {
 }
 
 class TextAdvancedTextPart(
-    rawText: String,
+    private val rawText: String,
     font: String,
     fontColor: Color,
-    fontScale: Float,
+    fontSize: Int,
     screen: OnjScreen,
-    isDistanceFiled: Boolean,
     override val breakLine: Boolean
-) : TemplateStringLabel(
+) : NewLabel(
     screen,
-    TemplateString(rawText),
-    LabelStyle(
-        FortyFive.resourceManager.forceGet(object : ResourceBorrower {}, screen.lifetime, font),
-        fontColor
-    ), // TODO: better way to do ResourceBorrowers
-    isDistanceFiled
+    rawText,
 ), AdvancedTextPart {
 
     override val actor: Actor = this
 
-    var progress: Int = templateString.string.length
+    var progress: Int = text.length
         private set
 
     private val actions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
 
     init {
-        templateString = TemplateString(rawText)
-        setFontScale(fontScale)
-        skipTextCheck = true
+        this.fontSize = fontSize
+        this.fontGroup = font
+        this.fontColor = fontColor
     }
 
     override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
@@ -294,9 +282,8 @@ class TextAdvancedTextPart(
 
     override fun progress(): Boolean {
         progress++
-        val text = templateString.string
-        if (progress > text.length) return true
-        setText(text.substring(0, progress))
+        if (progress > rawText.length) return true
+        setText(rawText.take(progress))
         return progress >= text.length
     }
 
@@ -306,15 +293,14 @@ class TextAdvancedTextPart(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        val newText = templateString.string
-        if (progress >= newText.length) setText(newText)
+
         actions.forEach { it(this) }
         if (batch == null) {
             super.draw(null, parentAlpha)
             return
         }
 
-        val shouldTransform = drawOffsetX != null || drawOffsetY != null
+        val shouldTransform = drawOffsetX != 0f || drawOffsetY != 0f
 
         val oldTransform = batch.transformMatrix.cpy()
         if (shouldTransform) {
@@ -331,9 +317,8 @@ class TextAdvancedTextPart(
 
 class IconAdvancedTextPart(
     private val resourceHandle: ResourceHandle,
-    private val font: String,
     screen: OnjScreen,
-    private val dialogFontScale: Float,
+    private val fontSize: Int,
     override val breakLine: Boolean
 ) : CustomImageActor(resourceHandle, screen), AdvancedTextPart, ResourceBorrower {
 
@@ -349,18 +334,13 @@ class IconAdvancedTextPart(
 
     private var calculatedLayout = false
 
-    private val fontPromise: Promise<BitmapFont> = FortyFive.resourceManager.request(this, screen.lifetime, font)
-
     init {
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
-        fontPromise.then { calculatedLayout = false }
     }
 
     private fun recalcLayout() {
-        val font = fontPromise.getOrNull() ?: return
-        val layout = GlyphLayout(font, "qh")
-        iconHeight = layout.height * dialogFontScale * 1.5f
+        iconHeight = fontSize.toFloat()
         val drawable = loadedDrawable!!
         val aspectRatio = drawable.minWidth / drawable.minHeight
         iconWidth = aspectRatio * iconHeight

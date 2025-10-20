@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.screen.actors
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -16,6 +17,7 @@ import com.microwavestudios.fortyfive.utils.Promise
 class Selector(
     private val font: BitmapFont,
     var fontScale: Float = 1f,
+    var fontColor: Color,
     private val arrowTextureHandle: ResourceHandle,
     private val arrowWidth: Float = 20f,
     private val arrowHeight: Float = 20f,
@@ -74,13 +76,9 @@ class Selector(
             arrowTexture.width, arrowTexture.height,
             false, false
         )
-        val shader = CustomLabel.fontShader
-        batch.flush()
-        shader.bind()
-        batch.shader = shader
+        font.data.setScale(fontScale)
+        font.color = fontColor
         font.draw(batch, glyphLayout, x + width / 2 - glyphLayout.width / 2, y + height / 2 + glyphLayout.height / 2)
-        batch.flush()
-        batch.shader = null
     }
 
     private fun checkValue() {

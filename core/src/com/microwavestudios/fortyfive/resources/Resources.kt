@@ -246,7 +246,7 @@ class FontResource(
     override fun finishLoadingMainThread() {
         val texture = Texture(pixmap, true)
         val font = BitmapFont(fontData!!, TextureRegion(texture), false)
-        texture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.Linear)
+        texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.Linear)
         font.setUseIntegerPositions(false)
         font.color = Color.WHITE
         font.data.markupEnabled = markupEnabled

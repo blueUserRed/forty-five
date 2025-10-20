@@ -28,17 +28,15 @@ object ProfileCardCreator {
     }
 
     private fun CustomBox.failedCard(creator: ScreenCreator, profile: Profile.Preview) = with(creator) {
-        label("red_wing", "Profile ${profile.name}") {
-            setFontScale(1.3f)
-        }
+        label("red wing", "Profile ${profile.name}", fontSize = (32 * 1.3).toInt()) { syncHeight() }
         val message = when (profile.loadFailure) {
             null -> ""
             Profile.LoadFailure.MARKED_CORRUPTED, Profile.LoadFailure.CORRUPTED_FILES -> "Profile is corrupted!"
             Profile.LoadFailure.VERSION_TOO_NEW -> "Profile was created by a newer version of the game; try upgrading the game"
             Profile.LoadFailure.VERSION_TOO_OLD -> "Profile was created by an older version of the game; try downgrading the game"
         }
-        label("red_wing", message, Color.Red) {
-            setFontScale(0.8f)
+        label("red wing", message, Color.Red, (32 * 0.8).toInt()) {
+            syncHeight()
             wrap = true
             relativeWidth(100f)
             syncHeight()
@@ -46,24 +44,22 @@ object ProfileCardCreator {
     }
 
     private fun CustomBox.normalCard(creator: ScreenCreator, profile: Profile.Preview) = with(creator) {
-        label("red_wing", "Profile ${profile.name}") {
-            setFontScale(1.3f)
-        }
+        label("red wing", "Profile ${profile.name}", fontSize = (32 * 1.3).toInt()) { syncHeight() }
         if (profile.exists) {
-            label("red_wing", "current area: ${profile.currentArea}")
-            label("red_wing", "money: ${profile.money}")
-            label("red_wing", "cards in collection: ${profile.collection!!.size}")
-            label("red_wing", "run:")
+            label("red wing", "current area: ${profile.currentArea}", fontSize = 32) { syncHeight() }
+            label("red wing", "money: ${profile.money}", fontSize = 32) { syncHeight() }
+            label("red wing", "cards in collection: ${profile.collection!!.size}", fontSize = 32) { syncHeight() }
+            label("red wing", "run:", fontSize = 32) { syncHeight() }
             val runPreview = profile.runPreview
             if (runPreview != null) {
-                label("red_wing", "   health: ${runPreview.playerHealth}")
-                label("red_wing", "   type: ${runPreview.run.type.displayName}")
-                label("red_wing", "   difficulty: ${runPreview.run.difficulty}")
+                label("red wing", "   health: ${runPreview.playerHealth}", fontSize = 32) { syncHeight() }
+                label("red wing", "   type: ${runPreview.run.type.displayName}", fontSize = 32) { syncHeight() }
+                label("red wing", "   difficulty: ${runPreview.run.difficulty}", fontSize = 32) { syncHeight() }
             } else {
-                label("red_wing", "   No run active")
+                label("red wing", "   No run active", fontSize = 32) { syncHeight() }
             }
         } else {
-            label("red_wing", "no save yet")
+            label("red wing", "no save yet", fontSize = 32) { syncHeight() }
         }
     }
 

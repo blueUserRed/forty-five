@@ -102,7 +102,7 @@ object RunBoardCreator {
 
         isVisible = false
 
-        lateinit var bodyLabel: CustomLabel
+        lateinit var bodyLabel: NewLabel
 
         box {
             width = 600f
@@ -115,13 +115,11 @@ object RunBoardCreator {
 
             backgroundHandle = "map_extraction_background"
 
-            label("red_wing", "Start run?", Color.FortyWhite) {
+            label("red wing", "Start run?", Color.FortyWhite, (32 * 1.3).toInt()) {
                 setAlignment(Align.center)
-                setFontScale(1.3f)
             }
-            bodyLabel = label("roadgeek", "", Color.FortyWhite) {
+            bodyLabel = label("roadgeek", "", Color.FortyWhite, (28 * 0.8).toInt()) {
                 setAlignment(Align.center)
-                setFontScale(0.8f)
             }
 
             box {
@@ -141,7 +139,7 @@ object RunBoardCreator {
                     joinGroup(buttonGroup)
                     defaultButtonBackgrounds()
 
-                    label("red_wing", "Cancel", color = Color.FortyWhite)
+                    label("red wing", "Cancel", Color.FortyWhite, 32)
 
                     onInput(GameInputs.interact) {
                         promise.resolve(false)
@@ -157,7 +155,7 @@ object RunBoardCreator {
                     joinGroup(buttonGroup)
                     defaultButtonBackgrounds()
 
-                    label("red_wing", "Start", color = Color.FortyWhite)
+                    label("red wing", "Start", Color.FortyWhite, 32)
 
                     onInput(GameInputs.interact) {
                         promise.resolve(true)
@@ -216,7 +214,7 @@ object RunBoardCreator {
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
 
-                label("red_wing", "Current Run:")
+                label("red wing", "Current Run:", fontSize = 32)
                 actor(getSharedRunCard(profile.activeRun!!))
             }
 

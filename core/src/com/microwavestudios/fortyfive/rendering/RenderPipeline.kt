@@ -261,7 +261,7 @@ open class RenderPipeline(
 
     private fun renderDebugMenu(menu: DebugMenu) {
         menu.update()
-        val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, lifetime, "red_wing_bmp")
+        val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, lifetime, "redwing100")
         font.data.setScale(0.2f)
 
         val page = menu.currentPage()

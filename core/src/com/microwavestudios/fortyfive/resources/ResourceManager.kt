@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
+import javax.lang.model.element.VariableElement
 import kotlin.reflect.KClass
 
 interface ResourceBorrower
@@ -17,6 +18,9 @@ typealias ResourceHandle = String
 class ResourceManager {
 
     lateinit var resources: List<Resource>
+        private set
+
+    lateinit var fonts: List<FontGroup>
         private set
 
     inline fun <reified T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle) =
@@ -73,7 +77,7 @@ class ResourceManager {
                 texture.get<String>("file"),
                 texture.getOr("tileable", false),
                 texture.getOr("tileScale", 1.0).toFloat(),
-                texture.getOr("useMipMaps", false),
+                texture.getOr("useMipMaps", true),
                 dropShadowData
             )
             resource.stayLoaded = texture.getOr("stayLoaded", false)
@@ -92,17 +96,26 @@ class ResourceManager {
             resources.add(resourceDropShadow)
         }
 
-        assets.get<OnjArray>("fonts").value.forEach {
-            it as OnjObject
-            val resource = FontResource(
-                it.get<String>("name"),
-                it.get<String>("imageFile"),
-                it.get<String>("fontFile"),
-                it.getOr("markupEnabled", false)
-            )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
-            resources.add(resource)
+        val fonts = mutableListOf<FontGroup>()
+        assets.get<OnjArray>("fonts").value.forEach { font ->
+            font as OnjObject
+            val fontName = font.get<String>("name")
+            val variants = mutableListOf<FontVariant>()
+            font.get<OnjArray>("variants").value.forEach { variant ->
+                variant as OnjObject
+                val resourceHandle = variant.get<ResourceHandle>("resourceHandle")
+                val fontFile = variant.get<ResourceHandle>("fontFile")
+                val imageFile = variant.get<ResourceHandle>("imageFile")
+                val size = variant.get<Long>("size").toInt()
+                val resource = FontResource(resourceHandle, imageFile, fontFile, false)
+                resource.stayLoaded = font.getOr("stayLoaded", false)
+                resources.add(resource)
+                val variant = FontVariant(resourceHandle, size)
+                variants.add(variant)
+            }
+            fonts.add(FontGroup(fontName, variants))
         }
+        this.fonts = fonts
 
         assets.get<OnjArray>("pixmapFonts").value.forEach {
             it as OnjObject
@@ -262,6 +275,9 @@ class ResourceManager {
                 "be indicative of a memory leak. Summary:")
         FortyFive.logger.dump(FortyFiveLogger.LogLevel.MEDIUM, message.toString())
     }
+
+    data class FontVariant(val resourceHandle: ResourceHandle, val size: Int)
+    data class FontGroup(val name: String, val variants: List<FontVariant>)
 
     companion object {
         const val DROP_SHADOW_END = "_drop_shadow"

@@ -113,6 +113,34 @@ object GameInputs {
         )
     ))
 
+    val skipCredits = Input("skipCredits", arrayOf(
+        Input.Cause.Keyboard(Keys.ENTER)
+    ))
+
+
+    val mapEditorDelete = Input("mapEditorDelete", arrayOf(
+        Input.Cause.Keyboard(Keys.DEL),
+        Input.Cause.Keyboard(Keys.BACKSPACE),
+    ))
+    val mapEditorConnect = Input("mapEditorConnect", arrayOf(
+        Input.Cause.Keyboard(Keys.C),
+    ))
+    val mapEditorMove = Input("mapEditorMove", arrayOf(
+        Input.Cause.Keyboard(Keys.M),
+    ))
+    val mapEditorScale = Input("mapEditorScale", arrayOf(
+        Input.Cause.Keyboard(Keys.S),
+    ))
+    val mapEditorSwitchMode = Input("mapEditorSwitchMode", arrayOf(
+        Input.Cause.Keyboard(Keys.X),
+    ))
+    val mapEditorNext = Input("mapEditorNext", arrayOf(
+        Input.Cause.Keyboard(Keys.J),
+    ))
+    val mapEditorPrevious = Input("mapEditorPrevious", arrayOf(
+        Input.Cause.Keyboard(Keys.H),
+    ))
+
     object States {
 
         val trueFocused = InputState("trueFocused", arrayOf(

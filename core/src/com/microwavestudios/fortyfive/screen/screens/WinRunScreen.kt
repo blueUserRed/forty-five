@@ -127,7 +127,7 @@ class WinRunScreen : ScreenCreator() {
             backgroundHandle = "map_extraction_background"
             centerX()
 
-            label("red_wing", "Cards that will be added to your collection", Color.FortyWhite) {
+            label("red wing", "Cards that will be added to your collection", Color.FortyWhite, 32) {
                 relativeWidth(100f)
                 setAlignment(Align.center)
                 centerX()
@@ -189,7 +189,7 @@ class WinRunScreen : ScreenCreator() {
                 joinGroup("extract-cards-popup-button")
                 defaultButtonBackgrounds()
 
-                label("red_wing", "Ok", color = Color.FortyWhite)
+                label("red wing", "Ok", Color.FortyWhite, 32)
 
                 onInput(GameInputs.interact) {
                     finishedPromise.resolve(Unit)
@@ -232,7 +232,7 @@ class WinRunScreen : ScreenCreator() {
 
     private fun CustomGroup.cashPopup() {
 
-        lateinit var cashLabel: CustomLabel
+        lateinit var cashLabel: NewLabel
         lateinit var cashGroup: CustomGroup
 
         val popup = box {
@@ -259,7 +259,7 @@ class WinRunScreen : ScreenCreator() {
                 backgroundHandle = "common_button_default"
                 badTexture("background on win screen cash popup")
 
-                cashLabel = label("red_wing", "${profile.playerMoney}$", color = Color.FortyWhite) {
+                cashLabel = label("red wing", "${profile.playerMoney}$", Color.FortyWhite, 32) {
                     centerY()
                     x = 0f
                     relativeWidth(90f)
@@ -334,7 +334,7 @@ class WinRunScreen : ScreenCreator() {
             touchable = Touchable.enabled
             defaultButtonBackgrounds()
 
-            label("red_wing", "Claim Rewards", color = Color.FortyWhite)
+            label("red wing", "Claim Rewards", Color.FortyWhite, 32)
 
             onInput(GameInputs.interact) {
                 val profile = FortyFive.profileManager.currentProfile!!
@@ -372,7 +372,7 @@ class WinRunScreen : ScreenCreator() {
             relativeWidth(25f)
             relativeHeight(50f)
 
-            label("red_wing", "completed run:", Color.FortyWhite)
+            label("red wing", "completed run:", Color.FortyWhite, 32)
             actor(getSharedRunCard(run))
         }
 
@@ -382,7 +382,7 @@ class WinRunScreen : ScreenCreator() {
             relativeWidth(25f)
             relativeHeight(50f)
 
-            label("red_wing", "rewards:", Color.FortyWhite)
+            label("red wing", "rewards:", Color.FortyWhite, 32)
             if (cardsToExtract.isNotEmpty()) extractCardsReward()
             rewards(run.rewards)
         }
@@ -410,7 +410,7 @@ class WinRunScreen : ScreenCreator() {
                 marginRight = 10f
             }
 
-            label("red_wing", "You can keep cards!", Color.FortyWhite)
+            label("red wing", "You can keep cards!", Color.FortyWhite, 32)
         }
         events.watchFor<ClaimRewardsEvent> { event -> event.append {
             later {
@@ -438,7 +438,7 @@ class WinRunScreen : ScreenCreator() {
                 marginRight = 10f
             }
 
-            label("red_wing", "You get ${reward.amount}$", Color.FortyWhite)
+            label("red wing", "You get ${reward.amount}$", Color.FortyWhite, 32)
         }
 
         events.watchFor<ClaimRewardsEvent> { event -> event.append {

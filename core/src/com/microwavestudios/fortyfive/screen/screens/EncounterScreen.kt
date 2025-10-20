@@ -38,6 +38,7 @@ import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import com.microwavestudios.fortyfive.utils.AdvancedTextParser.*
@@ -234,18 +235,16 @@ class EncounterScreen : ScreenCreator() {
                 syncHeight()
                 flexDirection = FlexDirection.COLUMN
 
-                label("roadgeek", encounterModifier.displayName) {
+                label("roadgeek", encounterModifier.displayName, fontSize = (24 * 0.9).toInt()) {
                     syncDimensions()
-                    setFontScale(0.9f)
                 }
                 box {
                     backgroundHandle = "black_texture"
                     height = 1f
                     relativeWidth(100f)
                 }
-                label("roadgeek", encounterModifier.description) {
+                label("roadgeek", encounterModifier.description, fontSize = (24 * 0.6).toInt()) {
                     wrap = true
-                    setFontScale(0.6f)
                     relativeWidth(100f)
                     syncHeight()
                 }
@@ -343,7 +342,7 @@ class EncounterScreen : ScreenCreator() {
             }
         }
 
-        label("red_wing", "Select cards to put under the deck", color = Color.White) {
+        label("red wing", "Select cards to put under the deck", Color.White, 32) {
             syncDimensions()
             onLayoutAndNow { y = underDeck.y + underDeck.height - height - 40f }
             centerX()
@@ -419,7 +418,7 @@ class EncounterScreen : ScreenCreator() {
                         } else {
                             text
                         }
-                        advancedText("roadgeek", Color.FortyWhite, 0.9f) {
+                        advancedText("roadgeek", Color.FortyWhite, 23) {
                             val redEffect = AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red)
                             relativeHeight(58f)
                             setRawText(newText, listOf(redEffect))
@@ -530,26 +529,23 @@ class EncounterScreen : ScreenCreator() {
             action.alpha = if (event.inParryMenu) 1f else 0f
             addAction(action)
         }
-        label("red_wing", "Parry?", Color.BrightYellow, isDistanceField = true) {
-            setFontScale(1.4f)
+        label("red wing", "Parry?", Color.BrightYellow, (32 * 1.4).toInt()) {
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
         }
-        label("roadgeek", "", Color.GRAY) {
+        label("roadgeek", "", Color.GRAY, (24 * 0.7).toInt()) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, blockable) ->
                 setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
             }
-            setFontScale(0.7f)
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
         }
-        label("roadgeek", "", Color.GRAY) {
+        label("roadgeek", "", Color.GRAY, (24 * 0.7).toInt()) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, _) ->
                 setText("Passing will let $damage damage through")
             }
-            setFontScale(0.7f)
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
@@ -579,7 +575,7 @@ class EncounterScreen : ScreenCreator() {
             animateInOut(true)
             event.promise.then { animateInOut(false) }
         }
-        label("red_wing", "", Color.BrightYellow, isDistanceField = true) {
+        label("red wing", "", Color.BrightYellow, 32) {
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
@@ -662,8 +658,7 @@ class EncounterScreen : ScreenCreator() {
                 y = 90f
             }
 
-            label("red_wing", "0/0", Color.White) {
-                setFontScale(1.1f)
+            label("red wing", "0/0", Color.White, (32 * 1.1).toInt()) {
                 centerX()
                 centerY()
                 gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new) ->
@@ -692,8 +687,7 @@ class EncounterScreen : ScreenCreator() {
                 y = 90f
             }
 
-            label("red_wing", "{game.cardsInStack}", Color.White, isTemplate = true) {
-                setFontScale(1.1f)
+            label("red wing", "{game.cardsInStack}", Color.White, (32 * 1.1).toInt()) {
                 centerX()
                 centerY()
             }
@@ -972,8 +966,7 @@ class EncounterScreen : ScreenCreator() {
                 horizontalAlign = CustomAlign.CENTER
                 relativeWidth(100f)
                 // TODO: randomize text
-                label("red_wing_bmp", "You survived", Color.FortyWhite, isDistanceField = false) {
-                    setFontScale(0.5f)
+                label("red wing", "You survived", Color.FortyWhite, (128 * 0.5).toInt()) {
                     setAlignment(Align.center)
                     marginTop = 150f
                 }
@@ -999,7 +992,7 @@ class EncounterScreen : ScreenCreator() {
                         gotCash = money > 0
                     }
 
-                    label("red_wing", "", Color.FortyWhite) {
+                    label("red wing", "", Color.FortyWhite, 32) {
                         gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, money, _) ->
                             setText("You get \$$money overkill cash")
                         }
@@ -1026,7 +1019,7 @@ class EncounterScreen : ScreenCreator() {
                         isVisible = gotCard
                     }
 
-                    label("red_wing", "You get a card", Color.FortyWhite)
+                    label("red wing", "You get a card", Color.FortyWhite, 32)
                 }
             }
 
@@ -1044,8 +1037,7 @@ class EncounterScreen : ScreenCreator() {
                     { backgroundHandle = "common_button_hover" },
                     { backgroundHandle = "common_button_default" }
                 )
-                label("red_wing", "Claim & Continue", Color.FortyWhite) {
-                    setFontScale(0.7f)
+                label("red wing", "Claim & Continue", Color.FortyWhite, (32 * 0.7).toInt()) {
                     setAlignment(Align.center)
                 }
                 marginBottom = 120f

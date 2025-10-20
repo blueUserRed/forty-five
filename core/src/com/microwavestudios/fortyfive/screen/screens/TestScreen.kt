@@ -2,12 +2,20 @@ package com.microwavestudios.fortyfive.screen.screens
 
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.ScreenManager
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.CustomBox
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.NewLabel
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.utils.Color
+import kotlin.reflect.KClass
 
 class TestScreen : ScreenCreator() {
 
@@ -20,149 +28,94 @@ class TestScreen : ScreenCreator() {
 
     override val playAmbientSounds: Boolean = false
 
-    override val background: String? = "background_bewitched_forest"
+    override val background: String = "black_texture"
 
     override val transitionAwayTimes: Map<String, Int> = mapOf()
 
     override fun getRoot(): Group = newGroup {
-        name("root")
-        width = worldWidth
-        height = worldHeight
-        screen.inputManager.addDragAndDrop("test-drag", "test-drop")
-
         box {
-            name("container")
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
             width = worldWidth
             height = worldHeight
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.CENTER
 
             box {
-                name("drops")
-                height = 200f
-                width = 900f
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
+                width = worldWidth * 0.5f
+                height = worldHeight
+                flexDirection = FlexDirection.COLUMN
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
 
-                box {
-                    name("drops-1")
-                    width = 200f
-                    height = 200f
-                    backgroundHandle = "white_texture"
-                    isDropTarget = true
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    joinGroup("test-drop")
-                    onDrop { backgroundHandle = "black_texture" }
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
-                }
-
-                box {
-                    name("drops-2")
-                    width = 200f
-                    height = 200f
-                    backgroundHandle = "white_texture"
-                    isDropTarget = true
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    joinGroup("test-drop")
-                    onDrop { backgroundHandle = "black_texture" }
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
-                }
-
-                box {
-                    name("drops-3")
-                    width = 200f
-                    height = 200f
-                    backgroundHandle = "white_texture"
-                    isDropTarget = true
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    joinGroup("test-drop")
-                    onDrop { backgroundHandle = "black_texture" }
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
-                }
-            }
-            box {
-                name("spacer")
-                height = 200f
+                biggerLabels()
             }
 
             box {
-                name("drags")
-                width = 900f
-                height = 200f
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
+                width = worldWidth * 0.5f
+                height = worldHeight
+                flexDirection = FlexDirection.COLUMN
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
 
-                box {
-                    name("drags-1")
-                    width = 200f
-                    height = 200f
-                    backgroundHandle = "black_texture"
-                    touchable = Touchable.enabled
-                    isDraggable = true
-                    joinGroup("test-drag")
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    startDragAndDropOn(GameInputs.initDragAndDrop)
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
-                }
-
-                box {
-                    name("drags-2")
-                    width = 200f
-                    height = 200f
-                    backgroundHandle = "black_texture"
-                    touchable = Touchable.enabled
-                    isDraggable = true
-                    joinGroup("test-drag")
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    startDragAndDropOn(GameInputs.initDragAndDrop)
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
-                }
-
-                box {
-                    name("drags-3")
-                    width = 200f
-                    height = 200f
-                    backgroundHandle = "black_texture"
-                    touchable = Touchable.enabled
-                    isDraggable = true
-                    joinGroup("test-drag")
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    startDragAndDropOn(GameInputs.initDragAndDrop)
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
-                }
+                newLabels()
             }
+
+//            smallerLabels()
+//            biggerLabels()
         }
     }
 
+    private fun CustomBox.biggerLabels() {
+
+        backgroundHandle = "statusbar_option"
+
+        label("red wing", "Backpack", Color.FortyWhite, fontSize = (32 * 0.7).toInt()) {
+            wrap = false
+            debug()
+            setAlignment(Align.center)
+            relativeWidth(100f)
+            syncHeight()
+        }
+    }
+
+    private fun CustomBox.newLabels() {
+
+        label("red wing", "Backpack", Color.FortyWhite, fontSize = 100) {
+            wrap = false
+            debug()
+            relativeWidth(100f)
+            syncHeight()
+        }
+    }
+
+//    private fun CustomBox.smallerLabels() {
+//        label("red wing", ".Forty-Five", Color.FortyWhite) {
+//            debug()
+//            fontSize = 60
+//            syncDimensions()
+//        }
+//        label("red wing", ".Forty-Five", Color.FortyWhite) {
+//            fontSize = 50
+//            syncDimensions()
+//        }
+//        label("red wing", ".Forty-Five", Color.FortyWhite) {
+//            fontSize = 40
+//            syncDimensions()
+//        }
+//        label("red wing", ".Forty-Five", Color.FortyWhite) {
+//            fontSize = 30
+//            syncDimensions()
+//        }
+//        label("red wing", ".Forty-Five", Color.FortyWhite) {
+//            fontSize = 20
+//            syncDimensions()
+//        }
+//    }
+
     override fun getScreenControllers(): List<ScreenController> = listOf()
 
+    companion object : ScreenManager.ScreenCreatorCompanion {
+        override val creatorClass: KClass<out ScreenCreator> = TestScreen::class
+    }
 
 }

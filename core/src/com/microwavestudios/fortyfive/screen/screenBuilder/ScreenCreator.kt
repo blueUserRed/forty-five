@@ -185,6 +185,7 @@ abstract class ScreenCreator : ResourceBorrower {
         font: String,
         bindTarget: String,
         fontScale: Float = 1f,
+        fontColor: Color,
         builder: Selector.() -> Unit = {}
     ): Selector {
         contract {
@@ -195,6 +196,7 @@ abstract class ScreenCreator : ResourceBorrower {
             arrowTextureHandle = "common_symbol_arrow_right",
             bind = bindTarget,
             fontScale = fontScale,
+            fontColor = fontColor,
             screen = screen
         )
         this.addActor(selector)
@@ -266,31 +268,20 @@ abstract class ScreenCreator : ResourceBorrower {
         font: String,
         text: String,
         color: Color = Color.BLACK,
+        fontSize: Int,
         isTemplate: Boolean = false,
-        isDistanceField: Boolean = true,
         backgroundHints: Array<String> = arrayOf(),
-        builder: CustomLabel.() -> Unit = {}
-    ): CustomLabel {
+        builder: NewLabel.() -> Unit = {}
+    ): NewLabel {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
-        val label = if (isTemplate) {
-            TemplateStringLabel(
-                screen,
-                TemplateString(text),
-                Label.LabelStyle(forceLoadFont(font), color),
-                isDistanceField = isDistanceField,
-                backgroundHints = backgroundHints
-            )
-        } else {
-            CustomLabel(
-                screen,
-                text,
-                Label.LabelStyle(forceLoadFont(font), color),
-                isDistanceField = isDistanceField,
-                backgroundHints = backgroundHints
-            )
-        }
+        val label = NewLabel(screen, text, backgroundHints)
+        label.fontSize = fontSize
+        label.fontColor = color
+        label.fontGroup = font
+        if (isTemplate) label.template = TemplateString(text)
+
         this.addActor(label)
         builder(label)
         return label
@@ -299,30 +290,27 @@ abstract class ScreenCreator : ResourceBorrower {
     inline fun Group.advancedText(
         defaultFont: String,
         defaultColor: Color,
-        defaultFontScale: Float,
-        isDistanceField: Boolean = true,
+        defaultFontSize: Int,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
         val advancedText =
-            AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
+            AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontSize), screen)
         this.addActor(advancedText)
         builder(advancedText)
         return advancedText
     }
 
     inline fun Group.advancedText(
-        defaults: Triple<String, Color, Float>,
-        isDistanceField: Boolean = true,
+        defaults: Triple<String, Color, Int>,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
-        val advancedText =
-            AdvancedTextWidget(defaults, screen, isDistanceField)
+        val advancedText = AdvancedTextWidget(defaults, screen)
         this.addActor(advancedText)
         builder(advancedText)
         return advancedText
@@ -389,7 +377,7 @@ abstract class ScreenCreator : ResourceBorrower {
 
     fun buttonBackgroundHints() = arrayOf("common_button_default", "common_button_hover" )
 
-    fun CustomLabel.defaultButtonBackgrounds() {
+    fun NewLabel.defaultButtonBackgrounds() {
         backgroundHandle = "common_button_default"
         observeInputState(
             GameInputs.States.focused,
@@ -485,7 +473,7 @@ abstract class ScreenCreator : ResourceBorrower {
                 height = worldHeight
                 isVisible = false
             }
-            advancedText("red_wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 1f) {
+            advancedText("red wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 32) {
                 name("tutorial_info_text")
                 horizontalTextAlign = CustomAlign.CENTER
                 centerX()

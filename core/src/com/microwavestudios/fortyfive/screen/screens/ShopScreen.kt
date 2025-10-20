@@ -134,7 +134,7 @@ class ShopScreen : ScreenCreator() {
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 logicalOffsetY = 55f
-                val label = label("roadgeek", "", color = Color.FortyWhite) {
+                val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
                     syncDimensions()
                 }
@@ -145,11 +145,11 @@ class ShopScreen : ScreenCreator() {
             }
 
             label(
-                "red_wing",
+                "red wing",
                 "drag to the merchant to confirm your purchase and add it to your backpack",
-                color = Color.FortyWhite
+                Color.FortyWhite,
+                (32 * 0.7).toInt()
             ) {
-                setFontScale(0.7f)
                 logicalOffsetY = 55f
                 syncDimensions()
             }
@@ -275,7 +275,7 @@ class ShopScreen : ScreenCreator() {
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
         }
-        val label = label("red_wing", "") {
+        val label = label("red wing", "", fontSize = 32) {
             width = 130f
             height = 60f
             setAlignment(Align.center)
@@ -332,12 +332,12 @@ class ShopScreen : ScreenCreator() {
                     onLayoutAndNow { width = height }
                 }
                 label(
-                    "red_wing",
+                    "red wing",
                     npc.displayName,
-                    isTemplate = true,
-                    color = Color.FortyWhite
+                    Color.FortyWhite,
+                    64,
+                    isTemplate = true
                 ) {
-                    setFontScale(2F)
                     setAlignment(Align.left)
                     syncDimensions()
                 }
@@ -373,7 +373,7 @@ class ShopScreen : ScreenCreator() {
         advancedText(
             "roadgeek",
             defaultColor = Color.FortyWhite,
-            defaultFontScale = 0.8f,
+            defaultFontSize = 19,
         ) {//subtext
             relativeWidth(100f)
             syncHeight()

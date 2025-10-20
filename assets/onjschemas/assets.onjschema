@@ -25,12 +25,23 @@ textures: {
 }[],
 fonts: {
     name: string,
+    variants: {
+        size: int,
+        resourceHandle: string,
+        fontFile: string,
+        imageFile: string
+    }[],
+}[],
+/*
+fonts: {
+    name: string,
     fontFile: string,
     imageFile: string,
     color?: Color,
     markupEnabled?: boolean,
    ...resourceSharedKeys
 }[],
+*/
 pixmapFonts: {
     name: string,
     fontFile: string,

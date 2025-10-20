@@ -40,8 +40,8 @@ class LoseRunScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.CENTER
 
-        label("red_wing_bmp", "You lost!", isDistanceField = false, color = Color.Red)
-        label("roadgeek", "Press any key to continue", color = Color.FortyWhite)
+        label("red wing", "You lost!", Color.Red, 128)
+        label("roadgeek", "Press any key to continue", Color.FortyWhite, 24)
 
         val listener = object : InputListener() {
 

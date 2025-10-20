@@ -6,10 +6,9 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.screen.OnjScreen
 
 class AnimatedAdvancedTextWidget(
-    defaults: Triple<String, Color, Float>,
+    defaults: Triple<String, Color, Int>,
     screen: OnjScreen,
-    isDistanceField: Boolean,
-) : AdvancedTextWidget(defaults, screen, isDistanceField) {
+) : AdvancedTextWidget(defaults, screen) {
 
     var progressTimeMs: Int = 10
 

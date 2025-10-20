@@ -17,8 +17,8 @@ $AdvancedTextEffect {
         ...advancedTextEffectSharedKeys
     }
 
-    $FontScale {
-        fontScale: float,
+    $FontSize {
+        fontSize: int,
         ...advancedTextEffectSharedKeys
     }
 

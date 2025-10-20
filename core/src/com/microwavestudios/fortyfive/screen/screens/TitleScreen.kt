@@ -94,7 +94,10 @@ class TitleScreen : ScreenCreator() {
             y = worldHeight * 0.65F
             addOption("Start", true) { handleContinue() }
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
-            addOption("View Credits") { FortyFive.screenManager.appendScreen(CreditsScreen) }
+            addOption("View Credits") {
+                FortyFive.screenManager.appendScreen(CreditsScreen)
+                FortyFive.screenManager.screenFinished()
+            }
             addOption("Quit") { handleQuit() }
         }
 
@@ -113,11 +116,12 @@ class TitleScreen : ScreenCreator() {
             currentlySelectedProfile = event.newProfile
         }
 
-        label("red_wing", "rework stage 1", Color.Black) {
+        label("red wing", "rework stage 1", Color.Black, 32) {
             onLayoutAndNow {
                 x = worldWidth - width - 10
                 y = worldHeight - height - 10
             }
+            syncDimensions()
         }
 
         actor(settings) {
@@ -231,8 +235,7 @@ class TitleScreen : ScreenCreator() {
         displayText: String,
         onlyAvailableWhenProfileIsSelected: Boolean = false,
         action: () -> Unit
-    ) = label("red_wing_bmp", displayText) {
-        setFontScale(0.4f)
+    ) = label("red wing", displayText, fontSize = 62) {
         syncWidth()
         syncHeight()
         touchable = Touchable.enabled

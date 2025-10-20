@@ -104,6 +104,12 @@ fun cleanupAssets(tmpDir: File) {
     (tmpDir / "profiles")
         .listFiles()!!
         .forEach { it.deleteRecursively() }
+
+    debug("removing font files")
+    (tmpDir / "blobs/fonts2")
+        .listFiles()!!
+        .filter { it.extension in arrayOf("ttf", "otf") }
+        .forEach { it.delete() }
 }
 
 fun changeLoggingVersionTag(tmpDir: File, newTag: String) {

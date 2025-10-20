@@ -66,7 +66,7 @@ object UserPrefs {
         set(value) {
             field = value
             dirty = true
-            value.setScreenToOption()
+//            value.setScreenToOption()
         }
 
     var windowWidth: Int = 700

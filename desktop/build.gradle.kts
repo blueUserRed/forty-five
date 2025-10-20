@@ -42,6 +42,18 @@ tasks.register<JavaExec>("run") {
     }
 }
 
+tasks.register<JavaExec>("mapEditor") {
+    group = "map editor"
+    dependsOn("classes")
+    mainClass.set(mainClassName)
+    classpath = sourceSets["main"].runtimeClasspath
+    standardInput = System.`in`
+    workingDir = assetsDir
+    isIgnoreExitValue = true
+
+    args = mutableListOf("-mapEditor")
+}
+
 tasks.register<JavaExec>("createDropShadows") {
     group = "bake"
     dependsOn("classes")

@@ -29,6 +29,9 @@ public class DesktopLauncher {
         } else {
             config.setForegroundFPS(60);
             config.setTitle(".Forty-Five");
+            config.setWindowedMode(1000, 800);
+            config.setDecorated(true);
+            config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
             config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "blobs/icon.png");
         }
 

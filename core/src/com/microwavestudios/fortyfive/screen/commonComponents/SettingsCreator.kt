@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.Timeline
 
 object SettingsCreator {
@@ -89,9 +90,8 @@ object SettingsCreator {
 
     fun CustomBox.settings(creator: ScreenCreator, parentWidth: Float) = with(creator) {
 
-        label("red_wing", "General") {
+        label("red wing", "General", fontSize = (32 * 1.4).toInt()) {
             marginBottom = 10f
-            setFontScale(1.4f)
             fontColor = ScreenCreator.fortyWhite
         }
 
@@ -101,10 +101,9 @@ object SettingsCreator {
         singleSettingSelector(creator, parentWidth, "Window Mode:", "windowMode")
 
 
-        label("red_wing", "Audio") {
+        label("red wing", "Audio", fontSize = (32 * 1.4).toInt()) {
             marginTop = 20f
             marginBottom = 10f
-            setFontScale(1.4f)
             fontColor = ScreenCreator.fortyWhite
         }
 
@@ -144,8 +143,7 @@ object SettingsCreator {
                 relativeHeight(100f)
                 width = 210f
                 horizontalSpacer(10f)
-                label("red_wing", name, color = ScreenCreator.fortyWhite) {
-                    setFontScale(0.8f)
+                label("red wing", name, color = ScreenCreator.fortyWhite, fontSize = (32 * 0.8).toInt()) {
                     syncHeight()
                     width = 200f
                 }
@@ -157,7 +155,7 @@ object SettingsCreator {
                 flexDirection = FlexDirection.ROW
                 relativeHeight(100f)
                 width = 250f
-                selector = selector("red_wing", bindTarget, fontScale = 0.8f) {
+                selector = selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite) {
                     onLayoutAndNow { height = parent.height }
                     width = 240f
                 }
@@ -200,8 +198,7 @@ object SettingsCreator {
                 horizontalSpacer(10f)
                 width = 210f
                 relativeHeight(100f)
-                label("red_wing", name, color = ScreenCreator.fortyWhite) {
-                    setFontScale(0.8f)
+                label("red wing", name, ScreenCreator.fortyWhite, (32 * 0.8).toInt()) {
                     width = 200f
                     syncHeight()
                     marginLeft = 10f
