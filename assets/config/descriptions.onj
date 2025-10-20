@@ -86,9 +86,9 @@ defaultTextEffects: [
         color: color.hemoglobin_red,
     },
 
-    $FontScale {
+    $FontSize {
         indicator:"$trigger$",
-        fontScale: 0.8,
+        fontSize: (24 * 0.8)#int,
     },
 
     $Color {

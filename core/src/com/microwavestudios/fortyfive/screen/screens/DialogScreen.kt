@@ -226,9 +226,8 @@ class DialogScreen : ScreenCreator() {
 
     private fun CustomGroup.textWidget() {
         val advTextWidget = AnimatedAdvancedTextWidget(
-            Triple("red_wing", Color.FortyWhite, 0.5f),
+            Triple("red wing", Color.FortyWhite, 16),
             screen,
-            true
         )
         actor(advTextWidget) {
             relativeWidth(75F)

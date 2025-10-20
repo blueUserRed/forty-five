@@ -373,7 +373,7 @@ class ShopScreen : ScreenCreator() {
         advancedText(
             "roadgeek",
             defaultColor = Color.FortyWhite,
-            defaultFontScale = 0.8f,
+            defaultFontSize = 19,
         ) {//subtext
             relativeWidth(100f)
             syncHeight()

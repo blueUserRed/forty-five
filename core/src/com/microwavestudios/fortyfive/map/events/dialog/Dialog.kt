@@ -28,7 +28,6 @@ data class Dialog(
         private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: OnjScreen): DialogPart {
             val text = AdvancedText.readFromOnj(
                 onj.get<String>("rawText"),
-                true, // TODO: should be passed through the constructor, but because the dialog is usually small it's going to be distance field
                 onj.get<OnjArray?>("effects"),
                 screen,
                 defaults

@@ -28,7 +28,7 @@ import com.microwavestudios.fortyfive.utils.component1
 import com.microwavestudios.fortyfive.utils.component2
 import kotlin.math.absoluteValue
 
-class NewLabel(
+open class NewLabel(
     val screen: OnjScreen,
     text: String,
     private val backgroundHints: Array<String> = arrayOf(),
@@ -114,7 +114,7 @@ class NewLabel(
         renderer
     }
 
-    var useShader: Boolean = false
+    var useShader: Boolean = true
 
     var template: TemplateString? = null
     var skipTemplateTextCheck: Boolean = false
@@ -213,7 +213,6 @@ class NewLabel(
         val shader = shaderPromise.getOrNull() ?: return
         batch.flush()
         batch.shader = shader.shader
-        shader.prepare(screen)
         font.draw(batch, layout, x, textY)
         batch.flush()
         batch.shader = null
@@ -227,6 +226,7 @@ class NewLabel(
         requireNotNull(group) { "unknown font group: '$fontGroup'" }
         require(group.variants.isNotEmpty()) { "font '$fontGroup' has no variants" }
         fontHandle = overrideFontHandle ?: findBestVariant(group).resourceHandle
+        println(fontHandle)
     }
 
     private fun findBestVariant(group: ResourceManager.FontGroup): ResourceManager.FontVariant {

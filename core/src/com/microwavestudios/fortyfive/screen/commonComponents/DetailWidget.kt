@@ -71,8 +71,8 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
         override fun generateDetailActor(addFadeInAction: Boolean): Actor {
             val actor = AdvancedTextWidget(
-                Triple("red_wing", Color.FortyWhite, 0.6f),
-                screen, true
+                Triple("red wing", Color.FortyWhite, 19),
+                screen
             )
             actor.backgroundHandle = defBackground
             actor.width = 300F
@@ -123,8 +123,8 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                     parent.addActor(imgActor)
                 }
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek_bmp", Color.FortyWhite, if (i == 0) 0.6f else 0.5f),
-                    screen, true
+                    Triple("roadgeek", Color.FortyWhite, if (i == 0) 14 else 12),
+                    screen
                 )
                 actor.width = innerWidth
                 actor.setRawText(it, effects)
@@ -148,7 +148,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
             texts.forEach {
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek_bmp", Color.FortyWhite, 0.6f), screen, true
+                    Triple("roadgeek", Color.FortyWhite, 14), screen
                 )
                 actor.backgroundHandle = defBackgroundSmall
                 actor.width = width
@@ -164,7 +164,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         @Suppress("SameParameterValue")
         private fun getSingleTextParent(text: List<String>, width: Float): Actor {
             val actor = AdvancedTextWidget(
-                Triple("roadgeek_bmp", Color.FortyWhite, 0.6f), screen, true
+                Triple("roadgeek", Color.FortyWhite, 14), screen
             )
             actor.backgroundHandle = defBackground
             actor.width = width
@@ -224,13 +224,13 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                 AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$green\$", Color.Green),
                 AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$blue\$", Color.Blue),
                 AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$brown\$", Color.DarkBrown),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontScaleTextEffect("\$minimal\$", 0.8f),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontScaleTextEffect("\$small\$", 0.65f),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontScaleTextEffect("\$tiny\$", 0.5f),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontScaleTextEffect("\$big\$", 1.2f),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontScaleTextEffect("\$giant\$", 1.35f),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontScaleTextEffect("\$enormous\$", 1.5f),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedFontTextEffect("\$red_wing\$", "red_wing"),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$minimal\$", 25),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$small\$", 21),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$tiny\$", 16),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$big\$", 38),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$giant\$", 43),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$enormous\$", 48),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedFontTextEffect("\$red_wing\$", "red wing"),
                 AdvancedTextParser.AdvancedTextEffect.AdvancedFontTextEffect("\$roadgeek\$", "roadgeek"),
             )
         }

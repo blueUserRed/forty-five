@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.screen.screens
 
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -66,90 +67,25 @@ class TestScreen : ScreenCreator() {
 
     private fun CustomBox.biggerLabels() {
 
-        label("red wing", "AVWXY hello world", Color.FortyWhite, fontSize = 100) {
+        backgroundHandle = "statusbar_option"
+
+        label("red wing", "Backpack", Color.FortyWhite, fontSize = (32 * 0.7).toInt()) {
             wrap = false
+            debug()
+            setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
         }
-
-//        label("redwing14", "Be at ease little sister, support is on the way, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\\\" -Letter to Salem", Color.White, isDistanceField = false) {
-//            wrap = true
-//            setFontScale(1f)
-//            relativeWidth(100f)
-//            syncHeight()
-//        }
-
-
-//        label("redwing200", ".Forty-Five", Color.FortyWhite, isDistanceField = false) {
-//            setFontScale(1f * 0.5f)
-//            syncDimensions()
-//        }
-//        label("redwing200", ".Forty-Five", Color.FortyWhite, isDistanceField = false) {
-//            setFontScale(0.8f * 0.5f)
-//            syncDimensions()
-//        }
-//        label("redwing200", ".Forty-Five", Color.FortyWhite, isDistanceField = false) {
-//            setFontScale(0.6f * 0.5f)
-//            syncDimensions()
-//        }
-//        label("redwing200", ".Forty-Five", Color.FortyWhite, isDistanceField = false) {
-//            setFontScale(0.4f * 0.5f)
-//            syncDimensions()
-//        }
     }
 
     private fun CustomBox.newLabels() {
 
-        label("red wing", "AVWXY hello world", Color.FortyWhite, fontSize = 100) {
+        label("red wing", "Backpack", Color.FortyWhite, fontSize = 100) {
             wrap = false
+            debug()
             relativeWidth(100f)
             syncHeight()
         }
-
-//        label("redwing200", "AVWXY", Color.White, isDistanceField = false) {
-//            wrap = false
-//            setFontScale(0.07f)
-//            relativeWidth(100f)
-//            syncHeight()
-//        }
-
-//        label("redwing60", "Be at ease little sister, support is on the way, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\\\" -Letter to Salem", Color.FortyWhite, isDistanceField = false) {
-//            wrap = true
-//            setFontScale(0.23333333f)
-//            relativeWidth(100f)
-//            syncHeight()
-//        }
-
-//        actor(NewLabel(screen, ".Forty-Five")) {
-//            fontGroup = "red wing"
-//            fontSize = 100
-//            syncDimensions()
-//        }
-//        actor(NewLabel(screen, ".Forty-Five")) {
-//            fontGroup = "red wing"
-//            fontSize = (100 * 0.8f).toInt()
-//            syncDimensions()
-//        }
-//        actor(NewLabel(screen, ".Forty-Five")) {
-//            fontGroup = "red wing"
-//            fontSize = (100 * 0.6f).toInt()
-//            syncDimensions()
-//        }
-//        actor(NewLabel(screen, ".Forty-Five")) {
-//            fontGroup = "red wing"
-//            fontSize = (100 * 0.4f).toInt()
-//            syncDimensions()
-//        }
-//        actor(NewLabel(screen, ".Forty-Five")) {
-//            fontGroup = "red wing"
-//            fontSize = (100 * 0.2f).toInt()
-//            syncDimensions()
-//        }
-//        actor(NewLabel(screen, ".Forty-Five")) {
-//            fontGroup = "red wing"
-//            fontSize = (100 * 0.1f).toInt()
-//            syncDimensions()
-//        }
     }
 
 //    private fun CustomBox.smallerLabels() {

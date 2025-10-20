@@ -290,30 +290,27 @@ abstract class ScreenCreator : ResourceBorrower {
     inline fun Group.advancedText(
         defaultFont: String,
         defaultColor: Color,
-        defaultFontScale: Float,
-        isDistanceField: Boolean = true,
+        defaultFontSize: Int,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
         val advancedText =
-            AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontScale), screen, isDistanceField)
+            AdvancedTextWidget(Triple(defaultFont, defaultColor, defaultFontSize), screen)
         this.addActor(advancedText)
         builder(advancedText)
         return advancedText
     }
 
     inline fun Group.advancedText(
-        defaults: Triple<String, Color, Float>,
-        isDistanceField: Boolean = true,
+        defaults: Triple<String, Color, Int>,
         builder: AdvancedTextWidget.() -> Unit = {}
     ): AdvancedTextWidget {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
-        val advancedText =
-            AdvancedTextWidget(defaults, screen, isDistanceField)
+        val advancedText = AdvancedTextWidget(defaults, screen)
         this.addActor(advancedText)
         builder(advancedText)
         return advancedText
@@ -476,7 +473,7 @@ abstract class ScreenCreator : ResourceBorrower {
                 height = worldHeight
                 isVisible = false
             }
-            advancedText("red_wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 1f) {
+            advancedText("red wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 32) {
                 name("tutorial_info_text")
                 horizontalTextAlign = CustomAlign.CENTER
                 centerX()

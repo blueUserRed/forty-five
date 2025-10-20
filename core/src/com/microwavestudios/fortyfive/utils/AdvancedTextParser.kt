@@ -14,8 +14,7 @@ import java.lang.Exception
 class AdvancedTextParser(
     val code: String,
     private val screen: OnjScreen,
-    private val defaultSettings: Triple<String, Color, Float>,
-    private val isDistanceField: Boolean,
+    private val defaultSettings: Triple<String, Color, Int>,
     private val changes: List<AdvancedTextEffect>
 ) {
     init {
@@ -42,7 +41,7 @@ class AdvancedTextParser(
 
     private var curFont: String = defaultSettings.first
     private var curColor: Color = defaultSettings.second
-    private var curFontScale = defaultSettings.third
+    private var curFontSize: Int = defaultSettings.third
     private var currentActions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
 
     private var isReadingIcon = false
@@ -105,16 +104,15 @@ class AdvancedTextParser(
         if (breakLine) text = text.trimEnd('\n', '\r')
 
         if (isReadingIcon) {
-            parts.add(IconAdvancedTextPart(text.trim(), curFont, screen, curFontScale, breakLine))
+            parts.add(IconAdvancedTextPart(text.trim(), screen, curFontSize, breakLine))
         } else {
             parts.add(
                 TextAdvancedTextPart(
                     text,
                     curFont,
                     curColor,
-                    curFontScale,
+                    curFontSize,
                     screen,
-                    isDistanceField,
                     breakLine,
                 )
             )
@@ -165,14 +163,12 @@ class AdvancedTextParser(
         fun asOnjObject(): OnjObject
 
         companion object {
-            fun getFromOnj(onj: OnjNamedObject): AdvancedTextEffect {
-                return when (onj.name) {
-                    "Color" -> AdvancedColorTextEffect(onj)
-                    "Font" -> AdvancedFontTextEffect(onj)
-                    "FontScale" -> AdvancedFontScaleTextEffect(onj)
-                    "Action" -> AdvancedActionTextEffect(onj)
-                    else -> throw Exception("Unknown Text Effect: ${onj.name}")
-                }
+            fun getFromOnj(onj: OnjNamedObject): AdvancedTextEffect = when (onj.name) {
+                "Color" -> AdvancedColorTextEffect(onj)
+                "Font" -> AdvancedFontTextEffect(onj)
+                "FontSize" -> AdvancedFontSizeTextEffect(onj)
+                "Action" -> AdvancedActionTextEffect(onj)
+                else -> throw Exception("Unknown Text Effect: ${onj.name}")
             }
         }
 
@@ -228,31 +224,31 @@ class AdvancedTextParser(
         }
 
 
-        class AdvancedFontScaleTextEffect(
+        class AdvancedFontSizeTextEffect(
             override val indicator: String,
-            private val fontScale: Float,
+            private val fontSize: Int,
         ) : AdvancedTextEffect {
 
             override val overridesOthers: Boolean = true
 
             constructor(data: OnjObject) : this(
                 data.get<String>("indicator"),
-                data.get<Double>("fontScale").toFloat()
+                data.get<Long>("fontSize").toInt()
             )
 
             override fun executeChange(parser: AdvancedTextParser) {
-                parser.curFontScale = fontScale
+                parser.curFontSize = fontSize
             }
 
             override fun backToDefault(parser: AdvancedTextParser) {
-                parser.curFontScale = parser.defaultSettings.third
+                parser.curFontSize = parser.defaultSettings.third
             }
 
 
             override fun asOnjObject(): OnjObject = buildOnjObject {
                 name("FontScale")
                 "indicator" with indicator
-                "fontScale" with fontScale
+                "fontSize" with fontSize
             }
         }
 

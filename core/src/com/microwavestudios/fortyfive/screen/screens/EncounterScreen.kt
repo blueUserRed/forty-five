@@ -418,7 +418,7 @@ class EncounterScreen : ScreenCreator() {
                         } else {
                             text
                         }
-                        advancedText("roadgeek", Color.FortyWhite, 0.9f) {
+                        advancedText("roadgeek", Color.FortyWhite, 23) {
                             val redEffect = AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red)
                             relativeHeight(58f)
                             setRawText(newText, listOf(redEffect))
