@@ -3,6 +3,9 @@ package com.microwavestudios.fortyfive.map
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.MapConfig
+import com.microwavestudios.fortyfive.config.MapImageData
 import com.microwavestudios.fortyfive.map.generation.Direction
 import com.microwavestudios.fortyfive.map.generation.Line
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
@@ -19,6 +22,7 @@ data class MapNode(
     val imageName: String?,
     val imagePos: ImagePosition?,
     val nodeTexture: ResourceHandle?,
+    val distance: Int,
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
 ) : ResourceBorrower {
 
@@ -26,6 +30,8 @@ data class MapNode(
     private var imageCache: Promise<Drawable>? = null
     private var nodeTextureCache: Promise<Drawable>? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
+
+    private val mapConfig: MapConfig = ConfigFileManager.mapConfig
 
     fun getEdge(dir: Direction): MapNode? {
         if (nodePositionsForDirection.size != edgesTo.size) initNodeDirections()
@@ -123,6 +129,7 @@ data class MapNode(
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
+        screen.lifetime.onEnd { nodeTextureCache = null }
         return nodeTextureCache
     }
 
@@ -131,8 +138,8 @@ data class MapNode(
         nodeTextureCache = null
     }
 
-    fun getImageData(): MapManager.MapImageData? =
-        MapManager.mapImages.find { it.name == imageName && it.type == "sign" }
+    fun getImageData(): MapImageData? =
+        mapConfig.images.find { it.name == imageName && it.type == MapImageData.Type.SIGN }
 
     fun isLinkedTo(node: MapNode): Boolean {
         for (linkedNode in node.edgesTo) {
@@ -213,6 +220,7 @@ data class MapNodeBuilder(
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
     var nodeTexture: ResourceHandle? = null,
+    var distance: Int = -1,
     var event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -251,6 +259,7 @@ data class MapNodeBuilder(
             imageName,
             imagePos,
             nodeTexture,
+            distance,
             event
         )
         for (edge in edgesTo) {

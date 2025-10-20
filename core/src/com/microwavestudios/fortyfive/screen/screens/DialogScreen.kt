@@ -8,17 +8,21 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
+import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.Npc
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.screen.commonComponents.AnimatedAdvancedTextWidget
-import com.microwavestudios.fortyfive.screen.screenController.DialogNpc
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.PositionType
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.reflect.KClass
@@ -58,17 +62,24 @@ class DialogScreen : ScreenCreator() {
         textWidget()
         choiceBox()
 
-        addDefaultOverlays(worldWidth, worldHeight, events, hasNavbar = false)
+        addDefaultOverlays(
+            worldWidth,
+            worldHeight,
+            events,
+            hasNavbar = false,
+            hasSettings = false,
+            hasTutorial = false,
+            hasTitleScreen = false
+        )
     }
 
     private fun CustomGroup.choiceBox() = box {
         val optionGroup = "dialog-screen-choice-option"
         val optionModal = InputManager.Modal(listOf(optionGroup), screen)
 
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+        flexDirection = FlexDirection.COLUMN
         width = 240f
         height = 400f
-        debug()
         x = worldWidth / 2 - width / 2
 //        x = worldWidth * (3.5f / 4f) - width
         y = worldHeight * 0.33f
@@ -81,8 +92,8 @@ class DialogScreen : ScreenCreator() {
                 box(backgroundHints = arrayOf("dialog_answer_option", "dialog_answer_option_hover")) {
                     relativeWidth(100f)
                     syncHeight()
-                    verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                    horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                    verticalAlign = CustomAlign.CENTER
+                    horizontalAlign = CustomAlign.CENTER
                     touchable = Touchable.enabled
                     keyboardFocusable = KeyboardFocusable.LEAF
                     backgroundHandle = "dialog_answer_option"
@@ -156,7 +167,7 @@ class DialogScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.npc(isLeft: Boolean) {
-        var currentNpc: DialogNpc? = null
+        var currentNpc: Npc? = null
         val animTime = 150
 
         image {
@@ -180,7 +191,7 @@ class DialogScreen : ScreenCreator() {
             )
 
             onLayoutAndNow {
-                y = currentNpc?.offset?.y ?: 0f
+                y = currentNpc?.offsetY ?: 0f
             }
 
             events.watchFor<DialogScreenController.ChangeToNewDialogPart> { (part) ->
@@ -196,14 +207,13 @@ class DialogScreen : ScreenCreator() {
                     delay(animTime)
                     action {
                         currentNpc = npc
-                        backgroundHandle = npc?.textureName
+                        backgroundHandle = npc?.texture
                         invalidate()
-                        println(npc)
                         npc ?: return@action
-                        width = npc.width
-                        height = npc.height
+                        width = npc.drawWidth
+                        height = npc.drawHeight
                         var x = if (isLeft) 0f else worldWidth - width
-                        x += npc.offset.x
+                        x += npc.offsetX
                         xAnimation.replaceState(AnimState("shown", x))
                         xAnimation.state("shown")
                     }
@@ -230,22 +240,22 @@ class DialogScreen : ScreenCreator() {
             paddingBottom = 50F
             paddingLeft = 80F
             paddingRight = 150F
-            verticalTextAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            verticalTextAlign = CustomAlign.CENTER
             backgroundHandle = "dialog_background"
 
             box {
-                positionType = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.PositionType.ABSOLUTE
+                positionType = PositionType.ABSOLUTE
                 relativeWidth(100F)
                 height = 40F
                 y = parent.height - height
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
+                horizontalAlign = CustomAlign.SPACE_AROUND
+                flexDirection = FlexDirection.ROW
                 minHorizontalDistBetweenElements = 350F
                 nameLabels()
             }
 
             val continueButton = image {
-                positionType = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.PositionType.ABSOLUTE
+                positionType = PositionType.ABSOLUTE
                 backgroundHandle = "common_symbol_arrow_right"
                 width = 40F
                 height = 40F

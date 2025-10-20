@@ -1,12 +1,9 @@
-version: 0,
+majorDifficulty: 1,
 startNode: 0,
-endNode: 2,
+endNode: 4,
 biome: "wasteland",
 scrollable: false,
 camPosOffset: [480.0, -790.0],
-progress: [
-    0.0, 0.1
-],
 nodes: [
     {
         x: -40.0,
@@ -17,25 +14,46 @@ nodes: [
         event: $EmptyMapEvent { }
     },
     {
-        x: -15.0,
-        y: 115.0,
+        x: -27.5,
+        y: 110.0,
         edgesTo: [
             0, 2
         ],
+        event: $EmptyMapEvent { }
+    },
+    {
+        x: -15.0,
+        y: 115.0,
+        edgesTo: [
+            1, 3
+        ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            dialog: "tavelling_merchant_welcome",
+            dialog: "tutorial_dialog",
+            displayName: "Your Brother",
+            descriptionText: "Your Brother wants to talk to you before you go on your journey",
+            completedDescriptionText: "You completed the tutorial run",
             canOnlyBeStartedOnce: false,
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+                $Not {
+                    negate: $RunCompleted { runName: "tutorial_run" }
+                }
+            ],
+            blockConditions: [
+                $Not {
+                    negate: $RunCompleted { runName: "tutorial_run" }
+                }
+            ]
         }
     },
     {
         x: 20.0,
         y: 107.0,
         edgesTo: [
-            1, 3
+            2, 4
         ],
         event: $EmptyMapEvent {
         }
@@ -44,27 +62,51 @@ nodes: [
         x: 40.0,
         y: 115.0,
         edgesTo: [
-            2, 4
+            3, 5
         ],
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
-            dialog: "priest_of_aqua_balle_warning",
-            canOnlyBeStartedOnce: true,
-            onlyIfPlayerDoesntHaveCard: "guardianAngelBullet",
+            dialog: "aqua_balle_progress_dialog",
+            displayName: "Stranger",
+            descriptionText: "A stranger has a mission for you",
+            completedDescriptionText: "",
+            canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false
+            startable: true,
+            isCompleted: false,
+        }
+    },
+    {
+        x: 50.0,
+        y: 110.0,
+        edgesTo: [
+            4, 6
+        ],
+        nodeTexture: "map_node_default",
+        event: $SimpleMapEvent {
+            displayDescription: true,
+            displayName: "Progress Run",
+            descriptionText: "To progress beyond this point, you must complete a mission. Talk to the person behind you",
+            currentlyBlocks: false,
+            startable: false,
+            isCompleted: false,
+            blockConditions: [
+                $Not {
+                    negate: $RunCompleted { runName: "aqua_balle_progress_run" }
+                }
+            ]
         }
     },
     {
         x: 65.0,
         y: 105.0,
         edgesTo: [
-            3, 4
+            5
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
+            targetMap: "tabu_letter_outpost",
+            fromEnd: false,
         }
     },
 ],
@@ -105,4 +147,3 @@ decorations: [
         ]
     }
 ],
-isArea: true,

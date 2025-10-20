@@ -1,42 +1,50 @@
+import "imports/map_predicates.onjschema" as _;
 
 var mapEventStandardConfig = {
     currentlyBlocks: boolean,
-    canBeStarted: boolean,
-    isCompleted: boolean
+    startable: boolean,
+    isCompleted: boolean,
+    startConditions?: $MapPredicate[],
+    blockConditions?: $MapPredicate[],
+};
+
+var encounter = {
+    enemies: string[],
+    encounterModifier: string[],
+    forceCards: string[]?,
+    shuffleCards: boolean,
+    minorDifficulty: float,
+    special: boolean,
 };
 
 $MapEvent {
 
     $EmptyMapEvent { }
 
-    $HealOrMaxHPEvent {
+    $SimpleMapEvent {
         ...mapEventStandardConfig,
-        healRange: int[2],
-        maxHPRange: int[2],
-        seed: int?,
-        distanceToEnd?: int,
-    }
-
-    $AddMaxHPEvent {
-        ...mapEventStandardConfig,
-        maxHPRange: int[2],
-        seed: int?,
+        displayDescription?: boolean,
+        descriptionText?: string,
+        displayName?: string
     }
 
     $EncounterMapEvent {
         ...mapEventStandardConfig,
-        distanceToEnd: int,
-        encounterIndex: int,
+        encounter: encounter,
+        isExtraction: boolean
     }
 
     $EnterMapMapEvent {
         targetMap: string,
+        fromEnd: Boolean,
     }
 
     $DialogMapEvent {
         dialog: string,
+        displayName: string,
+        descriptionText: string,
+        completedDescriptionText: string,
         canOnlyBeStartedOnce: boolean,
-        onlyIfPlayerDoesntHaveCard?: string,
         ...mapEventStandardConfig
     }
 
@@ -44,8 +52,7 @@ $MapEvent {
         types: string[],
         person: string,
         amountCards: int[2],
-        selectedCards: string[],
-        seed: int?,
+        currentCards: string[]?,
         amountOfRerolls: int,
         rerollPriceIncrease: int,
         rerollBasePrice: int,
@@ -63,8 +70,21 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
-    $FinishTutorialMapEvent {
-        goToMap: string
+    $LockNodeMapEvent {
+        conditions: $MapPredicate[],
+        locked: boolean,
+        lockedDescription: string,
+        openDescription: string,
     }
+
+    $CompleteRunMapEvent {
+        runName: string,
+        displayName: string,
+        descriptionText: string,
+        completedDescriptionText: string,
+        ...mapEventStandardConfig
+    }
+
+    $FinishTutorialRunMapEvent { }
 
 }

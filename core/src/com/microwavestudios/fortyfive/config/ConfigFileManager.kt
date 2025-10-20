@@ -2,9 +2,12 @@ package com.microwavestudios.fortyfive.config
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.run.Run
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
+import onj.value.OnjArray
 import onj.value.OnjObject
 
 object ConfigFileManager {
@@ -17,6 +20,15 @@ object ConfigFileManager {
     }
 
     private lateinit var configFiles: List<ConfigFile>
+    private lateinit var displayNames: Map<String, String>
+
+    val mapConfig: MapConfig by lazy {
+        val onj = getConfigFile("mapConfig")
+        MapConfig.fromOnj(onj)
+    }
+
+    val npcConfig: NpcConfig = NpcConfig()
+    val runConfig: RunConfig = RunConfig()
 
     fun init() {
         val onj = OnjParser.parseFile(path)
@@ -34,6 +46,20 @@ object ConfigFileManager {
                     null
                 )
             }
+        displayNames = onj
+            .get<OnjArray>("displayNames")
+            .value
+            .associate { names ->
+                names as OnjArray
+                names.get<String>(0) to names.get<String>(1)
+            }
+    }
+
+    fun getDisplayName(internalName: String): String {
+        val name = displayNames[internalName]
+        if (name != null) return name
+        FortyFive.logger.warn(logTag, "No display name for '$internalName' found")
+        return internalName
     }
 
     fun getConfigFile(configFile: String): OnjObject {
@@ -69,3 +95,6 @@ object ConfigFileManager {
     )
 
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun displayName(internalName: String): String = ConfigFileManager.getDisplayName(internalName)

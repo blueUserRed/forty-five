@@ -1,10 +1,7 @@
-version: 0,
+majorDifficulty: 2,
 startNode: 0,
-endNode: 3,
+endNode: 5,
 biome: "wasteland",
-progress: [
-    0.0, 0.1
-],
 nodes: [
     {
         x: -7.0,
@@ -14,7 +11,8 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
+            targetMap: "location.aqua_balle",
+            fromEnd: true,
         }
     },
     {
@@ -25,8 +23,7 @@ nodes: [
         ],
         nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
-            seed: null,
-            selectedCards: [],
+            currentCards: null,
             amountCards: [3, 5],
             amountOfRerolls: 0,
             rerollPriceIncrease: 10,
@@ -49,9 +46,12 @@ nodes: [
         imagePos: "LEFT",
         event: $DialogMapEvent {
             dialog: "not_yet_implemented_dialog",
+            displayName: "Not yet implemented",
+            descriptionText: "",
+            completedDescriptionText: "",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: true
         }
     },
@@ -62,15 +62,7 @@ nodes: [
             1, 4
         ],
         nodeTexture: "map_node_heal",
-        event: $AddMaxHPEvent {
-            maxHPRange: [
-                10, 15
-            ],
-            seed: null,
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-        }
+        event: $EmptyMapEvent {}
     },
     {
         x: 65.0,
@@ -83,7 +75,7 @@ nodes: [
             dialog: "witch_dialog",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: true
         }
     },
@@ -95,7 +87,8 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_tabu_letter_outpost_and_salem",
+            targetMap: "location.salem",
+            fromEnd: false,
         }
     },
 
@@ -149,4 +142,6 @@ decorations: [
         ],
     }
 ],
-isArea: true,
+areaConfig: {
+    completedProgressRun: false
+},

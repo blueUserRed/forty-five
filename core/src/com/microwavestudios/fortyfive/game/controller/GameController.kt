@@ -88,8 +88,6 @@ interface GameController {
 
     fun addEncounterModifier(modifier: EncounterModifier)
 
-    fun addTutorialText(textParts: List<GameDirector.GameTutorialTextPart>)
-
     fun initEnemyArea(enemies: List<Enemy>)
 
     fun playGameAnimation(anim: GameAnimation)

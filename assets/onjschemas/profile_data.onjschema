@@ -1,0 +1,21 @@
+import "imports/run.onjschema" as run;
+import "imports/deck.onjschema" as deck;
+
+var runBoard = {
+    areaName: string,
+    limitedRun: run?,
+    constructedRun: run?,
+    progressRun: run?,
+    specialRuns: run[],
+};
+
+cardCollection: string[],
+collectionDecks: deck[],
+currentDeckId: int,
+playerMoney: int,
+currentMap: string,
+currentNode: int,
+lastNode: int?,
+wonRuns: int,
+runBoards: runBoard[],
+completedSpecialRuns: string[],

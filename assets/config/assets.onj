@@ -1443,6 +1443,10 @@ colorTextures: [
         color: color.grey
     },
     {
+        name: "red_texture",
+        color: color.red
+    },
+    {
         name: "forty_white_texture",
         color: color.forty_white
     },

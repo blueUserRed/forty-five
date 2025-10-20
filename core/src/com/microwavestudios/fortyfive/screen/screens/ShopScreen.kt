@@ -8,24 +8,28 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.Npc
+import com.microwavestudios.fortyfive.config.displayName
+import com.microwavestudios.fortyfive.game.Deck
+import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
-import com.microwavestudios.fortyfive.map.events.shop.ShopScreenController
+import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
+import com.microwavestudios.fortyfive.screen.actors.*
+import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
-import com.microwavestudios.fortyfive.utils.EventPipeline
-import com.microwavestudios.fortyfive.utils.percent
+import com.microwavestudios.fortyfive.utils.*
+import kotlin.random.Random
 import kotlin.reflect.KClass
 
 class ShopScreen : ScreenCreator() {
-
-    //TODO  children in CustomFocusableBox autoscroll + bar drag and drop
-    //TODO check reroll
 
     override val name: String = "shopScreen"
 
@@ -38,16 +42,19 @@ class ShopScreen : ScreenCreator() {
 
     override val playAmbientSounds: Boolean = false
 
+    private val context: ShopMapEvent by lazy { context() }
+
+    private val npc: Npc by lazy {
+        ConfigFileManager.npcConfig.npcs[context.person] ?: throw RuntimeException("unknown npc: ${context.person}")
+    }
+
+    private val random = Random
+
+    private val events: EventPipeline = EventPipeline()
+
     override val transitionAwayTimes: Map<String, Int> = mapOf(
         "*" to 100
     )
-
-    private val messageWidgetName: String = "shop_messageWidget"
-    private val cardsParentName: String = "shop_cardsParent"
-    private val addToDeckWidgetName: String = "shop_addToDeck"
-    private val addToBackpackWidgetName: String = "shop_addToBackpack"
-    private val shopPersonWidgetName: String = "shop_personWidget"
-    private val rerollWidgetName: String = "shop_rerollWidget"
 
     private val dropTargetFilter: InputManager.FocusFilter by lazy {
         InputManager.FocusFilter(
@@ -56,16 +63,15 @@ class ShopScreen : ScreenCreator() {
         )
     }
 
+    private val cardFocusGrid = InputManager.FocusGrid()
+
+    private var cardsLifetime: EndableLifetime = EndableLifetime()
+
+    private val cardStateChangedCallbacks: MutableList<() -> Unit> = mutableListOf()
+
+    private lateinit var currentDeck: Deck
+
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        ShopScreenController(
-            screen,
-            messageWidgetName,
-            cardsParentName,
-            addToDeckWidgetName,
-            addToBackpackWidgetName,
-            shopPersonWidgetName,
-            rerollWidgetName,
-        ),
         BiomeBackgroundScreenController(screen, true)
     )
 
@@ -76,7 +82,17 @@ class ShopScreen : ScreenCreator() {
         height = worldHeight
 
         dropTargetFilter.start()
-        screen.inputManager.addDragAndDrop(ShopScreenController.availableCardGroup, shopDropTargetGroup)
+        screen.inputManager.addDragAndDrop("buyable", shopDropTargetGroup)
+
+        val profile = FortyFive.profileManager.currentProfile!!
+        val inRun = profile.isRunActive
+        currentDeck = if (inRun) profile.currentRunDeck!! else profile.currentCollectionDeck
+
+        events.watchFor<BackpackCreator.DeckChangedEvent> {
+            currentDeck = if (inRun) profile.currentRunDeck!! else profile.currentCollectionDeck
+            events.fire(RecheckAddToDeck)
+        }
+        events.watchFor<BackpackCreator.CardsChangedEvent> { events.fire(RecheckAddToDeck) }
 
         image {
             x = 0f
@@ -86,8 +102,8 @@ class ShopScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
 
-        dropTarget(worldHeight * 0.5F, "shop_add_to_deck", addToDeckWidgetName)
-        dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", addToBackpackWidgetName)
+        dropTarget(worldHeight * 0.5F, "shop_add_to_deck", true)
+        dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", false)
 
         box {
             width = worldWidth.percent(63)
@@ -95,10 +111,10 @@ class ShopScreen : ScreenCreator() {
             x = worldWidth.percent(36)
             y = 1f
             backgroundHandle = "shop_background"
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
-            wrap = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomWrap.NONE
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.SPACE_AROUND
+            wrap = CustomWrap.NONE
             paddingTop = worldWidth.percent(3)
             paddingLeft = 25f
             paddingRight = 10f
@@ -107,40 +123,25 @@ class ShopScreen : ScreenCreator() {
 
             textsAtTheTop(childrenSize)
 
-            box(isScrollable = true) {
-                this as _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
-                relativeWidth(childrenSize)
-                relativeHeight(59f)
-                name(cardsParentName)
-                backgroundHandle = "shop_items_background"
-                minVerticalDistBetweenElements = 15F
-                minHorizontalDistBetweenElements = 15F
-                scrollDistancePerScroll = 50F
-                paddingLeft = 30f
-                paddingTop = 15f
-                paddingBottom = 30f
+            cardContainer(childrenSize)
 
-                val cardFocusGrid = InputManager.FocusGrid()
-                onLayout {
-                    cardFocusGrid.clear()
-                    var x = 0
-                    var y = 0
-                    walk().forEach { child ->
-                        if (child !is CardActor) return@forEach
-                        cardFocusGrid.set(x, y, child)
-                        x++
-                        if (x >= 4) {
-                            x = 0
-                            y++
-                        }
-                    }
+            box(backgroundHints = buttonBackgroundHints()) {
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
+                height = 60f
+                width = 140f
+                defaultButtonBackgrounds()
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                logicalOffsetY = 55f
+                val label = label("roadgeek", "", color = Color.FortyWhite) {
+                    setText("reroll: ${context.currentRerollPrice}\$")
+                    syncDimensions()
                 }
-//                addTestChildren()
-                addScrollbarFromDefaults(
-                    _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomDirection.RIGHT,
-                    "backpack_scrollbar",
-                    "backpack_scrollbar_background"
-                )
+                onInput(GameInputs.interact) {
+                    reroll()
+                    label.setText("reroll: ${context.currentRerollPrice}\$")
+                }
             }
 
             label(
@@ -149,65 +150,167 @@ class ShopScreen : ScreenCreator() {
                 color = Color.FortyWhite
             ) {
                 setFontScale(0.7f)
-                syncWidth()
-            }
-
-            label(
-                "red_wing",
-                "reroll Shop: {shop.currentRerollPrice}\$",
-                isTemplate = true,
-                color = Color.FortyWhite
-            ) {
-                name(rerollWidgetName)
-                setFontScale(0.7f)
-                width = 200F
-                setAlignment(Align.center)
-                positionType = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.PositionType.ABSOLUTE
-                badTexture("reroll shop button", missingFocusTexture = true)
-                touchable = Touchable.enabled
-                keyboardFocusable = KeyboardFocusable.LEAF
-                onInput(GameInputs.interact) {
-                    screen.findController<ShopScreenController>()?.rerollShop()
-                }
-                onLayoutAndNow {
-                    x = (parent.width - width) / 2
-                    y = 70F
-                }
+                logicalOffsetY = 55f
+                syncDimensions()
             }
         }
 
-        image {
-            this.name(shopPersonWidgetName)
-            reportDimensionsWithScaling = true
-            fixedZIndex = 100
-            touchable = Touchable.disabled
-            onLayout {
-                val loadedDrawable1 = loadedDrawable ?: return@onLayout
-                width = loadedDrawable1.minWidth * scaleX * 0.35f
-                height = loadedDrawable1.minHeight * scaleY * 0.35f
-            }
-        }
+        personImage()
 
-        addDefaultOverlays(worldHeight, worldHeight, EventPipeline())
+        addDefaultOverlays(worldWidth, worldHeight, events, hasBackpack = inRun, hasCollection = !inRun)
+
+        val cards = context.currentCards ?: run {
+            val cards = generateRandomCards()
+            context.currentCards = cards
+            cards
+        }
+        updateCards(cards)
     }
 
-    private fun Group.addTestChildren() {
-        fun _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomBox.addBasicStyles() {
-            val size = 150f
-            val listOf = listOf("shop_targets")
-            width = size
-            height = size
-
-//            onFocus { if (!it) (parent as CustomScrollableBox).scrollTo(this) }
+    private fun reroll() {
+        val profile = FortyFive.profileManager.currentProfile!!
+        val price = context.currentRerollPrice
+        if (profile.playerMoney < price) {
+            FortyFive.soundPlayer.situation("not_allowed", screen)
+            return
         }
+        profile.payMoney(price)
+        context.amountOfRerolls++
+        val newCards = generateRandomCards()
+        context.boughtIndices.clear()
+        context.currentCards = newCards
+        updateCards(newCards)
+    }
 
-        for (i in 0..20) {
-            box {
-                backgroundHandle = "card%%bullet"
-                name("bullet_$i")
-                addBasicStyles()
+    private fun generateRandomCards(): List<String> {
+        val amount = context.amountCards.random(random)
+        val cards = RandomCardSelection.getRandomCards(
+            screen,
+            listOf(),
+            amount,
+            random,
+            FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap.biome,
+            "shop",
+            unique = true
+        ).map { it.name }
+        return cards
+    }
+
+    private fun updateCards(cards: List<String>) {
+        val protos = RandomCardSelection.allCardPrototypes
+        val newLifetime = EndableLifetime()
+        val guardedLifetime = newLifetime.shorter(screen.lifetime)
+        val createdCards = cards.map { name ->
+            val proto = protos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
+            val card = proto.create(screen)
+            guardedLifetime.tieDisposable(card)
+            card
+        }
+        // Not guarded on purpose, because the lifetime is used for actor cleanup, which isn't required if the screen
+        // is disposed anyway
+        events.fire(CardsChangedEvent(createdCards, newLifetime))
+        cardsLifetime.die()
+        cardsLifetime = newLifetime
+        updateCardStates()
+    }
+
+    private fun updateCardStates() {
+        cardStateChangedCallbacks.forEach { it() }
+    }
+
+    private fun Group.personImage() = image {
+        touchable = Touchable.disabled
+
+        val npc = npc
+        backgroundHandle = npc.texture
+        width = npc.drawWidth
+        height = npc.drawHeight
+        drawOffsetX = npc.offsetX
+        drawOffsetY = npc.offsetY
+    }
+
+    private fun Group.cardContainer(childrenSize: Float) = box(isScrollable = true) {
+        this as CustomScrollableBox
+        relativeWidth(childrenSize)
+        relativeHeight(59f)
+        backgroundHandle = "shop_items_background"
+        minVerticalDistBetweenElements = 15F
+        minHorizontalDistBetweenElements = 15F
+        scrollDistancePerScroll = 50F
+        paddingLeft = 30f
+        paddingTop = 15f
+        paddingBottom = 30f
+
+        events.watchFor<CardsChangedEvent> { (cards, lifetime) ->
+            clearChildren()
+            cardFocusGrid.clear()
+            cards.forEachIndexed { index, card -> card(card, index, lifetime) }
+            var x = 0
+            var y = 0
+            walk().forEach { child ->
+                if (child !is CardActor) return@forEach
+                cardFocusGrid.set(x, y, child)
+                x++
+                if (x >= 4) {
+                    x = 0
+                    y++
+                }
             }
         }
+
+        addScrollbarFromDefaults(
+            CustomDirection.RIGHT,
+            "backpack_scrollbar",
+            "backpack_scrollbar_background"
+        )
+    }
+
+    private fun CustomBox.card(card: Card, index: Int, lifetime: Lifetime) = box {
+        width = 130f
+        height = 190f
+        flexDirection = FlexDirection.COLUMN
+        val actor = actor (card.actor) {
+            width = 130f
+            height = 130f
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+        }
+        val label = label("red_wing", "") {
+            width = 130f
+            height = 60f
+            setAlignment(Align.center)
+        }
+        val stateChangeCallback: () -> Unit = {
+            val profile = FortyFive.profileManager.currentProfile!!
+            val buyable = profile.playerMoney >= card.price
+            val bought = index in context.boughtIndices
+            actor.leaveGroup("buyable")
+            actor.infoObject = null
+            when {
+                bought -> {
+                    actor.isDraggable = false
+                    label.setText("sold out")
+                    label.alpha = 0.5f
+                    actor.isGrayScale = true
+                }
+                buyable -> {
+                    actor.isDraggable = true
+                    label.setText("\$${card.price}")
+                    label.alpha = 1f
+                    actor.isGrayScale = false
+                    actor.joinGroup("buyable")
+                    actor.infoObject = CardDragAndDropInfo(card, card.price, index)
+                }
+                else -> {
+                    actor.isDraggable = false
+                    label.setText("\$${card.price}")
+                    label.alpha = 0.5f
+                    actor.isGrayScale = false
+                }
+            }
+        }
+        cardStateChangedCallbacks.add(stateChangeCallback)
+        lifetime.onEnd { cardStateChangedCallbacks.remove(stateChangeCallback) }
     }
 
     private fun Group.textsAtTheTop(childrenSize: Float) = box {
@@ -215,12 +318,12 @@ class ShopScreen : ScreenCreator() {
         syncHeight()
         box {
             height = 90F
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            flexDirection = FlexDirection.ROW
+            horizontalAlign = CustomAlign.SPACE_BETWEEN
+            verticalAlign = CustomAlign.CENTER
             relativeWidth(100F)
             box { //name and icon
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
+                flexDirection = FlexDirection.ROW
                 relativeHeight(100F)
 
                 image {
@@ -230,7 +333,7 @@ class ShopScreen : ScreenCreator() {
                 }
                 label(
                     "red_wing",
-                    "{map.cur_event.personDisplayName}",
+                    npc.displayName,
                     isTemplate = true,
                     color = Color.FortyWhite
                 ) {
@@ -272,7 +375,6 @@ class ShopScreen : ScreenCreator() {
             defaultColor = Color.FortyWhite,
             defaultFontScale = 0.8f,
         ) {//subtext
-            name(messageWidgetName)
             relativeWidth(100f)
             syncHeight()
             fitContentHeight = true
@@ -280,9 +382,7 @@ class ShopScreen : ScreenCreator() {
     }
 
 
-    private fun Group.dropTarget(yStart: Float, textureName: String, actorName: String) = image {
-
-        name(actorName)
+    private fun Group.dropTarget(yStart: Float, textureName: String, addToDeck: Boolean) = image {
         relativeHeight(40F)
         relativeWidth(30F)
         y = yStart
@@ -294,7 +394,15 @@ class ShopScreen : ScreenCreator() {
         keyboardFocusable = KeyboardFocusable.LEAF
 
         isDropTarget = true
-        joinGroup(shopDropTargetGroup)
+
+        if (addToDeck) {
+            events.watchFor<RecheckAddToDeck> {
+                leaveGroup(shopDropTargetGroup)
+                if (currentDeck.canAddCards()) joinGroup(shopDropTargetGroup)
+            }
+        } else {
+            joinGroup(shopDropTargetGroup)
+        }
 
         observeInputState(
             GameInputs.States.awaitingDrop,
@@ -307,6 +415,22 @@ class ShopScreen : ScreenCreator() {
                 touchable = Touchable.disabled
             },
         )
+
+        onDrop { actor ->
+            val info = actor.infoObject as? CardDragAndDropInfo ?: return@onDrop
+            val profile = FortyFive.profileManager.currentProfile!!
+            if (profile.playerMoney < info.price) return@onDrop
+            profile.payMoney(info.price)
+            val deck = currentDeck
+            if (profile.isRunActive) profile.addCardToBackpack(info.card.name)
+            else profile.addCardToCollection(info.card.name)
+            if (addToDeck && deck.canAddCards()) {
+                deck.addToDeck(deck.nextFreeSlot(), info.card.name)
+            }
+            context.boughtIndices.add(info.index)
+            updateCardStates()
+            events.fire(BackpackCreator.CardsModifiedEvent)
+        }
 
         fun updateState() {
             when {
@@ -332,4 +456,11 @@ class ShopScreen : ScreenCreator() {
 
         override val creatorClass: KClass<out ScreenCreator> = ShopScreen::class
     }
+
+
+    private data class CardsChangedEvent(val cards: List<Card>, val lifetime: Lifetime)
+    private data object RecheckAddToDeck
+
+    private data class CardDragAndDropInfo(val card: Card, val price: Int, val index: Int)
+
 }

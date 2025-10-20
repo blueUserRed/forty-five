@@ -1,10 +1,7 @@
-version: 0,
+majorDifficulty: 4,
 startNode: 0,
 endNode: 2,
 biome: "bewitched_forest",
-progress: [
-    99.0, 100.0
-],
 nodes: [
     {
         x: 20.0,
@@ -14,7 +11,8 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_salem_and_spire_outpost",
+            targetMap: "location.salem",
+            fromEnd: true,
         }
     },
     {
@@ -28,7 +26,7 @@ nodes: [
             distanceToEnd: 1,
             encounterIndex: 0,
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: false,
         }
     },
@@ -43,8 +41,11 @@ nodes: [
         imagePos: "RIGHT",
         event: $DialogMapEvent {
             dialog: "to_be_continued_dialog",
+            displayName: "Developers",
+            descriptionText: ""
+            completedDescriptionText: "",
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             canOnlyBeStartedOnce: false,
             isCompleted: false,
     }
@@ -98,4 +99,6 @@ decorations: [
         ]
     }
 ],
-isArea: true,
+areaConfig: {
+    completedProgressRun: false
+},

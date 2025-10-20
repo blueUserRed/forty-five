@@ -7,21 +7,23 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
-import com.microwavestudios.fortyfive.game.SaveState
+import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.card.CardPrototype
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -55,11 +57,22 @@ class ChooseCardScreen : ScreenCreator() {
         InputManager.FocusFilter(listOf(dropTargetGroup), screen)
     }
 
+    private val profile: Profile = FortyFive.profileManager.currentProfile!!
+
+    private lateinit var currentDeck: Deck
+
     override fun getRoot(): Group = newGroup {
         width = worldWidth
         height = worldHeight
         x = 0f
         y = 0f
+
+        currentDeck = profile.currentRunDeck!!
+        events.watchFor<BackpackCreator.DeckChangedEvent> {
+            currentDeck = profile.currentRunDeck!!
+            events.fire(RecheckAddToDeck)
+        }
+        events.watchFor<BackpackCreator.CardsChangedEvent> { events.fire(RecheckAddToDeck) }
 
         screen.inputManager.addDragAndDrop(CardActor.cardGroup, dropTargetGroup)
         dropTargetFilter.start()
@@ -70,9 +83,9 @@ class ChooseCardScreen : ScreenCreator() {
             height = worldHeight * 0.5f
             centerX()
             onLayoutAndNow { y = parent.height / 2 - height / 2 + 80f }
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.SPACE_AROUND
 
             label("red_wing", "", color = Color.FortyWhite) {
                 syncDimensions()
@@ -85,10 +98,9 @@ class ChooseCardScreen : ScreenCreator() {
                 name("chooseCardCardParent")
                 height = 200f
                 relativeWidth(80f)
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-                verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
-                debug()
+                flexDirection = FlexDirection.ROW
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.SPACE_AROUND
                 events.watchFor<CardsChangedEvent> { (cards) ->
                     clearChildren()
                     val data = getDataForCards(cards.size)
@@ -123,8 +135,8 @@ class ChooseCardScreen : ScreenCreator() {
                 syncDimensions()
             }
             if (context.enableRerolls) box(backgroundHints = buttonBackgroundHints()) {
-                horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-                verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.CENTER
                 height = 60f
                 width = 140f
                 logicalOffsetY = -30f
@@ -143,17 +155,17 @@ class ChooseCardScreen : ScreenCreator() {
         }
 
         dropTargets()
-        addDefaultOverlays(worldWidth, worldHeight, events, hasTutorial = false)
+        addDefaultOverlays(worldWidth, worldHeight, events, hasTutorial = false, hasBackpack = true)
         initCards()
     }
 
     private fun reroll() {
         val price = context.currentRerollPrice
-        if (SaveState.playerMoney < price) {
+        if (profile.playerMoney < price) {
             FortyFive.soundPlayer.situation("not_allowed", screen)
             return
         }
-        SaveState.payMoney(price)
+        profile.payMoney(price)
         context.amountOfRerolls++
         context.seed = Random(context.seed).nextLong()
         initCards()
@@ -166,8 +178,8 @@ class ChooseCardScreen : ScreenCreator() {
         height = 350f * scale
         centerX()
         y = 0f
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+        flexDirection = FlexDirection.ROW
+        horizontalAlign = CustomAlign.SPACE_AROUND
 
         box {
             backgroundHandle = "choose_card_add_to_deck"
@@ -190,7 +202,7 @@ class ChooseCardScreen : ScreenCreator() {
                 invalidateParent = true,
             )
 
-            var isDisabled = !SaveState.curDeck.canAddCards()
+            var isDisabled = !currentDeck.canAddCards()
             if (isDisabled) {
                 animation.state("closed")
                 alpha = 0.5f
@@ -199,8 +211,8 @@ class ChooseCardScreen : ScreenCreator() {
                 alpha = 1f
                 filter.end()
             }
-            events.watchFor<BackpackCreator.DeckChangedEvent> {
-                isDisabled = !SaveState.curDeck.canAddCards()
+            events.watchFor<RecheckAddToDeck> {
+                isDisabled = !currentDeck.canAddCards()
                 if (isDisabled) {
                     animation.state("closed")
                     alpha = 0.5f
@@ -246,7 +258,7 @@ class ChooseCardScreen : ScreenCreator() {
                 invalidateParent = true,
             )
 
-            var isDisabled = !SaveState.curDeck.hasEnoughCards()
+            var isDisabled = !currentDeck.hasEnoughCards()
             if (isDisabled) {
                 animation.state("closed")
                 alpha = 0.5f
@@ -255,8 +267,8 @@ class ChooseCardScreen : ScreenCreator() {
                 alpha = 1f
                 filter.end()
             }
-            events.watchFor<BackpackCreator.DeckChangedEvent> {
-                isDisabled = !SaveState.curDeck.hasEnoughCards()
+            events.watchFor<RecheckAddToDeck> {
+                isDisabled = !currentDeck.hasEnoughCards()
                 if (isDisabled) {
                     animation.state("closed")
                     alpha = 0.5f
@@ -284,10 +296,9 @@ class ChooseCardScreen : ScreenCreator() {
 
     private fun getCard(card: String, addToDeck: Boolean) {
         FortyFive.logger.debug(name, "Chose card: $card")
-        SaveState.buyCard(card)
-        if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card)
+        profile.getCardForRun(card)
+        if (addToDeck) currentDeck.addToDeck(currentDeck.nextFreeSlot(), card)
         context.completed()
-        SaveState.write()
         FortyFive.screenManager.screenFinished()
     }
 
@@ -309,12 +320,14 @@ class ChooseCardScreen : ScreenCreator() {
                 allProtos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
             }
         } else {
+            val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
+                ?: return listOf()
             RandomCardSelection.getRandomCards(
                 screen,
                 context.types,
                 context.nbrOfCards,
                 Random(context.seed),
-                MapManager.currentDetailMap.biome,
+                biome,
                 "chooseCard",
                 unique = true
             )
@@ -351,6 +364,7 @@ class ChooseCardScreen : ScreenCreator() {
         BiomeBackgroundScreenController(screen, true)
     )
 
+    private data object RecheckAddToDeck
     private data class CardsChangedEvent(val newCards: List<Card>)
 
     companion object : ScreenManager.ScreenCreatorCompanion {

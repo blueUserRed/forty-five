@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 
@@ -100,6 +102,20 @@ class PropertyAnimation<T : Any>(
     fun transition(from: String, to: String, time: Int, interpolation: Interpolation) {
         val transition = AnimTransition(from, to, time, interpolation)
         transitions.add(transition)
+    }
+
+    fun stateAction(state: String): Timeline.TimelineAction = object : Timeline.TimelineAction() {
+
+        private var endTime: Long = -1
+
+        override fun start(timeline: Timeline) {
+            super.start(timeline)
+            val transition = transitionFor(currentState, state)
+            endTime = TimeUtils.millis() + transition.time
+            state(state)
+        }
+
+        override fun isFinished(timeline: Timeline): Boolean = TimeUtils.millis() >= endTime
     }
 
     fun state(state: String) {

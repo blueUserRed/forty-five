@@ -1,6 +1,6 @@
 package com.microwavestudios.fortyfive.screen.screenController
 
-import com.microwavestudios.fortyfive.game.SaveState
+import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -23,7 +23,7 @@ class DraftScreenController(private val screen: OnjScreen) : ScreenController() 
 
     private val timeline: Timeline = Timeline()
 
-    private val targetAmount: Int = SaveState.Deck.minDeckSize
+    private val targetAmount: Int = Deck.minDeckSize
     private var currentAmount: Int by templateParam(
         "draft.current", 0
     )

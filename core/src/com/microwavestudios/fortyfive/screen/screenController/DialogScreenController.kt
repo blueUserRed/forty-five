@@ -1,12 +1,13 @@
 package com.microwavestudios.fortyfive.screen.screenController
 
-import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.Npc
 import com.microwavestudios.fortyfive.map.Completable
 import com.microwavestudios.fortyfive.map.events.dialog.Dialog
 import com.microwavestudios.fortyfive.map.events.dialog.DialogPart
 import com.microwavestudios.fortyfive.map.events.dialog.NextDialogPartSelector
+import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
@@ -24,7 +25,7 @@ class DialogScreenController(
 
     private lateinit var context: DialogScreenContext
 
-    private lateinit var npcs: Map<String, DialogNpc>
+    private lateinit var npcs: Map<String, Npc>
 
     private lateinit var dialog: Dialog
 
@@ -47,7 +48,7 @@ class DialogScreenController(
             .find { it.get<String>("name") == context.dialog }
             ?: throw RuntimeException("unknown dialog: ${context.dialog}")
 
-        npcs = toNpcMap(configFile.get<OnjArray>("npcs"))
+        npcs = ConfigFileManager.npcConfig.npcs
         dialog = Dialog.readFromOnj(dialogOnj, screen)
     }
 
@@ -98,6 +99,49 @@ class DialogScreenController(
                 updateToNewDialog()
             }
 
+            is NextDialogPartSelector.ByPredicate -> {
+                val profile = FortyFive.profileManager.currentProfile!!
+                val map = profile.currentMapSaver.currentMap
+                val condition = selector.predicate.check(map)
+                val partName = if (condition) selector.ifTrue else selector.ifFalse
+                val part = dialog.partWithLabel(partName)
+                currentDialogPartIndex = dialog.parts.indexOf(part)
+                updateToNewDialog()
+            }
+
+            is NextDialogPartSelector.MatchPredicate -> {
+                val profile = FortyFive.profileManager.currentProfile!!
+                val map = profile.currentMapSaver.currentMap
+                var chosen: String? = null
+                selector.options.forEach { (predicate, label) ->
+                    if (chosen != null) return@forEach
+                    if (predicate.check(map)) chosen = label
+                }
+                val part = dialog.partWithLabel(chosen ?: selector.default)
+                currentDialogPartIndex = dialog.parts.indexOf(part)
+                updateToNewDialog()
+            }
+
+            is NextDialogPartSelector.StartSpecialRunEnd -> {
+                val run = ConfigFileManager.runConfig.loadRun(selector.run)
+                require(run.type == RunType.SPECIAL_NOT_IN_BOARD) {
+                    "run started via Dialog must be of type SPECIAL_NOT_IN_BOARD"
+                }
+                val profile = FortyFive.profileManager.currentProfile!!
+                profile.startRun(run)
+                FortyFive.screenManager.screenFinished()
+            }
+
+            is NextDialogPartSelector.AddSpecialRunEnd -> {
+                val run = ConfigFileManager.runConfig.loadRun(selector.run)
+                require(run.type == RunType.SPECIAL || run.type == RunType.PROGRESS) {
+                    "dialogs can only add special or progress runs to the runBoard"
+                }
+                val profile = FortyFive.profileManager.currentProfile!!
+                profile.addRunToRunBoard(profile.currentAreaMapName, run)
+                FortyFive.screenManager.screenFinished()
+            }
+
             is NextDialogPartSelector.GiftCardEnd -> {
                 val context = object : ChooseCardScreenContext {
                     override var seed: Long = 0
@@ -113,6 +157,7 @@ class DialogScreenController(
                     override fun completed() {}
                 }
                 FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, context)
+                FortyFive.screenManager.screenFinished()
             }
 
             is NextDialogPartSelector.Choice -> {
@@ -162,47 +207,17 @@ class DialogScreenController(
         context.completed()
     }
 
-    private fun toNpcMap(array: OnjArray): Map<String, DialogNpc> = array
-        .value
-        .filterIsInstance<OnjObject>()
-        .map {
-            val img = it.get<OnjObject>("image")
-            DialogNpc(
-                it.get<String>("name"),
-                it.get<String>("displayName"),
-                img.get<String>("textureName"),
-                Vector2(
-                    img.getOr<Double>("offsetX", 0.0).toFloat(),
-                    img.getOr<Double>("offsetY", 0.0).toFloat()
-                ),
-                img.getOr<Double>("width", 1.0).toFloat(),
-                img.getOr<Double>("height", 1.0).toFloat(),
-                img.getOr<Boolean>("flipOnRightSide", false),
-            )
-        }
-        .associateBy { it.name }
-
 
     companion object {
         const val logTag = "dialogScreenController"
     }
 
-    data class ChangeNpcEvent(val newNpc: DialogNpc?, val isLeft: Boolean)
+    data class ChangeNpcEvent(val newNpc: Npc?, val isLeft: Boolean)
     data object NextClicked
     data class ChangeToNewDialogPart(val part: DialogPart)
     data class Choice(val choices: Set<String>, val promise: Promise<String>)
 
 }
-
-data class DialogNpc(
-    val name: String,
-    val displayName: String,
-    val textureName: String,
-    val offset: Vector2,
-    val width: Float,
-    val height: Float,
-    val flipOnRightSide: Boolean
-)
 
 interface DialogScreenContext : Completable {
     val dialog: String

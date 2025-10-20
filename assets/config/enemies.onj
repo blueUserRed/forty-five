@@ -3,325 +3,369 @@ import "imports/colors.onj" as color;
 
 use Cards; // include Card namespace for status effects
 
+enemyGroups: [
+    {
+        groupName: "Outlaw",
+        variants: [
+            {
+                name: "Outlaw-1",
+                majorDifficulty: 1
+            },
+            {
+                name: "Outlaw-2",
+                majorDifficulty: 2
+            },
+            {
+                name: "Outlaw-3",
+                majorDifficulty: 3
+            },
+            {
+                name: "Outlaw-4",
+                majorDifficulty: 4
+            },
+        ]
+    }
+],
+
 enemies: [
 
     {
-        name: "Outlaw_lvl1_alone",
+        name: "Outlaw_test",
         title: "Outlaw",
-        baseHealth: 80,
+        baseHealth: 50,
+        texture: "enemy_outlaw",
+        brain: $ScriptedEnemyBrain {
+            actions: [
+//                {
+//                    turn: 1,
+//                    show: true,
+//                    action: $DamagePlayer {
+//                        damage: [ 600, 600 ],
+//                        scaleFactor: 1.0,
+//                        icon: "enemy_action_damage",
+//                        hasSpecialAnimation: false,
+//                        title: "Damage",
+//                        descriptionTemplate: "This attack does {damage} damage",
+//                    }
+//                }
+            ],
+        },
+    },
+
+    {
+        name: "Outlaw-1",
+        title: "Outlaw",
+        baseHealth: 70,
         texture: "enemy_outlaw",
         brain: $NewEnemyBrain {
             damageShieldWeight: 0.78,
             normalSpecialActionWeight: 1.0,
-            baseDamage: [4, 5],
-            baseShield: [4, 5],
-            scaleIncreasePerTurn: 0.3,
+            baseDamage: [3, 5],
+            baseShield: [3, 5],
+            scaleIncreasePerTurn: 0.0,
             actions: [],
         },
     },
-
     {
-        name: "Outlaw_lvl1_partner",
-        title: "Outlaw",
-        baseHealth: 80,
-        texture: "enemy_outlaw",
-        brain: $NewEnemyBrain {
-            damageShieldWeight: 0.7,
-            normalSpecialActionWeight: 1.0,
-            baseDamage: [4, 5],
-            baseShield: [4, 5],
-            scaleIncreasePerTurn: 0.15,
-            actions: [],
-        },
-    },
-
-    {
-        name: "Outlaw_lvl2_alone",
-        title: "Outlaw",
-        baseHealth: 100,
-        texture: "enemy_outlaw",
-        brain: $NewEnemyBrain {
-            damageShieldWeight: 0.78,
-            normalSpecialActionWeight: 1.0,
-            baseDamage: [6, 7],
-            baseShield: [6, 7],
-            scaleIncreasePerTurn: 0.3,
-            actions: [],
-        },
-    },
-
-    {
-        name: "Outlaw_lvl2_partner",
+        name: "Outlaw-2",
         title: "Outlaw",
         baseHealth: 100,
         texture: "enemy_outlaw",
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.7,
+            damageShieldWeight: 0.78,
             normalSpecialActionWeight: 1.0,
-            baseDamage: [6, 7],
-            baseShield: [6, 7],
-            scaleIncreasePerTurn: 0.15,
+            baseDamage: [5, 7],
+            baseShield: [5, 8],
+            scaleIncreasePerTurn: 0.0,
+            actions: [],
+        },
+    },
+    {
+        name: "Outlaw-3",
+        title: "Outlaw",
+        baseHealth: 120,
+        texture: "enemy_outlaw",
+        brain: $NewEnemyBrain {
+            damageShieldWeight: 0.78,
+            normalSpecialActionWeight: 1.0,
+            baseDamage: [6, 8],
+            baseShield: [6, 9],
+            scaleIncreasePerTurn: 0.0,
+            actions: [],
+        },
+    },
+    {
+        name: "Outlaw-4",
+        title: "Outlaw",
+        baseHealth: 150,
+        texture: "enemy_outlaw",
+        brain: $NewEnemyBrain {
+            damageShieldWeight: 0.78,
+            normalSpecialActionWeight: 1.0,
+            baseDamage: [6, 8],
+            baseShield: [6, 9],
+            scaleIncreasePerTurn: 0.0,
             actions: [],
         },
     },
 
-    {
-        name: "Pyro_lvl1_alone",
-        title: "Pyro",
-        baseHealth: 75,
-        texture: "enemy_pyro",
-        brain: $NewEnemyBrain {
-            damageShieldWeight: 0.78,
-            normalSpecialActionWeight: 0.7,
-            baseDamage: [4, 5],
-            baseShield: [4, 5],
-            scaleIncreasePerTurn: 0.4,
-            actions: [
-                {
-                    weight: 10,
-                    showProbability: 0.8,
-                    maxExecutions: 1,
-                    action: $GivePlayerCard {
-                        card: "scorchingBullet",
-                        icon: "enemy_action_hot_potato",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-                        specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
-                        title: "Hot Potato",
-                        descriptionTemplate: "A Scorching Bullet will be put in your hand!",
-                    }
-                },
-                {
-                    weight: 20,
-                    showProbability: 0.6,
-                    action: $GivePlayerStatusEffect {
-                        statusEffect: burning([3, 5]#val, 0.5, false),
-                        icon: "enemy_action_burning",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-                        specialPanel: "enemy_pyro_action_comic_panel_burning",
-                        title: "Burning",
-                        descriptionTemplate: "You get Burning!",
-                    }
-                },
-            ],
-        },
-    },
-
-    {
-        name: "Pyro_lvl1_partner",
-        title: "Pyro",
-        baseHealth: 75,
-        texture: "enemy_pyro",
-        brain: $NewEnemyBrain {
-            damageShieldWeight: 0.7,
-            normalSpecialActionWeight: 0.4,
-            baseDamage: [2, 3],
-            baseShield: [4, 6],
-            scaleIncreasePerTurn: 0.2,
-            actions: [
-                {
-                    weight: 10,
-                    showProbability: 0.8,
-                    maxExecutions: 1,
-                    action: $GivePlayerCard {
-                        card: "scorchingBullet",
-                        icon: "enemy_action_hot_potato",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-                        specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
-                        title: "Hot Potato",
-                        descriptionTemplate: "A Scorching Bullet will be put in your hand!",
-                    }
-                },
-                {
-                    weight: 20,
-                    showProbability: 0.6,
-                    action: $GivePlayerStatusEffect {
-                        statusEffect: burning([3, 5]#val, 0.5, false),
-                        icon: "enemy_action_burning",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-                        specialPanel: "enemy_pyro_action_comic_panel_burning",
-                        title: "Burning",
-                        descriptionTemplate: "You get Burning!",
-                    }
-                },
-            ],
-        },
-    },
-
-    {
-        name: "Witch_lvl1_alone",
-        title: "Witch",
-        baseHealth: 90,
-        texture: "enemy_witch",
-        brain: $NewEnemyBrain {
-            damageShieldWeight: 0.78,
-            normalSpecialActionWeight: 0.8,
-            baseDamage: [4, 5],
-            baseShield: [4, 5],
-            scaleIncreasePerTurn: 0.4,
-            actions: [
-                {
-                    weight: 10,
-                    showProbability: 0.8,
-                    action: $RotateRevolver {
-                        maxTurns: 1,
-                        forceDirection: "left",
-                        icon: "enemy_action_left_turn",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
-                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
-                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
-                        specialPanel: "enemy_witch_action_comic_panel_left_turn",
-                        title: "Left Turn",
-                        descriptionTemplate: "The revolver rotates to the left!",
-                    }
-                },
-                {
-                    weight: 10,
-                    showProbability: 0.6,
-                    action: $GivePlayerStatusEffect {
-                        statusEffect: bewitched([1, 2]#val, [4, 6]#val),
-                        icon: "enemy_action_bewitched",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
-                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
-                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
-                        specialPanel: "enemy_witch_action_comic_panel_bewitched",
-                        title: "Bewitched",
-                        descriptionTemplate: "You get the Bewitched status effect!",
-                    }
-                },
-            ],
-        },
-    },
-
-    {
-        name: "Witch_lvl1_partner",
-        title: "Witch",
-        baseHealth: 90,
-        texture: "enemy_witch",
-        brain: $NewEnemyBrain {
-            damageShieldWeight: 0.7,
-            normalSpecialActionWeight: 0.4,
-            baseDamage: [2, 3],
-            baseShield: [8, 9],
-            scaleIncreasePerTurn: 0.2,
-            actions: [
-                {
-                    weight: 10,
-                    showProbability: 0.8,
-                    action: $RotateRevolver {
-                        maxTurns: 1,
-                        forceDirection: "left",
-                        icon: "enemy_action_left_turn",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
-                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
-                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
-                        specialPanel: "enemy_witch_action_comic_panel_left_turn",
-                        title: "Left Turn",
-                        descriptionTemplate: "The revolver rotates to the left!",
-                    }
-                },
-                {
-                    weight: 10,
-                    showProbability: 0.6,
-                    action: $GivePlayerStatusEffect {
-                        statusEffect: bewitched([1, 2]#val, [4, 6]#val),
-                        icon: "enemy_action_bewitched",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
-                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
-                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
-                        specialPanel: "enemy_witch_action_comic_panel_bewitched",
-                        title: "Bewitched",
-                        descriptionTemplate: "You get the Bewitched status effect!",
-                    }
-                },
-            ],
-        },
-    },
-
-    {
-        name: "Sniper_lvl1_alone",
-        title: "Sniper",
-        baseHealth: 90,
-        texture: "enemy_sniper",
-        brain: $SniperEnemyBrain {
-            damageShieldWeight: 0.8,
-            normalSpecialActionWeight: 0.5,
-            baseDamage: [4, 6],
-            baseShield: [8, 9],
-            scaleIncreasePerTurn: 0.2,
-            goodbyesAction: $PutMarkedCardsUnderDeck {
-                icon: "enemy_action_goodbyes",
-                hasSpecialAnimation: true,
-                commonPanel1: "enemy_sniper_action_comic_common_panel_1",
-                commonPanel2: "enemy_sniper_action_comic_common_panel_2",
-                commonPanel3: "enemy_sniper_action_comic_common_panel_3",
-                specialPanel: "enemy_sniper_action_comic_panel_goodbyes",
-                title: "Hope you said your goodbyes",
-                descriptionTemplate: "All marked cards in the hand get put underneath your deck",
-            },
-            actions: [
-                {
-                    weight: 5,
-                    showProbability: 1.0,
-                    action: $PiercingDamage {
-                        damage: [3, 5],
-                        scaleFactor: 0.8,
-                        icon: "enemy_action_piercing",
-                        hasSpecialAnimation: false,
-                        title: "Piercing Damage",
-                        descriptionTemplate: "This attack cannot be blocked by shield, only parried",
-                    }
-                },
-                {
-                    weight: 15,
-                    showProbability: 1.0,
-                    maxExecutions: 2,
-                    action: $MarkCards {
-                        amountToMark: [4, 6],
-                        icon: "enemy_action_heads_up",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_sniper_action_comic_common_panel_1",
-                        commonPanel2: "enemy_sniper_action_comic_common_panel_2",
-                        commonPanel3: "enemy_sniper_action_comic_common_panel_3",
-                        specialPanel: "enemy_sniper_action_comic_panel_heads_up",
-                        title: "Heads up - or rather down",
-                        descriptionTemplate: "{amount} cards in your hand are marked and will be put under your deck the next turn. Loading them in the revolver unmarks them.",
-                    }
-                },
-                {
-                    weight: 10,
-                    showProbability: 1.0,
-                    maxExecutions: 2,
-                    action: $PutBulletFromRevolverUnderDeck {
-                        possibleSlots: [4],
-                        icon: "enemy_action_and_its_gone",
-                        hasSpecialAnimation: true,
-                        commonPanel1: "enemy_sniper_action_comic_common_panel_1",
-                        commonPanel2: "enemy_sniper_action_comic_common_panel_2",
-                        commonPanel3: "enemy_sniper_action_comic_common_panel_3",
-                        specialPanel: "enemy_sniper_action_comic_panel_and_its_gone",
-                        title: "Aaaand it's gone",
-                        descriptionTemplate: "The bullet in slot {slot} will be put under you deck.",
-                    }
-                },
-            ],
-        },
-    },
+//    {
+//        name: "Pyro_lvl1_alone",
+//        title: "Pyro",
+//        baseHealth: 75,
+//        texture: "enemy_pyro",
+//        brain: $NewEnemyBrain {
+//            damageShieldWeight: 0.78,
+//            normalSpecialActionWeight: 0.7,
+//            baseDamage: [4, 5],
+//            baseShield: [4, 5],
+//            scaleIncreasePerTurn: 0.4,
+//            actions: [
+//                {
+//                    weight: 10,
+//                    showProbability: 0.8,
+//                    maxExecutions: 1,
+//                    action: $GivePlayerCard {
+//                        card: "scorchingBullet",
+//                        icon: "enemy_action_hot_potato",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+//                        specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
+//                        title: "Hot Potato",
+//                        descriptionTemplate: "A Scorching Bullet will be put in your hand!",
+//                    }
+//                },
+//                {
+//                    weight: 20,
+//                    showProbability: 0.6,
+//                    action: $GivePlayerStatusEffect {
+//                        statusEffect: burning([3, 5]#val, 0.5, false),
+//                        icon: "enemy_action_burning",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+//                        specialPanel: "enemy_pyro_action_comic_panel_burning",
+//                        title: "Burning",
+//                        descriptionTemplate: "You get Burning!",
+//                    }
+//                },
+//            ],
+//        },
+//    },
+//
+//    {
+//        name: "Pyro_lvl1_partner",
+//        title: "Pyro",
+//        baseHealth: 75,
+//        texture: "enemy_pyro",
+//        brain: $NewEnemyBrain {
+//            damageShieldWeight: 0.7,
+//            normalSpecialActionWeight: 0.4,
+//            baseDamage: [2, 3],
+//            baseShield: [4, 6],
+//            scaleIncreasePerTurn: 0.2,
+//            actions: [
+//                {
+//                    weight: 10,
+//                    showProbability: 0.8,
+//                    maxExecutions: 1,
+//                    action: $GivePlayerCard {
+//                        card: "scorchingBullet",
+//                        icon: "enemy_action_hot_potato",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+//                        specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
+//                        title: "Hot Potato",
+//                        descriptionTemplate: "A Scorching Bullet will be put in your hand!",
+//                    }
+//                },
+//                {
+//                    weight: 20,
+//                    showProbability: 0.6,
+//                    action: $GivePlayerStatusEffect {
+//                        statusEffect: burning([3, 5]#val, 0.5, false),
+//                        icon: "enemy_action_burning",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+//                        specialPanel: "enemy_pyro_action_comic_panel_burning",
+//                        title: "Burning",
+//                        descriptionTemplate: "You get Burning!",
+//                    }
+//                },
+//            ],
+//        },
+//    },
+//
+//    {
+//        name: "Witch_lvl1_alone",
+//        title: "Witch",
+//        baseHealth: 90,
+//        texture: "enemy_witch",
+//        brain: $NewEnemyBrain {
+//            damageShieldWeight: 0.78,
+//            normalSpecialActionWeight: 0.8,
+//            baseDamage: [4, 5],
+//            baseShield: [4, 5],
+//            scaleIncreasePerTurn: 0.4,
+//            actions: [
+//                {
+//                    weight: 10,
+//                    showProbability: 0.8,
+//                    action: $RotateRevolver {
+//                        maxTurns: 1,
+//                        forceDirection: "left",
+//                        icon: "enemy_action_left_turn",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
+//                        specialPanel: "enemy_witch_action_comic_panel_left_turn",
+//                        title: "Left Turn",
+//                        descriptionTemplate: "The revolver rotates to the left!",
+//                    }
+//                },
+//                {
+//                    weight: 10,
+//                    showProbability: 0.6,
+//                    action: $GivePlayerStatusEffect {
+//                        statusEffect: bewitched([1, 2]#val, [4, 6]#val),
+//                        icon: "enemy_action_bewitched",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
+//                        specialPanel: "enemy_witch_action_comic_panel_bewitched",
+//                        title: "Bewitched",
+//                        descriptionTemplate: "You get the Bewitched status effect!",
+//                    }
+//                },
+//            ],
+//        },
+//    },
+//
+//    {
+//        name: "Witch_lvl1_partner",
+//        title: "Witch",
+//        baseHealth: 90,
+//        texture: "enemy_witch",
+//        brain: $NewEnemyBrain {
+//            damageShieldWeight: 0.7,
+//            normalSpecialActionWeight: 0.4,
+//            baseDamage: [2, 3],
+//            baseShield: [8, 9],
+//            scaleIncreasePerTurn: 0.2,
+//            actions: [
+//                {
+//                    weight: 10,
+//                    showProbability: 0.8,
+//                    action: $RotateRevolver {
+//                        maxTurns: 1,
+//                        forceDirection: "left",
+//                        icon: "enemy_action_left_turn",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
+//                        specialPanel: "enemy_witch_action_comic_panel_left_turn",
+//                        title: "Left Turn",
+//                        descriptionTemplate: "The revolver rotates to the left!",
+//                    }
+//                },
+//                {
+//                    weight: 10,
+//                    showProbability: 0.6,
+//                    action: $GivePlayerStatusEffect {
+//                        statusEffect: bewitched([1, 2]#val, [4, 6]#val),
+//                        icon: "enemy_action_bewitched",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_witch_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_witch_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_witch_action_comic_common_panel_3",
+//                        specialPanel: "enemy_witch_action_comic_panel_bewitched",
+//                        title: "Bewitched",
+//                        descriptionTemplate: "You get the Bewitched status effect!",
+//                    }
+//                },
+//            ],
+//        },
+//    },
+//
+//    {
+//        name: "Sniper_lvl1_alone",
+//        title: "Sniper",
+//        baseHealth: 90,
+//        texture: "enemy_sniper",
+//        brain: $SniperEnemyBrain {
+//            damageShieldWeight: 0.8,
+//            normalSpecialActionWeight: 0.5,
+//            baseDamage: [4, 6],
+//            baseShield: [8, 9],
+//            scaleIncreasePerTurn: 0.2,
+//            goodbyesAction: $PutMarkedCardsUnderDeck {
+//                icon: "enemy_action_goodbyes",
+//                hasSpecialAnimation: true,
+//                commonPanel1: "enemy_sniper_action_comic_common_panel_1",
+//                commonPanel2: "enemy_sniper_action_comic_common_panel_2",
+//                commonPanel3: "enemy_sniper_action_comic_common_panel_3",
+//                specialPanel: "enemy_sniper_action_comic_panel_goodbyes",
+//                title: "Hope you said your goodbyes",
+//                descriptionTemplate: "All marked cards in the hand get put underneath your deck",
+//            },
+//            actions: [
+//                {
+//                    weight: 5,
+//                    showProbability: 1.0,
+//                    action: $PiercingDamage {
+//                        damage: [3, 5],
+//                        scaleFactor: 0.8,
+//                        icon: "enemy_action_piercing",
+//                        hasSpecialAnimation: false,
+//                        title: "Piercing Damage",
+//                        descriptionTemplate: "This attack cannot be blocked by shield, only parried",
+//                    }
+//                },
+//                {
+//                    weight: 15,
+//                    showProbability: 1.0,
+//                    maxExecutions: 2,
+//                    action: $MarkCards {
+//                        amountToMark: [4, 6],
+//                        icon: "enemy_action_heads_up",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_sniper_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_sniper_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_sniper_action_comic_common_panel_3",
+//                        specialPanel: "enemy_sniper_action_comic_panel_heads_up",
+//                        title: "Heads up - or rather down",
+//                        descriptionTemplate: "{amount} cards in your hand are marked and will be put under your deck the next turn. Loading them in the revolver unmarks them.",
+//                    }
+//                },
+//                {
+//                    weight: 10,
+//                    showProbability: 1.0,
+//                    maxExecutions: 2,
+//                    action: $PutBulletFromRevolverUnderDeck {
+//                        possibleSlots: [4],
+//                        icon: "enemy_action_and_its_gone",
+//                        hasSpecialAnimation: true,
+//                        commonPanel1: "enemy_sniper_action_comic_common_panel_1",
+//                        commonPanel2: "enemy_sniper_action_comic_common_panel_2",
+//                        commonPanel3: "enemy_sniper_action_comic_common_panel_3",
+//                        specialPanel: "enemy_sniper_action_comic_panel_and_its_gone",
+//                        title: "Aaaand it's gone",
+//                        descriptionTemplate: "The bullet in slot {slot} will be put under you deck.",
+//                    }
+//                },
+//            ],
+//        },
+//    },
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

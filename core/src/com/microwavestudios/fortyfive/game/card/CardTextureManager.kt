@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.game.SaveState
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -125,7 +124,8 @@ class CardTextureManager {
         data.cardPixmap = null
     }
 
-    private fun preventUnloadingOfCard(data: CardTextureData): Boolean = data.cardName in SaveState.curDeck.cards
+    private fun preventUnloadingOfCard(data: CardTextureData): Boolean =
+        FortyFive.profileManager.currentProfile?.currentRunDeck?.cards?.let { data.cardName in it } ?: false
 
     private fun cardTextureDataFor(card: Card): CardTextureData = cardTextures
         .find { it.cardName == card.name }

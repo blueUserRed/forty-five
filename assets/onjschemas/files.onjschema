@@ -4,6 +4,8 @@ var fileConfig = {
     validatedBy: string?
 };
 
+displayNames: string[2][],
+
 configFiles: {
     assets: fileConfig,
     cards: fileConfig,
@@ -21,6 +23,7 @@ configFiles: {
     mapConfig: fileConfig,
     inputMaps: fileConfig,
     creditsText: fileConfig,
+    npcs: fileConfig,
 },
 
 screenSchema: string,

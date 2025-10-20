@@ -7,20 +7,23 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.EncounterModifier
-import com.microwavestudios.fortyfive.game.GameDirector
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.keyInput.GameInputs
+import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.DetailMapWidget
 import com.microwavestudios.fortyfive.map.EncounterMapEvent
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.map.MapNode
+import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.actors.CustomAlign
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -47,10 +50,13 @@ class MapScreen : ScreenCreator() {
         "*" to 200 //TODO maybe change back to 1000
     )
 
+    private val mapSaver: MapSaver by lazy {
+        FortyFive.profileManager.currentProfile!!.currentMapSaver
+    }
+
     private val mapWidget by lazy {
         DetailMapWidget(
             screen = screen,
-            map = MapManager.currentDetailMap,
             defaultNodeDrawableHandle = "map_node_default",
             edgeTextureHandle = "map_path",
             playerDrawableHandle = "map_player",
@@ -65,6 +71,7 @@ class MapScreen : ScreenCreator() {
             screenSpeed = 25f,
             scrollMargin = 0f,
             disabledDirectionIndicatorAlpha = 0.5f,
+            mapSaver = mapSaver,
             mapScale = 10f
         )
     }
@@ -78,9 +85,7 @@ class MapScreen : ScreenCreator() {
         )
     }
 
-    override fun getScreenControllers(): List<ScreenController> = listOf(
-//        MapScreenController(screen)
-    )
+    override fun getScreenControllers(): List<ScreenController> = listOf()
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -93,7 +98,7 @@ class MapScreen : ScreenCreator() {
             y = 0f
             width = worldWidth
             height = worldHeight
-            backgroundHandle = when (MapManager.currentDetailMap.biome) {
+            backgroundHandle = when (mapSaver.currentMap.biome) {
                 "wasteland" -> "map_background_wasteland_tileable"
                 "bewitched_forest" -> "map_background_bewitched_forest_tileable"
                 "magenta_mountains" -> "map_background_magenta_mountains_tileable"
@@ -101,10 +106,15 @@ class MapScreen : ScreenCreator() {
             }
         }
         getInfoPopup()
+
+        val inRun = FortyFive.profileManager.currentProfile!!.isRunActive
         addDefaultOverlays(
             worldWidth,
             worldHeight,
             warningEvents,
+            canHaveRunBoard = true,
+            hasBackpack = inRun,
+            hasCollection = !inRun,
             warnings = WarningParent(this@MapScreen, screen, warningEvents)
         )
     }
@@ -118,9 +128,12 @@ class MapScreen : ScreenCreator() {
         val normalX = worldWidth - width + 10f
         val closedX = normalX + 300f
         x = normalX
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_BETWEEN
+        flexDirection = FlexDirection.COLUMN
+        horizontalAlign = CustomAlign.CENTER
+        verticalAlign = CustomAlign.SPACE_BETWEEN
+
+        val startButtonGroup = "map-popup-start-button"
+        val startButtonFilter = InputManager.FocusFilter(listOf(startButtonGroup), screen)
 
         fun getAction(to: Float) = MoveToAction().also {
             it.x = to
@@ -137,15 +150,20 @@ class MapScreen : ScreenCreator() {
             open = shouldBeOpen
             val action = getAction(if (shouldBeOpen) normalX else closedX)
             addAction(action)
+            if (shouldBeOpen) {
+                startButtonFilter.end()
+            } else {
+                startButtonFilter.start()
+            }
         }
 
         val eventName: CustomLabel
         val eventDescription: CustomLabel
 
         box {
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+            flexDirection = FlexDirection.COLUMN
             relativeWidth(100f)
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+            horizontalAlign = CustomAlign.CENTER
             marginTop = 20f
             height = 500f
 
@@ -167,6 +185,7 @@ class MapScreen : ScreenCreator() {
                 syncHeight()
             }
 
+            warningLabel()
             encounterModifiers()
         }
 
@@ -174,7 +193,11 @@ class MapScreen : ScreenCreator() {
             val event = node.event ?: return
             if (!event.displayDescription) return
             eventName.setText(event.displayName)
-            eventDescription.setText(event.descriptionText)
+            if (event.isCompleted) {
+                eventDescription.setText(event.completedDescriptionText)
+            } else {
+                eventDescription.setText(event.descriptionText)
+            }
         }
 
         updateDescription(mapWidget.playerNode)
@@ -194,11 +217,16 @@ class MapScreen : ScreenCreator() {
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             marginBottom = 27f
+            joinGroup(startButtonGroup)
             onInput(GameInputs.interact) {
-                if (mapWidget.playerNode.event?.canBeStarted == true) {
+                if (mapWidget.playerNode.event?.startable == true) {
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
                 }
+            }
+
+            mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
+                isVisible = node.event?.canBeStarted(mapSaver.currentMap) ?: false
             }
 
             val dropShadow = BakedDropShadow(
@@ -226,18 +254,44 @@ class MapScreen : ScreenCreator() {
         }
     }
 
+    private fun Group.warningLabel() = box {
+        backgroundHandle = "red_texture"
+        width = 320f
+        height = 140f
+
+        verticalAlign = CustomAlign.CENTER
+        horizontalAlign = CustomAlign.CENTER
+
+        isVisible = false
+
+        val label = label("roadgeek", "", Color.FortyWhite) {
+            setFontScale(0.6f)
+            setAlignment(Align.center)
+            badTexture("map info popup warning label")
+            wrap = true
+            width = 320f
+            height = 140f
+        }
+
+        mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
+            val warning = node.event?.warningText
+            label.setText(warning)
+            isVisible = warning != null
+        }
+    }
+
     private fun Group.encounterModifiers() = box {
         backgroundHandle = "map_detail_encounter_modifier_background"
         width = 320f
         height = 320f
-        flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
-        verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-        horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+        flexDirection = FlexDirection.COLUMN
+        verticalAlign = CustomAlign.CENTER
+        horizontalAlign = CustomAlign.SPACE_AROUND
 
         fun encounterModifierDisplay(modifier: EncounterModifier) = box {
-            flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.ROW
-            verticalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
-            horizontalAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.SPACE_AROUND
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.SPACE_AROUND
             val icon = GraphicsConfig.encounterModifierIcon(modifier)
             val name = GraphicsConfig.encounterModifierDisplayName(modifier)
             val description = GraphicsConfig.encounterModifierDescription(modifier)
@@ -253,7 +307,7 @@ class MapScreen : ScreenCreator() {
 
             box {
 
-                flexDirection = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.FlexDirection.COLUMN
+                flexDirection = FlexDirection.COLUMN
                 width = parent.width - iconImage.width - 40f
                 syncHeight()
 
@@ -282,7 +336,7 @@ class MapScreen : ScreenCreator() {
             clearChildren()
             isVisible = false
             val event = node.event as? EncounterMapEvent ?: return@watchFor
-            val encounter = GameDirector.encounters[event.encounterIndex]
+            val encounter = event.encounter
             val modifiers = encounter.encounterModifier
             if (modifiers.isEmpty()) return@watchFor
             isVisible = true

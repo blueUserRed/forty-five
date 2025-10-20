@@ -21,11 +21,13 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     private val groups: MutableMap<String, MutableList<InputActor>> = mutableMapOf()
 
-    private var currentlyDraggedActor: InputActor? = null
+    var currentlyDraggedActor: InputActor? = null
+        private set
 
     private val dragAndDrops: MutableList<DragAndDrop> = mutableListOf()
 
-    private var keyboardFocused: InputActor? = null
+    var keyboardFocused: InputActor? = null
+        private set
 
     private val inputCallbacks: MutableMap<Input, MutableList<() -> Unit>> = mutableMapOf()
 
@@ -415,7 +417,6 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     ): Boolean {
         cancelKeyboardDragAndDrop()
         val hit = hit(screenX, screenY)
-        println("touch up")
         if (currentlyDraggedActor != null) finishDrag(screenX, screenY, hit)
 
         fun checkInput(input: Input, isHit: Boolean, callbacks: List<() -> Unit>) {
@@ -428,6 +429,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         actors.forEach { inputActor ->
             val isHit = inputActor.actor === hit
             val callbacksForInputs = inputActor.inputCallbacks
+            if (!canBeFocused(inputActor, false)) return@forEach
             callbacksForInputs.forEach { input, callbacks ->
                 checkInput(input, isHit, callbacks)
             }
@@ -442,7 +444,6 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
 
     override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
         val hit = hit(screenX, screenY)
-        println("dragged")
         if (currentlyDraggedActor == null) {
             if (hit !is InputActor) return false
             if (!hit.isDraggable) return false
@@ -493,7 +494,8 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         hitResult.notifyDropped(actor)
     }
 
-    private var lastHovered: Actor? = null
+    var lastHovered: Actor? = null
+        private set
 
     override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
         cancelKeyboardDragAndDrop()

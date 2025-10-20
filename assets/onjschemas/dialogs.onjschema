@@ -1,4 +1,5 @@
 import "imports/advanced_text_effect.onjschema" as _;
+import "imports/map_predicates.onjschema" as _;
 
 use Common;
 
@@ -21,6 +22,28 @@ $NextDialogPartSelector {
 
     $GiftCardEnd {
         card: string
+    }
+
+    $ByPredicate {
+        predicate: $MapPredicate,
+        ifTrue: string,
+        ifFalse: string,
+    }
+
+    $MatchPredicate {
+        options: {
+            predicate: $MapPredicate,
+            label: string
+        }[],
+        default: string
+    }
+
+    $StartSpecialRunEnd {
+        run: string,
+    }
+
+    $AddSpecialRunEnd {
+        run: string
     }
 
     $ToCreditScreenEnd { }
@@ -47,19 +70,3 @@ var dialog = {
 };
 
 dialogs: dialog[]
-
-
-var image = {
-    textureName: string,
-    offsetX?: float,
-    offsetY?: float,
-    flipOnRightSide?: boolean,
-    width: float,
-    height: float,
-};
-
-npcs: {
-    name: string,
-    displayName: string,
-    image: image,
-}[]

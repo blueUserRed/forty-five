@@ -1,11 +1,11 @@
 package com.microwavestudios.fortyfive.map
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.buildOnjObject
@@ -16,6 +16,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.schema.OnjSchemaException
 import onj.value.*
+import java.io.File
 
 /**
  * represents a detailMap
@@ -32,9 +33,9 @@ data class DetailMap(
     val animatedDecorations: List<MapDecoration>,
     val isArea: Boolean,
     val biome: String,
-    val progress: ClosedFloatingPointRange<Float>,
     val scrollable: Boolean,
-    val camPosOffset: Vector2
+    val camPosOffset: Vector2,
+    val majorDifficulty: Int,
 ) {
 
     /**
@@ -73,18 +74,16 @@ data class DetailMap(
      * returns a representation of this map as an OnjObject
      */
     fun asOnjObject(): OnjObject = buildOnjObject {
-        "version" with mapVersion
         "nodes" with nodesAsOnjArray()
         "startNode" with startNode.index
         "endNode" with endNode.index
         "decorations" with decorations.map { it.asOnjObject() }
         "animatedDecorations" with animatedDecorations.map { it.asOnjObject() }
-        "isArea" with isArea
         "biome" with biome
-        "progress" with progress.asArray()
         "tutorialText" with listOf<Nothing>()
         "scrollable" with scrollable
         "camPosOffset" with camPosOffset.toArray()
+        "majorDifficulty" with majorDifficulty
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -96,6 +95,7 @@ data class DetailMap(
                     "y" with node.y
                     "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
                     "event" with node.event?.asOnjObject()
+                    "distance" with node.distance
                     node.nodeTexture?.let { "nodeTexture" with node.nodeTexture }
                     node.imageName?.let {
                         "image" with it
@@ -112,15 +112,14 @@ data class DetailMap(
 
     companion object {
 
-        const val mapVersion: Int = 0
         const val logTag = "Map"
 
         /**
          * reads a DetailMap from an onj-file
          */
-        fun readFromFile(file: FileHandle): DetailMap {
+        fun readFromFile(file: File): DetailMap {
             val onj = try {
-                val onj = OnjParser.parseFile(file.file())
+                val onj = OnjParser.parseFile(file)
                 mapOnjSchema.assertMatches(onj)
                 onj
             } catch (e: OnjParserException) {
@@ -133,10 +132,6 @@ data class DetailMap(
                 throw InvalidMapFileException()
             }
             onj as OnjObject
-            if (onj.get<Long>("version").toInt() != mapVersion) {
-                FortyFive.logger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
-                throw InvalidMapFileException()
-            }
             val nodes = mutableListOf<MapNodeBuilder>()
             val nodesOnj = onj.get<OnjArray>("nodes")
             nodesOnj
@@ -152,6 +147,7 @@ data class DetailMap(
                             nodeOnj.getOr<String?>("image", null),
                             MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
                             nodeOnj.getOr<String?>("nodeTexture", null),
+                            nodeOnj.getOr<Long?>("distance", null)?.toInt() ?: -1,
                             if (nodeOnj.hasKey<OnjNull>("event")) {
                                 EmptyMapEvent()
                             } else {
@@ -182,26 +178,23 @@ data class DetailMap(
                 .get<OnjArray>("animatedDecorations")
                 .value
                 .map { MapDecoration.fromOnj(it as OnjObject) }
+            val areaConfig = onj.getOr<OnjObject?>("areaConfig", null)
+            val isArea = areaConfig != null
             return DetailMap(
-                file.nameWithoutExtension(),
+                file.nameWithoutExtension,
                 nodes[startNodeIndex].build(),
                 endNode.asNode!!,
                 decorations,
                 animatedDecorations,
-                onj.get<Boolean>("isArea"),
+                isArea,
                 onj.get<String>("biome"),
-                onj.get<OnjArray>("progress").toFloatRange(),
-//                onj.getOr<OnjArray?>("tutorialText", null)
-//                    ?.value
-//                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
-//                    ?.toMutableList()
-//                    ?: mutableListOf(),
                 onj.getOr("scrollable", true),
                 if (onj.hasKey<OnjArray>("camPosOffset")) {
                     onj.get<OnjArray>("camPosOffset").toVector2()
                 } else {
                     Vector2()
-                }
+                },
+                onj.get<Long>("majorDifficulty").toInt(),
             )
         }
 

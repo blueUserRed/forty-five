@@ -19,11 +19,15 @@ import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
+import com.microwavestudios.fortyfive.profile.Profile
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
+import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
+import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
@@ -67,9 +71,9 @@ class GameControllerImpl(
         get() = _encounterModifiers.map { it.second }
 
     override var curPlayerLives: Int
-        get() = SaveState.playerLives
+        get() = profile.healthInRun!!
         private set(value) {
-            SaveState.playerLives = value
+            profile.healthInRun = value
         }
 
     override val activeEnemies: List<Enemy>
@@ -92,7 +96,7 @@ class GameControllerImpl(
     override lateinit var encounterContext: EncounterContext
         private set
 
-    private lateinit var encounter: GameDirector.Encounter
+    private lateinit var encounter: Encounter
 
     private var cardPrototypes: List<CardPrototype> = listOf()
 
@@ -104,8 +108,6 @@ class GameControllerImpl(
 
     private val mainTimeline: Timeline = Timeline().also { it.startTimeline() }
     private val animTimelines: MutableList<Timeline> = mutableListOf()
-
-    private val tutorialText: MutableList<GameDirector.GameTutorialTextPart> = mutableListOf()
 
     var cardsDrawn: Int = 0
         private set
@@ -129,23 +131,29 @@ class GameControllerImpl(
         WarningParent.Level.HIGH
     )
 
+    private val enemyDifficulty
+        get() = 1f + (encounter.minorDifficulty * Config.enemyAggressiveDifficultyAdjustment)
+
+    private lateinit var profile: Profile
+
     override fun init(context: Any?) {
         if (context !is EncounterContext) {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
         encounterContext = context
 
+        profile = FortyFive.profileManager.currentProfile!!
+
         FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.BATTLE)
 
-        encounter = GameDirector.encounters.getOrNull(encounterContext.encounterIndex)
-            ?: throw RuntimeException("No encounter with index: ${encounterContext.encounterIndex}")
+        encounter = encounterContext.encounter
         encounter.encounterModifier.forEach {
             addEncounterModifier(it)
         }
 
         bindGameEventListeners()
 
-        allEnemies = encounter.createdEnemies
+        allEnemies = encounter.createEnemies()
         gameEvents.fire(Events.SetupEnemies(allEnemies))
         gameEvents.fire(Events.EnemySelected(allEnemies.first()))
 
@@ -263,7 +271,7 @@ class GameControllerImpl(
             }
         }
         gameEvents.watchFor<Events.PlayerLivesChanged> { event ->
-            val situation = GameSituation.PlayerHealthChanged(event.oldValue, event.newValue, SaveState.maxPlayerLives)
+            val situation = GameSituation.PlayerHealthChanged(event.oldValue, event.newValue, profile.maxHealthInRun!!)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
             }
@@ -313,6 +321,7 @@ class GameControllerImpl(
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
+        allEnemies.forEach { it.update() }
     }
 
     private fun initCards() {
@@ -320,7 +329,7 @@ class GameControllerImpl(
 
         val cards = encounter.forceCards
             ?: encounterContext.forceCards
-            ?: SaveState.curDeck.cards
+            ?: profile.currentRunDeck!!.cards
 
         val cardsArray = onj.get<OnjArray>("cards")
 
@@ -666,9 +675,14 @@ class GameControllerImpl(
             animTimelines.forEach(Timeline::stopTimeline)
         }
         include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
-        action { mainTimeline.stopTimeline() }
         delay(500)
-        action { FortyFive.newRun(true) }
+        action {
+            if (profile.isRunActive) {
+                profile.loseRun()
+                FortyFive.screenManager.ensureNextScreen(LoseRunScreen)
+            }
+            FortyFive.screenManager.screenFinished()
+        }
     }
 
     override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline = Timeline.timeline {
@@ -818,7 +832,6 @@ class GameControllerImpl(
             dispatchAnimTimeline(postProcessor)
         }
         cardToShoot?.let { card ->
-            action { SaveState.bulletsShot++ }
             targetedEnemies
                 .map { it.damage(cardToShoot.curDamage(this@GameControllerImpl)) }
                 .collectTimeline()
@@ -855,7 +868,6 @@ class GameControllerImpl(
 
     override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
         if (cost > curReserves) return false
-        SaveState.usedReserves += cost
         updateReserves(curReserves - cost, sourceActor = animTarget)
         return true
     }
@@ -891,10 +903,6 @@ class GameControllerImpl(
         gameEvents.fire(Events.EncounterModifierAdded(modifier))
     }
 
-    override fun addTutorialText(textParts: List<GameDirector.GameTutorialTextPart>) {
-        tutorialText.addAll(textParts)
-    }
-
     override fun initEnemyArea(enemies: List<Enemy>) {
     }
 
@@ -907,6 +915,7 @@ class GameControllerImpl(
     }
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
+        if (isUIFrozen) return
         var cardInSlot: Card? = null
         val info = createTriggerInfo(card, sourceCard = card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
@@ -985,7 +994,9 @@ class GameControllerImpl(
 
     private fun winTimeline(): Timeline = Timeline.timeline { later {
         val money = -allEnemies.sumOf { it.currentHealth }
-        val playerGetsCard = !encounter.special && Utils.coinFlip(Config.playerGetsRewardCardChance)
+        val playerGetsCard = !encounter.special &&
+                !encounterContext.isExtraction &&
+                Utils.coinFlip(Config.playerGetsRewardCardChance)
         val event = Events.ShowPlayerWonPopup(
             gotCard = playerGetsCard,
             cashAmount = money
@@ -993,20 +1004,20 @@ class GameControllerImpl(
         action {
             gameEvents.fire(event)
             FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
-            SaveState.encountersWon++
         }
         delayUntil { event.popupPromise.isResolved }
         if (money > 0) {
             delay(600)
             action {
                 FortyFive.soundPlayer.situation("money_earned", this@GameControllerImpl.screen)
-                SaveState.earnMoney(money)
+                profile.earnMoney(money)
             }
         }
         delay(300)
         action {
             encounterContext.completed()
-            SaveState.write()
+            profile.write()
+            profile.writeMaps()
 
             val chooseCardContext = object : ChooseCardScreenContext {
                 override var seed: Long = TimeUtils.millis()
@@ -1023,6 +1034,11 @@ class GameControllerImpl(
             if (playerGetsCard) {
                 FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, chooseCardContext)
             }
+
+            if (encounterContext.isExtraction) {
+                FortyFive.screenManager.ensureNextScreen(WinRunScreen)
+            }
+
             FortyFive.screenManager.screenFinished()
         }
     } }
@@ -1103,7 +1119,7 @@ class GameControllerImpl(
     private fun chooseEnemyActions() {
         val otherActions = mutableListOf<NextEnemyAction>()
         activeEnemies.forEach { enemy ->
-            val action = enemy.chooseNewAction(this, 1.0, otherActions)
+            val action = enemy.chooseNewAction(this, enemyDifficulty.toDouble(), otherActions)
             otherActions.add(action)
         }
     }
@@ -1170,6 +1186,8 @@ class GameControllerImpl(
         const val playerGetsRewardCardChance = 1f
         const val rewardRerollPriceIncrease = 30
         const val rewardRerollBasePrice = 30
+        const val enemyHealthDifficultyAdjustment = 0.4f
+        const val enemyAggressiveDifficultyAdjustment = 0.2f
     }
 
     object Events {

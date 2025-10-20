@@ -23,9 +23,9 @@ import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator.ge
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator.getSharedNavBar
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.getSharedSettingsMenu
-import com.microwavestudios.fortyfive.screen.commonComponents.ToTitleScreenCreator.getSharedTitleScreen
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
+import com.microwavestudios.fortyfive.screen.commonComponents.RunBoardCreator.getSharedRunBoard
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.TemplateString
@@ -403,32 +403,51 @@ abstract class ScreenCreator : ResourceBorrower {
         worldHeight: Float,
         events: EventPipeline,
         hasSettings: Boolean = true,
-        hasBackpack: Boolean = true,
+        hasBackpack: Boolean = false,
+        hasCollection: Boolean = false,
         hasNavbar: Boolean = true,
         navbarIsLeft: Boolean = false,
         warnings: WarningParent? = null,
         hasTutorial: Boolean = true,
-        hasTitleScreenInNavbar: Boolean = true,
+        hasTitleScreen: Boolean = true,
+        canHaveRunBoard: Boolean = false,
     ) {
 
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
-        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
+//        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
 
-        var settings: CustomGroup? = null
-        if (hasSettings) {
-            val (_settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
-            settings = _settings
+        val settings: CustomGroup? = if (hasSettings) {
+            val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
             navbarObjects.add(settingsObject)
+            settings
+        } else {
+            null
         }
 
-        var backpack: CustomGroup? = null
-        if (hasBackpack) {
-            val (_backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events)
-            backpack = _backpack
+        val backpack = if (hasBackpack) {
+            val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events, false)
             navbarObjects.add(backpackObject)
+            backpack
+        } else {
+            null
         }
 
+        val collection = if (hasCollection) {
+            val (collection, collectionObject) = getSharedBackpack(worldWidth, worldHeight, events, events, true)
+            navbarObjects.add(collectionObject)
+            collection
+        } else {
+            null
+        }
+
+        val runBoard = if (canHaveRunBoard) {
+            val (runBoard, runBoardObj) = getSharedRunBoard(worldWidth, worldHeight, events)
+            navbarObjects.add(runBoardObj)
+            runBoard
+        } else {
+            null
+        }
 
         if (hasNavbar) {
             val navbar = getSharedNavBar(
@@ -442,7 +461,9 @@ abstract class ScreenCreator : ResourceBorrower {
                 centerX()
             }
         }
+        runBoard?.let { actor(it) }
         backpack?.let { actor(it) }
+        collection?.let { actor(it) }
         settings?.let {
             actor(it) {
                 centerX()
@@ -466,7 +487,7 @@ abstract class ScreenCreator : ResourceBorrower {
             }
             advancedText("red_wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 1f) {
                 name("tutorial_info_text")
-                horizontalTextAlign = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomAlign.CENTER
+                horizontalTextAlign = CustomAlign.CENTER
                 centerX()
                 onLayout { y = worldHeight - prefHeight }
                 syncHeight()

@@ -6,12 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.Align
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.game.SaveState
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.*
@@ -47,6 +46,8 @@ class ShopScreenController(
 
     private lateinit var random: Random
 
+    private val profile: Profile = FortyFive.profileManager.currentProfile!!
+
     override fun init(context: Any?) {
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
@@ -72,7 +73,7 @@ class ShopScreenController(
         val messageWidget = screen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = personData.get<OnjArray>("texts").value
 
-        random = Random(context.seed)
+        random = Random
         addCards(context.types)
 //
         val textToShow = text[(random.nextDouble() * text.size).toInt()] as OnjObject
@@ -89,12 +90,11 @@ class ShopScreenController(
 
     fun rerollShop() {
         val rerollPrice = context.currentRerollPrice
-        if (SaveState.playerMoney < rerollPrice) return
-        SaveState.payMoney(rerollPrice)
+        if (profile.playerMoney < rerollPrice) return
+        profile.payMoney(rerollPrice)
         context.amountOfRerolls++
         context.boughtIndices.clear()
-        context.selectedCards.clear()
-        context.seed = Random(context.seed).nextLong()
+//        context.currentCards!!.clear()
         cardsParentWidget.children.filterIsInstance<CustomBox>().forEach { it.remove() }
         cardWidgets.clear()
         labels.clear()
@@ -102,28 +102,28 @@ class ShopScreenController(
     }
 
     private fun addCards(contextTypes: Set<String>) {
-        if (context.selectedCards.isEmpty()) {
+        if (context.currentCards!!.isEmpty()) {
             val amount = context.amountCards.random(random)
             val cards = RandomCardSelection.getRandomCards(
                 screen,
                 contextTypes.toList(),
                 amount,
                 random,
-                MapManager.currentDetailMap.biome,
+                FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap.biome,
                 "shop",
                 unique = true
             )
-            context.selectedCards.addAll(cards.map { it.name })
+//            context.currentCards!!.addAll(cards.map { it.name })
         }
         val allPrototypes = RandomCardSelection.allCardPrototypes
         val availableCards = RandomCardSelection.availableCards(allPrototypes).toMutableList()
         val cardsToAdd = context
-            .selectedCards
+            .currentCards!!
             .map { name -> allPrototypes.find { it.name == name }!! }
         cardsToAdd.forEach { cardProto ->
             val card = cardProto.create(screen)
             screen.addDisposable(card)
-            addCard(card, cardProto==cardsToAdd.first())
+            addCard(card, cardProto == cardsToAdd.first())
             if (cardProto !in availableCards) updateStateOfCard(card, setSoldOut = true)
             availableCards.remove(cardProto)
         }
@@ -133,7 +133,7 @@ class ShopScreenController(
             updateStateOfCard(cardActor.card, setBought = true, label = label)
         }
         TemplateString.updateGlobalParam("shop.currentRerollPrice", context.currentRerollPrice)
-        if (context.currentRerollPrice > SaveState.playerMoney) {
+        if (context.currentRerollPrice > profile.playerMoney) {
             val customLabel = screen.namedActorOrNull(rerollWidgetName) as CustomLabel
             customLabel.isDisabled = true
             customLabel.backgroundHandle = "common_button_disabled"
@@ -193,7 +193,7 @@ class ShopScreenController(
         }
         card.actor.leaveGroup(availableCardGroup)
         card.actor.isDraggable = false
-        if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
+        if (!setBought && !setSoldOut && card.price > profile.playerMoney) {
             if (label.alpha != 1f) return
             label.alpha = 0.6f
             card.actor.unavailable()
@@ -221,9 +221,8 @@ class ShopScreenController(
         this.personWidget = shopPersonWidget
 
         personWidget.backgroundHandle = imgData.get<String>("textureName")
-        val scale = imgData.get<Double>("scale").toFloat()
-        personWidget.scaleX = scale
-        personWidget.scaleY = scale
+        personWidget.width = imgData.get<Double>("width").toFloat()
+        personWidget.height = imgData.get<Double>("height").toFloat()
         personWidget.drawOffsetX = imgData.getOr<Double>("offsetX", 0.0).toFloat()
         personWidget.drawOffsetY = imgData.getOr<Double>("offsetY", 0.0).toFloat()
 
@@ -234,10 +233,15 @@ class ShopScreenController(
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
         actor as CardActor
-        SaveState.payMoney(actor.card.price)
-        SaveState.buyCard(actor.card.name)
+        profile.payMoney(actor.card.price)
+        profile.getCardForRun(actor.card.name)
         context.boughtIndices.add(cardWidgets.indexOf(actor))
-        if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), actor.card.name)
+        if (addToDeck && profile.isRunActive) {
+            val deck = profile.currentRunDeck!!
+            if (deck.canAddCards()) {
+                deck.addToDeck(deck.nextFreeSlot(), actor.card.name)
+            }
+        }
         updateStateOfCard(actor.card, setBought = true)
         updateStatesOfUnboughtCards()
     }

@@ -1,9 +1,10 @@
 package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.game.PermaSaveState
-import com.microwavestudios.fortyfive.game.SaveState
+import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.utils.toIntRange
@@ -18,45 +19,32 @@ object MapEventFactory {
 
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
-        "EncounterMapEvent" to { EncounterMapEvent(it) },
-        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) },
-        "DialogMapEvent" to { DialogMapEvent(it) },
+        "SimpleMapEvent" to { SimpleMapEvent.fromOnj(it) },
+        "EncounterMapEvent" to { EncounterMapEvent.fromOnj(it) },
+        "EnterMapMapEvent" to {
+            EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("fromEnd"))
+        },
+        "DialogMapEvent" to { DialogMapEvent.fromOnj(it) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
                 onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
                 onjObject.get<String>("person"),
-                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
                 onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
                 onjObject.get<OnjArray>("amountCards").toIntRange(),
-                onjObject.get<OnjArray>("selectedCards").value.map { it.value as String }.toMutableList(),
+                onjObject.get<OnjArray?>("currentCards")?.value?.map { it.value as String },
                 onjObject.get<Long>("amountOfRerolls").toInt(),
                 onjObject.get<Long>("rerollPriceIncrease").toInt(),
                 onjObject.get<Long>("rerollBasePrice").toInt(),
             )
         },
-        "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
-        "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
-        "AddMaxHPEvent" to { AddMaxHPMapEvent(it) },
-        "FinishTutorialMapEvent" to { FinishTutorialMapEvent(it) },
+        "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
+        "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
+        "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
+        "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
         mapEventCreators[onj.name]?.invoke(onj) ?: throw RuntimeException("unknown map event ${onj.name}")
-}
-
-/**
- * for those events that need to know the distance till the end of the next road
- */
-interface ScaledByDistance {
-    var distanceToEnd: Int
-
-    fun setDistanceFromConfig(onj: OnjObject) {
-        distanceToEnd = onj.get<Long?>("distanceToEnd")?.toInt() ?: -1
-    }
-
-    fun OnjObjectBuilderDSL.includeDistanceFromEnd() {
-        "distanceToEnd" with distanceToEnd
-    }
 }
 
 interface Completable {
@@ -72,19 +60,16 @@ abstract class MapEvent {
      * when this is true, the player can't progress past the node
      */
     abstract var currentlyBlocks: Boolean
-        protected set
 
     /**
      * when this is true, a start button for this event is displayed and the start function can be called
      */
-    abstract var canBeStarted: Boolean
-        protected set
+    abstract var startable: Boolean
 
     /**
      * when this is true, the event was already completed
      */
     abstract var isCompleted: Boolean
-        protected set
 
     /**
      * when this is true, the sidebar with the description is displayed
@@ -94,19 +79,11 @@ abstract class MapEvent {
     open val buttonText: String = "Start"
 
     /**
-     * currently unused
-     */
-    open val icon: String? = null
-
-    /**
-     * currently unused
-     */
-    open val additionalIcons: List<String> = listOf()
-
-    /**
      * Short text describing the event
      */
     open val descriptionText: String = ""
+
+    open val warningText: String? = null
 
     /**
      * Short text that is displayed instead of [descriptionText] when the event was completed
@@ -118,6 +95,14 @@ abstract class MapEvent {
      */
     open val displayName: String = ""
 
+    private val _startConditions: MutableList<MapPredicate> = mutableListOf()
+    val startConditions: List<MapPredicate>
+        get() = _startConditions
+
+    private val _blockConditions: MutableList<MapPredicate> = mutableListOf()
+    val blockConditions: List<MapPredicate>
+        get() = _blockConditions
+
     /**
      * called when the start button was clicked
      */
@@ -128,24 +113,43 @@ abstract class MapEvent {
      */
     abstract fun asOnjObject(): OnjObject
 
-    /**
-     * utility function that reads and sets the [currentlyBlocks], [canBeStarted], [isCompleted] fields from an
-     * OnjObject
-     */
-    protected fun setStandardValuesFromConfig(config: OnjObject) {
+    open fun onMapLoad(map: DetailMap) {}
+    open fun onPlayerMovedToNode(map: DetailMap) {}
+
+    fun canBeStarted(map: DetailMap): Boolean =
+        startable && _startConditions.all { it.check(map) }
+
+    fun isBlocking(map: DetailMap): Boolean =
+        currentlyBlocks || _blockConditions.any { it.check(map) }
+
+    fun setStandardValuesFromConfig(config: OnjObject) {
         currentlyBlocks = config.get<Boolean>("currentlyBlocks")
-        canBeStarted = config.get<Boolean>("canBeStarted")
+        startable = config.get<Boolean>("startable")
         isCompleted = config.get<Boolean>("isCompleted")
+        val startConditions = config
+            .getOr<OnjArray?>("startConditions", null)
+            ?.value
+            ?.map { MapPredicate.fromOnj(it as OnjNamedObject) }
+        _startConditions.clear()
+        startConditions?.let { _startConditions.addAll(it) }
+        val blockConditions = config
+            .getOr<OnjArray?>("blockConditions", null)
+            ?.value
+            ?.map { MapPredicate.fromOnj(it as OnjNamedObject) }
+        _blockConditions.clear()
+        blockConditions?.let { _blockConditions.addAll(it) }
     }
 
     /**
      * utility function that can be called from the [asOnjObject] function and includes the [currentlyBlocks],
-     * [canBeStarted], [isCompleted] fields in the onjObject.
+     * [startable], [isCompleted] fields in the onjObject.
      */
     protected fun OnjObjectBuilderDSL.includeStandardConfig() {
         "currentlyBlocks" with currentlyBlocks
-        "canBeStarted" with canBeStarted
+        "startable" with startable
         "isCompleted" with isCompleted
+        "startConditions" with _startConditions.map { it.asOnj() }
+        "blockConditions" with _blockConditions.map { it.asOnj() }
     }
 
 }
@@ -156,7 +160,7 @@ abstract class MapEvent {
 class EmptyMapEvent : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = false
+    override var startable: Boolean = false
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = false
@@ -168,30 +172,65 @@ class EmptyMapEvent : MapEvent() {
     }
 }
 
+class SimpleMapEvent(
+    override val displayDescription: Boolean,
+    override val descriptionText: String,
+    override val displayName: String
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var startable: Boolean = false
+    override var isCompleted: Boolean = false
+
+    constructor() : this(false, "", "")
+
+    override fun start() {
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("SimpleMapEvent")
+        "displayDescription" with displayDescription
+        "descriptionText" with descriptionText
+        "displayName" with displayName
+        includeStandardConfig()
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): SimpleMapEvent = SimpleMapEvent(
+            onj.getOr<Boolean>("displayDescription", false),
+            onj.getOr<String>("descriptionText", ""),
+            onj.getOr<String>("displayName", ""),
+        ).apply { setStandardValuesFromConfig(onj) }
+    }
+
+}
+
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledByDistance, Completable {
+class EncounterMapEvent(
+    override var encounter: Encounter,
+    override val isExtraction: Boolean
+) : MapEvent(), EncounterContext, Completable {
 
     override var currentlyBlocks: Boolean = true
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
-    override var distanceToEnd: Int = -1
 
     override val displayDescription: Boolean = true
 
-    override var encounterIndex: Int = obj.get<Long>("encounterIndex").toInt()
-
-    override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
     override val buttonText: String = "Fight!"
 
-    init {
-        setStandardValuesFromConfig(obj)
-        setDistanceFromConfig(obj)
+    override val warningText: String? = if (isExtraction) {
+        "Last encounter:\nAfter this Encounter, all cards in your current deck will be added to your collection. All" +
+                "other cards will be lost!"
+    } else {
+        null
     }
 
     override fun start() {
@@ -200,46 +239,44 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), EncounterContext, ScaledBy
     }
 
     override fun completed() {
-        FortyFive.logger.debug("EncounterMapEvent", "Encounter with $encounterIndex is completed")
         currentlyBlocks = false
-        canBeStarted = false
+        startable = false
         isCompleted = true
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterMapEvent")
         includeStandardConfig()
-        includeDistanceFromEnd()
-        "encounterIndex" with encounterIndex
-
+        "encounter" with encounter.asOnj()
+        "isExtraction" with isExtraction
     }
 
+    companion object {
+
+        fun fromOnj(onj: OnjObject): EncounterMapEvent = EncounterMapEvent(
+            Encounter.fromOnj(onj.get<OnjObject>("encounter")),
+            onj.get<Boolean>("isExtraction")
+        ).apply { setStandardValuesFromConfig(onj) }
+    }
 }
 
-/**
- * MapEvent that opens another map when started
- * @param targetMap the name of the map to be opened
- * @param placeAtEnd if true, the player is placed at last node of the map instead of the first
- */
-class EnterMapMapEvent(val targetMap: String) : MapEvent() {
+class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
 
     override val buttonText: String = "Enter"
 
+    private val targetMapDisplayName: String = displayName(targetMap)
+
     // lazy so it doesn't crash when the event is instanced
-    override val displayName: String by lazy {
-        "Enter ${MapManager.displayName(targetMap)}"
-    }
-    override val descriptionText: String by lazy {
-        "Have fun exploring ${MapManager.displayName(targetMap)}"
-    }
+    override val displayName: String = "Enter $targetMapDisplayName"
+    override val descriptionText: String = ""
 
     override fun start() {
-        MapManager.changeToMap(targetMap)
+        FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)
         FortyFive.screenManager.appendScreen(MapScreen, this)
         FortyFive.screenManager.screenFinished()
     }
@@ -247,40 +284,29 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EnterMapMapEvent")
         "targetMap" with targetMap
+        "fromEnd" with fromEnd
     }
 }
 
 /**
  * event that opens a dialog box and allows talking to an NPC
  */
-class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
+class DialogMapEvent(
+    private val canOnlyBeStartedOnce: Boolean,
+    override val dialog: String,
+    override val displayName: String,
+    override val descriptionText: String,
+    override val completedDescriptionText: String
+) : MapEvent(), DialogScreenContext {
 
     override var currentlyBlocks: Boolean = true
-    override var canBeStarted: Boolean = true
-        get() {
-            if (onlyIfPlayerDoesntHaveCard != null) {
-                val card = onlyIfPlayerDoesntHaveCard
-                return card !in SaveState.cards
-            }
-            return field
-        }
+    override var startable: Boolean = true
 
-    override var isCompleted: Boolean = !canBeStarted
+    override var isCompleted: Boolean = !startable
 
     override val displayDescription: Boolean = true
 
-    private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
-    private val onlyIfPlayerDoesntHaveCard: String? = onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null)
-
-    override val dialog: String = onj.get<String>("dialog")
-
-    override val descriptionText: String = ""
-    override val displayName: String = MapManager.displayName(dialog)
     override val buttonText: String = "Talk"
-
-    init {
-        setStandardValuesFromConfig(onj)
-    }
 
     override fun start() {
         FortyFive.screenManager.appendScreen(DialogScreen, this)
@@ -289,7 +315,7 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
 
     override fun completed() {
         currentlyBlocks = false
-        if (canOnlyBeStartedOnce) canBeStarted = false
+        if (canOnlyBeStartedOnce) startable = false
         isCompleted = true
     }
 
@@ -297,8 +323,21 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
         name("DialogMapEvent")
         includeStandardConfig()
         "dialog" with dialog
+        "displayName" with displayName
+        "descriptionText" with descriptionText
+        "completedDescriptionText" with completedDescriptionText
         "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
-        onlyIfPlayerDoesntHaveCard?.let { "onlyIfPlayerDoesntHaveCard" to it }
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): DialogMapEvent = DialogMapEvent(
+            onj.get<Boolean>("canOnlyBeStartedOnce"),
+            onj.get<String>("dialog"),
+            onj.get<String>("displayName"),
+            onj.get<String>("descriptionText"),
+            onj.get<String>("completedDescriptionText"),
+        ).apply { setStandardValuesFromConfig(onj) }
     }
 }
 
@@ -309,17 +348,16 @@ class DialogMapEvent(onj: OnjObject) : MapEvent(), DialogScreenContext {
 class ShopMapEvent(
     val types: Set<String>,
     val person: String,
-    var seed: Long,
     val boughtIndices: MutableSet<Int>,
     val amountCards: IntRange,
-    val selectedCards: MutableList<String>,
+    var currentCards: List<String>?,
     var amountOfRerolls: Int,
     val rerollPriceIncrease: Int,
     val rerollBasePrice: Int,
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
@@ -340,10 +378,9 @@ class ShopMapEvent(
         name("ShopMapEvent")
         "types" with types
         "person" with person
-        "seed" with seed
         "amountCards" with arrayOf(amountCards.first, amountCards.last)
         "boughtIndices" with boughtIndices
-        "selectedCards" with selectedCards
+        "currentCards" with currentCards
         "amountOfRerolls" with amountOfRerolls
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice
@@ -355,32 +392,24 @@ class ShopMapEvent(
  * @param types which type the restrictions are
  */
 class ChooseCardMapEvent(
-    onj: OnjObject
+    override val types: List<String>,
+    override val enableRerolls: Boolean,
+    override var amountOfRerolls: Int,
+    override val rerollPriceIncrease: Int,
+    override val rerollBasePrice: Int,
+    override var seed: Long,
+    override val nbrOfCards: Int,
 ) : MapEvent(), ChooseCardScreenContext, Completable {
 
     override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
-    override val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
-
-    override val enableRerolls: Boolean = onj.get<Boolean>("enableRerolls")
-    override var amountOfRerolls: Int = onj.get<Long>("amountOfRerolls").toInt()
-    override val rerollPriceIncrease: Int = onj.get<Long>("rerollPriceIncrease").toInt()
-    override val rerollBasePrice: Int = onj.get<Long>("rerollBasePrice").toInt()
-
-    override var seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    override val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
-
     override val descriptionText: String =
         if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
     override val displayName: String = "Ominous person"
-
-    init {
-        setStandardValuesFromConfig(onj)
-    }
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ChooseCardScreen, this)
@@ -390,7 +419,7 @@ class ChooseCardMapEvent(
     override fun completed() {
         isCompleted = true
         currentlyBlocks = false
-        canBeStarted = false
+        startable = false
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
@@ -404,118 +433,153 @@ class ChooseCardMapEvent(
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice
     }
-}
 
+    companion object {
 
-class HealOrMaxHPMapEvent(
-    onj: OnjObject
-) : MapEvent(), ScaledByDistance, Completable {
-
-    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    val healthRange: IntRange = onj.get<OnjArray>("healRange").toIntRange()
-    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
-
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
-    override var isCompleted: Boolean = false
-    override var distanceToEnd = -1
-
-    override val displayDescription: Boolean = true
-
-    override val descriptionText: String = "You can choose to either heal yourself or obtain a higher Max HP."
-    override val displayName: String = "Restoration Point"
-
-    override fun start() {
-        TODO("I don't know if it will be possible to increase max hp in future versions of the game")
-//        MapManager.changeToHealOrMaxHPScreen(this)
-    }
-
-    init {
-        setDistanceFromConfig(onj)
-        setStandardValuesFromConfig(onj)
-    }
-
-    override fun completed() {
-        isCompleted = true
-        canBeStarted = false
-        currentlyBlocks = false
-    }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("HealOrMaxHPEvent")
-        includeStandardConfig()
-        includeDistanceFromEnd()
-        "seed" with seed
-        "healRange" with arrayOf(healthRange.first, healthRange.last)
-        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
+        fun fromOnj(onj: OnjObject): ChooseCardMapEvent = ChooseCardMapEvent(
+            onj.get<OnjArray>("types").value.map { (it as OnjString).value },
+            onj.get<Boolean>("enableRerolls"),
+            onj.get<Long>("amountOfRerolls").toInt(),
+            onj.get<Long>("rerollPriceIncrease").toInt(),
+            onj.get<Long>("rerollBasePrice").toInt(),
+            onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+            onj.get<Long>("nbrOfCards").toInt(),
+        ).apply { setStandardValuesFromConfig(onj) }
     }
 }
 
-class AddMaxHPMapEvent(
-    onj: OnjObject
-) : MapEvent(), Completable {
-
-    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
-
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
-    override var isCompleted: Boolean = false
-
-    override val displayDescription: Boolean = true
-
-    override val descriptionText: String = "You obtain higher Max HP."
-    override val displayName: String = "Restoration Point"
-
-    override fun start() {
-        TODO("I don't know if it will be possible to increase max hp in future versions of the game")
-//        MapManager.changeToAddMaxHPScreen(this)
-    }
-
-    init {
-        setStandardValuesFromConfig(onj)
-    }
-
-    override fun completed() {
-        isCompleted = true
-        canBeStarted = false
-    }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("AddMaxHPEvent")
-        includeStandardConfig()
-        "seed" with seed
-        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
-    }
-}
-
-class FinishTutorialMapEvent(
-    onj: OnjObject,
+class LockNodeMapEvent(
+    val conditions: List<MapPredicate>,
+    initialLocked: Boolean,
+    val lockedDescription: String,
+    val openDescription: String,
 ) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = true
+    override var currentlyBlocks: Boolean
+        get() = locked
+        set(_) {}
+
+    override var startable: Boolean = false
     override var isCompleted: Boolean = false
+
     override val displayDescription: Boolean = true
 
-    override val displayName: String = "Exit"
-    override val descriptionText: String = "Start your Journey"
+    override val descriptionText: String
+        get() = if (locked) lockedDescription else openDescription
 
-    private val goToMap: String = onj.get<String>("goToMap")
+    var locked: Boolean = initialLocked
+        private set
 
     override fun start() {
-        SaveState.playerLives = SaveState.maxPlayerLives
-        SaveState.extract()
-        SaveState.write()
-        PermaSaveState.playerHasCompletedTutorial = true
-        PermaSaveState.write()
-        MapManager.changeToMap(goToMap)
+    }
+
+    override fun onMapLoad(map: DetailMap) {
+        checkLocked(map)
+    }
+
+    override fun onPlayerMovedToNode(map: DetailMap) {
+        checkLocked(map)
+    }
+
+    private fun checkLocked(map: DetailMap) {
+        if (!locked) return
+        if (conditions.all { it.check(map) }) locked = false
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("LockNodeMapEvent")
+        "conditions" with conditions.map { it.asOnj() }
+        "locked" with locked
+        "lockedDescription" with lockedDescription
+        "openDescription" with openDescription
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): LockNodeMapEvent = LockNodeMapEvent(
+            onj.get<OnjArray>("conditions").value.map { MapPredicate.fromOnj(it as OnjNamedObject) },
+            onj.get<Boolean>("locked"),
+            onj.get<String>("lockedDescription"),
+            onj.get<String>("openDescription"),
+        )
+    }
+
+}
+
+class CompleteRunMapEvent(
+    val runName: String,
+    override val displayName: String,
+    override val descriptionText: String,
+    override val completedDescriptionText: String,
+) : MapEvent(), Completable {
+
+    override var currentlyBlocks: Boolean = true
+    override var startable: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override fun start() {
+        val map = FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap
+        if (!map.isArea) throw RuntimeException("cant start progress run when not in an area")
+        val run = ConfigFileManager.runConfig.loadRun(runName)
+        FortyFive.profileManager.currentProfile!!.startRun(run)
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun onMapLoad(map: DetailMap) {
+        val profile = FortyFive.profileManager.currentProfile!!
+        if (profile.isSpecialRunCompleted(runName)) {
+            completed()
+        }
+    }
+
+    override fun completed() {
+        currentlyBlocks = false
+        startable = false
+        isCompleted = true
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("CompleteRunMapEvent")
+        "runName" with runName
+        "displayName" with displayName
+        "descriptionText" with descriptionText
+        "completedDescriptionText" with completedDescriptionText
+        includeStandardConfig()
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): CompleteRunMapEvent = CompleteRunMapEvent(
+            onj.get<String>("runName"),
+            onj.get<String>("displayName"),
+            onj.get<String>("descriptionText"),
+            onj.get<String>("completedDescriptionText"),
+        ).also { it.setStandardValuesFromConfig(onj) }
+    }
+
+}
+
+class FinishTutorialRunMapEvent : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var startable: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val displayName: String = "Finish"
+    override val descriptionText: String = "You completed the Tutorial!"
+
+    override fun start() {
+        val profile = FortyFive.profileManager.currentProfile!!
+        profile.winRun()
         FortyFive.screenManager.screenFinished()
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("FinishTutorialMapEvent")
-        "goToMap" with goToMap
+        name("FinishTutorialRunMapEvent")
     }
 
 }

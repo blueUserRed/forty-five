@@ -5,7 +5,6 @@ import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
@@ -149,7 +148,8 @@ class SoundPlayer : ResourceBorrower {
 
     private fun updateAmbientSounds(screen: OnjScreen) {
         val now = TimeUtils.millis()
-        val biome = MapManager.currentDetailMap.biome
+        val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
+            ?: return
         val sounds = biomeAmbience[biome] ?: run {
             FortyFive.logger.warn(logTag, "No ambience defined for biome $biome")
             return

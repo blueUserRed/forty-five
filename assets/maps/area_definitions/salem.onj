@@ -1,10 +1,7 @@
-version: 0,
+majorDifficulty: 3,
 startNode: 0,
-endNode: 3,
+endNode: 4,
 biome: "bewitched_forest",
-progress: [
-    0.0, 0.1
-],
 nodes: [
     {
         x: -7.0,
@@ -14,7 +11,8 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_tabu_letter_outpost_and_salem",
+            targetMap: "location.tabu_letter_outpost",
+            fromEnd: true,
         }
     },
     {
@@ -26,9 +24,12 @@ nodes: [
         nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "traveler_in_salem_dialog",
+            displayName: "Random Traveler"
+            descriptionText: ""
+            completedDescriptionText: "",
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
-            canBeStarted: true,
+            startable: true,
             isCompleted: false
         }
     },
@@ -60,15 +61,7 @@ nodes: [
             2, 4
         ],
         nodeTexture: "map_node_heal",
-        event: $AddMaxHPEvent {
-            maxHPRange: [
-                10, 15
-            ],
-            seed: null,
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-        }
+        event: $EmptyMapEvent {}
     },
     {
         x: 65.0,
@@ -78,7 +71,8 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_salem_and_spire_outpost",
+            targetMap: "location.spire_outpost",
+            fromEnd: false,
         }
     },
 ],
@@ -130,4 +124,6 @@ decorations: [
         ]
     }
 ],
-isArea: true,
+areaConfig: {
+    completedProgressRun: false
+},

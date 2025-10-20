@@ -1,0 +1,34 @@
+
+$MapPredicate {
+
+    $PlayerHasCard {
+        card: string
+    }
+
+    $RunCompleted {
+        runName: string
+    }
+
+    $RunInCurrentBoard {
+        runName: string
+    }
+
+    $MinimumRunsWon {
+        minimum: int
+    }
+
+    $Not {
+        negate: $MapPredicate
+    }
+
+    $Or {
+        predicates: $MapPredicate[]
+    }
+
+    $And {
+        predicates: $MapPredicate[]
+    }
+
+    $Never {}
+
+}

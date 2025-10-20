@@ -5,10 +5,12 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.config.MapImageData
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
-import com.microwavestudios.fortyfive.map.MapManager
-import com.microwavestudios.fortyfive.map.EnterMapMapEvent
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.*
@@ -87,6 +89,57 @@ object NavbarCreator {
         }
     }
 
+    private fun CustomGroup.healthLabel(creator: ScreenCreator) = with(creator) {
+        val profile = FortyFive.profileManager.currentProfile
+        box {
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            profile ?: return@box
+            if (!profile.isRunActive) return@box
+            syncDimensions()
+            image {
+                name("player_health_icon")
+                marginRight = 10f
+                width = 30f
+                height = 30f
+                backgroundHandle = "statusbar_lives"
+            }
+
+            val healthLabel = label("red_wing", "${profile.healthInRun}", isTemplate = true) {
+                fontColor = ScreenCreator.fortyWhite
+                syncDimensions()
+            }
+            profile.events.watchFor<Profile.HealthChangedEvent> { event ->
+                healthLabel.setText(event.newHealth.toString())
+            }
+        }
+    }
+
+    private fun CustomBox.cashLabel(creator: ScreenCreator) = with(creator) {
+        val profile = FortyFive.profileManager.currentProfile
+        box {
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            syncDimensions()
+            profile ?: return@box
+            image {
+                name("cash_symbol")
+                marginRight = 10f
+                backgroundHandle = "cash_symbol"
+                width = 30f
+                height = 30f
+            }
+
+            val cashLabel = label("red_wing", "\$${profile.playerMoney}") {
+                fontColor = ScreenCreator.fortyWhite
+                syncDimensions()
+            }
+            profile.events.watchFor<Profile.MoneyChangedEvent> { event ->
+                cashLabel.setText("\$${event.newMoney}")
+            }
+        }
+    }
+
     private fun CustomBox.getSmallerLeftNavBar(
         creator: ScreenCreator,
         worldWidth: Float,
@@ -112,41 +165,8 @@ object NavbarCreator {
             paddingLeft = 50f
             paddingRight = 50f
 
-            box {
-                flexDirection = FlexDirection.ROW
-                verticalAlign = CustomAlign.CENTER
-                syncDimensions()
-                image {
-                    name("player_health_icon")
-                    marginRight = 10f
-                    width = 30f
-                    height = 30f
-                    backgroundHandle = "statusbar_lives"
-                }
-
-                label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
-                    fontColor = ScreenCreator.fortyWhite
-                    syncDimensions()
-                }
-            }
-
-            box {
-                flexDirection = FlexDirection.ROW
-                verticalAlign = CustomAlign.CENTER
-                syncDimensions()
-                image {
-                    name("cash_symbol")
-                    marginRight = 10f
-                    backgroundHandle = "cash_symbol"
-                    width = 30f
-                    height = 30f
-                }
-
-                label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
-                    fontColor = ScreenCreator.fortyWhite
-                    syncDimensions()
-                }
-            }
+            healthLabel(creator)
+            cashLabel(creator)
         }
 
         box {
@@ -189,23 +209,7 @@ object NavbarCreator {
             paddingLeft = 50f
             paddingRight = 50f
 
-            box {
-                flexDirection = FlexDirection.ROW
-                verticalAlign = CustomAlign.CENTER
-                syncDimensions()
-                image {
-                    name("player_health_icon")
-                    marginRight = 10f
-                    width = 30f
-                    height = 30f
-                    backgroundHandle = "statusbar_lives"
-                }
-
-                label("red_wing", "{stat.playerLives}/{stat.maxPlayerLives}", isTemplate = true) {
-                    fontColor = ScreenCreator.fortyWhite
-                    syncDimensions()
-                }
-            }
+            healthLabel(creator)
 
             box {
                 flexDirection = FlexDirection.ROW
@@ -213,24 +217,7 @@ object NavbarCreator {
                 syncDimensions()
             }
 
-            box {
-                // TODO: this box (and others around it?) calls layout every frame
-                //  (but seemingly without invalidate being called)
-                flexDirection = FlexDirection.ROW
-                verticalAlign = CustomAlign.CENTER
-                syncDimensions()
-                image {
-                    name("cash_symbol")
-                    marginRight = 10f
-                    backgroundHandle = "cash_symbol"
-                    width = 30f
-                    height = 30f
-                }
-                label("red_wing", "\${stat.playerMoney}", isTemplate = true) {
-                    fontColor = ScreenCreator.fortyWhite
-                    syncDimensions()
-                }
-            }
+            cashLabel(creator)
         }
 
         box {
@@ -341,7 +328,8 @@ object NavbarCreator {
     }
 
     private fun CustomBox.locationIndicator(creator: ScreenCreator) = with(creator) {
-        val map = MapManager.currentDetailMap
+        val profile = FortyFive.profileManager.currentProfile ?: return@with
+        val map = profile.currentMapSaver.currentMap
         minHorizontalDistBetweenElements = 10f
         if (map.isArea) {
             image {
@@ -349,32 +337,18 @@ object NavbarCreator {
                 setupDimensionsForAreaName(this@locationIndicator)
             }
         } else {
-            val enterMap = (map.startNode.event as? EnterMapMapEvent)?.targetMap
-            val exitMap = (map.endNode.event as? EnterMapMapEvent)?.targetMap
-            if (enterMap == null || exitMap == null) {
-                label("red_wing", "You are on a road", color = Color.WHITE) {
-                    syncDimensions()
-                }
-            } else {
-                label("red_wing", "Road between", color = Color.WHITE) {
-                    setFontScale(0.8f)
-                    syncWidth()
-                }
-                image {
-                    backgroundHandle = nameTextureForMap(enterMap)
-                    setupDimensionsForAreaName(this@locationIndicator)
-                }
-                label("red_wing", "and", color = Color.WHITE) { setFontScale(0.8f) }
-                image {
-                    backgroundHandle = nameTextureForMap(exitMap)
-                    setupDimensionsForAreaName(this@locationIndicator)
-                }
+            label("red_wing", "You are on a road", color = Color.WHITE) {
+                syncDimensions()
             }
         }
     }
 
     private fun nameTextureForMap(mapName: String) =
-        MapManager.mapImages.find { it.name == mapName && it.type == "name" }?.resourceHandle
+        ConfigFileManager
+            .mapConfig
+            .images
+            .find { it.name == mapName && it.type == MapImageData.Type.NAME }
+            ?.resourceHandle
 
 
     private fun CustomImageActor.setupDimensionsForAreaName(parent: CustomBox) {

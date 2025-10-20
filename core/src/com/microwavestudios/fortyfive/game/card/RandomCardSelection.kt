@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.game.card
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.game.SaveState
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection.getRandomCards
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.random
@@ -123,7 +122,8 @@ object RandomCardSelection {
                 newCards.add(card)
                 return@forEach
             }
-            val ownedAmount = SaveState.cards.count { it == card.name }
+            val ownedAmount = 0 // TODO: baaaaaaaaaaaaaaad
+//            val ownedAmount = SaveState.cards.count { it == card.name }
             val maxAmount = (cardMaximums[tag]!! - ownedAmount).coerceAtLeast(0)
             repeat(maxAmount) { newCards.add(card.copy()) }
         }

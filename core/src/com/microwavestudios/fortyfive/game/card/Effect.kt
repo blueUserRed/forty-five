@@ -35,11 +35,13 @@ abstract class Effect(val data: EffectData) {
         data.onlyTriggerInZones?.let { zones ->
             if (onCard.zone !in zones) return false
         }
+        if (!checkConditions(controller, onCard)) return false
         if (!data.trigger.check(situation, onCard, triggerInformation, controller)) return false
         return true
     }
 
-    fun checkConditions(controller: GameController, card: Card): Boolean = data.condition?.check(controller) ?: true
+    private fun checkConditions(controller: GameController, card: Card): Boolean =
+        data.condition?.check(controller) ?: true
 
     protected fun getSelectedBullets(
         bulletSelector: BulletSelector,

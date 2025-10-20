@@ -8,9 +8,6 @@ import onj.value.OnjInt
 @OnjNamespace
 object MapNamespace {
 
-    @RegisterOnjFunction(schema = "params: [int]")
-    fun runRandom(i: OnjInt): OnjInt {
-        return OnjInt(PermaSaveState.runRandom(i.value.toInt()))
-    }
+
 
 }

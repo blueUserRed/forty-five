@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.utils.*
+import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -12,14 +13,15 @@ import kotlin.math.sin
 
 class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String): DetailMap {
-        setup(name, data)
+    override fun generate(name: String, seed: Long): DetailMap {
+        setup(name, data, seed)
         val startNode = newNode(0f, 0f)
-        setupExitNode(startNode, data.startArea)
-        doNodeImage(startNode, MapNode.ImagePosition.LEFT)
+        setupFirstNode(startNode)
 
         val nodes = generateNodes(data.circles)
         generateNodeConnections(startNode, nodes)
+
+        calculateDistances(startNode)
 
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
@@ -42,8 +44,8 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
             biome = data.biome,
-            progress = data.progress,
             scrollable = true,
+            majorDifficulty = data.majorDifficulty,
             camPosOffset = Vector2(0f, 0f)
         )
     }
@@ -64,16 +66,12 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         }
         val allNodes = nodes.flatten()
         val fixedEvents = events.filter { it.fixedAmount != null }.toMutableList()
-        fixedEvents.add(
-            RadialMapGeneratorEventSpawner(
-            { EnterMapMapEvent(data.endArea) },
-            data.exitNodeCircle,
-            0,
-            data.exitNodeTexture,
-            1
-        )
-        )
         val usedNodes = mutableListOf<MapNodeBuilder>()
+
+        val exitNode = nodes[data.exitNodeCircle].random(random)
+        setupLastNode(exitNode)
+        usedNodes.add(exitNode)
+
         fixedEvents.forEach { eventSpawner ->
             val possibleNodes = if (eventSpawner.circle == null) {
                 allNodes
@@ -93,13 +91,8 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 }
                 val chosen = candidates.random(random)
                 val event = eventSpawner.eventCreator()
-                if (event is EnterMapMapEvent) {
-                    setupExitNode(chosen, event.targetMap)
-                    doNodeImage(chosen, findIdealNodeImagePosition(chosen))
-                } else {
-                    chosen.event = event
-                    chosen.nodeTexture = eventSpawner.nodeTexture
-                }
+                chosen.event = event
+                chosen.nodeTexture = eventSpawner.nodeTexture
                 usedNodes.add(chosen)
                 spawned++
             }
@@ -161,11 +154,23 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         y = cos(angle) * radius
     )
 
+    override fun asOnj(): OnjObject = buildOnjObject {
+        name("Radial")
+        includeAll(data.asOnj())
+    }
+
     data class Circle(
         val radius: Float,
         val numNodes: Int,
         val angleVariance: Float
     ) {
+
+        fun asOnj(): OnjObject = buildOnjObject {
+            "radius" with radius
+            "numNodes" with numNodes
+            "angleVariance" with angleVariance
+        }
+
         companion object {
 
             fun fromOnj(onj: OnjObject) = Circle(
@@ -177,7 +182,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
     }
 
     data class RadialMapGeneratorData(
-        override val seed: Long,
+        override val majorDifficulty: Int,
         override val nodeProtectedArea: Float,
         val biome: String,
         val circles: List<Circle>,
@@ -187,28 +192,38 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val events: List<RadialMapGeneratorEventSpawner>,
         override val locationSignProtectedAreaWidth: Float,
         override val locationSignProtectedAreaHeight: Float,
-        override val startArea: String,
-        val endArea: String,
-        override val exitNodeTexture: String,
-        override val progress: ClosedFloatingPointRange<Float>,
+        override val firstNodeEvent: () -> MapEvent,
+        override val firstNodeTexture: String,
+        override val lastNodeEvent: () -> MapEvent,
+        override val lastNodeTexture: String,
         val exitNodeCircle: Int,
     ) : BaseMapGeneratorData {
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            "biome" with biome
+            "circles" with circles.map { it.asOnj() }
+            "horizontalExtension" with horizontalExtension
+            "verticalExtension" with verticalExtension
+            "decorations" with decorations.map { it.asOnj() }
+            "events" with events.map { it.asOnj() }
+            includeBaseData()
+        }
 
         companion object {
 
             fun fromOnj(onj: OnjObject) = RadialMapGeneratorData(
-                seed = onj.get<Long>("seed"),
+                majorDifficulty = onj.get<Long>("majorDifficulty").toInt(),
                 nodeProtectedArea = onj.get<Double>("nodeProtectedArea").toFloat(),
                 biome = onj.get<String>("biome"),
                 horizontalExtension = onj.get<Double>("horizontalExtension").toFloat(),
                 verticalExtension = onj.get<Double>("verticalExtension").toFloat(),
                 locationSignProtectedAreaWidth = onj.get<Double>("locationSignProtectedAreaWidth").toFloat(),
                 locationSignProtectedAreaHeight = onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
-                startArea = onj.get<String>("startArea"),
-                endArea = onj.get<String>("endArea"),
+                firstNodeEvent = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("firstNodeEvent")) },
+                firstNodeTexture = onj.get<String>("firstNodeTexture"),
+                lastNodeEvent = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("lastNodeEvent")) },
+                lastNodeTexture = onj.get<String>("lastNodeTexture"),
                 exitNodeCircle = onj.get<Long>("exitNodeCircle").toInt(),
-                exitNodeTexture = onj.get<String>("exitNodeTexture"),
-                progress = onj.get<OnjArray>("progress").toFloatRange(),
                 circles = onj
                     .get<OnjArray>("circles")
                     .value
@@ -232,6 +247,15 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val nodeTexture: String,
         val fixedAmount: Int?,
     ) {
+
+        fun asOnj(): OnjObject = buildOnjObject {
+            "event" with eventCreator().asOnjObject()
+            "circle" with circle
+            "weight" with weight
+            "nodeTexture" with nodeTexture
+            "fixedAmount" with fixedAmount
+        }
+
         companion object {
 
             fun fromOnj(onj: OnjObject) = RadialMapGeneratorEventSpawner(

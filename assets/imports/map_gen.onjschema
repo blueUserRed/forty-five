@@ -1,0 +1,94 @@
+import "imports/map_events.onjschema" as _;
+
+use Common;
+
+$DecorationDistribution {
+
+    $Random {}
+
+    $FadeX {
+        start: float,
+        end: float,
+        interpolation: Interpolation,
+    }
+
+}
+
+var decoration = {
+    distribution: $DecorationDistribution,
+    decoration: string,
+    baseWidth: float,
+    baseHeight: float,
+    density: float,
+    checkNodeCollisions: boolean,
+    checkLineCollisions: boolean,
+    checkDecorationCollisions: boolean,
+    generateDecorationCollisions: boolean,
+    onlyCheckCollisionsAtSpawnPoints: boolean,
+    scale: float[2],
+    shrinkBoundsWidth?: float,
+    shrinkBoundsHeight?: float,
+    sortByY: boolean,
+    animated: boolean,
+};
+
+var mapGeneratorSharedKeys = {
+    majorDifficulty: int,
+    biome: string,
+    horizontalExtension: float,
+    verticalExtension: float,
+    locationSignProtectedAreaWidth: float,
+    locationSignProtectedAreaHeight: float,
+    nodeProtectedArea: float,
+    firstNodeEvent: $MapEvent,
+    firstNodeTexture: string,
+    lastNodeEvent: $MapEvent,
+    lastNodeTexture: string,
+};
+
+$MapGenerator {
+
+    $ThreeLine {
+        roadLength: float,
+        mainLineNodes: int,
+        altLinesPadding: int[2],
+        altLinesOffset: float,
+        varianceX: float,
+        varianceY: float,
+        mainEvent: {
+            nodeTexture: string,
+            event: $MapEvent,
+        },
+        events: {
+            nodeTexture: string,
+            event: $MapEvent,
+            offset: int[2],
+            line: int,
+        }[],
+        decorations: decoration[],
+        ...mapGeneratorSharedKeys
+    }
+
+    $Radial {
+        decorations: decoration[],
+        exitNodeCircle: int,
+        circles: {
+            radius: float,
+            numNodes: int,
+            angleVariance: float,
+        }[],
+        events: {
+            event: $MapEvent,
+            nodeTexture: string,
+            circle?: int?,
+            weight: int,
+            fixedAmount?: int?,
+        }[],
+        ...mapGeneratorSharedKeys
+    }
+
+    $StaticMap {
+        name: string
+    }
+
+}

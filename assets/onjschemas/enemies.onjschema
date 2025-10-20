@@ -10,7 +10,6 @@ var enemyActionSharedKeys = {
     scaleFactor?: float,
     predicates?: $GamePredicate[],
     hasSpecialAnimation: boolean,
-    hasUnlikelyPredicates?: boolean,
     commonPanel1?: string,
     commonPanel2?: string,
     commonPanel3?: string,
@@ -135,4 +134,12 @@ var enemy = {
     brain: $EnemyBrain,
 };
 
-enemies: enemy[]
+enemies: enemy[],
+
+enemyGroups: {
+    groupName: string,
+    variants: {
+        name: string,
+        majorDifficulty: int,
+    }[]
+}[],

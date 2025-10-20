@@ -4,8 +4,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 
@@ -29,6 +31,8 @@ interface DebugActor {
     fun invalidateCalled()
 
     fun debugHierarchy()
+
+    fun getDebugName(): String
 
 }
 
@@ -72,6 +76,28 @@ class DebugActorImpl : DebugActor {
             if (actor is Group) actor.children.forEach { rec(it) }
         }
         rec(actor)
+    }
+
+    override fun getDebugName(): String {
+        val actor = actor
+        if (actor.name != null) return actor.name
+        if (actor is Label) return "Label(\"${actor.text}\")"
+        if (actor is InputActor && actor.groups.isNotEmpty()) {
+            return actor
+                .groups
+                .joinToString(
+                    separator = ", ",
+                    prefix = "${actor::class.simpleName}(",
+                    postfix = ")"
+                )
+        }
+        if (actor is CustomImageActor && actor.backgroundHandle != null) {
+            return "Image(${actor.backgroundHandle})"
+        }
+        if (actor is CustomGroup && actor.backgroundHandle != null) {
+            return "${actor::class.simpleName}(bg = ${actor.backgroundHandle})"
+        }
+        return actor::class.simpleName ?: ""
     }
 
     override fun badTexture(

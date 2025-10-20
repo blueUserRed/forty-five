@@ -7,13 +7,13 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
+import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -23,6 +23,7 @@ import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
 import com.microwavestudios.fortyfive.screen.screens.IntroScreen
 import com.microwavestudios.fortyfive.screen.screens.MapScreen
 import com.microwavestudios.fortyfive.screen.screens.TitleScreen
+import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.steam.SteamHandler
 import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
@@ -38,6 +39,7 @@ object FortyFive : Game() {
     val soundPlayer = SoundPlayer()
     val logger = FortyFiveLogger()
     val resourceManager = ResourceManager()
+    val profileManager = ProfileManager()
     val screenManager = ScreenManager(TitleScreen, null)
 
     private val _lifetime: EndableLifetime = EndableLifetime()
@@ -77,6 +79,8 @@ object FortyFive : Game() {
             UserPrefs.StartScreen.TITLE -> screenManager.appendScreen(TitleScreen)
             UserPrefs.StartScreen.MAP -> toMap()
         }
+//        profileManager.selectProfile(profileManager.availableProfiles.first())
+//        screenManager.appendScreen(WinRunScreen)
         screenManager.screenFinished()
     }
 
@@ -125,27 +129,10 @@ object FortyFive : Game() {
         currentRenderPipeline = renderPipeline
     }
 
-    fun newRun(forwardToLooseScreen: Boolean) {
-        logger.title("newRun called; forwardToLooseScreen = $forwardToLooseScreen")
-        PermaSaveState.newRun()
-        if (forwardToLooseScreen) SaveState.copyStats()
-        SaveState.reset()
-        MapManager.newRunSync()
-        if (forwardToLooseScreen) TODO()
-    }
-
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         currentRenderPipeline?.sizeChanged()
         if (UserPrefs.windowMode == UserPrefs.WindowMode.Window) UserPrefs.windowWidth = width
-    }
-
-    fun resetAll() {
-        PermaSaveState.reset()
-        SaveState.reset()
-        MapManager.resetAllSync()
-        UserPrefs.reset()
-        newRun(false)
     }
 
     private fun init() {
@@ -158,18 +145,11 @@ object FortyFive : Game() {
         ConfigFileManager.init()
         TemplateString.init()
         logger.init()
+        profileManager.init()
         steamHandler = SteamHandler()
         UserPrefs.read()
         soundPlayer.init()
-        GameDirector.init()
-        MapManager.init()
-
-        if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
-            resetAll()
-        }
         PermaSaveState.read()
-        SaveState.read()
-        MapManager.read()
         GraphicsConfig.init()
         resourceManager.init()
         serviceThread.start()
@@ -180,9 +160,9 @@ object FortyFive : Game() {
     override fun dispose() {
         logger.debug(logTag, "game closing")
         DebugActorImpl.dumpActorsWithDebugWarnings()
-        MapManager.write()
+        profileManager.currentProfile?.write()
+        profileManager.currentProfile?.writeMaps()
         PermaSaveState.write()
-        SaveState.write()
         UserPrefs.write()
         _lifetime.die()
         soundPlayer.end()

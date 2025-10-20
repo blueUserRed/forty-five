@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.map.MapManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenBuilder
@@ -70,18 +69,16 @@ class ScreenManager(
         fun onScreenChange() {
             FortyFive.logger.title("changing screen to ${screenBuilder.name}")
             currentScreen?.dispose()
-            MapManager.invalidateCachedAssets()
             this.currentScreen = screen
             FortyFive.currentScreen = screen
             nextScreen = null
             FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
             FortyFive.setScreen(screen)
             inScreenTransition = false
-//            FortyFive.inMs(100) {
-//                val lagSpike = renderTimes.max()
-//                screenTransitionTimes[(screenTransitionCount % screenTransitionTimes.size).toInt()] = lagSpike
-//                screenTransitionCount++
-//            }
+            val profile = FortyFive.profileManager.currentProfile
+            profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
+            profile?.write()
+            profile?.writeMaps()
         }
 
         val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {

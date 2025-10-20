@@ -18,10 +18,7 @@ import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
-import com.microwavestudios.fortyfive.rendering.DebugMenu
-import com.microwavestudios.fortyfive.rendering.DebugMenuPage
-import com.microwavestudios.fortyfive.rendering.Renderable
-import com.microwavestudios.fortyfive.rendering.ScreenDebugMenuPage
+import com.microwavestudios.fortyfive.rendering.*
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenBuilder

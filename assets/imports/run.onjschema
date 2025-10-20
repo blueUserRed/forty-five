@@ -1,0 +1,20 @@
+import "imports/map_gen.onjschema" as _;
+
+$RunReward {
+
+    $CashReward {
+        amount: int
+    }
+
+}
+
+name: string,
+length: string,
+type: string,
+difficulty: int,
+rewards: $RunReward[],
+biome: string,
+fromArea: string,
+maxPlayerLives: int,
+initialPlayerLives: int,
+mapGenerator: $MapGenerator

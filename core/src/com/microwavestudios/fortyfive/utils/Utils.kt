@@ -352,6 +352,10 @@ inline fun <T, U> MutableMap<T, U>.iterateRemoving(block: (value: MutableMap.Mut
     }
 }
 
+fun <T> List<T>.with(element: T): List<T> {
+    return MutableList(size + 1) { i -> if (i == size) element else get(i) }
+}
+
 fun Color.interpolate(other: Color): Color {
     return Color(
         (this.r + other.r) / 2,

@@ -7,118 +7,154 @@ var shake = $ShakeTextAction {
     yMagnitude: 1.0,
 };
 
-var images = {
-
-    traveler: {
-        textureName: "npc_traveler",
-        width: 1_402 * 1.1,
-        height: 1_885 * 1.1,
-    },
-
-    stranger: {
-        textureName: "npc_stranger",
-        width: 809 * 0.39,
-        height: 2_018 * 0.39,
-        offsetY: 40.0
-    },
-
-    merchant: {
-        textureName: "npc_merchant",
-        width: 1_294 * 0.5,
-        height: 1_728 * 0.5,
-        offsetX: -35.0,
-    },
-
-    priest: {
-        textureName: "npc_priest",
-        width: 1_289 * 0.46,
-        height: 1_814 * 0.46,
-        offsetX: 30.0,
-    },
-
-    witch: {
-        textureName: "npc_witch",
-        width: 389 * 1.6,
-        height: 925 * 1.6,
-        offsetY: -450.0,
-        offsetX: 50.0,
-    }
-
-};
-
-npcs: [
-    {
-        name: "to_be_continued_npc",
-        displayName: "Developers",
-        image: images.traveler,
-    },
-    {
-        name: "brother",
-        displayName: "Your Brother",
-        image: images.stranger
-    },
-    {
-        name: "traveling_merchant",
-        displayName: "Traveling Merchant",
-        image: images.merchant
-    },
-    {
-        name: "priest_of_aqua_balle",
-        displayName: "Priest of Aqua Balle",
-        image: images.priest
-    },
-    {
-        name: "not_yet_implemented_npc",
-        displayName: "Stranger",
-        image: images.stranger
-    },
-    {
-        name: "witch",
-        displayName: "Witch",
-        image: images.witch
-    },
-    {
-        name: "traveler_in_salem_npc",
-        displayName: "Traveller",
-        image: images.traveler
-    },
-
-],
-
 dialogs: [
+    {
+        name: "tutorial_dialog",
+        eventText: "",
+        parts: [
+            {
+                rawText: "Hello, I've heard you want to try your luck in the frontier?",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                rawText: "But before I let you go, you will have to complete a small trial run I prepared for you, to make sure you know how to use a revolver",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                rawText: "Ready? Go!",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $StartSpecialRunEnd { run: "tutorial_run" },
+            }
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
+    {
+        name: "aqua_balle_progress_dialog",
+        eventText: "",
+        parts: [
+            {
+                rawText: "Hello.",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $MatchPredicate {
+                    options: [
+                        {
+                            predicate: $RunCompleted { runName: "aqua_balle_progress_run" },
+                            label: "runCompleted"
+                        },
+                        {
+                            predicate: $RunInCurrentBoard { runName: "aqua_balle_progress_run" },
+                            label: "runGiven"
+                        },
+                        {
+                            predicate: $MinimumRunsWon { minimum: 3 },
+                            label: "giveRun"
+                        }
+                    ],
+                    default: "dontGiveRun"
+                }
+            },
+            {
+                label: "runGiven",
+                rawText: "When you feel ready, you start the mission by clicking on 'Run Board' and selecting the run in the second row",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $EndOfDialog {},
+            },
+            {
+                label: "runCompleted",
+                rawText: "You showed these Outlaws! Good work!",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $EndOfDialog {},
+            },
+            {
+                label: "giveRun",
+                rawText: "I have a mission for you. The road to tabu letter outpost is full of all kinds of outlaws and needs to be cleared.",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                label: "giveRun",
+                rawText: "I'll add it to your Run Board. When the road is cleared we will finally be able to go to tabu letter outpost again",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $AddSpecialRunEnd { run: "aqua_balle_progress_run" },
+            },
+            {
+                label: "dontGiveRun",
+                rawText: "I'm looking for someone to help me on an important mission. It looks like you're still quite inexperienced though",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                label: "dontGiveRun",
+                rawText: "Complete a few runs from you run board first, and when you feel ready, you can come back",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $EndOfDialog {},
+            },
+        ],
+        defaults: {
+            font: "red_wing",
+            fontScale: 1.0,
+            color: color.forty_white
+        }
+    },
     {
         name: "testing_dialog",
         eventText: "hi",
         parts: [
             {
                 rawText: "Hello, this is just an example text because i am awesome... Hello, this is just an example text because i am awesome...Hello, this is just an example text because i am awesome...",
-                rightNpc: "priest_of_aqua_balle",
+                rightNpc: "npc.priest_of_aqua_balle",
                 leftNpc: null,
-                talkingNpc: "priest_of_aqua_balle",
+                talkingNpc: "npc.priest_of_aqua_balle",
                 next: $Continue {
                 },
             },
             {
                 rawText: "Hello, this is just an example text because i am awesome... Hello, this is just an example text because i am awesome...Hello, this is just an example text because i am awesome...",
-                rightNpc: "priest_of_aqua_balle",
-                leftNpc: "brother",
-                talkingNpc: "brother",
+                rightNpc: "npc.priest_of_aqua_balle",
+                leftNpc: "npc.brother",
+                talkingNpc: "npc.brother",
                 next: $Continue {
                 },
             },
             {
                 rawText: "Hello, this is just an example text because i am awesome... Hello, this is just an example text because i am awesome...Hello, this is just an example text because i am awesome...",
-                rightNpc: "priest_of_aqua_balle",
+                rightNpc: "npc.priest_of_aqua_balle",
                 leftNpc: null,
-                talkingNpc: "priest_of_aqua_balle",
+                talkingNpc: "npc.priest_of_aqua_balle",
                 next: $Continue {
                 },
             },
             {
                 rawText: "Bye",
-                rightNpc: "priest_of_aqua_balle",
-                leftNpc: "brother",
-                talkingNpc: "brother",
+                rightNpc: "npc.priest_of_aqua_balle",
+                leftNpc: "npc.brother",
+                talkingNpc: "npc.brother",
                 next: $EndOfDialog { }
             },
         ],
@@ -134,31 +170,31 @@ dialogs: [
         parts: [
             {
                 rawText: "Hi.",
-                talkingNpc: "brother",
-                rightNpc: "brother",
+                talkingNpc: "npc.brother",
+                rightNpc: "npc.brother",
                 leftNpc: null,
                 next: $Continue {}
             },
             {
                 rawText: "Glad I caught you before you left",
-                talkingNpc: "brother",
-                rightNpc: "brother",
+                talkingNpc: "npc.brother",
+                rightNpc: "npc.brother",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "I know I can't stop you from taking on this voyage, but please promise to be careful",
-                talkingNpc: "brother",
-                rightNpc: "brother",
+                talkingNpc: "npc.brother",
+                rightNpc: "npc.brother",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "Also, there is $1something$1 I wanted to give you before you leave",
-                talkingNpc: "brother",
-                rightNpc: "brother",
+                talkingNpc: "npc.brother",
+                rightNpc: "npc.brother",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -171,8 +207,8 @@ dialogs: [
             },
             {
                 rawText: "Here, this might be useful on your journey",
-                talkingNpc: "brother",
-                rightNpc: "brother",
+                talkingNpc: "npc.brother",
+                rightNpc: "npc.brother",
                 leftNpc: null,
                 next: $GiftCardEnd {
                     card: "incendiaryBullet",
@@ -191,8 +227,8 @@ dialogs: [
         parts: [
             {
                 rawText: "Howdy, welcome in $1Aqua Balle$1, where all the scum, outlaws and gamblers of the $1Old World$1 come together to find their luck in the frontier.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -205,8 +241,8 @@ dialogs: [
             },
             {
                 rawText: "You can buy some $3cursed$3 Bullets at my shop over there, coffins can be preordered.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -238,16 +274,16 @@ dialogs: [
             {
                 label: "frontier",
                 rawText: "Yes, the land that was discovered here a while ago. This town serves as the entrance to it. How did you not know this? ",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "It's a lawless zone out there, although since the governor showed up here, it hasn't been the same anymore...",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 next: $ChooseNextPart {
                     choices: [
@@ -265,16 +301,16 @@ dialogs: [
             {
                 label: "bullets",
                 rawText: "... yeah, I don't know why they are here or what they are, but they can be found all over the frontier.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "They are really powerful and also $3cursed$3, so a lot of people want them either for themselves or to turn a profit.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -291,8 +327,8 @@ dialogs: [
             },
             {
                 rawText: "That's where all those guys here come from. They hope to turn their life around and try their luck in the frontier. Good business for us here in $1Aqua Balle$1 though, so I won't complain.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -320,16 +356,16 @@ dialogs: [
             {
                 label: "end",
                 rawText: "You can come visit me at my shop over there, if you want.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "But I travel the frontier with my stock most of the time, so we’ll probably see each other anyway. Until then, take care.",
-                talkingNpc: "traveling_merchant",
-                rightNpc: "traveling_merchant",
+                talkingNpc: "npc.traveling_merchant",
+                rightNpc: "npc.traveling_merchant",
                 leftNpc: null,
                 next: $EndOfDialog { }
             },
@@ -346,16 +382,16 @@ dialogs: [
         parts: [
             {
                 rawText: "Bless you!",
-                talkingNpc: "priest_of_aqua_balle",
-                rightNpc: "priest_of_aqua_balle",
+                talkingNpc: "npc.priest_of_aqua_balle",
+                rightNpc: "npc.priest_of_aqua_balle",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "It’s $1$3dangerous$3$1 out there, you should turn back. However, you probably won’t listen to me, nobody does.",
-                talkingNpc: "priest_of_aqua_balle",
-                rightNpc: "priest_of_aqua_balle",
+                talkingNpc: "npc.priest_of_aqua_balle",
+                rightNpc: "npc.priest_of_aqua_balle",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -372,8 +408,8 @@ dialogs: [
             },
             {
                 rawText: "So, here take $1this$1 at least. It will look over you on the way.",
-                talkingNpc: "priest_of_aqua_balle",
-                rightNpc: "priest_of_aqua_balle",
+                talkingNpc: "npc.priest_of_aqua_balle",
+                rightNpc: "npc.priest_of_aqua_balle",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -402,24 +438,24 @@ dialogs: [
         parts: [
             {
                 rawText: "Hello!",
-                talkingNpc: "not_yet_implemented_npc",
-                rightNpc: "not_yet_implemented_npc",
+                talkingNpc: "npc.not_yet_implemented",
+                rightNpc: "npc.not_yet_implemented",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "This area is still under construction, so maybe check back later.",
-                talkingNpc: "not_yet_implemented_npc",
-                rightNpc: "not_yet_implemented_npc",
+                talkingNpc: "npc.not_yet_implemented",
+                rightNpc: "npc.not_yet_implemented",
                 leftNpc: null,
                 next: $Continue {
                 }
             },
             {
                 rawText: "Thanks for you patience!",
-                talkingNpc: "not_yet_implemented_npc",
-                rightNpc: "not_yet_implemented_npc",
+                talkingNpc: "npc.not_yet_implemented",
+                rightNpc: "npc.not_yet_implemented",
                 leftNpc: null,
                 next: $EndOfDialog {}
             },
@@ -436,8 +472,8 @@ dialogs: [
         parts: [
             {
                 rawText: "$4$1I'll warn you!$1$4",
-                talkingNpc: "witch",
-                rightNpc: "witch",
+                talkingNpc: "npc.witch",
+                rightNpc: "npc.witch",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -454,8 +490,8 @@ dialogs: [
             },
             {
                 rawText: "Not a $1single$1 step further or I $4swear to the $3Gods$3 I'll $1kill$1 you$4",
-                talkingNpc: "witch",
-                rightNpc: "witch",
+                talkingNpc: "npc.witch",
+                rightNpc: "npc.witch",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -476,8 +512,8 @@ dialogs: [
             },
             {
                 rawText: "This was $1$3$4OUR$4$3$1 home before you all came and took it.",
-                talkingNpc: "witch",
-                rightNpc: "witch",
+                talkingNpc: "npc.witch",
+                rightNpc: "npc.witch",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -498,8 +534,8 @@ dialogs: [
             },
             {
                 rawText: "Someday, the $2Onathans$2 will return to $5Salem$5 and reclaim it. Until then, $1$4stay away$4$1 from it if you value your $3life$3.",
-                talkingNpc: "witch",
-                rightNpc: "witch",
+                talkingNpc: "npc.witch",
+                rightNpc: "npc.witch",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -528,8 +564,8 @@ dialogs: [
             },
             {
                 rawText: "Oh and and tell the $2governor$2 that his days are $1$3limited$3$1.",
-                talkingNpc: "witch",
-                rightNpc: "witch",
+                talkingNpc: "npc.witch",
+                rightNpc: "npc.witch",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -568,15 +604,15 @@ dialogs: [
         parts: [
             {
                 rawText: "Mornin'. Good seein' someone who doesn't want to kill me at first sight.",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 next: $Continue {}
             },
             {
                 rawText: "I traveled around here a lot, so if there is any question you wanna ask feel free. I study the culture and history of the $1Onathahans$1, so i might know a few things...",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -608,8 +644,8 @@ dialogs: [
             {
                 label: "onathahans",
                 rawText: "Yes, the tribe of people who inhabited this land before we came here from the Old World. People often call them $1witches$1. But they are people, like you and me, no different.",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -621,8 +657,8 @@ dialogs: [
             },
             {
                 rawText: "$1$4If you even are a person. Who knows? I might have been conversing with a tree $5§§map_decoration_bewitched_forest_tree1§§$5$4 this whole time...$4$1",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -658,8 +694,8 @@ dialogs: [
             {
                 label: "forest",
                 rawText: "Hm? oh yes, beyond the forest... I've read stories from the Onathahans. There is said to be a sacred place beyond the forest...",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -671,8 +707,8 @@ dialogs: [
             },
             {
                 rawText: "How did they call it? Was it ... oh yes, $1$4The Magenta Mountains$4$1. Soon, we will be able to see what the stories are about...",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -704,8 +740,8 @@ dialogs: [
             {
                 label: "you",
                 rawText: "Me? I'm just a traveler. I travel... learn as much as I can as long as I have time... I think the frontier is fascinating... so many stories and places to discover... ",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 effects: [
                     $Color {
@@ -733,8 +769,8 @@ dialogs: [
             {
                 label: "end",
                 rawText: "Bye",
-                talkingNpc: "traveler_in_salem_npc",
-                rightNpc: "traveler_in_salem_npc",
+                talkingNpc: "npc.traveler_in_salem",
+                rightNpc: "npc.traveler_in_salem",
                 leftNpc: null,
                 next: $EndOfDialog { }
             },

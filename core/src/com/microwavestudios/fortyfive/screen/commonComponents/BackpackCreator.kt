@@ -2,9 +2,9 @@ package com.microwavestudios.fortyfive.screen.commonComponents
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.game.SaveState
-import com.microwavestudios.fortyfive.game.SaveState.Deck
+import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.card.CardPrototype
@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
@@ -33,6 +34,7 @@ object BackpackCreator {
         worldHeight: Float,
         warningEvents: EventPipeline,
         publicEvents: EventPipeline,
+        isCollection: Boolean,
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
 
         val cardsOnj = ConfigFileManager.getConfigFile("cards")
@@ -40,8 +42,11 @@ object BackpackCreator {
             .getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) })
             .associate { it.name to it }
 
+        val profile = FortyFive.profileManager.currentProfile!!
+
         val state = BackpackState(
-            SaveState.curDeck,
+            if (isCollection) profile.currentCollectionDeck else profile.currentRunDeck!!,
+            profile,
             cardPrototypes,
             mutableListOf(),
             listOf(),
@@ -52,7 +57,8 @@ object BackpackCreator {
             false,
             InputManager.FocusGrid(),
             InputManager.FocusGrid(),
-            null, null
+            null, null,
+            isCollection
         )
         updateCardsInCollection(state)
 
@@ -68,8 +74,12 @@ object BackpackCreator {
             backpackSide(state, worldWidth, this@getSharedBackpack)
         }
 
-        state.currentDeck.checkDeck()
+        state.currentDeck.checkDeck(if (isCollection) profile.cardCollection else profile.backpack!!)
         state.events.fire(DeckChangedEvent)
+        state.publicEvents.fire(DeckChangedEvent)
+        state.publicEvents.watchFor<CardsModifiedEvent> {
+            switchToDeck(state.currentDeck.id, state)
+        }
         with(screen.inputManager) {
             addDragAndDrop(backpackCardInDeckGroup, backpackCardInDeckGroup)
             addDragAndDrop(backpackCardInDeckGroup, backpackSlotInDeckGroup)
@@ -93,7 +103,7 @@ object BackpackCreator {
         filter.start()
 
         val navbarObject = NavbarCreator.NavBarObject(
-            "Backpack",
+            if (isCollection) "Collection" else "Backpack",
             { Timeline.timeline {
 
                 action {
@@ -154,10 +164,18 @@ object BackpackCreator {
         return backpack to navbarObject
     }
 
-    private fun switchToDeck(num: Int, state: BackpackState) {
-        SaveState.curDeckNbr = num
-        val deck = SaveState.curDeck
-        deck.checkDeck()
+    private fun switchToDeck(id: Int, state: BackpackState) {
+        val deck = if (state.functionsAsCollection) {
+            val deck = state.profile.collectionDecks.find { it.id == id }!!
+            state.profile.currentCollectionDeck = deck
+            deck.checkDeck(state.profile.cardCollection)
+            deck
+        } else {
+            val deck = state.profile.backpackDecks!!.find { it.id == id }!!
+            state.profile.currentRunDeck = deck
+            deck.checkDeck(state.profile.backpack!!)
+            deck
+        }
         state.currentDeck = deck
         updateCardsInCollection(state)
         with(state.events) {
@@ -177,6 +195,7 @@ object BackpackCreator {
             fire(SlotChangedEvent(firstNum, false))
             fire(SlotChangedEvent(secondNum, false))
         }
+        state.publicEvents.fire(CardsChangedEvent)
     }
 
     private fun putCardFromDeckInEmptySlot(firstNum: Int, secondNum: Int, state: BackpackState) {
@@ -186,6 +205,7 @@ object BackpackCreator {
             fire(SlotChangedEvent(firstNum, false))
             fire(SlotChangedEvent(secondNum, false))
         }
+        state.publicEvents.fire(CardsChangedEvent)
     }
 
     private fun putCardFromBackpackInDeck(card: Card, slot: Int, state: BackpackState) {
@@ -200,6 +220,7 @@ object BackpackCreator {
             fire(CollectionChangedEvent)
             fire(SlotChangedEvent(slot, false))
         }
+        state.publicEvents.fire(CardsChangedEvent)
     }
 
     private fun putCardFromDeckInBackpack(slot: Int, state: BackpackState) {
@@ -215,6 +236,7 @@ object BackpackCreator {
             fire(SlotChangedEvent(slot, false))
             fire(CollectionChangedEvent)
         }
+        state.publicEvents.fire(CardsChangedEvent)
     }
 
     private fun sortingModeChanged(state: BackpackState) {
@@ -231,6 +253,7 @@ object BackpackCreator {
             fire(SlotChangedEvent(deckSlot, false))
             fire(CollectionChangedEvent)
         }
+        state.publicEvents.fire(CardsChangedEvent)
     }
 
     private fun CustomGroup.backpackSide(
@@ -335,9 +358,9 @@ object BackpackCreator {
     private fun CustomBox.collection(state: BackpackState, creator: ScreenCreator) = with(creator) {
         box(isScrollable = true) scrollableBox@{
             this as CustomScrollableBox
-            relativeWidth(88f)
+            relativeWidth(95f)
             height = 680f
-            x = 20f
+            x = 80f
             scrollDirectionStart = CustomDirection.TOP
             horizontalAlign = CustomAlign.START
             wrap = CustomWrap.WRAP
@@ -398,7 +421,7 @@ object BackpackCreator {
     }
 
     private fun updateCardsInCollection(state: BackpackState) {
-        val allCards = SaveState.cards
+        val allCards = if (state.functionsAsCollection) state.profile.cardCollection else state.profile.backpack!!
         val result = allCards.toMutableList()
         val cardsInDeck = state.currentDeck.cards
         cardsInDeck.forEach { result.remove(it) }
@@ -445,7 +468,7 @@ object BackpackCreator {
     private fun CustomBox.deck(state: BackpackState, creator: ScreenCreator) = with(creator) {
         val cardsPerRow = 4
         val cardSize = 140f
-        val cardSlotsPerDeck = SaveState.Deck.numberOfSlots
+        val cardSlotsPerDeck = Deck.numberOfSlots
         var rowsNeeded = cardSlotsPerDeck / cardsPerRow
         val lastRow = cardSlotsPerDeck % cardsPerRow
         if (lastRow != 0) rowsNeeded++
@@ -583,27 +606,36 @@ object BackpackCreator {
             relativeWidth(100f)
             syncHeight()
 
-            inputField("red_wing", Color.Black, backgroundHints = arrayOf("black_texture")) {
-                maxLength = 20
-                touchable = Touchable.enabled
-                joinGroup(backpackElementsGroup)
-                keyboardFocusable = KeyboardFocusable.LEAF
-                setText("Hello World")
+            label(
+                "red_wing",
+                if (state.functionsAsCollection) "Collection" else "Backpack",
+                Color.White
+            ) {
                 width = 200f
                 height = 40f
-                isDisabled = true
-                observeInputState(
-                    GameInputs.States.focused,
-                    {
-                        isDisabled = false
-                        backgroundHandle = "black_texture"
-                    },
-                    {
-                        isDisabled = true
-                        backgroundHandle = null
-                    }
-                )
             }
+
+//            inputField("red_wing", Color.Black, backgroundHints = arrayOf("black_texture")) {
+//                maxLength = 20
+//                touchable = Touchable.enabled
+//                joinGroup(backpackElementsGroup)
+//                keyboardFocusable = KeyboardFocusable.LEAF
+//                setText("Hello World")
+//                width = 200f
+//                height = 40f
+//                isDisabled = true
+//                observeInputState(
+//                    GameInputs.States.focused,
+//                    {
+//                        isDisabled = false
+//                        backgroundHandle = "black_texture"
+//                    },
+//                    {
+//                        isDisabled = true
+//                        backgroundHandle = null
+//                    }
+//                )
+//            }
 
             box {
                 flexDirection = FlexDirection.ROW
@@ -611,19 +643,20 @@ object BackpackCreator {
                 width = 5f * 65f
                 repeat(5) { num ->
                     val n = num + 1
+                    val id = if (state.functionsAsCollection) 100 + num else num
                     box(backgroundHints = arrayOf("backpack_$n", "backpack_${n}_hover")) {
                         width = 65f
                         height = 50f
                         joinGroup(backpackElementsGroup)
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
-                        backgroundHandle = if (state.currentDeck.id == n) {
+                        backgroundHandle = if (state.currentDeck.id == id) {
                             "backpack_${n}_hover"
                         } else {
                             "backpack_$n"
                         }
                         state.events.watchFor<DeckChangedEvent> {
-                            backgroundHandle = if (state.currentDeck.id == n) {
+                            backgroundHandle = if (state.currentDeck.id == id) {
                                 "backpack_${n}_hover"
                             } else {
                                 "backpack_$n"
@@ -631,7 +664,7 @@ object BackpackCreator {
                         }
                         onInput(GameInputs.interact) {
                             if (state.currentDeck.id == n) return@onInput
-                            switchToDeck(n, state)
+                            switchToDeck(id, state)
                         }
                     }
                 }
@@ -641,6 +674,7 @@ object BackpackCreator {
 
     private data class BackpackState(
         var currentDeck: Deck,
+        val profile: Profile,
         val cardPrototypes: Map<String, CardPrototype>,
         val createdCards: MutableList<Card>,
         var cardsInCollection: List<String>,
@@ -652,7 +686,8 @@ object BackpackCreator {
         var deckFocusGrid: InputManager.FocusGrid,
         var backpackFocusGrid: InputManager.FocusGrid,
         var deckParent: CustomBox?,
-        var collectionParent: CustomBox?
+        var collectionParent: CustomBox?,
+        val functionsAsCollection: Boolean,
     ) {
 
         fun getCardInstance(name: String, screen: OnjScreen, state: BackpackState): Card {
@@ -713,5 +748,8 @@ object BackpackCreator {
     private data class SlotChangedEvent(val slot: Int, val backpack: Boolean)
 
     data object DeckChangedEvent
+    data object CardsChangedEvent
+
+    data object CardsModifiedEvent
 
 }

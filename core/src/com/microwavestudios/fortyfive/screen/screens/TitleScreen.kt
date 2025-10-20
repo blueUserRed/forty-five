@@ -8,15 +8,18 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
-import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
+import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator.getSharedPopup
+import com.microwavestudios.fortyfive.screen.commonComponents.ProfileCardCreator.getSharedProfileCard
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.getSharedSettingsMenu
-import com.microwavestudios.fortyfive.screen.screenController.TitleScreenController
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.screen.screenController.TimelineController
+import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
@@ -39,17 +42,13 @@ class TitleScreen : ScreenCreator() {
         "*" to 800 //800 fits good with the animation
     )
 
-    override fun getScreenControllers(): List<ScreenController> = listOf(
-        TitleScreenController(screen)
-    )
-
-    private val controller: TitleScreenController by lazy {
-        screen.screenControllers.filterIsInstance<TitleScreenController>().first()
-    }
-
     private var settingsOpen: Boolean = false
 
     private val events: EventPipeline = EventPipeline()
+
+    private var currentlySelectedProfile: Profile.Preview? = null
+
+    private val timelines: TimelineController = TimelineController()
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -93,13 +92,32 @@ class TitleScreen : ScreenCreator() {
         box {
             x = 120F
             y = worldHeight * 0.65F
-            addOption("Continue") { FortyFive.toMap() }
-            addOption("Abandon Run") { handleAbandonRun() }
-            addOption("Reset Game") { handleResetGame() }
-
+            addOption("Start", true) { handleContinue() }
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
             addOption("View Credits") { FortyFive.screenManager.appendScreen(CreditsScreen) }
             addOption("Quit") { handleQuit() }
+        }
+
+        box {
+            x = 400f
+            y = worldHeight * 0.65f
+            width = worldWidth * 0.7f
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.SPACE_AROUND
+
+            profileSelector()
+        }
+
+        events.watchFor<SelectedProfileChanged> { event ->
+            currentlySelectedProfile = event.newProfile
+        }
+
+        label("red_wing", "rework stage 1", Color.Black) {
+            onLayoutAndNow {
+                x = worldWidth - width - 10
+                y = worldHeight - height - 10
+            }
         }
 
         actor(settings) {
@@ -115,10 +133,58 @@ class TitleScreen : ScreenCreator() {
             worldHeight,
             events,
             hasSettings = false, // added manually
-            hasBackpack = false,
             hasNavbar = false,
             hasTutorial = false,
         )
+
+        screen.afterMs(0) { // run when screen is shown
+            val profileManager = FortyFive.profileManager
+            val current = profileManager.currentProfile?.name
+            profileManager.deselectProfile()
+            val preview = if (current != null) {
+                profileManager.availableProfiles.find { it.name == current }!!
+            } else {
+                profileManager.availableProfiles.first()
+            }
+            events.fire(SelectedProfileChanged(preview))
+        }
+    }
+
+    private fun CustomBox.profileSelector() {
+        val previews = FortyFive.profileManager.availableProfiles
+        previews.forEach { preview ->
+
+            actor(getSharedProfileCard(preview)) {
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+
+                onInput(GameInputs.interact) {
+                    if (!preview.loadedSuccessfully) return@onInput
+                    events.fire(SelectedProfileChanged(preview))
+                }
+
+                events.watchFor<SelectedProfileChanged> { event ->
+                    backgroundHandle = if (event.newProfile === preview) "grey_texture" else "white_texture"
+                }
+            }
+        }
+    }
+
+    private fun handleContinue() {
+        val selected = currentlySelectedProfile!!
+        if (!selected.loadedSuccessfully) {
+            FortyFive.soundPlayer.situation("not_allowed", screen)
+            return
+        }
+        val success = FortyFive.profileManager.selectProfile(selected)
+        if (success) {
+            FortyFive.toMap()
+        } else {
+            // a bit ugly, but shouldn't really happen
+            FortyFive.profileManager.reloadPreviews()
+            FortyFive.screenManager.ensureNextScreen(TitleScreen)
+            FortyFive.screenManager.screenFinished()
+        }
     }
 
     private fun handleQuit() {
@@ -137,68 +203,47 @@ class TitleScreen : ScreenCreator() {
         events.fire(popup)
     }
 
-    private fun handleAbandonRun() {
-
-        val popup = PopupCreator.ShowPopup(
-            "Do you want to abandon you run?",
-            "All the progress you made will be lost",
-            listOf(
-                "Ok" to true,
-                "Cancel" to false
-            )
-        ) { result ->
-            if (result) FortyFive.newRun(false)
-        }
-        events.fire(popup)
-    }
-
-    private fun handleResetGame() {
-
-        val popup = PopupCreator.ShowPopup(
-            "Are you sure you want to reset the game?",
-            "All progress you made will be lost forever",
-            listOf(
-                "Ok" to true,
-                "Cancel" to false
-            )
-        ) { result ->
-            if (result) FortyFive.resetAll()
-        }
-        events.fire(popup)
-    }
-
     private fun openSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
         if (settingsOpen) return
         settingsOpen = true
-        controller.timeline.appendAction(Timeline.timeline {
+        timelines.appendMainTimeline(Timeline.timeline {
             include(settingsObject.openTimelineCreator())
             action {
                 blackOverlay.isVisible = true
                 blackOverlay.touchable = Touchable.enabled
             }
-        }.asAction())
+        })
     }
 
     private fun closeSettings(blackOverlay: CustomImageActor, settingsObject: NavbarCreator.NavBarObject) {
         if (!settingsOpen) return
         settingsOpen = false
-        controller.timeline.appendAction(Timeline.timeline {
+        timelines.appendMainTimeline(Timeline.timeline {
             include(settingsObject.closeTimelineCreator())
             action {
                 blackOverlay.isVisible = false
                 blackOverlay.touchable = Touchable.disabled
             }
-        }.asAction())
+        })
     }
 
-    private fun Group.addOption(displayText: String, action: () -> Unit) = label("red_wing_bmp", displayText) {
+    private fun Group.addOption(
+        displayText: String,
+        onlyAvailableWhenProfileIsSelected: Boolean = false,
+        action: () -> Unit
+    ) = label("red_wing_bmp", displayText) {
         setFontScale(0.4f)
         syncWidth()
         syncHeight()
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
 
+        if (onlyAvailableWhenProfileIsSelected) events.watchFor<SelectedProfileChanged> { event ->
+            fontColor = if (event.newProfile == null) Color.Grey else Color.Black
+        }
+
         onInput(GameInputs.interact) {
+            if (onlyAvailableWhenProfileIsSelected && currentlySelectedProfile == null) return@onInput
             action()
         }
 
@@ -210,12 +255,18 @@ class TitleScreen : ScreenCreator() {
     }
 
     private fun Group.addBullet(name: String) = box {
-        positionType = _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.PositionType.ABSOLUTE
+        positionType = PositionType.ABSOLUTE
         width = worldWidth
         height = worldHeight
         name(name)
         backgroundHandle = name
     }
+
+    override fun getScreenControllers(): List<ScreenController> = listOf(
+        timelines
+    )
+
+    private class SelectedProfileChanged(val newProfile: Profile.Preview?)
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = TitleScreen::class

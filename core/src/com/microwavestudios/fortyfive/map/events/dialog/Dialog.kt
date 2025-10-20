@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.map.events.dialog
 
+import com.microwavestudios.fortyfive.map.MapPredicate
 import com.microwavestudios.fortyfive.screen.commonComponents.AdvancedText
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import onj.value.OnjArray
@@ -64,6 +65,31 @@ data class Dialog(
                         }
                 )
 
+                "ByPredicate" -> NextDialogPartSelector.ByPredicate(
+                    MapPredicate.fromOnj(nextSelector.get<OnjNamedObject>("predicate")),
+                    nextSelector.get<String>("ifTrue"),
+                    nextSelector.get<String>("ifFalse"),
+                )
+
+                "MatchPredicate" -> NextDialogPartSelector.MatchPredicate(
+                    nextSelector
+                        .get<OnjArray>("options")
+                        .value
+                        .map {
+                            it as OnjObject
+                            MapPredicate.fromOnj(it.get<OnjNamedObject>("predicate")) to it.get<String>("label")
+                        },
+                    nextSelector.get<String>("default")
+                )
+
+                "StartSpecialRunEnd" -> NextDialogPartSelector.StartSpecialRunEnd(
+                    nextSelector.get<String>("run")
+                )
+
+                "AddSpecialRunEnd" -> NextDialogPartSelector.AddSpecialRunEnd(
+                    nextSelector.get<String>("run")
+                )
+
                 "GiftCardEnd" -> NextDialogPartSelector.GiftCardEnd(
                     nextSelector.get<String>("card"),
                 )
@@ -94,9 +120,24 @@ sealed class NextDialogPartSelector {
         val choices: Map<String, String>
     ) : NextDialogPartSelector()
 
+    class ByPredicate(
+        val predicate: MapPredicate,
+        val ifTrue: String,
+        val ifFalse: String
+    ) : NextDialogPartSelector()
+
+    class MatchPredicate(
+        val options: List<Pair<MapPredicate, String>>,
+        val default: String
+    ) : NextDialogPartSelector()
+
     data object End : NextDialogPartSelector()
 
     class GiftCardEnd(val card: String) : NextDialogPartSelector()
+
+    class StartSpecialRunEnd(val run: String) : NextDialogPartSelector()
+
+    class AddSpecialRunEnd(val run: String) : NextDialogPartSelector()
 
     data object ToCreditScreenEnd : NextDialogPartSelector()
 
