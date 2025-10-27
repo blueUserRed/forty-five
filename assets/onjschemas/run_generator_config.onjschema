@@ -1,0 +1,16 @@
+import "imports/run.onjschema" as _;
+
+runModifierPools: {
+    majorDifficulty: int,
+    modifierProbability: float,
+    modifiers: string[]
+}[],
+
+runModifierProbabilityIncreases: {
+    biome: string,
+    makeMoreLikely: string[]
+}[],
+
+runModifierBlacklist: string[][],
+
+runModifiersMax: int,

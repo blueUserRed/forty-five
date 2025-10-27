@@ -24,6 +24,7 @@ configFiles: {
     inputMaps: fileConfig,
     creditsText: fileConfig,
     npcs: fileConfig,
+    runGeneratorConfig: fileConfig,
 },
 
 screenSchema: string,

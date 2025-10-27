@@ -67,6 +67,10 @@ configFiles: {
     npcs: {
         file: "config/npcs.onj",
         validatedBy: "onjschemas/npcs.onjschema"
+    },
+    runGeneratorConfig: {
+        file: "config/run_generator_config.onj",
+        validatedBy: "onjschemas/run_generator_config.onjschema"
     }
 },
 

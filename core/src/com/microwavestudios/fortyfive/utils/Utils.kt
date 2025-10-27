@@ -367,7 +367,7 @@ fun Color.interpolate(other: Color): Color {
 
 object Utils {
 
-    fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability
+    fun coinFlip(probability: Float, random: Random = Random): Boolean = (0f..1f).random(random) < probability
 
     /**
      * sets the currently active cursor

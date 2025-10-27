@@ -1,0 +1,37 @@
+
+runModifierPools: [
+    {
+        majorDifficulty: 1,
+        modifierProbability: 0f
+        modifiers: []
+    },
+    {
+        majorDifficulty: 2,
+        modifierProbability: 0.3f
+        modifiers: [ "AllRain", "AllMoist" ]
+    },
+    {
+        majorDifficulty: 3,
+        modifierProbability: 0.4f
+        modifiers: [ "AllRain", "AllMoist", "AllBewitchedMist" ]
+    },
+    {
+        majorDifficulty: 4,
+        modifierProbability: 0.4f
+        modifiers: [ "AllRain", "AllMoist", "AllBewitchedMist", "AllFrozen" ]
+    },
+],
+
+runModifierProbabilityIncreases: [
+    {
+        biome: "bewitched_forest",
+        makeMoreLikely: ["AllBewitchedMist"],
+    }
+],
+
+runModifierBlacklist: [
+    [ "allMoist", "allFrozen" ],
+    [ "allFrozen", "allBewitchedMist" ],
+],
+
+runModifiersMax: 2
