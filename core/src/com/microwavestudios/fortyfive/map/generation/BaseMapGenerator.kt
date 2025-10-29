@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.onjNamespaces.OnjInterpolation
+import com.microwavestudios.fortyfive.run.EncounterGenerator
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -187,6 +188,16 @@ abstract class BaseMapGenerator {
     protected fun connectNodes(node1: MapNodeBuilder, node2: MapNodeBuilder) {
         node1.connect(node2)
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
+    }
+
+    fun generateEncounters() {
+        _allNodes.forEach { node ->
+            val event = node.event
+            if (event !is EncounterPlaceholderMapEvent) return@forEach
+            val encounter = EncounterGenerator.generate(event, node)
+            val mapEvent = EncounterMapEvent(encounter, event.genExtraction)
+            node.event = mapEvent
+        }
     }
 
     abstract fun asOnj(): OnjObject

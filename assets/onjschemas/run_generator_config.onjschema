@@ -12,6 +12,7 @@ runModifierProbabilityIncreases: {
 }[],
 
 runModifierBlacklist: string[][],
+encounterModifierBlacklist: string[][],
 
 runModifiersMax: int,
 
@@ -21,4 +22,11 @@ runRewardPools: {
     maxRewards: Int,
     rewardProbability: float,
     rewards: $RunReward[][]
-}[]
+}[],
+
+encounterModifierPools: {
+    majorDifficulty: int,
+    modifierProbability: float,
+    maxModifiers: int,
+    modifiers: string[]
+}[],

@@ -7,20 +7,20 @@ import onj.value.OnjArray
 
 abstract class RunModifier {
 
-    abstract class ModifyAllEncounters(val encounterModifier: EncounterModifier) : RunModifier() {
+    abstract class ModifyAllEncounters(val encounterModifier: String) : RunModifier() {
         override val difficultyAdjustment: Float = 0f // handled by encounter
-        override fun addModifier(): EncounterModifier? = encounterModifier
+        override fun addModifier(): String? = encounterModifier
     }
 
-    data object AllRain : ModifyAllEncounters(EncounterModifier.Rain)
-    data object AllMoist : ModifyAllEncounters(EncounterModifier.Moist)
-    data object AllBewitchedMist : ModifyAllEncounters(EncounterModifier.BewitchedMist)
-    data object AllFrozen : ModifyAllEncounters(EncounterModifier.Frost)
+    data object AllRain : ModifyAllEncounters("rain")
+    data object AllMoist : ModifyAllEncounters("moist")
+    data object AllBewitchedMist : ModifyAllEncounters("bewitchedMist")
+    data object AllFrozen : ModifyAllEncounters("frost")
 
 
     abstract val difficultyAdjustment: Float
 
-    open fun addModifier(): EncounterModifier? = null
+    open fun addModifier(): String? = null
 
     open fun name(): String = this::class.simpleName ?: unreachable()
 
@@ -43,6 +43,19 @@ abstract class RunModifier {
                     pool as OnjArray
                     pool.value.map { get(it.value as String) }
                 }
+        }
+
+        fun isValid(modifiers: List<RunModifier>): Boolean {
+            modifiers.forEach { modifier ->
+                blacklist.forEach { list ->
+                    if (modifier !in list) return@forEach
+                    list.forEach { toCheck ->
+                        if (toCheck == modifier) return@forEach
+                        if (toCheck in modifiers) return false
+                    }
+                }
+            }
+            return true
         }
 
         fun isBlacklisted(m1: RunModifier, m2: RunModifier): Boolean {

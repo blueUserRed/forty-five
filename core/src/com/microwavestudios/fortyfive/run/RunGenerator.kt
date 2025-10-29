@@ -4,6 +4,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
 import com.microwavestudios.fortyfive.map.EmptyMapEvent
+import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
@@ -13,6 +14,7 @@ import com.microwavestudios.fortyfive.utils.requireNot
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.math.absoluteValue
 import kotlin.math.log
 import kotlin.random.Random
 
@@ -23,6 +25,11 @@ class RunGenerator {
     fun generateRun(forDifficulty: Int, forBiome: String, forArea: String, type: RunType): Run {
 
         val modifiers = generateRunModifiers(forBiome, forDifficulty)
+
+        val difficultyAdjustment = modifiers.sumOf { it.difficultyAdjustment.toDouble() }
+        val majorDifficulty = (forDifficulty + difficultyAdjustment).toInt().coerceAtLeast(0)
+        val minorDifficulty = ((forDifficulty + difficultyAdjustment).absoluteValue % 1).toFloat().coerceAtLeast(0f)
+
         val rewards = generateRunRewards(forDifficulty)
 
         return Run(
@@ -36,12 +43,17 @@ class RunGenerator {
             forArea,
             100,
             100,
-            threeLineMapGen(forDifficulty.toFloat())
+            threeLineMapGen(majorDifficulty, forDifficulty, minorDifficulty, modifiers)
         )
     }
 
 
-    private fun threeLineMapGen(difficulty: Float): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
+    private fun threeLineMapGen(
+        majorDifficulty: Int,
+        unadjustedMajorDifficulty: Int,
+        minorDifficulty: Float,
+        runModifier: List<RunModifier>
+    ): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
         majorDifficulty = 1,
         biome = "wasteland",
         nodeProtectedArea = 20f,
@@ -58,9 +70,27 @@ class RunGenerator {
         firstNodeTexture = "map_node_default",
         firstNodeEvent = { EmptyMapEvent() },
         lastNodeTexture = "map_node_fight",
-        lastNodeEvent = { EmptyMapEvent() },
+        lastNodeEvent = {
+            EncounterPlaceholderMapEvent(
+                true,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                runModifier,
+                random.nextLong()
+            )
+        },
         mainEvent = ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-            { EmptyMapEvent() },
+            {
+                EncounterPlaceholderMapEvent(
+                    false,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    runModifier,
+                    random.nextLong()
+                )
+            },
             offset = 0..1,
             nodeTexture = "map_node_fight",
             line = -1,
@@ -237,7 +267,7 @@ class RunGenerator {
             var current = start
             while (true) {
                 val modifier = modifiers[current]
-                if (selectedModifiers.none { RunModifier.isBlacklisted(modifier, it) }) {
+                if (modifier !in selectedModifiers && selectedModifiers.none { RunModifier.isBlacklisted(modifier, it) }) {
                     selectedModifiers.add(modifier)
                     break
                 }

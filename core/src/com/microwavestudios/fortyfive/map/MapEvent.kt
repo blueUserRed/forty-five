@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.RunModifier
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.utils.toIntRange
@@ -37,6 +38,7 @@ object MapEventFactory {
                 onjObject.get<Long>("rerollBasePrice").toInt(),
             )
         },
+        "EncounterPlaceholderMapEvent" to { EncounterPlaceholderMapEvent.fromOnj(it) },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
@@ -258,6 +260,48 @@ class EncounterMapEvent(
             onj.get<Boolean>("isExtraction")
         ).apply { setStandardValuesFromConfig(onj) }
     }
+}
+
+class EncounterPlaceholderMapEvent(
+    val genExtraction: Boolean,
+    val majorDifficulty: Int,
+    val unadjustedMajorDifficulty: Int,
+    val minorDifficulty: Float,
+    val runModifier: List<RunModifier>,
+    val seed: Long,
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var startable: Boolean = false
+    override var isCompleted: Boolean = false
+    override val displayDescription: Boolean = false
+
+    override fun start() {
+        FortyFive.logger.warn("MapEvent", "EncounterPlaceholderMapEvent started")
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("EncounterPlaceholderMapEvent")
+        "genExtraction" with genExtraction
+        "majorDifficulty" with majorDifficulty
+        "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
+        "minorDifficulty" with minorDifficulty
+        "runModifier" with runModifier.map { it.name() }
+        "seed" with seed
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): EncounterPlaceholderMapEvent = EncounterPlaceholderMapEvent(
+            onj.get<Boolean>("genExtraction"),
+            onj.get<Long>("majorDifficulty").toInt(),
+            onj.get<Long>("unadjustedMajorDifficulty").toInt(),
+            onj.get<Double>("minorDifficulty").toFloat(),
+            onj.get<OnjArray>("runModifier").value.map { RunModifier.get(it.value as String) },
+            onj.get<Long>("seed"),
+        )
+    }
+
 }
 
 class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {

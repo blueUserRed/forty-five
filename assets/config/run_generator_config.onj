@@ -38,7 +38,7 @@ runModifierBlacklist: [
     [ "allFrozen", "allBewitchedMist" ],
 ],
 
-runModifiersMax: 2
+runModifiersMax: 2,
 
 //////////////////////////////////////////////////////
 // Run rewards
@@ -64,4 +64,40 @@ runRewardPools: [
             ]
         ]
     }
-]
+],
+
+//////////////////////////////////////////////////////
+// Encounter modifier
+//////////////////////////////////////////////////////
+
+encounterModifierBlacklist: [
+    [ "moist", "frozen" ],
+    [ "frozen", "bewitchedMist"],
+],
+
+encounterModifierPools: [
+    {
+        majorDifficulty: 0,
+        modifierProbability: 0.0,
+        maxModifiers: 0,
+        modifiers: []
+    },
+    {
+        majorDifficulty: 1,
+        modifierProbability: 0.3,
+        maxModifiers: 1,
+        modifiers: [ "rain", "moist", "bewitchedMist" ]
+    },
+    {
+        majorDifficulty: 3,
+        modifierProbability: 0.6,
+        maxModifiers: 2,
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
+    },
+    {
+        majorDifficulty: 5,
+        modifierProbability: 0.8,
+        maxModifiers: 3,
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
+    },
+],
