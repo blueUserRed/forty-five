@@ -9,7 +9,7 @@ data class Run(
     val length: RunLength,
     val type: RunType,
     val difficulty: Int,
-    val modifiers: List<String>,
+    val modifiers: List<RunModifier>,
     val rewards: List<RunReward>,
     val biome: String,
     val fromArea: String,
@@ -23,7 +23,7 @@ data class Run(
         "length" with length.asOnj()
         "type" with type.asOnj()
         "difficulty" with difficulty
-        "modifiers" with modifiers
+        "modifiers" with modifiers.map { it.name() }
         "rewards" with rewards.map { it.asOnj() }
         "biome" with biome
         "fromArea" with fromArea
@@ -39,7 +39,7 @@ data class Run(
             RunLength.fromOnj(onj.get<OnjString>("length")),
             RunType.fromOnj(onj.get<OnjString>("type")),
             onj.get<Long>("difficulty").toInt(),
-            onj.get<OnjArray>("modifiers").value.map { it.value as String },
+            onj.get<OnjArray>("modifiers").value.map { RunModifier.get(it.value as String) },
             onj.get<OnjArray>("rewards").value.map {
                 it as OnjNamedObject
                 RunReward.fromOnj(it)

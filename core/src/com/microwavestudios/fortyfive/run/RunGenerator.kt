@@ -9,8 +9,11 @@ import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.random
+import com.microwavestudios.fortyfive.utils.requireNot
 import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.math.log
 import kotlin.random.Random
 
 class RunGenerator {
@@ -20,14 +23,15 @@ class RunGenerator {
     fun generateRun(forDifficulty: Int, forBiome: String, forArea: String, type: RunType): Run {
 
         val modifiers = generateRunModifiers(forBiome, forDifficulty)
+        val rewards = generateRunRewards(forDifficulty)
 
         return Run(
             "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,
-            listOf(),
-            listOf(RunReward.Cash(100)),
+            modifiers,
+            rewards,
             forBiome,
             forArea,
             100,
@@ -174,6 +178,37 @@ class RunGenerator {
         )
     )
 
+    private fun generateRunRewards(majorDifficulty: Int): List<RunReward> {
+        var checkDifficulty = majorDifficulty
+        lateinit var pool: RunRewardPool
+        while (true) {
+            if (checkDifficulty < 0) {
+                throw RuntimeException("no run rewards for difficulty $majorDifficulty")
+            }
+            val checkPool = runRewardPools.find { it.majorDifficulty == checkDifficulty }
+            checkDifficulty--
+            checkPool ?: continue
+            pool = checkPool
+            break
+        }
+        val rewards = mutableListOf<RunReward>()
+        val collections = pool.rewards.toMutableList()
+        require(collections.isNotEmpty()) { "run reward pool is empty" }
+        repeat(pool.maxRewards) {
+            if (!Utils.coinFlip(pool.rewardProbability, random)) return@repeat
+            if (collections.isEmpty()) {
+                FortyFive.logger.warn(logTag, "not enough run reward collections for major difficulty $majorDifficulty")
+                return rewards
+            }
+            val collection = collections.random(random)
+            collections.remove(collection)
+            require(collection.isNotEmpty()) { "run reward collection is empty" }
+            val reward = collection.random(random)
+            rewards.add(reward)
+        }
+        return rewards
+    }
+
     private fun generateRunModifiers(biome: String, majorDifficulty: Int): List<RunModifier> {
         var checkDifficulty = majorDifficulty
         lateinit var pool: Pair<Float, List<String>>
@@ -196,9 +231,9 @@ class RunGenerator {
 
         val selectedModifiers = mutableListOf<RunModifier>()
         repeat(runModifiersMax) {
-            if (!Utils.coinFlip(pool.first)) return@repeat
+            if (!Utils.coinFlip(pool.first, random)) return@repeat
 
-            val start: Int = modifiers.indices.random(random)
+            val start = modifiers.indices.random(random)
             var current = start
             while (true) {
                 val modifier = modifiers[current]
@@ -227,6 +262,31 @@ class RunGenerator {
 
         val configFile: OnjObject by lazy {
             ConfigFileManager.getConfigFile("runGeneratorConfig")
+        }
+
+        val runRewardPools: List<RunRewardPool> by lazy {
+            configFile
+                .get<OnjArray>("runRewardPools")
+                .value
+                .map { obj ->
+                    obj as OnjObject
+                    val majorDifficulty = obj.get<Long>("majorDifficulty").toInt()
+                    val maxRewards = obj.get<Long>("maxRewards").toInt()
+                    val rewardProbability = obj.get<Double>("rewardProbability").toFloat()
+                    val pools = obj
+                        .get<OnjArray>("rewards")
+                        .value
+                        .map { pool ->
+                            pool as OnjArray
+                            pool.value.map { RunReward.fromOnj(it as OnjNamedObject) }
+                        }
+                    RunRewardPool(
+                        majorDifficulty,
+                        maxRewards,
+                        rewardProbability,
+                        pools
+                    )
+                }
         }
 
         val runModifiersMax: Int by lazy { configFile.get<Long>("runModifiersMax").toInt() }
@@ -259,5 +319,12 @@ class RunGenerator {
         }
 
     }
+
+    data class RunRewardPool(
+        val majorDifficulty: Int,
+        val maxRewards: Int,
+        val rewardProbability: Float,
+        val rewards: List<List<RunReward>>
+    )
 
 }

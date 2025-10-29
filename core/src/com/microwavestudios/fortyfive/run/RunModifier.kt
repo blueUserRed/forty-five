@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.run
 
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.EncounterModifier
+import com.microwavestudios.fortyfive.utils.unreachable
 import onj.value.OnjArray
 
 abstract class RunModifier {
@@ -21,6 +22,7 @@ abstract class RunModifier {
 
     open fun addModifier(): EncounterModifier? = null
 
+    open fun name(): String = this::class.simpleName ?: unreachable()
 
     companion object {
 

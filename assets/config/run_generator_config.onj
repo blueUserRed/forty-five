@@ -1,4 +1,8 @@
 
+//////////////////////////////////////////////////////
+// Run Modifiers
+//////////////////////////////////////////////////////
+
 runModifierPools: [
     {
         majorDifficulty: 1,
@@ -35,3 +39,29 @@ runModifierBlacklist: [
 ],
 
 runModifiersMax: 2
+
+//////////////////////////////////////////////////////
+// Run rewards
+//////////////////////////////////////////////////////
+
+
+runRewardPools: [
+    {
+        majorDifficulty: 0,
+        maxRewards: 1,
+        rewardProbability: 1f,
+        rewards: [
+            [
+                $CashReward {
+                    amount: 200
+                },
+                $CashReward {
+                    amount: 250
+                },
+                $CashReward {
+                    amount: 300
+                },
+            ]
+        ]
+    }
+]
