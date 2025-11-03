@@ -30,3 +30,17 @@ encounterModifierPools: {
     maxModifiers: int,
     modifiers: string[]
 }[],
+
+enemies: {
+    majorDifficulty: int,
+    amount: int[2],
+    allowedEnemies: string[],
+}[],
+
+enemyProbabilityIncrease: {
+    enemy: string,
+    biome: string,
+    bonusPoints: int,
+}[],
+
+enemyProbabilityRandomPoints: int,

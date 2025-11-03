@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.Resource
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActor
 import kotlin.reflect.KProperty
@@ -60,6 +61,7 @@ class DebugMenu(val pages: List<DebugMenuPage>) {
             registerDebugMenuPage("Card Textures") { CardTextureDebugMenuPage() }
             registerDebugMenuPage("Resources") { ResourceDebugMenuPage() }
             registerDebugMenuPage("Map") { MapDebugMenuPage() }
+            registerDebugMenuPage("Encounter Preview") { EncounterPreviewDebugMenuPage() }
         }
 
         fun registerDebugMenuPage(name: String, creator: () -> DebugMenuPage) {
@@ -198,4 +200,19 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
     override fun getText(screen: OnjScreen): String = """
         $walkEverywhere
     """.trimIndent()
+}
+
+class EncounterPreviewDebugMenuPage : DebugMenuPage("Encounter Preview") {
+
+    var encounter: Encounter? = null
+
+    override fun getText(screen: OnjScreen): String = encounter?.let { encounter ->
+        """
+            enemies: ${encounter.enemies.joinToString(separator = ", ")}
+            modifier: ${encounter.encounterModifierNames.joinToString(separator = ", ")}
+            major difficulty: ${encounter.majorDifficulty}
+            minor difficulty: ${encounter.minorDifficulty}
+            major difficulty (unadjusted): ${encounter.unadjustedMajorDifficulty}
+        """.trimIndent()
+    } ?: ""
 }

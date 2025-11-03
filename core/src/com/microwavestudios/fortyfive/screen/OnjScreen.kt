@@ -264,7 +264,6 @@ open class OnjScreen(
 
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
-        println("hi")
         screenEvents.fire(ScreenResizedEvent(width, height))
     }
 

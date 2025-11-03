@@ -13,6 +13,8 @@ var encounter = {
     encounterModifier: string[],
     forceCards: string[]?,
     shuffleCards: boolean,
+    unadjustedMajorDifficulty: int,
+    majorDifficulty: int,
     minorDifficulty: float,
     special: boolean,
 };
@@ -86,5 +88,16 @@ $MapEvent {
     }
 
     $FinishTutorialRunMapEvent { }
+
+    $EncounterPlaceholderMapEvent {
+        genExtraction: boolean,
+        majorDifficulty: int,
+        unadjustedMajorDifficulty: int,
+        minorDifficulty: float,
+        runModifier: string[],
+        amountEnemies: int,
+        biome: string,
+        seed: int
+    }
 
 }

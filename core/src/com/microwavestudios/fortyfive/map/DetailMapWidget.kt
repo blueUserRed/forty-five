@@ -18,6 +18,7 @@ import com.microwavestudios.fortyfive.animation.AnimationDrawable
 import com.microwavestudios.fortyfive.animation.createAnimation
 import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.rendering.BetterShader
+import com.microwavestudios.fortyfive.rendering.EncounterPreviewDebugMenuPage
 import com.microwavestudios.fortyfive.rendering.MapDebugMenuPage
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -184,7 +185,10 @@ class DetailMapWidget(
         }
     }
 
-    private val debugMenuPage: MapDebugMenuPage = screen.findDebugMenuPage<MapDebugMenuPage>()!!
+    private val debugMenuPage: MapDebugMenuPage =
+        screen.findDebugMenuPage<MapDebugMenuPage>()!!
+    private val encounterDebugMenuPage: EncounterPreviewDebugMenuPage =
+        screen.findDebugMenuPage<EncounterPreviewDebugMenuPage>()!!
 
     private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
 
@@ -193,6 +197,8 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
+
+        encounterDebugMenuPage.encounter = (playerNode.event as? EncounterMapEvent)?.encounter
 
         animatedDecorations.forEach { (_, instances) ->
             instances.forEach { (_, _, animation) ->
@@ -545,6 +551,7 @@ class DetailMapWidget(
         playerPos = scaledNodePos(movePlayerTo)
         events.fire(PlayerChangedNodeEvent(movePlayerTo))
         this.movePlayerTo = null
+        encounterDebugMenuPage.encounter = (this.playerNode.event as? EncounterMapEvent)?.encounter
         updateDirectionIndicator(lastPointerPosition)
     }
 

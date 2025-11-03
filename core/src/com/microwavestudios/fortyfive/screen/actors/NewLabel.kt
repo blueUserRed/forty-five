@@ -226,7 +226,6 @@ open class NewLabel(
         requireNotNull(group) { "unknown font group: '$fontGroup'" }
         require(group.variants.isNotEmpty()) { "font '$fontGroup' has no variants" }
         fontHandle = overrideFontHandle ?: findBestVariant(group).resourceHandle
-        println(fontHandle)
     }
 
     private fun findBestVariant(group: ResourceManager.FontGroup): ResourceManager.FontVariant {

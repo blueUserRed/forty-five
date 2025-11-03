@@ -268,6 +268,8 @@ class EncounterPlaceholderMapEvent(
     val unadjustedMajorDifficulty: Int,
     val minorDifficulty: Float,
     val runModifier: List<RunModifier>,
+    val amountEnemies: Int,
+    val biome: String,
     val seed: Long,
 ) : MapEvent() {
 
@@ -287,6 +289,8 @@ class EncounterPlaceholderMapEvent(
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "minorDifficulty" with minorDifficulty
         "runModifier" with runModifier.map { it.name() }
+        "amountEnemies" with amountEnemies
+        "biome" with biome
         "seed" with seed
     }
 
@@ -298,6 +302,8 @@ class EncounterPlaceholderMapEvent(
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Double>("minorDifficulty").toFloat(),
             onj.get<OnjArray>("runModifier").value.map { RunModifier.get(it.value as String) },
+            onj.get<Long>("amountEnemies").toInt(),
+            onj.get<String>("biome"),
             onj.get<Long>("seed"),
         )
     }

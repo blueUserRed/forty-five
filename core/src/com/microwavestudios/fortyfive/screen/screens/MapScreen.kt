@@ -343,7 +343,7 @@ class MapScreen : ScreenCreator() {
         }
     }
 
-    override fun debugMenuPages(): List<String> = listOf("Map")
+    override fun debugMenuPages(): List<String> = listOf("Map", "Encounter Preview")
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = MapScreen::class
