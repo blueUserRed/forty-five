@@ -139,6 +139,14 @@ object RunGeneratorConfig {
         configFile.get<Long>("enemyProbabilityRandomPoints").toInt()
     }
 
+    val enemyHealthAdjustment: Float by lazy {
+        configFile.get<Double>("enemyHealthAdjustment").toFloat()
+    }
+
+    val enemyDamageAdjustment: Float by lazy {
+        configFile.get<Double>("enemyDamageAdjustment").toFloat()
+    }
+
 }
 
 data class EnemyProbabilityIncrease(

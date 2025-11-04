@@ -21,6 +21,7 @@ import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -132,7 +133,7 @@ class GameControllerImpl(
     )
 
     private val enemyDifficulty
-        get() = 1f + (encounter.minorDifficulty * Config.enemyAggressiveDifficultyAdjustment)
+        get() = 1f + ((1f - encounter.minorDifficulty) * RunGeneratorConfig.enemyDamageAdjustment)
 
     private lateinit var profile: Profile
 
@@ -1186,8 +1187,6 @@ class GameControllerImpl(
         const val playerGetsRewardCardChance = 1f
         const val rewardRerollPriceIncrease = 30
         const val rewardRerollBasePrice = 30
-        const val enemyHealthDifficultyAdjustment = 0.4f
-        const val enemyAggressiveDifficultyAdjustment = 0.2f
     }
 
     object Events {

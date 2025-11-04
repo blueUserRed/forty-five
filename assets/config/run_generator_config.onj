@@ -10,17 +10,17 @@ runModifierPools: [
         modifiers: []
     },
     {
-        majorDifficulty: 2,
+        majorDifficulty: 3,
         modifierProbability: 0.3,
         modifiers: [ "AllRain", "AllMoist" ]
     },
     {
-        majorDifficulty: 3,
+        majorDifficulty: 4,
         modifierProbability: 0.4,
         modifiers: [ "AllRain", "AllMoist", "AllBewitchedMist" ]
     },
     {
-        majorDifficulty: 6,
+        majorDifficulty: 5,
         modifierProbability: 0.4,
         modifiers: [ "AllBewitchedMist", "AllFrozen" ]
     },
@@ -64,6 +64,24 @@ runRewardPools: [
                 },
             ]
         ]
+    },
+    {
+        majorDifficulty: 2,
+        maxRewards: 1,
+        rewardProbability: 1.0,
+        rewards: [
+            [
+                $CashReward {
+                    amount: 300
+                },
+                $CashReward {
+                    amount: 350
+                },
+                $CashReward {
+                    amount: 400
+                },
+            ]
+        ]
     }
 ],
 
@@ -86,7 +104,7 @@ encounterModifierPools: [
         modifiers: []
     },
     {
-        majorDifficulty: 1,
+        majorDifficulty: 2,
         modifierProbability: 0.3,
         maxModifiers: 1,
         modifiers: [ "rain", "moist", "bewitchedMist" ]
@@ -137,3 +155,6 @@ enemyProbabilityIncrease: [
 ],
 
 enemyProbabilityRandomPoints: 100,
+
+enemyHealthAdjustment: 0.6f,
+enemyDamageAdjustment: 0.3f,
