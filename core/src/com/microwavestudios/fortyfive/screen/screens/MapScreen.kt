@@ -47,9 +47,9 @@ class MapScreen : ScreenCreator() {
 
     private val warningEvents: EventPipeline = EventPipeline()
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "mapScreen" to 0,
-        "*" to 200 //TODO maybe change back to 1000
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
     )
 
     private val mapSaver: MapSaver by lazy {

@@ -59,8 +59,9 @@ class EncounterScreen : ScreenCreator() {
 
     override val background: String? = null
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 0
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
     )
 
     val gameEvents: EventPipeline = EventPipeline()

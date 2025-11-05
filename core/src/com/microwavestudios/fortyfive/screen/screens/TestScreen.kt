@@ -30,8 +30,6 @@ class TestScreen : ScreenCreator() {
 
     override val background: String = "black_texture"
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf()
-
     override fun getRoot(): Group = newGroup {
         box {
             width = worldWidth

@@ -101,6 +101,8 @@ data class DetailMap(
                         "image" with it
                         "imagePos" with (node.imagePos?.name ?: "up")
                     }
+                    if (node.additionalEvent != null) "additionalEvent" with node.additionalEvent
+                    if (node.additionalNodeTexture != null) "additionalNodeTexture" with node.additionalNodeTexture
                 }
             }
             .toOnjArray()
@@ -152,7 +154,9 @@ data class DetailMap(
                                 EmptyMapEvent()
                             } else {
                                 MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
-                            }
+                            },
+                            nodeOnj.getOr<OnjNamedObject?>("additionalEvent", null)?.let { MapEventFactory.getMapEvent(it) },
+                            nodeOnj.getOr<String?>("additionalNodeTexture", null)
                         )
                     )
                 }

@@ -38,7 +38,11 @@ class DialogScreen : ScreenCreator() {
     override val background: String = "background_bewitched_forest"
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
     override val playAmbientSounds: Boolean = false
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 100)
+
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
+    )
 
     private val events: EventPipeline = EventPipeline()
 

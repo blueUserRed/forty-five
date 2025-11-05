@@ -18,6 +18,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.commonComponents.AdvancedTextWidget
 import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator.getSharedBackpack
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator
@@ -29,6 +30,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.RunBoardCreator.ge
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.TemplateString
+import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -45,7 +47,7 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract val background: String?
 
-    abstract val transitionAwayTimes: Map<String, Int>
+    open val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf()
 
     lateinit var screen: OnjScreen
         private set
@@ -542,6 +544,45 @@ abstract class ScreenCreator : ResourceBorrower {
         set(value) {
             style.fontColor = value
         }
+
+    fun geometricFadeTransition(duration: Int = 1000): ScreenManager.ScreenTransition = ScreenManager.ScreenTransition(
+        transitionAway = {
+            FortyFive
+                .currentRenderPipeline
+                ?.getGeometricFadeTimeline(duration / 2, reverse = false, stayBlack = true)
+                ?: Timeline.emptyTimeline
+        },
+        transitionTo = {
+            FortyFive
+                .currentRenderPipeline
+                ?.getGeometricFadeTimeline(duration / 2, reverse = true, stayBlack = false)
+                ?: Timeline.emptyTimeline
+        }
+    )
+
+    fun fadeToBlackTransition(duration: Int = 1500): ScreenManager.ScreenTransition = ScreenManager.ScreenTransition(
+        transitionAway = {
+            FortyFive
+                .currentRenderPipeline
+                ?.getFadeToBlackTimeline(duration / 2, stayBlack = true, reverse = false)
+                ?: Timeline.emptyTimeline
+        },
+        transitionTo = {
+            FortyFive
+                .currentRenderPipeline
+                ?.getFadeToBlackTimeline(duration / 2, stayBlack = false, reverse = true)
+                ?: Timeline.emptyTimeline
+        }
+    )
+
+    fun noTransition(): ScreenManager.ScreenTransition = ScreenManager.ScreenTransition(null, null)
+
+    fun delayTransition(waitFor: Int): ScreenManager.ScreenTransition = ScreenManager.ScreenTransition(
+        transitionAway = {
+            Timeline.timeline { delay(waitFor) }
+        },
+        transitionTo = null
+    )
 
     companion object {
         val fortyWhite: Color = Color.valueOf("F0EADD")

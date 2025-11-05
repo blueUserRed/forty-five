@@ -1313,8 +1313,8 @@ shaders: [
         }
     },
     {
-        name: "bewitched_fog_static_noise_shader",
-        file: "shaders/bewitched_fog_static_noise.glsl",
+        name: "test_shader",
+        file: "shaders/test.glsl",
         constantArgs: {
         }
     },

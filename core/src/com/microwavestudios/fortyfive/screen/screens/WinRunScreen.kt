@@ -46,7 +46,10 @@ class WinRunScreen : ScreenCreator() {
 
     override val background: String = "microwave_studios_brown_texture"
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 0)
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
+    )
 
     private val events: EventPipeline = EventPipeline()
 

@@ -46,7 +46,10 @@ class ChooseCardScreen : ScreenCreator() {
 
     override val background: String? = null
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf()
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
+    )
 
     private val context: ChooseCardScreenContext by lazy { context() }
 

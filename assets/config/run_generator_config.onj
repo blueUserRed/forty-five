@@ -156,5 +156,5 @@ enemyProbabilityIncrease: [
 
 enemyProbabilityRandomPoints: 100,
 
-enemyHealthAdjustment: 0.6f,
-enemyDamageAdjustment: 0.3f,
+enemyHealthAdjustment: 0.6,
+enemyDamageAdjustment: 0.3,

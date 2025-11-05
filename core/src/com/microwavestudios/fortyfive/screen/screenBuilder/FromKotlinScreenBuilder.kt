@@ -21,7 +21,7 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             earlyRenderTasks = listOf({ creator.update() }),
             lateRenderTasks = listOf(),
             namedActors = namedActors,
-            transitionAwayTimes = creator.transitionAwayTimes,
+            transitions = creator.transitions,
             screenBuilder = this,
             music = null,
             playAmbientSounds = creator.playAmbientSounds

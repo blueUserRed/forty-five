@@ -38,8 +38,9 @@ class TitleScreen : ScreenCreator() {
 
     override val playAmbientSounds: Boolean = false
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 800 //800 fits good with the animation
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
     )
 
     private var settingsOpen: Boolean = false

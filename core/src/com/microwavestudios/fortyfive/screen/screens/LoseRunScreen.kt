@@ -27,8 +27,10 @@ class LoseRunScreen : ScreenCreator() {
 
     override val background: String = "black_texture"
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 0)
-
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to fadeToBlackTransition(2500)
+    )
 
     override fun getRoot(): Group = newBox {
         x = 0f

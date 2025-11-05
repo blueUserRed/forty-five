@@ -6,6 +6,7 @@ import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
 
@@ -16,9 +17,17 @@ class ScreenManager(
 
     private val chain: ScreenChain = ScreenChain(listOf())
 
+    private val timeline: Timeline = Timeline().also { it.startTimeline() }
+
+    private var overrideTransition: ScreenTransition? = null
+
     constructor(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) : this(
         { FromKotlinScreenBuilder(creatorFromClass(creatorCompanion.creatorClass)) } to context
     )
+
+    fun overrideNextTransition(transition: ScreenTransition) {
+        overrideTransition = transition
+    }
 
     fun newBaseScreen(screenBuilder: () -> ScreenBuilder, context: Any? = null) {
         baseScreen = screenBuilder to context
@@ -54,6 +63,10 @@ class ScreenManager(
         chain.pushScreenToFront(FromKotlinScreenBuilder(creator), context)
     }
 
+    fun update() {
+        timeline.updateTimeline()
+    }
+
     private var inScreenTransition: Boolean = false
     private var nextScreen: OnjScreen? = null
     private var currentScreen: OnjScreen? = null
@@ -62,34 +75,78 @@ class ScreenManager(
         if (inScreenTransition) return@postRunnable
         inScreenTransition = true
         val currentScreen = currentScreen
-        if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
         val screen = screenBuilder.build(context, currentScreen)
         nextScreen = screen
 
-        fun onScreenChange() {
-            FortyFive.logger.title("changing screen to ${screenBuilder.name}")
-            currentScreen?.dispose()
-            this.currentScreen = screen
-            FortyFive.currentScreen = screen
-            nextScreen = null
-            FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
-            FortyFive.setScreen(screen)
-            inScreenTransition = false
-            val profile = FortyFive.profileManager.currentProfile
-            profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
-            profile?.write()
-            profile?.writeMaps()
-        }
+        val transition =
+            overrideTransition
+            ?: currentScreen?.transitions[screenBuilder.name]
+            ?: currentScreen?.transitions["*"]
 
-        val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
-            it[screenBuilder.name] ?: it["*"]
-        } ?: 0
-        if (currentScreen == null) {
-            onScreenChange()
-        } else currentScreen.afterMs(transitionAwayTime) {
-            onScreenChange()
+        overrideTransition = null
+
+        val timeline = Timeline.timeline {
+            action {
+                currentScreen?.transitionAway()
+            }
+            transition?.transitionAway?.let {
+                include(it())
+            }
+            action {
+                currentScreen?.dispose()
+                this@ScreenManager.currentScreen = screen
+                FortyFive.currentScreen = screen
+                nextScreen = null
+                FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
+                FortyFive.setScreen(screen)
+            }
+            transition?.transitionTo?.let {
+                later { include(it()) }
+            }
+            action {
+                val profile = FortyFive.profileManager.currentProfile
+                profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
+                profile?.write()
+                profile?.writeMaps()
+                screen.active()
+                inScreenTransition = false
+            }
         }
+        this.timeline.appendAction(timeline.asAction())
     }
+
+//    private fun changeToScreen(screenBuilder: ScreenBuilder, context: Any?) = Gdx.app.postRunnable {
+//        if (inScreenTransition) return@postRunnable
+//        inScreenTransition = true
+//        val currentScreen = currentScreen
+//        if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
+//        val screen = screenBuilder.build(context, currentScreen)
+//        nextScreen = screen
+//
+//        fun onScreenChange() {
+//            FortyFive.logger.title("changing screen to ${screenBuilder.name}")
+//            currentScreen?.dispose()
+//            this.currentScreen = screen
+//            FortyFive.currentScreen = screen
+//            nextScreen = null
+//            FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
+//            FortyFive.setScreen(screen)
+//            inScreenTransition = false
+//            val profile = FortyFive.profileManager.currentProfile
+//            profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
+//            profile?.write()
+//            profile?.writeMaps()
+//        }
+//
+//        val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
+//            it[screenBuilder.name] ?: it["*"]
+//        } ?: 0
+//        if (currentScreen == null) {
+//            onScreenChange()
+//        } else currentScreen.afterMs(transitionAwayTime) {
+//            onScreenChange()
+//        }
+//    }
 
     private class ScreenChain(screens: List<Pair<ScreenBuilder, Any?>>) {
 
@@ -110,6 +167,11 @@ class ScreenManager(
     interface ScreenCreatorCompanion {
         val creatorClass: KClass<out ScreenCreator>
     }
+
+    data class ScreenTransition(
+        val transitionAway: (() -> Timeline)?,
+        val transitionTo: (() -> Timeline)?,
+    )
 
     companion object {
 

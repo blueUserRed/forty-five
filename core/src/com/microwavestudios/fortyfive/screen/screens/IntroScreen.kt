@@ -22,8 +22,9 @@ class IntroScreen : ScreenCreator() {
 
     override val background: String = "microwave_studios_brown_texture"
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 5_000)
-
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        "*" to delayTransition(5_000)
+    )
 
     override fun getRoot(): Group = newGroup {
         x = 0f

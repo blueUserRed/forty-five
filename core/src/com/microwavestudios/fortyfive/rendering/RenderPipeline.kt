@@ -4,13 +4,19 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.graphics.g2d.PolygonBatch
+import com.badlogic.gdx.graphics.g2d.PolygonRegion
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.math.CatmullRomSpline
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
@@ -53,6 +59,7 @@ open class RenderPipeline(
     protected open val postPreprocessingSteps: MutableList<() -> Unit> = mutableListOf()
 
     protected val batch: SpriteBatch = SpriteBatch()
+    protected val polygonBatch: PolygonBatch = PolygonSpriteBatch()
 
     private val orbAnimations: MutableList<OrbAnimation> = mutableListOf()
 
@@ -68,6 +75,12 @@ open class RenderPipeline(
     private val gaussianBlurShader: Promise<BetterShader> =
         FortyFive.resourceManager.request(this, lifetime, "gaussian_blur_shader")
 
+    private val blackTexture: Promise<Texture> =
+        FortyFive.resourceManager.request(this, lifetime, "black_texture")
+
+//    private val testShader: Promise<BetterShader> =
+//        FortyFive.resourceManager.request(this, lifetime, "test_shader")
+
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
         get() = orbAnimations.isNotEmpty() || TimeUtils.millis() <= orbFinisesAt
@@ -76,6 +89,11 @@ open class RenderPipeline(
 
     private var fadeDuration: Int = -1
     private var fadeFinishesAt: Long = -1
+    private var reverseFade: Boolean = false
+
+    private var geometricFadeDuration: Int = -1
+    private var geometricFadeFinishesAt: Long = -1
+    private var reverseGeometricFade: Boolean = false
 
     private val screenShakePostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(screenShakeShader)
@@ -91,7 +109,11 @@ open class RenderPipeline(
         shapeRenderer.projectionMatrix = screen.viewport.camera.combined
         shapeRenderer.begin(ShapeType.Filled)
         val remaining = (fadeFinishesAt - now).toFloat()
-        val alpha = 1f - remaining / fadeDuration.toFloat()
+        val alpha = if (reverseFade) {
+            remaining / fadeDuration.toFloat()
+        } else {
+            1f - remaining / fadeDuration.toFloat()
+        }
         Gdx.gl.glEnable(GL20.GL_BLEND)
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         shapeRenderer.color = Color(0f, 0f, 0f, alpha)
@@ -99,15 +121,77 @@ open class RenderPipeline(
         shapeRenderer.end()
     }
 
+    private val geometricFadeTask: () -> Unit = lambda@{
+        screen.viewport.apply()
+        val batch = polygonBatch
+        batch.projectionMatrix = screen.viewport.camera.combined
+
+        val now = TimeUtils.millis()
+        val remaining = (geometricFadeFinishesAt - now).toFloat()
+        var percent = (remaining / geometricFadeDuration).between(0f, 1f)
+        val interpolation = Interpolation.pow3
+        percent = interpolation.apply(percent)
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        val width = screen.viewport.worldWidth
+        val height = screen.viewport.worldHeight
+        val overshoot = 300f
+        val offX = if (reverseGeometricFade) {
+            -(width + overshoot * 3) * (1f - percent)
+        } else {
+            (-overshoot) * (1f - percent) + (width + overshoot) * percent
+        }
+        val region = PolygonRegion(
+            TextureRegion(blackTexture.getOrNull() ?: return@lambda),
+            floatArrayOf(
+                0f, 0f,
+                -overshoot / width, 1f,
+                1f + overshoot / width, 1f,
+                1f, 0f
+            ),
+            shortArrayOf(
+                0, 1, 2,
+                0, 2, 3,
+            )
+        )
+        batch.begin()
+        batch.draw(region, offX, 0f, width + overshoot, height)
+        batch.end()
+    }
+
     init {
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
+//        postPreprocessingSteps.add(shaderPostProcessingStep(testShader))
     }
 
-    fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
+    fun getGeometricFadeTimeline(
+        fadeDuration: Int,
+        reverse: Boolean,
+        stayBlack: Boolean = false
+    ): Timeline = Timeline.timeline {
+        action {
+            geometricFadeDuration = fadeDuration
+            geometricFadeFinishesAt = TimeUtils.millis() + fadeDuration
+            reverseGeometricFade = reverse
+            lateTasks.add(geometricFadeTask)
+        }
+        delayUntil { TimeUtils.millis() > geometricFadeFinishesAt }
+        if (!stayBlack) action {
+            lateTasks.remove(geometricFadeTask)
+        }
+    }
+
+    fun getFadeToBlackTimeline(
+        fadeDuration: Int,
+        stayBlack: Boolean = false,
+        reverse: Boolean = false
+    ): Timeline = Timeline.timeline {
         action {
             this@RenderPipeline.fadeDuration = fadeDuration
             fadeFinishesAt = TimeUtils.millis() + fadeDuration
+            reverseFade = reverse
             lateTasks.add(fadeToBlackTask)
         }
         delayUntil { TimeUtils.millis() >= fadeFinishesAt }
@@ -364,6 +448,7 @@ open class RenderPipeline(
         frameBufferManager.dispose()
         shapeRenderer.dispose()
         batch.dispose()
+        polygonBatch.dispose()
         _lifetime.die()
     }
 

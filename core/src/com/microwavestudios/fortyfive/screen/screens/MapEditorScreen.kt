@@ -37,7 +37,10 @@ class MapEditorScreen : ScreenCreator() {
     override val background: String = "white_texture"
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
     override val playAmbientSounds: Boolean = false
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 0)
+
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        "*" to noTransition()
+    )
 
     private val events: EventPipeline = EventPipeline()
 

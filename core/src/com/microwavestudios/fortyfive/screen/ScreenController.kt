@@ -14,6 +14,8 @@ abstract class ScreenController {
 
     open fun onShow() {}
 
+    open fun onActive() {}
+
     /**
      * called every frame
      */

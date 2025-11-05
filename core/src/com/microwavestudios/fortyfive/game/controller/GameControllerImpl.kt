@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
@@ -682,6 +683,7 @@ class GameControllerImpl(
                 profile.loseRun()
                 FortyFive.screenManager.ensureNextScreen(LoseRunScreen)
             }
+            FortyFive.screenManager.overrideNextTransition(ScreenManager.ScreenTransition(null, null))
             FortyFive.screenManager.screenFinished()
         }
     }

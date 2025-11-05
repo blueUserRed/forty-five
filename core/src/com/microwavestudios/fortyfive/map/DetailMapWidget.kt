@@ -238,7 +238,20 @@ class DetailMapWidget(
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
         if (playerNode.event?.canBeStarted(map)?.not() ?: true) return
-        playerNode.event?.start()
+        val event = playerNode.event
+        val additionalEvent = playerNode.additionalEvent
+        if (additionalEvent == null) {
+            event?.start()
+        } else {
+            requireNotNull(event) { "node cant have additional event without primary event" }
+            val firstScreen = event.chainScreen
+            val secondScreen = additionalEvent.chainScreen
+            requireNotNull(firstScreen) { "event: $event cant be chained" }
+            requireNotNull(secondScreen) { "event: $additionalEvent cant be chained" }
+            FortyFive.screenManager.appendScreen(firstScreen.first, firstScreen.second)
+            FortyFive.screenManager.appendScreen(secondScreen.first, secondScreen.second)
+            FortyFive.screenManager.screenFinished()
+        }
     }
 
     private fun updateDirectionIndicator(pointerPosition: Vector2) {
@@ -560,6 +573,15 @@ class DetailMapWidget(
         val shaderPromise = visitedNodeShader
         val nodeDrawer: (MapNode) -> Unit = { node ->
             val (nodeX, nodeY) = scaledNodePos(node) + mapOffset
+            node.getSecondaryNodeTexture(screen)?.let { secondaryTexture ->
+                val offset = nodeSize * 0.3f
+                secondaryTexture.getOrNull()?.draw(
+                    batch,
+                    x + nodeX + offset, y + nodeY - offset,
+                    nodeSize * 0.9f,
+                    nodeSize * 0.9f
+                )
+            }
             val drawable = node.getNodeTexture(screen) ?: nodeDrawable
             drawable.getOrNull()?.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }

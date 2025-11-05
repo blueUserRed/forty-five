@@ -34,7 +34,7 @@ open class OnjScreen(
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val namedActors: MutableMap<String, Actor>,
-    val transitionAwayTimes: Map<String, Int>,
+    val transitions: Map<String, ScreenManager.ScreenTransition>,
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
@@ -195,10 +195,14 @@ open class OnjScreen(
     }
 
     override fun show() {
-        Gdx.input.inputProcessor = inputMultiplexer
-        Utils.setCursor(defaultCursor)
         isVisible = true
         screenControllers.forEach { it.onShow() }
+    }
+
+    fun active() {
+        Gdx.input.inputProcessor = inputMultiplexer
+        Utils.setCursor(defaultCursor)
+        screenControllers.forEach { it.onActive() }
     }
 
     fun transitionAway() {

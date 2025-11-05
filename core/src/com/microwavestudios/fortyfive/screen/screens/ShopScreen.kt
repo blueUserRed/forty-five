@@ -52,8 +52,9 @@ class ShopScreen : ScreenCreator() {
 
     private val events: EventPipeline = EventPipeline()
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 100
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
     )
 
     private val dropTargetFilter: InputManager.FocusFilter by lazy {

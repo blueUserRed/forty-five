@@ -60,9 +60,6 @@ object FortyFive : Game() {
     private var renderCounter: Long = 0L
     val renderTimes: IntArray = IntArray(15 * 60)
 
-//    private var screenTransitionCount: Long = 0L
-    val screenTransitionTimes: IntArray = IntArray(5)
-
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
     override fun create() {
@@ -73,8 +70,6 @@ object FortyFive : Game() {
             return
         }
 
-//        UserPrefs.windowMode = UserPrefs.WindowMode.Window
-
         if (appArguments.mapEditor) {
             screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
                 override val map: DetailMap? = null
@@ -84,7 +79,8 @@ object FortyFive : Game() {
             return
         }
 
-//        screenManager.appendScreen(TestScreen)
+//        profileManager.selectProfile(profileManager.availableProfiles.first())
+//        screenManager.appendScreen(MapScreen)
         screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
     }
@@ -110,6 +106,7 @@ object FortyFive : Game() {
     }
 
     override fun render() {
+        screenManager.update()
         val renderTime = measureTimeMillis {
             timedCallbacks.iterateRemoving { (callback, time), remove ->
                 if (TimeUtils.millis() < time) return@iterateRemoving
