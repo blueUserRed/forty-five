@@ -314,8 +314,6 @@ class GameControllerImpl(
     }
 
     override fun update() {
-        TemplateString.updateGlobalParam("game.cardsInStack", cardStack.size())
-
         _encounterModifiers.removeIf { (predicate, _) -> predicate != null && !predicate(this@GameControllerImpl) }
         _encounterModifiers.forEach { it.second.update(this@GameControllerImpl) }
 

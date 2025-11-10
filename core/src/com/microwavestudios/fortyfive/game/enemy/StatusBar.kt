@@ -40,7 +40,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     private val sliderShader: Promise<BetterShader> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_shader")
 
     // TODO: add a smaller version of roadgeek
-    private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen.lifetime, "roadgeek")
+    private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen.lifetime, "roadgeek60")
 
     private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Color.FortyWhite, 100f, Align.center, false)
 
@@ -141,7 +141,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
             val iconWidth = iconHeight * (icon.minWidth / icon.minHeight)
             icon.draw(batch, x + 3f, y + boxHeight / 2 - iconHeight / 2, iconWidth, iconHeight)
             val layout = hpGlyphLayout
-            roadgeek.data.setScale(0.5f)
+            roadgeek.data.setScale(0.2f)
             val text = effect.getDisplayText()
             layout.setText(roadgeek, text, Color.White, 0f, Align.left, false)
             roadgeek.draw(batch, layout, x + iconWidth + 6f, y + 6f + layout.height)
@@ -174,13 +174,13 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         val labelWidth = barWidth * 0.37f
         val labelHeight = labelWidth * (background.minHeight / background.minWidth)
         val layout = hpGlyphLayout
-        roadgeek.data.setScale(0.5f)
+        roadgeek.data.setScale(0.24f)
         val text = "${enemy.currentHealth}/${enemy.health}"
-        layout.setText(roadgeek, text, Color.White, labelWidth, Align.center, false)
+        layout.setText(roadgeek, text, Color.FortyWhite, labelWidth, Align.center, false)
         val labelX = barX + barWidth - labelWidth + 15f
         val labelY = barY - 5f
         background.draw(batch, labelX, labelY, labelWidth, labelHeight)
-        roadgeek.draw(batch, layout, labelX, labelY + layout.height + 5f)
+        roadgeek.draw(batch, layout, labelX, labelY + layout.height + 7.5f)
     }
 
     private fun updateHpBar() {

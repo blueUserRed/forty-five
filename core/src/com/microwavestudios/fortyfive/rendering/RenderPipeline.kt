@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
-import com.badlogic.gdx.math.CatmullRomSpline
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -31,8 +30,6 @@ import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.*
-import java.lang.Long.max
-import kotlin.math.absoluteValue
 
 interface Renderable {
 
@@ -78,8 +75,8 @@ open class RenderPipeline(
     private val blackTexture: Promise<Texture> =
         FortyFive.resourceManager.request(this, lifetime, "black_texture")
 
-//    private val testShader: Promise<BetterShader> =
-//        FortyFive.resourceManager.request(this, lifetime, "test_shader")
+    private val postprocessor: Promise<BetterShader> =
+        FortyFive.resourceManager.request(this, lifetime, "postprocessor_shader")
 
     private var orbFinisesAt: Long = -1
     private val isOrbAnimActive: Boolean
@@ -163,7 +160,7 @@ open class RenderPipeline(
     init {
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
-//        postPreprocessingSteps.add(shaderPostProcessingStep(testShader))
+        postPreprocessingSteps.add(shaderPostProcessingStep(postprocessor))
     }
 
     fun getGeometricFadeTimeline(

@@ -43,7 +43,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         val eventsLine2 = data.events.filter { it.line == 2 }
         assignEvents(addLine2, eventsLine2)
 
-        generateEncounters()
+        generateEncounters(startNode)
 
         startNode.build()
 

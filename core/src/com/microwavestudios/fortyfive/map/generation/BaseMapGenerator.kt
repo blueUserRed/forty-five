@@ -178,7 +178,7 @@ abstract class BaseMapGenerator {
             val newNodes = mutableListOf<MapNodeBuilder>()
             currentNodes.forEach { node ->
                 node.distance = dist
-                node.edgesTo.filter { it.distance != -1 }.let { newNodes.addAll(it) }
+                node.edgesTo.filter { it.distance == -1 }.let { newNodes.addAll(it) }
             }
             currentNodes = newNodes
             dist++
@@ -190,11 +190,11 @@ abstract class BaseMapGenerator {
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
     }
 
-    fun generateEncounters() {
+    fun generateEncounters(startNode: MapNodeBuilder) {
         _allNodes.forEach { node ->
             val event = node.event
             if (event !is EncounterPlaceholderMapEvent) return@forEach
-            val encounter = EncounterGenerator.generate(event, node)
+            val encounter = EncounterGenerator.generate(event, node, startNode)
             val mapEvent = EncounterMapEvent(encounter, event.genExtraction)
             node.event = mapEvent
         }

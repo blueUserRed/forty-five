@@ -47,3 +47,16 @@ enemyProbabilityRandomPoints: int,
 
 enemyHealthAdjustment: float,
 enemyDamageAdjustment: float,
+
+difficultyScaling: {
+    limited: {
+        relativeMin: float,
+        relativeMax: float,
+        scaling: $DifficultyScaling,
+    },
+    constructed: {
+        relativeMin: float,
+        relativeMax: float,
+        scaling: $DifficultyScaling,
+    },
+},

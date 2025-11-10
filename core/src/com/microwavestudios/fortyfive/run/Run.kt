@@ -97,6 +97,32 @@ enum class RunType(private val onjName: String, val displayName: String) {
     }
 }
 
+abstract class DifficultyScaling {
+
+    data object Linear : DifficultyScaling() {
+
+        override fun scale(min: Float, max: Float, percent: Float): Float {
+            return (max - min) * percent + min
+        }
+
+        override fun toOnj(): OnjObject = buildOnjObject {
+            name("LinearScaling")
+        }
+    }
+
+    // TODO: Exponential
+
+    abstract fun scale(min: Float, max: Float, percent: Float): Float
+    abstract fun toOnj(): OnjObject
+
+    companion object {
+        fun fromOnj(onj: OnjNamedObject): DifficultyScaling = when (onj.name) {
+            "LinearScaling" -> Linear
+            else -> throw RuntimeException("no difficulty scaling with name: ${onj.name}")
+        }
+    }
+}
+
 sealed class RunReward {
 
     data class Cash(val amount: Int) : RunReward() {

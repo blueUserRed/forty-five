@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.rendering
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.OnjScreen
@@ -195,9 +196,13 @@ class ResourceDebugMenuPage : DebugMenuPage("Resources") {
 
 class MapDebugMenuPage : DebugMenuPage("Map") {
 
+    var currentNode: MapNode? = null
+
     val walkEverywhere = debugButton("walk everywhere", Keys.R, false)
 
     override fun getText(screen: OnjScreen): String = """
+        dist: ${currentNode?.distance}
+        index: ${currentNode?.index}
         $walkEverywhere
     """.trimIndent()
 }
@@ -213,6 +218,7 @@ class EncounterPreviewDebugMenuPage : DebugMenuPage("Encounter Preview") {
             major difficulty: ${encounter.majorDifficulty}
             minor difficulty: ${encounter.minorDifficulty}
             major difficulty (unadjusted): ${encounter.unadjustedMajorDifficulty}
+            difficulty scaling contribution: ${encounter.difficultyScalingInfo}
         """.trimIndent()
     } ?: ""
 }

@@ -158,3 +158,16 @@ enemyProbabilityRandomPoints: 100,
 
 enemyHealthAdjustment: 0.6,
 enemyDamageAdjustment: 0.3,
+
+difficultyScaling: {
+    limited: {
+        relativeMin: 0.0,
+        relativeMax: 0.5,
+        scaling: $LinearScaling {},
+    },
+    constructed: {
+        relativeMin: 0.3,
+        relativeMax: 0.7,
+        scaling: $LinearScaling {},
+    },
+},

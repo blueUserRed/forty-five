@@ -4,6 +4,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunModifier
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -279,6 +280,9 @@ class EncounterPlaceholderMapEvent(
     val runModifier: List<RunModifier>,
     val amountEnemies: Int,
     val biome: String,
+    val difficultyScaling: DifficultyScaling,
+    val scaleMin: Float,
+    val scaleMax: Float,
     val seed: Long,
 ) : MapEvent() {
 
@@ -303,6 +307,9 @@ class EncounterPlaceholderMapEvent(
         "amountEnemies" with amountEnemies
         "biome" with biome
         "seed" with seed
+        "difficultyScaling" with difficultyScaling.toOnj()
+        "scaleMin" with scaleMin
+        "scaleMax" with scaleMax
     }
 
     companion object {
@@ -315,6 +322,9 @@ class EncounterPlaceholderMapEvent(
             onj.get<OnjArray>("runModifier").value.map { RunModifier.get(it.value as String) },
             onj.get<Long>("amountEnemies").toInt(),
             onj.get<String>("biome"),
+            DifficultyScaling.fromOnj(onj.get<OnjNamedObject>("difficultyScaling")),
+            onj.get<Double>("scaleMin").toFloat(),
+            onj.get<Double>("scaleMax").toFloat(),
             onj.get<Long>("seed"),
         )
     }

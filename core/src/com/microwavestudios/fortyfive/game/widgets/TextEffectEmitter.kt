@@ -96,11 +96,10 @@ class TextEffectEmitter(
     companion object {
 
         val standardTextAnimConfigs by lazy {
-            // Ugly, but fine because fonts stay loaded all the time anyway
             val roadgeek = FortyFive.resourceManager.forceGet<BitmapFont>(
                 object : ResourceBorrower {},
                 FortyFive.gameLifetime,
-                "roadgeek"
+                "roadgeek60"
             )
             mapOf(
                 "number_neutral" to TextAnimationConfig(

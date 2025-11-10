@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.utils.between
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.requireNot
 import com.microwavestudios.fortyfive.utils.toIntRange
+import com.microwavestudios.fortyfive.utils.unreachable
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -25,6 +26,9 @@ class RunGenerator {
     private val random: Random = Random
 
     fun generateRun(forDifficulty: Int, forBiome: String, forArea: String, type: RunType): Run {
+        require(type in arrayOf(RunType.LIMITED, RunType.CONSTRUCTED)) {
+            "generateRun only works for Limited and Constructed Runs"
+        }
 
         val modifiers = generateRunModifiers(forBiome, forDifficulty)
 
@@ -34,12 +38,21 @@ class RunGenerator {
 
         val rewards = generateRunRewards(forDifficulty)
 
+        val (minDiff, maxDiff, scaling) = when (type) {
+            RunType.CONSTRUCTED -> RunGeneratorConfig.scalingConstructed
+            RunType.LIMITED -> RunGeneratorConfig.scalingLimited
+            else -> unreachable()
+        }
+
         val mapGenerator = threeLineMapGen(
             majorDifficulty,
             forDifficulty,
             minorDifficulty,
             enemyAmountRange(forDifficulty),
             modifiers,
+            minDiff,
+            maxDiff,
+            scaling,
             forBiome
         )
 
@@ -64,6 +77,9 @@ class RunGenerator {
         minorDifficulty: Float,
         enemyAmountRange: IntRange,
         runModifier: List<RunModifier>,
+        minDiff: Float,
+        maxDiff: Float,
+        difficultyScaling: DifficultyScaling,
         biome: String
     ): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
         majorDifficulty = 1,
@@ -91,6 +107,9 @@ class RunGenerator {
                 runModifier,
                 enemyAmountRange.random(random),
                 biome,
+                difficultyScaling,
+                minDiff,
+                maxDiff,
                 random.nextLong()
             )
         },
@@ -104,6 +123,9 @@ class RunGenerator {
                     runModifier,
                     enemyAmountRange.random(random),
                     biome,
+                    difficultyScaling,
+                    minDiff,
+                    maxDiff,
                     random.nextLong()
                 )
             },

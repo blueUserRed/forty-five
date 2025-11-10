@@ -360,7 +360,8 @@ textures: [
     },
     {
         name: "map_detail_background",
-        file: "blobs/map/detail/background.png"
+        file: "blobs/map/detail/background.png",
+        dropShadow: defaultDropShadowConfig,
     },
     {
         name: "map_detail_encounter_modifier_background",
@@ -1313,8 +1314,8 @@ shaders: [
         }
     },
     {
-        name: "test_shader",
-        file: "shaders/test.glsl",
+        name: "postprocessor_shader",
+        file: "shaders/postprocessor.glsl",
         constantArgs: {
         }
     },

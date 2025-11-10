@@ -134,6 +134,13 @@ class MapScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.CENTER
         verticalAlign = CustomAlign.SPACE_BETWEEN
 
+        dropShadow = BakedDropShadow(
+            "map_detail_background",
+            screen,
+            -10f, 0f,
+            1.3f, 1.3f
+        )
+
         val startButtonGroup = "map-popup-start-button"
         val startButtonFilter = InputManager.FocusFilter(listOf(startButtonGroup), screen)
 

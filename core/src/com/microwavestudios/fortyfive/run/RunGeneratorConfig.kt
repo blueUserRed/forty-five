@@ -7,6 +7,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.collections.associate
 import kotlin.collections.map
+import kotlin.math.pow
 
 object RunGeneratorConfig {
 
@@ -145,6 +146,28 @@ object RunGeneratorConfig {
 
     val enemyDamageAdjustment: Float by lazy {
         configFile.get<Double>("enemyDamageAdjustment").toFloat()
+    }
+
+    val scalingLimited: Triple<Float, Float, DifficultyScaling> by lazy {
+        val config = configFile
+            .get<OnjObject>("difficultyScaling")
+            .get<OnjObject>("limited")
+        Triple(
+            config.get<Double>("relativeMin").toFloat(),
+            config.get<Double>("relativeMax").toFloat(),
+            DifficultyScaling.fromOnj(config.get<OnjNamedObject>("scaling"))
+        )
+    }
+
+    val scalingConstructed: Triple<Float, Float, DifficultyScaling> by lazy {
+        val config = configFile
+            .get<OnjObject>("difficultyScaling")
+            .get<OnjObject>("constructed")
+        Triple(
+            config.get<Double>("relativeMin").toFloat(),
+            config.get<Double>("relativeMax").toFloat(),
+            DifficultyScaling.fromOnj(config.get<OnjNamedObject>("scaling"))
+        )
     }
 
 }

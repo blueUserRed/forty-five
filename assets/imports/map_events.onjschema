@@ -1,5 +1,9 @@
 import "imports/map_predicates.onjschema" as _;
 
+$DifficultyScaling {
+    $LinearScaling {}
+}
+
 var mapEventStandardConfig = {
     currentlyBlocks: boolean,
     startable: boolean,
@@ -16,6 +20,7 @@ var encounter = {
     unadjustedMajorDifficulty: int,
     majorDifficulty: int,
     minorDifficulty: float,
+    difficultyScalingInfo?: float,
     special: boolean,
 };
 
@@ -96,6 +101,9 @@ $MapEvent {
         minorDifficulty: float,
         runModifier: string[],
         amountEnemies: int,
+        difficultyScaling: $DifficultyScaling,
+        scaleMin: float,
+        scaleMax: float,
         biome: string,
         seed: int
     }

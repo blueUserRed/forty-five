@@ -34,7 +34,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val genDecorations = decorations.map { generateDecoration(it) }
         val genAnimatedDecorations = animatedDecorations.map { generateDecoration(it) }
 
-        generateEncounters()
+        generateEncounters(startNode)
 
         startNode.build()
 

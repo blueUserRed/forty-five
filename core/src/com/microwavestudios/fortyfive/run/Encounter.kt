@@ -1,13 +1,10 @@
 package com.microwavestudios.fortyfive.run
 
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.canReturnToTwo
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.UserPrefs
-import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
-import com.microwavestudios.fortyfive.game.enemy.EnemyPrototype
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
 import com.microwavestudios.fortyfive.run.RunGenerator.Companion.logTag
@@ -17,9 +14,6 @@ import com.microwavestudios.fortyfive.utils.zip
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjObject
-import kotlin.math.abs
-import kotlin.math.absoluteValue
-import kotlin.math.min
 import kotlin.random.Random
 
 data class Encounter(
@@ -30,6 +24,7 @@ data class Encounter(
     val unadjustedMajorDifficulty: Int,
     val majorDifficulty: Int,
     val minorDifficulty: Float,
+    val difficultyScalingInfo: Float, // additional info for debugging/balancing
     val special: Boolean,
 ) {
 
@@ -56,6 +51,7 @@ data class Encounter(
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "majorDifficulty" with majorDifficulty
         "minorDifficulty" with minorDifficulty
+        "difficultyScalingInfo" with difficultyScalingInfo
         "special" with special
     }
 
@@ -69,6 +65,7 @@ data class Encounter(
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Long>("majorDifficulty").toInt(),
             onj.get<Double>("minorDifficulty").toFloat(),
+            onj.getOr<Double>("difficultyScalingInfo", -1.0).toFloat(),
             onj.getOr("special", false),
         )
     }
@@ -77,7 +74,11 @@ data class Encounter(
 
 object EncounterGenerator {
 
-    fun generate(placeholder: EncounterPlaceholderMapEvent, node: MapNodeBuilder): Encounter {
+    fun generate(
+        placeholder: EncounterPlaceholderMapEvent,
+        node: MapNodeBuilder,
+        startNode: MapNodeBuilder,
+    ): Encounter {
 
         val random = Random(placeholder.seed)
 
@@ -92,9 +93,12 @@ object EncounterGenerator {
 
         val modifiers = generateEncounterModifier(random, baseModifiers, placeholder)
 
-        val difficultyAdjustment = -modifiers
+        var difficultyAdjustment = -modifiers
             .map { EncounterModifier.getFromName(it) }
             .sumOf { it.difficultyChange.toDouble() }
+
+        val difficultyScaling = difficultyScale(node, placeholder, startNode)
+        difficultyAdjustment += difficultyScaling
 
         majorDifficulty = (majorDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         minorDifficulty = (minorDifficulty + (difficultyAdjustment % 1)).toFloat()
@@ -111,8 +115,28 @@ object EncounterGenerator {
             placeholder.unadjustedMajorDifficulty,
             majorDifficulty,
             minorDifficulty,
+            difficultyScaling,
             placeholder.genExtraction
         )
+    }
+
+    private fun difficultyScale(
+        node: MapNodeBuilder,
+        placeholder: EncounterPlaceholderMapEvent,
+        startNode: MapNodeBuilder
+    ): Float {
+        val currentDistance = node.distance
+        require(currentDistance != -1) { "node distance is -1" }
+        val maxDistance = maxDistance(startNode)
+        val percent = currentDistance.toFloat() / maxDistance.toFloat()
+        return placeholder.difficultyScaling.scale(placeholder.scaleMin, placeholder.scaleMax, percent)
+    }
+
+    private fun maxDistance(node: MapNodeBuilder): Int {
+        val localMaxDist = node.edgesTo.maxOf { it.distance }
+        if (localMaxDist <= node.distance) return node.distance
+        val maxEdges = node.edgesTo.filter { it.distance == localMaxDist }
+        return maxEdges.maxOf { maxDistance(it) }
     }
 
     private fun generateEnemies(

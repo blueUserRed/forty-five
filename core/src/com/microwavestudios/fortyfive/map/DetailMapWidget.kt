@@ -199,6 +199,7 @@ class DetailMapWidget(
         invalidateHierarchy()
 
         encounterDebugMenuPage.encounter = (playerNode.event as? EncounterMapEvent)?.encounter
+        debugMenuPage.currentNode = playerNode
 
         animatedDecorations.forEach { (_, instances) ->
             instances.forEach { (_, _, animation) ->
@@ -565,6 +566,7 @@ class DetailMapWidget(
         events.fire(PlayerChangedNodeEvent(movePlayerTo))
         this.movePlayerTo = null
         encounterDebugMenuPage.encounter = (this.playerNode.event as? EncounterMapEvent)?.encounter
+        debugMenuPage.currentNode = this.playerNode
         updateDirectionIndicator(lastPointerPosition)
     }
 

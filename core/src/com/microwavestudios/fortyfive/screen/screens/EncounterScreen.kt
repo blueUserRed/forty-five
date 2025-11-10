@@ -15,8 +15,10 @@ import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
@@ -104,9 +106,9 @@ class EncounterScreen : ScreenCreator() {
         )
     }
 
-    private val playerStatusEffectDisplay: HorizontalStatusEffectDisplay by lazy {
-        HorizontalStatusEffectDisplay(screen, forceLoadFont("red_wing"), Color.Black, 1.4f)
-    }
+//    private val playerStatusEffectDisplay: HorizontalStatusEffectDisplay by lazy {
+//        HorizontalStatusEffectDisplay(screen, forceLoadFont("red_wing"), Color.Black, 1.4f)
+//    }
 
     private lateinit var cardRevolverDragAndDrop: InputManager.DragAndDrop
     private lateinit var cardUnderDeckDragAndDrop: InputManager.DragAndDrop
@@ -152,31 +154,21 @@ class EncounterScreen : ScreenCreator() {
             y = worldHeight * 0.4f
         }
 
-        box {
-            badTexture("status effect background", comment = "??????")
-            backgroundHandle = "status_effect_background"
-            height = 90f
-            onLayoutAndNow { width = parent.width * 0.5f }
-            x = parent.width / 2 - 180
-            y = worldHeight - height + 10
-            isVisible = false
+        playerStatusEffectDisplay()
 
-            actor(playerStatusEffectDisplay) {
-                relativeWidth(100f)
-                relativeHeight(100f)
-                centerX()
-                centerY()
-            }
-
-            gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
-                playerStatusEffectDisplay.displayEffect(event.statusEffect)
-                isVisible = true
-            }
-            gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
-                playerStatusEffectDisplay.removeEffect(event.statusEffect)
-                if (playerStatusEffectDisplay.effects.isEmpty()) isVisible = false
-            }
-        }
+//        box {
+//
+//            playerStatusEffectDisplay()
+//
+//            gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
+//                playerStatusEffectDisplay.displayEffect(event.statusEffect)
+//                isVisible = true
+//            }
+//            gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
+//                playerStatusEffectDisplay.removeEffect(event.statusEffect)
+//                if (playerStatusEffectDisplay.effects.isEmpty()) isVisible = false
+//            }
+//        }
 
         putCardsUnderStackPopup()
 
@@ -190,6 +182,65 @@ class EncounterScreen : ScreenCreator() {
             hasBackpack = true,
             warnings = warningParent
         )
+    }
+
+
+    override fun update() {
+        gameEvents.fire(UpdateUiEvent)
+    }
+
+    private fun CustomGroup.playerStatusEffectDisplay() = box {
+        badTexture("status effect background", comment = "??????")
+        backgroundHandle = "status_effect_background"
+        height = 90f
+        horizontalAlign = CustomAlign.CENTER
+        verticalAlign = CustomAlign.CENTER
+        flexDirection = FlexDirection.ROW
+        onLayoutAndNow { width = parent.width * 0.5f }
+        x = parent.width / 2 - 180
+        y = worldHeight - height + 10
+        isVisible = false
+
+        val effects: MutableList<StatusEffect> = mutableListOf()
+        val updaters: MutableList<() -> Unit> = mutableListOf()
+
+        fun effect(effect: StatusEffect) = box {
+            relativeHeight(100f)
+            width = 200f
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.CENTER
+            flexDirection = FlexDirection.ROW
+            image {
+                backgroundHandle = effect.iconHandle
+                width = 50f
+                height = 50f
+            }
+            label("red wing", effect.getDisplayText(), fontSize = 45) {
+                syncDimensions()
+                updaters.add { setText(effect.getDisplayText()) }
+            }
+        }
+
+        fun effectsChanged() {
+            clearChildren()
+            updaters.clear()
+            effects.forEach { effect(it) }
+        }
+
+        gameEvents.watchFor<UpdateUiEvent> {
+            updaters.forEach { it() }
+        }
+
+        gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
+            effects.add(event.statusEffect)
+            effectsChanged()
+            isVisible = true
+        }
+        gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
+            effects.removeIf { it === event.statusEffect }
+            effectsChanged()
+            if (effects.isEmpty()) isVisible = false
+        }
     }
 
     private fun CustomGroup.encounterModifierDisplay() = box {
@@ -665,6 +716,7 @@ class EncounterScreen : ScreenCreator() {
                 gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new) ->
                     setText("${new}/${GameControllerImpl.Config.baseReserves}")
                 }
+                syncDimensions()
             }
         }
 
@@ -688,9 +740,14 @@ class EncounterScreen : ScreenCreator() {
                 y = 90f
             }
 
+            val controller = getScreenControllers().filterIsInstance<GameController>().first()
             label("red wing", "{game.cardsInStack}", Color.White, (32 * 1.1).toInt()) {
+                gameEvents.watchFor<UpdateUiEvent> {
+                    setText(controller.cardStack.size().toString())
+                }
                 centerX()
                 centerY()
+                syncDimensions()
             }
         }
 
@@ -1188,4 +1245,6 @@ class EncounterScreen : ScreenCreator() {
         override val creatorClass: KClass<out ScreenCreator> = EncounterScreen::class
         const val underDeckGroup: String = "encounter-screen-under-deck"
     }
+
+    private data object UpdateUiEvent
 }
