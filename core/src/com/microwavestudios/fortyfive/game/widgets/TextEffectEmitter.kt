@@ -1,63 +1,26 @@
 package com.microwavestudios.fortyfive.game.widgets
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.game.widgets.TextEffectEmitter.TextAnimationConfig
-import com.microwavestudios.fortyfive.screen.actors.CustomLabel
+import com.microwavestudios.fortyfive.particle.ParticleSystem
+import com.microwavestudios.fortyfive.particle.TextParticleRenderer
+import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
-import com.microwavestudios.fortyfive.utils.*
-import onj.value.OnjArray
-import onj.value.OnjObject
 
 class TextEffectEmitter(
-    private val animationConfigs: Map<String, TextAnimationConfig>,
+    animationConfigs: Map<String, TextAnimationConfig>,
     private val actor: Actor,
     private val screen: OnjScreen
-) : AnimatedActor.NeedsUpdate {
+) {
 
-    private val runningAnimations: MutableList<TextAnimation> = mutableListOf()
+    private val animationConfigs: Map<String, TextAnimationConfig> = animationConfigs + standardTextAnimConfigs
 
-    override fun update() {
-        val now = TimeUtils.millis()
-        val iterator = runningAnimations.iterator()
-        while (iterator.hasNext()) {
-            val anim = iterator.next()
-            if (anim.startTime + anim.duration <= now) {
-                screen.removeActorFromRoot(anim.label)
-                iterator.remove()
-                continue
-            }
-            anim.label.y += anim.speed * Gdx.graphics.deltaTime
-        }
-    }
-
-    fun playAnimation(text: String, configName: String? = null) {
-        val config = findConfig(configName)
-        val label = CustomLabel(screen, text, Label.LabelStyle(config.font, config.fontColor), true)
-        label.setFontScale(config.fontScale)
-        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-        label.setPosition(
-            x + actor.width / 2 + (-config.spawnVarianceX..config.spawnVarianceX).random(),
-            y + actor.height / 2 + (-config.spawnVarianceY..config.spawnVarianceY).random()
-        )
-        val animation = TextAnimation(
-            text,
-            label,
-            TimeUtils.millis(),
-            config.animationDuration.random(),
-            config.speed.random()
-        )
-        screen.addActorToRoot(label)
-        runningAnimations.add(animation)
-    }
+    private val particleRenderer: MutableMap<TextAnimationConfig, TextParticleRenderer> = mutableMapOf()
 
     fun playNumberChangeAnimation(num: Int, overrideConfig: String? = null) {
         val config = overrideConfig ?: when {
@@ -68,6 +31,58 @@ class TextEffectEmitter(
         playAnimation(num.toString(), config)
     }
 
+    fun playAnimation(text: String, configName: String? = null) {
+        val config = findConfig(configName)
+        val renderer = rendererForConfig(config)
+        renderer.spawn(config.font, config.fontScale, config.fontColor, text)
+    }
+
+    private fun rendererForConfig(config: TextAnimationConfig): TextParticleRenderer {
+        val cachedRenderer = particleRenderer[config]
+        if (cachedRenderer != null) return cachedRenderer
+        val emitter = createEmitter(screen.textEffectParticleSystem, config)
+        val renderer = TextParticleRenderer(emitter)
+        emitter.renderer = renderer
+        particleRenderer[config] = renderer
+        return renderer
+    }
+
+    private fun createEmitter(system: ParticleSystem, config: TextAnimationConfig) = system.emitter {
+        syncSpawnPosWithActor(actor)
+
+        if (config.positiveSpeed == null) {
+            xVelocityRange = (-2f..2f)
+            yVelocityRange = (10f..20f)
+            ttlRange = (5000L..5000L)
+
+            updateParticles { particle ->
+                if (particle.forces.y != 0f) return@updateParticles
+                if (particle.velocity.y > -14f) return@updateParticles
+                particle.applyForce(0f, 1f)
+            }
+        } else {
+            val speed = config.positiveSpeed
+            yVelocityRange = speed
+            ttlRange = (1000L..1000L)
+
+            initParticle { particle ->
+                particle.applyForce(0f, 1f)
+            }
+
+            val fadeOutFraction = 1f / 3f
+            updateParticles { particle ->
+                val fadeOutTime = (particle.ttl * fadeOutFraction).toLong()
+                val startFadeOutAt = particle.spawnedAt + (particle.ttl - fadeOutTime)
+                val now = TimeUtils.millis()
+                if (now < startFadeOutAt) return@updateParticles
+                val passedFadeTime = now - startFadeOutAt
+                val fadeFraction = passedFadeTime.toFloat() / fadeOutTime.toFloat()
+                particle.alpha = 1f - fadeFraction
+            }
+
+        }
+    }
+
     private fun findConfig(name: String?): TextAnimationConfig {
         if (animationConfigs.isEmpty()) {
             throw RuntimeException("attempted to play animation on TextEffectEmitter with no config defined")
@@ -75,84 +90,51 @@ class TextEffectEmitter(
         return name?.let { animationConfigs[it] } ?: animationConfigs["default"] ?: animationConfigs.values.first()
     }
 
-    private data class TextAnimation(
-        val text: String,
-        val label: CustomLabel,
-        val startTime: Long,
-        val duration: Int,
-        val speed: Float
-    )
-
     data class TextAnimationConfig(
         val font: BitmapFont,
         val fontColor: Color,
         val fontScale: Float,
-        val speed: ClosedFloatingPointRange<Float>,
-        val spawnVarianceX: Float,
-        val spawnVarianceY: Float,
-        val animationDuration: IntRange,
+        val positiveSpeed: ClosedFloatingPointRange<Float>? = null
     )
 
     companion object {
 
-        val standardTextAnimConfigs by lazy {
-            val roadgeek = FortyFive.resourceManager.forceGet<BitmapFont>(
+        val roadgeek: BitmapFont by lazy {
+            FortyFive.resourceManager.forceGet<BitmapFont>(
                 object : ResourceBorrower {},
                 FortyFive.gameLifetime,
                 "roadgeek60"
             )
+        }
+
+        val standardTextAnimConfigs by lazy {
+
             mapOf(
                 "number_neutral" to TextAnimationConfig(
                     font = roadgeek,
                     fontColor = Color.WHITE,
-                    fontScale = 0.9f,
-                    speed = 60f..80f,
-                    spawnVarianceX = 30f,
-                    spawnVarianceY = 30f,
-                    animationDuration = 1000..1500
+                    fontScale = 0.6f,
                 ),
                 "number_negative" to TextAnimationConfig(
                     font = roadgeek,
                     fontColor = Color.RED,
-                    fontScale = 0.9f,
-                    speed = -80f..-60f,
-                    spawnVarianceX = 30f,
-                    spawnVarianceY = 30f,
-                    animationDuration = 1000..1500
+                    fontScale = 0.6f,
                 ),
                 "number_positive" to TextAnimationConfig(
                     font = roadgeek,
                     fontColor = Color.GREEN,
-                    fontScale = 0.9f,
-                    speed = 60f..80f,
-                    spawnVarianceX = 30f,
-                    spawnVarianceY = 30f,
-                    animationDuration = 1000..1500
+                    fontScale = 0.6f,
+                    positiveSpeed = 3f..5f,
                 ),
             )
         }
-
-        fun configsFromOnj(onj: OnjArray, screen: OnjScreen): Map<String, TextAnimationConfig> = onj
-            .value
-            .map { it as OnjObject }
-            .associate { it.get<String>("name") to configFromOnj(it, screen) }
-
-        fun configFromOnj(onj: OnjObject, screen: OnjScreen): TextAnimationConfig = TextAnimationConfig(
-            FortyFive.resourceManager.forceGet(screen, screen.lifetime, onj.get<String>("font")),
-            onj.get<Color>("color"),
-            onj.get<Double>("fontScale").toFloat(),
-            onj.get<OnjArray>("speed").toFloatRange(),
-            onj.get<Double>("spawnVarianceX").toFloat(),
-            onj.get<Double>("spawnVarianceY").toFloat(),
-            onj.get<OnjArray>("duration").toIntRange(),
-        )
-
     }
 
 }
 
-fun AnimatedActor.textEffectEmitter(animationConfigs: Map<String, TextAnimationConfig>): TextEffectEmitter {
+fun AnimatedActor.textEffectEmitter(
+    animationConfigs: Map<String, TextAnimationConfig> = mapOf()
+): TextEffectEmitter {
     val emitter = TextEffectEmitter(animationConfigs, this as Actor, screen)
-    animationsNeedingUpdate.add(emitter)
     return emitter
 }

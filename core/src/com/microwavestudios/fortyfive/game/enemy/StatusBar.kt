@@ -49,7 +49,7 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
     private var currentDisplayPercent: Float = 1f
     private var targetPercent: Float = 1f
 
-    private val emitter = textEffectEmitter(TextEffectEmitter.standardTextAnimConfigs)
+    private val emitter = textEffectEmitter()
 
     private val statusEffectIcons: MutableMap<String, Promise<Drawable>> = mutableMapOf()
 
@@ -160,11 +160,11 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         val height = width * (189f / 1041f)
         shieldOverlay.draw(batch, barX - shieldWidthDiff + 2, barY - 8f, width, height)
         val layout = hpGlyphLayout
-        roadgeek.data.setScale(0.5f)
+        roadgeek.data.setScale(0.4f)
         val text = enemy.currentCover.toString()
-        layout.setText(roadgeek, text, Color.Black, 0f, Align.center, false)
-        val labelX = barX - shieldWidthDiff / 2 - layout.width / 2 + 12f
-        val labelY = barY + barHeight / 2 - layout.height / 2 + 7f
+        layout.setText(roadgeek, text, Color.Black, 100f, Align.center, false)
+        val labelX = barX - shieldWidthDiff / 2 - layout.width / 2 //+ 16f
+        val labelY = barY + barHeight / 2 - layout.height / 2 + 11f
         // TODO: fix alignment
         roadgeek.draw(batch, layout, labelX, labelY)
     }

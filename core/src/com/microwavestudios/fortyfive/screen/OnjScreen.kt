@@ -18,6 +18,7 @@ import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
+import com.microwavestudios.fortyfive.particle.ParticleSystem
 import com.microwavestudios.fortyfive.rendering.*
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -91,6 +92,10 @@ open class OnjScreen(
 
     val inputManager = InputManager(this)
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
+
+    val textEffectParticleSystem: ParticleSystem = ParticleSystem(viewport.worldWidth, viewport.worldHeight).also {
+        it.addBaseForce(0f, -1f)
+    }
 
     init {
         addEarlyRenderTask {
@@ -253,6 +258,8 @@ open class OnjScreen(
             actor.x = oX
             actor.y = oY
         }
+        textEffectParticleSystem.update()
+        textEffectParticleSystem.render(batch, this)
         batch.end()
         doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
     } catch (e: Exception) {

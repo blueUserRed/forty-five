@@ -105,11 +105,12 @@ object NavbarCreator {
                 backgroundHandle = "statusbar_lives"
             }
 
-            val healthLabel = label("red wing", "${profile.healthInRun}", isTemplate = true, fontSize = 32) {
+            val healthLabel = label("red wing", "${profile.healthInRun}", fontSize = 32) {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
             profile.events.watchFor<Profile.HealthChangedEvent> { event ->
+                println(event.newHealth)
                 healthLabel.setText(event.newHealth.toString())
             }
         }

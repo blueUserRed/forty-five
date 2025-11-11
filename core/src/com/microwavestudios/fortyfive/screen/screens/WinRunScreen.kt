@@ -286,17 +286,12 @@ class WinRunScreen : ScreenCreator() {
             )
         )
 
-        val redWing = FortyFive.resourceManager.forceGet<BitmapFont>(screen, screen.lifetime, "red_wing")
-
         val textEmitter = cashGroup.textEffectEmitter(mapOf(
             "cash" to TextEffectEmitter.TextAnimationConfig(
-                redWing,
+                TextEffectEmitter.roadgeek,
                 Color.DarkGreen,
-                1f,
-                speed = 150f..180f,
-                spawnVarianceX = 30f,
-                spawnVarianceY = 30f,
-                animationDuration = 1000..1500
+                0.8f,
+                positiveSpeed = 150f..180f,
             )
         ))
 

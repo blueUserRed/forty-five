@@ -571,7 +571,7 @@ class EncounterScreen : ScreenCreator() {
         centerX()
         y = 340f
         flexDirection = FlexDirection.COLUMN
-        horizontalAlign = CustomAlign.SPACE_AROUND
+        horizontalAlign = CustomAlign.CENTER
         verticalAlign = CustomAlign.CENTER
         color.a = 0f
         touchable = Touchable.disabled
@@ -586,7 +586,8 @@ class EncounterScreen : ScreenCreator() {
             relativeWidth(100f)
             syncHeight()
         }
-        label("roadgeek", "", Color.GRAY, (24 * 0.7).toInt()) {
+        verticalSpacer(20f)
+        label("roadgeek", "", Color.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, blockable) ->
                 setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
             }
@@ -594,7 +595,8 @@ class EncounterScreen : ScreenCreator() {
             relativeWidth(100f)
             syncHeight()
         }
-        label("roadgeek", "", Color.GRAY, (24 * 0.7).toInt()) {
+        verticalSpacer(20f)
+        label("roadgeek", "", Color.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, _) ->
                 setText("Passing will let $damage damage through")
             }
@@ -602,6 +604,7 @@ class EncounterScreen : ScreenCreator() {
             relativeWidth(100f)
             syncHeight()
         }
+        verticalSpacer(60f)
     }
 
     private fun CustomGroup.targetSelectionPopup() = box {
