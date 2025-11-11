@@ -888,24 +888,15 @@ class CardActor(
         val isShaderSetup = setupShader(batch)
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
-        val width: Float
-        val height: Float
-        val x: Float = x
-        val y: Float = y
-        width = this.width
-        height = this.height
-//        if (isDragged) {
-//            x = dragX
-//            y = dragY
-//        } else {
-//            x = this.x
-//            y = this.y
+        val textureSize = width
+        val x = x
+        val y = y
         dropShadow?.doDropShadow(batch, screen, TextureRegionDrawable(textureRegion), this, scaleX, scaleY, rotation)
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,
-            width / 2, height / 2,
-            width, height,
+            textureSize / 2, textureSize / 2,
+            textureSize, textureSize,
             scaleX, scaleY,
             rotation
         )
@@ -916,8 +907,8 @@ class CardActor(
         markedSymbol.getOrNull()?.draw(
             batch,
             x + drawOffsetX, y + drawOffsetY,
-            width / 2, height / 2,
-            width, height,
+            textureSize / 2, textureSize / 2,
+            textureSize, textureSize,
             scaleX, scaleY,
             rotation
         )

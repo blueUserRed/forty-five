@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.resources.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -72,7 +73,14 @@ class ServiceThread : Thread("ServiceThread") {
             val isDark = card.actor.isDark
             val fontScale = card.actor.fontScale
             val savedSymbol = message.savedPixmap
-            pixmap.drawPixmap(cardTexturePixmap, 0, 0)
+            val padding = (CardTextureManager.texturePaddingFraction * cardTexturePixmap.width).toInt()
+            pixmap.drawPixmap(
+                cardTexturePixmap,
+                0, 0,
+                cardTexturePixmap.width, cardTexturePixmap.height,
+                padding, padding,
+                cardTexturePixmap.width, cardTexturePixmap.height
+            )
             val situation = when {
                 damageValue > baseDamage -> "increase"
                 damageValue < baseDamage -> "decrease"

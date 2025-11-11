@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.Texture.TextureFilter
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.utils.*
@@ -63,7 +64,12 @@ class CardTextureManager {
         damage: Int
     ): Promise<Texture> {
         val pixmapPromise = getCardPixmap(data, card).chainMainThread { cardPixmap ->
-            val pixmap = Pixmap(cardPixmap.width, cardPixmap.height, Pixmap.Format.RGBA8888)
+            val padding = (cardPixmap.width * texturePaddingFraction).toInt()
+            val pixmap = Pixmap(
+                cardPixmap.width + 2 * padding,
+                cardPixmap.height + 2 * padding,
+                Pixmap.Format.RGBA8888
+            )
             if (!card.actor.font.isResolved) FortyFive.resourceManager.forceResolve(card.actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
                 pixmap,
@@ -75,16 +81,14 @@ class CardTextureManager {
                 card.actor.font.getOrError()
             )
             FortyFive.serviceThread.sendMessage(message)
-//            println("start drawing ${card.name}")
             message.promise
         }
         val texturePromise = pixmapPromise.chain { pixmap ->
-//            println("finished drawing ${card.name}")
             FortyFive.mainThreadTask {
                 val texture = Texture(pixmap, true)
                 texture.setFilter(
-                    Texture.TextureFilter.MipMapLinearLinear,
-                    Texture.TextureFilter.MipMapLinearLinear
+                    TextureFilter.MipMapLinearLinear,
+                    TextureFilter.Linear
                 )
                 statistics.textureDraws++
                 texture
@@ -169,6 +173,10 @@ class CardTextureManager {
         val textureUsages: Int
             get() = cardTextures.flatMap { it.variants }.sumOf { it.borrowers.size }
 
+    }
+
+    companion object {
+        const val texturePaddingFraction: Double = 1.0 / 75.0
     }
 
 }

@@ -1146,6 +1146,7 @@ textures: [
     },
     {
         name: "common_popup_background_black_large",
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/common/backgrounds/popup_black_large.png",
     },
     {

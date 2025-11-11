@@ -35,6 +35,7 @@ import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
@@ -566,6 +567,12 @@ class EncounterScreen : ScreenCreator() {
 
     private fun CustomGroup.parryPopup() = box {
         backgroundHandle = "common_popup_background_black_large"
+        dropShadow = BakedDropShadow(
+            "common_popup_background_black_large",
+            screen,
+            0f, 0f,
+            1.3f, 1.3f
+        )
         width = 680f
         height = width * (1057f / 1845f)
         centerX()
@@ -609,6 +616,12 @@ class EncounterScreen : ScreenCreator() {
 
     private fun CustomGroup.targetSelectionPopup() = box {
         backgroundHandle = "common_popup_background_black_large"
+        dropShadow = BakedDropShadow(
+            "common_popup_background_black_large",
+            screen,
+            0f, 0f,
+            1.3f, 1.3f
+        )
         width = 680f
         height = width * (1057f / 1845f)
         centerX()
