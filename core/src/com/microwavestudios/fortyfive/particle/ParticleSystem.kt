@@ -92,12 +92,17 @@ class ParticleSystem(
 
         var ttlRange: LongRange? = null
 
+        var spawnPerFrame: IntRange? = null
+
         private var syncWithActor: Actor? = null
 
         var renderer: ParticleRenderer? = null
 
         private val particleInitializers: MutableList<(Particle) -> Unit> = mutableListOf()
         private val particleUpdaters: MutableList<(Particle) -> Unit> = mutableListOf()
+        private val updaters: MutableList<() -> Unit> = mutableListOf()
+
+        val globalForce: Vector2 = Vector2()
 
         fun setRangesToActor(actor: Actor) {
             val stageCoords = actor.localToStageCoordinates(Vector2(0f, 0f))
@@ -122,6 +127,10 @@ class ParticleSystem(
             particleUpdaters.add(block)
         }
 
+        fun onUpdate(block: () -> Unit) {
+            updaters.add(block)
+        }
+
         fun spawn(): Particle {
             val particle = Particle(
                 xRange.random(), yRange.random(),
@@ -133,20 +142,29 @@ class ParticleSystem(
                 true,
                 Vector2()
             )
-            println(particle)
             particleInitializers.forEach { it(particle) }
             _particles.add(particle)
             return particle
         }
 
         fun update() {
+            updaters.forEach { it() }
             val now = TimeUtils.millis()
             _particles.removeIf { particle ->
                 val toRemove = particle.ttl != -1L && now > particle.spawnedAt + particle.ttl
                 if (toRemove) particle.active = false
                 toRemove
             }
-            _particles.forEach { particle -> particleUpdaters.forEach { it(particle) } }
+            spawnPerFrame?.let { range ->
+                repeat(range.random()) {
+                    spawn()
+                }
+            }
+            _particles.forEach { particle ->
+                particle.velocity.x += globalForce.x
+                particle.velocity.y += globalForce.y
+                particleUpdaters.forEach { it(particle) }
+            }
             syncWithActor?.let { setRangesToActor(it) }
         }
 

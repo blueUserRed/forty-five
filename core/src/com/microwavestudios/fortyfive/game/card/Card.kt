@@ -822,7 +822,11 @@ class CardActor(
                 this.dropShadow?.showDropShadow = false
             }
         )
-
+        observeInputState(
+            GameInputs.States.inDrag,
+            { FortyFive.soundPlayer.situation("card_drag_started", screen) },
+            { FortyFive.soundPlayer.situation("card_drag_finished", screen) }
+        )
     }
 
     fun clickedViaSlot(rightClick: Boolean) {

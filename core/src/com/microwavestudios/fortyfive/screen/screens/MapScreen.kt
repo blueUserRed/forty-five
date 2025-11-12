@@ -227,6 +227,7 @@ class MapScreen : ScreenCreator() {
             joinGroup(startButtonGroup)
             onInput(GameInputs.interact) {
                 if (mapWidget.playerNode.event?.startable == true) {
+                    FortyFive.soundPlayer.situation("general_button_click", screen)
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
                 }

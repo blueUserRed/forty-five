@@ -137,7 +137,7 @@ object RunBoardCreator {
                     keyboardFocusable = KeyboardFocusable.LEAF
                     touchable = Touchable.enabled
                     joinGroup(buttonGroup)
-                    defaultButtonBackgrounds()
+                    defaultButtonConfig()
 
                     label("red wing", "Cancel", Color.FortyWhite, 32)
 
@@ -153,7 +153,7 @@ object RunBoardCreator {
                     keyboardFocusable = KeyboardFocusable.LEAF
                     touchable = Touchable.enabled
                     joinGroup(buttonGroup)
-                    defaultButtonBackgrounds()
+                    defaultButtonConfig()
 
                     label("red wing", "Start", Color.FortyWhite, 32)
 

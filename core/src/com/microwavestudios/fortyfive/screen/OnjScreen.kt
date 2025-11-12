@@ -97,6 +97,8 @@ open class OnjScreen(
         it.addBaseForce(0f, -1f)
     }
 
+    val events: EventPipeline = EventPipeline()
+
     init {
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask

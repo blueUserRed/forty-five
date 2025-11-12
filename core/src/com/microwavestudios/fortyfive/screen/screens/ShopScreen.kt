@@ -131,7 +131,7 @@ class ShopScreen : ScreenCreator() {
                 verticalAlign = CustomAlign.CENTER
                 height = 60f
                 width = 140f
-                defaultButtonBackgrounds()
+                defaultButtonConfig()
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 logicalOffsetY = 55f
@@ -421,6 +421,7 @@ class ShopScreen : ScreenCreator() {
             val info = actor.infoObject as? CardDragAndDropInfo ?: return@onDrop
             val profile = FortyFive.profileManager.currentProfile!!
             if (profile.playerMoney < info.price) return@onDrop
+            FortyFive.soundPlayer.situation("card_bought", screen)
             profile.payMoney(info.price)
             val deck = currentDeck
             if (profile.isRunActive) profile.addCardToBackpack(info.card.name)

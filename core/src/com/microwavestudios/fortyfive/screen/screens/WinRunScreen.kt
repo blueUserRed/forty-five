@@ -190,7 +190,7 @@ class WinRunScreen : ScreenCreator() {
                 keyboardFocusable = KeyboardFocusable.LEAF
                 touchable = Touchable.enabled
                 joinGroup("extract-cards-popup-button")
-                defaultButtonBackgrounds()
+                defaultButtonConfig()
 
                 label("red wing", "Ok", Color.FortyWhite, 32)
 
@@ -304,6 +304,7 @@ class WinRunScreen : ScreenCreator() {
             action {
                 textEmitter.playAnimation("+$amount$", "cash")
                 profile.earnMoney(amount)
+                FortyFive.soundPlayer.situation("money_earned", screen)
                 cashLabel.setText("${profile.playerMoney}$")
             }
 
@@ -330,7 +331,7 @@ class WinRunScreen : ScreenCreator() {
             width = 180f
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
-            defaultButtonBackgrounds()
+            defaultButtonConfig()
 
             label("red wing", "Claim Rewards", Color.FortyWhite, 32)
 

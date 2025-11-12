@@ -8,6 +8,8 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.particle.ParticleSystem
+import com.microwavestudios.fortyfive.particle.TextureParticleRenderer
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -18,11 +20,14 @@ import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator.getSh
 import com.microwavestudios.fortyfive.screen.commonComponents.ProfileCardCreator.getSharedProfileCard
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.getSharedSettingsMenu
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
+import com.microwavestudios.fortyfive.screen.screenController.ParticleSystemScreenController
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.alpha
+import com.microwavestudios.fortyfive.utils.minus
 import kotlin.reflect.KClass
 
 class TitleScreen : ScreenCreator() {
@@ -50,6 +55,8 @@ class TitleScreen : ScreenCreator() {
     private var currentlySelectedProfile: Profile.Preview? = null
 
     private val timelines: TimelineController = TimelineController()
+
+    private val testParticleSystem = ParticleSystem(worldWidth, worldHeight)
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -153,6 +160,32 @@ class TitleScreen : ScreenCreator() {
             }
             events.fire(SelectedProfileChanged(preview))
         }
+
+//        testParticleSystem.emitter {
+//
+//            xRange = (-100f..worldWidth)
+//            yRange = ((worldHeight + 200f)..(worldHeight + 400f))
+//            xVelocityRange = (-10f..10f)
+//            spawnPerFrame = (50..60)
+//            speedCap = (40f..40f)
+//            ttlRange = (5000L..5000L)
+//
+//            initParticle { particle ->
+//                particle.applyForce(0f, -2f)
+//            }
+//
+//            onUpdate {
+//                if (globalForce.x > 0) {
+//                    globalForce.x = (globalForce.x - 0.06f).coerceAtLeast(0f)
+//                }
+//                if (globalForce.x < 0.4f && Utils.coinFlip(0.08f)) {
+//                    globalForce.x += 0.9f
+//                }
+//            }
+//
+//            renderer = TextureParticleRenderer("particle_rain", 20f * 0.7f, 35f * 0.7f,
+//                com.badlogic.gdx.graphics.Color(0f, 0f, 0.7f, 0.6f), screen, this)
+//        }
     }
 
     private fun CustomBox.profileSelector() {
@@ -267,7 +300,7 @@ class TitleScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        timelines
+        timelines, // ParticleSystemScreenController(testParticleSystem, screen)
     )
 
     private class SelectedProfileChanged(val newProfile: Profile.Preview?)

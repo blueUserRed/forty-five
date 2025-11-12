@@ -23,24 +23,8 @@ void main() {
     vec4 color = v_color * texture2D(u_texture, v_texCoords);
     vec2 coords = v_texCoords;
     float dist = distance(coords, vec2(0.5));
+//    color = mix(color, vec4(0.0, 0.0, 0.0, 1.0), 0.3);
+//    outColor = mix(color, vec4(0.0, 0.0, 0.0, 1.0), dist);
     outColor = mix(color, vec4(0.0, 0.0, 0.0, 1.0), dist * dist * dist * 1.3);
 }
 
-//void main() {
-//    vec4 baseColor = v_color * texture2D(u_texture, v_texCoords);
-//    vec3 color = baseColor.rgb;
-//    vec3 hsl = rgb2hsl(color);
-//
-//    float grayScale = baseColor.r + baseColor.g + baseColor.b;
-//    grayScale /= 3;
-//    float diff = fwidth(grayScale);
-//    hsl.b -= diff;
-//
-//    vec3 rgb = hsl2rgb(hsl);
-//    if (v_texCoords.x > 0.5) {
-//        outColor = vec4(rgb, baseColor.a);
-//    } else {
-//        outColor = baseColor;
-//    }
-//    outColor = vec4(rgb, baseColor.a);
-//}

@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.run
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import onj.builder.buildOnjObject
 import onj.value.*
+import kotlin.math.pow
 
 data class Run(
     val name: String,
@@ -110,7 +111,19 @@ abstract class DifficultyScaling {
         }
     }
 
-    // TODO: Exponential
+    data class Power(val power: Int) : DifficultyScaling() {
+
+        override fun scale(min: Float, max: Float, percent: Float): Float {
+            val adjPercent = percent.pow(power)
+            return (max - min) * adjPercent + min
+        }
+
+        override fun toOnj(): OnjObject = buildOnjObject {
+            name("PowerScaling")
+            "power" to power
+        }
+
+    }
 
     abstract fun scale(min: Float, max: Float, percent: Float): Float
     abstract fun toOnj(): OnjObject
@@ -118,6 +131,7 @@ abstract class DifficultyScaling {
     companion object {
         fun fromOnj(onj: OnjNamedObject): DifficultyScaling = when (onj.name) {
             "LinearScaling" -> Linear
+            "Power" -> Power(onj.get<Long>("power").toInt())
             else -> throw RuntimeException("no difficulty scaling with name: ${onj.name}")
         }
     }

@@ -1245,6 +1245,10 @@ textures: [
         name: "card_symbol_text_t_equals",
         file: "blobs/cards/symbols/text/t_equals.png",
     },
+    {
+        name: "particle_rain",
+        file: "blobs/particles/rain.png",
+    },
 ],
 
 cursors: [

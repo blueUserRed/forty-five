@@ -142,7 +142,7 @@ class ChooseCardScreen : ScreenCreator() {
                 height = 60f
                 width = 140f
                 logicalOffsetY = -30f
-                defaultButtonBackgrounds()
+                defaultButtonConfig()
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {

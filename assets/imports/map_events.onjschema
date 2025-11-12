@@ -2,6 +2,9 @@ import "imports/map_predicates.onjschema" as _;
 
 $DifficultyScaling {
     $LinearScaling {}
+    $PowerScaling {
+        power: int,
+    }
 }
 
 var mapEventStandardConfig = {

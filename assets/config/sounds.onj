@@ -6,7 +6,7 @@ situations: [
         sound: "revolver_shot_sound"
     },
     {
-        name: "statusbar_button_clicked",
+        name: "navbar_button_clicked",
         sound: "button_1_sound",
         volume: 0.5
     },

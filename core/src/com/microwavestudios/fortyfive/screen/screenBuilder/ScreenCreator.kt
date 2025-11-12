@@ -368,24 +368,30 @@ abstract class ScreenCreator : ResourceBorrower {
         onLayoutAndNow { y = parent.height / 2 - height / 2 }
     }
 
-    fun CustomBox.defaultButtonBackgrounds() {
+    fun CustomBox.defaultButtonConfig() {
         backgroundHandle = "common_button_default"
         observeInputState(
             GameInputs.States.focused,
             { backgroundHandle = "common_button_hover" },
             { backgroundHandle = "common_button_default" }
         )
+        onInput(GameInputs.interact) {
+            FortyFive.soundPlayer.situation("general_button_click", screen)
+        }
     }
 
     fun buttonBackgroundHints() = arrayOf("common_button_default", "common_button_hover" )
 
-    fun NewLabel.defaultButtonBackgrounds() {
+    fun NewLabel.defaultButtonConfig() {
         backgroundHandle = "common_button_default"
         observeInputState(
             GameInputs.States.focused,
             { backgroundHandle = "common_button_hover" },
             { backgroundHandle = "common_button_default" }
         )
+        onInput(GameInputs.interact) {
+            FortyFive.soundPlayer.situation("general_button_click", screen)
+        }
     }
 
     fun CustomGroup.addDefaultOverlays(

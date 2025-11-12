@@ -160,11 +160,11 @@ class StatusBar(screen: OnjScreen, private val enemy: Enemy) : CustomGroup(scree
         val height = width * (189f / 1041f)
         shieldOverlay.draw(batch, barX - shieldWidthDiff + 2, barY - 8f, width, height)
         val layout = hpGlyphLayout
-        roadgeek.data.setScale(0.4f)
+        roadgeek.data.setScale(0.35f)
         val text = enemy.currentCover.toString()
         layout.setText(roadgeek, text, Color.Black, 100f, Align.center, false)
-        val labelX = barX - shieldWidthDiff / 2 - layout.width / 2 //+ 16f
-        val labelY = barY + barHeight / 2 - layout.height / 2 + 11f
+        val labelX = barX - shieldWidthDiff / 2 - 50f + 5f
+        val labelY = barY + barHeight / 2 - layout.height / 2 + 13f
         // TODO: fix alignment
         roadgeek.draw(batch, layout, labelX, labelY)
     }

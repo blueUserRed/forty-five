@@ -109,7 +109,7 @@ object NavbarCreator {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
-            profile.events.watchFor<Profile.HealthChangedEvent> { event ->
+            screen.events.watchFor<Profile.HealthChangedEvent> { event ->
                 println(event.newHealth)
                 healthLabel.setText(event.newHealth.toString())
             }
@@ -135,7 +135,7 @@ object NavbarCreator {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
-            profile.events.watchFor<Profile.MoneyChangedEvent> { event ->
+            screen.events.watchFor<Profile.MoneyChangedEvent> { event ->
                 cashLabel.setText("\$${event.newMoney}")
             }
         }
@@ -311,6 +311,7 @@ object NavbarCreator {
             }
 
             onInput(GameInputs.interact) {
+                FortyFive.soundPlayer.situation("navbar_button_clicked", screen)
                 if (isOpen) {
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))

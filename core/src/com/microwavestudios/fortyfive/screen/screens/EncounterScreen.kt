@@ -157,20 +157,6 @@ class EncounterScreen : ScreenCreator() {
 
         playerStatusEffectDisplay()
 
-//        box {
-//
-//            playerStatusEffectDisplay()
-//
-//            gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
-//                playerStatusEffectDisplay.displayEffect(event.statusEffect)
-//                isVisible = true
-//            }
-//            gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
-//                playerStatusEffectDisplay.removeEffect(event.statusEffect)
-//                if (playerStatusEffectDisplay.effects.isEmpty()) isVisible = false
-//            }
-//        }
-
         putCardsUnderStackPopup()
 
         winPopup()

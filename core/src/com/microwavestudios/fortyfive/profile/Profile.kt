@@ -40,8 +40,6 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         mutableMapOf()
     )
 
-    val events: EventPipeline = EventPipeline()
-
     val profilePath: File = File("profiles/$name")
 
     private var dirty: Boolean = true
@@ -51,7 +49,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     private var _playerMoney: Int by DataDelegate(
         ProfileData::playerMoney,
         onSet = { value ->
-            events.fire(MoneyChangedEvent(value))
+            FortyFive.currentScreen?.events?.fire(MoneyChangedEvent(value))
         }
     )
     val playerMoney: Int
