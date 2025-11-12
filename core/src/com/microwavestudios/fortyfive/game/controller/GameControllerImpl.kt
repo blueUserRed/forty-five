@@ -471,12 +471,15 @@ class GameControllerImpl(
             revolver
                 .slots
                 .filter { it.card?.enteredInSlot == it.num }
-                .forEach {
+                .map {
                     val card = it.card!!
                     val info = createTriggerInfo(card, sourceCard = sourceCard)
                     val event = Events.CardReturnedHome(card, info)
                     gameEvents.fire(event)
+                    event.createTimeline()
                 }
+                .collectTimeline()
+                .let { include(it) }
         }
         later {
             val info = createTriggerInfo(null, multiplier = newRotation.amount, sourceCard = sourceCard)

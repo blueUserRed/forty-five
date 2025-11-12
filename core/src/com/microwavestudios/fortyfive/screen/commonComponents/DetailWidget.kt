@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
@@ -19,7 +20,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
     var shownAlpha = 1F
 
-    abstract fun generateDetailActor(addFadeInAction: Boolean): Actor
+    abstract fun generateDetailActor(addFadeInAction: Boolean): Actor?
 
     open fun drawDetailActor(batch: Batch) {
         detailActor?.draw(batch, shownAlpha)
@@ -84,7 +85,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         }
     }
 
-    class KomplexBigDetailActor(
+    class ComplexBigDetailActor(
         screen: OnjScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
@@ -94,10 +95,13 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
         private var subtextParent: CustomBox? = null
         private val distanceBetweenMainAndSub: Float = 10F
-        override fun generateDetailActor(addFadeInAction: Boolean): Actor {
-            val texts = text.invoke().filter { it.isNotEmpty() }
+
+        override fun generateDetailActor(addFadeInAction: Boolean): Actor? {
+            val texts = text.invoke().filter { it.isNotBlank() }
             val width = 300F
             generateSubtexts(width * 3 / 5)
+
+            if (subtextParent == null && texts.isEmpty()) return null
 
             if (texts.size <= 1) {
                 val singleTextParent = getSingleTextParent(texts, width)
@@ -106,13 +110,18 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
             }
 
             val parent = CustomBox(screen)
-            parent.verticalAlign = CustomAlign.SPACE_AROUND
+            parent.verticalAlign = CustomAlign.START
             parent.setPadding(15F)
             parent.width = width
-            parent.fitContentInFlexDirection = true
+            parent.onLayout { parent.height = parent.prefHeight.coerceAtLeast(200f) }
             parent.minVerticalDistBetweenElements = 5f
             parent.backgroundHandle = defBackground
-
+            parent.dropShadow = BakedDropShadow(
+                defBackground,
+                screen,
+                0f, 0f,
+                1.33f, 1.33f
+            )
 
             val innerWidth = parent.width - parent.paddingLeft - parent.paddingRight
             texts.forEachIndexed { i, it ->
@@ -123,7 +132,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                     parent.addActor(imgActor)
                 }
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek", Color.FortyWhite, if (i == 0) 14 else 12),
+                    Triple("roadgeek", Color.FortyWhite, if (i == 0) 16 else 14),
                     screen
                 )
                 actor.width = innerWidth
@@ -151,6 +160,12 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                     Triple("roadgeek", Color.FortyWhite, 14), screen
                 )
                 actor.backgroundHandle = defBackgroundSmall
+                actor.dropShadow = BakedDropShadow(
+                    defBackgroundSmall,
+                    screen,
+                    0f, 0f,
+                    1.33f, 1.33f
+                )
                 actor.width = width
                 actor.setRawText(it, effects)
                 actor.setPadding(13F)

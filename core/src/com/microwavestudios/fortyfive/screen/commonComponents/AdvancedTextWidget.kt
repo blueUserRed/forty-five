@@ -49,8 +49,6 @@ open class AdvancedTextWidget(
             initText(value)
         }
 
-    private var initialisedStyleInstruction: Boolean = false
-
     init {
         @Suppress("LeakingThis")
         initText(advancedText)

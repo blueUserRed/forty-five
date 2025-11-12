@@ -170,7 +170,7 @@ open class OnjScreen(
     fun showHoverDetail(actor: InputActor) {
         val detailWidget = actor.detailWidget ?: return
         if (detailWidget.isShown) return
-        val detailActor = detailWidget.generateDetailActor(addFadeInAction = true)
+        val detailActor = detailWidget.generateDetailActor(addFadeInAction = true) ?: return
         detailWidget.detailActor = detailActor
         detailWidget.updateBounds(actor.actor)
         actorsWithActiveHoverDetails.add(actor)

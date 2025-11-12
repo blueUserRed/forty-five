@@ -966,10 +966,12 @@ textures: [
     },
     {
         name: "detail_widget_background_big",
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/cards/detail_widget/detailwidget_big.png"
     },
     {
         name: "detail_widget_background_small",
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/cards/detail_widget/detailwidget_small.png"
     },
     {

@@ -720,7 +720,7 @@ class CardActor(
 ) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
     OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
 
-    override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
+    override var detailWidget: DetailWidget? = DetailWidget.ComplexBigDetailActor(
         screen,
         effects = cardDetailEffects,
         text = {
