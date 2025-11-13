@@ -685,6 +685,18 @@ class EncounterScreen : ScreenCreator() {
             }
         }
 
+        label("red wing", "10", Color.Red, 90) {
+            centerX()
+            y = 210f
+            width = 50f
+            setAlignment(Align.center)
+            isVisible = false
+            gameEvents.watchFor<GameControllerImpl.Events.SteelNervesCountdown> { (newNumber) ->
+                setText(newNumber.toString())
+                isVisible = true
+            }
+        }
+
         actor(cardHand) {
             name("cardHand")
             centerX()

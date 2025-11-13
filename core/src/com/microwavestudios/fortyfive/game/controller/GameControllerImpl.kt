@@ -114,7 +114,7 @@ class GameControllerImpl(
     var cardsDrawn: Int = 0
         private set
 
-    val hasWon: Boolean
+    override val hasWon: Boolean
         get() = allEnemies.all { it.isDefeated }
 
     private val enemyBannerPromise: Promise<Drawable> =
@@ -1225,6 +1225,8 @@ class GameControllerImpl(
         data object HolsterButtonPressed
         data object AfterlifeOpenToggle
         data class CardRightClickEvent(val card: Card)
+
+        data class SteelNervesCountdown(val newNumber: Int)
 
         abstract class TimelineBuildingEvent {
 

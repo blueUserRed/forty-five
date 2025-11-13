@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.game.card.GameSituation
 import com.microwavestudios.fortyfive.game.card.Trigger
 import com.microwavestudios.fortyfive.game.card.TriggerInformation
 import com.microwavestudios.fortyfive.game.controller.GameController
+import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -126,24 +127,27 @@ sealed class EncounterModifier {
         override val difficultyChange: Float = 0.5f
 
         private var baseTime: Long = -1
+        private var lastDigit: Int = -1
 
         override fun getModifierTypes(): List<Type> = listOf(Type.RT_BASED)
 
         override fun onStart(controller: GameController) {
-            controller.screen.enterState("steel_nerves")
+            controller.gameEvents.fire(GameControllerImpl.Events.SteelNervesCountdown(10))
         }
 
         override fun update(controller: GameController) {
             if (baseTime == -1L) return
-            TODO()
-//            if (controller.playerLost || OldGameController.showWinScreen in controller.screen.screenState) {
-//                controller.screen.leaveState("steel_nerves")
-//                baseTime = -1
-//                return
-//            }
+
+            if (controller.playerLost || controller.hasWon) {
+                baseTime = -1L
+            }
+
             val now = TimeUtils.millis()
             val diff = max(10 - ((now - baseTime).toDouble() / 1000.0).roundToInt(), 0)
-            TemplateString.updateGlobalParam("game.steelNerves.remainingTime", diff)
+            if (diff != lastDigit) {
+                lastDigit = diff
+                controller.gameEvents.fire(GameControllerImpl.Events.SteelNervesCountdown(diff))
+            }
             if (now - baseTime < 10_000) return
             if (controller.isUIFrozen) return
             baseTime = -1
@@ -153,6 +157,7 @@ sealed class EncounterModifier {
         override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
             action {
                 baseTime = TimeUtils.millis()
+                lastDigit = 10
             }
         }
 
@@ -165,6 +170,7 @@ sealed class EncounterModifier {
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             action {
                 baseTime = TimeUtils.millis()
+                lastDigit = 10
             }
         }
     }

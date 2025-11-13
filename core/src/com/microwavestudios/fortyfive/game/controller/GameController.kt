@@ -21,6 +21,7 @@ interface GameController {
     val gameRenderPipeline: GameRenderPipeline
 
     val playerLost: Boolean
+    val hasWon: Boolean
     val curReserves: Int
     val isUIFrozen: Boolean
     val revolverRotationCounter: Int
