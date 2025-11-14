@@ -137,6 +137,7 @@ class ShopScreen : ScreenCreator() {
                 logicalOffsetY = 55f
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
+                    touchable = Touchable.disabled
                     syncDimensions()
                 }
                 onInput(GameInputs.interact) {
@@ -185,13 +186,13 @@ class ShopScreen : ScreenCreator() {
 
     private fun generateRandomCards(): List<String> {
         val amount = context.amountCards.random(random)
+        val profile = FortyFive.profileManager.currentProfile!!
         val cards = RandomCardSelection.getRandomCards(
-            screen,
             listOf(),
             amount,
+            profile.currentMapSaver.currentMap.biome,
+            profile.currentMapSaver.currentMap.majorDifficulty,
             random,
-            FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap.biome,
-            "shop",
             unique = true
         ).map { it.name }
         return cards

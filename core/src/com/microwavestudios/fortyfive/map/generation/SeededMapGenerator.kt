@@ -733,9 +733,9 @@ class SeededMapGenerator(
             }
         }
 
-        private fun getCurDir(posDirs: MutableList<Int>): Direction =
-            Direction.values()[posDirs[RandomCardSelection.getRandomIndex(posDirs.map { Direction.values()[it].getPriorityToGoNext() }
-                .toMutableList(), rnd)]]
+        private fun getCurDir(posDirs: MutableList<Int>): Direction = Direction.DOWN
+//            Direction.values()[posDirs[RandomCardSelection.getRandomIndex(posDirs.map { Direction.values()[it].getPriorityToGoNext() }
+//                .toMutableList(), rnd)]]
 
         /**
          * searches all possible points to connect to for generating a path

@@ -322,15 +322,15 @@ class ChooseCardScreen : ScreenCreator() {
                 allProtos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
             }
         } else {
-            val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
-                ?: return listOf()
+            val profile = FortyFive.profileManager.currentProfile!!
+            val biome = profile.currentMapSaver.currentMap.biome
+            val difficulty = profile.currentMapSaver.currentMap.majorDifficulty
             RandomCardSelection.getRandomCards(
-                screen,
                 context.types,
                 context.nbrOfCards,
-                Random(context.seed),
                 biome,
-                "chooseCard",
+                difficulty,
+                Random(context.seed),
                 unique = true
             )
         }

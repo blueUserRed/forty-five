@@ -463,7 +463,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: ["weight", "unobtainable", "not in collection"],
+        tags: ["weight", "unobtainable"],
         price: 50,
     },
     {
@@ -1138,7 +1138,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "unobtainable", "not used", "not in collection"],
+        tags: ["pool1", "rarity2", "not used"],
         price: 50,
     },
     {
@@ -1228,7 +1228,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "not used", "unobtainable", "not in collection"],
+        tags: ["pool2", "rarity1", "not used"],
         price: 50,
     },
     {
@@ -1252,7 +1252,7 @@ cards: [
            },
         ],
         cost: 0,
-        tags: ["pool2", "rarity2", "not used", "unobtainable", "not in collection"],
+        tags: ["pool2", "rarity2", "not used"],
         price: 50,
     },
     {

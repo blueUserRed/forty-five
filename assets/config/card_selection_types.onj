@@ -1,109 +1,6 @@
 use Common;
 
-var default = [
-    {
-        select: $ByTag {
-            name: "not used",
-        },
-        effect: $Blacklist {
-        }
-    },
-    {
-        select: $ByTag {
-            name: "unobtainable",
-        },
-        effect: $Blacklist {
-        }
-    },
-    {
-        select: $ByTag {
-            name: "pool0",
-        },
-        effect: $ProbabilityAddition {
-            weight: 1.0
-        }
-    },
-    {
-        select: $ByTag {
-            name: "rarity2"
-        },
-        effect: $ProbabilityAddition {
-            weight: 1.0
-        }
-    },
-    {
-        select: $ByTag {
-            name: "rarity3"
-        },
-        effect: $ProbabilityAddition {
-            weight: 2.0
-        }
-    },
-    {
-        select: $ByTag {
-            name: "rarity2"
-        },
-        effect: $PriceAddition {
-            price: 25
-        }
-    },
-    {
-        select: $ByTag {
-            name: "rarity1"
-        },
-        effect: $PriceAddition {
-            price: 50
-        }
-    },
-];
-
-var wasteland = [ //for demo only the biome says which cards, this makes it easier
-
-    ...default,
-    {
-        select: $ByTag {
-            name: "pool2",
-        },
-        effect: $Blacklist {
-        }
-    },
-    {
-        select: $ByTag {
-            name: "pool1",
-        },
-        effect: $ProbabilityAddition {
-            weight: 2.0
-        }
-    }
-];
-
-var bewitchedForest = [
-    ...default,
-    {
-        select: $ByTag {
-            name: "pool1",
-        },
-        effect: $ProbabilityAddition {
-            weight: 2.0
-        }
-    },
-    {
-        select: $ByTag {
-            name: "pool2",
-        },
-        effect: $ProbabilityAddition {
-            weight: 3.0
-        }
-    }
-];
-
 types: [
-    {
-        name: "defType",
-        cardChanges: [
-            ...default
-        ],
-    },
     {
         name: "tutorial_only_silver_bullet",
         cardChanges: [
@@ -130,141 +27,65 @@ types: [
             }
         ]
     },
-    {
-        name: "tutorial_only_incendiary_bullet",
-        cardChanges: [
-            {
-                select: $ByName {
-                    name: "incendiaryBullet",
-                    negate: true
-                },
-                effect: $Blacklist {
-                }
-            }
-        ]
-    },
-    {
-        name: "tutorial_only_leaders_bullet",
-        cardChanges: [
-            {
-                select: $ByName {
-                    name: "leadersBullet",
-                    negate: true
-                },
-                effect: $Blacklist {
-                }
-            }
-        ]
-    },
-    {
-        name: "weighted_cards_pool_1",
-        cardChanges: [
-            {
-                select: $ByTag {
-                    name: "rarity1"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 1.0
-                }
-            },
-            {
-                select: $ByTag {
-                    name: "rarity2"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 2.0
-                }
-            },
-            {
-                select: $ByTag {
-                    name: "rarity3"
-                },
-                effect: $ProbabilityAddition {
-
-                    weight: 2.0
-                }
-            },
-        ]
-    },
-    {
-        name: "weighted_cards_pool_2",
-        cardChanges: [
-            {
-                select: $ByTag {
-                    name: "rarity1"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 1.0
-                }
-            },
-            {
-                select: $ByTag {
-                    name: "rarity2"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 2.0
-                }
-            },
-            {
-                select: $ByTag {
-                    name: "rarity3"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 2.0
-                }
-            },
-        ]
-    },
 ],
 
 biomes: [
     {
         name: "wasteland",
-        shop: [
-            ...wasteland
-        ],
-        chooseCard: [
-            ...wasteland,
-            {
-                select: $ByTag {
-                    name: "pool1",
-                },
-                effect: $ProbabilityAddition {
-                    weight: 10.0
-                }
-            }
-        ]
+        changes: [],
     },
     {
         name: "bewitched_forest",
-        shop: [
-            ...bewitchedForest
-        ],
-        chooseCard: [
-            ...bewitchedForest,
-            {
-                select: $ByTag {
-                    name: "pool2",
-                },
-                effect: $ProbabilityAddition {
-                    weight: 10.0
-                }
-            }
-        ]
+        changes: [],
     },
 ],
 
-rarities: [
+difficulties: [
     {
-        tag: "rarity1",
-        maxAmount: 1
+        difficulty: 0,
+        changes: [
+            {
+                select: $All {},
+                effect: $Blacklist {}
+            }
+        ]
     },
     {
-        tag: "rarity2",
-        maxAmount: 2
+        difficulty: 1,
+        changes: [
+            {
+                select: $ByTag {
+                    name: "pool2"
+                },
+                effect: $Blacklist {}
+            }
+        ]
     },
     {
-        tag: "rarity3",
-        maxAmount: 3
+        difficulty: 3,
+        changes: [],
+    }
+],
+
+default: [
+    {
+        select: $ByTag { name: "unobtainable" },
+        effect:  $Blacklist {}
     },
-]
+    {
+        select: $ByTag { name: "not used" },
+        effect:  $Blacklist {}
+    },
+    {
+        select: $ByTag { name: "rarity1" },
+        effect: $ProbabilityAddition {
+            weight: 1.0
+        }
+    },
+    {
+        select: $ByTag { name: "rarity2" },
+        effect: $ProbabilityAddition {
+            weight: 0.5
+        }
+    }
+],

@@ -16,6 +16,10 @@ $CardSelector{
         ...cardSelectorSharedKeys
     }
 
+    $All {
+        ...cardSelectorSharedKeys
+    }
+
 }
 
 $CardEffect{
@@ -44,12 +48,13 @@ types: {
 }[],
 
 biomes: {
-    name:string,
-    shop: cardChange[],
-    chooseCard: cardChange[],
+    name: string,
+    changes: cardChange[],
 }[],
 
-rarities: {
-    tag: string,
-    maxAmount: int
-}[]
+difficulties: {
+    difficulty : int,
+    changes: cardChange[],
+}[],
+
+default: cardChange[],
