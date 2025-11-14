@@ -120,7 +120,7 @@ abstract class DifficultyScaling {
 
         override fun toOnj(): OnjObject = buildOnjObject {
             name("PowerScaling")
-            "power" to power
+            "power" with power
         }
 
     }
@@ -131,7 +131,7 @@ abstract class DifficultyScaling {
     companion object {
         fun fromOnj(onj: OnjNamedObject): DifficultyScaling = when (onj.name) {
             "LinearScaling" -> Linear
-            "Power" -> Power(onj.get<Long>("power").toInt())
+            "PowerScaling" -> Power(onj.get<Long>("power").toInt())
             else -> throw RuntimeException("no difficulty scaling with name: ${onj.name}")
         }
     }

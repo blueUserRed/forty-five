@@ -132,17 +132,22 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Outlaw" ],
+        allowedEnemies: [ "Pyro" ],
     },
     {
         majorDifficulty: 2,
         amount: [1, 2],
-        allowedEnemies: [ "Outlaw" ],
+        allowedEnemies: [ "Outlaw", "Pyro" ],
+    },
+    {
+        majorDifficulty: 3,
+        amount: [1, 2],
+        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
     },
     {
         majorDifficulty: 4,
-        amount: [1, 3],
-        allowedEnemies: [ "Outlaw" ],
+        amount: [2, 3],
+        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
     },
 ],
 
@@ -150,11 +155,31 @@ enemyProbabilityIncrease: [
     {
         enemy: "Outlaw",
         biome: "wasteland",
-        bonusPoints: 30,
+        bonusPoints: 40,
+    },
+    {
+        enemy: "Outlaw",
+        biome: "bewitched_forest",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Outlaw",
+        biome: "magenta_mountains",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Pyro",
+        biome: "wasteland",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Witch",
+        biome: "bewitched_forest",
+        bonusPoints: 20,
     },
 ],
 
-enemyProbabilityRandomPoints: 100,
+enemyProbabilityRandomPoints: 50,
 
 enemyHealthAdjustment: 0.6,
 enemyDamageAdjustment: 0.3,
@@ -163,7 +188,9 @@ difficultyScaling: {
     limited: {
         relativeMin: 0.0,
         relativeMax: 0.5,
-        scaling: $LinearScaling {},
+        scaling: $PowerScaling {
+            power: 3,
+        },
     },
     constructed: {
         relativeMin: 0.3,

@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.screen.screens
 
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -7,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -21,6 +23,7 @@ import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.game.enemy.StatusBar
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -35,6 +38,7 @@ import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
+import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -157,6 +161,31 @@ class EncounterScreen : ScreenCreator() {
 
         playerStatusEffectDisplay()
 
+        group {
+            backgroundHandle = "transparent_black_texture"
+            x = 0f
+            y = 0f
+            width = worldWidth
+            height = worldHeight
+            isVisible = false
+            var promise: Promise<Unit>? = null
+            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+                promise = event.finishedPromise
+                event.append { action {
+                    isVisible = true
+                    touchable = Touchable.enabled
+                } }
+                promise.then {
+                    isVisible = false
+                    touchable = Touchable.disabled
+                }
+            }
+            onInput(GameInputs.enemyAnimConfirmation) {
+                promise?.resolve(Unit)
+            }
+        }
+        enemySpecialAttackAnim()
+
         putCardsUnderStackPopup()
 
         winPopup()
@@ -171,9 +200,160 @@ class EncounterScreen : ScreenCreator() {
         )
     }
 
-
     override fun update() {
         gameEvents.fire(UpdateUiEvent)
+    }
+
+    private fun CustomGroup.enemySpecialAttackAnim() = group {
+        val parentWidth = 400f
+        height = worldHeight
+        width = parentWidth
+        centerY()
+        onLayoutAndNow { x = worldWidth - parentWidth }
+        y = 200f
+
+        val borrower = object : ResourceBorrower {}
+
+        fun commonPanelHandle(i: Int, proto: EnemyActionPrototype) = when (i) {
+            0 -> proto.commonPanel1
+            1 -> proto.commonPanel2
+            2 -> proto.commonPanel3
+            else -> unreachable()
+        }
+
+        fun commonPanel(i: Int, panel: String) = group {
+            width = 170f
+            onLayoutAndNow { y = parent.height / 2 + 100 }
+            val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
+                borrower,
+                screen.lifetime,
+                panel
+            )
+            promise.then { texture ->
+                height = width * (texture.minHeight / texture.minWidth)
+                manualBackground = texture
+            }
+            val xAnim = propertyAnimation(
+                xPositionAbstractProperty(),
+                AnimState("open", parentWidth - (width - 8f) * (i + 1)),
+                AnimState("closed", parentWidth + 100),
+                initialState = "closed",
+                defaultTime = 300,
+                defaultInterpolation = Interpolation.pow2,
+            )
+            xAnim.transition("open", "closed", 0, Interpolation.linear)
+            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
+                    borrower,
+                    screen.lifetime,
+                    commonPanelHandle(i, event.enemyAction.prototype)
+                )
+                promise.then { texture ->
+                    height = width * (texture.minHeight / texture.minWidth)
+                    manualBackground = texture
+                }
+                event.finishedPromise.then {
+                    xAnim.state("closed")
+                    manualBackground = null
+                }
+                event.append { includeAction(xAnim.stateAction("open")) }
+            }
+        }
+
+        fun actionPanel() = group {
+            height = 220f
+            onLayoutAndNow { y = parent.height / 2 + 100 - height + 20f }
+            x = parentWidth + 100f
+            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
+                    borrower,
+                    screen.lifetime,
+                    event.enemyAction.prototype.specialPanel
+                )
+                promise.then { texture ->
+                    width = height * (texture.minWidth / texture.minHeight)
+                    manualBackground = texture
+                }
+                event.finishedPromise.then {
+                    x = parentWidth + 100f
+                    manualBackground = null
+                }
+                val action = MoveToAction()
+                action.duration = 0.3f
+                action.interpolation = Interpolation.Pow(10)
+                event.append {
+                    delayUntil { manualBackground != null }
+                    delay(100)
+                    action {
+                        action.x = parentWidth - width - 5f
+                        action.y = y
+                        addAction(action)
+                        event.controller.dispatchAnimTimeline(Timeline.timeline {
+                            delay(200)
+                            include(event.controller.gameRenderPipeline.getScreenShakeTimeline())
+                        })
+                    }
+                    delayUntil { action.isComplete }
+                }
+            }
+        }
+
+        fun descriptionBox() = box {
+            width = 500f
+            height = 300f
+
+            onLayoutAndNow { y = parent.height / 2 - 120f - height + 100 }
+
+            backgroundHandle = "common_popup_background_black_large"
+            dropShadow = BakedDropShadow(
+                "common_popup_background_black_large",
+                screen,
+                0f, 0f,
+                1.3f, 1.3f
+            )
+            flexDirection = FlexDirection.COLUMN
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.CENTER
+
+            val title = label("red wing", "Hot Potato", Color.Red, 35) {
+                syncDimensions()
+            }
+            verticalSpacer(10f)
+            val body = label("roadgeek", "A scorching Bullet will be put in your hand!", Color.FortyWhite, 22) {
+                wrap = true
+                setAlignment(Align.center)
+                relativeWidth(60f)
+                syncHeight()
+            }
+            val xAnim = propertyAnimation(
+                xPositionAbstractProperty(),
+                AnimState("open", parentWidth - width + 60f),
+                AnimState("closed", parentWidth + 100),
+                initialState = "closed",
+                defaultTime = 300,
+                defaultInterpolation = Interpolation.pow5,
+            )
+            xAnim.transition("open", "closed", 0, Interpolation.linear)
+            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+                val enemyAction = event.enemyAction
+                val prototype = enemyAction.prototype
+                title.setText(prototype.title)
+                val bodyTemplate = TemplateString(prototype.descriptionTemplate, enemyAction.descriptionParams)
+                body.setText(bodyTemplate.string)
+                event.finishedPromise.then {
+                    xAnim.state("closed")
+                }
+                event.append {
+                    includeAction(xAnim.stateAction("open"))
+                }
+            }
+        }
+
+        commonPanel(0, "enemy_pyro_action_comic_common_panel_1")
+        commonPanel(1, "enemy_pyro_action_comic_common_panel_2")
+        commonPanel(2, "enemy_pyro_action_comic_common_panel_3")
+        descriptionBox()
+        actionPanel()
     }
 
     private fun CustomGroup.playerStatusEffectDisplay() = box {

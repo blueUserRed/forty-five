@@ -973,27 +973,36 @@ class GameControllerImpl(
             ).asTimeline(this)
         } ?: Timeline()
 
-    private fun enemyActionTimeline(): Timeline = Timeline.timeline { later {
-        activeEnemies
-            .forEach { enemy ->
-                val action = enemy.resolveAction(this@GameControllerImpl, 1.0)
-                action?.let { action ->
-                    val event = Enemy.PlayChargeAnimationEvent()
-                    enemy.enemyEvents.fire(event)
-                    action {
-                        event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
-                    }
-                    delay(200)
-                    val data = EnemyAction.ExecutionData(newDamage = action.directDamageDealt + enemy.additionalDamage)
-                    include(action.getTimeline(data))
-                    delay(400)
-                }
+    private fun enemyActionTimeline(): Timeline = Timeline.timeline {
+        activeEnemies.forEach { enemy -> later {
+            val action = enemy.resolveAction(this@GameControllerImpl, 1.0) ?: return@later
+            if (action.prototype.hasSpecialAnimation) {
+                val event = Events.PlayEnemySpecialAttackAnim(this@GameControllerImpl, action)
+                gameEvents.fire(event)
+                delay(300)
+                include(event.createTimeline())
+                delayUntil { event.finishedPromise.isResolved }
+                delay(100)
+                val data = EnemyAction.ExecutionData(newDamage = action.directDamageDealt + enemy.additionalDamage)
+                include(action.getTimeline(data))
+                delay(400)
+            } else {
+                val event = Enemy.PlayChargeAnimationEvent()
+                enemy.enemyEvents.fire(event)
                 action {
-                    val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None, 0, null)
-                    enemy.enemyEvents.fire(event)
+                    event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
                 }
+                delay(200)
+                val data = EnemyAction.ExecutionData(newDamage = action.directDamageDealt + enemy.additionalDamage)
+                include(action.getTimeline(data))
+                delay(400)
             }
-    } }
+            action {
+                val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None, 0, null)
+                enemy.enemyEvents.fire(event)
+            }
+        } }
+    }
 
     private fun winTimeline(): Timeline = Timeline.timeline { later {
         val money = -allEnemies.sumOf { it.currentHealth }
@@ -1289,5 +1298,10 @@ class GameControllerImpl(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
+        data class PlayEnemySpecialAttackAnim(
+            val controller: GameController,
+            val enemyAction: EnemyAction,
+            val finishedPromise: Promise<Unit> = Promise(),
+        ) : TimelineBuildingEvent()
     }
 }

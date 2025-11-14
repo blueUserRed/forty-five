@@ -59,6 +59,14 @@ object GameInputs {
         arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))
     )
 
+    val enemyAnimConfirmation = Input(
+        "enemyAnimConfirmation",
+        arrayOf(
+            Input.Cause.Mouse(MouseButton.LEFT),
+            Input.Cause.Keyboard(Keys.ENTER)
+        )
+    )
+
     val switchSelectorToLeft = Input(
         "switchToLeft",
         arrayOf(
