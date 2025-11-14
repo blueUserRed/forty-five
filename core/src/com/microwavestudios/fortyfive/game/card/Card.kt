@@ -78,6 +78,10 @@ class CardPrototype(
         this.creator = this@CardPrototype.creator
     }
 
+    fun cleanCopy(): CardPrototype = CardPrototype(name, title, baseCost, baseDamage, tags).apply {
+        this.creator = this@CardPrototype.creator
+    }
+
     override fun equals(other: Any?): Boolean = other is CardPrototype && other.name == name
 
     override fun toString(): String = "CardProto($name)"

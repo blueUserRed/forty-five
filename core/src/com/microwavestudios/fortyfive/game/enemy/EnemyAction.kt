@@ -72,9 +72,11 @@ sealed class EnemyActionPrototype(
             return EnemyAction(amountToDestroy.toString(), mapOf("amount" to amountToDestroy),this) {
                 repeat(amountToDestroy) {
                     // might cause mismatches when this action is shown instead of hidden
-                    if (controller.cardsInHand.isEmpty()) return@repeat
-                    val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random()]
-                    include(controller.destroyCardInHandTimeline(card))
+                    later {
+                        if (controller.cardsInHand.isEmpty()) return@later
+                        val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random()]
+                        include(controller.destroyCardInHandTimeline(card))
+                    }
                 }
             }
         }
@@ -120,18 +122,15 @@ sealed class EnemyActionPrototype(
             controller: GameController,
             scale: Double
         ): EnemyAction = EnemyAction(null, mapOf(),this) {
-            var card: Card? = null
-            action {
-                card = controller
+            later {
+                controller
                     .revolver
                     .slots
-                    .filter { it.card != null }
-                    .random()
-                    .card!!
+                    .mapNotNull { it.card }
+                    .randomOrNull()
+                    ?.let { include(controller.bounceBulletTimeline(it)) }
             }
-            include(controller.bounceBulletTimeline(card!!))
         }
-
     }
 
     class TakeCover(

@@ -185,13 +185,13 @@ class ShopScreen : ScreenCreator() {
 
     private fun generateRandomCards(): List<String> {
         val amount = context.amountCards.random(random)
+        val profile = FortyFive.profileManager.currentProfile!!
         val cards = RandomCardSelection.getRandomCards(
-            screen,
             listOf(),
             amount,
+            profile.currentMapSaver.currentMap.biome,
+            profile.currentMapSaver.currentMap.majorDifficulty,
             random,
-            FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap.biome,
-            "shop",
             unique = true
         ).map { it.name }
         return cards

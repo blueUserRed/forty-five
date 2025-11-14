@@ -184,6 +184,10 @@ fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
 }
 
+fun ClosedFloatingPointRange<Double>.random(random: Random = Random): Double {
+    return random.nextFloat() * (endInclusive - start) + start
+}
+
 fun <T, U> Collection<T>.slot(keyMapper: (T) -> U): Map<U, List<T>> {
     val map = mutableMapOf<U, MutableList<T>>()
     forEach {
@@ -301,6 +305,8 @@ inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
     return chunks.filter { it.isNotEmpty() }
 }
 
+inline fun <T, U> Iterable<T>.zipIndexed(creator: (T, Int) -> U): List<Pair<T, U>> =
+    mapIndexed { i, element -> element to creator(element, i) }
 inline fun <T, U> Iterable<T>.zip(creator: (T) -> U): List<Pair<T, U>> = map { it to creator(it) }
 inline fun <T, U> Iterable<T>.zipToFirst(creator: (T) -> U): List<Pair<U, T>> = map { creator(it) to it }
 

@@ -1,42 +1,15 @@
 package com.microwavestudios.fortyfive.game.card
 
-import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.config.ConfigFileManager
-import com.microwavestudios.fortyfive.game.card.RandomCardSelection.getRandomCards
-import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.random
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
+import com.microwavestudios.fortyfive.utils.zipIndexed
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.random.Random
 
-@Suppress("MemberVisibilityCanBePrivate")
-/**
- * generates with the [getRandomCards] method for [Card] and [CardPrototype] random values with certain types and restrictions
- *
- * Word Definition:
- *
- *  Type: a named List with instructions to change the probability of certain items
- *   (fe. add weight of incendiary bullet and blacklist workerBullet are the type "flameing")
- */
+
 object RandomCardSelection {
-
-    private var types: Map<String, List<CardChange>> = mapOf()
-    private var biomes: Map<String, Map<String, List<CardChange>>> = mapOf()
-
-    /**
-     * the path to the file from which the data is read from
-     */
-    const val TYPES_FILE_PATH: String = "maps/events/card_selection_types.onj"
-    const val cardConfigFile: String = "config/cards.onj"
-
-    private val cardSelectionSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/card_selection_types.onjschema").file())
-    }
-
-    private var cardMaximums: Map<String, Int> = mapOf()
 
     val allCardPrototypes: List<CardPrototype> by lazy {
         val onj = ConfigFileManager.getConfigFile("cards")
@@ -44,152 +17,124 @@ object RandomCardSelection {
             .getFrom(onj.get<OnjArray>("cards"), initializer = {})
     }
 
-    val allAvailableCardPrototypes: List<CardPrototype> by lazy {
-        allCardPrototypes.filter { "not in collection" !in it.tags }
-    }
-
-    fun init() {
-        val file = ConfigFileManager.getConfigFile("cardSelectionTypeConfig")
-        val allTypes: MutableMap<String, List<CardChange>> = mutableMapOf()
-        val allTypesOnj = file.get<OnjArray>("types").value.map { it as OnjObject }
-        allTypesOnj.forEach {
-            val name = it.get<String>("name")
-            val changes = it.get<OnjArray>("cardChanges")
-                .value
-                .map { e -> e as OnjObject }
-                .map { e -> CardChange.getFromOnj(e) }
-            allTypes[name] = changes
-        }
-        types = allTypes
-
-        val allBiomes: MutableMap<String, Map<String, List<CardChange>>> = mutableMapOf()
-        val allBiomesOnj = file.get<OnjArray>("biomes").value.map { it as OnjObject }
-        allBiomesOnj.forEach { biome ->
-            val name = biome.get<String>("name")
-            val tempMap: MutableMap<String, List<CardChange>> = mutableMapOf()
-            biome.value.filter { it.key != "name" }.forEach {
-                val changes = (it.value as OnjArray).value
-                    .map { e -> e as OnjObject }
-                    .map { e -> CardChange.getFromOnj(e) }
-                tempMap[it.key] = changes
-            }
-            allBiomes[name] = tempMap
-        }
-
-        cardMaximums = file
-            .get<OnjArray>("rarities")
-            .value
-            .map { it as OnjObject }
-            .associate { it.get<String>("tag") to it.get<Long>("maxAmount").toInt() }
-
-        biomes = allBiomes
-    }
-
-    /**
-     * It takes a set of cards or cardprototypes, the applies the "type"(definition found at [RandomCardSelection]) changes
-     * to them and then return cards with these changes. It is possible to have the same card twice, which essentially says
-     * this card can exist twice AND has double the chance to appear. If [unique] is true, then it only has double the chance to appear,
-     * but it can exist an infinite number of times
-     *
-     * @param cards allows the caller to specify an already modified list of prototypes, if not specified all available card
-     * prototypes are used
-     * @param typeNames the names of the types you want to apply to
-     * @param unique if true, then all chosen cards will be removed from the remaining selection and can therefore be there only once
-     * @param nbrOfCards how many cards you want. However, there can be fewer cards remaining after applying the effects
-     * @throws Exception if a type is not known
-     */
     fun getRandomCards(
-        screen: OnjScreen,
         typeNames: List<String>,
         nbrOfCards: Int,
-        rnd: Random,
         biome: String,
-        occasion: String, // TODO: could be an enum
-        unique: Boolean = false,
-        cards: List<CardPrototype> = allCardPrototypes,
+        difficulty: Int,
+        random: Random = Random,
+        unique: Boolean = true,
     ): List<CardPrototype> {
-        val newCards = availableCards(cards)
-        val (tempCards, tempChances) = getCardsWithChances(newCards.toMutableList(), typeNames, biome, occasion)
-        return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, unique)
-    }
-
-    fun availableCards(cards: List<CardPrototype>): List<CardPrototype> {
-        val newCards = mutableListOf<CardPrototype>()
-        // .toSet() to eliminate duplicate cards
-        cards.toSet().forEach { card ->
-            val tag = card.tags.find { it in cardMaximums.keys }
-            if (tag == null) {
-                newCards.add(card)
-                return@forEach
+        require(nbrOfCards > 0) { "nbrOfCards must be positive" }
+        val cardsWithProbabilities = cardsWithProbabilities(typeNames, biome, difficulty).toMutableList()
+        if (cardsWithProbabilities.size <= nbrOfCards && unique) return cardsWithProbabilities.map { it.first }
+        val chosenCards = mutableListOf<CardPrototype>()
+        var weightsSum = cardsWithProbabilities.sumOf { it.second }
+        repeat(nbrOfCards) {
+            if (cardsWithProbabilities.isEmpty()) return@repeat
+            val r = (0.0..weightsSum).random(random)
+            var acc = 0.0
+            var choice: Pair<CardPrototype, Double>? = null
+            var i = 0
+            while (choice == null) {
+                require(i < cardsWithProbabilities.size)
+                val element = cardsWithProbabilities[i]
+                acc += element.second
+                if (acc < r) choice = element
+                i++
             }
-            val ownedAmount = 0 // TODO: baaaaaaaaaaaaaaad
-//            val ownedAmount = SaveState.cards.count { it == card.name }
-            val maxAmount = (cardMaximums[tag]!! - ownedAmount).coerceAtLeast(0)
-            repeat(maxAmount) { newCards.add(card.copy()) }
-        }
-        return newCards
-    }
-
-    /**
-     * returns [nbrOfCards] cards with the chances
-     */
-    private fun getCardsFromChances(
-        nbrOfCards: Int,
-        tempCards: MutableList<CardPrototype>,
-        tempChances: MutableList<Float>,
-        rnd: Random,
-        cardsMaxOnce: Boolean
-    ): MutableList<CardPrototype> {
-        val res: MutableList<CardPrototype> = mutableListOf()
-        for (i in 0 until nbrOfCards) {
-            if (tempCards.size == 0) break
-            val index = getRandomIndex(tempChances, rnd)
-            res.add(tempCards[index])
-            if (cardsMaxOnce) {
-                tempCards.removeAt(index)
-                tempChances.removeAt(index)
+            chosenCards.add(choice.first)
+            if (unique) {
+                cardsWithProbabilities.remove(choice)
+                weightsSum -= choice.second
             }
         }
-        return res
+        return chosenCards
     }
 
-    /**
-     * applies the effects from the "types" on the cards
-     */
-    private fun getCardsWithChances(
-        cards: MutableList<CardPrototype>,
-        changeNames: List<String>,
+    private fun cardsWithProbabilities(
+        typeNames: List<String>,
         biome: String,
-        occasion: String
-    ): Pair<MutableList<CardPrototype>, MutableList<Float>> {
-        val tempCards = cards.toMutableList()
-        val tempChances = MutableList(tempCards.size) { 0f }
-        changeNames.forEach { name ->
-            val type = types[name] ?: throw RuntimeException("unknown card selection type $name")
-            type.forEach {
-                it.applyEffects(tempCards, tempChances)
+        difficulty: Int,
+    ): List<Pair<CardPrototype, Double>> {
+        val protos = allCardPrototypes.map { it.cleanCopy() }.toMutableList()
+        val changes = collectCardChanges(typeNames, biome, difficulty)
+        val weights = MutableList(protos.size) { 1f }
+        changes.forEach { it.applyEffects(protos, weights) }
+        return protos.zipIndexed { _, i -> weights[i].toDouble() }
+    }
+
+    private fun collectCardChanges(
+        typeNames: List<String>,
+        biome: String,
+        difficulty: Int,
+    ): List<CardChange> {
+        val changesAcc = mutableListOf<CardChange>()
+
+        var checkDiff = difficulty
+        while (true) {
+            if (checkDiff < 0) {
+                throw RuntimeException("no card selection type defined for difficulty: $difficulty")
             }
+            val changes = difficulties[checkDiff]
+            if (changes != null) {
+                changesAcc.addAll(changes)
+                break
+            }
+            checkDiff--
         }
-        biomes[biome]?.get(occasion)?.forEach {
-            it.applyEffects(tempCards, tempChances)
+
+        biomes[biome]?.let { changesAcc.addAll(it) }
+        typeNames.forEach { name ->
+            val changes = types[name] ?: throw RuntimeException("unknown card selection type: $name")
+            changesAcc.addAll(changes)
         }
-        return tempCards to tempChances
+        changesAcc.addAll(default)
+        return changesAcc
     }
 
-    fun getRandomIndex(chances: MutableList<Float>, rnd: Random): Int {
-        val maxWeight = chances.sum()
-        val value = (0.0F..maxWeight).random(rnd)
-        var curSum = 0.0
-        for (i in chances.indices) {
-            curSum += chances[i]
-            if (curSum > value) return i
-        }
-        return chances.size - 1
+
+    private val configFile: OnjObject by lazy {
+        ConfigFileManager.getConfigFile("cardSelectionTypeConfig")
     }
 
-    fun hasType(type: String): Boolean {
-        return types.containsKey(type)
+    private val types: Map<String, List<CardChange>> by lazy {
+        configFile
+            .get<OnjArray>("types")
+            .value
+            .associate { obj ->
+                obj as OnjObject
+                val changes = obj.get<OnjArray>("changes").value.map { CardChange.getFromOnj(it as OnjObject) }
+                obj.get<String>("name") to changes
+            }
     }
+
+    private val biomes: Map<String, List<CardChange>> by lazy {
+        configFile
+            .get<OnjArray>("biomes")
+            .value
+            .associate { obj ->
+                obj as OnjObject
+                val changes = obj.get<OnjArray>("changes").value.map { CardChange.getFromOnj(it as OnjObject) }
+                obj.get<String>("name") to changes
+            }
+    }
+
+    private val difficulties: Map<Int, List<CardChange>> by lazy {
+        configFile
+            .get<OnjArray>("difficulties")
+            .value
+            .associate { obj ->
+                obj as OnjObject
+                val changes = obj.get<OnjArray>("changes").value.map { CardChange.getFromOnj(it as OnjObject) }
+                obj.get<Long>("difficulty").toInt() to changes
+            }
+    }
+
+    private val default: List<CardChange> by lazy {
+        configFile.get<OnjArray>("default").value.map { CardChange.getFromOnj(it as OnjObject) }
+    }
+
 }
 
 interface CardChange {
@@ -275,6 +220,7 @@ interface Selector {
         fun getFromOnj(onj: OnjNamedObject): Selector = when (onj.name) {
             "ByName" -> ByNameSelector(onj.get<String>("name"))
             "ByTag" -> ByTagSelector(onj.get<String>("name"))
+            "All" -> AllSelector
             else -> throw Exception("Unknown card change: ${onj.name}")
         }.let {
             if (onj.getOr("negate", false)) InvertingSelector(it) else it
@@ -296,5 +242,10 @@ interface Selector {
     class ByTagSelector(private val name: String) : Selector {
 
         override fun isPartOf(card: CardPrototype): Boolean = name in card.tags
+    }
+
+    object AllSelector : Selector {
+
+        override fun isPartOf(card: CardPrototype): Boolean = true
     }
 }

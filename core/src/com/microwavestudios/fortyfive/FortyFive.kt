@@ -156,7 +156,6 @@ object FortyFive : Game() {
         resourceManager.init()
         serviceThread.start()
         cardTextureManager.init()
-        RandomCardSelection.init()
     }
 
     override fun dispose() {
