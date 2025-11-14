@@ -137,8 +137,8 @@ class ShopScreen : ScreenCreator() {
                 logicalOffsetY = 55f
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
-                    touchable = Touchable.disabled
                     syncDimensions()
+                    touchable = Touchable.disabled
                 }
                 onInput(GameInputs.interact) {
                     reroll()
