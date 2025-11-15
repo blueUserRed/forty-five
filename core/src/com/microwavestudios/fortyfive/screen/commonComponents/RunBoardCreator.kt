@@ -140,6 +140,7 @@ object RunBoardCreator {
                     defaultButtonConfig()
 
                     label("red wing", "Cancel", Color.FortyWhite, 32) {
+                        touchable = Touchable.disabled
                         syncDimensions()
                     }
 
@@ -158,6 +159,7 @@ object RunBoardCreator {
                     defaultButtonConfig()
 
                     label("red wing", "Start", Color.FortyWhite, 32) {
+                        touchable = Touchable.disabled
                         syncDimensions()
                     }
 

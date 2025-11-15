@@ -423,6 +423,7 @@ object BackpackCreator {
     private fun updateCardsInCollection(state: BackpackState) {
         val allCards = if (state.functionsAsCollection) state.profile.cardCollection else state.profile.backpack!!
         val result = allCards.toMutableList()
+        state.currentDeck.checkDeck(allCards)
         val cardsInDeck = state.currentDeck.cards
         cardsInDeck.forEach { result.remove(it) }
 

@@ -104,7 +104,7 @@ object RandomCardSelection {
             .value
             .associate { obj ->
                 obj as OnjObject
-                val changes = obj.get<OnjArray>("changes").value.map { CardChange.getFromOnj(it as OnjObject) }
+                val changes = obj.get<OnjArray>("cardChanges").value.map { CardChange.getFromOnj(it as OnjObject) }
                 obj.get<String>("name") to changes
             }
     }

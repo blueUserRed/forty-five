@@ -28,7 +28,6 @@ object SettingsCreator {
         filter.start()
 
         val group = newGroup {
-            debug()
             width = worldWidth * 0.6f
             height = worldHeight
             backgroundHandle = "settings_background"

@@ -134,7 +134,7 @@ class GameControllerImpl(
     )
 
     private val enemyDifficulty
-        get() = 1f + ((1f - encounter.minorDifficulty) * RunGeneratorConfig.enemyDamageAdjustment)
+        get() = 1f + ((encounter.minorDifficulty - 1f) * RunGeneratorConfig.enemyDamageAdjustment)
 
     private lateinit var profile: Profile
 

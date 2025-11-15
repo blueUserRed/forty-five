@@ -111,10 +111,6 @@ class EncounterScreen : ScreenCreator() {
         )
     }
 
-//    private val playerStatusEffectDisplay: HorizontalStatusEffectDisplay by lazy {
-//        HorizontalStatusEffectDisplay(screen, forceLoadFont("red_wing"), Color.Black, 1.4f)
-//    }
-
     private lateinit var cardRevolverDragAndDrop: InputManager.DragAndDrop
     private lateinit var cardUnderDeckDragAndDrop: InputManager.DragAndDrop
 
@@ -211,6 +207,7 @@ class EncounterScreen : ScreenCreator() {
         centerY()
         onLayoutAndNow { x = worldWidth - parentWidth }
         y = 200f
+        touchable = Touchable.disabled
 
         val borrower = object : ResourceBorrower {}
 
@@ -1221,6 +1218,7 @@ class EncounterScreen : ScreenCreator() {
                 label("red wing", "You survived", Color.FortyWhite, (128 * 0.5).toInt()) {
                     setAlignment(Align.center)
                     marginTop = 150f
+                    syncDimensions()
                 }
 
                 box {
@@ -1245,6 +1243,7 @@ class EncounterScreen : ScreenCreator() {
                     }
 
                     label("red wing", "", Color.FortyWhite, 32) {
+                        syncDimensions()
                         gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, money, _) ->
                             setText("You get \$$money overkill cash")
                         }

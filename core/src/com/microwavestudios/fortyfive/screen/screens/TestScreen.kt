@@ -69,7 +69,6 @@ class TestScreen : ScreenCreator() {
 
         label("red wing", "Backpack", Color.FortyWhite, fontSize = (32 * 0.7).toInt()) {
             wrap = false
-            debug()
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()

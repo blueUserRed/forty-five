@@ -134,6 +134,7 @@ class WinRunScreen : ScreenCreator() {
                 relativeWidth(100f)
                 setAlignment(Align.center)
                 centerX()
+                syncHeight()
                 onLayoutAndNow { y = parent.height - height - 30f }
             }
 
@@ -147,7 +148,6 @@ class WinRunScreen : ScreenCreator() {
 
             box(isScrollable = true) {
                 this as CustomScrollableBox
-                debug()
                 backgroundHandle = "map_extraction_card_background_white"
                 relativeWidth(75f)
                 relativeHeight(70f)
@@ -167,7 +167,6 @@ class WinRunScreen : ScreenCreator() {
                 )
                 cards.forEach { card ->
                     box {
-                        debug()
                         width = widthPerCard
                         height = widthPerCard
                         verticalAlign = CustomAlign.CENTER
@@ -192,7 +191,10 @@ class WinRunScreen : ScreenCreator() {
                 joinGroup("extract-cards-popup-button")
                 defaultButtonConfig()
 
-                label("red wing", "Ok", Color.FortyWhite, 32)
+                label("red wing", "Ok", Color.FortyWhite, 32) {
+                    touchable = Touchable.disabled
+                    syncDimensions()
+                }
 
                 onInput(GameInputs.interact) {
                     finishedPromise.resolve(Unit)
@@ -291,7 +293,7 @@ class WinRunScreen : ScreenCreator() {
                 TextEffectEmitter.roadgeek,
                 Color.DarkGreen,
                 0.8f,
-                positiveSpeed = 150f..180f,
+                positiveSpeed = 3f..5f,
             )
         ))
 
@@ -333,7 +335,10 @@ class WinRunScreen : ScreenCreator() {
             touchable = Touchable.enabled
             defaultButtonConfig()
 
-            label("red wing", "Claim Rewards", Color.FortyWhite, 32)
+            label("red wing", "Claim Rewards", Color.FortyWhite, 32) {
+                touchable = Touchable.disabled
+                syncDimensions()
+            }
 
             onInput(GameInputs.interact) {
                 val profile = FortyFive.profileManager.currentProfile!!
@@ -371,7 +376,9 @@ class WinRunScreen : ScreenCreator() {
             relativeWidth(25f)
             relativeHeight(50f)
 
-            label("red wing", "completed run:", Color.FortyWhite, 32)
+            label("red wing", "completed run:", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
             actor(getSharedRunCard(run))
         }
 
@@ -381,7 +388,9 @@ class WinRunScreen : ScreenCreator() {
             relativeWidth(25f)
             relativeHeight(50f)
 
-            label("red wing", "rewards:", Color.FortyWhite, 32)
+            label("red wing", "rewards:", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
             if (cardsToExtract.isNotEmpty()) extractCardsReward()
             rewards(run.rewards)
         }
@@ -409,7 +418,9 @@ class WinRunScreen : ScreenCreator() {
                 marginRight = 10f
             }
 
-            label("red wing", "You can keep cards!", Color.FortyWhite, 32)
+            label("red wing", "You can keep cards!", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
         }
         events.watchFor<ClaimRewardsEvent> { event -> event.append {
             later {
@@ -437,7 +448,9 @@ class WinRunScreen : ScreenCreator() {
                 marginRight = 10f
             }
 
-            label("red wing", "You get ${reward.amount}$", Color.FortyWhite, 32)
+            label("red wing", "You get ${reward.amount}$", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
         }
 
         events.watchFor<ClaimRewardsEvent> { event -> event.append {

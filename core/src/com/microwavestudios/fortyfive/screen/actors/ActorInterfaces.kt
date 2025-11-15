@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.screen.actors
 
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -147,13 +148,15 @@ interface AnimatedActor {
         amplitude: Float = 20f,
         frequency: Float = 0.5f,
         phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
-        offset: Float = 0f
+        offset: Float = 0f,
+        interpolation: Interpolation = Interpolation.linear
     ) {
         this as Actor
         val initialX = x
         val time = TimeUtils.millis()
         val updater = NeedsUpdate {
-            val value = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase) * amplitude + offset
+            val sin = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase)
+            val value = (interpolation.apply((sin + 1) / 2) * 2 - 1) * amplitude + offset
             when (method) {
                 AnimationMethod.DRAW_OFFSET -> {
                     this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")

@@ -249,7 +249,6 @@ open class NewLabel(
     }
 
     override fun layout() {
-        onLayout.forEach { it() }
         bitmapFont?.let { font ->
             val variant = FortyFive
                 .resourceManager
@@ -265,7 +264,7 @@ open class NewLabel(
             prefWidth = layout.width
             prefHeight = layout.height + (-font.descent + font.ascent) * scale * 2
         }
-
+        onLayout.forEach { it() }
         super.layout()
     }
 
