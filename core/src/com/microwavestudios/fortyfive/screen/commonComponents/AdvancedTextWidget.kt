@@ -166,6 +166,7 @@ open class AdvancedTextWidget(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         advancedText.update()
         super.draw(batch, parentAlpha)
+        invalidate()
     }
 
     private fun clearText() = advancedText.parts.forEach {
@@ -282,7 +283,7 @@ class TextAdvancedTextPart(
         progress++
         if (progress > rawText.length) return true
         setText(rawText.take(progress))
-        return progress >= text.length
+        return progress >= rawText.length
     }
 
     override fun resetProgress() {

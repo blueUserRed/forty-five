@@ -132,7 +132,7 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Pyro" ],
+        allowedEnemies: [ "Outlaw" ],
     },
     {
         majorDifficulty: 2,

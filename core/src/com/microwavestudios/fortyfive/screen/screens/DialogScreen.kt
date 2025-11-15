@@ -86,7 +86,6 @@ class DialogScreen : ScreenCreator() {
         width = 240f
         height = 400f
         x = worldWidth / 2 - width / 2
-//        x = worldWidth * (3.5f / 4f) - width
         y = worldHeight * 0.33f
 
         var currentPromise: Promise<String>? = null
@@ -142,7 +141,6 @@ class DialogScreen : ScreenCreator() {
 
         val right = label("red wing", "", fontSize = (32 * 0.9).toInt()) {
             backgroundHandle = "dialog_name_field"
-            setFontScale(0.9f)
             onLayoutAndNow {
                 width = prefWidth * 1.3F
                 height = prefHeight * 1.4F

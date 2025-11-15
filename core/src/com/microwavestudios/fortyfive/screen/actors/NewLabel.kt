@@ -101,6 +101,7 @@ open class NewLabel(
     var fontColor: com.badlogic.gdx.graphics.Color = Color.Black
 
     private var reuseLayout: Boolean = false
+    private var fontWasAlreadyLoaded: Boolean = false
     private val layout: GlyphLayout = GlyphLayout()
 
     private var labelAlign: Int = Align.left
@@ -118,9 +119,6 @@ open class NewLabel(
 
     var template: TemplateString? = null
     var skipTemplateTextCheck: Boolean = false
-
-    val isTemplate
-        get() = template != null
 
     init {
         initInput(this, screen)
@@ -171,7 +169,12 @@ open class NewLabel(
 
     private fun drawText(batch: Batch, parentAlpha: Float) {
         val font = bitmapFont ?: return
+        if (!fontWasAlreadyLoaded) {
+            fontWasAlreadyLoaded = true
+            invalidateHierarchy()
+        }
         val currentFontHandle = fontGetter.currentResourceHandle ?: return
+        validate()
         val variant = FortyFive
             .resourceManager
             .fonts
@@ -183,28 +186,11 @@ open class NewLabel(
         val scale = target.toFloat() / fontSize.toFloat()
         font.data.setScale(scale)
         val color = com.badlogic.gdx.graphics.Color(fontColor.r, fontColor.g, fontColor.b, fontColor.a * color.a * parentAlpha)
-        font.cache.tint(color)
-
-        // TODO: figure out how to reuse the Layout again
-        // doesnt work because of color, the layout for whatever reason determines the color the font is rendered with,
-        // and if it isn't set everytime the color changes, the label will render with the wrong color
-        // BUT you can't just set reuseLayout to false everytime the color changes, because, due to the fact that
-        // the LibGDX Color class is mutable, it is impossible to know when the color changes
-
-//        if (!reuseLayout) {
-            layout.setText(font, text, color, width, labelAlign, wrap)
-            prefWidth = layout.width
-            prefHeight = layout.height + (-font.descent + font.ascent) * scale * 2
-            invalidateHierarchy()
-            reuseLayout = true
-//        }
         val lHeight = layout.height
-        val textY = if (Align.isTop(labelAlign)) {
-            y + height
-        } else if (Align.isCenterVertical(labelAlign)) {
-            y + height / 2 + lHeight / 2
-        } else {
-            y + lHeight * 2
+        val textY = when {
+            Align.isTop(labelAlign) -> y + height
+            Align.isCenterVertical(labelAlign) -> y + height / 2 + lHeight / 2
+            else -> y + lHeight * 2
         }
         if (!useShader) {
             font.draw(batch, layout, x, textY)
@@ -213,6 +199,7 @@ open class NewLabel(
         val shader = shaderPromise.getOrNull() ?: return
         batch.flush()
         batch.shader = shader.shader
+        shader.shader.setUniformf("u_color", color)
         font.draw(batch, layout, x, textY)
         batch.flush()
         batch.shader = null
@@ -220,7 +207,6 @@ open class NewLabel(
 
     private fun paramsChanged() {
         invalidateHierarchy()
-        reuseLayout = false
         val fontGroup = fontGroup ?: return
         val group = FortyFive.resourceManager.fonts.find { it.name == fontGroup }
         requireNotNull(group) { "unknown font group: '$fontGroup'" }
@@ -258,17 +244,28 @@ open class NewLabel(
         batch.setColor(old.r, old.g, old.b, old.a)
     }
 
-    override fun sizeChanged() {
-        super.sizeChanged()
-        reuseLayout = false
-    }
-
     override fun onLayout(callback: () -> Unit) {
         onLayout.add(callback)
     }
 
     override fun layout() {
         onLayout.forEach { it() }
+        bitmapFont?.let { font ->
+            val variant = FortyFive
+                .resourceManager
+                .fonts
+                .flatMap { it.variants }
+                .find { it.resourceHandle == fontHandle }
+            requireNotNull(variant) { "no variant for font handle: '$fontHandle'" }
+            val fontSize = variant.size
+            val target = this.fontSize
+            val scale = target.toFloat() / fontSize.toFloat()
+            font.data.setScale(scale)
+            layout.setText(font, text, color, width, labelAlign, wrap)
+            prefWidth = layout.width
+            prefHeight = layout.height + (-font.descent + font.ascent) * scale * 2
+        }
+
         super.layout()
     }
 

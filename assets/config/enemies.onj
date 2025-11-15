@@ -220,7 +220,7 @@ var pyros = [
         baseHealth: 75,
         texture: "enemy_pyro",
         brain: $NewEnemyBrain {
-            normalSpecialActionWeight: 0.0,
+            normalSpecialActionWeight: 0.78,
             damageShieldWeight: 0.78,
             baseDamage: [3, 5],
             baseShield: [3, 5],

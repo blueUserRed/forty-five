@@ -139,7 +139,9 @@ object RunBoardCreator {
                     joinGroup(buttonGroup)
                     defaultButtonConfig()
 
-                    label("red wing", "Cancel", Color.FortyWhite, 32)
+                    label("red wing", "Cancel", Color.FortyWhite, 32) {
+                        syncDimensions()
+                    }
 
                     onInput(GameInputs.interact) {
                         promise.resolve(false)
@@ -155,7 +157,9 @@ object RunBoardCreator {
                     joinGroup(buttonGroup)
                     defaultButtonConfig()
 
-                    label("red wing", "Start", Color.FortyWhite, 32)
+                    label("red wing", "Start", Color.FortyWhite, 32) {
+                        syncDimensions()
+                    }
 
                     onInput(GameInputs.interact) {
                         promise.resolve(true)
