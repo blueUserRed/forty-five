@@ -337,7 +337,8 @@ class WinRunScreen : ScreenCreator() {
 
             label("red wing", "Claim Rewards", Color.FortyWhite, 32) {
                 touchable = Touchable.disabled
-                syncDimensions()
+                width = 200f
+                syncHeight()
             }
 
             onInput(GameInputs.interact) {

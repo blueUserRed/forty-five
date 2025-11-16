@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActor
+import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import kotlin.reflect.KProperty
 
 class DebugMenu(val pages: List<DebugMenuPage>) {
@@ -36,7 +37,7 @@ class DebugMenu(val pages: List<DebugMenuPage>) {
     fun amountOfPages(): Int = pages.size
 
     fun update() {
-        pages.forEach { it.update() }
+        pages.forEach { it.update(this) }
     }
 
     inline fun <reified T : DebugMenuPage> findPage(): T? = pages.find { it is T } as T?
@@ -82,25 +83,44 @@ class DebugMenu(val pages: List<DebugMenuPage>) {
 
 abstract class DebugMenuPage(val name: String) {
 
+    private val switches: MutableList<DebugSwitch> = mutableListOf()
     private val buttons: MutableList<DebugButton> = mutableListOf()
 
-    fun update() {
-        buttons.forEach {
+    fun update(menu: DebugMenu) {
+        if (menu.currentPage() !== this) return
+        switches.forEach {
             if (Gdx.input.isKeyJustPressed(it.key)) {
                 it.set = !it.set
             }
+        }
+        buttons.forEach { button ->
+            if (Gdx.input.isKeyJustPressed(button.key)) button.action()
         }
     }
 
     protected fun debugButton(
         name: String,
         key: Int,
+        action: () -> Unit
+    ): DebugButton = DebugButton(name, key, action).also { buttons.add(it) }
+
+    protected fun debugSwitch(
+        name: String,
+        key: Int,
         default: Boolean
-    ): DebugButton = DebugButton(name, key, default).also { buttons.add(it) }
+    ): DebugSwitch = DebugSwitch(name, key, default).also { switches.add(it) }
 
     abstract fun getText(screen: OnjScreen): String
 
     data class DebugButton(
+        val name: String,
+        val key: Int,
+        val action: () -> Unit
+    ) {
+        override fun toString(): String = "[-] $name <${Keys.toString(key)}>"
+    }
+
+    data class DebugSwitch(
         val name: String,
         val key: Int,
         var set: Boolean
@@ -128,7 +148,7 @@ class BaseInfosDebugMenuPage : DebugMenuPage("Basic infos") {
 
 class ScreenDebugMenuPage : DebugMenuPage("Screen/Input") {
 
-    val makeLaggy = debugButton("make laggy", Keys.L, false)
+    val makeLaggy = debugSwitch("make laggy", Keys.L, false)
 
     override fun getText(screen: OnjScreen): String = """
         focused with keyboard: ${
@@ -198,11 +218,19 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
 
     var currentNode: MapNode? = null
 
-    val walkEverywhere = debugButton("walk everywhere", Keys.R, false)
+    val walkEverywhere = debugSwitch("walk everywhere", Keys.R, false)
+
+    val completeRun = debugButton("complete run", Keys.Q) {
+        val profile = FortyFive.profileManager.currentProfile ?: return@debugButton
+        if (profile.activeRun == null) return@debugButton
+        FortyFive.screenManager.ensureNextScreen(WinRunScreen)
+        FortyFive.screenManager.screenFinished()
+    }
 
     override fun getText(screen: OnjScreen): String = """
         dist: ${currentNode?.distance}
         index: ${currentNode?.index}
+        $completeRun
         $walkEverywhere
     """.trimIndent()
 }
