@@ -91,11 +91,6 @@ runRewardPools: [
 //////////////////////////////////////////////////////
 
 
-encounterModifierBlacklist: [
-    [ "moist", "frozen" ],
-    [ "frozen", "bewitchedMist"],
-],
-
 encounterModifierPools: [
     {
         majorDifficulty: 0,
@@ -121,6 +116,11 @@ encounterModifierPools: [
         maxModifiers: 3,
         modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
     },
+],
+
+encounterModifierBlacklist: [
+    [ "moist", "frozen" ],
+    [ "frozen", "bewitchedMist"],
 ],
 
 //////////////////////////////////////////////////////

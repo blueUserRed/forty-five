@@ -13,9 +13,13 @@
 - copy the files from the [share](https://drive.google.com/drive/folders/1BAB1r4_ptZkCL3BoCwP0T3ynZVvJWGS_?usp=sharing) into assets (f.e. assets/blobs/animations/...)
 - Open the repository as a project in [Intellij](https://www.jetbrains.com/idea/download/) (scroll down for Community Version, it is free and has everything you need)
 - IntelliJ will set up Gradle, create Indices, etc. which will take a while (a few minutes)
+- Depending on where you copied the assets from, you may need to generate the drop shadows
+  - In Intellij in the project, on the right side, open gradle (the elephant)
+  - Go to forty-five => desktop => Tasks => bake => createDropShadows
+  - Double Click "createDropShadows"
 - start the game
   - In Intellij in the project, on the right side, open gradle (the elephant)
-  - Go to forty-five => desktop => Tasks => other => run
+  - Go to forty-five => desktop => Tasks => development => run
   - Double Click "run"
 
 # The Rest in this file might be outdated and could not work
@@ -27,6 +31,10 @@
 - make sure you have a jre in your ``assets/large_assets`` folder. You can copy the jre from the steam release or follow the instructions below to create one yourself. (If you only build to .jar you don't need one)
 - Execute the build.main.kts script, either by using the IntelliJ UI or by running ``kontlinc scripts/build.main.kts``. (make sure you running it in the root directory of the project)
 
+> [!NOTE]
+> The build script was created to automate the build process on my machine to save time.
+> Due to that, it could very easily break on any other computer, so no guarantees.
+
 ## Project Build (to .jar)
 
 - run the forty_five [dist] gradle task
@@ -34,8 +42,7 @@
 - navigate to: forty_five/desktop/build/libs
 - copy the desktop.jar file to the temporary directory
 - copy the contents of the assets directory to the temporary directory
-- delete the saves/savefile.onj file
-- delete the saves/perma_savefile.onj file
+- delete the profiles is assets/profiles
 - delete the logging/forty-five.log file
 - _keep in mind that these files are generated again when the game
     is started_
@@ -50,9 +57,6 @@
   - open the .jar file with a program like 7zip
   - go through the directories in the .jar, compare the names with the contents of the
       assets directory, and delete if they match
-- remove unnecessary assets
-  - for example assets that are packed into atlases (e.g. textures/game_screen, 
-    textures/title_screen)
 - zip the temporary directory
 - rename it to "forty-five-" followed by the version tag
 - upload

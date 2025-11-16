@@ -230,7 +230,7 @@ var pyros = [
                 {
                     weight: 20,
                     showProbability: 1.0, // always shown
-                    action:action.pyro.burning3to5
+                    action: action.pyro.burning3to5
                 },
             ],
         },
