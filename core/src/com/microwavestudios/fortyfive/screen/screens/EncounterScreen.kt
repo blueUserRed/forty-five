@@ -46,6 +46,7 @@ import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.setText
+import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import com.microwavestudios.fortyfive.utils.AdvancedTextParser.*
@@ -615,7 +616,7 @@ class EncounterScreen : ScreenCreator() {
             box {
 
                 fun showAction(
-                    text: String,
+                    text: String?,
                     iconHandle: String,
                     additionalDamage: String? = null,
                     additionalDamageIcon: String? = null
@@ -625,15 +626,16 @@ class EncounterScreen : ScreenCreator() {
                         width = 60f
                         height = 60f
                     }
-                    group {
+                    if (text != null) group {
                         width = 60f
                         height = 40f
                         backgroundHandle = "wood_box"
                         val newText = if (additionalDamageIcon != null) {
-                            "$text + ?1$additionalDamage?1 §§${additionalDamageIcon}§§"
+                            "$text + ?R$additionalDamage?R §§${additionalDamageIcon}§§"
                         } else {
                             text
                         }
+                        touchable = Touchable.disabled
                         advancedText("roadgeek", Color.FortyWhite, 23) {
                             val redEffect = AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red)
                             relativeHeight(58f)
@@ -654,11 +656,27 @@ class EncounterScreen : ScreenCreator() {
                 horizontalAlign = CustomAlign.CENTER
                 verticalAlign = CustomAlign.CENTER
                 height = enemyHeight * 0.15f
+                touchable = Touchable.enabled
+                bindDetailToInputState(GameInputs.States.focused)
                 enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->
                     this.clear()
+                    val hoverText = when (val nextAction = event.nextAction) {
+                        is NextEnemyAction.ShownEnemyAction -> {
+                            val template = nextAction.action.prototype.descriptionTemplate
+                            val templateString = TemplateString(template, nextAction.action.descriptionParams)
+                            templateString.string
+                        }
+                        is NextEnemyAction.HiddenEnemyAction -> "You cant see the action of the enemy yet!"
+                        is NextEnemyAction.None -> null
+                    }
+                    detailWidget = if (hoverText != null) {
+                        DetailWidget.SimpleSmallDetailActor(screen) { hoverText }
+                    } else {
+                        null
+                    }
                     when (val nextAction = event.nextAction) {
                         is NextEnemyAction.ShownEnemyAction -> showAction(
-                            nextAction.action.indicatorText ?: "",
+                            nextAction.action.indicatorText,
                             nextAction.action.prototype.iconHandle,
                             event.additionalDamage.toString(),
                             event.additionalDamageIcon

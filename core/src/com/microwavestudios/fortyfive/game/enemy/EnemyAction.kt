@@ -159,7 +159,7 @@ sealed class EnemyActionPrototype(
             // TODO: fix this
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
-            return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
+            return EnemyAction(null, mapOf("statusEffect" to displayText),this) {
                 include(controller.tryApplyStatusEffectToPlayerTimeline(statusEffect))
             }
         }
@@ -176,7 +176,7 @@ sealed class EnemyActionPrototype(
             val statusEffect = statusEffectCreator(controller, null, false)
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
-            return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
+            return EnemyAction(null, mapOf("statusEffect" to displayText),this) {
                 include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemy))
             }
         }

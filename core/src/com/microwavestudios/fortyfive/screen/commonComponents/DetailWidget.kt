@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
+import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.utils.*
 
@@ -39,8 +40,8 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
         detailActor.validate()
-        val width = if (detailActor.prefWidth == 0f) detailActor.width else detailActor.prefWidth
-        val height = if (detailActor.prefHeight == 0f) detailActor.height else detailActor.prefHeight
+        val width = detailActor.width
+        val height = detailActor.height
 
         val (x, y) = original.localToStageCoordinates(Vector2(0, 0))
         val yCoordinate =
@@ -85,6 +86,43 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         }
     }
 
+    class SimpleSmallDetailActor(
+        screen: OnjScreen,
+        effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
+        useDefaultEffects: Boolean = true,
+        private val text: () -> String
+    ) : AdvancedTextDetailWidget(screen, effects, useDefaultEffects) {
+
+
+        override fun generateDetailActor(addFadeInAction: Boolean): Actor {
+            val actor = AdvancedTextWidget(
+                Triple("red wing", Color.FortyWhite, 15),
+                screen
+            )
+            val group = CustomGroup(screen)
+            group.backgroundHandle = defBackgroundSmall
+            group.dropShadow = BakedDropShadow(
+                defBackgroundSmall,
+                screen,
+                0f, 0f,
+                1.33f, 1.33f
+            )
+            group.width = 200F
+            group.height = 150F
+            actor.width = group.width
+            actor.setRawText(text.invoke(), effects)
+            actor.setPadding(15F)
+            group.addActor(actor)
+            actor.onLayout {
+                actor.height = actor.prefHeight
+                actor.x = group.width / 2f - actor.width / 2f
+                actor.y = group.height / 2f - actor.height / 2f
+            }
+            if (addFadeInAction) addFadeInAction(actor)
+            return group
+        }
+    }
+
     class ComplexBigDetailActor(
         screen: OnjScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
@@ -104,7 +142,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
             if (subtextParent == null && texts.isEmpty()) return null
 
             if (texts.size <= 1) {
-                val singleTextParent = getSingleTextParent(texts, width)
+                val singleTextParent = getSingleTextParent(texts)
                 if (addFadeInAction) addFadeInAction(singleTextParent)
                 return singleTextParent
             }
@@ -177,16 +215,31 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
         }
 
         @Suppress("SameParameterValue")
-        private fun getSingleTextParent(text: List<String>, width: Float): Actor {
+        private fun getSingleTextParent(text: List<String>): Actor {
             val actor = AdvancedTextWidget(
-                Triple("roadgeek", Color.FortyWhite, 14), screen
+                Triple("red wing", Color.FortyWhite, 15),
+                screen
             )
-            actor.backgroundHandle = defBackground
-            actor.width = width
-            actor.height = 100F
-            actor.setRawText(if (text.isEmpty()) " ".repeat(20) else text[0], effects) //this if needs to be tested
+            val group = CustomGroup(screen)
+            group.backgroundHandle = defBackgroundSmall
+            group.dropShadow = BakedDropShadow(
+                defBackgroundSmall,
+                screen,
+                0f, 0f,
+                1.33f, 1.33f
+            )
+            group.width = 200F
+            group.height = 150F
+            actor.width = group.width
+            actor.setRawText(text.firstOrNull() ?: "", effects)
             actor.setPadding(15F)
-            return actor
+            group.addActor(actor)
+            actor.onLayout {
+                actor.height = actor.prefHeight
+                actor.x = group.width / 2f - actor.width / 2f
+                actor.y = group.height / 2f - actor.height / 2f
+            }
+            return group
         }
 
         override fun drawDetailActor(batch: Batch) {
@@ -254,7 +307,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     companion object {
         const val LOG_TAG: String = "DetailWidget"
 
-        const val defBackground: String = "detail_widget_background_big" //TODO replace assets once markus exported them
+        const val defBackground: String = "detail_widget_background_big"
         const val defBackgroundSmall: String = "detail_widget_background_small"
     }
 }
