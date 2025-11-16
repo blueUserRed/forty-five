@@ -11,7 +11,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "location.tabu_letter_outpost",
+            targetMap: "tabu_letter_outpost",
             fromEnd: true,
         }
     },
@@ -71,7 +71,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "location.spire_outpost",
+            targetMap: "spire_outpost",
             fromEnd: false,
         }
     },

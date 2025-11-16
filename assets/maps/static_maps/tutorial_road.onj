@@ -236,7 +236,7 @@ nodes: [
         edgesTo: [
             8
         ],
-        image: "location.aqua_balle",
+        image: "aqua_balle",
         imagePos: "RIGHT",
         nodeTexture: "map_node_exit",
         event: $FinishTutorialRunMapEvent {

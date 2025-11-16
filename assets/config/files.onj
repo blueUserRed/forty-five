@@ -75,10 +75,10 @@ configFiles: {
 },
 
 displayNames: [
-    ["location.tabu_letter_outpost", "Tabu Letter Outpost"],
-    ["location.sqire_outpost", "Spire Outpost"],
-    ["location.salem", "Salem"],
-    ["location.aqua_balle", "Aqua Balle"],
+    ["tabu_letter_outpost", "Tabu Letter Outpost"],
+    ["sqire_outpost", "Spire Outpost"],
+    ["salem", "Salem"],
+    ["aqua_balle", "Aqua Balle"],
     ["npc.traveler_in_salem", "Random Traveler"],
     ["npc.witch", "Witch"],
     ["npc.not_yet_implemented", "Coming Soon!"],

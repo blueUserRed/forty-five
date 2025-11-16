@@ -52,24 +52,24 @@ var images = {
 
 mapImages: [
     {
-        name: "location.aqua_balle",
+        name: "aqua_balle",
         type: "sign",
         ...(images.aquaBalle),
     },
     {
-        name: "location.tabu_letter_outpost",
+        name: "tabu_letter_outpost",
         type: "sign",
         ...(images.tabuletter),
     },
     {
-        name: "location.salem",
+        name: "salem",
         image: images.salem.image,
         width: images.salem.width,
         height: images.salem.height,
         type: "sign",
     },
     {
-        name: "location.spire_outpost",
+        name: "spire_outpost",
         type: "sign",
         ...(images.spire),
     },
@@ -79,24 +79,24 @@ mapImages: [
         ...(images.underConstruction),
     },
     {
-        name: "location.aqua_balle",
+        name: "aqua_balle",
         type: "name",
         ...(images.aquaBalleName),
     },
     {
-        name: "location.tabu_letter_outpost",
+        name: "tabu_letter_outpost",
         type: "name",
         ...(images.tabuletterName),
     },
     {
-        name: "location.salem",
+        name: "salem",
         image: images.salemName.image,
         width: images.salemName.width,
         height: images.salemName.height,
         type: "name",
     },
     {
-        name: "location.spire_outpost",
+        name: "spire_outpost",
         type: "name",
         ...(images.spireName),
     }

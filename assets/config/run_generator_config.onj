@@ -155,7 +155,7 @@ enemyProbabilityIncrease: [
     {
         enemy: "Outlaw",
         biome: "wasteland",
-        bonusPoints: 40,
+        bonusPoints: 20,
     },
     {
         enemy: "Outlaw",
@@ -179,7 +179,7 @@ enemyProbabilityIncrease: [
     },
 ],
 
-enemyProbabilityRandomPoints: 50,
+enemyProbabilityRandomPoints: 120,
 
 enemyHealthAdjustment: 0.6,
 enemyDamageAdjustment: 0.3,

@@ -103,7 +103,7 @@ $MapEvent {
         unadjustedMajorDifficulty: int,
         minorDifficulty: float,
         runModifier: string[],
-        amountEnemies: int,
+        amountEnemies: int[2],
         difficultyScaling: $DifficultyScaling,
         scaleMin: float,
         scaleMax: float,

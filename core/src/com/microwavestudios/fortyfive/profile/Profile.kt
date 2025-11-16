@@ -314,7 +314,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     }
 
     private fun loadAreaMap(map: String) {
-        val newMapFile = lookupAreaFile(map) ?: throw RuntimeException("no file for area: $map")
+        val newMapFile = lookupAreaFile(map)
+            ?: throw RuntimeException("no file for area: $map")
         this.currentMapFile = newMapFile
         currentAreaMap = DetailMap.readFromFile(newMapFile)
         _currentMapName = map

@@ -37,9 +37,7 @@ data class Encounter(
     fun createEnemies(): List<Enemy> {
         val enemiesOnj = ConfigFileManager.getConfigFile("enemies")
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
-        println("minorDifficulty = ${minorDifficulty}")
         val healthMultiplier = 1f + ((minorDifficulty - 1f) * RunGeneratorConfig.enemyHealthAdjustment)
-        println(healthMultiplier)
         return enemies
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
             .map { println(it.baseHealth); it.create((it.baseHealth * healthMultiplier).toInt()) }
@@ -169,7 +167,7 @@ object EncounterGenerator {
         }
         availableEnemies.sortBy { it.first }
 
-        var candidates = when (placeholder.amountEnemies) {
+        var candidates = when (placeholder.amountEnemies.random(random)) {
             1 -> generateEnemySingle(majorDifficulty, availableEnemies)
             2 -> generateEnemyPairs(majorDifficulty, availableEnemies)
             3 -> generateEnemyTriples(majorDifficulty, availableEnemies)
