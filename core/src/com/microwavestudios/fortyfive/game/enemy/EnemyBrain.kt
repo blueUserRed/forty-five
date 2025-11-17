@@ -66,6 +66,11 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
     private val baseShield: IntRange = onj.get<OnjArray>("baseShield").toIntRange()
     private val scaleIncreasePerTurn: Float = onj.get<Double>("scaleIncreasePerTurn").toFloat()
 
+    private val aggressionHealthPercent: Float = onj.access<Double>(".aggressionBoostConfig.healthPercent").toFloat()
+    private val aggressionNormalSpecialWeightChange: Float = onj.access<Double>(".aggressionBoostConfig.normalSpecialWeightChange").toFloat()
+    private val aggressionDamageShieldWeightChange: Float = onj.access<Double>(".aggressionBoostConfig.damageShieldWeightChange").toFloat()
+    private val aggressionDamageIncrease: Int = onj.access<Long>(".aggressionBoostConfig.damageIncrease").toInt()
+
     private val actions: MutableList<EnemyActionConfig> = onj
         .get<OnjArray>("actions")
         .value
@@ -104,10 +109,28 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
             nextAction = action
             return if (show) NextEnemyAction.ShownEnemyAction(action) else NextEnemyAction.HiddenEnemyAction
         }
+        val aggressionHealth = enemy.health * aggressionHealthPercent
+        val aggressive = aggressionHealth >= enemy.currentHealth
+
+        val normalSpecialActionWeight = if (aggressive) {
+            (normalSpecialActionWeight + aggressionNormalSpecialWeightChange).between(0f, 1f)
+        } else {
+            normalSpecialActionWeight
+        }
+        val damageShieldWeight = if (aggressive) {
+            (damageShieldWeight + aggressionDamageShieldWeightChange).between(0f, 1f)
+        } else {
+            damageShieldWeight
+        }
         val doNormalAction = Utils.coinFlip(normalSpecialActionWeight)
         if (doNormalAction) {
             val actionProto = if (Utils.coinFlip(damageShieldWeight)) {
-                damagePlayer(baseDamage, enemy)
+                val damage = if (aggressive) {
+                    baseDamage shift aggressionDamageIncrease
+                } else {
+                    baseDamage
+                }
+                damagePlayer(damage, enemy)
             } else {
                 takeCover(baseShield, enemy)
             }

@@ -165,6 +165,12 @@ var outlaws = [
            normalSpecialActionWeight: 1.0,
            baseDamage: [3, 5],
            baseShield: [3, 5],
+           aggressionBoostConfig: {
+               healthPercent: 0.1,
+               normalSpecialWeightChange: 1.0,
+               damageShieldWeightChange: 1.0,
+               damageIncrease: 3,
+           },
            scaleIncreasePerTurn: 0.0,
            actions: [],
        },
@@ -179,6 +185,12 @@ var outlaws = [
            normalSpecialActionWeight: 1.0,
            baseDamage: [6, 9],
            baseShield: [8, 11],
+           aggressionBoostConfig: {
+               healthPercent: 0.1,
+               normalSpecialWeightChange: 1.0,
+               damageShieldWeightChange: 1.0,
+               damageIncrease: 4,
+           },
            scaleIncreasePerTurn: 0.0,
            actions: [],
        },
@@ -193,6 +205,12 @@ var outlaws = [
            normalSpecialActionWeight: 1.0,
            baseDamage: [9, 12],
            baseShield: [10, 13],
+           aggressionBoostConfig: {
+               healthPercent: 0.1,
+               normalSpecialWeightChange: 1.0,
+               damageShieldWeightChange: 1.0,
+               damageIncrease: 5,
+           },
            scaleIncreasePerTurn: 0.0,
            actions: [],
        },
@@ -207,6 +225,12 @@ var outlaws = [
            normalSpecialActionWeight: 1.0,
            baseDamage: [10, 15],
            baseShield: [11, 15],
+           aggressionBoostConfig: {
+               healthPercent: 0.1,
+               normalSpecialWeightChange: 1.0,
+               damageShieldWeightChange: 1.0,
+               damageIncrease: 6,
+           },
            scaleIncreasePerTurn: 0.0,
            actions: [],
        },
@@ -224,6 +248,12 @@ var pyros = [
             damageShieldWeight: 0.78,
             baseDamage: [3, 5],
             baseShield: [3, 5],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 3,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 // pyro level one only does burning, not hot potato
@@ -245,6 +275,12 @@ var pyros = [
             damageShieldWeight: 0.78,
             baseDamage: [8, 10],
             baseShield: [8, 12],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 4,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
@@ -272,6 +308,12 @@ var pyros = [
             damageShieldWeight: 0.78,
             baseDamage: [9, 12],
             baseShield: [10, 15],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 5,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
@@ -299,6 +341,12 @@ var pyros = [
             damageShieldWeight: 0.78,
             baseDamage: [9, 12],
             baseShield: [10, 15],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 6,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
@@ -328,6 +376,12 @@ var witches = [
             normalSpecialActionWeight: 0.7,
             baseDamage: [3, 5],
             baseShield: [8, 9],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 3,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
@@ -353,6 +407,12 @@ var witches = [
             normalSpecialActionWeight: 0.7,
             baseDamage: [6, 9],
             baseShield: [9, 10],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 4,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
@@ -378,6 +438,12 @@ var witches = [
             normalSpecialActionWeight: 0.7,
             baseDamage: [8, 11],
             baseShield: [10, 15],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 5,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
@@ -403,6 +469,12 @@ var witches = [
             normalSpecialActionWeight: 0.7,
             baseDamage: [9, 12],
             baseShield: [10, 15],
+            aggressionBoostConfig: {
+                healthPercent: 0.1,
+                normalSpecialWeightChange: 1.0,
+                damageShieldWeightChange: 1.0,
+                damageIncrease: 6,
+            },
             scaleIncreasePerTurn: 0.0,
             actions: [
                 {
