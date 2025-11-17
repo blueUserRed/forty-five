@@ -106,21 +106,21 @@ encounterModifierPools: [
     },
     {
         majorDifficulty: 3,
-        modifierProbability: 0.6,
+        modifierProbability: 0.5,
         maxModifiers: 2,
         modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
     },
     {
         majorDifficulty: 5,
-        modifierProbability: 0.8,
+        modifierProbability: 0.7,
         maxModifiers: 3,
         modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
     },
 ],
 
 encounterModifierBlacklist: [
-    [ "moist", "frozen" ],
-    [ "frozen", "bewitchedMist"],
+    [ "frost", "moist" ],
+    [ "frost", "bewitchedMist"],
 ],
 
 //////////////////////////////////////////////////////

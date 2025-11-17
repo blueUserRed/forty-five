@@ -21,17 +21,7 @@ nodes: [
         edgesTo: [
             2
         ],
-        nodeTexture: "map_node_dialog",
-        event: $DialogMapEvent {
-            dialog: "traveler_in_salem_dialog",
-            displayName: "Random Traveler"
-            descriptionText: ""
-            completedDescriptionText: "",
-            canOnlyBeStartedOnce: false,
-            currentlyBlocks: false,
-            startable: true,
-            isCompleted: false
-        }
+        event: $EmptyMapEvent {}
     },
     {
         x: 20.0,
@@ -39,20 +29,7 @@ nodes: [
         edgesTo: [
             0, 1, 3
         ],
-        nodeTexture: "map_node_shop",
-        event: $ShopMapEvent {
-            seed: null,
-            amountCards: [3, 5],
-            selectedCards: [],
-            amountOfRerolls: 0,
-            rerollPriceIncrease: 10,
-            rerollBasePrice: 10,
-            boughtIndices: [
-            ],
-            types: [
-            ],
-            person: "traveling_merchant",
-        }
+        event: $EmptyMapEvent {}
     },
     {
         x: 40.0,
@@ -69,11 +46,12 @@ nodes: [
         edgesTo: [
             3
         ],
-        nodeTexture: "map_node_exit",
-        event: $EnterMapMapEvent {
-            targetMap: "spire_outpost",
-            fromEnd: false,
-        }
+//        nodeTexture: "map_node_exit",
+        event: $EmptyMapEvent {},
+//        event: $EnterMapMapEvent {
+//            targetMap: "spire_outpost",
+//            fromEnd: false,
+//        }
     },
 ],
 animatedDecorations: [
@@ -124,6 +102,3 @@ decorations: [
         ]
     }
 ],
-areaConfig: {
-    completedProgressRun: false
-},

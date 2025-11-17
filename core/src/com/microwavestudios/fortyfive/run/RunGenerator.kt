@@ -238,11 +238,11 @@ class RunGenerator {
                 val moreCacti = !moreSkulls && Utils.coinFlip(0.2f, random)
                 wastelandDecorations(moreSkulls, moreCacti)
             }
-            "bewitchedForest" -> {
+            "bewitched_forest" -> {
                 val moreSheep = Utils.coinFlip(0.3f, random)
                 bewitchedForestDecorations(moreSheep)
             }
-            "magentaMountains" -> TODO()
+            "magenta_mountains" -> TODO()
             else -> unreachable()
         }
 

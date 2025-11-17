@@ -124,7 +124,7 @@ class TitleScreen : ScreenCreator() {
             currentlySelectedProfile = event.newProfile
         }
 
-        label("red wing", "rework stage 1", Color.Black, 32) {
+        label("red wing", "rework stage 2", Color.Black, 32) {
             onLayoutAndNow {
                 x = worldWidth - width - 10
                 y = worldHeight - height - 10

@@ -494,6 +494,7 @@ textures: [
     },
     {
         name: "map_decoration_bewitched_forest_sheep_1",
+        useMipMaps: false,
         file: "blobs/map/decorations/bewitched_forest_sheep_1.png"
     },
     {
@@ -502,6 +503,7 @@ textures: [
     },
     {
         name: "map_decoration_bewitched_forest_tree1",
+        useMipMaps: false,
         file: "blobs/map/decorations/bewitched_forest_tree1.png"
     },
     {
