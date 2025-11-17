@@ -220,7 +220,9 @@ object RunBoardCreator {
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
 
-                label("red wing", "Current Run:", fontSize = 32)
+                label("red wing", "Current Run:", fontSize = 32) {
+                    syncDimensions()
+                }
                 actor(getSharedRunCard(profile.activeRun!!))
             }
 

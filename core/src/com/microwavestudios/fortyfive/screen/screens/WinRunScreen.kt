@@ -330,7 +330,7 @@ class WinRunScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.CENTER
             height = 70f
-            width = 180f
+            width = 250f
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
             defaultButtonConfig()

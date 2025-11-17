@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.run
 
+import com.badlogic.gdx.utils.compression.lzma.Base
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
@@ -7,6 +8,7 @@ import com.microwavestudios.fortyfive.map.EmptyMapEvent
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
+import com.microwavestudios.fortyfive.map.generation.PointCloudMapGenerator
 import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.between
@@ -14,6 +16,7 @@ import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.requireNot
 import com.microwavestudios.fortyfive.utils.toIntRange
 import com.microwavestudios.fortyfive.utils.unreachable
+import com.microwavestudios.fortyfive.utils.weightedRandom
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -44,7 +47,9 @@ class RunGenerator {
             else -> unreachable()
         }
 
-        val mapGenerator = threeLineMapGen(
+        val mapGenerator = MapGens.mapGenFor(
+            type,
+            random,
             majorDifficulty,
             forDifficulty,
             minorDifficulty,
@@ -70,181 +75,6 @@ class RunGenerator {
             mapGenerator
         )
     }
-
-    private fun threeLineMapGen(
-        majorDifficulty: Int,
-        unadjustedMajorDifficulty: Int,
-        minorDifficulty: Float,
-        enemyAmountRange: IntRange,
-        runModifier: List<RunModifier>,
-        minDiff: Float,
-        maxDiff: Float,
-        difficultyScaling: DifficultyScaling,
-        biome: String
-    ): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
-        majorDifficulty = 1,
-        biome = "wasteland",
-        nodeProtectedArea = 20f,
-        altLinesOffset = (50f..65f).random(random),
-        mainLineNodes = 8,
-        altLinesPadding = 0..2,
-        varianceX = 12f,
-        varianceY = 12f,
-        roadLength = 270f,
-        horizontalExtension = 80f,
-        verticalExtension = 50f,
-        locationSignProtectedAreaWidth = 25f,
-        locationSignProtectedAreaHeight = 30f,
-        firstNodeTexture = "map_node_default",
-        firstNodeEvent = { EmptyMapEvent() },
-        lastNodeTexture = "map_node_fight",
-        lastNodeEvent = {
-            EncounterPlaceholderMapEvent(
-                true,
-                majorDifficulty,
-                unadjustedMajorDifficulty,
-                minorDifficulty,
-                runModifier,
-                enemyAmountRange,
-                biome,
-                difficultyScaling,
-                minDiff,
-                maxDiff,
-                random.nextLong()
-            )
-        },
-        mainEvent = ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-            {
-                EncounterPlaceholderMapEvent(
-                    false,
-                    majorDifficulty,
-                    unadjustedMajorDifficulty,
-                    minorDifficulty,
-                    runModifier,
-                    enemyAmountRange,
-                    biome,
-                    difficultyScaling,
-                    minDiff,
-                    maxDiff,
-                    random.nextLong()
-                )
-            },
-            offset = 0..1,
-            nodeTexture = "map_node_fight",
-            line = -1,
-        ),
-        events = listOf(
-            ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-                {
-                    ChooseCardMapEvent(
-                        listOf(),
-                        true,
-                        0,
-                        20,
-                        10,
-                        random.nextLong(),
-                        3
-                    )
-                },
-                offset = 2..2,
-                line = 2,
-                nodeTexture = "map_node_choose_card"
-            ),
-            ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-                {
-                    ShopMapEvent(
-                        setOf(),
-                        "npc.traveling_merchant",
-                        mutableSetOf(),
-                        3..5,
-                        mutableListOf(),
-                        0,
-                        20,
-                        20,
-                    )
-                },
-                offset = 2..2,
-                line = 2,
-                nodeTexture = "map_node_shop"
-            ),
-        ),
-        decorations = run {
-            val moreSkulls = Utils.coinFlip(0.1f, random)
-            val moreCacti = !moreSkulls && Utils.coinFlip(0.2f, random)
-            wastelandDecorations(moreSkulls, moreCacti)
-        }
-    ).let { ThreeLineMapGenerator(it) }
-
-    private fun wastelandDecorations(moreSkulls: Boolean, moreCacti: Boolean): List<BaseMapGenerator.MapGeneratorDecoration> = listOf(
-        BaseMapGenerator.MapGeneratorDecoration(
-            distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
-            decoration = "map_decoration_wasteland_cactus_1",
-            baseWidth = 2f,
-            baseHeight = 4f,
-            density = if (moreCacti) 0.0048f else 0.0024f,
-            checkNodeCollisions = true,
-            checkLineCollisions = false,
-            checkDecorationCollisions = true,
-            generateDecorationCollisions = true,
-            onlyCheckCollisionsAtSpawnPoints = true,
-            scale = 2.75f..3.25f,
-            sortByY = true,
-            shrinkBoundsWidth = 0f,
-            shrinkBoundsHeight = 0f,
-            animated = false,
-        ),
-        BaseMapGenerator.MapGeneratorDecoration(
-            distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
-            decoration = "map_decoration_wasteland_cactus_2",
-            baseWidth = 2f,
-            baseHeight = 4f,
-            density = if (moreCacti) 0.0016f else 0.0008f,
-            checkNodeCollisions = true,
-            checkLineCollisions = false,
-            checkDecorationCollisions = true,
-            generateDecorationCollisions = true,
-            onlyCheckCollisionsAtSpawnPoints = false,
-            scale = 2.75f..3.25f,
-            sortByY = false,
-            shrinkBoundsWidth = 0f,
-            shrinkBoundsHeight = 0f,
-            animated = false,
-        ),
-        BaseMapGenerator.MapGeneratorDecoration(
-            distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
-            decoration = "map_decoration_wasteland_skull_1",
-            baseWidth = 3f,
-            baseHeight = 3f,
-            density = if (moreSkulls) 0.0008f else 0.0004f,
-            checkNodeCollisions = true,
-            checkLineCollisions = false,
-            checkDecorationCollisions = true,
-            generateDecorationCollisions = true,
-            onlyCheckCollisionsAtSpawnPoints = false,
-            scale = 1.1f..1.7f,
-            sortByY = false,
-            shrinkBoundsWidth = 0f,
-            shrinkBoundsHeight = 0f,
-            animated = false,
-        ),
-        BaseMapGenerator.MapGeneratorDecoration(
-            distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
-            decoration = "map_decoration_wasteland_skull_2",
-            baseWidth = 3f,
-            baseHeight = 3f,
-            density = if (moreSkulls) 0.0008f else 0.0004f,
-            checkNodeCollisions = true,
-            checkLineCollisions = false,
-            checkDecorationCollisions = true,
-            generateDecorationCollisions = true,
-            onlyCheckCollisionsAtSpawnPoints = false,
-            scale = 1.1f..1.7f,
-            sortByY = false,
-            shrinkBoundsWidth = 0f,
-            shrinkBoundsHeight = 0f,
-            animated = false,
-        )
-    )
 
     private fun enemyAmountRange(majorDifficulty: Int): IntRange {
         var checkDifficulty = majorDifficulty
@@ -343,6 +173,392 @@ class RunGenerator {
 
     companion object {
         const val logTag: String = "RunGenerator"
+    }
+
+    private object MapGens {
+
+        fun mapGenFor(
+            type: RunType,
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            runModifier: List<RunModifier>,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): BaseMapGenerator {
+            val options = when (type) {
+                RunType.LIMITED -> listOf(
+                    20 to MapGenType.ThreeLine,
+                    10 to MapGenType.PointCloud
+                )
+                RunType.CONSTRUCTED -> listOf(
+                    10 to MapGenType.ThreeLine,
+                    20 to MapGenType.PointCloud
+                )
+                else -> unreachable()
+            }
+            val chosen = options.weightedRandom(random)
+            return when (chosen) {
+                MapGenType.PointCloud -> pointCloudMapGen(
+                    random,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    enemyAmountRange,
+                    runModifier,
+                    minDiff,
+                    maxDiff,
+                    difficultyScaling,
+                    biome,
+                )
+                MapGenType.ThreeLine -> threeLineMapGen(
+                    random,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    enemyAmountRange,
+                    runModifier,
+                    minDiff,
+                    maxDiff,
+                    difficultyScaling,
+                    biome,
+                )
+            }
+        }
+
+        enum class MapGenType { ThreeLine, PointCloud }
+
+        fun decorationsFor(biome: String, random: Random): List<BaseMapGenerator.MapGeneratorDecoration> = when (biome) {
+            "wasteland" -> {
+                val moreSkulls = Utils.coinFlip(0.1f, random)
+                val moreCacti = !moreSkulls && Utils.coinFlip(0.2f, random)
+                wastelandDecorations(moreSkulls, moreCacti)
+            }
+            "bewitchedForest" -> {
+                val moreSheep = Utils.coinFlip(0.3f, random)
+                bewitchedForestDecorations(moreSheep)
+            }
+            "magentaMountains" -> TODO()
+            else -> unreachable()
+        }
+
+        fun pointCloudMapGen(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            runModifier: List<RunModifier>,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): BaseMapGenerator = PointCloudMapGenerator.PointCloudMapGeneratorData(
+            nodeProtectedArea = 20f,
+            amountNodes = 16,
+            roadLength = 240f,
+            roadHeight = 110f,
+            exclusionRadius = 10f,
+            locationSignProtectedAreaWidth = 25f,
+            locationSignProtectedAreaHeight = 30f,
+            firstNodeTexture = "map_node_default",
+            firstNodeEvent = { EmptyMapEvent() },
+            lastNodeTexture = "map_node_fight",
+            lastNodeEvent = {
+                EncounterPlaceholderMapEvent(
+                    true,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    runModifier,
+                    enemyAmountRange,
+                    biome,
+                    difficultyScaling,
+                    minDiff,
+                    maxDiff,
+                    random.nextLong()
+                )
+            },
+            eventSpawner = listOf(
+                PointCloudMapGenerator.EventSpawner(
+                    {
+                        EncounterPlaceholderMapEvent(
+                            false,
+                            majorDifficulty,
+                            unadjustedMajorDifficulty,
+                            minorDifficulty,
+                            runModifier,
+                            enemyAmountRange,
+                            biome,
+                            difficultyScaling,
+                            minDiff,
+                            maxDiff,
+                            random.nextLong()
+                        )
+                    },
+                    "map_node_fight",
+                    100
+                ),
+                PointCloudMapGenerator.EventSpawner(
+                    {
+                        ChooseCardMapEvent(
+                            listOf(),
+                            true,
+                            0,
+                            20,
+                            10,
+                            random.nextLong(),
+                            3
+                        )
+                    },
+                    "map_node_choose_card",
+                    20
+                ),
+                PointCloudMapGenerator.EventSpawner(
+                    {
+                        EmptyMapEvent()
+                    },
+                    "map_node_default",
+                    20
+                ),
+                PointCloudMapGenerator.EventSpawner(
+                    {
+                        ShopMapEvent(
+                            setOf(),
+                            "npc.traveling_merchant",
+                            mutableSetOf(),
+                            3..5,
+                            mutableListOf(),
+                            0,
+                            20,
+                            20,
+                        )
+                    },
+                    "map_node_shop",
+                    10
+                )
+            ),
+            majorDifficulty = unadjustedMajorDifficulty,
+            horizontalExtension = 80f,
+            verticalExtension = 50f,
+            decorations = decorationsFor(biome, random),
+            biome = biome,
+        ).let { PointCloudMapGenerator(it) }
+
+        fun threeLineMapGen(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            runModifier: List<RunModifier>,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): BaseMapGenerator = ThreeLineMapGenerator.ThreeLineMapGeneratorData(
+            majorDifficulty = unadjustedMajorDifficulty,
+            biome = biome,
+            nodeProtectedArea = 20f,
+            altLinesOffset = (50f..65f).random(random),
+            mainLineNodes = 8,
+            altLinesPadding = 0..2,
+            varianceX = 12f,
+            varianceY = 12f,
+            roadLength = 270f,
+            horizontalExtension = 80f,
+            verticalExtension = 50f,
+            locationSignProtectedAreaWidth = 25f,
+            locationSignProtectedAreaHeight = 30f,
+            firstNodeTexture = "map_node_default",
+            firstNodeEvent = { EmptyMapEvent() },
+            lastNodeTexture = "map_node_fight",
+            lastNodeEvent = {
+                EncounterPlaceholderMapEvent(
+                    true,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    runModifier,
+                    enemyAmountRange,
+                    biome,
+                    difficultyScaling,
+                    minDiff,
+                    maxDiff,
+                    random.nextLong()
+                )
+            },
+            mainEvent = ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
+                {
+                    EncounterPlaceholderMapEvent(
+                        false,
+                        majorDifficulty,
+                        unadjustedMajorDifficulty,
+                        minorDifficulty,
+                        runModifier,
+                        enemyAmountRange,
+                        biome,
+                        difficultyScaling,
+                        minDiff,
+                        maxDiff,
+                        random.nextLong()
+                    )
+                },
+                offset = 0..1,
+                nodeTexture = "map_node_fight",
+                line = -1,
+            ),
+            events = listOf(
+                ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
+                    {
+                        ChooseCardMapEvent(
+                            listOf(),
+                            true,
+                            0,
+                            20,
+                            10,
+                            random.nextLong(),
+                            3
+                        )
+                    },
+                    offset = 2..2,
+                    line = 2,
+                    nodeTexture = "map_node_choose_card"
+                ),
+                ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
+                    {
+                        ShopMapEvent(
+                            setOf(),
+                            "npc.traveling_merchant",
+                            mutableSetOf(),
+                            3..5,
+                            mutableListOf(),
+                            0,
+                            20,
+                            20,
+                        )
+                    },
+                    offset = 2..2,
+                    line = 2,
+                    nodeTexture = "map_node_shop"
+                ),
+            ),
+            decorations = decorationsFor(biome, random)
+        ).let { ThreeLineMapGenerator(it) }
+
+
+        private fun bewitchedForestDecorations(moreSheep: Boolean): List<BaseMapGenerator.MapGeneratorDecoration> = listOf(
+            BaseMapGenerator.MapGeneratorDecoration(
+                distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
+                decoration = "sheep",
+                baseWidth = 8f,
+                baseHeight = 8f,
+                density = if (moreSheep) 0.002f else 0.001f,
+                checkNodeCollisions = true,
+                checkLineCollisions = false,
+                checkDecorationCollisions = true,
+                generateDecorationCollisions = true,
+                onlyCheckCollisionsAtSpawnPoints = false,
+                scale = (1f..1.1f),
+                sortByY = false,
+                animated = true,
+                shrinkBoundsHeight = 0f,
+                shrinkBoundsWidth = 0f,
+            ),
+            BaseMapGenerator.MapGeneratorDecoration(
+                distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
+                decoration = "tree",
+                baseWidth = 5f,
+                baseHeight = 10f,
+                density = 0.024f,
+                checkNodeCollisions = true,
+                checkLineCollisions = false,
+                checkDecorationCollisions = true,
+                generateDecorationCollisions = true,
+                onlyCheckCollisionsAtSpawnPoints = true,
+                scale = (1f..2f),
+                sortByY = true,
+                animated = true,
+                shrinkBoundsHeight = 0f,
+                shrinkBoundsWidth = 0f
+            )
+        )
+
+        private fun wastelandDecorations(moreSkulls: Boolean, moreCacti: Boolean): List<BaseMapGenerator.MapGeneratorDecoration> = listOf(
+            BaseMapGenerator.MapGeneratorDecoration(
+                distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
+                decoration = "map_decoration_wasteland_cactus_1",
+                baseWidth = 2f,
+                baseHeight = 4f,
+                density = if (moreCacti) 0.0048f else 0.0024f,
+                checkNodeCollisions = true,
+                checkLineCollisions = false,
+                checkDecorationCollisions = true,
+                generateDecorationCollisions = true,
+                onlyCheckCollisionsAtSpawnPoints = true,
+                scale = 2.75f..3.25f,
+                sortByY = true,
+                shrinkBoundsWidth = 0f,
+                shrinkBoundsHeight = 0f,
+                animated = false,
+            ),
+            BaseMapGenerator.MapGeneratorDecoration(
+                distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
+                decoration = "map_decoration_wasteland_cactus_2",
+                baseWidth = 2f,
+                baseHeight = 4f,
+                density = if (moreCacti) 0.0016f else 0.0008f,
+                checkNodeCollisions = true,
+                checkLineCollisions = false,
+                checkDecorationCollisions = true,
+                generateDecorationCollisions = true,
+                onlyCheckCollisionsAtSpawnPoints = false,
+                scale = 2.75f..3.25f,
+                sortByY = false,
+                shrinkBoundsWidth = 0f,
+                shrinkBoundsHeight = 0f,
+                animated = false,
+            ),
+            BaseMapGenerator.MapGeneratorDecoration(
+                distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
+                decoration = "map_decoration_wasteland_skull_1",
+                baseWidth = 3f,
+                baseHeight = 3f,
+                density = if (moreSkulls) 0.0008f else 0.0004f,
+                checkNodeCollisions = true,
+                checkLineCollisions = false,
+                checkDecorationCollisions = true,
+                generateDecorationCollisions = true,
+                onlyCheckCollisionsAtSpawnPoints = false,
+                scale = 1.1f..1.7f,
+                sortByY = false,
+                shrinkBoundsWidth = 0f,
+                shrinkBoundsHeight = 0f,
+                animated = false,
+            ),
+            BaseMapGenerator.MapGeneratorDecoration(
+                distribution = BaseMapGenerator.DecorationDistribution.RandomDistribution,
+                decoration = "map_decoration_wasteland_skull_2",
+                baseWidth = 3f,
+                baseHeight = 3f,
+                density = if (moreSkulls) 0.0008f else 0.0004f,
+                checkNodeCollisions = true,
+                checkLineCollisions = false,
+                checkDecorationCollisions = true,
+                generateDecorationCollisions = true,
+                onlyCheckCollisionsAtSpawnPoints = false,
+                scale = 1.1f..1.7f,
+                sortByY = false,
+                shrinkBoundsWidth = 0f,
+                shrinkBoundsHeight = 0f,
+                animated = false,
+            )
+        )
+
     }
 
 }

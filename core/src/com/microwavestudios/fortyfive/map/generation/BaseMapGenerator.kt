@@ -354,6 +354,7 @@ abstract class BaseMapGenerator {
             "ThreeLine" -> ThreeLineMapGenerator(ThreeLineMapGenerator.ThreeLineMapGeneratorData.fromOnj(onj))
             "Radial" -> RadialMapGenerator(RadialMapGenerator.RadialMapGeneratorData.fromOnj(onj))
             "StaticMap" -> StaticMapGenerator(onj.get<String>("name"))
+            "PointCloud" -> PointCloudMapGenerator(PointCloudMapGenerator.PointCloudMapGeneratorData.fromOnj(onj))
             else -> throw RuntimeException("unknown MapGenerator: $name")
         }
 
