@@ -434,7 +434,7 @@ class Card(
                     )
                     include(anim)
                 }
-                include(effect.onTrigger(this@Card, triggerInformation, controller))
+                include(effect.trigger(this@Card, triggerInformation, controller))
             }
         }
 
@@ -612,6 +612,7 @@ class Card(
                             isHidden = it.getOr("isHidden", false),
                             cacheAffectedCards = it.getOr("cacheAffectedCards", false),
                             canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
+                            maxExecutions = it.getOr("maxExecutions", -1L).toInt(),
                             onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
                                 arr
                                     .value

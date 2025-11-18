@@ -31,7 +31,7 @@ hoverDetailDescriptions: [
     {
         keyword: "DISINTEGRATION",
         groupName: "trait",
-        description: "$trait$DISINTEGRATION$trait$\nA bullet with disintegration loses 1 dmg On-Rotate.",
+        description: "$trait$DISINTEGRATION$trait$\nA bullet with disintegration loses 1 dmg On-Rotate. When a bullet with disintegration has 0 dmg, destroy it.",
     },
     {
         keyword: "SPRAY",

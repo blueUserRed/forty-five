@@ -171,6 +171,19 @@ class GameControllerImpl(
                 _encounterModifiers.forEach { it.second.onStart(this@GameControllerImpl) }
             }
             action { chooseEnemyActions() }
+            later {
+                cardStack.cards().forEach { card ->
+                    val info = createTriggerInfo(card)
+                    val eventBefore = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, true, info)
+                    val eventAfter = eventBefore.copy(before = false)
+                    gameEvents.fire(eventBefore)
+                    include(eventBefore.createTimeline())
+                    includeLater({
+                        gameEvents.fire(eventAfter)
+                        eventAfter.createTimeline()
+                    })
+                }
+            }
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
                 val startTriggerInformation = createTriggerInfo(null)
@@ -584,6 +597,17 @@ class GameControllerImpl(
     ): Timeline = Timeline.timeline {
         var orbAnimationTimeline: Timeline? = null
         val info = createTriggerInfo(card, sourceCard = source)
+        if (cardIsntActuallyInStack) later {
+            // move card from limbo to stack and then from the stack to the hand, to keep things consistent
+            val limboEventBefore = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, info)
+            val limboEventAfter = limboEventBefore.copy(before = false)
+            gameEvents.fire(limboEventBefore)
+            include(limboEventBefore.createTimeline())
+            includeLater({
+                gameEvents.fire(limboEventAfter)
+                limboEventAfter.createTimeline()
+            })
+        }
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.STACK, Zone.HAND, before = true, info)
         includeLater({
             gameEvents.fire(beforeEvent)

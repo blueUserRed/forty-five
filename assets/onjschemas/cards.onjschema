@@ -28,6 +28,7 @@ var effectDefinition = {
     condition?: { ...* },
     canPreventEnteringGame?: boolean,
     isHidden?: boolean,
+    maxExecutions?: int,
     cacheAffectedCards?: boolean,
 };
 

@@ -274,12 +274,12 @@ cards: [
         name: "bulletBullet",
         title: "Bullet Bullet",
         flavourText: "Flavortext Flavortext",
-        description: "$trigger$On-Placedown:$trigger$\nCreate 3 cards named [Bullet] in your hand",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$CREATE$keyword$ 2 cards named [Bullet] in your hand",
         baseDamage: 16,
         effects: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
-                effect: putCardInHand("bullet", 3#val)
+                effect: putCardInHand("bullet", 2#val)
             }
         ],
         cost: 2,
@@ -417,7 +417,7 @@ cards: [
     {
         name: "bull_et",
         title: "Bull et",
-        flavourText: "§§card_symbol_text_i_equals§§",
+        flavourText: "Ole! Ole! Ole! Ole!", // TODO: the fancy é
         description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
         baseDamage: 5,
         effects: [
@@ -582,9 +582,9 @@ cards: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgMultiplier(
                     bSelectSelf(),
-                    damageOfSelf() * 0.5,
+                    1.5,
                     $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
                     sourceCardInZone(zone.revolver)
                 )
@@ -793,14 +793,14 @@ cards: [
         title: "Brick Bullet",
         flavourText: "I've not thrown this at a homeless man! It slipped out of my hand!",
         description: "$trigger$On-Placedown:$trigger$\n You get $status$SHIELD$status$ (6)",
-        baseDamage: 7,
+        baseDamage: 10,
         effects: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
-                effect: givePlayerStatus(shield(6#val))
+                effect: givePlayerStatus(shield(10#val))
             }
         ],
-        cost: 1,
+        cost: 2,
         tags: ["pool1", "rarity1"],
         price: 50,
     },
@@ -1343,6 +1343,27 @@ cards: [
         dark: true,
         cost: 2,
         tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "bulletOfSouls",
+        title: "Bullet of Souls",
+        flavourText: "",
+        description: "This bullet has +3 dmg for every Bullet currently in the Afterlife",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: leaveZone(zone.limbo, "onlySelf", false),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(inZone(zone.afterlife)) * 3,
+                    changedInOrOutOfZone(zone.afterlife, false, "allCards")
+                )
+            },
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity2"],
         price: 50,
     },
 
