@@ -13,6 +13,11 @@ class CardStack(
         dirty()
     }
 
+    fun addCardAtTop(card: Card) {
+        cards.add(0, card)
+        dirty()
+    }
+
     fun set(cards: MutableList<Card>) {
         this.cards = cards
         dirty()

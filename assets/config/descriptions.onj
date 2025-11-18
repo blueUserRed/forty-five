@@ -63,6 +63,11 @@ hoverDetailDescriptions: [
         groupName: "keyword",
         description: "$trait$SEARCH$trait$\nPuts a random card from the deck into the players hand, that matches the requirement.",
     },
+    {
+        keyword: "CREATE",
+        groupName: "keyword",
+        description: "$trait$CREATE$trait$\ncreated cards get removed after the encounter",
+    },
 ],
 
 hoverDetailDescriptionGroups: [

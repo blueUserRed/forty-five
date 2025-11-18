@@ -165,10 +165,19 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun putCardInHand(name: OnjString, amount: OnjEffectValue): OnjEffect = OnjEffect(
         Effect.PutCardInHand(
-        name.value,
-        amount.value,
-        EffectData()
-    ))
+            name.value,
+            amount.value,
+            EffectData()
+        )
+    )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun putCardsInStack(name: OnjString, amount: OnjEffectValue): OnjEffect =
+        OnjEffect(Effect.PutCardInStack(
+            name.value,
+            amount.value,
+            EffectData()
+        ))
 
     @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int]")
     fun protect(bulletSelector: OnjBulletSelector, shots: OnjInt): OnjEffect =
@@ -441,16 +450,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         BulletSelector.ByLambda { info, card ->
             val p = predicate.value
             val controller = info.controller
-            val revolver = controller.cardsInRevolver().filter { cardToCheck ->
+            controller.allCards.filter { cardToCheck ->
                 p.check(cardToCheck, controller, card)
             }
-            val hand = controller.cardsInHand.filter { cardToCheck ->
-                p.check(cardToCheck, controller, card)
-            }
-            val stack = controller.cardStack.cards().filter { cardToCheck ->
-                p.check(cardToCheck, controller, card)
-            }
-            revolver + hand + stack
         }
     )
 
@@ -566,6 +568,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.OPERATOR)
     fun star(value: OnjEffectValue, multiplier: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
         floor(value.value(controller, card, triggerInformation) * multiplier.value.toFloat()).toInt()
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun damageOfSelf(): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+        card?.curDamage(controller) ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
+    fun damageOfCard(predicate: OnjCardPredicate): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+        val p = predicate.value
+        val card = controller.allCards.firstOrNull { cardToCheck ->
+            p.check(cardToCheck, controller, card)
+        }
+        card?.curDamage(controller) ?: 0
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)

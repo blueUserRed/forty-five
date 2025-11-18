@@ -106,6 +106,9 @@ class GameControllerImpl(
 
     private val createdCards: MutableList<Card> = mutableListOf()
 
+    override val allCards: List<Card>
+        get() = createdCards
+
     private lateinit var defaultBullet: CardPrototype
 
     private val mainTimeline: Timeline = Timeline().also { it.startTimeline() }
@@ -399,6 +402,30 @@ class GameControllerImpl(
             val event = Events.CardDestroyedEvent(card, triggerInfo)
             gameEvents.fire(event)
             include(event.createTimeline())
+        }
+    } }
+
+    override fun putCardsInStackTimeline(
+        cardName: String,
+        amount: Int,
+        sourceCard: Card?
+    ): Timeline = Timeline.timeline { later {
+        val proto = cardPrototypes.find { it.name == cardName }
+        requireNotNull(proto) { "No card with name $cardName" }
+        repeat(amount) {
+            val card = proto.create(screen)
+            val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, triggerInfo)
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
+            action { cardStack.addCardAtTop(card) }
+            later {
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
+            }
         }
     } }
 

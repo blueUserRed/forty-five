@@ -267,7 +267,7 @@ abstract class Effect(val data: EffectData) {
         data: EffectData
     ) : Effect(data) {
 
-    override fun copy(data: EffectData): Effect = PutCardInHand(cardName, amount, data)
+        override fun copy(data: EffectData): Effect = PutCardInHand(cardName, amount, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
@@ -277,7 +277,30 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun toString(): String {
-            return "PutCardInHand(amount=$amount)"
+            return "PutCardInHand(card=$cardName, amount=$amount)"
+        }
+    }
+
+    /**
+     * puts a number of specific cards in the players hand
+     */
+    class PutCardInStack(
+        val cardName: String,
+        val amount: EffectValue,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun copy(data: EffectData): Effect = PutCardInStack(cardName, amount, data)
+
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            include(controller.putCardsInStackTimeline(cardName, amount, sourceCard = card))
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun toString(): String {
+            return "PutCardInStack(card=$cardName, amount=$amount)"
         }
     }
 

@@ -576,7 +576,7 @@ cards: [
         name: "pppBullet",
         title: "+P+ Bullet",
         flavourText: "This Bullet has \"Manufactured in New Hemingway\" engraved in it. The overpressured Tip guarantees maximal effectiveness",
-        description: "If the enemy has at least 1 status effect: \nThis bullet gets +6 dmg",
+        description: "If the enemy has at least 1 status effect: \nThis bullet gets +50% dmg",
         baseDamage: 8,
         effects: [
             {
@@ -584,7 +584,7 @@ cards: [
                 isHidden: true,
                 effect: buffDmg(
                     bSelectSelf(),
-                    6#val,
+                    damageOfSelf() * 0.5,
                     $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
                     sourceCardInZone(zone.revolver)
                 )
@@ -1132,13 +1132,13 @@ cards: [
                 trigger: enterZone(zone.revolver, "onlySelf"),
                 effect: buffDmgLimitValidity(
                     bSelectRevolverTarget(false, false, "Choose Bullet to buff"),
-                    10#val,
+                    8#val,
                     sourceCardInZone(zone.revolver)
                 )
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "not used"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -1212,23 +1212,23 @@ cards: [
         effects: [
             {
                 trigger: cardsDrawn(false, true, true),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
                 trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
                 trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
                 trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "not used"],
+        tags: ["pool2", "rarity1"],
         price: 50,
     },
     {
@@ -1305,6 +1305,44 @@ cards: [
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "aircraftCarrierBullet",
+        title: "Aircraft Carrier Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\n$keyword$CREATE$keyword$ 3 [Kamikaze bullet] in your deck, then draw a card",
+        baseDamage: 15,
+        effects: [
+            {
+                trigger: shot(),
+                effect: putCardsInStack("kamikazeBullet", 3#val)
+            },
+            {
+                trigger: shot(),
+                effect: draw(1#val)
+            },
+        ],
+        cost: 3,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "amethystBullet",
+        title: "Amethyst Bullet",
+        flavourText: "",
+        description: "$trigger$On-Turn-Begin:$trigger$\nyou draw 1 Card",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: draw(1#val)
+            },
+        ],
+        dark: true,
+        cost: 2,
+        tags: ["pool1", "rarity3"],
         price: 50,
     },
 

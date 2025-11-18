@@ -3,7 +3,6 @@ package com.microwavestudios.fortyfive.game.controller
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameAnimation
-import com.microwavestudios.fortyfive.game.GameDirector
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -31,6 +30,7 @@ interface GameController {
     val cardsInHand: List<Card>
     val encounterModifiers: List<EncounterModifier>
     val curPlayerLives: Int
+    val allCards: List<Card>
 
     val activeEnemies: List<Enemy>
     val allEnemies: List<Enemy>
@@ -47,6 +47,8 @@ interface GameController {
     fun destroyCardTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
+
+    fun putCardsInStackTimeline(cardName: String, amount: Int, sourceCard: Card? = null): Timeline
 
     fun bounceBulletTimeline(card: Card): Timeline
 

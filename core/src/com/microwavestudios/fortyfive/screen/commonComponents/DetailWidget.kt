@@ -141,12 +141,6 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
 
             if (subtextParent == null && texts.isEmpty()) return null
 
-            if (texts.size <= 1) {
-                val singleTextParent = getSingleTextParent(texts)
-                if (addFadeInAction) addFadeInAction(singleTextParent)
-                return singleTextParent
-            }
-
             val parent = CustomBox(screen)
             parent.verticalAlign = CustomAlign.START
             parent.setPadding(15F)
