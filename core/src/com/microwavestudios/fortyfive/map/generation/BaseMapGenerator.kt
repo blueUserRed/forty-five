@@ -147,6 +147,10 @@ abstract class BaseMapGenerator {
         addNodeCollider(bounds)
     }
 
+    protected fun rotateNodes(angleRad: Double = data.rotation.toDouble() ) {
+        _allNodes.forEach { node -> node.rotate(angleRad) }
+    }
+
     protected fun newNode(
         x: Float = 0f,
         y: Float = 0f,
@@ -211,6 +215,7 @@ abstract class BaseMapGenerator {
         val lastNodeEvent: () -> MapEvent
         val lastNodeTexture: String
         val majorDifficulty: Int
+        val rotation: Float
 
         fun asOnj(): OnjObject
 
@@ -223,6 +228,7 @@ abstract class BaseMapGenerator {
             "lastNodeEvent" with lastNodeEvent().asOnjObject()
             "lastNodeTexture" with lastNodeTexture
             "majorDifficulty" with majorDifficulty
+            "rotation" with rotation
         }
     }
 

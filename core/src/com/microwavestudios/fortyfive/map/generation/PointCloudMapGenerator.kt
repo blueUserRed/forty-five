@@ -32,6 +32,7 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
         val groups = collectGroups()
         connectGroups(groups)
 
+        rotateNodes()
         calculateDistances(startNode)
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
@@ -212,6 +213,7 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
         val eventSpawner: List<EventSpawner>,
         val decorations: List<MapGeneratorDecoration>,
         val biome: String,
+        override val rotation: Float
     ) : BaseMapGeneratorData {
 
         override fun asOnj(): OnjObject = buildOnjObject {
@@ -248,7 +250,8 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
                     .get<OnjArray>("decorations")
                     .value
                     .map { MapGeneratorDecoration.fromOnj(it as OnjObject) },
-                onj.get<String>("biome")
+                onj.get<String>("biome"),
+                onj.get<Double>("rotation").toFloat()
             )
         }
     }

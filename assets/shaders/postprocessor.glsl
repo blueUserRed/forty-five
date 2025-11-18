@@ -23,8 +23,8 @@ void main() {
     vec4 color = v_color * texture2D(u_texture, v_texCoords);
     vec2 coords = v_texCoords;
     float dist = distance(coords, vec2(0.5));
-    color = mix(color, vec4(0.0, 0.0, 0.0, 1.0), 0.3);
-    outColor = mix(color, vec4(0.0, 0.0, 0.0, 1.0), dist);
-//    outColor = mix(color, vec4(0.0, 0.0, 0.0, 1.0), dist * dist * dist * 1.3);
+//    color = mix(color, vec4(0.0, 0.0, 0.0, 1.0), 0.3);
+//    outColor = mix(color, vec4(0.0, 0.0, 0.0, 1.0), dist);
+    outColor = mix(color, vec4(0.0, 0.0, 0.0, 1.0), dist * dist * dist * 1.3);
 }
 

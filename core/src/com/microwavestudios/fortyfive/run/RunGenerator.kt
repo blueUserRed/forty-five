@@ -347,6 +347,7 @@ class RunGenerator {
             verticalExtension = 50f,
             decorations = decorationsFor(biome, random),
             biome = biome,
+            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random)
         ).let { PointCloudMapGenerator(it) }
 
         fun threeLineMapGen(
@@ -447,7 +448,8 @@ class RunGenerator {
                     nodeTexture = "map_node_shop"
                 ),
             ),
-            decorations = decorationsFor(biome, random)
+            decorations = decorationsFor(biome, random),
+            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random)
         ).let { ThreeLineMapGenerator(it) }
 
 

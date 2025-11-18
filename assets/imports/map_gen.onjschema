@@ -44,6 +44,7 @@ var mapGeneratorSharedKeys = {
     firstNodeTexture: string,
     lastNodeEvent: $MapEvent,
     lastNodeTexture: string,
+    rotation: float,
 };
 
 $MapGenerator {
