@@ -69,7 +69,7 @@ dialogs: [
             },
             {
                 label: "runGiven",
-                rawText: "When you feel ready, you start the mission by clicking on 'Run Board' and selecting the run in the second row",
+                rawText: "When you feel ready, you start the mission by clicking on 'Run Board' and selecting progress run",
                 rightNpc: "npc.brother",
                 leftNpc: null,
                 talkingNpc: "npc.brother",
@@ -92,8 +92,14 @@ dialogs: [
                 next: $Continue {},
             },
             {
-                label: "giveRun",
-                rawText: "I'll add it to your Run Board. When the road is cleared we will finally be able to go to tabu letter outpost again",
+                rawText: "But you need to be careful: I heard reports of some outlaw with a gas mask, and where he was, fire always followed.",
+                rightNpc: "npc.brother",
+                leftNpc: null,
+                talkingNpc: "npc.brother",
+                next: $Continue {},
+            },
+            {
+                rawText: "I'll add the mission to your Run Board. When the road is cleared we will finally be able to go to tabu letter outpost again",
                 rightNpc: "npc.brother",
                 leftNpc: null,
                 talkingNpc: "npc.brother",

@@ -125,6 +125,10 @@ object GameInputs {
         Input.Cause.Keyboard(Keys.ENTER)
     ))
 
+    val dialogContinue = Input("dialogContinue", arrayOf(
+        Input.Cause.Keyboard(Keys.ENTER)
+    ))
+
 
     val mapEditorDelete = Input("mapEditorDelete", arrayOf(
         Input.Cause.Keyboard(Keys.DEL),

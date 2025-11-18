@@ -4,11 +4,14 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Promise
+import com.microwavestudios.fortyfive.utils.degrees
+import kotlin.math.sin
 
 abstract class ParticleRenderer(val emitter: ParticleSystem.Emitter) {
 
@@ -64,6 +67,7 @@ class TextureParticleRenderer(
     val width: Float,
     val height: Float,
     val color: Color,
+    val angleFromVelocity: Boolean,
     private val screen: OnjScreen,
     emitter: ParticleSystem.Emitter
 ) : ParticleRenderer(emitter), ResourceBorrower {
@@ -79,6 +83,27 @@ class TextureParticleRenderer(
         batch.setColor(color.r, color.g, color.b, color.a)
         val drawable = drawable.getOrNull() ?: return
         emitter.particles.forEach { particle ->
+            drawParticle(batch, drawable, particle)
+        }
+        batch.flush()
+        batch.color = originalColor
+    }
+
+    fun drawParticle(batch: Batch, drawable: Drawable, particle: ParticleSystem.Particle) {
+        if (angleFromVelocity && drawable is TransformDrawable) {
+            val velocity = particle.velocity
+            val mag = velocity.len()
+            val angle = sin(velocity.x / mag).degrees
+            drawable.draw(
+                batch,
+                particle.x - width / 2,
+                particle.y - height / 2,
+                width / 2f, height / 2f,
+                width, height,
+                1f, 1f,
+                angle
+            )
+        } else {
             drawable.draw(
                 batch,
                 particle.x - width / 2,
@@ -86,8 +111,6 @@ class TextureParticleRenderer(
                 width, height
             )
         }
-        batch.flush()
-        batch.color = originalColor
     }
 
 }

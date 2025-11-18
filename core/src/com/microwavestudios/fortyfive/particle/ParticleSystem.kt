@@ -92,7 +92,7 @@ class ParticleSystem(
 
         var ttlRange: LongRange? = null
 
-        var spawnPerFrame: IntRange? = null
+        var spawnPerFrame: Int? = null
 
         private var syncWithActor: Actor? = null
 
@@ -155,8 +155,8 @@ class ParticleSystem(
                 if (toRemove) particle.active = false
                 toRemove
             }
-            spawnPerFrame?.let { range ->
-                repeat(range.random()) {
+            spawnPerFrame?.let { amount ->
+                repeat(amount) {
                     spawn()
                 }
             }

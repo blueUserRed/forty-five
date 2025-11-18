@@ -760,6 +760,8 @@ textures: [
     },
     {
         name: "dialog_background",
+        useMipMaps: false,
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/events/dialog/background.png"
     },
     {
@@ -1251,7 +1253,7 @@ textures: [
     },
     {
         name: "particle_rain",
-        file: "blobs/particles/rain.png",
+        file: "blobs/particles/rain2.png",
     },
 ],
 

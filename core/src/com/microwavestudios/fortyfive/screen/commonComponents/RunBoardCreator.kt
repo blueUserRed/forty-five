@@ -203,6 +203,8 @@ object RunBoardCreator {
 
         val profile = FortyFive.profileManager.currentProfile ?: return@newGroup
 
+        val ready = profile.isSpecialRunCompleted("tutorial_run")
+
         box {
             flexDirection = FlexDirection.COLUMN
             width = worldWidth * 0.85f
@@ -212,7 +214,7 @@ object RunBoardCreator {
             centerY()
 
             if (!profile.isRunActive) {
-                noRunActiveBoard(this@runBoard, profile, events)
+                if (ready) noRunActiveBoard(this@runBoard, profile, events)
             } else box {
                 relativeWidth(100f)
                 relativeHeight(100f)

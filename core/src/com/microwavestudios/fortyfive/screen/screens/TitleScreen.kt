@@ -163,28 +163,33 @@ class TitleScreen : ScreenCreator() {
 
 //        testParticleSystem.emitter {
 //
-//            xRange = (-100f..worldWidth)
+//            xRange = (-400f..worldWidth)
 //            yRange = ((worldHeight + 200f)..(worldHeight + 400f))
-//            xVelocityRange = (-10f..10f)
-//            spawnPerFrame = (50..60)
-//            speedCap = (40f..40f)
+//            xVelocityRange = (-3f..3f)
+//            yVelocityRange = (-10f..10f)
+//            spawnPerFrame = 70
+////            speedCap = (40f..40f)
 //            ttlRange = (5000L..5000L)
 //
 //            initParticle { particle ->
-//                particle.applyForce(0f, -2f)
+//                particle.applyForce(0f, -0.5f)
 //            }
 //
 //            onUpdate {
 //                if (globalForce.x > 0) {
 //                    globalForce.x = (globalForce.x - 0.06f).coerceAtLeast(0f)
 //                }
-//                if (globalForce.x < 0.4f && Utils.coinFlip(0.08f)) {
-//                    globalForce.x += 0.9f
+//                if (globalForce.x < 0.2f && Utils.coinFlip(0.08f)) {
+//                    globalForce.x += 0.4f
 //                }
+//                if (spawnPerFrame!! > 70) spawnPerFrame = spawnPerFrame!! - 1
+//                if (spawnPerFrame!! < 70) spawnPerFrame = spawnPerFrame!! + 1
+//                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! + 30
+//                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! - 30
 //            }
 //
 //            renderer = TextureParticleRenderer("particle_rain", 20f * 0.7f, 35f * 0.7f,
-//                com.badlogic.gdx.graphics.Color(0f, 0f, 0.7f, 0.6f), screen, this)
+//                com.badlogic.gdx.graphics.Color(0f, 0f, 0.7f, 0.6f), true, screen, this)
 //        }
     }
 

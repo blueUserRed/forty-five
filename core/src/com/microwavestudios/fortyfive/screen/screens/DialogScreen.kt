@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.config.Npc
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.commonComponents.AnimatedAdvancedTextWidget
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -242,6 +243,12 @@ class DialogScreen : ScreenCreator() {
             paddingRight = 150F
             verticalTextAlign = CustomAlign.CENTER
             backgroundHandle = "dialog_background"
+            dropShadow = BakedDropShadow(
+                "dialog_background",
+                screen,
+                0f, 0f,
+                1.34f, 1.34f
+            )
 
             box {
                 positionType = PositionType.ABSOLUTE
@@ -264,6 +271,10 @@ class DialogScreen : ScreenCreator() {
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 onInput(GameInputs.interact) {
+                    if (!advTextWidget.isFinished) return@onInput
+                    events.fire(DialogScreenController.NextClicked)
+                }
+                onInput(GameInputs.dialogContinue) {
                     if (!advTextWidget.isFinished) return@onInput
                     events.fire(DialogScreenController.NextClicked)
                 }
