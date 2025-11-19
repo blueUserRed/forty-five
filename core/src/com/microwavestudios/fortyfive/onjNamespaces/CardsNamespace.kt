@@ -52,6 +52,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
                 triggerInformation!!.sourceCard!!.curDamage(controller)
             }
+            "uniqueCardsInTheStack" with OnjEffectValue { controller, _, _, ->
+                controller
+                    .cardStack
+                    .cards()
+                    .map { it.name }
+                    .toSet()
+                    .size
+            }
         },
         "zone" to buildOnjObject {
             Zone.entries.forEach {

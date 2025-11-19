@@ -599,7 +599,7 @@ cards: [
         title: "Deputies Bullet",
         flavourText: "",
         description: "This Bullet can't be placed in slot 3" + slot.3 + ".\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3" + slot.3 + " to your hand",
-        baseDamage: 6,
+        baseDamage: 8,
         effects: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
@@ -930,7 +930,7 @@ cards: [
             }
         ],
         dark: true,
-        cost: 4,
+        cost: 3,
         tags: ["pool2", "rarity1"],
         price: 50,
     },
@@ -1145,7 +1145,7 @@ cards: [
         name: "doodleBullet",
         title: "Doodle Bullet",
         flavourText: "A great activity when taking breaks from shooting people! Doodling!",
-        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +7 dmg.",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +4 dmg.",
         baseDamage: 4,
         effects: [
             {
@@ -1155,7 +1155,7 @@ cards: [
             },
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
-                effect: buffDmg(bSelectCachedBullets(), 7#val)
+                effect: buffDmg(bSelectCachedBullets(), 4#val)
             }
         ],
         cost: 1,
@@ -1403,6 +1403,26 @@ cards: [
         ],
         cost: 1,
         tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "excaliBullet",
+        title: "Excalibullet",
+        flavourText: "For the king!",
+        description: "$trigger$On-Placedown:$trigger$\nThe bullet in Slot 3 " + slot.3 + " gets plus x dmg, for as long as Excalibullet is in the revolver, where x is the number of unique bullets with no duplicates currently in your stack",
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: buffDmgLimitValidity(
+                    (inZone(zone.revolver) and inRevolverSlot(3))#bSelect,
+                    value.uniqueCardsInTheStack,
+                    sourceCardInZone(zone.revolver)
+                )
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
 

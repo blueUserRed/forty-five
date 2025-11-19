@@ -359,6 +359,7 @@ class GameControllerImpl(
                 card.setGame(this@GameControllerImpl)
             }
             .toMutableList()
+        println("\n${cardPrototypes.size}\n")
 
         cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
