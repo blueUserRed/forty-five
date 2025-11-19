@@ -28,6 +28,7 @@ import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
+import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
 import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.*
@@ -330,6 +331,7 @@ class GameControllerImpl(
     }
 
     override fun update() {
+        gameEvents.fire(EncounterScreen.UpdateUiEvent(this))
         _encounterModifiers.removeIf { (predicate, _) -> predicate != null && !predicate(this@GameControllerImpl) }
         _encounterModifiers.forEach { it.second.update(this@GameControllerImpl) }
 
@@ -359,7 +361,7 @@ class GameControllerImpl(
                 card.setGame(this@GameControllerImpl)
             }
             .toMutableList()
-        println("\n${cardPrototypes.size}\n")
+        println("\namount cards: ${cardPrototypes.size}\n")
 
         cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
@@ -471,24 +473,54 @@ class GameControllerImpl(
     } }
 
     override fun bounceBulletTimeline(card: Card): Timeline = Timeline.timeline {
-        val info = createTriggerInfo(card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, info)
-        includeLater({
-            gameEvents.fire(beforeEvent)
-            beforeEvent.createTimeline()
-        })
-        action {
-            if (card !in revolver.slots.mapNotNull { it.card }) {
-                throw RuntimeException("cant bounce card $card because it isn't in the revolver")
+
+        later  {
+            val freeSpace = maxSpaceInHand()
+            var leaveInRevolver = freeSpace == 0
+            val triggerInformation = createTriggerInfo(card)
+            val beforeEvent = Events.CardChangeZoneEvent(
+                card,
+                Zone.REVOLVER,
+                Zone.HAND,
+                true,
+                triggerInformation
+            )
+            if (!leaveInRevolver) {
+                gameEvents.fire(beforeEvent)
+                include(beforeEvent.createTimeline())
             }
-            revolver.removeCard(card)
-            tryPutCardInHand(card)
+            if (!leaveInRevolver) later {
+                include(card.actor.spawnAnimation(reverse = true))
+                action { card.actor.alpha = 0f }
+            }
+            if (!leaveInRevolver) later {
+                val success = maxSpaceInHand() > 0
+                if (success) revolver.removeCard(card)
+                require(tryPutCardInHand(card))
+                if (!success) leaveInRevolver = true
+                if (success) {
+                    delay(200)
+                    include(card.actor.spawnAnimation())
+                    action { card.actor.alpha = 1f }
+                    delay(100)
+                } else {
+                    action { card.actor.alpha = 1f }
+                }
+            }
+            later {
+                val afterEvent = Events.CardChangeZoneEvent(
+                    card,
+                    Zone.REVOLVER,
+                    Zone.HAND,
+                    false,
+                    triggerInformation
+                )
+                if (!leaveInRevolver) {
+                    gameEvents.fire(afterEvent)
+                    include(afterEvent.createTimeline())
+                }
+            }
         }
-        includeLater({
-            val afterEvent = beforeEvent.copy(before = false)
-            gameEvents.fire(afterEvent)
-            afterEvent.createTimeline()
-        })
     }
 
     override fun rotateRevolverTimeline(
@@ -582,56 +614,60 @@ class GameControllerImpl(
             card?.let { cardAcc?.add(it) }
         }
         later {
-            val card = card
+            var card = card
             if (card == null) {
-                include(putCardFromStackInHandTimeline(defaultBullet.create(screen), sourceCard, cardIsntActuallyInStack = true))
-            } else {
-                include(putCardFromStackInHandTimeline(card, sourceCard))
+                // create default card and put in stack
+                val info = createTriggerInfo(card, sourceCard = sourceCard)
+                card = defaultBullet.create(screen)
+                val limboEventBefore = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, info)
+                val limboEventAfter = limboEventBefore.copy(before = false)
+                gameEvents.fire(limboEventBefore)
+                include(limboEventBefore.createTimeline())
+                action { cardStack.addCardAtBottom(card) }
+                includeLater({
+                    gameEvents.fire(limboEventAfter)
+                    limboEventAfter.createTimeline()
+                })
             }
+            include(putCardFromStackInHandTimeline(card, sourceCard))
         }
     }
 
     override fun putCardFromStackInHandTimeline(
         card: Card,
         source: Card?,
-        cardIsntActuallyInStack: Boolean, // kinda stupid, but necessary when drawing the default bullet
     ): Timeline = Timeline.timeline {
         var orbAnimationTimeline: Timeline? = null
         val info = createTriggerInfo(card, sourceCard = source)
-        if (cardIsntActuallyInStack) later {
-            // move card from limbo to stack and then from the stack to the hand, to keep things consistent
-            val limboEventBefore = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, info)
-            val limboEventAfter = limboEventBefore.copy(before = false)
-            gameEvents.fire(limboEventBefore)
-            include(limboEventBefore.createTimeline())
-            includeLater({
-                gameEvents.fire(limboEventAfter)
-                limboEventAfter.createTimeline()
-            })
-        }
+        var canAdd = true
+        action { if (maxSpaceInHand() == 0) canAdd = false }
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.STACK, Zone.HAND, before = true, info)
         includeLater({
             gameEvents.fire(beforeEvent)
             beforeEvent.createTimeline()
-        })
+        }, { canAdd })
         action {
-            if (!cardIsntActuallyInStack) cardStack.remove(card)
-            cardHand.addCard(card)
+            if (maxSpaceInHand() == 0) canAdd = false
+            if (canAdd) cardStack.remove(card)
+            if (!canAdd) return@action
+            require(tryPutCardInHand(card))
             card.actor.alpha = 0f
             val event = Events.PlayCardOrbAnimation(card.actor)
             gameEvents.fire(event)
             orbAnimationTimeline = event.orbAnimationTimeline
         }
-        includeLater({ Timeline.timeline {
-            include(orbAnimationTimeline!!)
-            action { card.actor.alpha = 1f }
-            include(card.actor.spawnAnimation())
-        } }, { orbAnimationTimeline != null })
+        later {
+            if (orbAnimationTimeline != null && canAdd) {
+                include(orbAnimationTimeline!!)
+                action { card.actor.alpha = 1f }
+                include(card.actor.spawnAnimation())
+            }
+        }
         includeLater({
             val afterEvent = beforeEvent.copy(before = false)
             gameEvents.fire(afterEvent)
             afterEvent.createTimeline()
-        })
+        }, { canAdd })
         action { checkCardMaximums() }
     }
 
@@ -768,6 +804,15 @@ class GameControllerImpl(
         TODO("Not yet implemented")
     }
 
+    override fun removeAllPlayerStatusEffectsTimeline(): Timeline = Timeline.timeline {
+        action {
+            _playerStatusEffects.iterateRemoving { effect, remover ->
+                remover()
+                gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
+            }
+        }
+    }
+
     private fun parryTimeline(
         damage: Int,
         isPiercing: Boolean,
@@ -813,20 +858,48 @@ class GameControllerImpl(
     }
 
     private fun putCardBackInHandAfterShot(card: Card): Timeline = Timeline.timeline {
-        val triggerInformation = createTriggerInfo(card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, triggerInformation)
-        includeLater({
+        later  {
+            val freeSpace = maxSpaceInHand()
+            var putInStackInstead = freeSpace == 0
+            val triggerInformation = createTriggerInfo(card)
+            val beforeEvent = Events.CardChangeZoneEvent(
+                card,
+                Zone.REVOLVER,
+                if (putInStackInstead) Zone.STACK else Zone.HAND,
+                true,
+                triggerInformation
+            )
             gameEvents.fire(beforeEvent)
-            beforeEvent.createTimeline()
-        })
-        action {
-            revolver.removeCard(card)
-            tryPutCardInHand(card)
-        }
-        later {
-            val afterEvent = beforeEvent.copy(before = false)
-            gameEvents.fire(afterEvent)
-            include(afterEvent.createTimeline())
+            include(beforeEvent.createTimeline())
+            if (!putInStackInstead) later {
+                include(card.actor.spawnAnimation(reverse = true))
+                action { card.actor.alpha = 0f }
+            }
+            action { revolver.removeCard(card) }
+            if (!putInStackInstead) later {
+                val success = tryPutCardInHand(card)
+                if (!success) putInStackInstead = true
+                if (success) {
+                    delay(200)
+                    include(card.actor.spawnAnimation())
+                    action { card.actor.alpha = 1f }
+                    delay(100)
+                } else {
+                    action { card.actor.alpha = 1f }
+                }
+            }
+            later {
+                if (putInStackInstead) cardStack.addCardAtBottom(card)
+                val afterEvent = Events.CardChangeZoneEvent(
+                    card,
+                    Zone.REVOLVER,
+                    if (putInStackInstead) Zone.STACK else Zone.HAND,
+                    false,
+                    triggerInformation
+                )
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
+            }
         }
     }
 

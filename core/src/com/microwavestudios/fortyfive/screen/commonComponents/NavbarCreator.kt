@@ -110,7 +110,6 @@ object NavbarCreator {
                 syncDimensions()
             }
             screen.events.watchFor<Profile.HealthChangedEvent> { event ->
-                println(event.newHealth)
                 healthLabel.setText(event.newHealth.toString())
             }
         }

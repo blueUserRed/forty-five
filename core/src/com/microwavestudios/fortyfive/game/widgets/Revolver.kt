@@ -362,7 +362,10 @@ class RevolverSlot(
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
 //        if (card?.actor?.inAnimation ?: true) return
-        card?.actor?.setPosition(cardPosition())
+        val actor = card?.actor
+        if (actor != null && !actor.inTriggerPosition) {
+            actor.setPosition(cardPosition())
+        }
     }
 
     fun cardPosition(): Vector2 {

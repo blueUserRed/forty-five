@@ -75,31 +75,24 @@ abstract class Effect(val data: EffectData) {
                 store("selectedCards", cards)
             }
 
-            is BulletSelector.ByPopup -> {
-                includeLater(
-                    { Timeline.timeline {
-                        include(controller.cardSelectionPopupTimeline(
-                            bulletSelector.text,
-                            if (bulletSelector.includeSelf) null else self
-                        ))
-                        action {
-                            val cards = listOf(get<Card>("selectedCard"))
-                            cardsAffected(self, cards)
-                            store("selectedCards", cards)
-                        }
-                    } },
-                    { !bulletSelector.blocks(controller, self) }
-                )
-                includeLater(
-                    { Timeline.timeline {
-                       action {
-                           store("selectedCards", listOf<Card>())
-                       }
-                    } },
-                    { bulletSelector.blocks(controller, self) }
-                )
+            is BulletSelector.ByPopup -> later {
+                val cards = controller.cardsInRevolver()
+                val show = !(cards.size == 1 && cards.first() === self && !bulletSelector.includeSelf) &&
+                        !cards.isEmpty()
+                if (show) {
+                    include(controller.cardSelectionPopupTimeline(
+                        bulletSelector.text,
+                        if (bulletSelector.includeSelf) null else self
+                    ))
+                    action {
+                        val cards = listOf(get<Card>("selectedCard"))
+                        cardsAffected(self, cards)
+                        store("selectedCards", cards)
+                    }
+                } else {
+                    action { store("selectedCards", listOf<Card>()) }
+                }
             }
-
         }
     }
 
@@ -256,7 +249,7 @@ abstract class Effect(val data: EffectData) {
             }
         } }
 
-        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun copy(data: EffectData): Effect =
             BuffDamageTransformable(amount, bulletSelector, reevaluateOn, validityChecker, activeChecker, data)
@@ -506,6 +499,17 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun copy(data: EffectData): Effect = GivePlayerStatus(statusEffectCreator, data)
+    }
+
+    class RemoveAllPlayerStatusEffects(data: EffectData) : Effect(data) {
+
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(controller.removeAllPlayerStatusEffectsTimeline())
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = RemoveAllPlayerStatusEffects(data)
     }
 
     class TurnRevolver(

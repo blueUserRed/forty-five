@@ -281,6 +281,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             data = EffectData()
         ))
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun cleanse(): OnjEffect = OnjEffect(Effect.RemoveAllPlayerStatusEffects(EffectData()))
+
     @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector]")
     fun destroy(bulletSelector: OnjBulletSelector): OnjEffect =
         OnjEffect(Effect.Destroy(bulletSelector.value, EffectData()))

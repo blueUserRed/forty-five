@@ -502,7 +502,7 @@ cards: [
                 trigger: turnBegin(),
                 effect: buffDmg(
                     (not(isSelf()) and inZone(zone.revolver))#bSelect,
-                    12#val
+                    10#val
                 )
             }
         ],
@@ -555,14 +555,14 @@ cards: [
         title: "Hollowpoint Bullet",
         flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
         description: "If the enemy has shield:\nThis Bullet has +6 dmg",
-        baseDamage: 10,
+        baseDamage: 5,
         effects: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgMultiplier(
                     bSelectSelf(),
-                    6#val,
+                    1.5,
                     $TargetedEnemyShieldIsAtLeast { value: 1 }#modifierPredicate,
                     sourceCardInZone(zone.revolver)
                 )
@@ -648,6 +648,7 @@ cards: [
             },
             {
                 trigger: turnBegin(),
+                inZones: [zone.revolver],
                 effect: givePlayerStatus(poison(3#val, 9#val))
             }
         ],
@@ -994,7 +995,7 @@ cards: [
         title: "Kamikaze Bullet",
         flavourText: "Isn't like every bullet technically a kamikaze bullet?",
         description: "$trigger$On-Placedown:$trigger$\nAs an extra cost: destroy target other bullet.",
-        baseDamage: 10,
+        baseDamage: 12,
         effects: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
@@ -1423,6 +1424,38 @@ cards: [
         ],
         cost: 2,
         tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "hydroBullet",
+        title: "Hydro Bullet",
+        flavourText: "Don't forget to keep hydrated",
+        description: "$trigger$On-Shot:$trigger$\n$keyword$CLEANSE$keyword$",
+        baseDamage: 12,
+        effects: [
+            {
+                trigger: shot(),
+                effect: cleanse(),
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "decoyBullet",
+        title: "Decoy Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nPut target bullet into your hand",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: shot(),
+                effect: bounce(bSelectRevolverTarget(false, true, "Select bullet to put back into your hand")),
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
         price: 50,
     },
 

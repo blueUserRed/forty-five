@@ -197,10 +197,6 @@ class EncounterScreen : ScreenCreator() {
         )
     }
 
-    override fun update() {
-        gameEvents.fire(UpdateUiEvent)
-    }
-
     private fun CustomGroup.enemySpecialAttackAnim() = group {
         val parentWidth = 400f
         height = worldHeight
@@ -949,9 +945,8 @@ class EncounterScreen : ScreenCreator() {
                 y = 90f
             }
 
-            val controller = getScreenControllers().filterIsInstance<GameController>().first()
-            label("red wing", "{game.cardsInStack}", Color.White, (32 * 1.1).toInt()) {
-                gameEvents.watchFor<UpdateUiEvent> {
+            label("red wing", "", Color.White, (32 * 1.1).toInt()) {
+                gameEvents.watchFor<UpdateUiEvent> { (controller) ->
                     setText(controller.cardStack.size().toString())
                 }
                 centerX()
@@ -1457,5 +1452,5 @@ class EncounterScreen : ScreenCreator() {
         const val underDeckGroup: String = "encounter-screen-under-deck"
     }
 
-    private data object UpdateUiEvent
+    data class UpdateUiEvent(val controller: GameController)
 }

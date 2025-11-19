@@ -771,6 +771,7 @@ class CardActor(
     private var inDestroyAnim: Boolean = false
     private var spawnAnimStart: Long = 0L
     private var spawnAnimDuration: Int = 0
+    private var reverseSpawnAnim: Boolean = false
 
     override var dropShadow: DropShadow? = null
 
@@ -802,6 +803,9 @@ class CardActor(
 
     private var cardTexturePromise: Promise<Texture>? = null
     private var texture: Texture? = null
+
+    var inTriggerPosition: Boolean = false
+        private set
 
     init {
         initInput(this, screen)
@@ -889,7 +893,8 @@ class CardActor(
         batch.shader = shader.shader
         if (spawnAnimStart != 0L) {
             val time = TimeUtils.millis()
-            val percent = (time - spawnAnimStart).toFloat() / spawnAnimDuration.toFloat()
+            var percent = (time - spawnAnimStart).toFloat() / spawnAnimDuration.toFloat()
+            if (reverseSpawnAnim) percent = 1f - percent
             shader.shader.setUniformf("u_progress", percent)
         }
         return true
@@ -965,11 +970,12 @@ class CardActor(
         action { inDestroyAnim = false }
     }
 
-    fun spawnAnimation(): Timeline = Timeline.timeline {
+    fun spawnAnimation(reverse: Boolean = false): Timeline = Timeline.timeline {
         val duration = 300
         action {
             spawnAnimStart = TimeUtils.millis()
             spawnAnimDuration = duration
+            reverseSpawnAnim = reverse
         }
         delay(duration)
         action {
@@ -1003,6 +1009,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
+            inTriggerPosition = true
             if (card.inZone(Zone.REVOLVER)) touchable = Touchable.enabled
             FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
@@ -1043,6 +1050,7 @@ class CardActor(
         action {
             removeAction(moveAction)
             removeAction(scaleAction)
+            inTriggerPosition = false
         }
     }
 

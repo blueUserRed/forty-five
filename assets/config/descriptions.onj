@@ -68,6 +68,11 @@ hoverDetailDescriptions: [
         groupName: "keyword",
         description: "$trait$CREATE$trait$\ncreated cards get removed after the encounter",
     },
+    {
+        keyword: "CLEANSE",
+        groupName: "keyword",
+        description: "$trait$CLEANSE$trait$\nRemoves all status effects the player has",
+    },
 ],
 
 hoverDetailDescriptionGroups: [

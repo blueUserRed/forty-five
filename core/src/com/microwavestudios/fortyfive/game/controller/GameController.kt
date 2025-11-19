@@ -68,10 +68,11 @@ interface GameController {
 
     fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline
 
+    fun removeAllPlayerStatusEffectsTimeline(): Timeline
+
     fun putCardFromStackInHandTimeline(
         card: Card,
         source: Card? = null,
-        cardIsntActuallyInStack: Boolean = false, // kinda stupid, but necessary when drawing the default bullet
     ): Timeline
 
     fun destroyCardInHandTimeline(card: Card): Timeline
