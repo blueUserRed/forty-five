@@ -424,6 +424,7 @@ class Card(
         action { checkModifierTransformers(situation, triggerInformation, controller) }
 
         val prevPosition = Vector2(actor.x, actor.y)
+        val zoneAtStart = zone
         var isInTriggerPosition = false
         effects.forEach { effect ->
             later {
@@ -449,7 +450,12 @@ class Card(
         }
 
         later {
-            if (isInTriggerPosition) include(actor.animateBack(controller, prevPosition))
+            if (!isInTriggerPosition) return@later
+            if (zone == zoneAtStart) {
+                include(actor.animateBack(controller, prevPosition))
+            } else {
+                action { actor.skipAnimateBack() }
+            }
         }
     } }
 
@@ -1023,6 +1029,11 @@ class CardActor(
         }
         delay(100)
     } }
+
+    fun skipAnimateBack() {
+        inTriggerPosition = false
+        setScale(1f)
+    }
 
     fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {
         val target = controller

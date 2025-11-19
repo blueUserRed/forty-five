@@ -633,6 +633,21 @@ class GameControllerImpl(
         }
     }
 
+    override fun switchSlotOfBulletInRevolverTimeline(
+        card: Card,
+        newSlot: Int,
+    ): Timeline = Timeline.timeline {
+        action {
+            val currentSlot = revolver
+                .slots
+                .find { it.card === card }
+            requireNotNull(currentSlot) { "card $card not in revolver" }
+            revolver.removeCard(currentSlot.num)
+            requireNull(revolver.getCardInSlot(newSlot)) { "cant switch slot of bullet to a used one" }
+            revolver.setCard(newSlot, card)
+        }
+    }
+
     override fun putCardFromStackInHandTimeline(
         card: Card,
         source: Card?,
@@ -1312,12 +1327,11 @@ class GameControllerImpl(
     }
 
     object Config {
-        const val baseReserves = 4
+        const val baseReserves = 10
+//        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-//        const val cardsToDrawInFirstRound = 20
         const val cardsToDrawInFirstRound = 6
-//        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
         const val playerGetsRewardCardChance = 1f

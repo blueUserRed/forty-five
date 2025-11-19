@@ -676,6 +676,30 @@ abstract class Effect(val data: EffectData) {
 
     }
 
+    class BeHyperactive(data: EffectData) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+           val slot = controller
+               .revolver
+               .slots
+               .filter { it.card == null }
+               .randomOrNull()
+            if (slot == null) {
+                include(controller.bounceBulletTimeline(card))
+            } else {
+                include(controller.switchSlotOfBulletInRevolverTimeline(card, slot.num))
+            }
+        } }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = BeHyperactive(data)
+    }
+
 }
 
 /**

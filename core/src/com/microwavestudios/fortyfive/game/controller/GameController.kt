@@ -70,10 +70,9 @@ interface GameController {
 
     fun removeAllPlayerStatusEffectsTimeline(): Timeline
 
-    fun putCardFromStackInHandTimeline(
-        card: Card,
-        source: Card? = null,
-    ): Timeline
+    fun putCardFromStackInHandTimeline(card: Card, source: Card? = null): Timeline
+
+    fun switchSlotOfBulletInRevolverTimeline(card: Card, newSlot: Int): Timeline
 
     fun destroyCardInHandTimeline(card: Card): Timeline
 
