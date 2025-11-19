@@ -30,6 +30,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "CardPredicate" to OnjCardPredicate::class,
         "Zone" to OnjZone::class,
         "Trigger" to OnjTrigger::class,
+        "VariableTextureSelector" to OnjVariableTextureSelector::class,
     )
 
     @OnjNamespaceVariables
@@ -656,6 +657,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         first * second
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
+    fun atMost(value: OnjEffectValue, max: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+        val first = value.value(controller, card, triggerInformation)
+        first.coerceAtMost(max.value.toInt())
+    }
+
     @RegisterOnjFunction(schema = "params: []")
     fun damageOfSelf(): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
         card?.curDamage(controller) ?: 0
@@ -685,6 +692,16 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         val predicate = GamePredicate.fromOnj(value)
         return OnjCardModifierPredicate { controller, _, _ -> predicate.check(controller) }
     }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]")
+    fun numberBasedVariableTexture(value: OnjEffectValue, base: OnjInt): OnjVariableTextureSelector = OnjVariableTextureSelector(
+        VariableTextureSelector(
+            { controller, card ->
+                value.value(controller, card, null).toString()
+            },
+            base.value.toString()
+        )
+    )
 
     @Suppress("NAME_SHADOWING")
     private fun getStatusEffectValue(
@@ -816,5 +833,13 @@ class OnjZone(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--zone--'")
+    }
+}
+
+class OnjVariableTextureSelector(
+    override val value: VariableTextureSelector
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--VariableTextureSelector--'")
     }
 }

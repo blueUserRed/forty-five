@@ -1366,6 +1366,45 @@ cards: [
         tags: ["pool2", "rarity2"],
         price: 50,
     },
+    {
+        name: "cupidsArrow",
+        title: "Cupid's Arrow",
+        flavourText: "\"Love is giving someone the power to hurt you, and trusting them not to use it.\" Paulo Coelho Adultery",
+        description: "$trait$EVERLASTING$trait$\n$trigger$On-Shot:$trigger$\nDeal 4 damage to yourself",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: shot(),
+                effect: damagePlayer(4#val)
+            },
+        ],
+        traitEffects: [ "everlasting" ],
+        cost: 1,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "cardBullet",
+        title: "Card Bullet",
+        flavourText: "",
+        description: "This bullet has +1 dmg for every card in your hand",
+        baseDamage: 1,
+        variableTexture: numberBasedVariableTexture(countCards(inZone(zone.hand)) atMost 20, 0),
+        effects: [
+            {
+                trigger: leaveZone(zone.limbo, "onlySelf", false),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(inZone(zone.hand)),
+                    changedInOrOutOfZone(zone.hand, false, "allCards")
+                )
+            },
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
 
 ],
 

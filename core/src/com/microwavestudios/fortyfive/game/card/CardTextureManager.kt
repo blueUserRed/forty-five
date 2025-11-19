@@ -10,6 +10,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.RuntimeException
 
+// TODO: make sure this isn't leaking memory somehow
 class CardTextureManager {
 
     private val cardTextures: MutableList<CardTextureData> = mutableListOf()
@@ -33,26 +34,28 @@ class CardTextureManager {
             .forEach { cardTextures.add(it) }
     }
 
-    fun cardTextureFor(card: Card, cost: Int, damage: Int): Promise<Texture> {
+    fun cardTextureFor(card: Card, cost: Int, damage: Int, variablePostfix: String? = null): Promise<Texture> {
         statistics.lastLoadedCard = card.name
         val data = cardTextureDataFor(card)
-        val variant = data.findVariant(cost, damage) ?: run {
-            return createVariant(data, card, cost, damage)
+        val variant = data.findVariant(cost, damage, variablePostfix) ?: run {
+            return createVariant(data, card, cost, damage, variablePostfix)
         }
         variant.borrowers.add(card)
         statistics.cachedGets++
         return variant.texture
     }
 
-    private fun getCardPixmap(data: CardTextureData, card: Card): Promise<Pixmap> {
+    private fun getCardPixmap(data: CardTextureData, card: Card, variablePostfix: String?): Promise<Pixmap> {
         val pixmap = data.cardPixmap
-        pixmap?.let {
-            data.cardPixmap = it
-            return it.asPromise()
+        if (variablePostfix == null && pixmap != null) {
+            data.cardPixmap = pixmap
+            return pixmap.asPromise()
         }
-        val message = ServiceThreadMessage.LoadCardPixmap(card.name)
+        val message = ServiceThreadMessage.LoadCardPixmap(
+            variablePostfix?.let { "${card.name}-$it" } ?: card.name
+        )
         FortyFive.serviceThread.sendMessage(message)
-        message.promise.then { data.cardPixmap = it }
+        if (variablePostfix == null) message.promise.then { data.cardPixmap = it }
         statistics.pixmapLoads++
         return message.promise
     }
@@ -61,9 +64,10 @@ class CardTextureManager {
         data: CardTextureData,
         card: Card,
         cost: Int,
-        damage: Int
+        damage: Int,
+        variablePostfix: String?
     ): Promise<Texture> {
-        val pixmapPromise = getCardPixmap(data, card).chainMainThread { cardPixmap ->
+        val pixmapPromise = getCardPixmap(data, card, variablePostfix).chainMainThread { cardPixmap ->
             val padding = (cardPixmap.width * texturePaddingFraction).toInt()
             val pixmap = Pixmap(
                 cardPixmap.width + 2 * padding,
@@ -94,7 +98,7 @@ class CardTextureManager {
                 texture
             }
         }
-        val variant = CardTextureVariant(cost, damage, pixmapPromise, texturePromise, mutableListOf(card))
+        val variant = CardTextureVariant(cost, damage, pixmapPromise, texturePromise, mutableListOf(card), variablePostfix)
         data.variants.add(variant)
         return texturePromise
     }
@@ -120,7 +124,7 @@ class CardTextureManager {
             return
         }
         data.variants.remove(variant)
-        variant.pixmap.getOrError().dispose()
+        if (variant.variablePostFix != null) variant.pixmap.getOrError().dispose()
         variant.texture.getOrError().dispose()
         if (data.variants.isNotEmpty()) return
         if (preventCompleteUnload) return
@@ -143,11 +147,11 @@ class CardTextureManager {
         var cardPixmap: Pixmap? = null,
     ) {
 
-        fun findVariant(cost: Int, damage: Int): CardTextureVariant? =
-            variants.find { !it.isDisposing && it.cost == cost && it.damage == damage }
+        fun findVariant(cost: Int, damage: Int, variablePostFix: String?): CardTextureVariant? =
+            variants.find { !it.isDisposing && it.cost == cost && it.damage == damage && it.variablePostFix == variablePostFix }
 
         fun isStandardVariant(variant: CardTextureVariant): Boolean =
-            variant.cost == baseCost && variant.damage == baseDamage
+            variant.variablePostFix == null && variant.cost == baseCost && variant.damage == baseDamage
     }
 
     private data class CardTextureVariant(
@@ -156,6 +160,7 @@ class CardTextureManager {
         val pixmap: Promise<Pixmap>,
         val texture: Promise<Texture>,
         val borrowers: MutableList<Card>,
+        val variablePostFix: String?,
         var isDisposing: Boolean = false,
     )
 

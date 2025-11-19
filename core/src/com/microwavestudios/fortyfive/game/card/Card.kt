@@ -110,6 +110,7 @@ class Card(
     val price: Int,
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
+    val variableTexture: VariableTextureSelector?,
     val tags: List<String>,
     val lockedDescription: String?,
     isDark: Boolean,
@@ -195,6 +196,9 @@ class Card(
     private var game: GameController? = null
     internal val gameEvents: EventPipeline
         get() = game!!.gameEvents
+
+    var currentVariablePostfix: String? = null
+        private set
 
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
@@ -289,6 +293,12 @@ class Card(
             }
             modifierValuesDirty = false
             if (isRotten && newDamage == 0) controller.appendMainTimeline(controller.destroyCardTimeline(this))
+        }
+        variableTexture?.let { selector ->
+            val new = selector.selector(controller, this)
+            if (new == currentVariablePostfix) return@let
+            currentVariablePostfix = new
+            updateTexture(controller)
         }
     }
 
@@ -644,6 +654,7 @@ class Card(
                 screen = onjScreen,
                 isSaved = isSaved,
                 enableHoverDetails = enableHoverDetails,
+                variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 lockedDescription = onj.get<String?>("lockedDescription")
             )
             applyTraitEffects(card, onj)
@@ -684,6 +695,11 @@ class Card(
 interface CardModifier {
     val data: CardModifierData
 }
+
+data class VariableTextureSelector(
+    val selector: (controller: GameController, card: Card) -> String,
+    val base: String
+)
 
 data class CardDamageModifier(
     val damage: Int = 0,
@@ -792,7 +808,12 @@ class CardActor(
         bindDetailToInputState(GameInputs.States.focused)
         keyboardFocusable = KeyboardFocusable.LEAF
 
-        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
+            card,
+            card.baseCost,
+            card.baseDamage,
+            card.variableTexture?.base
+        )
 
         joinGroup(cardGroup)
         startDragAndDropOn(GameInputs.initDragAndDrop)
@@ -929,7 +950,7 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
-        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue)
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue, card.currentVariablePostfix)
     }
 
     // TODO: came up with system for animations
