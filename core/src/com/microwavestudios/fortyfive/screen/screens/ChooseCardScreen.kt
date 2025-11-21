@@ -147,6 +147,7 @@ class ChooseCardScreen : ScreenCreator() {
                 keyboardFocusable = KeyboardFocusable.LEAF
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
+                    touchable = Touchable.disabled
                     syncDimensions()
                 }
                 onInput(GameInputs.interact) {

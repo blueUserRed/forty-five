@@ -367,7 +367,6 @@ class GameControllerImpl(
                 card.setGame(this@GameControllerImpl)
             }
             .toMutableList()
-        println("\namount cards: ${cardPrototypes.size}\n")
 
         cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
@@ -1346,8 +1345,8 @@ class GameControllerImpl(
     }
 
     object Config {
-        const val baseReserves = 10
-//        const val baseReserves = 4
+//        const val baseReserves = 10
+        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
         const val cardsToDrawInFirstRound = 6
