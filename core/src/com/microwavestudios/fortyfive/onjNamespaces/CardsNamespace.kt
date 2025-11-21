@@ -153,13 +153,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, EffectValue, Trigger, CardModifierPredicate, CardModifierPredicate]")
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, EffectValue, Trigger, CardModifierPredicate, CardModifierPredicate, boolean]")
     fun buffDmgTransformable(
         bulletSelector: OnjBulletSelector,
         amount: OnjEffectValue,
         reevaluateOn: OnjTrigger,
         activeChecker: OnjCardModifierPredicate,
         validityChecker: OnjCardModifierPredicate,
+        keepModifierActive: OnjBoolean
     ): OnjEffect = OnjEffect(
         Effect.BuffDamageTransformable(
             amount.value,
@@ -167,6 +168,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             reevaluateOn = reevaluateOn.value,
             activeChecker = activeChecker.value,
             validityChecker = validityChecker.value,
+            keepModifierActive = keepModifierActive.value,
             data = EffectData()
         )
     )
@@ -184,6 +186,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             reevaluateOn = reevaluateOn.value,
             activeChecker = activeChecker.value,
             validityChecker = { _, _, _ -> true },
+            keepModifierActive = true,
             data = EffectData()
         )
     )
@@ -200,6 +203,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             reevaluateOn = reevaluateOn.value,
             activeChecker = { _, _, _ -> true },
             validityChecker = { _, _, _ -> true },
+            keepModifierActive = true,
             data = EffectData()
         )
     )
@@ -281,6 +285,26 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             data = EffectData()
         ))
 
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int]")
+    fun protectParryOnly(bulletSelector: OnjBulletSelector, parries: OnjInt): OnjEffect =
+        OnjEffect(Effect.ProtectParryOnly(
+            bulletSelector.value,
+            parries.value.toInt(),
+            activeChecker = { _, _, _ -> true },
+            validityChecker = { _, _, _ -> true },
+            data = EffectData()
+        ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, int, CardModifierPredicate]")
+    fun protectParryOnlyLimitValidity(bulletSelector: OnjBulletSelector, parries: OnjInt, validityChecker: OnjCardModifierPredicate): OnjEffect =
+        OnjEffect(Effect.ProtectParryOnly(
+            bulletSelector.value,
+            parries.value.toInt(),
+            activeChecker = { _, _, _ -> true },
+            validityChecker = validityChecker.value,
+            data = EffectData()
+        ))
+
     @RegisterOnjFunction(schema = "params: []")
     fun cleanse(): OnjEffect = OnjEffect(Effect.RemoveAllPlayerStatusEffects(EffectData()))
 
@@ -357,6 +381,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: []")
     fun turnEnd(): OnjTrigger = OnjTrigger(triggerForSituation<GameSituation.TurnEnd>())
+
+    @RegisterOnjFunction(schema = "params: [boolean]")
+    fun statusEffectInflicted(onlyFromBullet: OnjBoolean): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.StatusEffectApplied> { situation, card, info, controller ->
+            if (onlyFromBullet.value) info.sourceCard != null else true
+        }
+    )
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean, string]")
     fun zoneChange(

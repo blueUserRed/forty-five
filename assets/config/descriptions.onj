@@ -54,6 +54,16 @@ hoverDetailDescriptions: [
         description: "$trait$REINFORCED$trait$\nWhen parrying with a bullet that is reinforced, no dmg will come through, even if this bullets dmg value is smaller than the attack that is being parried.",
     },
     {
+        keyword: "JAMMED",
+        groupName: "trait",
+        description: "$trait$JAMMED$trait$\nWhen shooting or parrying with this bullet, the revolver doesn’t rotate",
+    },
+    {
+        keyword: "HARDENED",
+        groupName: "trait",
+        description: "$trait$HARDENED (x)$trait$\nFor the next x times this bullet is used to parry, it won't leave the revolver ",
+    },
+    {
         keyword: "DISCHARGE POISON",
         groupName: "keyword",
         description: "$trait$DISCHARGE POISON (x)$trait$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",

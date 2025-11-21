@@ -213,6 +213,7 @@ abstract class Effect(val data: EffectData) {
         private val reevaluateOn: Trigger,
         private val validityChecker: CardModifierPredicate,
         private val activeChecker: CardModifierPredicate,
+        private val keepModifierActive: Boolean,
         data: EffectData
     ) : Effect(data) {
 
@@ -228,6 +229,7 @@ abstract class Effect(val data: EffectData) {
                 sourceCard = card,
                 validityChecker = validityChecker,
                 activeChecker = activeChecker,
+                keepActive = keepModifierActive
             )
 
             val modifier = CardDamageModifier(
@@ -252,7 +254,7 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun copy(data: EffectData): Effect =
-            BuffDamageTransformable(amount, bulletSelector, reevaluateOn, validityChecker, activeChecker, data)
+            BuffDamageTransformable(amount, bulletSelector, reevaluateOn, validityChecker, activeChecker, keepModifierActive, data)
 
     }
 
@@ -286,7 +288,11 @@ abstract class Effect(val data: EffectData) {
 
         override fun copy(data: EffectData): Effect = GiveStatus(statusEffectCreator, data)
 
-        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
             triggerInformation
                 .targetedEnemies
                 .map {
@@ -294,11 +300,11 @@ abstract class Effect(val data: EffectData) {
                         controller,
                         card,
                         triggerInformation.isOnShot
-                    ), it)
+                    ), it, card)
                 }
                 .collectTimeline()
                 .let { include(it) }
-        }
+        } }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
@@ -390,6 +396,40 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = Protect(bulletSelector, shots, validityChecker, activeChecker, data)
 
         override fun toString(): String = "Protect()"
+    }
+
+    class ProtectParryOnly(
+        val bulletSelector: BulletSelector,
+        val parries: Int,
+        val validityChecker: CardModifierPredicate,
+        val activeChecker: CardModifierPredicate,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            val protectingModifier = ProtectingModifier(
+                shots = parries,
+                data = CardModifierData(
+                    source = cardDescName(card),
+                    sourceCard = card,
+                    validityChecker = validityChecker,
+                    activeChecker = activeChecker
+                )
+            )
+            action {
+                get<List<Card>>("selectedCards")
+                    .forEach { it.protectParryOnly(protectingModifier) }
+            }
+        }
+
+        override fun blocks(card: Card, controller: GameController) = bulletSelector.blocks(controller, card)
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect = ProtectParryOnly(bulletSelector, parries, validityChecker, activeChecker, data)
+
+        override fun toString(): String = "ProtectParryOnly()"
     }
 
     class Destroy(
@@ -492,7 +532,7 @@ abstract class Effect(val data: EffectData) {
                     controller,
                     card,
                     triggerInformation.isOnShot
-                ))
+                ), card)
             )
         }
 
@@ -793,6 +833,11 @@ sealed class GameSituation {
         val isSpecial: Boolean,
         val isFromBottom: Boolean,
         val cards: List<Card>
+    ) : GameSituation()
+
+    class StatusEffectApplied(
+        val statusEffect: StatusEffect,
+        val toPlayer: Boolean,
     ) : GameSituation()
 
     class CardReturnedHome(val card: Card) : GameSituation()

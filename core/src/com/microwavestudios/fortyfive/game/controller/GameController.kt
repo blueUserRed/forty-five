@@ -60,13 +60,13 @@ interface GameController {
 
     fun drawCardsTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false, sourceCard: Card? = null): Timeline
 
-    fun tryApplyStatusEffectToEnemyTimeline(statusEffect: StatusEffect, enemy: Enemy): Timeline
+    fun tryApplyStatusEffectToEnemyTimeline(statusEffect: StatusEffect, enemy: Enemy, source: Card? = null): Timeline
 
     fun damagePlayerTimeline(damage: Int, triggeredByStatusEffect: Boolean = false, isPiercing: Boolean = false): Timeline
 
     fun playerDeathTimeline(): Timeline
 
-    fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline
+    fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect, source: Card? = null): Timeline
 
     fun removeAllPlayerStatusEffectsTimeline(): Timeline
 

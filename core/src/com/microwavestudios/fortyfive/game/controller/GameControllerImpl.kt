@@ -239,6 +239,12 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.StatusEffectAppliedEvent> { event ->
+            val situation = GameSituation.StatusEffectApplied(event.statusEffect, event.toPlayer)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
         gameEvents.watchFor<Events.EndTurnEvent> { event ->
             val situation = GameSituation.TurnEnd
             event.append {
@@ -409,6 +415,7 @@ class GameControllerImpl(
             afterlife.pushCard(card)
             card.actor.alpha = 1f
         }
+        delay(400)
         later {
             val afterEvent = beforeEvent.copy(before = false)
             gameEvents.fire(afterEvent)
@@ -691,10 +698,15 @@ class GameControllerImpl(
 
     override fun tryApplyStatusEffectToEnemyTimeline(
         statusEffect: StatusEffect,
-        enemy: Enemy
+        enemy: Enemy,
+        source: Card?,
     ): Timeline = Timeline.timeline { later {
         if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
-        action { enemy.applyEffect(statusEffect, this@GameControllerImpl) }
+        enemy.applyEffect(statusEffect, this@GameControllerImpl)
+        val info = createTriggerInfo(null, sourceCard = source)
+        val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
     } }
 
     override fun damagePlayerTimeline(
@@ -791,19 +803,26 @@ class GameControllerImpl(
         }
     }
 
-    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline = Timeline.timeline {
-        action {
+    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect, source: Card?): Timeline = Timeline.timeline {
+        later {
             FortyFive.logger.debug(logTag, "status effect $effect applied to player")
+            var stacked = false
             _playerStatusEffects
                 .find { it.canStackWith(effect) }
                 ?.let {
                     FortyFive.logger.debug(logTag, "stacked with $it")
                     it.stack(effect)
-                    return@action
+                    stacked = true
                 }
-            effect.start(this@GameControllerImpl)
-            _playerStatusEffects.add(effect)
-            gameEvents.fire(Events.AddedPlayerStatusEffect(effect))
+            if (!stacked) {
+                effect.start(this@GameControllerImpl)
+                _playerStatusEffects.add(effect)
+                gameEvents.fire(Events.AddedPlayerStatusEffect(effect)) // separate event for UI purposes
+            }
+            val info = createTriggerInfo(null, sourceCard = source)
+            val event = Events.StatusEffectAppliedEvent(effect, true, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
         }
     }
 
@@ -845,7 +864,7 @@ class GameControllerImpl(
         later {
             val parried = parryEnterEvent.resolutionPromise.getOrError()
             if (parried) {
-                include(card.afterShot(this@GameControllerImpl, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+                include(card.afterShot(this@GameControllerImpl, true, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
                 include(rotateRevolverTimeline(card.rotationDirection))
                 if (remainingDamage > 0) {
                     include(damagePlayerTimeline(remainingDamage, false, isPiercing))
@@ -982,7 +1001,7 @@ class GameControllerImpl(
             // Not handled via event because things like encounter modifiers or
             // status effects shouldn't hook into here
             include(checkTrigger(GameSituation.OnShot(card), triggerInfo))
-            include(card.afterShot(this@GameControllerImpl, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+            include(card.afterShot(this@GameControllerImpl, false, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
         }
         include(rotateRevolverTimeline(rotationDirection))
         includeLater(
@@ -1406,6 +1425,12 @@ class GameControllerImpl(
         data class RevolverRotatedEvent(
             val rotation: RevolverRotation,
             val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class StatusEffectAppliedEvent(
+            val statusEffect: StatusEffect,
+            val toPlayer: Boolean,
+            val triggerInformation: TriggerInformation,
         ) : TimelineBuildingEvent()
 
         data class AfterShotEvent(

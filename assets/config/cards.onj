@@ -402,7 +402,7 @@ cards: [
         name: "luckyLukesBullet",
         title: "Lucky Dukes Bullet",
         flavourText: "",
-        description: "$trigger$On-Placedown:$trigger$\n deal 6 dmg to target enemy", // TODO: desc
+        description: "$trigger$On-Placedown:$trigger$\n deal 6 dmg to target enemy",
         baseDamage: 6,
         effects: [
             {
@@ -475,10 +475,12 @@ cards: [
         effects: [
             {
                 trigger: cardsDrawn(false, 1),
+                inZones: [zone.revolver],
                 effect: buffDmg(bSelectSelf(), 5#val)
             },
             {
                 trigger: cardsDrawn(true, 2),
+                inZones: [zone.revolver],
                 isHidden: true,
                 effect: reserveGain(value.amountOfCardsDrawn * 0.5),
             }
@@ -500,6 +502,7 @@ cards: [
             },
             {
                 trigger: turnBegin(),
+                inZones: [zone.revolver],
                 effect: buffDmg(
                     (not(isSelf()) and inZone(zone.revolver))#bSelect,
                     10#val
@@ -777,9 +780,9 @@ cards: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgMultiplier(
                     bSelectSelf(),
-                    6#val,
+                    1.5,
                     $TargetedEnemyHealthAbovePercent { value: 0.5 }#modifierPredicate,
                     sourceCardInZone(zone.revolver)
                 )
@@ -1015,6 +1018,7 @@ cards: [
         effects: [
             {
                 trigger: cardDestroyed("allCards"),
+                inZones: [zone.revolver],
                 effect: damageDirect(value.sourceCardDamage * 2, false)
             }
         ],
@@ -1027,12 +1031,12 @@ cards: [
         title: "Molotov Bullet",
         flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
         description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
-        baseDamage: 6,
+        baseDamage: 2,
         traitEffects: [ "spray" ],
         effects: [
             {
                 trigger: shot(),
-                effect: giveStatus(burning(1#val, burningPercent, false))
+                effect: giveStatus(burning(2#val, burningPercent, false))
             }
         ],
         cost: 1,
@@ -1467,11 +1471,92 @@ cards: [
         effects: [
             {
                 trigger: rotation(),
+                inZones: [zone.revolver],
                 effect: beHyperactive(),
             }
         ],
         cost: 1,
         tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "damascusSteelBullet",
+        title: "Damascus Steel Bullet",
+        flavourText: "",
+        description: "$trait$JAMMED$trait$\n$trait$HARDENED$trait$ (2)",
+        baseDamage: 9,
+        rotation: $Dont {},
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                isHidden: true,
+                effect: protectParryOnlyLimitValidity(
+                    bSelectSelf(),
+                    2,
+                    sourceCardInZone(zone.revolver)
+                ),
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "gladiatorsBullet",
+        title: "Gladiators Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nAll other bullets in the revolver get $trait$PROTECTED$trait$ (1) ",
+        baseDamage: 15,
+        effects: [
+            {
+                trigger: shot(),
+                effect: protect(
+                    (inZone(zone.revolver) and not(isSelf()))#bSelect,
+                    1,
+                )
+            }
+        ],
+        cost: 4,
+        tags: ["pool1", "rarity1", "not used"],
+        price: 50,
+    },
+    {
+        name: "possessedBullet",
+        title: "Possessed Bullet",
+        flavourText: "",
+        description: "$trigger$On-Destroy:$trigger$\nThe revolver rotates left once",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: cardDestroyed("onlySelf"),
+                effect: turnRevolver("left", 1)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "spiderBullet",
+        title: "Spider Bullet",
+        flavourText: "Im sorry to everyone with arachnophobia... tho, if I had that, i probably wouldn't look at that hairy thing just to read an apology. Ew",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet inflicts a Statuseffect:$trigger$\nThis bullet gets +5 dmg and you draw 1 card",
+        baseDamage: 3,
+        effects: [
+            {
+                trigger: statusEffectInflicted(true),
+                inZones: [zone.revolver],
+                effect: buffDmg(bSelectSelf(), 5#val)
+            },
+            {
+                trigger: statusEffectInflicted(true),
+                inZones: [zone.revolver],
+                effect: draw(1#val)
+            },
+        ],
+        cost: 2,
+        dark: true,
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
 

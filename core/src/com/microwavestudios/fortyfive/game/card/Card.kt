@@ -163,7 +163,10 @@ class Card(
 
     private val damageModifiers: MutableList<Pair<Int, CardDamageModifier>> = mutableListOf()
     private val costModifiers: MutableList<CardCostModifier> = mutableListOf()
+
+    // first one protects in general, for shot and parry, second one protects for parry only
     private val protectingModifiers: MutableList<ProtectingModifier> = mutableListOf()
+    private val parryOnlyProtectingModifiers: MutableList<ProtectingModifier> = mutableListOf()
 
     /**
      * first is the keyword, second is the actual text
@@ -275,6 +278,7 @@ class Card(
             checkValiditySingleModifierList(controller, costModifiers, getter = { it }) ||
             checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) ||
             checkValiditySingleModifierList(controller, protectingModifiers, getter = { it })
+            checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
         if (somethingChanged) modifiersChanged()
     }
 
@@ -318,11 +322,24 @@ class Card(
      */
     fun afterShot(
         controller: GameController,
+        wasParry: Boolean,
         putCardInTheHand: (Card) -> Timeline,
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
         action {
             if (isEverlasting && !controller.isEverlastingDisabled) {
+                skip()
+                return@action
+            }
+            if (wasParry && parryOnlyProtectingModifiers.isNotEmpty()) {
+                val effect = parryOnlyProtectingModifiers.first()
+                val newEffect = effect.copy(shots = effect.shots - 1)
+                if (newEffect.shots == 0) {
+                    parryOnlyProtectingModifiers.removeFirst()
+                } else {
+                    parryOnlyProtectingModifiers[0] = newEffect
+                }
+                modifiersChanged()
                 skip()
                 return@action
             }
@@ -337,6 +354,12 @@ class Card(
                 modifiersChanged()
                 skip()
             }
+        }
+        action {
+            damageModifiers.removeIf { !it.second.data.keepActive }
+            protectingModifiers.removeIf { !it.data.keepActive }
+            parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
+            modifiersChanged()
         }
         if (isUndead) include(putCardInTheHand(this@Card))
         else include(putCardInTheStack(this@Card))
@@ -353,6 +376,15 @@ class Card(
             return
         }
         protectingModifiers.add(protectingModifier.copy())
+        modifiersChanged()
+    }
+
+    fun protectParryOnly(protectingModifier: ProtectingModifier) {
+        if (isUndead) {
+            FortyFive.logger.debug(logTag, "cant protect undead bullet")
+            return
+        }
+        parryOnlyProtectingModifiers.add(protectingModifier.copy())
         modifiersChanged()
     }
 
@@ -517,6 +549,11 @@ class Card(
         if (protectingModifiers.isNotEmpty()) {
             val total = protectingModifiers.sumOf { it.shots }
             currentEffects.add("protected" to "\$trait\$+ PROTECTED ($total)\$trait\$")
+        }
+
+        if (parryOnlyProtectingModifiers.isNotEmpty()) {
+            val total = parryOnlyProtectingModifiers.sumOf { it.shots }
+            currentEffects.add("hardened" to "\$trait\$+ HARDENED ($total)\$trait\$")
         }
 
         currentHoverTexts = currentEffects
@@ -729,6 +766,7 @@ data class CardModifierData(
     val sourceCard: Card? = null,
     val validityChecker: CardModifierPredicate = { _, _, _ -> true },
     val activeChecker: CardModifierPredicate = { _, _, _ -> true },
+    val keepActive: Boolean = false,
     var wasActive: Boolean = true,
 )
 
