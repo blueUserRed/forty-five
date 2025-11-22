@@ -58,6 +58,11 @@ project(":desktop") {
 
 project(":onj") {
     apply(plugin = "kotlin")
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
     dependencies {
         implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
     }
