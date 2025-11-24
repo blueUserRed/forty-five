@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.screen.screens
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
@@ -108,6 +109,15 @@ class ChooseCardScreen : ScreenCreator() {
                     clearChildren()
                     val data = getDataForCards(cards.size)
                     var i = 0
+                    if (cards.isEmpty()) label("red wing", "No cards to collect remain!\nClick to return", fontSize = 27) {
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        syncDimensions()
+                        setAlignment(Align.center)
+                        onInput(GameInputs.interact) {
+                            FortyFive.screenManager.screenFinished()
+                        }
+                    }
                     allActors(cards.map { it.actor }) {
                         width = 160f
                         height = 160f

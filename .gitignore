@@ -19,6 +19,7 @@ assets/profiles/*
 assets/error_logs/*
 website/out/*
 website/assets/*
+.kotlin/*
 
 ## Java
 

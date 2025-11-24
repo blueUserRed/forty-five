@@ -31,8 +31,7 @@ nodes: [
                 ],
                 encounterModifier: [
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -68,8 +67,7 @@ nodes: [
                 encounterModifier: [
                     'moist',
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -116,8 +114,7 @@ nodes: [
                 encounterModifier: [
                     'rain',
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -152,8 +149,7 @@ nodes: [
                 ],
                 encounterModifier: [
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -188,8 +184,7 @@ nodes: [
                 encounterModifier: [
                     'moist',
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -224,8 +219,7 @@ nodes: [
                 encounterModifier: [
                     'rain',
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -270,8 +264,7 @@ nodes: [
                 ],
                 encounterModifier: [
                 ],
-                forceCards: [
-                ],
+                forceCards: null,
                 shuffleCards: true,
                 unadjustedMajorDifficulty: 1,
                 majorDifficulty: 1,
@@ -767,4 +760,4 @@ camPosOffset: [
     0.0,
     0.0,
 ],
-majorDifficulty: 0,
+majorDifficulty: 1,
