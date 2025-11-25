@@ -577,9 +577,10 @@ class EncounterScreen : ScreenCreator() {
             height = enemyHeight
 
             keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
 
             onInput(GameInputs.interact) {
-                if (enemySelected) return@onInput
+                if (enemySelected || enemy.isDefeated) return@onInput
                 gameEvents.fire(GameControllerImpl.Events.EnemySelected(enemy))
             }
 
@@ -686,6 +687,7 @@ class EncounterScreen : ScreenCreator() {
             group {
                 relativeWidth(100f)
                 height = enemyHeight * 0.65f
+                touchable = Touchable.disabled
 
                 image {
                     // TODO: add anims back
@@ -712,6 +714,7 @@ class EncounterScreen : ScreenCreator() {
                     centerX()
                     centerY()
                     relativeWidth(60f)
+                    touchable = Touchable.disabled
                     onLayoutAndNow { height = width }
                     animateRotationSinus(
                         amplitude = Math.PI.toFloat() * 1.8f,

@@ -60,6 +60,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .toSet()
                     .size
             }
+            "timeInRevolver"  with OnjEffectValue { controller, card, _, ->
+                controller.turnCounter - card!!.enteredOnTurn!!
+            }
         },
         "zone" to buildOnjObject {
             Zone.entries.forEach {

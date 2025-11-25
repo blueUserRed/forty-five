@@ -1621,6 +1621,22 @@ cards: [
         tags: ["pool2", "rarity2"],
         price: 50,
     },
+    {
+        name: "eepyBullet",
+        title: "Eepy Bullet",
+        flavourText: "Zzzzzzz",
+        description: "$trigger$On-Leave:$trigger$\nDraw x cards, where x is the number of turns this bullet stayed in the revolver",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: leaveZone(zone.revolver, "onlySelf"),
+                effect: draw(value.timeInRevolver)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
 
 ],
 

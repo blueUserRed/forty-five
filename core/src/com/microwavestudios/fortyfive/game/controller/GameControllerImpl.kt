@@ -159,9 +159,7 @@ class GameControllerImpl(
 
         bindGameEventListeners()
 
-        allEnemies = encounter.createEnemies()
-        gameEvents.fire(Events.SetupEnemies(allEnemies))
-        gameEvents.fire(Events.EnemySelected(allEnemies.first()))
+        setupEnemies()
 
         initCards()
         updateReserves(Config.baseReserves)
@@ -193,6 +191,26 @@ class GameControllerImpl(
                 include(startEvent.createTimeline())
             }
         })
+    }
+
+    private fun setupEnemies() {
+        allEnemies = encounter.createEnemies()
+        gameEvents.fire(Events.SetupEnemies(allEnemies))
+
+        var selectedEnemy: Enemy = allEnemies.first()
+        gameEvents.fire(Events.EnemySelected(selectedEnemy))
+
+        gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
+            selectedEnemy = enemy
+        }
+
+        allEnemies.forEach { enemy ->
+            enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> {
+                if (selectedEnemy != enemy || !enemy.isDefeated) return@watchFor
+                val newEnemy = allEnemies.firstOrNull { !it.isDefeated } ?: allEnemies.first()
+                gameEvents.fire(Events.EnemySelected(newEnemy))
+            }
+        }
     }
 
     override fun onShow() {

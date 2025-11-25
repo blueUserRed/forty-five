@@ -132,13 +132,6 @@ class Enemy(
         enemyEvents.fire(StatusEffectsChangedEvent)
     }
 
-    private fun getPlayerDamagedTimeline(
-        damage: Int,
-        gameController: GameController,
-    ): Timeline = Timeline.timeline {
-        include(gameController.damagePlayerTimeline(damage))
-    }
-
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
         action {
             currentCover += amount
