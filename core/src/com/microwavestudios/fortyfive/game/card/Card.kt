@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
@@ -111,6 +112,7 @@ class Card(
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
     val variableTexture: VariableTextureSelector?,
+    val parryNumber: Int?,
     val tags: List<String>,
     val lockedDescription: String?,
     isDark: Boolean,
@@ -149,6 +151,8 @@ class Card(
     var isReinforced: Boolean = false
         private set
     var isShotProtected: Boolean = false
+        private set
+    var isThorns: Boolean = false
         private set
 
     var stackPosition: StackPosition = StackPosition.NORMAL
@@ -225,6 +229,7 @@ class Card(
     fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
 
     fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
+        action { lastEffectAffectedCardsCache = listOf(replaceBy) } // Memorize replacing card
         include(controller.destroyCardTimeline(this@Card, replaceBy))
     }
 
@@ -473,7 +478,11 @@ class Card(
                     action { controller.dispatchAnimTimeline(screenShakeTimeline) }
                     includeLater(
                         { controller.afterlife.closeTimeline() },
-                        { controller.afterlife.isOpen }
+                        { inZone(Zone.REVOLVER) && controller.afterlife.isOpen }
+                    )
+                    includeLater(
+                        { controller.afterlife.openTimeline() },
+                        { inZone(Zone.AFTERLIFE) && controller.afterlife.isClosed }
                     )
                     include(anim)
                 }
@@ -698,6 +707,7 @@ class Card(
                 isSaved = isSaved,
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
+                parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
                 lockedDescription = onj.get<String?>("lockedDescription")
             )
             applyTraitEffects(card, onj)
@@ -721,6 +731,7 @@ class Card(
                 "reinforced" -> card.isReinforced = true
                 "shotProtected" -> card.isShotProtected = true
                 "rotten" -> card.isRotten = true
+                "thorns" -> card.isThorns = true
                 "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
                 "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
@@ -1039,7 +1050,7 @@ class CardActor(
                 x, y + 300f
             )
             Zone.AFTERLIFE -> Vector2(
-                x, y + 300f
+                x, y + 200f
             )
             Zone.STACK, Zone.LIMBO -> return@later
         }
@@ -1064,9 +1075,15 @@ class CardActor(
         action {
             removeAction(moveAction)
             removeAction(scaleAction)
+            (parent as? Layout)?.invalidate()
         }
         delay(100)
     } }
+
+    override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
+        // baaaaaaaaaad
+        if (!inTriggerPosition) super.setBounds(x, y, width, height)
+    }
 
     fun skipAnimateBack() {
         inTriggerPosition = false

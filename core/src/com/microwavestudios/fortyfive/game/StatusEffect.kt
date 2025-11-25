@@ -219,36 +219,37 @@ class BurningPlayer(
 }
 
 class Poison(
-    turns: Int,
-    private var damage: Int
-) : TurnBasedStatusEffect(
+    damage: Int,
+) : StatusEffect(
     GraphicsConfig.iconName("poison"),
     GraphicsConfig.iconScale("poison"),
-    turns
 ) {
 
     override val name: String = "poison"
 
     override val effectType: StatusEffectType = StatusEffectType.POISON
 
-    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline {
-        if (target.isBlocked(this, controller)) return Timeline()
-        return target.damage(damage, controller)
+    var damage: Int = damage
+        private set
+
+    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        later {
+            if (target.isBlocked(this@Poison, controller)) return@later
+            include(target.damage(damage, controller))
+            action { damage /= 2 }
+        }
     }
 
     fun discharge(turns: Int, target: StatusEffectTarget, controller: GameController): Timeline = Timeline.timeline {
-        var damage: Int? = null
-        var actualTurns: Int? = null
-        action {
-            actualTurns = min(turns, turnOnEffectStart + duration - controller.turnCounter)
-            damage = actualTurns!! * this@Poison.damage
-        }
-        includeLater(
-            { target.damage(damage!!, controller) },
-            { true }
-        )
-        action {
-            reduceDuration(actualTurns!!)
+        later {
+            var damageAcc = 0
+            var damage = damage
+            repeat(turns) {
+                damageAcc += damage
+                damage /= 2
+            }
+            this@Poison.damage = damage
+            include(target.damage(damageAcc, controller))
         }
     }
 
@@ -256,20 +257,12 @@ class Poison(
 
     override fun stack(other: StatusEffect) {
         other as Poison
-        stackTurnEffect(other)
         damage += other.damage
     }
 
-    override fun getDisplayText(): String {
-        val damageString = damage.toString()
-        val turnsString = if (continueForever) {
-            "inf"
-        } else {
-            val turns = turnOnEffectStart + duration - controller.turnCounter
-            turns.toString()
-        }
-        return "$damageString, $turnsString"
-    }
+    override fun isStillValid(): Boolean = damage > 0
+
+    override fun getDisplayText(): String = damage.toString()
 
     override fun equals(other: Any?): Boolean = other is Poison
 }

@@ -377,6 +377,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     )
 
     @RegisterOnjFunction(schema = "params: []")
+    fun replaced(): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardReplaced> { gameSituation, card, triggerInformation, controller ->
+            gameSituation.replaced === card
+        }
+    )
+
+    @RegisterOnjFunction(schema = "params: []")
     fun turnBegin(): OnjTrigger = OnjTrigger(triggerForSituation<GameSituation.TurnBegin>())
 
     @RegisterOnjFunction(schema = "params: []")
@@ -615,11 +622,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         BulletSelector.ByLambda { _, card -> card.lastEffectAffectedCardsCache }
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
-    fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
+    fun poison(damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Poison(
-            getStatusEffectValue(turns, controller, card, 1),
-            getStatusEffectValue(damage, controller, card, 1)
+            getStatusEffectValue(damage, controller, card, 1),
         )
     }
 

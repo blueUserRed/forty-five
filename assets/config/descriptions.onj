@@ -11,7 +11,7 @@ hoverDetailDescriptions: [
     {
         keyword: "POISON",
         groupName: "status",
-        description: "$status$POISON (d,t)$status$\nPoison causes d damage for t turns. d and t both stack.",
+        description: "$status$POISON (d)$status$\nOn-Turn-End: deal d dmg, then, remove 50% of d",
     },
     {
         keyword: "SHIELD",
@@ -25,7 +25,7 @@ hoverDetailDescriptions: [
     },
     {
         keyword: "PROTECTED",
-        groupName: "trait",
+        groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",
     },
     {
@@ -59,29 +59,39 @@ hoverDetailDescriptions: [
         description: "$trait$JAMMED$trait$\nWhen shooting or parrying with this bullet, the revolver doesn’t rotate",
     },
     {
-        keyword: "HARDENED",
+        keyword: "THORNS",
+        groupName: "trait",
+        description: "$trait$THORNS$trait$\nWhen parrying with this bullet, the enemy takes x dmg, where x is the dmg value of the attack which was parried.",
+    },
+    {
+        keyword: "HARDENED", // TODO: Should be keyword
         groupName: "trait",
         description: "$trait$HARDENED (x)$trait$\nFor the next x times this bullet is used to parry, it won't leave the revolver ",
     },
     {
         keyword: "DISCHARGE POISON",
         groupName: "keyword",
-        description: "$trait$DISCHARGE POISON (x)$trait$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",
+        description: "$keyword$DISCHARGE POISON (x)$keyword$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",
     },
     {
         keyword: "SEARCH",
         groupName: "keyword",
-        description: "$trait$SEARCH$trait$\nPuts a random card from the deck into the players hand, that matches the requirement.",
+        description: "$keyword$SEARCH$keyword$\nPuts a random card from the deck into the players hand, that matches the requirement.",
     },
     {
         keyword: "CREATE",
         groupName: "keyword",
-        description: "$trait$CREATE$trait$\ncreated cards get removed after the encounter",
+        description: "$keyword$CREATE$keyword$\ncreated cards get removed after the encounter",
     },
     {
         keyword: "CLEANSE",
         groupName: "keyword",
-        description: "$trait$CLEANSE$trait$\nRemoves all status effects the player has",
+        description: "$keyword$CLEANSE$keyword$\nRemoves all status effects the player has",
+    },
+    {
+        keyword: "DEFENSE",
+        groupName: "keyword",
+        description: "$keyword$DEFENSE (p)$keyword$\nWhen a bullet with DEFENSE is parried with, it uses p to parry instead of its dmg",
     },
 ],
 

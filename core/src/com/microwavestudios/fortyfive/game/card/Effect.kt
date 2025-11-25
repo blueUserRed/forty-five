@@ -840,6 +840,11 @@ sealed class GameSituation {
         val toPlayer: Boolean,
     ) : GameSituation()
 
+    class CardReplaced(
+        val replaced: Card,
+        val newCard: Card
+    ) : GameSituation()
+
     class CardReturnedHome(val card: Card) : GameSituation()
 
     data object TurnEnd : GameSituation()

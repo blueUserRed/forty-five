@@ -245,6 +245,12 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.CardReplacedEvent> { event ->
+            val situation = GameSituation.CardReplaced(event.replaced, event.newCard)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
         gameEvents.watchFor<Events.EndTurnEvent> { event ->
             val situation = GameSituation.TurnEnd
             event.append {
@@ -852,9 +858,9 @@ class GameControllerImpl(
         card: Card
     ): Timeline = Timeline.timeline { later {
         FortyFive.soundPlayer.situation("enter_parry", this@GameControllerImpl.screen)
-        val damageOfCard = card.curDamage(this@GameControllerImpl)
-        val remainingDamage = if (card.isReinforced) 0 else (damage - damageOfCard).coerceAtLeast(0)
-        val parryEnterEvent = Events.ParryStateChange(true, damage, damageOfCard)
+        val damageToParry = card.parryNumber ?: card.curDamage(this@GameControllerImpl)
+        val remainingDamage = if (card.isReinforced) 0 else (damage - damageToParry).coerceAtLeast(0)
+        val parryEnterEvent = Events.ParryStateChange(true, damage, damageToParry)
         val parryLeaveEvent = Events.ParryStateChange(false, 0, 0)
         parryEnterEvent.resolutionPromise.then { gameEvents.fire(parryLeaveEvent) }
         include(afterlife.closeTimeline())
@@ -863,11 +869,12 @@ class GameControllerImpl(
         later {
             val parried = parryEnterEvent.resolutionPromise.getOrError()
             if (parried) {
-                include(card.afterShot(this@GameControllerImpl, true, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
-                include(rotateRevolverTimeline(card.rotationDirection))
                 if (remainingDamage > 0) {
                     include(damagePlayerTimeline(remainingDamage, false, isPiercing))
                 }
+                if (card.isThorns) include(targetedEnemy.damage(damage))
+                include(card.afterShot(this@GameControllerImpl, true, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+                include(rotateRevolverTimeline(card.rotationDirection))
             } else {
                 include(damagePlayerTimeline(damage, false, isPiercing))
             }
@@ -1101,6 +1108,16 @@ class GameControllerImpl(
                     cardHand.removeCard(card)
                     if (cardInSlot != null) revolver.preAddCard(slot, card)
                     checkCardMaximums()
+                }
+                later {
+                    if (cardInSlot == null) return@later
+                    include(cardInSlot!!.replaceTimeline(this@GameControllerImpl, card))
+                    val info = createTriggerInfo(cardInSlot, sourceCard = card)
+                    val event = Events.CardReplacedEvent(cardInSlot!!, card, info)
+                    includeLater({
+                        gameEvents.fire(event)
+                        event.createTimeline()
+                    })
                 }
                 includeLater(
                     { cardInSlot!!.replaceTimeline(this@GameControllerImpl, card) },
@@ -1453,6 +1470,12 @@ class GameControllerImpl(
         data class CardReturnedHome(
             val card: Card,
             val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class CardReplacedEvent(
+            val replaced: Card,
+            val newCard: Card,
+            val triggerInformation: TriggerInformation,
         ) : TimelineBuildingEvent()
 
         data class PlayerLivesChanged(

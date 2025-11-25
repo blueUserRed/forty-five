@@ -14,9 +14,6 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.run.RunModifier
-import com.microwavestudios.fortyfive.run.RunModifier.Companion.get
-import com.microwavestudios.fortyfive.utils.TemplateString
 import com.microwavestudios.fortyfive.utils.Timeline
 import onj.value.OnjArray
 import kotlin.collections.forEach

@@ -46,6 +46,7 @@ var card = {
     dark?: boolean,
     effects?: effectDefinition[],
     tags: string[],
+    parryNumber?: int,
     additionalHoverInfos?: string[],
     forbiddenSlots?: int[],
     variableTexture?: VariableTextureSelector,

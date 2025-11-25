@@ -310,12 +310,12 @@ cards: [
         name: "poisonBullet",
         title: "Poison Bullet",
         flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
-        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (4, 3)",
-        baseDamage: 9,
+        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6)",
+        baseDamage: 4,
         effects: [
             {
                 trigger: shot(),
-                effect: giveStatus(poison(3#val, 4#val))
+                effect: giveStatus(poison(6#val))
             }
         ],
         cost: 1,
@@ -390,10 +390,19 @@ cards: [
         name: "cowardBullet",
         title: "Coward Bullet",
         flavourText: "No, don't chicken out this time! Come here you lil shit, don't run from me!",
-        description: "$trigger$While in revolver:$trigger$\nYou can replace this with any card out of your hand (you still have to pay for it). If you do, destroy this bullet.",
+        description: "$trigger$While in revolver:$trigger$\nYou can replace this with any card out of your hand (you still have to pay for it). The card that you replaced Coward Bullet with gets +6 dmg for as long as it is in the Revolver. If you do, destroy this bullet.",
         baseDamage: 1,
         traitEffects: [ "replaceable" ],
-        effects: [],
+        effects: [
+            {
+                trigger: replaced(),
+                isHidden: true,
+                effect: buffDmg(
+                    bSelectCachedBullets(),
+                    6#val
+                )
+            }
+        ],
         cost: 1,
         tags: ["pool1", "rarity2"],
         price: 40,
@@ -620,39 +629,34 @@ cards: [
         name: "toxicBullet",
         title: "Toxic Bullet",
         flavourText: "Still not as toxic as my ex-girlfriend",
-        description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +8 dmg",
+        description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nThe targeted enemy gets $status$POISON$status$ (5)",
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
-                isHidden: true,
-                effect: buffDmg(
-                    bSelectSelf(),
-                    8#val,
-                    $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
-                )
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: giveStatus(poison(5#val))
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool1", "rarity3"],
         price: 50,
     },
     {
         name: "fullLeadBullet",
         title: "Full Lead Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (9, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6, 3)",
-        baseDamage: 8,
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (4);\n$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (10)",
+        baseDamage: 5,
         effects: [
             {
-                trigger: shot(),
-                effect: giveStatus(poison(3#val, 6#val))
+                trigger: leaveZone(zone.revolver, "onlySelf"),
+                effect: giveStatus(poison(10#val))
             },
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                effect: givePlayerStatus(poison(3#val, 9#val))
+                effect: givePlayerStatus(poison(4#val))
             }
         ],
         cost: 2,
@@ -663,15 +667,15 @@ cards: [
         name: "gasBullet",
         title: "Gas Bullet",
         flavourText: "",
-        description: "$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (5, 4)",
-        baseDamage: 1,
+        description: "$trigger$On-Placedown:$trigger$\nThe enemy gets $status$POISON$status$ (5)",
+        baseDamage: 3,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
-                effect: giveStatus(poison(4#val, 5#val))
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: giveStatus(poison(5#val))
             }
         ],
-        cost: 2,
+        cost: 1,
         tags: ["pool2", "rarity2"],
         price: 50,
     },
@@ -1096,8 +1100,9 @@ cards: [
         name: "backupBullet",
         title: "Backup Bullet",
         flavourText: "Here to safe your ass",
-        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.",
-        baseDamage: 20,
+        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.\n\n$keyword$DEFENSE$keyword$ (18)",
+        baseDamage: 8,
+        parryNumber: 18,
         traitEffects: ["alwaysAtBottom"],
         effects: [
             {
@@ -1194,13 +1199,13 @@ cards: [
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                condition: $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) },
+                condition: $AnyEnemyHasStatusEffect { value: poison(0#val) },
                 effect: reserveGain(1#val)
             },
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                condition: $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) },
+                condition: $AnyEnemyHasStatusEffect { value: poison(0#val) },
                 effect: draw(1#val)
             }
         ],
@@ -1601,6 +1606,19 @@ cards: [
         effects: [],
         cost: 2,
         tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "cactusBullet",
+        title: "Cactus Bullet",
+        flavourText: "",
+        description: "$trait$THORNS$trait$\n$keyword$DEFENSE$keyword$ (16)",
+        baseDamage: 8,
+        parryNumber: 16,
+        traitEffects: [ "thorns" ],
+        effects: [],
+        cost: 2,
+        tags: ["pool2", "rarity2"],
         price: 50,
     },
 
