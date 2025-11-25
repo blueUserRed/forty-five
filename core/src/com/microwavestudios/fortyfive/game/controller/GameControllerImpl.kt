@@ -307,12 +307,6 @@ class GameControllerImpl(
                     .let { include(it) }
             }
         }
-        gameEvents.watchFor<Events.CardReturnedHome> { event ->
-            val situation = GameSituation.CardReturnedHome(event.card)
-            event.append {
-                include(checkTrigger(situation, event.triggerInformation))
-            }
-        }
         gameEvents.watchFor<Events.CardDestroyedEvent> { event ->
             val situation = GameSituation.CardDestroyed(event.card)
             event.append {
@@ -438,7 +432,6 @@ class GameControllerImpl(
             afterlife.pushCard(card)
             card.actor.alpha = 1f
         }
-        delay(400)
         later {
             val afterEvent = beforeEvent.copy(before = false)
             gameEvents.fire(afterEvent)
@@ -564,25 +557,11 @@ class GameControllerImpl(
             encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
         }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
+        if (newRotation.amount == 0) return@later
         include(revolver.rotate(newRotation))
         action {
             revolverRotationCounter += newRotation.amount
             cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
-        }
-        if (newRotation.amount == 0) return@later
-        later {
-            revolver
-                .slots
-                .filter { it.card?.enteredInSlot == it.num }
-                .map {
-                    val card = it.card!!
-                    val info = createTriggerInfo(card, sourceCard = sourceCard)
-                    val event = Events.CardReturnedHome(card, info)
-                    gameEvents.fire(event)
-                    event.createTimeline()
-                }
-                .collectTimeline()
-                .let { include(it) }
         }
         later {
             val info = createTriggerInfo(null, multiplier = newRotation.amount, sourceCard = sourceCard)
@@ -1380,8 +1359,8 @@ class GameControllerImpl(
     }
 
     object Config {
-//        const val baseReserves = 10
-        const val baseReserves = 4
+        const val baseReserves = 10
+//        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
         const val cardsToDrawInFirstRound = 6
@@ -1481,11 +1460,6 @@ class GameControllerImpl(
         ) : TimelineBuildingEvent()
 
         data class CardDestroyedEvent(
-            val card: Card,
-            val triggerInformation: TriggerInformation
-        ) : TimelineBuildingEvent()
-
-        data class CardReturnedHome(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()

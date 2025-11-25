@@ -518,13 +518,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
-    @RegisterOnjFunction(schema = "params: [string]")
-    fun cardReturnedHome(whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.CardReturnedHome> { situation, card, _, _ ->
-            WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
-        }
-    )
-
     @RegisterOnjFunction(schema = "params: [int, string]")
     fun rotateIn(slot: OnjInt, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.RevolverRotation> { situation, card, _, controller ->
@@ -543,6 +536,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         triggerForSituation<GameSituation.PlayerHealthChanged> { situation, _, _, _ ->
             val curPercent = situation.newHealth.toFloat() / situation.baseHealth.toFloat()
             curPercent < percent.value
+        }
+    )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Trigger, CardPredicate]", type = OnjFunctionType.INFIX)
+    fun mustMatchPredicate(toModify: OnjTrigger, predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        Trigger { situation, card, information, controller ->
+            val originalTrigger = toModify.value.check(situation, card, information, controller)
+            if (!originalTrigger) return@Trigger false
+            predicate.value.check(card, controller, card)
         }
     )
 
@@ -568,6 +570,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: [int]")
     fun costs(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun rotationCount(count: OnjInt) = OnjCardPredicate(CardPredicate.rotationCount(count.value.toInt()))
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun inHomeSlot() = OnjCardPredicate(CardPredicate.inHomeSlot())
 
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
     fun not(predicate: OnjCardPredicate): OnjCardPredicate = OnjCardPredicate(CardPredicate.not(predicate.value))

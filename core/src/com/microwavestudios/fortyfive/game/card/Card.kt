@@ -189,6 +189,11 @@ class Card(
     var rotationCounter: Int = 0
         private set
 
+    var continuousRotationCounter: Int = 0
+        private set
+    var lastRotationDirection: RevolverRotation = RevolverRotation.None
+        private set
+
     var isMarked: Boolean
         set(value) {
             actor.isMarked = value
@@ -234,6 +239,7 @@ class Card(
     }
 
     fun changeZone(newZone: Zone, controller: GameController) {
+        val oldZone = zone
         zone = newZone
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
@@ -249,6 +255,10 @@ class Card(
             actor.touchable = Touchable.disabled
         } else {
             actor.touchable = Touchable.enabled
+        }
+        if (oldZone == Zone.REVOLVER) {
+            rotationCounter = 0
+            continuousRotationCounter = 0
         }
     }
 
@@ -282,7 +292,7 @@ class Card(
         val somethingChanged =
             checkValiditySingleModifierList(controller, costModifiers, getter = { it }) ||
             checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) ||
-            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it })
+            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) ||
             checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
         if (somethingChanged) modifiersChanged()
     }
@@ -446,12 +456,14 @@ class Card(
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
         rotationCounter += rotation.amount
+        if (rotation.directionString == lastRotationDirection.directionString) {
+            continuousRotationCounter += rotation.amount
+        } else {
+            continuousRotationCounter = 0
+            lastRotationDirection = rotation
+        }
     }
 
-    /**
-     * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
-     * effects; null if no effect was triggered
-     */
     fun checkEffects(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
@@ -487,6 +499,12 @@ class Card(
                     include(anim)
                 }
                 include(effect.trigger(this@Card, triggerInformation, controller))
+                later {
+                    if (!isInTriggerPosition) return@later
+                    if (zone == zoneAtStart) return@later
+                    actor.skipAnimateBack()
+                    isInTriggerPosition = false
+                }
             }
         }
 

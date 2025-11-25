@@ -804,7 +804,6 @@ fun interface Trigger {
             ) -> Boolean = { _, _, _, _, -> true },
         ): Trigger = Trigger { gameSituation, card, triggerInformation, controller ->
             if (!T::class.isInstance(gameSituation)) return@Trigger false
-            @Suppress("UNCHECKED_CAST")
             block(gameSituation as T, card, triggerInformation, controller)
         }
 
@@ -844,8 +843,6 @@ sealed class GameSituation {
         val replaced: Card,
         val newCard: Card
     ) : GameSituation()
-
-    class CardReturnedHome(val card: Card) : GameSituation()
 
     data object TurnEnd : GameSituation()
     data object TurnBegin : GameSituation()

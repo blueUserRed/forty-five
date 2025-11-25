@@ -836,11 +836,13 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: reserveGain(2#val)
             },
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: damagePlayer(1#val)
             }
         ],
@@ -890,11 +892,13 @@ cards: [
         baseDamage: 6,
         effects: [
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: draw(1#val)
             },
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: buffDmg(
                     (inZone(zone.revolver))#bSelect,
                     3#val
@@ -1631,6 +1635,23 @@ cards: [
             {
                 trigger: leaveZone(zone.revolver, "onlySelf"),
                 effect: draw(value.timeInRevolver)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "forsakenBullet",
+        title: "Forsaken Bullet",
+        flavourText: "Sometimes you just have to let it go...",
+        description: "Destroy this bullet on its third rotation.",
+        baseDamage: 10,
+        effects: [
+            {
+                trigger: rotation() mustMatchPredicate rotationCount(3),
+                inZones: [zone.revolver],
+                effect: destroy(bSelectSelf())
             }
         ],
         cost: 1,

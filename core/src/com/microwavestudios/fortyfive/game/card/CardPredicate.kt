@@ -21,6 +21,17 @@ fun interface CardPredicate {
             controller.revolver.slots.find { it.card === card }?.num == slot
         }
 
+        fun rotationCount(count: Int) = CardPredicate { card, _, _ -> card.rotationCounter == count }
+
+        fun inHomeSlot() = CardPredicate { card, controller, _ ->
+            val slotNum = controller
+                .revolver
+                .slots
+                .find { it.card === card }
+                ?.num
+            card.enteredInSlot != null && card.enteredInSlot == slotNum
+        }
+
         fun not(predicate: CardPredicate) = CardPredicate { card, controller, effectCard ->
             !predicate.check(card, controller, effectCard)
         }
