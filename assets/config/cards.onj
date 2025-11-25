@@ -1658,6 +1658,42 @@ cards: [
         tags: ["pool1", "rarity3"],
         price: 50,
     },
+    {
+        name: "iceBullet",
+        title: "Ice Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nYou get $status$FROZEN$status$ (2)",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: givePlayerStatus(frozen(2#val))
+            }
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "icedOutBullet",
+        title: "Iced Out Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nin slot 4" + slot.4 + ":\nyou get $status$FROZEN$status$ (4)\n$trigger$On-Leave:$trigger$\ndraw 1 card",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf") mustMatchPredicate inRevolverSlot(4),
+                effect: givePlayerStatus(frozen(4#val))
+            },
+            {
+                trigger: leaveZone(zone.revolver, "onlySelf"),
+                effect: draw(1#val)
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
 
 ],
 

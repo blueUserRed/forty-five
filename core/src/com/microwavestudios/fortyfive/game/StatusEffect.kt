@@ -36,6 +36,8 @@ abstract class StatusEffect(
 
     open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
 
+    open fun executeAfterShot(): Timeline? = null
+
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
     open fun additionalEnemyDamage(damage: Int, target: StatusEffectTarget): Int = 0
@@ -378,6 +380,43 @@ class Shield(
     override fun getDisplayText(): String = shield.toString()
 
     override fun equals(other: Any?): Boolean = other is Shield
+
+}
+
+class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect("encounter_modifier_frost", 1f) {
+
+    var shots: Int = shots
+        private set
+
+    private var skipped: Boolean = false
+
+    override val name: String = "Frost"
+
+    override val effectType: StatusEffectType = StatusEffectType.OTHER
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Frozen
+
+    override fun stack(other: StatusEffect) {
+        shots += (other as Frozen).shots
+    }
+
+    override fun executeAfterShot(): Timeline = Timeline.timeline {
+        action {
+            if (skipFirstRotation && !skipped) {
+                skipped = true
+                return@action
+            }
+            shots--
+        }
+    }
+
+    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
+
+    override fun isStillValid(): Boolean = shots > 0
+
+    override fun getDisplayText(): String = shots.toString()
+
+    override fun equals(other: Any?): Boolean = other is Frozen
 
 }
 

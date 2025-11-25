@@ -24,6 +24,11 @@ hoverDetailDescriptions: [
         description: "$status$BEWITCHED (t, r)$status$\nAll bullets turn the revolver one to the left. Active for t turns or r rotations.",
     },
     {
+        keyword: "FROZEN",
+        groupName: "status",
+        description: "$status$FROZEN (x)$status$\nThe Revolver won't rotate for x shots.",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",

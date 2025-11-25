@@ -690,6 +690,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
+    fun frozen(shots: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
+        Frozen(
+            getStatusEffectValue(shots, controller, card, 1),
+            skipFirstRotation
+        )
+    }
+
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
         name("NegatePredicate")

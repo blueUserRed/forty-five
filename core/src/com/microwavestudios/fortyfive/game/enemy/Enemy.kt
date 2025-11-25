@@ -118,6 +118,10 @@ class Enemy(
         .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
+    fun executeStatusEffectsAfterShot(): Timeline = _statusEffects
+        .mapNotNull { it.executeAfterShot() }
+        .collectTimeline()
+
     fun update() {
         var change = false
         _statusEffects.removeIf { effect ->

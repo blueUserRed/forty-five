@@ -1017,6 +1017,16 @@ class GameControllerImpl(
             gameEvents.fire(event)
             include(event.createTimeline())
         }
+        later {
+            _playerStatusEffects
+                .mapNotNull { it.executeAfterShot() }
+                .collectTimeline()
+                .let { include(it) }
+            allEnemies
+                .map { it.executeStatusEffectsAfterShot() }
+                .collectTimeline()
+                .let { include(it) }
+        }
     } }
 
     override fun shoot() {
