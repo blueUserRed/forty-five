@@ -53,6 +53,10 @@ abstract class StatusEffect(
     abstract fun getDisplayText(): String
 
     abstract override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int {
+        return this::class.qualifiedName?.hashCode() ?: 0
+    }
 }
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,

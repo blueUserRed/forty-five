@@ -47,7 +47,7 @@ cards: [
         title: "Silver Bullet",
         flavourText: "This bullet is silver and silence is golden",
         description: "$trigger$On-Placedown:$trigger$\nDraw 1 card\n$trigger$On-Shot:$trigger$\nDraw 1 card",
-        baseDamage: 7,
+        baseDamage: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, "onlySelf"),
@@ -350,7 +350,7 @@ cards: [
                 )
             }
         ],
-        cost: 3,
+        cost: 2,
         tags: ["pool1", "rarity2"],
         price: 50,
     },
@@ -1080,7 +1080,7 @@ cards: [
                 effect: drawFromBottomOfDeck(1#val)
             }
         ],
-        cost: 2,
+        cost: 1,
         tags: ["pool2", "rarity1"],
         price: 40,
     },
@@ -1186,10 +1186,12 @@ cards: [
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                effect: bounce(bSelectRevolverTarget(false, false, "Choose Bullet to return to your hand"))
+                effect: bounce((
+                    inZone(zone.revolver) and (slotNumber() lessThan slotNumberOfSelf())
+                )#bSelect)
             }
         ],
-        cost: 2,
+        cost: 3,
         tags: ["pool2", "rarity1"],
         price: 50,
     },
@@ -1692,6 +1694,56 @@ cards: [
         ],
         cost: 2,
         tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "opalBullet",
+        title: "Opal Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\ndraw x cards, where x is the highest number of unique status effects on an enemy",
+        baseDamage: 2,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, "onlySelf"),
+                effect: draw(value.mostUniqueStatusEffectsOnEnemy)
+            },
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "punkBullet",
+        title: "Punk Bullet",
+        flavourText: "",
+        description: "Nothing can stop you from playing this in the revolver",
+        baseDamage: 4,
+        traitEffects: [ "punk" ],
+        effects: [],
+        cost: 1,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "theWorldBullet",
+        title: "The World Bullet",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nIf The World Bullet hasn't rotated at least once last turn, destroy it.\n\nWhenever this bullet completes a $keyword$FULL ROTATION$keyword$ in the revolver:\nThis bullet get +50% dmg",
+        baseDamage: 12,
+        effects: [
+            {
+                trigger: turnBegin() mustMatchPredicate (lastTurnRotationCounter() equals 0),
+                inZones: [zone.revolver],
+                effect: destroy(bSelectSelf())
+            },
+            {
+                trigger: rotation() mustMatchPredicate (turnRotationCounter() equals 5),
+                inZones: [zone.revolver],
+                effect: buffDmgMultiplier(bSelectSelf(), 1.5)
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity2", "not used"],
         price: 50,
     },
 

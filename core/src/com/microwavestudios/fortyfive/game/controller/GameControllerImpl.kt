@@ -417,7 +417,7 @@ class GameControllerImpl(
     }
 
     override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
-        if (!card.inZone(Zone.REVOLVER)) return@later
+        require(card.inZone(Zone.REVOLVER))
         val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
         includeLater({
@@ -1091,56 +1091,92 @@ class GameControllerImpl(
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
         if (isUIFrozen) return
-        var cardInSlot: Card? = null
-        val info = createTriggerInfo(card, sourceCard = card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
-        val timeline = Timeline.timeline {
-            skipping { skip ->
-                action {
-                    FortyFive.logger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-                    cardInSlot = revolver.getCardInSlot(slot)
-                    val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(this@GameControllerImpl, card)
-                    val shouldSkip = !card.allowsEnteringGame(this@GameControllerImpl, slot)
-                        || blockedByCard
-                        || !tryPay(card.baseCost, card.actor)
-                    if (!shouldSkip) return@action
-                    FortyFive.soundPlayer.situation("not_allowed", screen)
-                    skip()
-                }
-                includeLater({
-                    gameEvents.fire(beforeEvent)
-                    beforeEvent.createTimeline()
-                })
-                action {
-                    cardHand.removeCard(card)
-                    if (cardInSlot != null) revolver.preAddCard(slot, card)
-                    checkCardMaximums()
-                }
-                later {
-                    if (cardInSlot == null) return@later
-                    include(cardInSlot!!.replaceTimeline(this@GameControllerImpl, card))
-                    val info = createTriggerInfo(cardInSlot, sourceCard = card)
-                    val event = Events.CardReplacedEvent(cardInSlot!!, card, info)
-                    includeLater({
-                        gameEvents.fire(event)
-                        event.createTimeline()
-                    })
-                }
-                includeLater(
-                    { cardInSlot!!.replaceTimeline(this@GameControllerImpl, card) },
-                    { cardInSlot != null }
-                )
-                action {
-                    revolver.setCard(slot, card)
-                }
-                includeLater({
-                    val afterEvent = beforeEvent.copy(before = false)
-                    gameEvents.fire(afterEvent)
-                    afterEvent.createTimeline()
-                })
-            }
+        val timeline = if (card.isPunk) {
+            loadPunkBulletFromHandInRevolverTimeline(card, slot)
+        } else {
+            loadBulletFromHandInRevolverTimeline(card, slot)
         }
         appendMainTimeline(timeline)
+    }
+
+    private fun loadBulletFromHandInRevolverTimeline(card: Card, slot: Int): Timeline = Timeline.timeline {
+        skipping { skip ->
+            var cardInSlot: Card? = null
+            val info = createTriggerInfo(card, sourceCard = card)
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
+            action {
+                FortyFive.logger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
+                cardInSlot = revolver.getCardInSlot(slot)
+                val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(this@GameControllerImpl, card)
+                val shouldSkip = !card.allowsEnteringGame(this@GameControllerImpl, slot)
+                        || blockedByCard
+                        || !tryPay(card.baseCost, card.actor)
+                if (!shouldSkip) return@action
+                FortyFive.soundPlayer.situation("not_allowed", screen)
+                skip()
+            }
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
+            action {
+                cardHand.removeCard(card)
+                if (cardInSlot != null) revolver.preAddCard(slot, card)
+                checkCardMaximums()
+            }
+            later {
+                if (cardInSlot == null) return@later
+                include(cardInSlot!!.replaceTimeline(this@GameControllerImpl, card))
+                val info = createTriggerInfo(cardInSlot, sourceCard = card)
+                val event = Events.CardReplacedEvent(cardInSlot!!, card, info)
+                includeLater({
+                    gameEvents.fire(event)
+                    event.createTimeline()
+                })
+            }
+            action {
+                revolver.setCard(slot, card)
+            }
+            includeLater({
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                afterEvent.createTimeline()
+            })
+        }
+    }
+
+    private fun loadPunkBulletFromHandInRevolverTimeline(card: Card, slot: Int): Timeline = Timeline.timeline {
+        later {
+            var cardInSlot: Card? = null
+            val info = createTriggerInfo(card, sourceCard = card)
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
+            action {
+                FortyFive.logger.debug(logTag, "loading punk bullet $card in revolver slot $slot")
+                tryPay(card.baseCost, card.actor) // ignore return value
+                cardInSlot = revolver.getCardInSlot(slot)
+            }
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
+            action {
+                cardHand.removeCard(card)
+                if (cardInSlot != null) revolver.preAddCard(slot, card)
+                checkCardMaximums()
+            }
+            later {
+                if (cardInSlot == null) return@later
+                include(destroyCardTimeline(cardInSlot!!, card))
+            }
+            action {
+                revolver.setCard(slot, card)
+            }
+            includeLater({
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                afterEvent.createTimeline()
+            })
+        }
     }
 
     private fun bannerAnimationTimeline(isPlayer: Boolean): Timeline =

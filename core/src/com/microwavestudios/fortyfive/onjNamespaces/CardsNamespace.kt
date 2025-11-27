@@ -36,7 +36,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @OnjNamespaceVariables
     val variables: Map<String, OnjObject> = mapOf(
         "value" to buildOnjObject {
-            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller, _, _ ->
+            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller, _, _, _ ->
                 controller
                     .revolver
                     .slots
@@ -44,15 +44,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .maxOfOrNull { it.baseCost }
                     ?: 0
             }
-            "rotationAmount" with OnjEffectValue { _, card, _ -> card!!.rotationCounter }
-            "bulletInSlot2" with OnjEffectValue { controller, _, _ ->
+            "rotationAmount" with OnjEffectValue { _, _, _, self -> self!!.rotationCounter }
+            "bulletInSlot2" with OnjEffectValue { controller, _, _, _->
                 controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
             }
-            "amountOfCardsDrawn" with OnjEffectValue { _, _, triggerValue -> triggerValue!!.amountOfCardsDrawn }
-            "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
+            "amountOfCardsDrawn" with OnjEffectValue { _, _, triggerValue, _ -> triggerValue!!.amountOfCardsDrawn }
+            "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation, _ ->
                 triggerInformation!!.sourceCard!!.curDamage(controller)
             }
-            "uniqueCardsInTheStack" with OnjEffectValue { controller, _, _, ->
+            "uniqueCardsInTheStack" with OnjEffectValue { controller, _, _, _ ->
                 controller
                     .cardStack
                     .cards()
@@ -60,8 +60,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .toSet()
                     .size
             }
-            "timeInRevolver"  with OnjEffectValue { controller, card, _, ->
-                controller.turnCounter - card!!.enteredOnTurn!!
+            // TODO: necessary? replace with rotationCounter functions
+            "timeInRevolver"  with OnjEffectValue { controller, _, _, self ->
+                controller.turnCounter - self!!.enteredOnTurn!!
+            }
+            "mostUniqueStatusEffectsOnEnemy" with OnjEffectValue { controller, _, _, _ ->
+                controller
+                    .allEnemies
+                    .maxOf { it.statusEffects.toSet().size }
             }
         },
         "zone" to buildOnjObject {
@@ -152,6 +158,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             bulletSelector.value,
             activeChecker = activeChecker.value,
             validityChecker = validityChecker.value,
+            data = EffectData()
+        )
+    )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, float]")
+    fun buffDmgMultiplier(
+        bulletSelector: OnjBulletSelector,
+        multiplier: OnjFloat,
+    ): OnjEffect = OnjEffect(
+        Effect.BuffDamageMultiplier(
+            multiplier.value.toFloat(),
+            bulletSelector.value,
+            activeChecker = { _, _, _ -> true },
+            validityChecker = { _, _, _ -> true },
             data = EffectData()
         )
     )
@@ -577,6 +597,36 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "params: []")
     fun inHomeSlot() = OnjCardPredicate(CardPredicate.inHomeSlot())
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
+    fun equals(rhs: OnjEffectValue, lhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        rhs.value(controller, card, null, self) == lhs.value(controller, card, null, self)
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
+    fun equals(rhs: OnjEffectValue, lhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        rhs.value(controller, card, null, self) == lhs.value.toInt()
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
+    fun lessThan(rhs: OnjEffectValue, lhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        rhs.value(controller, card, null, self) < lhs.value(controller, card, null, self)
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
+    fun lessThan(rhs: OnjEffectValue, lhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        rhs.value(controller, card, null, self) < lhs.value.toInt()
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
+    fun moreThan(rhs: OnjEffectValue, lhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        rhs.value(controller, card, null, self) > lhs.value(controller, card, null, self)
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
+    fun moreThan(rhs: OnjEffectValue, lhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        rhs.value(controller, card, null, self) > lhs.value.toInt()
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
     fun not(predicate: OnjCardPredicate): OnjCardPredicate = OnjCardPredicate(CardPredicate.not(predicate.value))
 
@@ -705,41 +755,71 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
-    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _, _ -> value.value.toInt() }
+    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _, _, _ -> value.value.toInt() }
 
     @RegisterOnjFunction(schema = "params: [int[2]]", type = OnjFunctionType.CONVERSION)
-    fun `val`(value: OnjArray): OnjEffectValue = OnjEffectValue { _, _, _ -> value.toIntRange().random() }
+    fun `val`(value: OnjArray): OnjEffectValue = OnjEffectValue { _, _, _, _ -> value.toIntRange().random() }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float]", type = OnjFunctionType.OPERATOR)
-    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        (value.value(controller, card, triggerInformation) * multiplier.value).toInt()
+    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
+        (value.value(controller, card, triggerInformation, self) * multiplier.value).toInt()
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.OPERATOR)
-    fun star(value: OnjEffectValue, multiplier: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        floor(value.value(controller, card, triggerInformation) * multiplier.value.toFloat()).toInt()
+    fun star(value: OnjEffectValue, multiplier: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
+        floor(value.value(controller, card, triggerInformation, self) * multiplier.value.toFloat()).toInt()
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.OPERATOR)
-    fun star(value: OnjEffectValue, value2: OnjEffectValue): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        val first = value.value(controller, card, triggerInformation)
-        val second = value2.value(controller, card, triggerInformation)
+    fun star(value: OnjEffectValue, value2: OnjEffectValue): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
+        val first = value.value(controller, card, triggerInformation, self)
+        val second = value2.value(controller, card, triggerInformation, self)
         first * second
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
-    fun atMost(value: OnjEffectValue, max: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        val first = value.value(controller, card, triggerInformation)
+    fun atMost(value: OnjEffectValue, max: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
+        val first = value.value(controller, card, triggerInformation, self)
         first.coerceAtMost(max.value.toInt())
     }
 
     @RegisterOnjFunction(schema = "params: []")
-    fun damageOfSelf(): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+    fun damage(): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
         card?.curDamage(controller) ?: 0
     }
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun lastTurnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
+        card?.lastTurnRotationCounter ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun turnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
+        card?.turnRotationCounter ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun slotNumber(): OnjEffectValue = OnjEffectValue { controller, card, _, self ->
+        val num = controller
+            .revolver
+            .slots
+            .find { it.card == card }
+            ?.num
+        num?.let { Utils.convertSlotRepresentation(it) } ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun slotNumberOfSelf(): OnjEffectValue = OnjEffectValue { controller, card, _, self ->
+        val num = controller
+            .revolver
+            .slots
+            .find { it.card == self }
+            ?.num
+        num?.let { Utils.convertSlotRepresentation(it) } ?: 0
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
-    fun damageOfCard(predicate: OnjCardPredicate): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+    fun damageOfCard(predicate: OnjCardPredicate): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
         val p = predicate.value
         val card = controller.allCards.firstOrNull { cardToCheck ->
             p.check(cardToCheck, controller, card)
@@ -748,7 +828,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
-    fun countCards(predicate: OnjCardPredicate): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+    fun countCards(predicate: OnjCardPredicate): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation, self ->
         val p = predicate.value
         var count = 0
         controller.allCards.forEach { cardToCheck ->
@@ -767,7 +847,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun numberBasedVariableTexture(value: OnjEffectValue, base: OnjInt): OnjVariableTextureSelector = OnjVariableTextureSelector(
         VariableTextureSelector(
             { controller, card ->
-                value.value(controller, card, null).toString()
+                value.value(controller, card, null, card).toString()
             },
             base.value.toString()
         )
@@ -781,7 +861,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         default: Int
     ) = controller?.let { controller ->
        card?.let { card ->
-           effectValue.value(controller, card, null)
+           effectValue.value(controller, card, null, card)
        }
     } ?: default
 

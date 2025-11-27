@@ -110,7 +110,7 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = ReserveGain(amount, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
                 action { controller.gainReserves(amount, card.actor) }
             }
@@ -143,7 +143,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             later {
-                val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
                 val modifier = CardDamageModifier(
                     damage = amount,
                     data = CardModifierData(
@@ -222,7 +222,7 @@ abstract class Effect(val data: EffectData) {
             triggerInformation: TriggerInformation,
             controller: GameController
         ): Timeline = Timeline.timeline { later {
-            fun amount() = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            fun amount() = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
 
             val data = CardModifierData(
                 cardDescName(card),
@@ -269,7 +269,7 @@ abstract class Effect(val data: EffectData) {
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(100)
             later {
-                val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
                 include(controller.drawCardsTimeline(amount, sourceCard = card))
             }
         }
@@ -327,7 +327,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             later {
-                val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
                 include(controller.tryToPutCardsInHandTimeline(cardName, amount, sourceCard = card))
             }
         }
@@ -352,7 +352,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             later {
-                val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
                 include(controller.putCardsInStackTimeline(cardName, amount, sourceCard = card))
             }
         }
@@ -463,7 +463,7 @@ abstract class Effect(val data: EffectData) {
     ) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            val damage = damage(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            val damage = damage(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             val enemies = if (isSpray) controller.allEnemies else triggerInformation.targetedEnemies
             enemies
                 .map { it.damage(damage) }
@@ -479,7 +479,7 @@ abstract class Effect(val data: EffectData) {
     class DamagePlayer(val damage: EffectValue, data: EffectData) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(controller.damagePlayerTimeline(damage(controller, card, triggerInformation)))
+            include(controller.damagePlayerTimeline(damage(controller, card, triggerInformation, card)))
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -614,7 +614,7 @@ abstract class Effect(val data: EffectData) {
                             .statusEffects
                             .filterIsInstance<Poison>()
                             .firstOrNull()
-                            ?.discharge(turns(controller, card, triggerInformation), StatusEffectTarget.EnemyTarget(enemy), controller)
+                            ?.discharge(turns(controller, card, triggerInformation, card), StatusEffectTarget.EnemyTarget(enemy), controller)
                             ?: Timeline()
                     },
                     { true }
@@ -653,7 +653,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(100)
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             include(controller.drawCardsTimeline(amount, fromBottom = true))
         }
 
@@ -780,7 +780,7 @@ sealed class BulletSelector {
     abstract fun useAlternateOnShotTriggerPosition(): Boolean
 }
 
-typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?) -> Int
+typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?, self: Card?) -> Int
 
 
 fun interface Trigger {

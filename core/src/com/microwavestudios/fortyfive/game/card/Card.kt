@@ -154,6 +154,8 @@ class Card(
         private set
     var isThorns: Boolean = false
         private set
+    var isPunk: Boolean = false
+        private set
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -188,7 +190,10 @@ class Card(
 
     var rotationCounter: Int = 0
         private set
-
+    var turnRotationCounter: Int = 0
+        private set
+    var lastTurnRotationCounter: Int = 0
+        private set
     var continuousRotationCounter: Int = 0
         private set
     var lastRotationDirection: RevolverRotation = RevolverRotation.None
@@ -229,6 +234,10 @@ class Card(
 
     fun setGame(game: GameController) {
         this.game = game
+        game.gameEvents.watchFor<GameControllerImpl.Events.EndTurnEvent> {
+            lastTurnRotationCounter = turnRotationCounter
+            turnRotationCounter = 0
+        }
     }
 
     fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
@@ -456,6 +465,7 @@ class Card(
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
         rotationCounter += rotation.amount
+        turnRotationCounter += rotation.amount
         if (rotation.directionString == lastRotationDirection.directionString) {
             continuousRotationCounter += rotation.amount
         } else {
@@ -750,6 +760,7 @@ class Card(
                 "shotProtected" -> card.isShotProtected = true
                 "rotten" -> card.isRotten = true
                 "thorns" -> card.isThorns = true
+                "punk" -> card.isPunk = true
                 "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
                 "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
