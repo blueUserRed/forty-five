@@ -1771,7 +1771,6 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
-    /*
     {
         name: "ufb",
         title: "UFB",
@@ -1780,22 +1779,15 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: shot(),
-                condition: $AnyEnemyHasStatusEffect {
-                    value: poison(0#val)
-                },
+                trigger: afterShot(not(startedInDeck())),
                 inZones: [zone.revolver],
-                effect: buffDmg(
-                    bSelectRevolverTarget(false, true, "Select bullet to buff"),
-                    value.highestPoison * 0.5
-                )
+                effect: draw(1#val)
             },
         ],
         cost: 2,
         tags: ["pool1", "rarity2"],
         price: 50,
     },
-    */
 
 ],
 

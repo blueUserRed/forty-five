@@ -1025,7 +1025,12 @@ class GameControllerImpl(
         )
 
         if (cardToShoot != null) later {
-            val event = Events.AfterShotEvent(cardToShoot, triggerInfo)
+            val afterShotInfo = TriggerInformation(
+                controller = this@GameControllerImpl,
+                targetedEnemies = targetedEnemies,
+                sourceCard = cardToShoot,
+            )
+            val event = Events.AfterShotEvent(cardToShoot, afterShotInfo)
             gameEvents.fire(event)
             include(event.createTimeline())
         }

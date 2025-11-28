@@ -407,7 +407,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         triggerForSituation<GameSituation.OnShot> { situation, card, info, controller -> situation.card === card }
     )
 
-//    fun afterShot(): OnjTrigger = OnjTrigger
+    @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
+    fun afterShot(predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.AfterShot> { gameSituation, card, triggerInformation, controller ->
+            predicate.value.check(gameSituation.card, controller, card)
+        }
+    )
 
     @RegisterOnjFunction(schema = "params: []")
     fun replaced(): OnjTrigger = OnjTrigger(
