@@ -850,6 +850,8 @@ sealed class GameSituation {
     class OnShot(val card: Card) : GameSituation()
     class CardDestroyed(val card: Card) : GameSituation()
 
+    class AfterShot(val card: Card) : GameSituation()
+
     class CardRightClicked(val card: Card) : GameSituation()
 }
 

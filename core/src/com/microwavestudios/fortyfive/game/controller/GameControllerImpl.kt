@@ -273,24 +273,30 @@ class GameControllerImpl(
             val situation = GameSituation.TurnEnd
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
-                encounterModifiers
-                    .mapNotNull { it.executeOnEndTurn() }
-                    .collectTimeline()
-                    .let { include(it) }
+                later {
+                    encounterModifiers
+                        .mapNotNull { it.executeOnEndTurn() }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.TurnBeginEvent> { event ->
             val situation = GameSituation.TurnBegin
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
-                encounterModifiers
-                    .mapNotNull { it.executeOnPlayerTurnStart(this@GameControllerImpl) }
-                    .collectTimeline()
-                    .let { include(it) }
-                activeEnemies
-                    .map { it.executeStatusEffectsAfterTurn() }
-                    .collectTimeline()
-                    .let { include(it) }
+                later {
+                    encounterModifiers
+                        .mapNotNull { it.executeOnPlayerTurnStart(this@GameControllerImpl) }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
+                later {
+                    activeEnemies
+                        .map { it.executeStatusEffectsAfterTurn() }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
@@ -301,10 +307,12 @@ class GameControllerImpl(
                     if (timeline != null) include(timeline)
                 }
                 include(checkTrigger(situation, event.triggerInformation))
-                activeEnemies
-                    .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
-                    .collectTimeline()
-                    .let { include(it) }
+                later {
+                    activeEnemies
+                        .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.CardDestroyedEvent> { event ->
@@ -320,10 +328,14 @@ class GameControllerImpl(
             }
         }
         gameEvents.watchFor<Events.AfterShotEvent> { event ->
+            val situation = GameSituation.AfterShot(event.card)
             event.append {
-                _encounterModifiers.forEach { (_, modifier) ->
-                    val timeline = modifier.executeAfterRevolverWasShot(event.card, this@GameControllerImpl)
-                    if (timeline != null) include(timeline)
+                include(checkTrigger(situation, event.triggerInformation))
+                later {
+                    _encounterModifiers.forEach { (_, modifier) ->
+                        val timeline = modifier.executeAfterRevolverWasShot(event.card, this@GameControllerImpl)
+                        if (timeline != null) include(timeline)
+                    }
                 }
             }
         }
@@ -390,7 +402,7 @@ class GameControllerImpl(
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            stack.add(card.create(this.screen))
+            stack.add(card.create(this.screen, true))
         }
 
         if (encounter.shuffleCards) stack.shuffle()

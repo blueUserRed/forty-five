@@ -69,6 +69,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .allEnemies
                     .maxOf { it.statusEffects.toSet().size }
             }
+            "highestPoison" with OnjEffectValue { controller, _, _, _ ->
+                controller
+                    .allEnemies
+                    .maxOfOrNull { enemy ->
+                        enemy.statusEffects.filterIsInstance<Poison>().firstOrNull()?.damage ?: 0
+                    }
+                    ?: 0
+            }
         },
         "zone" to buildOnjObject {
             Zone.entries.forEach {
@@ -399,6 +407,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         triggerForSituation<GameSituation.OnShot> { situation, card, info, controller -> situation.card === card }
     )
 
+//    fun afterShot(): OnjTrigger = OnjTrigger
+
     @RegisterOnjFunction(schema = "params: []")
     fun replaced(): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.CardReplaced> { gameSituation, card, triggerInformation, controller ->
@@ -419,15 +429,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean, string]")
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean, CardPredicate]")
     fun zoneChange(
         oldZone: OnjZone,
         newZone: OnjZone,
         triggerBefore: OnjBoolean,
-        whichCardTriggers: OnjString
+        predicate: OnjCardPredicate,
     ): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
-            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, _, controller ->
+            val triggers = predicate.value.check(situation.card, controller, card)
             when {
                 !triggers -> false
                 situation.before != triggerBefore.value -> false
@@ -438,14 +448,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean, string]")
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean, CardPredicate]")
     fun changedInOrOutOfZone(
         zone: OnjZone,
         triggerBefore: OnjBoolean,
-        whichCardTriggers: OnjString
+        predicate: OnjCardPredicate,
     ): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
-            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, _, controller ->
+            val triggers = predicate.value.check(situation.card, controller, card)
             when {
                 !triggers -> false
                 situation.before != triggerBefore.value -> false
@@ -455,49 +465,49 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
-    @RegisterOnjFunction(schema = "params: [string]")
+    @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
     fun rightClicked(
-        whichCardTriggers: OnjString
+        predicate: OnjCardPredicate
     ): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.CardRightClicked> { situation, card, _, _ ->
-            WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
+        triggerForSituation<GameSituation.CardRightClicked> { situation, card, _, controller ->
+            predicate.value.check(situation.card, controller, card)
         }
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
-    fun enterZone(newZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
-            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, CardPredicate]")
+    fun enterZone(newZone: OnjZone, predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, triggerInformation, controller ->
+            val triggers = predicate.value.check(situation.card, controller, card)
             when {
-                gameSituation.before -> false
+                situation.before -> false
                 !triggers -> false
-                newZone.value != gameSituation.newZone -> false
+                newZone.value != situation.newZone -> false
                 else -> true
             }
         }
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, string]")
-    fun leaveZone(oldZone: OnjZone, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
-            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, CardPredicate]")
+    fun leaveZone(oldZone: OnjZone, predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, triggerInformation, controller ->
+            val triggers = predicate.value.check(situation.card, controller, card)
             when {
                 !triggers -> false
-                !gameSituation.before -> false
-                oldZone.value != gameSituation.oldZone -> false
+                !situation.before -> false
+                oldZone.value != situation.oldZone -> false
                 else -> true
             }
         }
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [Zone, string, boolean]")
-    fun leaveZone(oldZone: OnjZone, whichCardTriggers: OnjString, before: OnjBoolean): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.ZoneChange> { gameSituation, card, triggerInformation, controller ->
-            val triggers = WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, gameSituation.card)
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone, CardPredicate, boolean]")
+    fun leaveZone(oldZone: OnjZone, predicate: OnjCardPredicate, before: OnjBoolean): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, triggerInformation, controller ->
+            val triggers = predicate.value.check(situation.card, controller, card)
             when {
                 !triggers -> false
-                gameSituation.before != before.value -> false
-                oldZone.value != gameSituation.oldZone -> false
+                situation.before != before.value -> false
+                oldZone.value != situation.oldZone -> false
                 else -> true
             }
         }
@@ -531,23 +541,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
-    @RegisterOnjFunction(schema = "params: [string]")
-    fun cardDestroyed(whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.CardDestroyed> { situation, card, _, _ ->
-            WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, situation.card)
-        }
-    )
-
-    @RegisterOnjFunction(schema = "params: [int, string]")
-    fun rotateIn(slot: OnjInt, whichCardTriggers: OnjString): OnjTrigger = OnjTrigger(
-        triggerForSituation<GameSituation.RevolverRotation> { situation, card, _, controller ->
-            val internalSlot = Utils.convertSlotRepresentation(slot.value.toInt())
-            val cardInSlot = controller.revolver.slots.find { it.num == internalSlot }?.card
-            if (cardInSlot == null) {
-                false
-            } else {
-                WhichCardTriggers.fromOnj(whichCardTriggers.value).check(card, cardInSlot)
-            }
+    @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
+    fun cardDestroyed(predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardDestroyed> { situation, card, _, controller ->
+            predicate.value.check(situation.card, controller, card)
         }
     )
 
@@ -581,6 +578,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun inRevolverSlot(slot: OnjInt): OnjCardPredicate = OnjCardPredicate(
         CardPredicate.inRevolverSlot(Utils.convertSlotRepresentation(slot.value.toInt()))
     )
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun startedInDeck(): OnjCardPredicate = OnjCardPredicate(
+        CardPredicate.startedInDeck()
+    )
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun trueCardModifier(): OnjCardPredicate = OnjCardPredicate { _, _, _ -> true }
 
     @RegisterOnjFunction(schema = "params: []")
     fun isSelf(): OnjCardPredicate = OnjCardPredicate(CardPredicate.isSelf())
@@ -864,41 +869,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
            effectValue.value(controller, card, null, card)
        }
     } ?: default
-
-    enum class WhichCardTriggers {
-        ONLY_SELF {
-            override fun check(
-                self: Card,
-                triggered: Card
-            ): Boolean = self === triggered
-        },
-        ONLY_OTHERS {
-            override fun check(
-                self: Card,
-                triggered: Card
-            ): Boolean = self !== triggered
-        },
-        ALL_CARDS {
-            override fun check(
-                self: Card,
-                triggered: Card
-            ): Boolean = true
-        }
-
-        ;
-
-        abstract fun check(self: Card, triggered: Card): Boolean
-
-        companion object {
-
-            fun fromOnj(name: String): WhichCardTriggers = when (name) {
-                "onlySelf" -> ONLY_SELF
-                "onlyOthers" -> ONLY_OTHERS
-                "allCards" -> ALL_CARDS
-                else -> throw RuntimeException("'$name' must be one of 'onlySelf', 'onlyOthers', 'allCards'")
-            }
-        }
-    }
 
 }
 

@@ -17,10 +17,11 @@ var slot = [
     iconPrefix + graphicsConfig.revolverSlotIcons."4" + iconPrefix,
     iconPrefix + graphicsConfig.revolverSlotIcons."5" + iconPrefix,
 ];
-//bullet  bigBullet, Silberbullet, Workerbullet, Incendiary, Leaders, Bewitched
-cards: [
 
-    // Bullets ----------------------------------
+var onlySelfTriggers = isSelf();
+var allCardsTrigger = trueCardModifier();
+
+cards: [
 
     {
         name: "bullet",
@@ -50,7 +51,7 @@ cards: [
         baseDamage: 2,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: draw(1#val)
             },
             {
@@ -103,7 +104,7 @@ cards: [
         baseDamage: 15,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     (inZone(zone.revolver) and not(isSelf()))#bSelect,
                     5#val,
@@ -147,7 +148,7 @@ cards: [
         baseDamage: 23,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: draw(2#val)
             },
             {
@@ -258,7 +259,7 @@ cards: [
         baseDamage: 12,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     (inZone([zone.revolver, zone.hand, zone.afterlife]) and hasName("bullet"))#bSelect,
                     10#val,
@@ -278,7 +279,7 @@ cards: [
         baseDamage: 16,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: putCardInHand("bullet", 2#val)
             }
         ],
@@ -295,7 +296,7 @@ cards: [
         traitEffects: [ "undead" ],
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmg(
                     (inZone(zone.revolver) and inRevolverSlot(3) and not(isSelf()))#bSelect,
                     5#val
@@ -342,7 +343,7 @@ cards: [
         baseDamage: 6,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: protectLimitValidity(
                     bSelectRevolverTarget(true, true, "Choose Bullet to protect"),
                     4,
@@ -362,7 +363,7 @@ cards: [
         baseDamage: 11,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: destroy(bSelectNeighbors())
             }
         ],
@@ -378,7 +379,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: destroy(bSelectSelf())
             }
         ],
@@ -415,7 +416,7 @@ cards: [
         baseDamage: 6,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: damageDirect(6#val, false)
             }
         ],
@@ -506,7 +507,7 @@ cards: [
         baseDamage: 20,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: killPlayer()
             },
             {
@@ -570,7 +571,7 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: buffDmgMultiplier(
                     bSelectSelf(),
@@ -592,7 +593,7 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: buffDmgMultiplier(
                     bSelectSelf(),
@@ -614,7 +615,7 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: bounce(
                     (inZone(zone.revolver) and not(isSelf()) and inRevolverSlot(3))#bSelect
                 )
@@ -650,7 +651,7 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: giveStatus(poison(10#val))
             },
             {
@@ -671,7 +672,7 @@ cards: [
         baseDamage: 3,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: giveStatus(poison(5#val))
             }
         ],
@@ -687,7 +688,7 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: turnRevolver("left", 1)
             }
@@ -704,14 +705,14 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: cardDestroyed("onlySelf"),
+                trigger: cardDestroyed(onlySelfTriggers),
                 effect: buffDmg(
                     bSelectRevolverTarget(false, true, "Choose bullet that receives +8 dmg"),
                     8#val
                 )
             },
             {
-                trigger: cardDestroyed("onlySelf"),
+                trigger: cardDestroyed(onlySelfTriggers),
                 effect: putCardInHand("sacrificialBullet", 1#val)
             }
         ],
@@ -727,12 +728,12 @@ cards: [
         baseDamage: 1,
         effects: [
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: draw(1#val)
             },
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: buffDmg(bSelectSelf(), 8#val)
             }
@@ -749,7 +750,7 @@ cards: [
         baseDamage: 9,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: draw(value.rotationAmount)
             }
         ],
@@ -766,7 +767,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: damageDirect(7#val, false)
             }
         ],
@@ -782,7 +783,7 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: buffDmgMultiplier(
                     bSelectSelf(),
@@ -804,7 +805,7 @@ cards: [
         baseDamage: 10,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: givePlayerStatus(shield(10#val))
             }
         ],
@@ -876,7 +877,7 @@ cards: [
         baseDamage: 4,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: givePlayerStatus(shield(7#val))
             }
         ],
@@ -937,8 +938,9 @@ cards: [
         baseDamage: 2,
         effects: [
             {
-                trigger: rotateIn(5, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), value.bulletInSlot2)
+                trigger: rotation() mustMatchPredicate (isSelf() and inRevolverSlot(5)),
+                inZones: [zone.revolver],
+                effect: buffDmg(bSelectSelf(), damageOfCard(inRevolverSlot(2)))
             }
         ],
         dark: true,
@@ -974,7 +976,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: discharge(2#val)
             }
         ],
@@ -990,7 +992,7 @@ cards: [
         baseDamage: 4,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: protect(
                     (inRevolverSlot(3) and not(isSelf()))#bSelect,
                     1,
@@ -1009,7 +1011,7 @@ cards: [
         baseDamage: 12,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: destroy(bSelectRevolverTarget(false, true, "Choose card to destroy"))
             }
         ],
@@ -1025,7 +1027,7 @@ cards: [
         baseDamage: 10,
         effects: [
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: damageDirect(value.sourceCardDamage * 2, false)
             }
@@ -1059,7 +1061,7 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: addEncounterModifierWhileBulletIsInRevolver("drawonemorecard")
             }
@@ -1076,7 +1078,7 @@ cards: [
         baseDamage: 9,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: drawFromBottomOfDeck(1#val)
             }
         ],
@@ -1126,7 +1128,7 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlyOthers"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 inZones: [zone.revolver],
                 effect: buffDmg(bSelectSourceBullet(), 4#val)
             }
@@ -1143,7 +1145,7 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     bSelectRevolverTarget(false, false, "Choose Bullet to buff"),
                     8#val,
@@ -1163,12 +1165,12 @@ cards: [
         baseDamage: 4,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: search(1, costs(0)),
                 cacheAffectedCards: true
             },
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmg(bSelectCachedBullets(), 4#val)
             }
         ],
@@ -1231,15 +1233,15 @@ cards: [
                 effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
-                trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
+                trigger: zoneChange(zone.revolver, zone.hand, false, onlySelfTriggers),
                 effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
-                trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
+                trigger: zoneChange(zone.afterlife, zone.hand, false, onlySelfTriggers),
                 effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
-                trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
+                trigger: zoneChange(zone.limbo, zone.hand, false, onlySelfTriggers),
                 effect: buffDmg(bSelectSelf(), 4#val)
             },
         ],
@@ -1255,15 +1257,15 @@ cards: [
         baseDamage: 2,
         effects: [
            {
-               trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
+               trigger: zoneChange(zone.revolver, zone.hand, false, onlySelfTriggers),
                effect: reserveGain(1#val)
            },
            {
-               trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
+               trigger: zoneChange(zone.afterlife, zone.hand, false, onlySelfTriggers),
                effect: reserveGain(1#val)
            },
            {
-               trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
+               trigger: zoneChange(zone.limbo, zone.hand, false, onlySelfTriggers),
                effect: reserveGain(1#val)
            },
         ],
@@ -1280,7 +1282,7 @@ cards: [
         rightClickCost: 1,
         effects: [
             {
-                trigger: rightClicked("onlySelf"),
+                trigger: rightClicked(onlySelfTriggers),
                 inZones: [zone.revolver],
                 effect: discharge(1#val)
             }
@@ -1369,12 +1371,12 @@ cards: [
         baseDamage: 1,
         effects: [
             {
-                trigger: leaveZone(zone.limbo, "onlySelf", false),
+                trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
                 maxExecutions: 1,
                 effect: buffDmgTransformable(
                     bSelectSelf(),
                     countCards(inZone(zone.afterlife)) * 3,
-                    changedInOrOutOfZone(zone.afterlife, false, "allCards")
+                    changedInOrOutOfZone(zone.afterlife, false, allCardsTrigger)
                 )
             },
         ],
@@ -1408,12 +1410,12 @@ cards: [
         variableTexture: numberBasedVariableTexture(countCards(inZone(zone.hand)) atMost 20, 0),
         effects: [
             {
-                trigger: leaveZone(zone.limbo, "onlySelf", false),
+                trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
                 maxExecutions: 1,
                 effect: buffDmgTransformable(
                     bSelectSelf(),
                     countCards(inZone(zone.hand)),
-                    changedInOrOutOfZone(zone.hand, false, "allCards")
+                    changedInOrOutOfZone(zone.hand, false, allCardsTrigger)
                 )
             },
         ],
@@ -1429,7 +1431,7 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     (inZone(zone.revolver) and inRevolverSlot(3))#bSelect,
                     value.uniqueCardsInTheStack,
@@ -1499,7 +1501,7 @@ cards: [
         rotation: $Dont {},
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: protectParryOnlyLimitValidity(
                     bSelectSelf(),
@@ -1528,7 +1530,7 @@ cards: [
             }
         ],
         cost: 4,
-        tags: ["pool1", "rarity1", "not used"],
+        tags: ["pool1", "rarity1"],
         price: 50,
     },
     {
@@ -1539,7 +1541,7 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: cardDestroyed("onlySelf"),
+                trigger: cardDestroyed(onlySelfTriggers),
                 effect: turnRevolver("left", 1)
             }
         ],
@@ -1578,7 +1580,7 @@ cards: [
         baseDamage: 12,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: protectParryOnlyLimitValidity(
                     bSelectSelf(),
@@ -1635,7 +1637,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: draw(value.timeInRevolver)
             }
         ],
@@ -1668,7 +1670,7 @@ cards: [
         baseDamage: 4,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: givePlayerStatus(frozen(2#val))
             }
         ],
@@ -1684,11 +1686,11 @@ cards: [
         baseDamage: 1,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf") mustMatchPredicate inRevolverSlot(4),
+                trigger: enterZone(zone.revolver, onlySelfTriggers) mustMatchPredicate inRevolverSlot(4),
                 effect: givePlayerStatus(frozen(4#val))
             },
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: draw(1#val)
             }
         ],
@@ -1704,7 +1706,7 @@ cards: [
         baseDamage: 2,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: draw(value.mostUniqueStatusEffectsOnEnemy)
             },
         ],
@@ -1743,9 +1745,57 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity2", "not used"],
+        tags: ["pool2", "rarity2"],
         price: 50,
     },
+    {
+        name: "stingrayBullet",
+        title: "Stingray Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nIf the enemy has $status$POISON$status$:\ntarget other bullet in the revolver gets +x, where x is half of the POISON Parameter of the enemy rounded down, for as long as it is in the revolver",
+        baseDamage: 6,
+        effects: [
+            {
+                trigger: shot(),
+                condition: $AnyEnemyHasStatusEffect {
+                    value: poison(0#val)
+                },
+                inZones: [zone.revolver],
+                effect: buffDmg(
+                    bSelectRevolverTarget(false, true, "Select bullet to buff"),
+                    value.highestPoison * 0.5
+                )
+            },
+        ],
+        cost: 3,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    /*
+    {
+        name: "ufb",
+        title: "UFB",
+        flavourText: "Unidentified Flying Bullet",
+        description: "$trigger$While in Revolver:$trigger$\nWhenever a Bullet that didn't start of in your deck is shot:\nDraw a card",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: shot(),
+                condition: $AnyEnemyHasStatusEffect {
+                    value: poison(0#val)
+                },
+                inZones: [zone.revolver],
+                effect: buffDmg(
+                    bSelectRevolverTarget(false, true, "Select bullet to buff"),
+                    value.highestPoison * 0.5
+                )
+            },
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    */
 
 ],
 

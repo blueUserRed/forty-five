@@ -55,7 +55,7 @@ class CardPrototype(
     val tags: List<String>,
 ) {
 
-    var creator: ((screen: OnjScreen, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
+    var creator: ((screen: OnjScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
@@ -64,9 +64,10 @@ class CardPrototype(
      */
     fun create(
         screen: OnjScreen,
+        startedInDeck: Boolean = false,
         isSaved: Boolean? = null,
         areHoverDetailsEnabled: Boolean = true
-    ): Card = creator!!(screen, isSaved, areHoverDetailsEnabled)
+    ): Card = creator!!(screen, startedInDeck, isSaved, areHoverDetailsEnabled)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -113,6 +114,7 @@ class Card(
     val rotationDirection: RevolverRotation,
     val variableTexture: VariableTextureSelector?,
     val parryNumber: Int?,
+    val startedInDeck: Boolean,
     val tags: List<String>,
     val lockedDescription: String?,
     isDark: Boolean,
@@ -667,8 +669,8 @@ class Card(
                         onj.get<Long>("baseDamage").toInt(),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, isSaved, areHoverDetailsEnabled ->
-                        getCardFrom(onj, screen, initializer, prototype, isSaved, areHoverDetailsEnabled)
+                    prototype.creator = { screen, startedInDeck, isSaved, areHoverDetailsEnabled ->
+                        getCardFrom(onj, screen, initializer, prototype, startedInDeck, isSaved, areHoverDetailsEnabled)
                     }
                     prototypes.add(prototype)
                 }
@@ -680,6 +682,7 @@ class Card(
             onjScreen: OnjScreen,
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
+            startedInDeck: Boolean,
             isSaved: Boolean?,
             enableHoverDetails: Boolean
         ): Card {
@@ -736,6 +739,7 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
+                startedInDeck = startedInDeck,
                 lockedDescription = onj.get<String?>("lockedDescription")
             )
             applyTraitEffects(card, onj)
