@@ -1772,21 +1772,54 @@ cards: [
         price: 50,
     },
     {
-        name: "ufb",
-        title: "UFB",
-        flavourText: "Unidentified Flying Bullet",
-        description: "$trigger$While in Revolver:$trigger$\nWhenever a Bullet that didn't start of in your deck is shot:\nDraw a card",
-        baseDamage: 5,
+        name: "hydraBullet",
+        title: "Hydra Bullet",
+        flavourText: "",
+        description: "$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your stack.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        baseDamage: 0,
         effects: [
             {
-                trigger: afterShot(not(startedInDeck())),
-                inZones: [zone.revolver],
-                effect: draw(1#val)
+                trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
+                effect: putCardsInStack("hydraHeadBullet", 2#val)
+            },
+            {
+                trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(hasName("hydraHeadBullet") and not(inZone(zone.stack))),
+                    changedInOrOutOfZone(zone.stack, false, allCardsTrigger)
+                )
             },
         ],
-        cost: 2,
-        tags: ["pool1", "rarity2"],
+        cost: 1,
+        tags: [ "pool2", "rarity1" ],
         price: 50,
+    },
+    {
+        name: "hydraHeadBullet",
+        title: "Hydra-Head Bullet",
+        flavourText: "",
+        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your stack.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
+                effect: putCardsInStack("hydraHeadBullet", 2#val)
+            },
+            {
+                trigger: enterZone(zone.stack, onlySelfTriggers),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(hasName("hydraHeadBullet") and not(inZone(zone.stack))),
+                    changedInOrOutOfZone(zone.stack, false, allCardsTrigger)
+                )
+            },
+        ],
+        cost: 1,
+        tags: [ "unobtainable" ],
+        price: 0,
     },
 
 ],

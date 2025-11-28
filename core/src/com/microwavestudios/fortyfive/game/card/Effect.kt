@@ -816,7 +816,8 @@ sealed class GameSituation {
         val card: Card,
         val oldZone: GameControllerImpl.Zone,
         val newZone: GameControllerImpl.Zone,
-        val before: Boolean
+        val before: Boolean,
+        val afterShot: Boolean,
     ) : GameSituation() {
         init { require(oldZone != newZone) { "oldZone must be != newZone" } }
     }

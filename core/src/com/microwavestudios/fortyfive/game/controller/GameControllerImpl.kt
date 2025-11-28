@@ -246,7 +246,7 @@ class GameControllerImpl(
                     }
                 }
             }
-            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before)
+            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before, event.afterShot)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
             }
@@ -916,7 +916,8 @@ class GameControllerImpl(
                 Zone.REVOLVER,
                 if (putInStackInstead) Zone.STACK else Zone.HAND,
                 true,
-                triggerInformation
+                triggerInformation,
+                true
             )
             gameEvents.fire(beforeEvent)
             include(beforeEvent.createTimeline())
@@ -944,7 +945,8 @@ class GameControllerImpl(
                     Zone.REVOLVER,
                     if (putInStackInstead) Zone.STACK else Zone.HAND,
                     false,
-                    triggerInformation
+                    triggerInformation,
+                    true
                 )
                 gameEvents.fire(afterEvent)
                 include(afterEvent.createTimeline())
@@ -962,7 +964,14 @@ class GameControllerImpl(
 
     private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
         val triggerInformation = createTriggerInfo(card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.STACK, before = true, triggerInformation)
+        val beforeEvent = Events.CardChangeZoneEvent(
+            card,
+            Zone.REVOLVER,
+            Zone.STACK,
+            before = true,
+            triggerInformation,
+            afterShot = true
+        )
         includeLater({
             gameEvents.fire(beforeEvent)
             beforeEvent.createTimeline()
@@ -1488,6 +1497,7 @@ class GameControllerImpl(
             val newZone: Zone,
             val before: Boolean,
             val triggerInformation: TriggerInformation,
+            val afterShot: Boolean = false,
         ) : TimelineBuildingEvent()
 
         data class CardsDrawnEvent(

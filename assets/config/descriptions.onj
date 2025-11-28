@@ -98,6 +98,11 @@ hoverDetailDescriptions: [
         groupName: "keyword",
         description: "$keyword$DEFENSE (p)$keyword$\nWhen a bullet with DEFENSE is parried with, it uses p to parry instead of its dmg",
     },
+    {
+        keyword: "UNOBTAINABLE",
+        groupName: "keyword",
+        description: "$keyword$UNOBTAINABLE$keyword$\nCan only be added to the deck through Bullet effects, remove from the deck after the encounter",
+    },
 ],
 
 hoverDetailDescriptionGroups: [
