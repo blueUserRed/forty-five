@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.screen.actors
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -17,6 +18,7 @@ import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
 import com.microwavestudios.fortyfive.utils.between
 import kotlin.math.max
@@ -507,7 +509,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
             field = value
             field?.let { addActor(it) }
         }
-    private var scrolledDistance = 0F
+    var scrolledDistance = 0F
         set(value) {
             val newField = value.between(0F, maxScrollableDistanceInDirection)
             if (field == newField) return
@@ -564,6 +566,28 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
         addListener(scrollListener)
         touchable = Touchable.enabled
         checkFlexDirection(scrollDirectionStart)
+    }
+
+    fun scrollToBegin() {
+        scrolledDistance = 0f
+    }
+
+    fun scrollToBeginTimeline(
+        duration: Int = 300,
+        interpolation: Interpolation = Interpolation.smooth
+    ): Timeline = Timeline.timeline {
+        later {
+            if (scrolledDistance < 0.0001f) return@later
+            val action = PropertyAction(
+                this@CustomScrollableBox,
+                ::scrolledDistance,
+                0f,
+            )
+            action.duration = (duration.toFloat() / 1000f)
+            action.interpolation = interpolation
+            addAction(action)
+            delayUntil { action.isComplete }
+        }
     }
 
     // -------------------------------------------------------------------------------------------actual code from here

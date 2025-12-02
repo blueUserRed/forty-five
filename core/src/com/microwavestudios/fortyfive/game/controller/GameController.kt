@@ -80,6 +80,10 @@ interface GameController {
 
     fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline
 
+    fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card? = null): Timeline
+
+    fun descendBulletTimeline(): Timeline
+
 
     fun shoot()
 

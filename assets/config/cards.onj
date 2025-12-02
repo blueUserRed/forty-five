@@ -1821,6 +1821,27 @@ cards: [
         tags: [ "unobtainable" ],
         price: 0,
     },
+    {
+        name: "parrabellumBullet",
+        title: "Parrabellum Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nCreate 7 [Mini Bullets] in the AFTERLIFE.\n\n\n$trigger$While in Revolver:$trigger$\n$trigger$Whenever the Revolver shoots:$trigger$\n$keyword$DESCEND$keyword$",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: createBulletsInAfterlife("miniBullet", 8#val)
+            },
+            {
+                trigger: afterShot(allCardsTrigger),
+                inZones: [zone.revolver],
+                effect: descendBullet()
+            }
+        ],
+        cost: 1,
+        tags: [ "pool2", "rarity1" ],
+        price: 0,
+    },
 
 ],
 

@@ -355,6 +355,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             )
         )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun descendBullet(): OnjEffect = OnjEffect(Effect.DescendBullet(EffectData()))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun createBulletsInAfterlife(name: OnjString, amount: OnjEffectValue): OnjEffect = OnjEffect(
+        Effect.CreateBulletsInAfterlife(name.value, amount.value, EffectData())
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, boolean]")
     fun damageDirect(damage: OnjEffectValue, isSpray: OnjBoolean): OnjEffect =
         OnjEffect(Effect.DamageDirectly(damage.value, isSpray.value, EffectData()))

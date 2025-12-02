@@ -576,7 +576,7 @@ class GameControllerImpl(
             cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
         }
         later {
-            val info = createTriggerInfo(null, multiplier = newRotation.amount, sourceCard = sourceCard)
+            val info = createTriggerInfo(null, sourceCard = sourceCard)
             val event = Events.RevolverRotatedEvent(rotation, info)
             gameEvents.fire(event)
             include(event.createTimeline())
@@ -613,7 +613,6 @@ class GameControllerImpl(
                 val info = createTriggerInfo(
                     null,
                     amountOfCardsDrawn = cardsToDraw,
-                    multiplier = cardsToDraw,
                     sourceCard = sourceCard
                 )
                 val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, cardAcc, info)
@@ -653,6 +652,55 @@ class GameControllerImpl(
             include(putCardFromStackInHandTimeline(card, sourceCard))
         }
     }
+
+    override fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card?): Timeline = Timeline.timeline {
+        val proto = cardPrototypes.find { it.name == bulletName }
+        requireNotNull(proto) { "No bullet with name $bulletName" }
+        later {
+            if (afterlife.isClosed) include(afterlife.openTimeline())
+        }
+        repeat(amount) {
+            later {
+                val card = proto.create(screen)
+                val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+                val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.AFTERLIFE, true, triggerInfo)
+                gameEvents.fire(beforeEvent)
+                include(beforeEvent.createTimeline())
+                later {
+                    afterlife.pushCard(card)
+                    val afterEvent = beforeEvent.copy(before = false)
+                    gameEvents.fire(afterEvent)
+                    include(afterEvent.createTimeline())
+                }
+            }
+        }
+    }
+
+    override fun descendBulletTimeline(): Timeline = Timeline.timeline { later {
+        val card = afterlife.cards.firstOrNull()
+        requireNotNull(card) { "no card to descend in afterlife" }
+        val info = createTriggerInfo(card)
+        val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.LIMBO, true, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
+        include(afterlife.scrollToBeginTimeline())
+        delay(200)
+        include(card.actor.descendAnimation())
+        delay(50)
+        later {
+            val damage = card.curDamage(this@GameControllerImpl)
+            include(targetedEnemy.damage(damage * 2))
+        }
+        delay(400)
+        include(afterlife.popCardTimeline())
+        action { card.actor.resetDescendAnimation() }
+        delay(400)
+        later {
+            val afterEvent = event.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
+        }
+    } }
 
     override fun switchSlotOfBulletInRevolverTimeline(
         card: Card,

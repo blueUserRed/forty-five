@@ -35,6 +35,7 @@ import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.actors.PositionType
+import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.*
@@ -492,23 +493,25 @@ class Card(
                 val shouldTrigger = effect.checkTrigger(situation, triggerInformation, controller, this@Card)
                 if (!shouldTrigger) return@later
                 if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) {
-                    val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
-                    val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot)
-                    isInTriggerPosition = true
-                    val screenShakeTimeline = Timeline.timeline {
-                        delay(210)
-                        include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                    later {
+                        isInTriggerPosition = true
+
+                        val afterlifeShouldBeOpen = inZone(Zone.AFTERLIFE) || effect.animatesInAfterlife()
+                        val afterlife = controller.afterlife
+                        if (afterlife.isClosed && afterlifeShouldBeOpen) include(afterlife.openTimeline())
+                        if (afterlife.isOpen && !afterlifeShouldBeOpen) include(afterlife.closeTimeline())
+
+                        val screenShakeTimeline = Timeline.timeline {
+                            delay(210)
+                            include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                        }
+
+                        val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
+                        val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
+
+                        action { controller.dispatchAnimTimeline(screenShakeTimeline) }
+                        include(anim)
                     }
-                    action { controller.dispatchAnimTimeline(screenShakeTimeline) }
-                    includeLater(
-                        { controller.afterlife.closeTimeline() },
-                        { inZone(Zone.REVOLVER) && controller.afterlife.isOpen }
-                    )
-                    includeLater(
-                        { controller.afterlife.openTimeline() },
-                        { inZone(Zone.AFTERLIFE) && controller.afterlife.isClosed }
-                    )
-                    include(anim)
                 }
                 include(effect.trigger(this@Card, triggerInformation, controller))
                 later {
@@ -1071,13 +1074,21 @@ class CardActor(
         }
     }
 
-    fun animateToTriggerPosition(controller: GameController, isOnShot: Boolean): Timeline = Timeline.timeline { later {
+    fun animateToTriggerPosition(
+        controller: GameController,
+        isOnShot: Boolean,
+        afterlifeOpen: Boolean
+    ): Timeline = Timeline.timeline { later {
         prevPosition = Vector2(x, y)
         val target = when (card.zone) {
             Zone.REVOLVER -> if (isOnShot) {
                 controller.revolver.getCardOnShotTriggerPosition()
             } else {
-                controller.revolver.getCardTriggerPosition()
+                if (afterlifeOpen) {
+                    controller.revolver.getMirroredCardTriggerPosition()
+                } else {
+                    controller.revolver.getCardTriggerPosition()
+                }
             }
             Zone.HAND -> Vector2(
                 x, y + 300f
@@ -1151,6 +1162,22 @@ class CardActor(
             removeAction(scaleAction)
             inTriggerPosition = false
         }
+    }
+
+    fun descendAnimation(): Timeline = Timeline.timeline {
+        val action = PropertyAction(
+            this@CardActor,
+            ::drawOffsetY,
+            y - 1000f
+        )
+        action.duration = 0.4f
+        action.interpolation = Interpolation.exp10
+        action { addAction(action) }
+        delayUntil { action.isComplete }
+    }
+
+    fun resetDescendAnimation() {
+        drawOffsetY = 0f
     }
 
     override fun positionChanged() {
