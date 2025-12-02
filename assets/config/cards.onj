@@ -1830,7 +1830,7 @@ cards: [
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
-                effect: createBulletsInAfterlife("miniBullet", 8#val)
+                effect: createBulletsInAfterlife("miniBullet", 7#val)
             },
             {
                 trigger: afterShot(allCardsTrigger),

@@ -27,6 +27,7 @@ import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.alpha
+import com.microwavestudios.fortyfive.utils.between
 import com.microwavestudios.fortyfive.utils.minus
 import kotlin.reflect.KClass
 
@@ -169,7 +170,7 @@ class TitleScreen : ScreenCreator() {
 //            yVelocityRange = (-10f..10f)
 //            spawnPerFrame = 70
 ////            speedCap = (40f..40f)
-//            ttlRange = (5000L..5000L)
+//            ttlRange = (1500L..1500L)
 //
 //            initParticle { particle ->
 //                particle.applyForce(0f, -0.5f)
@@ -177,15 +178,19 @@ class TitleScreen : ScreenCreator() {
 //
 //            onUpdate {
 //                if (globalForce.x > 0) {
-//                    globalForce.x = (globalForce.x - 0.06f).coerceAtLeast(0f)
+//                    globalForce.x = (globalForce.x - 0.03f).coerceAtLeast(0f)
 //                }
-//                if (globalForce.x < 0.2f && Utils.coinFlip(0.08f)) {
-//                    globalForce.x += 0.4f
+//                if (globalForce.x < 0.2f && Utils.coinFlip(0.05f)) {
+//                    globalForce.x += 0.3f
 //                }
-//                if (spawnPerFrame!! > 70) spawnPerFrame = spawnPerFrame!! - 1
-//                if (spawnPerFrame!! < 70) spawnPerFrame = spawnPerFrame!! + 1
-//                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! + 30
-//                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! - 30
+////                if (spawnPerFrame!! > 70) spawnPerFrame = spawnPerFrame!! - 1
+////                if (spawnPerFrame!! < 70) spawnPerFrame = spawnPerFrame!! + 1
+////                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! + 20
+////                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! - 20
+//                if (Utils.coinFlip(0.5f)) spawnPerFrame = spawnPerFrame!! + 3
+//                if (Utils.coinFlip(0.5f)) spawnPerFrame = spawnPerFrame!! - 3
+//                spawnPerFrame = spawnPerFrame!!.between(20, 100)
+//                println(this.particles.size)
 //            }
 //
 //            renderer = TextureParticleRenderer("particle_rain", 20f * 0.7f, 35f * 0.7f,
@@ -305,7 +310,7 @@ class TitleScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        timelines, // ParticleSystemScreenController(testParticleSystem, screen)
+        timelines, //  ParticleSystemScreenController(testParticleSystem, screen)
     )
 
     private class SelectedProfileChanged(val newProfile: Profile.Preview?)

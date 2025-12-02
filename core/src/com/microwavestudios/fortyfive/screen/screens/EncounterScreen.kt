@@ -1,6 +1,5 @@
 package com.microwavestudios.fortyfive.screen.screens
 
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -10,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
+import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
@@ -33,7 +33,6 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
-import com.microwavestudios.fortyfive.game.widgets.HorizontalStatusEffectDisplay
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
@@ -112,6 +111,14 @@ class EncounterScreen : ScreenCreator() {
         )
     }
 
+    private val bgZoom: Float = 1.07f
+    private val bgScreenController by lazy {
+        BiomeBackgroundScreenController(screen, false, bgZoom)
+    }
+
+    private var bgOffX: Float = 0f
+    private var bgOffY: Float = 0f
+
     private lateinit var cardRevolverDragAndDrop: InputManager.DragAndDrop
     private lateinit var cardUnderDeckDragAndDrop: InputManager.DragAndDrop
 
@@ -137,6 +144,11 @@ class EncounterScreen : ScreenCreator() {
             y = 0f
             height = worldHeight
             width = (1305f / 1512f) * worldHeight
+
+            gameEvents.watchFor<UpdateUiEvent> {
+                drawOffsetX = bgOffX
+                drawOffsetY = bgOffY
+            }
         }
 
         group {
@@ -578,6 +590,11 @@ class EncounterScreen : ScreenCreator() {
 
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
+
+            gameEvents.watchFor<UpdateUiEvent> {
+                drawOffsetX = bgOffX * 1.1f
+                drawOffsetY = bgOffY * 1.1f
+            }
 
             onInput(GameInputs.interact) {
                 if (enemySelected || enemy.isDefeated) return@onInput
@@ -1336,9 +1353,44 @@ class EncounterScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, false),
+        bgScreenController,
         GameControllerImpl(screen, gameEvents, warningParent, afterlife)
     )
+
+    private fun playerDamageTimeline(): Timeline = Timeline.timeline { later {
+        val duration = 150
+        val interpolation = Interpolation.fade
+        val startTime = TimeUtils.millis()
+        delayUntil {
+            val now = TimeUtils.millis()
+            val elapsed = now - startTime
+            val percent = (elapsed.toFloat() / duration.toFloat()).between(0f, 1f)
+            val adjPercent = interpolation.apply(percent)
+            val movementRangeFraction = (bgZoom - 1f) / 5
+            bgOffY = adjPercent * movementRangeFraction * worldHeight
+            bgOffX = adjPercent * movementRangeFraction * worldWidth
+            bgScreenController.offY = bgOffY
+            bgScreenController.offX = bgOffX
+            percent >= 0.999999f
+        }
+        val middleTime = startTime + duration
+        delayUntil {
+            val now = TimeUtils.millis()
+            val elapsed = now - middleTime
+            val percent = (elapsed.toFloat() / duration.toFloat()).between(0f, 1f)
+            val adjPercent = 1f - interpolation.apply(percent)
+            val movementRangeFraction = (bgZoom - 1f) / 5
+            bgOffY = adjPercent * movementRangeFraction * worldHeight
+            bgOffX = adjPercent * movementRangeFraction * worldWidth
+            bgScreenController.offY = bgOffY
+            bgScreenController.offX = bgOffX
+            percent >= 0.999999f
+        }
+        action {
+            bgOffY = 0f
+            bgScreenController.offY = 0f
+        }
+    } }
 
     private fun reserveAnimationTimeline(
         source: Actor,
@@ -1426,6 +1478,10 @@ class EncounterScreen : ScreenCreator() {
             )
         }
         gameEvents.watchFor<GameControllerImpl.Events.SetupEnemies>(::setupEnemies)
+        gameEvents.watchFor<GameControllerImpl.Events.PlayerLivesChanged> { event ->
+            if (event.newValue >= event.oldValue) return@watchFor
+            screen.screenControllers.filterIsInstance<GameControllerImpl>().first().dispatchAnimTimeline(playerDamageTimeline())
+        }
     }
 
     private fun setupEnemies(event: GameControllerImpl.Events.SetupEnemies) {

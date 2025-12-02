@@ -677,8 +677,7 @@ class GameControllerImpl(
     }
 
     override fun descendBulletTimeline(): Timeline = Timeline.timeline { later {
-        val card = afterlife.cards.firstOrNull()
-        requireNotNull(card) { "no card to descend in afterlife" }
+        val card = afterlife.cards.firstOrNull() ?: return@later
         val info = createTriggerInfo(card)
         val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.LIMBO, true, info)
         gameEvents.fire(event)
