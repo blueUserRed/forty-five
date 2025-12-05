@@ -3,12 +3,15 @@ package com.microwavestudios.fortyfive.rendering
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActor
 import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
+import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.findInstance
 import kotlin.reflect.KProperty
 
 class DebugMenu(val pages: List<DebugMenuPage>) {
@@ -64,6 +67,7 @@ class DebugMenu(val pages: List<DebugMenuPage>) {
             registerDebugMenuPage("Resources") { ResourceDebugMenuPage() }
             registerDebugMenuPage("Map") { MapDebugMenuPage() }
             registerDebugMenuPage("Encounter Preview") { EncounterPreviewDebugMenuPage() }
+            registerDebugMenuPage("Encounter") { EncounterDebugMenuPage() }
         }
 
         fun registerDebugMenuPage(name: String, creator: () -> DebugMenuPage) {
@@ -249,4 +253,38 @@ class EncounterPreviewDebugMenuPage : DebugMenuPage("Encounter Preview") {
             difficulty scaling contribution: ${encounter.difficultyScalingInfo}
         """.trimIndent()
     } ?: ""
+}
+
+class EncounterDebugMenuPage : DebugMenuPage("Encounter") {
+
+    val defeatEnemies = debugButton("defeat Enemies", Keys.U) {
+        val screen = FortyFive.currentScreen ?: return@debugButton
+        val controller = screen.screenControllers.findInstance<GameController>() ?: return@debugButton
+        controller.appendMainTimeline(Timeline.timeline { later {
+            controller.activeEnemies.forEach { enemy ->
+                includeLater({ enemy.damage(enemy.currentCover + enemy.currentHealth) })
+            }
+        } })
+    }
+
+    val giveReserves = debugButton("give reserves", Keys.I) {
+        val screen = FortyFive.currentScreen ?: return@debugButton
+        val controller = screen.screenControllers.findInstance<GameController>() ?: return@debugButton
+        controller.appendMainTimeline(Timeline.timeline {
+            action { controller.gainReserves(4) }
+        })
+    }
+
+    val drawCards = debugButton("draw card", Keys.O) {
+        val screen = FortyFive.currentScreen ?: return@debugButton
+        val controller = screen.screenControllers.findInstance<GameController>() ?: return@debugButton
+        controller.appendMainTimeline(controller.drawCardsTimeline(2))
+    }
+
+    override fun getText(screen: OnjScreen): String = """
+        $giveReserves
+        $drawCards
+        $defeatEnemies
+    """.trimIndent()
+
 }

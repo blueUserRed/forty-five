@@ -23,6 +23,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import kotlin.reflect.cast
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
@@ -365,6 +366,13 @@ inline fun <T, U> MutableMap<T, U>.iterateRemoving(block: (value: MutableMap.Mut
 
 fun <T> List<T>.with(element: T): List<T> {
     return MutableList(size + 1) { i -> if (i == size) element else get(i) }
+}
+
+inline fun <reified U> Iterable<*>.findInstance(): U? {
+    forEach { cur ->
+        if (cur is U) return cur
+    }
+    return null
 }
 
 fun Color.interpolate(other: Color): Color {

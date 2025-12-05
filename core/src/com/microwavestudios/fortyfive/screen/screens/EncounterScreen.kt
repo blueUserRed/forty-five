@@ -1357,6 +1357,8 @@ class EncounterScreen : ScreenCreator() {
         GameControllerImpl(screen, gameEvents, warningParent, afterlife)
     )
 
+    override fun debugMenuPages(): List<String> = listOf("Encounter")
+
     private fun playerDamageTimeline(): Timeline = Timeline.timeline { later {
         val duration = 150
         val interpolation = Interpolation.fade
