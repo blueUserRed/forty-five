@@ -12,10 +12,6 @@ configFiles: {
         file: "config/descriptions.onj",
         validatedBy: null,
     },
-    encounterDefinitions: {
-        file: "config/encounter_definitions.onj",
-        validatedBy: "onjschemas/encounter_definitions.onjschema",
-    },
     enemies: {
         file: "config/enemies.onj",
         validatedBy: "onjschemas/enemies.onjschema",
@@ -44,25 +40,9 @@ configFiles: {
         file: "config/dialogs.onj",
         validatedBy: "onjschemas/dialogs.onjschema",
     },
-    shopConfig: {
-        file: "config/shops.onj",
-        validatedBy: "onjschemas/shops.onjschema",
-    },
-    backpackConfig: {
-        file: "config/backpack_config.onj",
-        validatedBy: "onjschemas/backpack.onjschema",
-    },
     mapConfig: {
         file: "config/map_config.onj",
         validatedBy: "onjschemas/map_config.onjschema",
-    },
-    inputMaps: {
-        file: "screens/input_maps.onj",
-        validatedBy: null,
-    },
-    creditsText: {
-        file: "config/credits_text.onj",
-        validatedBy: "onjschemas/credits_text.onjschema",
     },
     npcs: {
         file: "config/npcs.onj",
