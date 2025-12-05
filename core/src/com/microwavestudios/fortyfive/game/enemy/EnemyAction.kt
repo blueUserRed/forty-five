@@ -42,8 +42,6 @@ sealed class EnemyActionPrototype(
 
     var scaleFactor: Float = 1f
 
-    private val predicates: MutableList<GamePredicate> = mutableListOf()
-
     abstract fun create(controller: GameController, scale: Double): EnemyAction
 
     class DamagePlayer(

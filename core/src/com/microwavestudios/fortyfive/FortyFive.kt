@@ -11,7 +11,6 @@ import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
-import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
 import com.microwavestudios.fortyfive.profile.ProfileManager
@@ -142,7 +141,6 @@ object FortyFive : Game() {
         with(OnjConfig) {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
-            registerNameSpace("Map", MapNamespace)
         }
         ConfigFileManager.init()
         TemplateString.init()
@@ -151,7 +149,6 @@ object FortyFive : Game() {
         steamHandler = SteamHandler()
         UserPrefs.read()
         soundPlayer.init()
-        PermaSaveState.read()
         GraphicsConfig.init()
         resourceManager.init()
         serviceThread.start()
@@ -163,7 +160,6 @@ object FortyFive : Game() {
         DebugActorImpl.dumpActorsWithDebugWarnings()
         profileManager.currentProfile?.write()
         profileManager.currentProfile?.writeMaps()
-        PermaSaveState.write()
         UserPrefs.write()
         _lifetime.die()
         soundPlayer.end()
