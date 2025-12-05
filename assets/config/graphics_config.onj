@@ -1,43 +1,12 @@
 import "imports/colors.onj" as color;
 
-bufferTime: 0.5,
-
-enemyChargeAnimation: {
-    xCharge: -7.0,
-    yCharge: 0.0,
-    duration: 0.5,
-    interpolation: "swing"
-},
-
 icons: {
-    burning: {
-        icon: "burning_icon",
-        scale: 0.6
-    },
-    poison: {
-        icon: "poison_icon",
-        scale: 0.6
-    },
-    fireResistance: {
-        icon: "burning_icon",
-        scale: 0.6
-    },
-    bewitched: {
-        icon: "bewitched_icon",
-        scale: 0.6
-    },
-    wardOfTheWitch: {
-        icon: "burning_icon",
-        scale: 0.6
-    },
-    wrathOfTheWitch: {
-        icon: "burning_icon",
-        scale: 0.6
-    },
-    shield: {
-        icon: "shield_icon",
-        scale: 0.6
-    }
+    burning: "burning_icon",
+    poison: "poison_icon",
+    fireResistance: "burning_icon",
+    bewitched: "bewitched_icon",
+    shield: "shield_icon",
+    frozen: "encounter_modifier_frost",
 },
 
 encounterModifiers: {
@@ -144,22 +113,6 @@ cardText: {
         increase: color.darkGreen,
         decrease: color.red,
     },
-    savedSymbol: "card_symbol_saved",
-    notSavedSymbol: "card_symbol_not_saved",
-},
-
-keySelect: {
-    drawable: "key_select_frame"
-},
-
-shootPostProcessor: {
-    name: "shoot_shader",
-    duration: 0.9
-},
-
-enemyGravestone: {
-    texture: "enemy_gravestone",
-    scale: 0.3,
 },
 
 revolverSlotIcons: {

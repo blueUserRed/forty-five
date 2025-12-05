@@ -24,7 +24,6 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -551,7 +550,7 @@ open class RenderPipeline(
 
 class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
 
-    private val shootShader: Promise<BetterShader> = GraphicsConfig.shootShader(this, lifetime)
+    private val shootShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, lifetime, "shoot_shader")
     private val shootPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(shootShader)
     }
@@ -564,7 +563,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
     fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
         if (!shootShader.isResolved) FortyFive.resourceManager.forceResolve(shootShader)
         val shootShader = shootShader.getOrError()
-        val duration = GraphicsConfig.shootPostProcessingDuration()
+        val duration = 900
         action {
             shootShader.resetReferenceTime()
             postPreprocessingSteps.add(shootPostProcessingStep)

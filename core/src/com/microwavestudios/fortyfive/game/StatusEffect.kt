@@ -13,7 +13,6 @@ import kotlin.math.min
 
 abstract class StatusEffect(
     val iconHandle: ResourceHandle,
-    private val iconScale: Float
 ) {
 
     abstract val name: String
@@ -62,10 +61,9 @@ abstract class StatusEffect(
 }
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
-    iconScale: Float,
     duration: Int,
     private val skipFirstRotation: Boolean
-) : StatusEffect(iconHandle, iconScale) {
+) : StatusEffect(iconHandle) {
 
     var duration: Int = duration
         private set
@@ -109,9 +107,8 @@ abstract class RotationBasedStatusEffect(
 
 abstract class TurnBasedStatusEffect(
     iconHandle: ResourceHandle,
-    iconScale: Float,
     duration: Int
-) : StatusEffect(iconHandle, iconScale) {
+) : StatusEffect(iconHandle) {
 
     var turnOnEffectStart = -1
         private set
@@ -162,7 +159,6 @@ class Burning(
     skipFirstRotation: Boolean,
 ) : RotationBasedStatusEffect(
     GraphicsConfig.iconName("burning"),
-    GraphicsConfig.iconScale("burning"),
     rotations,
     skipFirstRotation,
 ) {
@@ -201,7 +197,6 @@ class BurningPlayer(
     skipFirstRotation: Boolean,
 ) : RotationBasedStatusEffect(
     GraphicsConfig.iconName("burning"),
-    GraphicsConfig.iconScale("burning"),
     rotations,
     skipFirstRotation,
 ) {
@@ -230,7 +225,6 @@ class Poison(
     damage: Int,
 ) : StatusEffect(
     GraphicsConfig.iconName("poison"),
-    GraphicsConfig.iconScale("poison"),
 ) {
 
     override val name: String = "poison"
@@ -279,7 +273,6 @@ class FireResistance(
     turns: Int
 ) : TurnBasedStatusEffect(
     GraphicsConfig.iconName("fireResistance"),
-    GraphicsConfig.iconScale("fireResistance"),
     turns
 ) {
 
@@ -305,7 +298,6 @@ class Bewitched(
     private val skipFirstRotation: Boolean,
 ) : StatusEffect(
     GraphicsConfig.iconName("bewitched"),
-    GraphicsConfig.iconScale("bewitched")
 ) {
 
     override val name: String = "bewitched"
@@ -360,7 +352,6 @@ class Shield(
     private var shield: Int
 ) : StatusEffect(
     GraphicsConfig.iconName("shield"),
-    GraphicsConfig.iconScale("shield")
 ) {
 
     override val name: String = "shield"
@@ -393,7 +384,7 @@ class Shield(
 
 }
 
-class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect("encounter_modifier_frost", 1f) {
+class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect("encounter_modifier_frost") {
 
     var shots: Int = shots
         private set
