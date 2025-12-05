@@ -1272,7 +1272,7 @@ cards: [
            },
         ],
         cost: 0,
-        tags: ["pool2", "rarity2", "not used"],
+        tags: ["pool2", "rarity2", "not used", "unobtainable"],
         price: 50,
     },
     {

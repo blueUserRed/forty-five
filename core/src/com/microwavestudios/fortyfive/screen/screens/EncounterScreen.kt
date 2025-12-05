@@ -20,6 +20,7 @@ import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -383,6 +384,13 @@ class EncounterScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.CENTER
             flexDirection = FlexDirection.ROW
+            touchable = Touchable.enabled
+            val text = DetailDescriptionHandler.descriptions[effect.name.lowercase()]?.second
+            detailWidget = DetailWidget.SimpleSmallDetailActor(
+                screen,
+                effects = CardActor.cardDetailEffects // card detail effects contains all necessary text effects for status effects
+            ) { text ?: "" }
+            bindDetailToInputState(GameInputs.States.focused)
             image {
                 backgroundHandle = effect.iconHandle
                 width = 50f
