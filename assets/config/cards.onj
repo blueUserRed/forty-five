@@ -108,7 +108,7 @@ cards: [
                 effect: buffDmgLimitValidity(
                     (inZone(zone.revolver) and not(isSelf()))#bSelect,
                     5#val,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -263,7 +263,7 @@ cards: [
                 effect: buffDmgLimitValidity(
                     (inZone([zone.revolver, zone.hand, zone.afterlife]) and hasName("bullet"))#bSelect,
                     10#val,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -347,7 +347,7 @@ cards: [
                 effect: protectLimitValidity(
                     bSelectRevolverTarget(true, true, "Choose Bullet to protect"),
                     4,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -398,9 +398,10 @@ cards: [
             {
                 trigger: replaced(),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgLimitValidity(
                     bSelectCachedBullets(),
-                    6#val
+                    6#val,
+                    cardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -577,7 +578,7 @@ cards: [
                     bSelectSelf(),
                     1.5,
                     $TargetedEnemyShieldIsAtLeast { value: 1 }#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -599,7 +600,7 @@ cards: [
                     bSelectSelf(),
                     1.5,
                     $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -789,7 +790,7 @@ cards: [
                     bSelectSelf(),
                     1.5,
                     $TargetedEnemyHealthAbovePercent { value: 0.5 }#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -817,12 +818,13 @@ cards: [
         name: "shieldBullet",
         title: "Shield Bullet",
         flavourText: "",
-        description: "$trigger$On-Turn-Begin:$trigger$\nYou get $status$SHIELD$status$ (4)",
+        description: "$trigger$On-Turn-Begin:$trigger$\n$trigger$While in revolver$trigger$:\n$You get $status$SHIELD$status$ (4)",
         baseDamage: 0,
         effects: [
             {
                 trigger: turnBegin(),
-                effect: givePlayerStatus(shield(4#val))
+                inZones: [zone.revolver],
+                effect: givePlayerStatus(shield(5#val))
             }
         ],
         cost: 2,
@@ -873,12 +875,12 @@ cards: [
         name: "woodenBullet",
         title: "Wooden Bullet",
         flavourText: "Normally you would build houses or something out of wood, but I guess a bullet works too",
-        description: "$trigger$On-Leave:$trigger$\nYou get $status$SHIELD$status$ (7)",
+        description: "$trigger$On-Leave:$trigger$\nYou get $status$SHIELD$status$ (8)",
         baseDamage: 4,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
-                effect: givePlayerStatus(shield(7#val))
+                effect: givePlayerStatus(shield(8#val))
             }
         ],
         cost: 1,
@@ -1149,7 +1151,7 @@ cards: [
                 effect: buffDmgLimitValidity(
                     bSelectRevolverTarget(false, false, "Choose Bullet to buff"),
                     8#val,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -1329,12 +1331,12 @@ cards: [
         name: "aircraftCarrierBullet",
         title: "Aircraft Carrier Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\n$keyword$CREATE$keyword$ 3 [Kamikaze bullet] in your deck, then draw a card",
+        description: "$trigger$On-Shot:$trigger$\n$keyword$CREATE$keyword$ 3 [Kamikaze bullet] in your drawpile, then draw a card",
         baseDamage: 15,
         effects: [
             {
                 trigger: shot(),
-                effect: putCardsInStack("kamikazeBullet", 3#val)
+                effect: shuffleCardsIntoStack("kamikazeBullet", 3#val)
             },
             {
                 trigger: shot(),
@@ -1427,7 +1429,7 @@ cards: [
         name: "excaliBullet",
         title: "Excalibullet",
         flavourText: "For the king!",
-        description: "$trigger$On-Placedown:$trigger$\nThe bullet in Slot 3 " + slot.3 + " gets plus x dmg, for as long as Excalibullet is in the revolver, where x is the number of unique bullets with no duplicates currently in your stack",
+        description: "$trigger$On-Placedown:$trigger$\nThe bullet in Slot 3 " + slot.3 + " gets plus x dmg, for as long as Excalibullet is in the revolver, where x is the number of unique bullets with no duplicates currently in your drawpile",
         baseDamage: 7,
         effects: [
             {
@@ -1435,7 +1437,7 @@ cards: [
                 effect: buffDmgLimitValidity(
                     (inZone(zone.revolver) and inRevolverSlot(3))#bSelect,
                     value.uniqueCardsInTheStack,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -1506,7 +1508,7 @@ cards: [
                 effect: protectParryOnlyLimitValidity(
                     bSelectSelf(),
                     2,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 ),
             }
         ],
@@ -1515,8 +1517,8 @@ cards: [
         price: 50,
     },
     {
-        name: "gladiatorsBullet",
-        title: "Gladiators Bullet",
+        name: "gladiatorBullet",
+        title: "Gladiator Bullet",
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nAll other bullets in the revolver get $trait$PROTECTED$trait$ (1) ",
         baseDamage: 15,
@@ -1585,7 +1587,7 @@ cards: [
                 effect: protectParryOnlyLimitValidity(
                     bSelectSelf(),
                     2,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 ),
             }
         ],
@@ -1761,9 +1763,10 @@ cards: [
                     value: poison(0#val)
                 },
                 inZones: [zone.revolver],
-                effect: buffDmg(
+                effect: buffDmgLimitValidity(
                     bSelectRevolverTarget(false, true, "Select bullet to buff"),
-                    value.highestPoison * 0.5
+                    value.highestPoison * 0.5,
+                    cardInZoneModifierPredicate(zone.revolver)
                 )
             },
         ],
@@ -1775,12 +1778,12 @@ cards: [
         name: "hydraBullet",
         title: "Hydra Bullet",
         flavourText: "",
-        description: "$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your stack.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        description: "$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
         baseDamage: 0,
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
-                effect: putCardsInStack("hydraHeadBullet", 2#val)
+                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
             },
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
@@ -1800,12 +1803,12 @@ cards: [
         name: "hydraHeadBullet",
         title: "Hydra-Head Bullet",
         flavourText: "",
-        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your stack.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
         baseDamage: 0,
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
-                effect: putCardsInStack("hydraHeadBullet", 2#val)
+                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
             },
             {
                 trigger: enterZone(zone.stack, onlySelfTriggers),

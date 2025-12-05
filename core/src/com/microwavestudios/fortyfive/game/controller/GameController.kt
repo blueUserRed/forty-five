@@ -48,7 +48,7 @@ interface GameController {
 
     fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
 
-    fun putCardsInStackTimeline(cardName: String, amount: Int, sourceCard: Card? = null): Timeline
+    fun putCardsInStackTimeline(cardName: String, amount: Int, sourceCard: Card? = null, onTop: Boolean): Timeline
 
     fun bounceBulletTimeline(card: Card): Timeline
 

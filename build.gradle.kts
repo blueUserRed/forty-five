@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("eclipse")
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.0.20"
+    id("org.jetbrains.kotlin.jvm") version "2.2.20"
 }
 
 buildscript {
-    val kotlinVersion by extra("2.0.20")
+    val kotlinVersion by extra("2.2.20")
     val gdxVersion by extra("1.11.0")
 
     repositories {

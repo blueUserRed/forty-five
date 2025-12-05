@@ -349,15 +349,16 @@ abstract class Effect(val data: EffectData) {
     class PutCardInStack(
         val cardName: String,
         val amount: EffectValue,
+        val onTop: Boolean,
         data: EffectData
     ) : Effect(data) {
 
-        override fun copy(data: EffectData): Effect = PutCardInStack(cardName, amount, data)
+        override fun copy(data: EffectData): Effect = PutCardInStack(cardName, amount, onTop, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             later {
                 val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
-                include(controller.putCardsInStackTimeline(cardName, amount, sourceCard = card))
+                include(controller.putCardsInStackTimeline(cardName, amount, sourceCard = card, onTop = onTop))
             }
         }
 

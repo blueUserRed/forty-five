@@ -16,7 +16,7 @@ hoverDetailDescriptions: [
     {
         keyword: "SHIELD",
         groupName: "status",
-        description: "$status$SHIELD (d)$status$\nShield protects from d dmg.",
+        description: "$status$SHIELD (d)$status$\nShield protects from d dmg. d halves On-Turn-Begin",
     },
     {
         keyword: "BEWITCHED",
@@ -26,7 +26,7 @@ hoverDetailDescriptions: [
     {
         keyword: "FROZEN",
         groupName: "status",
-        description: "$status$FROZEN (x)$status$\nThe Revolver won't rotate for x shots.",
+        description: "$status$FROZEN (x)$status$\nThe Revolver won't rotate for x shots. Everlasting doesn't work.",
     },
     {
         keyword: "PROTECTED",
@@ -101,7 +101,7 @@ hoverDetailDescriptions: [
     {
         keyword: "UNOBTAINABLE",
         groupName: "keyword",
-        description: "$keyword$UNOBTAINABLE$keyword$\nCan only be added to the deck through Bullet effects, remove from the deck after the encounter",
+        description: "$keyword$UNOBTAINABLE$keyword$\nCan only be added to the encounter through Bullet effects",
     },
 ],
 

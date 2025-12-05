@@ -86,8 +86,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     )
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
-    fun sourceCardInZone(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, _, modifier ->
+    fun sourceCardInZoneModifierPredicate(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, _, modifier ->
         modifier.sourceCard?.inZone(zone.value) ?: false
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
+    fun cardInZoneModifierPredicate(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, card, _ ->
+        card.inZone(zone.value)
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
@@ -264,10 +269,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     )
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
-    fun putCardsInStack(name: OnjString, amount: OnjEffectValue): OnjEffect =
+    fun putCardsOnTopOfStack(name: OnjString, amount: OnjEffectValue): OnjEffect =
         OnjEffect(Effect.PutCardInStack(
             name.value,
             amount.value,
+            true,
+            EffectData()
+        ))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun shuffleCardsIntoStack(name: OnjString, amount: OnjEffectValue): OnjEffect =
+        OnjEffect(Effect.PutCardInStack(
+            name.value,
+            amount.value,
+            false,
             EffectData()
         ))
 

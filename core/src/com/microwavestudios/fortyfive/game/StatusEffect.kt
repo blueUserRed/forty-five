@@ -44,6 +44,8 @@ abstract class StatusEffect(
 
     open fun additionalDamageColor(): Color = Color.RED
 
+    open fun disableEverlasting(): Boolean = false
+
     abstract fun canStackWith(other: StatusEffect): Boolean
 
     abstract fun stack(other: StatusEffect)
@@ -379,6 +381,10 @@ class Shield(
         return 0
     }
 
+    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        action { shield /= 2 }
+    }
+
     override fun isStillValid(): Boolean = shield > 0
 
     override fun getDisplayText(): String = shield.toString()
@@ -413,6 +419,8 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
             shots--
         }
     }
+
+    override fun disableEverlasting(): Boolean = true
 
     override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
 

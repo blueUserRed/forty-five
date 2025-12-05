@@ -63,7 +63,8 @@ class GameControllerImpl(
         get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
-        get() = _encounterModifiers.any { it.second.disableEverlasting() }
+        get() = _encounterModifiers.any { it.second.disableEverlasting() } ||
+                _playerStatusEffects.any { it.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
@@ -459,7 +460,8 @@ class GameControllerImpl(
     override fun putCardsInStackTimeline(
         cardName: String,
         amount: Int,
-        sourceCard: Card?
+        sourceCard: Card?,
+        onTop: Boolean,
     ): Timeline = Timeline.timeline { later {
         val proto = cardPrototypes.find { it.name == cardName }
         requireNotNull(proto) { "No card with name $cardName" }
@@ -471,7 +473,13 @@ class GameControllerImpl(
                 gameEvents.fire(beforeEvent)
                 beforeEvent.createTimeline()
             })
-            action { cardStack.addCardAtTop(card) }
+            action {
+                if (onTop){
+                    cardStack.addCardAtTop(card)
+                } else {
+                    cardStack.shuffleCardIntoStack(card)
+                }
+            }
             later {
                 val afterEvent = beforeEvent.copy(before = false)
                 gameEvents.fire(afterEvent)

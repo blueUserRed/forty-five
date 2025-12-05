@@ -272,7 +272,7 @@ nodes: [
                 difficultyScalingInfo: 0.0,
                 special: false,
             },
-            isExtraction: false,
+            isExtraction: true,
         },
         distance: -1,
         nodeTexture: 'map_node_fight',
