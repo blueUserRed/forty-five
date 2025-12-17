@@ -121,26 +121,15 @@ interface AnimatedActor {
         frequency: Float = 0.5f,
         phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
         offset: Float = 0f
-    ) {
+    ): AnimationController {
         this as Actor
-        val initialY = y
         val time = TimeUtils.millis()
         val updater = NeedsUpdate {
             val value = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase) * amplitude + offset
-            when (method) {
-                AnimationMethod.DRAW_OFFSET -> {
-                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
-                    drawOffsetY = value
-                }
-                AnimationMethod.LOGICAL_OFFSET -> {
-                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
-                    logicalOffsetY = value
-                    (this as? Layout)?.invalidateHierarchy()
-                }
-                AnimationMethod.X_AND_Y -> y = initialY + value
-            }
+            method.set(false, this, value)
         }
         animationsNeedingUpdate.add(updater)
+        return AnimMethodBasedAnimationController(this, false, method, updater)
     }
 
     fun animateLeftAndRightSinus(
@@ -150,27 +139,16 @@ interface AnimatedActor {
         phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
         offset: Float = 0f,
         interpolation: Interpolation = Interpolation.linear
-    ) {
+    ): AnimationController {
         this as Actor
-        val initialX = x
         val time = TimeUtils.millis()
         val updater = NeedsUpdate {
             val sin = sin(TimeUtils.timeSinceMillis(time).toFloat() / 1000f * frequency + phase)
             val value = (interpolation.apply((sin + 1) / 2) * 2 - 1) * amplitude + offset
-            when (method) {
-                AnimationMethod.DRAW_OFFSET -> {
-                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
-                    drawOffsetX = value
-                }
-                AnimationMethod.LOGICAL_OFFSET -> {
-                    this as? OffSettable ?: throw RuntimeException("actor must be OffSettable to use method $method")
-                    logicalOffsetX = value
-                    (this as? Layout)?.invalidateHierarchy()
-                }
-                AnimationMethod.X_AND_Y -> x = initialX + value
-            }
+            method.set(true, this, value)
         }
         animationsNeedingUpdate.add(updater)
+        return AnimMethodBasedAnimationController(this, true, method, updater)
     }
 
     fun animateRotationSinus(
@@ -178,7 +156,7 @@ interface AnimatedActor {
         frequency: Float = 1f,
         phase: Float = (0f..(2f * Math.PI.toFloat())).random(),
         offset: Float = 0f
-    ) {
+    ): AnimationController {
         this as Actor
         if (this is Group) {
             isTransform = true
@@ -189,16 +167,90 @@ interface AnimatedActor {
             rotation = value
         }
         animationsNeedingUpdate.add(updater)
+
+        return object : AnimationController {
+
+            var isRunning = true
+
+            override fun start() {
+                if (isRunning) return
+                isRunning = true
+                animationsNeedingUpdate.add(updater)
+            }
+
+            override fun stop() {
+                if (!isRunning) return
+                isRunning = false
+                animationsNeedingUpdate.remove(updater)
+            }
+
+            override fun reset() {
+                rotation = 0f
+            }
+        }
     }
 
     fun interface NeedsUpdate {
         fun update()
     }
 
+    interface AnimationController {
+        fun start()
+        fun stop()
+        fun reset()
+    }
+
+    private class AnimMethodBasedAnimationController(
+        val actor: AnimatedActor,
+        val isX: Boolean,
+        val method: AnimationMethod,
+        val updater: NeedsUpdate
+    ) : AnimationController {
+
+        private var isRunning = true
+
+        override fun start() {
+            if (isRunning) return
+            isRunning = true
+            actor.animationsNeedingUpdate.add(updater)
+        }
+
+        override fun stop() {
+            if (!isRunning) return
+            isRunning = false
+            actor.animationsNeedingUpdate.remove(updater)
+        }
+
+        override fun reset() {
+            actor as Actor
+            method.set(isX, actor, 0f)
+        }
+    }
+
     enum class AnimationMethod {
-        X_AND_Y,
-        LOGICAL_OFFSET,
-        DRAW_OFFSET
+        X_AND_Y {
+            override fun set(isX: Boolean, actor: Actor, value: Float) {
+                if (isX) actor.x = value
+                else actor.y = value
+            }
+        },
+        LOGICAL_OFFSET {
+            override fun set(isX: Boolean, actor: Actor, value: Float) {
+                if (actor !is OffSettable) return
+                if (isX) actor.logicalOffsetX = value
+                else actor.logicalOffsetY = value
+                (actor as? Layout)?.invalidateHierarchy()
+            }
+        },
+        DRAW_OFFSET {
+            override fun set(isX: Boolean, actor: Actor, value: Float) {
+                if (actor !is OffSettable) return
+                if (isX) actor.drawOffsetX = value
+                else actor.drawOffsetY = value
+            }
+        };
+
+        abstract fun set(isX: Boolean, actor: Actor, value: Float)
     }
 }
 

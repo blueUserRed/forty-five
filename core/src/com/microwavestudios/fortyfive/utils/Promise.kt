@@ -56,6 +56,10 @@ class Promise<T> {
         if (isResolved) block(getOrError())
     }
 
+    companion object {
+        val nullPromise: Promise<Nothing?> = Promise<Nothing?>().also { it.resolve(null) }
+    }
+
 }
 
 fun <T> T.asPromise(): Promise<T> = Promise<T>().also { it.resolve(this) }

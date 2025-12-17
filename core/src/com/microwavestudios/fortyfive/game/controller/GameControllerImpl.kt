@@ -418,17 +418,6 @@ class GameControllerImpl(
             ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
     }
 
-    override fun cardSelectionPopupTimeline(
-        text: String,
-        exclude: Card?
-    ): Timeline = Timeline.timeline {
-        val event = Events.TargetSelectionEvent(text, exclude)
-        include(afterlife.closeTimeline())
-        action { gameEvents.fire(event) }
-        delayUntil { event.promise.isResolved }
-        action { store("selectedCard", event.promise.getOrError()) }
-    }
-
     override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
         require(card.inZone(Zone.REVOLVER))
         val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
@@ -1512,7 +1501,7 @@ class GameControllerImpl(
             val ableToBlock: Int,
             val resolutionPromise: Promise<Boolean /*= parried*/> = Promise()
         )
-        data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
+        data class SelectionChangedEvent(val text: String?)
         data class SetupEnemies(val enemies: List<Enemy>)
         data class EncounterModifierAdded(val modifier: EncounterModifier)
         data class EnemySelected(val selected: Enemy)

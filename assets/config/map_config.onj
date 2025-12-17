@@ -1,6 +1,4 @@
-use Map;
 use Common;
-
 
 var images = {
     aquaBalle: {

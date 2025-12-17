@@ -234,16 +234,15 @@ sealed class EncounterModifier {
         override val difficultyChange: Float = 0.65f
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
-            includeLater(
-                { Timeline.timeline {
-                    include(controller.cardSelectionPopupTimeline("Select bullet to destroy"))
-                    includeLater(
-                        { controller.destroyCardTimeline(get<Card>("selectedCard")) },
-                        { true }
-                    )
-                } },
-                { controller.cardsInRevolver().isNotEmpty() }
-            )
+            later {
+                val selector = CardInRevolverSelector(controller, "Select bullet to destroy")
+                val promise = selector.startSelect()
+                waitForPromise(promise)
+                later {
+                    val result = promise.getOrNull()
+                    if (result != null) include(controller.destroyCardTimeline(result))
+                }
+            }
         }
     }
 

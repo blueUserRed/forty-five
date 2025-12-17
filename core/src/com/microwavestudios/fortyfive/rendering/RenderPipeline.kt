@@ -563,7 +563,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
     fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
         if (!shootShader.isResolved) FortyFive.resourceManager.forceResolve(shootShader)
         val shootShader = shootShader.getOrError()
-        val duration = 900
+        val duration = 90
         action {
             shootShader.resetReferenceTime()
             postPreprocessingSteps.add(shootPostProcessingStep)

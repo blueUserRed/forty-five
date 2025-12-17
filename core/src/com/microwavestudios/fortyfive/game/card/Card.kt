@@ -31,6 +31,7 @@ import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
@@ -437,10 +438,6 @@ class Card(
         modifiersChanged()
     }
 
-    fun enterTargetSelection(promise: Promise<Card>) {
-        actor.enterSelectionMode(promise)
-    }
-
     private fun addRottenModifier(controller: GameController) {
         val rotationTransformer = { oldModifier: CardDamageModifier, triggerInformation: TriggerInformation ->
             val newDamage = (oldModifier.damage - (triggerInformation.multiplier ?: 1))
@@ -827,10 +824,10 @@ class CardActor(
     val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
-    val screen: OnjScreen,
+    override val screen: OnjScreen,
     val enableHoverDetails: Boolean // TODO: fix
-) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
-    OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
+) : Widget(), ZIndexActor, InputActor by InputActorImpl(), Selectable<CardActor>,
+    OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor, AnimatedActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.ComplexBigDetailActor(
         screen,
@@ -843,6 +840,8 @@ class CardActor(
         },
         subtexts = getEffectTexts()
     )
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     override var fixedZIndex: Int = 0
 
@@ -884,7 +883,25 @@ class CardActor(
 
     private var prevPosition: Vector2? = null
 
-    private var selectionPromise: Promise<Card>? = null
+    private var selectionPromise: Promise<CardActor>? = null
+
+    private val selectionAnimation: AnimatedActor.AnimationController =
+        animateRotationSinus(amplitude = Math.PI.toFloat() * 0.5f, frequency = 30f, phase = 0f)
+            .also { it.stop() }
+
+    private val selectionDropShadow = SquareDropShadow(
+        color = Color.GOLDENROD,
+        scale = 1.2f,
+        offX = 0f,
+        offY = 0f
+    )
+
+    private val defaultFocusDropShadow = SquareDropShadow(
+        color = Color.Black,
+        scale = 1.1f,
+        offX = 3f,
+        offY = -3f
+    )
 
     var playSoundsOnHover: Boolean = false
 
@@ -920,28 +937,9 @@ class CardActor(
         onInput(GameInputs.interact) { clicked() }
         onInput(GameInputs.triggerCard) { rightClicked() }
 
-        val dropShadow = SquareDropShadow(
-            color = Color.Black,
-            scale = 1.1f,
-            offX = 3f,
-            offY = -3f
-        )
-        dropShadow.showDropShadow = false
         observeInputState(
             GameInputs.States.focused,
-            {
-                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
-                    return@observeInputState
-                }
-                this.dropShadow = dropShadow
-                dropShadow.showDropShadow = true
-            },
-            {
-                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
-                    return@observeInputState
-                }
-                this.dropShadow?.showDropShadow = false
-            }
+            ::focusEnter, ::focusLoss
         )
         observeInputState(
             GameInputs.States.inDrag,
@@ -950,13 +948,36 @@ class CardActor(
         )
     }
 
+    private fun focusEnter() {
+        if (selectionPromise != null) {
+            selectionAnimation.start()
+            return
+        }
+        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+            dropShadow = defaultFocusDropShadow
+            defaultFocusDropShadow.showDropShadow = true
+        }
+    }
+
+    private fun focusLoss() {
+        if (selectionPromise != null) {
+            selectionAnimation.stop()
+            selectionAnimation.reset()
+            return
+        }
+        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+            dropShadow = defaultFocusDropShadow
+            defaultFocusDropShadow.showDropShadow = false
+        }
+    }
+
     fun clickedViaSlot(rightClick: Boolean) {
         if (rightClick) rightClicked() else clicked()
     }
 
     private fun clicked() {
         val selectionPromise = selectionPromise ?: return
-        selectionPromise.resolve(card)
+        selectionPromise.resolve(this)
     }
 
     private fun rightClicked() {
@@ -964,9 +985,14 @@ class CardActor(
         card.gameEvents.fire(GameControllerImpl.Events.CardRightClickEvent(card))
     }
 
-    fun enterSelectionMode(promise: Promise<Card>) {
+    override fun enterSelectionMode(promise: Promise<CardActor>) {
         selectionPromise = promise
-        promise.then { selectionPromise = null }
+        dropShadow = selectionDropShadow
+    }
+
+    override fun exitSelectionMode() {
+        selectionPromise = null
+        dropShadow = null
     }
 
     private fun setupShader(batch: Batch): Boolean {
@@ -996,6 +1022,7 @@ class CardActor(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         if (isDragged) return
         doDraw(batch, parentAlpha)
     }

@@ -565,6 +565,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
                 profile.loadAreaMap(profile._currentMapName)
                 return profile
             } catch (e: Exception) {
+                FortyFive.logger.severe(logTag, "Error loading profile: $profileName")
+                FortyFive.logger.stackTrace(e)
                 markVersionFileCorrupted(profileName)
                 return null
             }

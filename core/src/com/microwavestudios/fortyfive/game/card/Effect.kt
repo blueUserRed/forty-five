@@ -78,21 +78,27 @@ abstract class Effect(val data: EffectData) {
             }
 
             is BulletSelector.ByPopup -> later {
-                val cards = controller.cardsInRevolver()
-                val show = !(cards.size == 1 && cards.first() === self && !bulletSelector.includeSelf) &&
-                        !cards.isEmpty()
-                if (show) {
-                    include(controller.cardSelectionPopupTimeline(
-                        bulletSelector.text,
-                        if (bulletSelector.includeSelf) null else self
-                    ))
-                    action {
-                        val cards = listOf(get<Card>("selectedCard"))
-                        cardsAffected(self, cards)
-                        store("selectedCards", cards)
+
+                val selector = CardInRevolverSelector(
+                    controller,
+                    bulletSelector.text,
+                    predicate = { card ->
+                        bulletSelector.includeSelf || card != self
                     }
-                } else {
-                    action { store("selectedCards", listOf<Card>()) }
+                )
+                val promise = selector.startSelect()
+                waitForPromise(promise)
+                later {
+                    val result = promise.getOrNull()
+                    if (result == null) {
+                        action { store("selectedCards", listOf<Card>()) }
+                    } else {
+                        val cards = listOf(result)
+                        action {
+                            cardsAffected(self, cards)
+                            store("selectedCards", cards)
+                        }
+                    }
                 }
             }
         }

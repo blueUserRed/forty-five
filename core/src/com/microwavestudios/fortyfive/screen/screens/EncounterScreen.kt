@@ -844,15 +844,18 @@ class EncounterScreen : ScreenCreator() {
             addAction(action)
         }
 
-        gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
-            animateInOut(true)
-            event.promise.then { animateInOut(false) }
+        gameEvents.watchFor<GameControllerImpl.Events.SelectionChangedEvent> { event ->
+            if (event.text == null) {
+                animateInOut(false)
+            } else {
+                animateInOut(true)
+            }
         }
         label("red wing", "", Color.BrightYellow, 32) {
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
-            gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { event ->
+            gameEvents.watchFor<GameControllerImpl.Events.SelectionChangedEvent> { event ->
                 setText(event.text)
             }
         }
@@ -887,21 +890,21 @@ class EncounterScreen : ScreenCreator() {
                 screen
             )
 
-            gameEvents.watchFor<GameControllerImpl.Events.TargetSelectionEvent> { (_, exclude, promise) ->
-                revolver
-                    .slots
-                    .forEach {
-                        val card = it.card ?: return@forEach
-                        if (card === exclude) return@forEach
-                        card.enterTargetSelection(promise)
-                        it.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
-                    }
-                cardSelectionModal.push()
-                promise.then {
-                    cardSelectionModal.finished()
-                    revolver.slots.forEach { it.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode) }
-                }
-            }
+//            gameEvents.watchFor<GameControllerImpl.Events.SelectionChangedEvent> { (_, exclude, promise) ->
+//                revolver
+//                    .slots
+//                    .forEach {
+//                        val card = it.card ?: return@forEach
+//                        if (card === exclude) return@forEach
+//                        card.enterTargetSelection(promise)
+//                        it.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+//                    }
+//                cardSelectionModal.push()
+//                promise.then {
+//                    cardSelectionModal.finished()
+//                    revolver.slots.forEach { it.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode) }
+//                }
+//            }
         }
 
         label("red wing", "10", Color.Red, 90) {

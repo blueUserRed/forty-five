@@ -42,7 +42,7 @@ interface GameController {
 
     val gameEvents: EventPipeline
 
-    fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline
+//    fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline
 
     fun destroyCardTimeline(card: Card, sourceCard: Card? = null): Timeline
 
