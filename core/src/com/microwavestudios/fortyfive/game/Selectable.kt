@@ -75,6 +75,30 @@ class CardInRevolverSelector(
     override fun mapSelectable(selectable: CardActor): Card = selectable.card
 }
 
+class RevolverSlotSelector(
+    val controller: GameController,
+    val popupText: String,
+    val predicate: (RevolverSlot) -> Boolean
+) : BaseSelector<RevolverSlot, RevolverSlot>() {
+
+    override fun begin(selectables: List<RevolverSlot>) {
+        controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(popupText))
+    }
+
+    override fun end(selectables: List<RevolverSlot>) {
+        controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(null))
+    }
+
+    override fun getModal(): InputManager.Modal = InputManager.Modal(
+        listOf(RevolverSlot.revolverSlotGroup),
+        controller.screen
+    )
+
+    override fun getSelectables(): List<RevolverSlot> = controller.revolver.slots.filter { predicate(it) }
+
+    override fun mapSelectable(selectable: RevolverSlot): RevolverSlot = selectable
+}
+
 interface Selectable<T> {
     fun enterSelectionMode(promise: Promise<T>)
     fun exitSelectionMode()

@@ -2,12 +2,15 @@ package com.microwavestudios.fortyfive.onjNamespaces
 
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.*
+import com.microwavestudios.fortyfive.game.card.RevolverSlotGetter
 import com.microwavestudios.fortyfive.game.card.Trigger.Companion.triggerForSituation
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.toIntRange
+import com.microwavestudios.fortyfive.utils.unreachable
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
@@ -31,6 +34,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Zone" to OnjZone::class,
         "Trigger" to OnjTrigger::class,
         "VariableTextureSelector" to OnjVariableTextureSelector::class,
+        "RevolverSlotGetter" to OnjRevolverSlotGetter::class
     )
 
     @OnjNamespaceVariables
@@ -84,6 +88,26 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
         }
     )
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun slotGetterAdjacentSlots(
+        text: OnjString
+    ): OnjRevolverSlotGetter = OnjRevolverSlotGetter { controller, card, triggerInformation ->
+        val cardSlot = controller.revolver.slots.find { it.card == card }
+        cardSlot ?: return@OnjRevolverSlotGetter Promise.nullPromise
+        val adjacentSlots = when (cardSlot.num) {
+            1 -> arrayOf(5, 2)
+            2 -> arrayOf(3, 1)
+            3 -> arrayOf(2, 4)
+            4 -> arrayOf(5, 3)
+            5 -> arrayOf(1, 4)
+            else -> unreachable()
+        }
+        val selector = RevolverSlotSelector(controller, text.value) { slot ->
+            slot.card == null && slot.num in adjacentSlots
+        }
+        selector.startSelect()
+    }
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun sourceCardInZoneModifierPredicate(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, _, modifier ->
@@ -372,6 +396,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: []")
     fun descendBullet(): OnjEffect = OnjEffect(Effect.DescendBullet(EffectData()))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [RevolverSlotGetter]")
+    fun resurrect(revolverSlot: OnjRevolverSlotGetter): OnjEffect = OnjEffect(Effect.Resurrect(
+        revolverSlot.value,
+        EffectData()
+    ))
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun createBulletsInAfterlife(name: OnjString, amount: OnjEffectValue): OnjEffect = OnjEffect(
@@ -1003,5 +1033,13 @@ class OnjVariableTextureSelector(
 ) : OnjValue() {
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--VariableTextureSelector--'")
+    }
+}
+
+class OnjRevolverSlotGetter(
+    override val value: RevolverSlotGetter
+): OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--RevolverSlotGetter--'")
     }
 }

@@ -698,6 +698,38 @@ class GameControllerImpl(
         }
     } }
 
+    override fun resurrectTimeline(intoSlot: Int): Timeline = Timeline.timeline {
+        val slot = revolver.slots[intoSlot - 1]
+        later {
+            if (slot.card != null) return@later
+            val card = afterlife.cards.firstOrNull() ?: return@later
+            val info = createTriggerInfo(card)
+            val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.LIMBO, true, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+            include(afterlife.scrollToBeginTimeline())
+            delay(200)
+            include(card.actor.spawnAnimation(reverse = true))
+            action { card.actor.alpha = 0f }
+            delay(200)
+            later {
+                if (slot.card != null) { // may have changed due to bullet effects
+                    card.actor.alpha = 1f
+                    return@later
+                }
+                include(afterlife.popCardTimeline())
+                action { revolver.setCard(slot.num, card) }
+                include(card.actor.spawnAnimation())
+                action { card.actor.alpha = 1f }
+            }
+            later {
+                val afterEvent = event.copy(before = false)
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
+            }
+        }
+    }
+
     override fun switchSlotOfBulletInRevolverTimeline(
         card: Card,
         newSlot: Int,

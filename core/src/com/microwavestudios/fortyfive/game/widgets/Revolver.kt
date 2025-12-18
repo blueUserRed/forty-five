@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.EncounterModifier
+import com.microwavestudios.fortyfive.game.Selectable
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameController
@@ -22,7 +23,9 @@ import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
 import com.microwavestudios.fortyfive.screen.actors.OnLayoutActor
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
@@ -300,7 +303,7 @@ class RevolverSlot(
     screen: OnjScreen,
     private val events: EventPipeline,
     private val animationDuration: Float
-) : CustomImageActor(drawableHandle, screen) {
+) : CustomImageActor(drawableHandle, screen), Selectable<RevolverSlot>, DropShadowActor {
 
     override var dropShadow: DropShadow? = null
 
@@ -314,6 +317,14 @@ class RevolverSlot(
     private var action: RevolverSlotRotationAction? = null
     private var curAngle: Double = 0.0
 
+    private var selectionPromise: Promise<RevolverSlot>? = null
+
+    private val selectableDropShadow = SquareDropShadow(
+        Color.BrightYellow,
+        0f, 0f,
+        1.1f
+    )
+
     init {
         width = size
         height = size
@@ -324,10 +335,17 @@ class RevolverSlot(
         joinGroup(revolverSlotGroup)
         observeInputState(
             GameInputs.States.focused,
-            { card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused) },
-            { card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused) }
+            {
+                card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused)
+                selectableDropShadow.scale = 1.4f
+            },
+            {
+                card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused)
+                selectableDropShadow.scale = 1.1f
+            }
         )
         onInput(GameInputs.interact) {
+            selectionPromise?.resolve(this)
             card?.actor?.clickedViaSlot(false)
         }
         onInput(GameInputs.triggerCard) {
@@ -338,6 +356,16 @@ class RevolverSlot(
             if (actor !is CardActor) return@onDrop
             events.fire(CardHand.CardDraggedOntoSlotEvent(actor.card, this))
         }
+    }
+
+    override fun enterSelectionMode(promise: Promise<RevolverSlot>) {
+        selectionPromise = promise
+        dropShadow = selectableDropShadow
+    }
+
+    override fun exitSelectionMode() {
+        selectionPromise = null
+        dropShadow = null
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {

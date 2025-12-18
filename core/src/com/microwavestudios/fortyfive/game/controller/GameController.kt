@@ -42,8 +42,6 @@ interface GameController {
 
     val gameEvents: EventPipeline
 
-//    fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline
-
     fun destroyCardTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
@@ -83,6 +81,8 @@ interface GameController {
     fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card? = null): Timeline
 
     fun descendBulletTimeline(): Timeline
+
+    fun resurrectTimeline(intoSlot: Int): Timeline
 
 
     fun shoot()

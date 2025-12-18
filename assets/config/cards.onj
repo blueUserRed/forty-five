@@ -1845,6 +1845,23 @@ cards: [
         tags: [ "pool2", "rarity1" ],
         price: 0,
     },
+    {
+        name: "checkpointBullet",
+        title: "Checkpoint Bullet",
+        flavourText: "",
+        description: "$trigger$On-Turn-Begin:$trigger$\n$keyword$RESSURRECT$keyword$.\nRessurect only in slots ajacent to this bullet",
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: resurrect(slotGetterAdjacentSlots("Select slot to resurrect into"))
+            },
+        ],
+        cost: 2,
+        tags: [ "pool2", "rarity1" ],
+        price: 0,
+    },
 
 ],
 

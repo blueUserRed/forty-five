@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.utils.*
 
 /**
@@ -795,6 +796,34 @@ abstract class Effect(val data: EffectData) {
         override fun animatesInAfterlife(): Boolean = true
     }
 
+    class Resurrect(
+        val revolverSlotGetter: RevolverSlotGetter,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            later {
+                val promise = revolverSlotGetter(controller, card, triggerInformation)
+                waitForPromise(promise)
+                later {
+                    val slot = promise.getOrNull() ?: return@later
+                    if (slot.card != null) return@later
+                    include(controller.resurrectTimeline(slot.num))
+                }
+            }
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = true
+
+        override fun copy(data: EffectData): Effect = Resurrect(revolverSlotGetter, data)
+
+        override fun animatesInAfterlife(): Boolean = true
+    }
+
 }
 
 /**
@@ -837,6 +866,11 @@ sealed class BulletSelector {
 
 typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?, self: Card?) -> Int
 
+typealias RevolverSlotGetter = (
+    controller: GameController,
+    card: Card,
+    triggerInformation: TriggerInformation
+) -> Promise<out RevolverSlot?>
 
 fun interface Trigger {
 
