@@ -1843,7 +1843,7 @@ cards: [
         ],
         cost: 1,
         tags: [ "pool2", "rarity1" ],
-        price: 0,
+        price: 50,
     },
     {
         name: "checkpointBullet",
@@ -1860,7 +1860,32 @@ cards: [
         ],
         cost: 2,
         tags: [ "pool2", "rarity1" ],
-        price: 0,
+        price: 50,
+    },
+    {
+        name: "necromancerBullet",
+        title: "Necromancer Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$RESSURRECT$keyword$ three times.\nRessurect only in slots smaller that the one this Bullet was placed into",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: resurrect(slotGetterSmallerSlots("Select slot to resurrect into"))
+            },
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: resurrect(slotGetterSmallerSlots("Select slot to resurrect into"))
+            },
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: resurrect(slotGetterSmallerSlots("Select slot to resurrect into"))
+            },
+        ],
+        dark: true,
+        cost: 3,
+        tags: [ "pool2", "rarity1" ],
+        price: 50,
     },
 
 ],

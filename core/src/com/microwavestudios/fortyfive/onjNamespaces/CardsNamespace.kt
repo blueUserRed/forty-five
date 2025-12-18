@@ -108,6 +108,19 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
         selector.startSelect()
     }
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun slotGetterSmallerSlots(
+        text: OnjString
+    ): OnjRevolverSlotGetter = OnjRevolverSlotGetter { controller, card, triggerInformation ->
+        val cardSlot = controller.revolver.slots.find { it.card == card }
+        cardSlot ?: return@OnjRevolverSlotGetter Promise.nullPromise
+        val thisSlotNum = Utils.convertSlotRepresentation(cardSlot.num)
+
+        val selector = RevolverSlotSelector(controller, text.value) { slot ->
+            slot.card == null && Utils.convertSlotRepresentation(slot.num) < thisSlotNum
+        }
+        selector.startSelect()
+    }
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun sourceCardInZoneModifierPredicate(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, _, modifier ->
