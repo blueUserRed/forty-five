@@ -61,29 +61,7 @@ class Enemy(
     fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
         additionalDamage = 0
         val nextAction = brain.chooseNewAction(controller, this, difficulty, otherActions)
-        if (
-            nextAction !is NextEnemyAction.ShownEnemyAction ||
-            nextAction.action.prototype !is EnemyActionPrototype.DamagePlayer
-        ) {
-            val event = EnemyActionChangedEvent(nextAction, 0, null)
-            enemyEvents.fire(event)
-            return nextAction
-        }
-        val additionalDmgActions = controller
-            .playerStatusEffects
-            .zip { it.additionalEnemyDamage(nextAction.action.directDamageDealt, StatusEffectTarget.PlayerTarget) }
-            .filter { it.second != 0 }
-        if (additionalDmgActions.isEmpty()) {
-            val event = EnemyActionChangedEvent(nextAction, 0, null)
-            enemyEvents.fire(event)
-            return nextAction
-        }
-        if (additionalDmgActions.size > 1) {
-            FortyFive.logger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
-        }
-        val (action, additionalDamage) = additionalDmgActions.first()
-        this.additionalDamage = additionalDamage
-        val event = EnemyActionChangedEvent(nextAction, additionalDamage, action.iconHandle)
+        val event = EnemyActionChangedEvent(nextAction)
         enemyEvents.fire(event)
         return nextAction
     }
@@ -185,11 +163,7 @@ class Enemy(
     data object HealthChangedEvent
     data object StatusEffectsChangedEvent
     data class PlayChargeAnimationEvent(val timeline: Promise<Timeline> = Promise())
-    data class EnemyActionChangedEvent(
-        val nextAction: NextEnemyAction,
-        val additionalDamage: Int,
-        val additionalDamageIcon: String?
-    )
+    data class EnemyActionChangedEvent(val nextAction: NextEnemyAction)
 
     companion object {
 

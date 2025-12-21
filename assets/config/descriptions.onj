@@ -103,6 +103,16 @@ hoverDetailDescriptions: [
         groupName: "keyword",
         description: "$keyword$UNOBTAINABLE$keyword$\nCan only be added to the encounter through Bullet effects",
     },
+    {
+        keyword: "FULL ROTATION",
+        groupName: "keyword",
+        description: "$keyword$FULL ROTATION$keyword$\nrotates 5 times in the same direction uninterupted",
+    },
+    {
+        keyword: "RESURRECT",
+        groupName: "keyword",
+        description: "$keyword$RESURRECT$keyword$\nreturn the first bullet in the Afterlife into a target revolver slot",
+    },
 ],
 
 hoverDetailDescriptionGroups: [

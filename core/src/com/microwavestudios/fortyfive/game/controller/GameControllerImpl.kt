@@ -1303,8 +1303,7 @@ class GameControllerImpl(
                 include(event.createTimeline())
                 delayUntil { event.finishedPromise.isResolved }
                 delay(100)
-                val data = EnemyAction.ExecutionData(newDamage = action.directDamageDealt + enemy.additionalDamage)
-                include(action.getTimeline(data))
+                include(action.getTimeline())
                 delay(400)
             } else {
                 val event = Enemy.PlayChargeAnimationEvent()
@@ -1313,12 +1312,11 @@ class GameControllerImpl(
                     event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
                 }
                 delay(200)
-                val data = EnemyAction.ExecutionData(newDamage = action.directDamageDealt + enemy.additionalDamage)
-                include(action.getTimeline(data))
+                include(action.getTimeline())
                 delay(400)
             }
             action {
-                val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None, 0, null)
+                val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None)
                 enemy.enemyEvents.fire(event)
             }
         } }

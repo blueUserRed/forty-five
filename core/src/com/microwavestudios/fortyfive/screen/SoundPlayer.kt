@@ -12,6 +12,18 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
 
+/**
+ * handles music, volume control and playing sound
+ *
+ * the [changeMusicTo] function can be used to change the background music
+ *
+ * Sound effects are usually handled by calling the [situation] function. The name parameter is usually
+ * something descriptive, e.g. 'revolver_rotation'. The SoundPlayer then looks the situation up in
+ * the `assets/config/sounds.onj` file and plays the associated sound.
+ * Sounds can also be played manually using [playSoundFull] or [playMusicOnce].
+ *
+ * Also handles ambient sounds.
+ */
 class SoundPlayer : ResourceBorrower {
 
     private lateinit var situations: List<Situation>

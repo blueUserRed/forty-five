@@ -1741,7 +1741,7 @@ cards: [
                 effect: destroy(bSelectSelf())
             },
             {
-                trigger: rotation() mustMatchPredicate (turnRotationCounter() equals 5),
+                trigger: rotation() mustMatchPredicate (continuousTurnRotationCounter() equals 5),
                 inZones: [zone.revolver],
                 effect: buffDmgMultiplier(bSelectSelf(), 1.5)
             }
@@ -1849,7 +1849,7 @@ cards: [
         name: "checkpointBullet",
         title: "Checkpoint Bullet",
         flavourText: "",
-        description: "$trigger$On-Turn-Begin:$trigger$\n$keyword$RESSURRECT$keyword$.\nRessurect only in slots ajacent to this bullet",
+        description: "$trigger$On-Turn-Begin:$trigger$\n$keyword$RESURRECT$keyword$.\nResurect only in slots ajacent to this bullet",
         baseDamage: 7,
         effects: [
             {
@@ -1866,7 +1866,7 @@ cards: [
         name: "necromancerBullet",
         title: "Necromancer Bullet",
         flavourText: "",
-        description: "$trigger$On-Placedown:$trigger$\n$keyword$RESSURRECT$keyword$ three times.\nRessurect only in slots smaller that the one this Bullet was placed into",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$RESURRECT$keyword$ three times.\nResurect only in slots smaller that the one this Bullet was placed into",
         baseDamage: 5,
         effects: [
             {

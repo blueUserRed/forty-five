@@ -82,7 +82,10 @@ abstract class ScreenCreator : ResourceBorrower {
         return context
     }
 
-    inline fun newGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+    inline fun newGroup(
+        backgroundHints: Array<String> = arrayOf(),
+        builder: (@ScreenDslMarker CustomGroup).() -> Unit = {}
+    ): CustomGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -91,7 +94,10 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
-    inline fun newBox(backgroundHints: Array<String> = arrayOf(), builder: CustomBox.() -> Unit = {}): CustomBox {
+    inline fun newBox(
+        backgroundHints: Array<String> = arrayOf(),
+        builder: (@ScreenDslMarker CustomBox).() -> Unit = {}
+    ): CustomBox {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -121,31 +127,14 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
-    inline fun Group.group(backgroundHints: Array<String> = arrayOf(), builder: CustomGroup.() -> Unit = {}): CustomGroup {
+    inline fun Group.group(
+        backgroundHints: Array<String> = arrayOf(),
+        builder: (@ScreenDslMarker CustomGroup).() -> Unit = {}
+    ): CustomGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
         val group = CustomGroup(screen, backgroundHints = backgroundHints)
-        addActor(group)
-        builder(group)
-        return group
-    }
-
-    inline fun Group.horizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
-        contract {
-            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
-        }
-        val group = CustomHorizontalGroup(screen, backgroundHints = backgroundHints)
-        addActor(group)
-        builder(group)
-        return group
-    }
-
-    inline fun Group.verticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
-        contract {
-            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
-        }
-        val group = CustomVerticalGroup(screen, backgroundHints = backgroundHints)
         addActor(group)
         builder(group)
         return group
@@ -156,7 +145,10 @@ abstract class ScreenCreator : ResourceBorrower {
         this.name = name
     }
 
-    inline fun Group.image(backgroundHints: Array<String> = arrayOf(), builder: CustomImageActor.() -> Unit = {}): CustomImageActor {
+    inline fun Group.image(
+        backgroundHints: Array<String> = arrayOf(),
+        builder: (@ScreenDslMarker CustomImageActor).() -> Unit = {}
+    ): CustomImageActor {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -166,12 +158,16 @@ abstract class ScreenCreator : ResourceBorrower {
         return image
     }
 
-    inline fun Group.box(backgroundHints: Array<String> = arrayOf(), isScrollable: Boolean = false, builder: CustomBox.() -> Unit = {}): CustomBox {
+    inline fun Group.box(
+        backgroundHints: Array<String> = arrayOf(),
+        isScrollable: Boolean = false,
+        builder: (@ScreenDslMarker CustomBox).() -> Unit = {}
+    ): CustomBox {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
         val box = if (isScrollable) {
-            _root_ide_package_.com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox(
+            CustomScrollableBox(
                 backgroundHints,
                 screen
             )
@@ -188,7 +184,7 @@ abstract class ScreenCreator : ResourceBorrower {
         bindTarget: String,
         fontScale: Float = 1f,
         fontColor: Color,
-        builder: Selector.() -> Unit = {}
+        builder: (@ScreenDslMarker Selector).() -> Unit = {}
     ): Selector {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
@@ -206,7 +202,12 @@ abstract class ScreenCreator : ResourceBorrower {
         return selector
     }
 
-    inline fun Group.slider(min: Float, max: Float, bindTarget: String, builder: Slider.() -> Unit = {}): Slider {
+    inline fun Group.slider(
+        min: Float,
+        max: Float,
+        bindTarget: String,
+        builder: (@ScreenDslMarker Slider).() -> Unit = {}
+    ): Slider {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -230,7 +231,7 @@ abstract class ScreenCreator : ResourceBorrower {
         fontColor: Color,
         defaultText: String = "",
         backgroundHints: Array<String> = arrayOf(),
-        builder: CustomInputField.() -> Unit = {}
+        builder: (@ScreenDslMarker CustomInputField).() -> Unit = {}
     ): CustomInputField {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
@@ -246,7 +247,10 @@ abstract class ScreenCreator : ResourceBorrower {
         return inputField
     }
 
-    inline fun Group.horizontalSpacer(width: Float, builder: Spacer.() -> Unit = {}): Spacer {
+    inline fun Group.horizontalSpacer(
+        width: Float,
+        builder: (@ScreenDslMarker Spacer).() -> Unit = {}
+    ): Spacer {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -256,7 +260,10 @@ abstract class ScreenCreator : ResourceBorrower {
         return spacer
     }
 
-    inline fun Group.verticalSpacer(height: Float, builder: Spacer.() -> Unit = {}): Spacer {
+    inline fun Group.verticalSpacer(
+        height: Float,
+        builder: (@ScreenDslMarker Spacer).() -> Unit = {}
+    ): Spacer {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -273,7 +280,7 @@ abstract class ScreenCreator : ResourceBorrower {
         fontSize: Int,
         isTemplate: Boolean = false,
         backgroundHints: Array<String> = arrayOf(),
-        builder: NewLabel.() -> Unit = {}
+        builder: (@ScreenDslMarker NewLabel).() -> Unit = {}
     ): NewLabel {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
@@ -293,7 +300,7 @@ abstract class ScreenCreator : ResourceBorrower {
         defaultFont: String,
         defaultColor: Color,
         defaultFontSize: Int,
-        builder: AdvancedTextWidget.() -> Unit = {}
+        builder: (@ScreenDslMarker AdvancedTextWidget).() -> Unit = {}
     ): AdvancedTextWidget {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
@@ -307,7 +314,7 @@ abstract class ScreenCreator : ResourceBorrower {
 
     inline fun Group.advancedText(
         defaults: Triple<String, Color, Int>,
-        builder: AdvancedTextWidget.() -> Unit = {}
+        builder: (@ScreenDslMarker AdvancedTextWidget).() -> Unit = {}
     ): AdvancedTextWidget {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
@@ -326,7 +333,10 @@ abstract class ScreenCreator : ResourceBorrower {
         return actor
     }
 
-    inline fun <T : Actor> Group.allActors(actors: Iterable<T>, builder: T.() -> Unit = {}): Iterable<T> {
+    inline fun <T : Actor> Group.allActors(
+        actors: Iterable<T>,
+        builder: (@ScreenDslMarker T).() -> Unit = {}
+    ): Iterable<T> {
         actors.forEach { actor ->
             this.addActor(actor)
             builder(actor)
@@ -593,5 +603,9 @@ abstract class ScreenCreator : ResourceBorrower {
     companion object {
         val fortyWhite: Color = Color.valueOf("F0EADD")
     }
+
+    @Target(AnnotationTarget.TYPE, AnnotationTarget.CLASS)
+    @DslMarker
+    annotation class ScreenDslMarker
 
 }

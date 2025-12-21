@@ -889,6 +889,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: []")
+    fun continuousTurnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
+        card?.continuousRotationCounter ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
     fun slotNumber(): OnjEffectValue = OnjEffectValue { controller, card, _, self ->
         val num = controller
             .revolver
@@ -950,9 +955,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         card: Card?,
         default: Int
     ) = controller?.let { controller ->
-       card?.let { card ->
-           effectValue.value(controller, card, null, card)
-       }
+        effectValue.value(controller, card, null, card)
     } ?: default
 
 }

@@ -640,32 +640,45 @@ class EncounterScreen : ScreenCreator() {
                 fun showAction(
                     text: String?,
                     iconHandle: String,
-                    additionalDamage: String? = null,
-                    additionalDamageIcon: String? = null
+                    damageChanges: List<Pair<String, Int>>
                 ) {
                     image {
                         backgroundHandle = iconHandle
                         width = 60f
                         height = 60f
                     }
-                    if (text != null) group {
-                        width = 60f
+
+                    val effects = listOf(
+                        AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red),
+                        AdvancedTextEffect.AdvancedColorTextEffect("?G", Color.GRAY),
+                    )
+
+                    val texts = mutableListOf<String>()
+                    if (text != null) texts.add(text)
+                    damageChanges.forEach { (icon, damage) ->
+                        val text = when {
+                            damage > 0 -> "?R+$damage§§$icon§§?R"
+                            damage < 0 -> "?G-$damage§§$icon§§?G"
+                            else -> ""
+                        }
+                        texts.add(text)
+                    }
+
+                    texts.forEach { text -> group {
                         height = 40f
                         backgroundHandle = "wood_box"
-                        val newText = if (additionalDamageIcon != null) {
-                            "$text + ?R$additionalDamage?R §§${additionalDamageIcon}§§"
-                        } else {
-                            text
-                        }
                         touchable = Touchable.disabled
-                        advancedText("roadgeek", Color.FortyWhite, 23) {
-                            val redEffect = AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red)
+                        val text = advancedText("roadgeek", Color.FortyWhite, 23) {
                             relativeHeight(58f)
-                            setRawText(newText, listOf(redEffect))
+                            setRawText(text, effects)
                             centerX()
                             centerY()
+                            wrap = false
+                            syncWidth()
                         }
-                    }
+                        onLayoutAndNow { width = (text.width + 25).coerceAtLeast(40f) }
+                    } }
+
                 }
 
                 relativeWidth(100f)
@@ -700,11 +713,10 @@ class EncounterScreen : ScreenCreator() {
                         is NextEnemyAction.ShownEnemyAction -> showAction(
                             nextAction.action.indicatorText,
                             nextAction.action.prototype.iconHandle,
-                            event.additionalDamage.toString(),
-                            event.additionalDamageIcon
+                            nextAction.action.damageChanges
                         )
                         is NextEnemyAction.None -> {}
-                        is NextEnemyAction.HiddenEnemyAction -> showAction("?",  "enemy_action_unknown")
+                        is NextEnemyAction.HiddenEnemyAction -> showAction("?",  "enemy_action_unknown", listOf())
                     }
                 }
             }

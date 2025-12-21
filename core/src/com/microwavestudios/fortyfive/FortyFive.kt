@@ -31,8 +31,13 @@ object FortyFive : Game() {
 
     const val logTag = "forty-five"
 
+    /** see [CardTextureManager] */
     val cardTextureManager = CardTextureManager()
+
+    /** see [ServiceThread] */
     val serviceThread = ServiceThread()
+
+    /** see [SoundPlayer] */
     val soundPlayer = SoundPlayer()
     val logger = FortyFiveLogger()
     val resourceManager = ResourceManager()

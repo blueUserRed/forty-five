@@ -10,6 +10,26 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.RuntimeException
 
+/**
+ * loads, caches and manages textures for cards.
+ *
+ * The card textures in the
+ * `assets/blobs/cards` directory only contain the art and the name, the damage and cost
+ * information is missing. The CardTextureManager communicates with the [ServiceThread] to load
+ * these textures and draw the missing information on them dynamically. This enables cost/damage
+ * values to change mid-game.
+ *
+ * To obtain a card texture, use the [cardTextureFor] function and pass in the desired cost and
+ * damage values. If the same texture is already used, a cached version will be returned.
+ *
+ * > **Important:**
+ * > A texture obtained using [cardTextureFor] must be given back using [giveTextureBack] when
+ * > it is no longer needed. Not doing that will result in memory leaks.
+ *
+ * > _Note:_
+ * > If you want to draw a card to the screen, you shouldn't obtain the texture manually,
+ * > but instead use add the [CardActor] to the scene.
+ */
 // TODO: make sure this isn't leaking memory somehow
 class CardTextureManager {
 

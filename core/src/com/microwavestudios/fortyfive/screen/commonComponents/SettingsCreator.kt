@@ -154,8 +154,9 @@ object SettingsCreator {
                 flexDirection = FlexDirection.ROW
                 relativeHeight(100f)
                 width = 250f
+                height = parent.height
                 selector = selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite) {
-                    onLayoutAndNow { height = parent.height }
+                    height = parent.height
                     width = 240f
                 }
                 horizontalSpacer(10f)
@@ -212,9 +213,8 @@ object SettingsCreator {
                 relativeHeight(100f)
                 width = 210f
                 slider = slider(min, max, bindTarget) {
-                    onLayoutAndNow { height = parent.height }
+                    height = parent.height
                     width = 200f
-                    marginRight = 10f
                 }
                 horizontalSpacer(10f)
             }

@@ -170,6 +170,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
                 actor.width = innerWidth
                 actor.setRawText(it, effects)
                 actor.fitContentHeight = true
+//                actor.paddingRight = 40f
                 parent.addActor(actor)
             }
             if (addFadeInAction) addFadeInAction(parent)

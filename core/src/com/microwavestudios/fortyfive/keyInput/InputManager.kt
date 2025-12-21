@@ -417,7 +417,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     ): Boolean {
         cancelKeyboardDragAndDrop()
         val hit = hit(screenX, screenY)
-        if (currentlyDraggedActor != null) finishDrag(screenX, screenY, hit)
+        if (currentlyDraggedActor != null) {
+            finishDrag(screenX, screenY, hit)
+            return false
+        }
 
         fun checkInput(input: Input, isHit: Boolean, callbacks: List<() -> Unit>) {
             val cause = input.causes.filterIsInstance<Input.Cause.Mouse>().find { it.button.code == button }

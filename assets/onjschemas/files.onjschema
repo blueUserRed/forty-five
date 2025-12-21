@@ -21,10 +21,3 @@ configFiles: {
     npcs: fileConfig,
     runGeneratorConfig: fileConfig,
 },
-
-screenSchema: string,
-
-screens: {
-    name: string,
-    file: string,
-}[]

@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.game.enemy
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.GamePredicate
 import com.microwavestudios.fortyfive.game.StatusEffectCreator
+import com.microwavestudios.fortyfive.game.StatusEffectTarget
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -15,15 +16,11 @@ class EnemyAction(
     val indicatorText: String?,
     val descriptionParams: Map<String, Any>,
     val prototype: EnemyActionPrototype,
-    val directDamageDealt: Int = 0,
-    private val timelineCreator: Timeline.TimelineBuilderDSL.(data: ExecutionData) -> Unit
+    val damageChanges: List<Pair<String, Int>> = listOf(),
+    private val timelineCreator: Timeline.TimelineBuilderDSL.() -> Unit
 ) {
 
-    fun getTimeline(data: ExecutionData): Timeline = Timeline.timeline { timelineCreator(this, data) }
-
-    data class ExecutionData(
-        val newDamage: Int = 0
-    )
+    fun getTimeline(): Timeline = Timeline.timeline { timelineCreator(this) }
 
 }
 
@@ -44,6 +41,23 @@ sealed class EnemyActionPrototype(
 
     abstract fun create(controller: GameController, scale: Double): EnemyAction
 
+    fun getAdditionalDamage(
+        originalDamage: Int,
+        controller: GameController,
+    ): List<Pair<String, Int>> {
+        val playerModifiers = controller
+            .playerStatusEffects
+            .zip { it.additionalEnemyDamage(originalDamage, StatusEffectTarget.PlayerTarget) }
+            .filter { it.second != 0 }
+            .mapFirst { it.iconHandle }
+        val enemyModifiers = enemy
+            .statusEffects
+            .zip { it.additionalEnemyDamage(originalDamage, StatusEffectTarget.EnemyTarget(enemy)) }
+            .filter { it.second != 0 }
+            .mapFirst { it.iconHandle }
+        return playerModifiers + enemyModifiers
+    }
+
     class DamagePlayer(
         val damage: IntRange,
         enemy: Enemy,
@@ -52,8 +66,10 @@ sealed class EnemyActionPrototype(
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val damage = damage.scale(scale * scaleFactor).random()
-            return EnemyAction(damage.toString(), mapOf("damage" to damage), this, damage) { data ->
-                include(controller.enemyAttackTimeline(data.newDamage))
+            val additional = getAdditionalDamage(damage, controller)
+            val newDamage = damage + additional.sumOf { it.second }
+            return EnemyAction(damage.toString(), mapOf("damage" to newDamage), this, additional) {
+                include(controller.enemyAttackTimeline(newDamage))
             }
         }
     }
@@ -246,8 +262,10 @@ sealed class EnemyActionPrototype(
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val damage = damage.scale(scale * scaleFactor).random()
-            return EnemyAction(damage.toString(), mapOf("damage" to damage), this, damage) { data ->
-                include(controller.enemyAttackTimeline(data.newDamage, isPiercing = true))
+            val additional = getAdditionalDamage(damage, controller)
+            val newDamage = damage + additional.sumOf { it.second }
+            return EnemyAction(damage.toString(), mapOf("damage" to newDamage), this, additional) {
+                include(controller.enemyAttackTimeline(newDamage, isPiercing = true))
             }
         }
     }

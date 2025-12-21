@@ -12,6 +12,17 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.trySendBlocking
 
+/**
+ * The ServiceThread runs in the Background alongside other worker threads and performs
+ * expensive/blocking operations outside the main thread. It handles tasks like drawing
+ * the card textures or preparing resources.
+ *
+ * Keep in mind that operations involving OpenGL have to be done on the main thread, because
+ * only that thread holds the OpenGL Context. Attempting to e.g. upload a Texture to the GPU
+ * from another thread will result in undefined behaviour.
+ *
+ * The main thread can communicate with the ServiceThread using the [sendMessage] function.
+ */
 class ServiceThread : Thread("ServiceThread") {
 
     private val channel: Channel<ServiceThreadMessage> = Channel(Channel.Factory.UNLIMITED)

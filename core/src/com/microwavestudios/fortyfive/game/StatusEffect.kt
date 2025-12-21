@@ -41,8 +41,6 @@ abstract class StatusEffect(
 
     open fun additionalEnemyDamage(damage: Int, target: StatusEffectTarget): Int = 0
 
-    open fun additionalDamageColor(): Color = Color.RED
-
     open fun disableEverlasting(): Boolean = false
 
     abstract fun canStackWith(other: StatusEffect): Boolean

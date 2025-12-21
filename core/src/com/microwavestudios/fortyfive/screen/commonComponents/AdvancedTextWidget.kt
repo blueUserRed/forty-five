@@ -2,19 +2,18 @@ package com.microwavestudios.fortyfive.screen.commonComponents
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.math.Affine2
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
-import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.actors.*
-import com.microwavestudios.fortyfive.utils.*
+import com.microwavestudios.fortyfive.utils.AdvancedTextParser
+import com.microwavestudios.fortyfive.utils.splitAt
+import com.microwavestudios.fortyfive.utils.zip
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -49,6 +48,8 @@ open class AdvancedTextWidget(
             initText(value)
         }
 
+    var wrap = true
+
     init {
         @Suppress("LeakingThis")
         initText(advancedText)
@@ -78,20 +79,24 @@ open class AdvancedTextWidget(
                 child.height = child.prefHeight
             }
         var curX = paddingLeft
-        val lines = advancedText
-            .parts
-            .splitAt { part ->
-                val child = part.actor
-                val shouldSplit = curX + child.width > width - paddingRight
-                if (shouldSplit) {
-                    curX = paddingLeft
-                } else if (part.breakLine) {
-                    curX = width + 1f
+        val lines = if (wrap) {
+            advancedText
+                .parts
+                .splitAt { part ->
+                    val child = part.actor
+                    val shouldSplit = curX + child.width > width - paddingRight
+                    if (shouldSplit) {
+                        curX = paddingLeft
+                    } else if (part.breakLine) {
+                        curX = width + 1f
+                    }
+                    curX += child.width
+                    shouldSplit
                 }
-                curX += child.width
-                shouldSplit
-            }
-            .map { line -> line.map { it.actor } }
+                .map { line -> line.map { it.actor } }
+        } else {
+            listOf(advancedText.parts.map { it.actor })
+        }
 
         var curY = paddingBottom
         curX = paddingLeft
@@ -122,6 +127,9 @@ open class AdvancedTextWidget(
                     curY + paddingTop
                 }
 
+        }
+        if (!wrap) {
+            layoutPrefWidth = advancedText.parts.sumOf { it.actor.width.toDouble() }.toFloat()
         }
         if (lines.isNotEmpty()) {
             if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight

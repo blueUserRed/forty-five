@@ -83,7 +83,7 @@ var action = {
             descriptionTemplate: "A Scorching Bullet will be put in your hand!",
         },
         burning3to5: $GivePlayerStatusEffect {
-            statusEffect: burning([3, 5]#val, 0.5, false),
+            statusEffect: burningPlayer([3, 5]#val, 0.5, false),
             icon: "enemy_action_burning",
             hasSpecialAnimation: true,
             commonPanel1: "enemy_pyro_action_comic_common_panel_1",
@@ -94,7 +94,7 @@ var action = {
             descriptionTemplate: "You get Burning!",
         },
         burning4to6: $GivePlayerStatusEffect {
-            statusEffect: burning([4, 6]#val, 0.5, false),
+            statusEffect: burningPlayer([4, 6]#val, 0.5, false),
             icon: "enemy_action_burning",
             hasSpecialAnimation: true,
             commonPanel1: "enemy_pyro_action_comic_common_panel_1",
@@ -105,7 +105,7 @@ var action = {
             descriptionTemplate: "You get Burning!",
         },
         burning6to8: $GivePlayerStatusEffect {
-            statusEffect: burning([6, 8]#val, 0.5, false),
+            statusEffect: burningPlayer([6, 8]#val, 0.5, false),
             icon: "enemy_action_burning",
             hasSpecialAnimation: true,
             commonPanel1: "enemy_pyro_action_comic_common_panel_1",
@@ -244,7 +244,8 @@ var pyros = [
         baseHealth: 75,
         texture: "enemy_pyro",
         brain: $NewEnemyBrain {
-            normalSpecialActionWeight: 0.78,
+            normalSpecialActionWeight: 0.0,
+//            normalSpecialActionWeight: 0.78,
             damageShieldWeight: 0.78,
             baseDamage: [3, 5],
             baseShield: [3, 5],
@@ -507,6 +508,7 @@ enemies: [
 
     ...outlaws,
     ...pyros,
+    ...witches,
 
 //
 //    {
