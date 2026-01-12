@@ -799,6 +799,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
+    fun weak(
+        attacks: OnjEffectValue
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
+        Weak(getStatusEffectValue(attacks, controller, card, 1))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")
     fun burningPlayer(
         rotations: OnjEffectValue,

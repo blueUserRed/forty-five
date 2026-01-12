@@ -1,3 +1,4 @@
+///schema=onjschemas/assets.onjschema
 import "imports/colors.onj" as color;
 
 use Common;

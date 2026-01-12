@@ -1,3 +1,4 @@
+///schema=onjschemas/graphics_config.onjschema
 import "imports/colors.onj" as color;
 
 icons: {
@@ -7,6 +8,7 @@ icons: {
     bewitched: "bewitched_icon",
     shield: "shield_icon",
     frozen: "encounter_modifier_frost",
+    weak: "burning_icon",
 },
 
 encounterModifiers: {

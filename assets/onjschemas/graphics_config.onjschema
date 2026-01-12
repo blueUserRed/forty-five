@@ -8,6 +8,7 @@ icons: {
     bewitched: string,
     shield: string,
     frozen: string,
+    weak: string,
 },
 
 var encounterModifierConfig = {

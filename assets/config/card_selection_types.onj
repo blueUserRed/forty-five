@@ -1,3 +1,4 @@
+///schema=onjschemas/card_selection_types.onjschema
 use Common;
 
 types: [

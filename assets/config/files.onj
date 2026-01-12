@@ -1,3 +1,4 @@
+///schema=onjschemas/files.onjschema
 
 configFiles: {
     assets: {

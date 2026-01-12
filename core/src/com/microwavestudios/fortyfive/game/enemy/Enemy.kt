@@ -55,20 +55,50 @@ class Enemy(
     val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
-    var additionalDamage: Int = 0
-        private set
+    private var nextActionCreator: EnemyActionCreator? = null
+    private var nextActionShown: Boolean = true
+    private var createdNextAction: EnemyAction? = null
+    private var createdWithDifficulty: Double = 1.0
 
-    fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
-        additionalDamage = 0
-        val nextAction = brain.chooseNewAction(controller, this, difficulty, otherActions)
+    fun chooseNewAction(
+        controller: GameController,
+        difficulty: Double,
+        otherActions: List<Pair<EnemyActionPrototype, Boolean>>
+    ): Pair<EnemyActionPrototype, Boolean>? {
+        createdWithDifficulty = difficulty
+        val (actionProto, shown) = brain.chooseNewAction(controller, this, difficulty, otherActions) ?: run {
+            nextActionCreator = null
+            createdNextAction = null
+            enemyEvents.fire(EnemyActionChangedEvent(NextEnemyAction.None))
+            return null
+        }
+        val creator = actionProto.newCreator(controller, difficulty)
+        val created = creator()
+        nextActionCreator = creator
+        createdNextAction = created
+        nextActionShown = shown
+
+        val nextAction = if (shown) NextEnemyAction.ShownEnemyAction(created) else NextEnemyAction.HiddenEnemyAction
         val event = EnemyActionChangedEvent(nextAction)
         enemyEvents.fire(event)
-        return nextAction
+        return actionProto to shown
+    }
+
+    fun reevaluateAction(controller: GameController) {
+        val newAction = nextActionCreator?.invoke()
+        createdNextAction = newAction
+        val nextAction = when {
+            newAction == null -> NextEnemyAction.None
+            nextActionShown -> NextEnemyAction.ShownEnemyAction(newAction)
+            else -> NextEnemyAction.HiddenEnemyAction
+        }
+        val event = EnemyActionChangedEvent(nextAction)
+        enemyEvents.fire(event)
     }
 
     fun resolveAction(controller: GameController, difficulty: Double): EnemyAction? {
-        val action = brain.resolveEnemyAction(controller, this, difficulty)
-        return action
+        brain.onNewTurn(controller, this)
+        return createdNextAction
     }
 
     fun applyEffect(effect: StatusEffect, controller: GameController) {

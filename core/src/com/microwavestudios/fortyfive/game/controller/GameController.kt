@@ -74,7 +74,7 @@ interface GameController {
 
     fun destroyCardInHandTimeline(card: Card): Timeline
 
-    fun enemyAttackTimeline(damage: Int, isPiercing: Boolean = false): Timeline
+    fun enemyAttackTimeline(damage: Int, enemy: Enemy, isPiercing: Boolean = false): Timeline
 
     fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline
 

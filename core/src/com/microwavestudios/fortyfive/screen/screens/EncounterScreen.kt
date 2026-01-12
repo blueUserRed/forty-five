@@ -650,7 +650,7 @@ class EncounterScreen : ScreenCreator() {
 
                     val effects = listOf(
                         AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red),
-                        AdvancedTextEffect.AdvancedColorTextEffect("?G", Color.GRAY),
+                        AdvancedTextEffect.AdvancedColorTextEffect("?G", Color.LIGHT_GRAY),
                     )
 
                     val texts = mutableListOf<String>()
@@ -658,7 +658,7 @@ class EncounterScreen : ScreenCreator() {
                     damageChanges.forEach { (icon, damage) ->
                         val text = when {
                             damage > 0 -> "?R+$damage§§$icon§§?R"
-                            damage < 0 -> "?G-$damage§§$icon§§?G"
+                            damage < 0 -> "?G$damage§§$icon§§?G"
                             else -> ""
                         }
                         texts.add(text)

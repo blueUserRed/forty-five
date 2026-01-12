@@ -1,10 +1,8 @@
 package com.microwavestudios.fortyfive.game.enemy
 
 import com.microwavestudios.fortyfive.game.controller.GameController
-import com.microwavestudios.fortyfive.game.GamePredicate
 import com.microwavestudios.fortyfive.game.StatusEffectCreator
 import com.microwavestudios.fortyfive.game.StatusEffectTarget
-import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
@@ -24,6 +22,8 @@ class EnemyAction(
 
 }
 
+typealias EnemyActionCreator = () -> EnemyAction
+
 sealed class EnemyActionPrototype(
     protected val enemy: Enemy,
     val hasSpecialAnimation: Boolean
@@ -39,7 +39,7 @@ sealed class EnemyActionPrototype(
 
     var scaleFactor: Float = 1f
 
-    abstract fun create(controller: GameController, scale: Double): EnemyAction
+    abstract fun newCreator(controller: GameController, scale: Double): EnemyActionCreator
 
     fun getAdditionalDamage(
         originalDamage: Int,
@@ -64,12 +64,14 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val damage = damage.scale(scale * scaleFactor).random()
-            val additional = getAdditionalDamage(damage, controller)
-            val newDamage = damage + additional.sumOf { it.second }
-            return EnemyAction(damage.toString(), mapOf("damage" to newDamage), this, additional) {
-                include(controller.enemyAttackTimeline(newDamage))
+            return {
+                val additional = getAdditionalDamage(damage, controller)
+                val newDamage = damage + additional.sumOf { it.second }
+                EnemyAction(damage.toString(), mapOf("damage" to newDamage), this, additional) {
+                    include(controller.enemyAttackTimeline(newDamage, enemy))
+                }
             }
         }
     }
@@ -80,16 +82,18 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val cardAmount = controller.cardsInHand.size
             val amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
-            return EnemyAction(amountToDestroy.toString(), mapOf("amount" to amountToDestroy),this) {
-                repeat(amountToDestroy) {
-                    // might cause mismatches when this action is shown instead of hidden
-                    later {
-                        if (controller.cardsInHand.isEmpty()) return@later
-                        val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random()]
-                        include(controller.destroyCardInHandTimeline(card))
+            return {
+                EnemyAction(amountToDestroy.toString(), mapOf("amount" to amountToDestroy),this) {
+                    repeat(amountToDestroy) {
+                        // might cause mismatches when this action is shown instead of hidden
+                        later {
+                            if (controller.cardsInHand.isEmpty()) return@later
+                            val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random()]
+                            include(controller.destroyCardInHandTimeline(card))
+                        }
                     }
                 }
             }
@@ -104,7 +108,7 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val amount = (1..maxTurnAmount).random()
             val rotation = if (forceDirection == null) {
                 if (Random.nextBoolean()) {
@@ -120,8 +124,10 @@ sealed class EnemyActionPrototype(
                 }
             }
             val descriptionParams = mapOf("amount" to amount, "direction" to rotation.directionString)
-            return EnemyAction(amount.toString(), descriptionParams, this) {
-                include(controller.rotateRevolverTimeline(rotation))
+            return {
+                EnemyAction(amount.toString(), descriptionParams, this) {
+                    include(controller.rotateRevolverTimeline(rotation))
+                }
             }
         }
 
@@ -132,17 +138,16 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(
-            controller: GameController,
-            scale: Double
-        ): EnemyAction = EnemyAction(null, mapOf(),this) {
-            later {
-                controller
-                    .revolver
-                    .slots
-                    .mapNotNull { it.card }
-                    .randomOrNull()
-                    ?.let { include(controller.bounceBulletTimeline(it)) }
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator = {
+            EnemyAction(null, mapOf(),this) {
+                later {
+                    controller
+                        .revolver
+                        .slots
+                        .mapNotNull { it.card }
+                        .randomOrNull()
+                        ?.let { include(controller.bounceBulletTimeline(it)) }
+                }
             }
         }
     }
@@ -153,10 +158,12 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val cover = cover.scale(scale * scaleFactor).random()
-            return EnemyAction(cover.toString(), mapOf("cover" to cover),this) {
-                include(enemy.addCoverTimeline(cover))
+            return {
+                EnemyAction(cover.toString(), mapOf("cover" to cover),this) {
+                    include(enemy.addCoverTimeline(cover))
+                }
             }
         }
 
@@ -168,13 +175,18 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
+            // the creator will return an action that uses the same status effect every time, this can cause issues
+            // when the action was already executed and then a new one is created, but this isn't how this feature is
+            // used in practice
             val statusEffect = statusEffectCreator(controller, null, false)
             // TODO: fix this
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
-            return EnemyAction(null, mapOf("statusEffect" to displayText),this) {
-                include(controller.tryApplyStatusEffectToPlayerTimeline(statusEffect))
+            return {
+                EnemyAction(null, mapOf("statusEffect" to displayText),this) {
+                    include(controller.tryApplyStatusEffectToPlayerTimeline(statusEffect))
+                }
             }
         }
 
@@ -186,12 +198,14 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val statusEffect = statusEffectCreator(controller, null, false)
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
-            return EnemyAction(null, mapOf("statusEffect" to displayText),this) {
-                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemy))
+            return {
+                EnemyAction(null, mapOf("statusEffect" to displayText),this) {
+                    include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemy))
+                }
             }
         }
 
@@ -203,10 +217,12 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val cardTitle = controller.titleOfCard(card)
-            return EnemyAction(null, mapOf("card" to cardTitle), this) {
-                include(controller.tryToPutCardsInHandTimeline(card))
+            return {
+                EnemyAction(null, mapOf("card" to cardTitle), this) {
+                    include(controller.tryToPutCardsInHandTimeline(card))
+                }
             }
         }
 
@@ -218,15 +234,17 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val amount = amountToMark.random()
-            return EnemyAction(null, mapOf("amount" to amount), this) {
-                action {
-                    controller
-                        .cardsInHand
-                        .shuffled()
-                        .take(amount)
-                        .forEach { it.isMarked = true }
+            return {
+                EnemyAction(null, mapOf("amount" to amount), this) {
+                    action {
+                        controller
+                            .cardsInHand
+                            .shuffled()
+                            .take(amount)
+                            .forEach { it.isMarked = true }
+                    }
                 }
             }
         }
@@ -237,20 +255,21 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(
+        override fun newCreator(
             controller: GameController,
             scale: Double
-        ): EnemyAction = EnemyAction(null, mapOf(), this) {
-            includeLater(
-                {
-                    controller
-                        .cardsInHand
-                        .filter { it.isMarked }
-                        .map { controller.putBulletFromRevolverUnderTheDeckTimeline(it) }
-                        .collectTimeline()
-                },
-                { true }
-            )
+        ): EnemyActionCreator = {
+            EnemyAction(null, mapOf(), this) {
+                includeLater(
+                    {
+                        controller
+                            .cardsInHand
+                            .filter { it.isMarked }
+                            .map { controller.putBulletFromRevolverUnderTheDeckTimeline(it) }
+                            .collectTimeline()
+                    }
+                )
+            }
         }
     }
 
@@ -260,12 +279,14 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val damage = damage.scale(scale * scaleFactor).random()
-            val additional = getAdditionalDamage(damage, controller)
-            val newDamage = damage + additional.sumOf { it.second }
-            return EnemyAction(damage.toString(), mapOf("damage" to newDamage), this, additional) {
-                include(controller.enemyAttackTimeline(newDamage, isPiercing = true))
+            return {
+                val additional = getAdditionalDamage(damage, controller)
+                val newDamage = damage + additional.sumOf { it.second }
+                EnemyAction(damage.toString(), mapOf("damage" to newDamage), this, additional) {
+                    include(controller.enemyAttackTimeline(newDamage, enemy, isPiercing = true))
+                }
             }
         }
     }
@@ -276,15 +297,17 @@ sealed class EnemyActionPrototype(
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
-        override fun create(controller: GameController, scale: Double): EnemyAction {
+        override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val slot = possibleSlots.random()
-            return EnemyAction(
-                null,
-                mapOf("slot" to Utils.convertSlotRepresentation(slot)),
-                this,
-            ) {
-                controller.revolver.getCardInSlot(slot)?.let { card ->
-                    include(controller.putBulletFromRevolverUnderTheDeckTimeline(card))
+            return {
+                EnemyAction(
+                    null,
+                    mapOf("slot" to Utils.convertSlotRepresentation(slot)),
+                    this,
+                ) {
+                    controller.revolver.getCardInSlot(slot)?.let { card ->
+                        include(controller.putBulletFromRevolverUnderTheDeckTimeline(card))
+                    }
                 }
             }
         }

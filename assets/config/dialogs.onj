@@ -1,3 +1,4 @@
+///schema=onjschemas/dialogs.onjschema
 import "imports/colors.onj" as color;
 
 var shake = $ShakeTextAction {

@@ -43,6 +43,10 @@ abstract class StatusEffect(
 
     open fun disableEverlasting(): Boolean = false
 
+    open fun onEnemyAttack() {}
+
+    open fun reevaluateEnemyAttack(): Boolean = false
+
     abstract fun canStackWith(other: StatusEffect): Boolean
 
     abstract fun stack(other: StatusEffect)
@@ -215,6 +219,8 @@ class BurningPlayer(
         other as BurningPlayer
         stackRotationEffect(other)
     }
+
+    override fun reevaluateEnemyAttack(): Boolean = true
 
     override fun equals(other: Any?): Boolean = other is BurningPlayer
 }
@@ -418,6 +424,39 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
     override fun getDisplayText(): String = shots.toString()
 
     override fun equals(other: Any?): Boolean = other is Frozen
+
+}
+
+class Weak(attacks: Int) : StatusEffect(GraphicsConfig.iconName("weak")) {
+
+    private var attacks: Int = attacks
+
+    override val name: String = "weak"
+    override val effectType: StatusEffectType = StatusEffectType.OTHER
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Weak
+
+    override fun stack(other: StatusEffect) {
+        other as Weak
+        attacks += other.attacks
+    }
+
+    override fun additionalEnemyDamage(
+        damage: Int,
+        target: StatusEffectTarget
+    ): Int = -((damage.toDouble() / 2) + 0.5).toInt()
+
+    override fun onEnemyAttack() {
+        attacks--
+    }
+
+    override fun reevaluateEnemyAttack(): Boolean = true
+
+    override fun isStillValid(): Boolean = attacks > 0
+
+    override fun getDisplayText(): String = attacks.toString()
+
+    override fun equals(other: Any?): Boolean = other is Weak
 
 }
 

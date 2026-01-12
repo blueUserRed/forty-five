@@ -1,4 +1,4 @@
-
+///schema=onjschemas/enemies.onjschema
 import "imports/colors.onj" as color;
 
 use Cards; // include Card namespace for status effects

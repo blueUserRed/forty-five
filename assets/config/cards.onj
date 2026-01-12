@@ -1,4 +1,4 @@
-
+///schema=onjschemas/cards.onjschema
 use Cards;
 use Common;
 
@@ -1885,6 +1885,22 @@ cards: [
         dark: true,
         cost: 3,
         tags: [ "pool2", "rarity1" ],
+        price: 50,
+    },
+    {
+        name: "boo_llet",
+        title: "Boo! llet",
+        flavourText: "Ahhhh!",
+        description: "$trigger$On-Placedown:$trigger$\nThe targeted Enemy gets $status$WEAK$status$ (1)",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: giveStatus(weak(3#val))
+            },
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity3" ],
         price: 50,
     },
 

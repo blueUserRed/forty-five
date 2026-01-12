@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.*
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
+import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.GameRenderPipeline
@@ -140,6 +141,8 @@ class GameControllerImpl(
 
     private val enemyDifficulty
         get() = 1f + ((encounter.minorDifficulty - 1f) * RunGeneratorConfig.enemyDamageAdjustment)
+
+    private var inEnemyPhase: Boolean = false
 
     private lateinit var profile: Profile
 
@@ -793,6 +796,9 @@ class GameControllerImpl(
     ): Timeline = Timeline.timeline { later {
         if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
         enemy.applyEffect(statusEffect, this@GameControllerImpl)
+        if (!inEnemyPhase && statusEffect.reevaluateEnemyAttack()) {
+            enemy.reevaluateAction(this@GameControllerImpl)
+        }
         val info = createTriggerInfo(null, sourceCard = source)
         val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
         gameEvents.fire(event)
@@ -968,6 +974,7 @@ class GameControllerImpl(
 
     override fun enemyAttackTimeline(
         damage: Int,
+        enemy: Enemy,
         isPiercing: Boolean
     ): Timeline = Timeline.timeline { later {
         val card = revolver.getCardInSlot(5)
@@ -976,6 +983,7 @@ class GameControllerImpl(
         } else {
             include(parryTimeline(damage, isPiercing, card))
         }
+        later { enemy.statusEffects.forEach { it.onEnemyAttack() } }
     } }
 
     override fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline {
@@ -1419,7 +1427,9 @@ class GameControllerImpl(
         }
 
         include(bannerAnimationTimeline(false))
+        action { inEnemyPhase = true }
         include(enemyActionTimeline())
+        action { inEnemyPhase = false }
         include(bannerAnimationTimeline(true))
 
         action {
@@ -1447,10 +1457,10 @@ class GameControllerImpl(
     }
 
     private fun chooseEnemyActions() {
-        val otherActions = mutableListOf<NextEnemyAction>()
+        val otherActions = mutableListOf<Pair<EnemyActionPrototype, Boolean>>()
         activeEnemies.forEach { enemy ->
             val action = enemy.chooseNewAction(this, enemyDifficulty.toDouble(), otherActions)
-            otherActions.add(action)
+            action?.let { otherActions.add(it) }
         }
     }
 
