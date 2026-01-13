@@ -3,7 +3,6 @@ package com.microwavestudios.fortyfive.run
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.EncounterModifier
-import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
@@ -31,7 +30,6 @@ data class Encounter(
     val encounterModifier: List<EncounterModifier> by lazy {
         encounterModifierNames
             .map { EncounterModifier.getFromName(it) }
-            .filter { !UserPrefs.disableRtMechanics || !it.isRtBased }
     }
 
     fun createEnemies(): List<Enemy> {
@@ -40,7 +38,7 @@ data class Encounter(
         val healthMultiplier = 1f + ((minorDifficulty - 1f) * RunGeneratorConfig.enemyHealthAdjustment)
         return enemies
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
-            .map { println(it.baseHealth); it.create((it.baseHealth * healthMultiplier).toInt()) }
+            .map { it.create((it.baseHealth * healthMultiplier).toInt()) }
     }
 
     fun asOnj(): OnjObject = buildOnjObject {

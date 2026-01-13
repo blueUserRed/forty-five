@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
@@ -323,15 +322,15 @@ open class OnjScreen(
         const val transitionAwayScreenState = "transition away"
 
         fun toggleFullScreen(forceFullscreen: Boolean = false) {
-            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
-                UserPrefs.windowMode =
-                    if (UserPrefs.lastFullScreenAsBorderless)
-                        UserPrefs.WindowMode.BorderlessWindow
-                    else
-                        UserPrefs.WindowMode.Fullscreen
-            } else {
-                UserPrefs.windowMode = UserPrefs.WindowMode.Window
-            }
+//            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
+//                UserPrefs.windowMode =
+//                    if (UserPrefs.lastFullScreenAsBorderless)
+//                        UserPrefs.WindowMode.BorderlessWindow
+//                    else
+//                        UserPrefs.WindowMode.Fullscreen
+//            } else {
+//                UserPrefs.windowMode = UserPrefs.WindowMode.Window
+//            }
         }
     }
 

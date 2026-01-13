@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
+import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
@@ -29,7 +30,7 @@ import kotlin.system.measureTimeMillis
 
 object FortyFive : Game() {
 
-    const val logTag = "forty-five"
+    private const val logTag = "forty-five"
 
     /** see [CardTextureManager] */
     val cardTextureManager = CardTextureManager()
@@ -43,6 +44,7 @@ object FortyFive : Game() {
     val resourceManager = ResourceManager()
     val profileManager = ProfileManager()
     val screenManager = ScreenManager(TitleScreen, null)
+    val globalSave = GlobalSave()
 
     private val _lifetime: EndableLifetime = EndableLifetime()
     val gameLifetime: Lifetime
@@ -82,9 +84,8 @@ object FortyFive : Game() {
             screenManager.screenFinished()
             return
         }
-
-//        profileManager.selectProfile(profileManager.availableProfiles.first())
-//        screenManager.appendScreen(MapScreen)
+        globalSave.setToCorrectWindowMode()
+        if (!globalSave.skipIntroScreen) screenManager.appendScreen(IntroScreen)
         screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
     }
@@ -138,7 +139,6 @@ object FortyFive : Game() {
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         currentRenderPipeline?.sizeChanged()
-        if (UserPrefs.windowMode == UserPrefs.WindowMode.Window) UserPrefs.windowWidth = width
     }
 
     private fun init() {
@@ -152,7 +152,7 @@ object FortyFive : Game() {
         logger.init()
         profileManager.init()
         steamHandler = SteamHandler()
-        UserPrefs.read()
+        globalSave.readFromDisk()
         soundPlayer.init()
         GraphicsConfig.init()
         resourceManager.init()
@@ -165,7 +165,7 @@ object FortyFive : Game() {
         DebugActorImpl.dumpActorsWithDebugWarnings()
         profileManager.currentProfile?.write()
         profileManager.currentProfile?.writeMaps()
-        UserPrefs.write()
+        globalSave.write()
         _lifetime.die()
         soundPlayer.end()
         currentScreen?.dispose()

@@ -91,18 +91,22 @@ object SettingsCreator {
 
         label("red wing", "General", fontSize = (32 * 1.4).toInt()) {
             marginBottom = 10f
+            height = 50f
+            syncWidth()
             fontColor = ScreenCreator.fortyWhite
         }
 
         singleSettingSelector(creator, parentWidth, "Show Screenshake", "enableScreenShake", true)
-        singleSettingSelector(creator, parentWidth, "Start game on:", "startScreen")
-        singleSettingSelector(creator, parentWidth, "Realtime based mechanics", "disableRt")
-        singleSettingSelector(creator, parentWidth, "Window Mode:", "windowMode")
+        singleSettingSelector(creator, parentWidth, "Skip intro Screen:", "skipIntroScreen")
+        singleSettingSelector(creator, parentWidth, "Fullscreen:", "fullscreen")
+        singleSettingSelector(creator, parentWidth, "Use borderless window when in fullscreen:", "useBorderlessWindowFullscreen")
 
 
         label("red wing", "Audio", fontSize = (32 * 1.4).toInt()) {
             marginTop = 20f
             marginBottom = 10f
+            height = 50f
+            syncWidth()
             fontColor = ScreenCreator.fortyWhite
         }
 

@@ -1,8 +1,0 @@
-
-version: int,
-lastRandom: int?,
-collection: string[],
-visitedAreas: string[],
-playerHasCompletedTutorial: boolean,
-playerFoughtMultipleEnemies: boolean,
-hasSeenInDevPopup?: boolean,

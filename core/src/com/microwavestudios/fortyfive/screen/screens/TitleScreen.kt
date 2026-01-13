@@ -123,6 +123,7 @@ class TitleScreen : ScreenCreator() {
 
         events.watchFor<SelectedProfileChanged> { event ->
             currentlySelectedProfile = event.newProfile
+            FortyFive.globalSave.lastUsedProfile = event.newProfile?.name
         }
 
         label("red wing", "rework stage 2", Color.Black, 32) {
@@ -155,11 +156,12 @@ class TitleScreen : ScreenCreator() {
             val current = profileManager.currentProfile?.name
             profileManager.deselectProfile()
             val preview = if (current != null) {
-                profileManager.availableProfiles.find { it.name == current }!!
+                profileManager.availableProfiles.find { it.name == current }
             } else {
-                profileManager.availableProfiles.first()
+                val lastUsed = FortyFive.globalSave.lastUsedProfile
+                profileManager.availableProfiles.find { it.name == lastUsed }
             }
-            events.fire(SelectedProfileChanged(preview))
+            events.fire(SelectedProfileChanged(preview ?: profileManager.availableProfiles.first()))
         }
 
 //        testParticleSystem.emitter {

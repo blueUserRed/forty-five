@@ -24,7 +24,6 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
@@ -196,7 +195,7 @@ open class RenderPipeline(
         }
     }
 
-    fun getScreenShakeTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+    fun getScreenShakeTimeline(): Timeline = if (FortyFive.globalSave.enableScreenShake) Timeline.timeline {
         if (!screenShakeShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakeShader)
         val screenShakeShader = screenShakeShader.getOrError()
         action { screenShakeShader.resetReferenceTime() }
@@ -205,7 +204,7 @@ open class RenderPipeline(
         action { postPreprocessingSteps.remove(screenShakePostProcessingStep) }
     } else Timeline()
 
-    fun getScreenShakePopoutTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+    fun getScreenShakePopoutTimeline(): Timeline = if (FortyFive.globalSave.enableScreenShake) Timeline.timeline {
         if (!screenShakePopoutShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakePopoutShader)
         val screenShakePopoutShader = screenShakeShader.getOrError()
         action { screenShakePopoutShader.resetReferenceTime() }
@@ -560,7 +559,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         shaderPostProcessingStep(parryShader)
     }
 
-    fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+    fun getOnShotPostProcessingTimeline(): Timeline = if (FortyFive.globalSave.enableScreenShake) Timeline.timeline {
         if (!shootShader.isResolved) FortyFive.resourceManager.forceResolve(shootShader)
         val shootShader = shootShader.getOrError()
         val duration = 90
