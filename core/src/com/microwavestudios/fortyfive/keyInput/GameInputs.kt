@@ -54,6 +54,11 @@ object GameInputs {
         )
     )
 
+    val toggleFullScreen = Input(
+        "toggleFullScreen",
+        arrayOf(Input.Cause.Keyboard(Keys.F))
+    )
+
     val cancel = Input(
         "cancel",
         arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))

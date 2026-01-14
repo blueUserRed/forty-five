@@ -8,36 +8,96 @@ import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
-import javax.lang.model.element.VariableElement
 import kotlin.reflect.KClass
 
+/**
+ * this interface only exists to mark classes, it has no functions. Classes
+ * that implement this interface manage resources and ensure the resources that they
+ * borrowed are given back once they're not needed anymore
+ */
 interface ResourceBorrower
 
+/**
+ * a string that refers to a resource as defined in the
+ * `assets/config/assets.onj` file
+ */
 typealias ResourceHandle = String
 
+/**
+ * globally manages all resources used by the game.
+ * The `assets/config/assets.onj` file contains definitions for all available resources.
+ * The resource manager loads resources when they are needed, and frees them again once they
+ * are not needed anymore.
+ *
+ * A resource can be borrowed using various functions, like [request] or [forceGet].
+ * The ResourceManager uses Lifetimes (see [Lifetime]) to know how long a resource is borrowed for.
+ * It guarantees that the resource will be valid for as long as the lifetime is alive. A resource may
+ * stay valid for longer (e.g. if another part of the code also borrows it), but this can't be relied
+ * upon.
+ *
+ * **Important:**
+ *
+ * **Never call dispose on a resource that you got from the ResourceManager!** The ResourceManager will
+ * do that automatically once the lifetime ends. Keep in mind that even if you don't need the
+ * resource anymore, other parts of the game might have borrowed it as well!
+ *
+ * Each resource can have different 'variants', which all reference the same resource, but
+ * have a different type. For example, variants of a Texture are TextureRegion or
+ * TextureRegionDrawable. Because all variants use the same underlying data, they are all
+ * loaded and unloaded simultaneously and they all share a common handle. Functions for
+ * borrowing resources have a generic type parameter that is used to select a variant.
+ *
+ * Whenever possible, the ResourceManager will perform heavy operations on the [ServiceThread],
+ * to avoid blocking the render thread. However, because only the render thread can communicate
+ * with the GPU, large chunks of the resource loading process still need to be performed on the render
+ * thread.
+ */
 class ResourceManager {
 
+    /** list of all available resources */
     lateinit var resources: List<Resource>
         private set
 
+    /** list of all available fonts */
     lateinit var fonts: List<FontGroup>
         private set
 
+    /**
+     * Loads the resource with the specified [handle], if it isn't already loaded, and returns it.
+     * Note that this function will block the render thread for the time it takes to load the resource.
+     * Whenever possible, use [request] instead
+     */
     inline fun <reified T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle) =
         forceGet(borrower, lifetime, handle, T::class)
 
+    /**
+     * Takes a [promise] that was returned from [request] and forces it to resolve immediately.
+     * The function will block the render thread for the time it takes the resource to finish
+     * loading, so it should only be used when absolutely necessary.
+     */
     fun forceResolve(promise: Promise<*>) {
         val resource = resources.find { it.promiseMatches(promise) }
             ?: throw RuntimeException("no resource with matching promise found")
         resource.forceResolve()
     }
 
+    /**
+     * Loads the resource with the specified [handle], if it isn't already loaded, and returns it.
+     * Note that this function will block the render thread for the time it takes to load the resource.
+     * Whenever possible, use [request] instead
+     */
     fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle, type: KClass<T>): T {
         val resource = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         return resource.forceGet(borrower, lifetime, type)
     }
 
+    /**
+     * requests the resource with the handle [handle]. The resource will be loaded in the background
+     * and the returned [Promise] will resolve once the resource finished loading. If the resource
+     * was already loaded when the function was called, a promise that is already resolved may be
+     * returned.
+     */
     inline fun <reified T : Any> request(
         borrower: ResourceBorrower,
         lifetime: Lifetime,
@@ -45,6 +105,12 @@ class ResourceManager {
     ): Promise<T> =
         request(borrower, lifetime, handle, T::class)
 
+    /**
+     * requests the resource with the handle [handle]. The resource will be loaded in the background
+     * and the returned [Promise] will resolve once the resource finished loading. If the resource
+     * was already loaded when the function was called, a promise that is already resolved may be
+     * returned.
+     */
     fun <T : Any> request(
         borrower: ResourceBorrower,
         lifetime: Lifetime,

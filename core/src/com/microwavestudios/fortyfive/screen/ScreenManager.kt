@@ -10,7 +10,16 @@ import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.reflect.KClass
 import kotlin.reflect.KVisibility
 
-
+/**
+ * manages what screen is active and which screen comes next
+ *
+ * The ScreenManager maintains a list of screens that should be shown after the
+ * current screen finishes. Screens can be added to the list via the [appendScreen]
+ * and [ensureNextScreen] functions. If [screenFinished] is then called, the
+ * ScreenManager will transition to the next screen in the list. If the list
+ * is empty, the current base screen will be chosen instead. The base screen
+ * is typically either the title or the map screen.
+ */
 class ScreenManager(
     private var baseScreen: Pair<() -> ScreenBuilder, Any?>
 ) {
@@ -40,24 +49,39 @@ class ScreenManager(
         } to context
     }
 
+    /**
+     * starts the screen transition
+     */
     fun screenFinished() {
         val next = chain.next() ?: (baseScreen.first() to baseScreen.second)
         changeToScreen(next.first, next.second)
     }
 
+    /**
+     * appends a screen to the end of the list of screens (see [ScreenManager])
+     */
     fun appendScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
         chain.append(screenBuilder, context)
     }
 
+    /**
+     * appends a screen to the end of the list of screens (see [ScreenManager])
+     */
     fun appendScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
         val creator = creatorFromClass(creatorCompanion.creatorClass)
         chain.append(FromKotlinScreenBuilder(creator), context)
     }
 
+    /**
+     * add a screen to the start of the list of screens (see [ScreenManager])
+     */
     fun ensureNextScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
         chain.pushScreenToFront(screenBuilder, context)
     }
 
+    /**
+     * add a screen to the start of the list of screens (see [ScreenManager])
+     */
     fun ensureNextScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
         val creator = creatorFromClass(creatorCompanion.creatorClass)
         chain.pushScreenToFront(FromKotlinScreenBuilder(creator), context)
@@ -114,39 +138,6 @@ class ScreenManager(
         }
         this.timeline.appendAction(timeline.asAction())
     }
-
-//    private fun changeToScreen(screenBuilder: ScreenBuilder, context: Any?) = Gdx.app.postRunnable {
-//        if (inScreenTransition) return@postRunnable
-//        inScreenTransition = true
-//        val currentScreen = currentScreen
-//        if (currentScreen?.transitionAwayTimes != null) currentScreen.transitionAway()
-//        val screen = screenBuilder.build(context, currentScreen)
-//        nextScreen = screen
-//
-//        fun onScreenChange() {
-//            FortyFive.logger.title("changing screen to ${screenBuilder.name}")
-//            currentScreen?.dispose()
-//            this.currentScreen = screen
-//            FortyFive.currentScreen = screen
-//            nextScreen = null
-//            FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
-//            FortyFive.setScreen(screen)
-//            inScreenTransition = false
-//            val profile = FortyFive.profileManager.currentProfile
-//            profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
-//            profile?.write()
-//            profile?.writeMaps()
-//        }
-//
-//        val transitionAwayTime = currentScreen?.transitionAwayTimes?.let {
-//            it[screenBuilder.name] ?: it["*"]
-//        } ?: 0
-//        if (currentScreen == null) {
-//            onScreenChange()
-//        } else currentScreen.afterMs(transitionAwayTime) {
-//            onScreenChange()
-//        }
-//    }
 
     private class ScreenChain(screens: List<Pair<ScreenBuilder, Any?>>) {
 

@@ -40,9 +40,16 @@ object FortyFive : Game() {
 
     /** see [SoundPlayer] */
     val soundPlayer = SoundPlayer()
+
+    /** see [FortyFiveLogger] */
     val logger = FortyFiveLogger()
+
+    /** see [ResourceManager] */
     val resourceManager = ResourceManager()
+
     val profileManager = ProfileManager()
+
+    /** see [ScreenManager] */
     val screenManager = ScreenManager(TitleScreen, null)
     val globalSave = GlobalSave()
 

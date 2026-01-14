@@ -2,12 +2,12 @@
 version: int,
 masterVolume: float,
 musicVolume: float,
-soundEffectsVolume: float,
+soundEffectVolume: float,
 enableScreenShake: boolean,
 skipIntroScreen: boolean,
-lastUsedProfile: string?
-useBorderlessWindowFullscreen: boolean
-fullscreen: boolean
+lastUsedProfile: string?,
+useBorderlessWindowFullscreen: boolean,
+fullscreen: boolean,
 /*
 disableRtMechanics?: boolean,
 windowMode: string,
