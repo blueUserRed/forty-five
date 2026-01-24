@@ -519,6 +519,21 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "use Cards; params: [boolean, CardPredicate]")
+    fun zoneChange(
+        triggerBefore: OnjBoolean,
+        predicate: OnjCardPredicate,
+    ): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.ZoneChange> { situation, card, _, controller ->
+            val triggers = predicate.value.check(situation.card, controller, card)
+            when {
+                !triggers -> false
+                situation.before != triggerBefore.value -> false
+                else -> true
+            }
+        }
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, boolean, CardPredicate]")
     fun changedInOrOutOfZone(
         zone: OnjZone,

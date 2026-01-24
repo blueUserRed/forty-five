@@ -69,6 +69,11 @@ hoverDetailDescriptions: [
         description: "$trait$THORNS$trait$\nWhen parrying with this bullet, the enemy takes x dmg, where x is the dmg value of the attack which was parried.",
     },
     {
+        keyword: "PERSISTENCE",
+        groupName: "trait",
+        description: "$trait$PERSISTENCE$trait$\nThis Bullet doesn't lose its buffs or debuffs when shot.",
+    },
+    {
         keyword: "HARDENED", // TODO: Should be keyword
         groupName: "trait",
         description: "$trait$HARDENED (x)$trait$\nFor the next x times this bullet is used to parry, it won't leave the revolver ",
@@ -112,6 +117,11 @@ hoverDetailDescriptions: [
         keyword: "RESURRECT",
         groupName: "keyword",
         description: "$keyword$RESURRECT$keyword$\nreturn the first bullet in the Afterlife into a target revolver slot",
+    },
+    {
+        keyword: "ZONE",
+        groupName: "keyword",
+        description: "$keyword$ZONE$keyword$\nZones are the handcards, the drawpile, the revolver and the afterlife",
     },
 ],
 

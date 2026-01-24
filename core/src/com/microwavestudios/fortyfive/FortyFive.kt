@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
 import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
 
@@ -151,8 +152,8 @@ object FortyFive : Game() {
     private fun init() {
         ShaderProgram.pedantic = false
         with(OnjConfig) {
-            registerNameSpace("Common", CommonNamespace)
-            registerNameSpace("Cards", CardsNamespace)
+            registerNamespace("Common", CommonNamespace)
+            registerNamespace("Cards", CardsNamespace)
         }
         ConfigFileManager.init()
         TemplateString.init()
@@ -165,6 +166,9 @@ object FortyFive : Game() {
         resourceManager.init()
         serviceThread.start()
         cardTextureManager.init()
+        if (logger.versionTag != "--dev--") return
+        File(".onj").mkdirs()
+        OnjConfig.dumpOnjEnv(File(".onj/forty-five.onjenv"))
     }
 
     override fun dispose() {

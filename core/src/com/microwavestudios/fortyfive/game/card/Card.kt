@@ -160,6 +160,8 @@ class Card(
         private set
     var isPunk: Boolean = false
         private set
+    var isPersistent: Boolean = false
+        private set
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -384,6 +386,7 @@ class Card(
             }
         }
         action {
+            if (isPersistent) return@action
             damageModifiers.removeIf { !it.second.data.keepActive }
             protectingModifiers.removeIf { !it.data.keepActive }
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
@@ -765,6 +768,7 @@ class Card(
                 "rotten" -> card.isRotten = true
                 "thorns" -> card.isThorns = true
                 "punk" -> card.isPunk = true
+                "persistence" -> card.isPersistent = true
                 "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
                 "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
@@ -993,6 +997,8 @@ class CardActor(
     override fun exitSelectionMode() {
         selectionPromise = null
         dropShadow = null
+        selectionAnimation.stop()
+        selectionAnimation.reset()
     }
 
     private fun setupShader(batch: Batch): Boolean {
