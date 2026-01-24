@@ -40,6 +40,31 @@ abstract class BaseSelector<T, U> where T : Selectable<T> {
 
 }
 
+class CardInHandSelector(
+    val controller: GameController,
+    val popupText: String,
+    val predicate: (Card) -> Boolean = { true }
+) : BaseSelector<CardActor, Card>() {
+
+    override fun begin(selectables: List<CardActor>) {
+        controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(popupText))
+    }
+
+    override fun end(selectables: List<CardActor>) {
+        controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(null))
+    }
+
+    override fun getModal(): InputManager.Modal = InputManager.Modal(
+        listOf(CardActor.selectableCardGroup),
+        controller.screen
+    )
+
+    override fun getSelectables(): List<CardActor> =
+        controller.cardsInHand.filter { predicate(it) }.map { it.actor }
+
+    override fun mapSelectable(selectable: CardActor): Card = selectable.card
+}
+
 class CardInRevolverSelector(
     val controller: GameController,
     val popupText: String,

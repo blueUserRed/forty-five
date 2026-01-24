@@ -78,9 +78,33 @@ abstract class Effect(val data: EffectData) {
                 store("selectedCards", cards)
             }
 
-            is BulletSelector.ByPopup -> later {
+            is BulletSelector.RevolverCardByPopup -> later {
 
                 val selector = CardInRevolverSelector(
+                    controller,
+                    bulletSelector.text,
+                    predicate = { card ->
+                        bulletSelector.includeSelf || card != self
+                    }
+                )
+                val promise = selector.startSelect()
+                waitForPromise(promise)
+                later {
+                    val result = promise.getOrNull()
+                    if (result == null) {
+                        action { store("selectedCards", listOf<Card>()) }
+                    } else {
+                        val cards = listOf(result)
+                        action {
+                            cardsAffected(self, cards)
+                            store("selectedCards", cards)
+                        }
+                    }
+                }
+            }
+            is BulletSelector.HandCardByPopup -> later {
+
+                val selector = CardInHandSelector(
                     controller,
                     bulletSelector.text,
                     predicate = { card ->
@@ -654,7 +678,7 @@ abstract class Effect(val data: EffectData) {
             triggerInformation.targetedEnemies.forEach { enemy ->
                 includeLater(
                     {
-                        var turns = turns(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1
+                        val turns = turns(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1
                         enemy
                             .statusEffects
                             .filterIsInstance<Poison>()
@@ -824,6 +848,30 @@ abstract class Effect(val data: EffectData) {
         override fun animatesInAfterlife(): Boolean = true
     }
 
+    class Discard(
+        val bulletSelector: BulletSelector,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            includeLater({
+                get<List<Card>>("selectedCards")
+                    .map { controller.destroyCardInHandTimeline(it) }
+                    .collectTimeline()
+            })
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect = Discard(bulletSelector, data)
+
+    }
+
 }
 
 /**
@@ -845,14 +893,31 @@ sealed class BulletSelector {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
     }
 
-    class ByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
+    class RevolverCardByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean {
             if (optional) return false
             val bulletsInRevolver = controller.cardsInRevolver()
             if (bulletsInRevolver.size >= 2) return false
             if (bulletsInRevolver.isEmpty()) return true
-            if (!includeSelf && bulletsInRevolver[0] === self) return true
+            if (!includeSelf && bulletsInRevolver.first() === self) return true
+            return false
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = true
+    }
+
+    class HandCardByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
+
+        override fun blocks(
+            controller: GameController,
+            self: Card
+        ): Boolean {
+            if (optional) return false
+            val bulletsInHand = controller.cardsInHand
+            if (bulletsInHand.size >= 2) return false
+            if (bulletsInHand.isEmpty()) return true
+            if (!includeSelf && bulletsInHand.first() === self) return true
             return false
         }
 

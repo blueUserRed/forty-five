@@ -36,6 +36,7 @@ import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
 import kotlin.math.floor
+import kotlin.math.log
 
 class GameControllerImpl(
     override val screen: OnjScreen,
@@ -930,9 +931,27 @@ class GameControllerImpl(
         }
     }
 
-    override fun destroyCardInHandTimeline(card: Card): Timeline {
-        TODO("Not yet implemented")
-    }
+    override fun destroyCardInHandTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
+        if (card !in cardHand.allCards()) {
+            FortyFive.logger.warn(logTag, "cant destroy $card because it isn't in the hand")
+            return@later
+        }
+        val info = createTriggerInfo(card, sourceCard = sourceCard)
+        val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.AFTERLIFE, true, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
+        include(card.actor.destroyAnimation())
+        action { card.actor.alpha = 0f }
+        includeLater({ afterlife.openTimeline() }, { afterlife.isClosed })
+        later {
+            cardHand.removeCard(card)
+            afterlife.pushCard(card)
+            card.actor.alpha = 1f
+            val afterEvent = event.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
+        }
+    } }
 
     override fun removeAllPlayerStatusEffectsTimeline(): Timeline = Timeline.timeline {
         action {

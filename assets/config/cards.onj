@@ -1932,6 +1932,22 @@ cards: [
         tags: [ "pool1", "rarity1" ],
         price: 50,
     },
+    {
+        name: "lemonBullet",
+        title: "Lemon Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$DISCARD$keyword$ target bullet",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: discard(bSelectHandTarget(false, true, "Select bullet to discard"))
+            },
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
 
 ],
 

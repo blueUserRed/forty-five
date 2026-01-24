@@ -399,6 +399,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         OnjEffect(Effect.Destroy(bulletSelector.value, EffectData()))
 
     @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector]")
+    fun discard(bulletSelector: OnjBulletSelector): OnjEffect =
+        OnjEffect(Effect.Discard(bulletSelector.value, EffectData()))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector]")
     fun destroyTargetOrDestroySelf(bulletSelector: OnjBulletSelector): OnjEffect =
         OnjEffect(
             Effect.DestroyTargetOrDestroySelf(
@@ -757,7 +761,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: [boolean, boolean, string]")
     fun bSelectRevolverTarget(includeSelf: OnjBoolean, optional: OnjBoolean, text: OnjString): OnjBulletSelector =
-        OnjBulletSelector(BulletSelector.ByPopup(includeSelf.value, optional.value, text.value))
+        OnjBulletSelector(BulletSelector.RevolverCardByPopup(includeSelf.value, optional.value, text.value))
+
+    @RegisterOnjFunction(schema = "params: [boolean, boolean, string]")
+    fun bSelectHandTarget(includeSelf: OnjBoolean, optional: OnjBoolean, text: OnjString): OnjBulletSelector =
+        OnjBulletSelector(BulletSelector.HandCardByPopup(includeSelf.value, optional.value, text.value))
 
     @RegisterOnjFunction(schema = "params: []")
     fun bSelectSourceBullet(): OnjBulletSelector = OnjBulletSelector(BulletSelector.ByLambda { info, card ->

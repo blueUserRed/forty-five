@@ -72,7 +72,7 @@ interface GameController {
 
     fun switchSlotOfBulletInRevolverTimeline(card: Card, newSlot: Int): Timeline
 
-    fun destroyCardInHandTimeline(card: Card): Timeline
+    fun destroyCardInHandTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     fun enemyAttackTimeline(damage: Int, enemy: Enemy, isPiercing: Boolean = false): Timeline
 

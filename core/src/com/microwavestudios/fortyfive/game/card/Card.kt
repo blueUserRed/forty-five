@@ -889,6 +889,7 @@ class CardActor(
 
     private var selectionPromise: Promise<CardActor>? = null
 
+    private var rotationOnSelectionEnter: Float = 0f
     private val selectionAnimation: AnimatedActor.AnimationController =
         animateRotationSinus(amplitude = Math.PI.toFloat() * 0.5f, frequency = 30f, phase = 0f)
             .also { it.stop() }
@@ -967,6 +968,7 @@ class CardActor(
         if (selectionPromise != null) {
             selectionAnimation.stop()
             selectionAnimation.reset()
+            rotation = rotationOnSelectionEnter
             return
         }
         if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
@@ -992,6 +994,8 @@ class CardActor(
     override fun enterSelectionMode(promise: Promise<CardActor>) {
         selectionPromise = promise
         dropShadow = selectionDropShadow
+        joinGroup(selectableCardGroup)
+        rotationOnSelectionEnter = rotation
     }
 
     override fun exitSelectionMode() {
@@ -999,6 +1003,8 @@ class CardActor(
         dropShadow = null
         selectionAnimation.stop()
         selectionAnimation.reset()
+        rotation = rotationOnSelectionEnter
+        leaveGroup(selectableCardGroup)
     }
 
     private fun setupShader(batch: Batch): Boolean {
@@ -1243,5 +1249,6 @@ class CardActor(
         }
 
         const val cardGroup: String = "card-group"
+        const val selectableCardGroup: String = "selectable-card-group"
     }
 }
