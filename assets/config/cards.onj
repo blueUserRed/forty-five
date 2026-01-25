@@ -1948,6 +1948,22 @@ cards: [
         tags: [ "pool1", "rarity3" ],
         price: 50,
     },
+    {
+        name: "letterBullet",
+        title: "Letter Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nShuffle target card from your hand into your drawpile",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: shuffleCardFromHandIntoStack(bSelectHandTarget(false, true, "Select bullet to shuffle into the drawpile"))
+            },
+        ],
+        cost: 0,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
 
 ],
 

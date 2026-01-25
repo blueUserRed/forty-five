@@ -50,6 +50,8 @@ interface GameController {
 
     fun bounceBulletTimeline(card: Card): Timeline
 
+    fun shuffleCardFromHandIntoStackTimeline(card: Card, sourceCard: Card? = null): Timeline
+
     fun rotateRevolverTimeline(
         rotation: RevolverRotation,
         ignoreEncounterModifiers: Boolean = false,

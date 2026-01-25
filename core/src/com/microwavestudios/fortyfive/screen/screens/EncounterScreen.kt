@@ -1458,12 +1458,14 @@ class EncounterScreen : ScreenCreator() {
     private fun cardAnimationTimeline(
         source: Actor,
         target: Actor,
+        reverse: Boolean,
     ): Timeline = Timeline.timeline {
         val renderPipeline = FortyFive.currentRenderPipeline ?: return@timeline
         later {
             FortyFive.soundPlayer.situation("orb_anim_playing", screen)
-            val sourcePosition =
+            val sourceCallback = {
                 source.localToStageCoordinates(Vector2(0f, 0f)) + Vector2(source.width / 2, source.height / 2)
+            }
             val targetCallback = {
                 target.localToStageCoordinates(Vector2(0f, 0f)) +
                         Vector2(target.width / 2, target.height / 2)
@@ -1473,14 +1475,14 @@ class EncounterScreen : ScreenCreator() {
                 "card_orb",
                 10f, 10f,
                 renderPipeline,
-                sourcePosition,
+                if (reverse) targetCallback() else sourceCallback(),
                 startVelocity,
                 1000f,
                 4000f,
                 20,
                 5_000,
                 2.0f,
-                targetCallback
+                if (reverse) sourceCallback else targetCallback
             )
             renderPipeline.addOrbAnimation(orbAnimation)
             delayUntil { orbAnimation.isFinished() }
@@ -1500,6 +1502,7 @@ class EncounterScreen : ScreenCreator() {
             event.orbAnimationTimeline = cardAnimationTimeline(
                 deckAnimationTarget,
                 event.targetActor,
+                event.reverse
             )
         }
         gameEvents.watchFor<GameControllerImpl.Events.SetupEnemies>(::setupEnemies)

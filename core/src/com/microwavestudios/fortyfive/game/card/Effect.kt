@@ -861,7 +861,7 @@ abstract class Effect(val data: EffectData) {
             include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
             includeLater({
                 get<List<Card>>("selectedCards")
-                    .map { controller.destroyCardInHandTimeline(it) }
+                    .map { controller.destroyCardInHandTimeline(it, card) }
                     .collectTimeline()
             })
         }
@@ -869,6 +869,30 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun copy(data: EffectData): Effect = Discard(bulletSelector, data)
+
+    }
+
+    class ShuffleCardFromHandIntoStack(
+        val bulletSelector: BulletSelector,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            includeLater({
+                get<List<Card>>("selectedCards")
+                    .map { controller.shuffleCardFromHandIntoStackTimeline(it, card) }
+                    .collectTimeline()
+            })
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect = ShuffleCardFromHandIntoStack(bulletSelector, data)
 
     }
 

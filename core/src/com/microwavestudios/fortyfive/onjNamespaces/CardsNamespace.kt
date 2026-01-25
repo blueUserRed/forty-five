@@ -403,6 +403,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         OnjEffect(Effect.Discard(bulletSelector.value, EffectData()))
 
     @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector]")
+    fun shuffleCardFromHandIntoStack(bulletSelector: OnjBulletSelector): OnjEffect =
+        OnjEffect(Effect.ShuffleCardFromHandIntoStack(bulletSelector.value, EffectData()))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector]")
     fun destroyTargetOrDestroySelf(bulletSelector: OnjBulletSelector): OnjEffect =
         OnjEffect(
             Effect.DestroyTargetOrDestroySelf(

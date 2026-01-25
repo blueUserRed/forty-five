@@ -481,6 +481,35 @@ class GameControllerImpl(
         }
     } }
 
+    override fun shuffleCardFromHandIntoStackTimeline(
+        card: Card,
+        sourceCard: Card?
+    ): Timeline = Timeline.timeline { later {
+        if (card !in cardsInHand) {
+            FortyFive.logger.warn(logTag, "Cant shuffle card into the stack because it isn't in the hand $card")
+            return@later
+        }
+        val info = createTriggerInfo(card, sourceCard = sourceCard)
+        val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, true, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
+        include(card.actor.spawnAnimation(true))
+        action {
+            cardHand.removeCard(card)
+            cardStack.shuffleCardIntoStack(card)
+        }
+        later {
+            val animEvent = Events.PlayCardOrbAnimation(card.actor, true)
+            gameEvents.fire(animEvent)
+            include(animEvent.orbAnimationTimeline!!)
+            val afterEvent = event.copy(before = false)
+            includeLater({
+                gameEvents.fire(afterEvent)
+                afterEvent.createTimeline()
+            })
+        }
+    } }
+
     override fun tryToPutCardsInHandTimeline(
         cardName: String,
         amount: Int,
@@ -947,6 +976,7 @@ class GameControllerImpl(
             cardHand.removeCard(card)
             afterlife.pushCard(card)
             card.actor.alpha = 1f
+            checkCardMaximums()
             val afterEvent = event.copy(before = false)
             gameEvents.fire(afterEvent)
             include(afterEvent.createTimeline())
@@ -1553,7 +1583,11 @@ class GameControllerImpl(
             val sourceActor: Actor? = null,
             val controller: GameController
         )
-        data class PlayCardOrbAnimation(val targetActor: Actor, var orbAnimationTimeline: Timeline? = null)
+        data class PlayCardOrbAnimation(
+            val targetActor: Actor,
+            val reverse: Boolean = false,
+            var orbAnimationTimeline: Timeline? = null
+        )
         data class ParryStateChange(
             val inParryMenu: Boolean,
             val damage: Int,
