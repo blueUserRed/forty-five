@@ -50,6 +50,7 @@ import kotlin.math.absoluteValue
  * @param creator lambda that creates the instance
  */
 class CardPrototype(
+    val namespace: String?,
     val name: String,
     val title: String,
     val baseCost: Int,
@@ -77,12 +78,12 @@ class CardPrototype(
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
 
-    fun copy(): CardPrototype = CardPrototype(name, title, baseCost, baseDamage, tags).apply {
+    fun copy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
         this.creator = this@CardPrototype.creator
     }
 
-    fun cleanCopy(): CardPrototype = CardPrototype(name, title, baseCost, baseDamage, tags).apply {
+    fun cleanCopy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
         this.creator = this@CardPrototype.creator
     }
 
@@ -104,6 +105,7 @@ class CardPrototype(
  * @param effects the effects of this card
  */
 class Card(
+    val namespace: String?,
     val name: String,
     val title: String,
     val flavourText: String,
@@ -656,6 +658,7 @@ class Card(
          */
         fun getFrom(
             cards: OnjArray,
+            from: String?,
             initializer: (Card) -> Unit
         ): List<CardPrototype> {
 
@@ -666,6 +669,7 @@ class Card(
                 .forEach { onj ->
                     onj as OnjObject
                     val prototype = CardPrototype(
+                        from,
                         onj.get<String>("name"),
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
@@ -691,6 +695,7 @@ class Card(
         ): Card {
             val name = onj.get<String>("name")
             val card = Card(
+                namespace = prototype.namespace,
                 name = name,
                 title = onj.get<String>("title"),
                 flavourText = onj.get<String>("flavourText"),

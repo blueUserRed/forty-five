@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
+import java.io.File
 import kotlin.collections.map
 import kotlin.reflect.KClass
 
@@ -64,6 +65,10 @@ class ResourceManager {
     lateinit var fonts: List<FontGroup>
         private set
 
+    /** all directories containing cards, null for mainGame, plugin name for the plugin directory */
+    lateinit var cardDirectories: Map<String?, String>
+        private set
+
     /**
      * Loads the resource with the specified [handle], if it isn't already loaded, and returns it.
      * Note that this function will block the render thread for the time it takes to load the resource.
@@ -89,7 +94,7 @@ class ResourceManager {
      * Whenever possible, use [request] instead
      */
     fun <T : Any> forceGet(borrower: ResourceBorrower, lifetime: Lifetime, handle: ResourceHandle, type: KClass<T>): T {
-        val resource = resources.find { it.handle == handle }
+        val resource = resources.find { it.combinedHandle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         return resource.forceGet(borrower, lifetime, type)
     }
@@ -119,15 +124,30 @@ class ResourceManager {
         handle: ResourceHandle,
         type: KClass<T>
     ): Promise<T> {
-        val resource = resources.find { it.handle == handle }
+        val resource = resources.find { it.combinedHandle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         return resource.request(borrower, lifetime, type)
     }
 
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
-        val toGiveBack = resources.find { it.handle == handle }
+        val toGiveBack = resources.find { it.combinedHandle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         toGiveBack.giveBack(borrower)
+    }
+
+    fun findCardFileOrError(namespace: String?, cardName: String): File {
+        val cardDir = cardDirectories[namespace] ?: throw RuntimeException("no card directory for namespace $namespace")
+        val file = if (namespace == null) {
+            File(cardDir).resolve("$cardName.png")
+        } else {
+            val plugin = FortyFive.pluginManager.findPlugin(namespace)
+                ?: throw RuntimeException("no plugin with name $namespace")
+            plugin.directory.resolve(cardDir).resolve("$cardName.png")
+        }
+        if (!file.exists()) {
+            throw RuntimeException("couldn't find card texture at: $file")
+        }
+        return file
     }
 
     private fun collectResources(): CollectedResources {
@@ -191,6 +211,7 @@ class ResourceManager {
                 .getOr<OnjObject?>("dropShadow", null)
                 ?.let { TextureResource.DropShadowData.fromOnj(it) }
             val resource = TextureResource(
+                from,
                 name,
                 texture.get<String>("file"),
                 texture.getOr("tileable", false),
@@ -203,6 +224,7 @@ class ResourceManager {
 
             dropShadowData ?: return@forEach
             val resourceDropShadow = TextureResource(
+                from,
                 name + DROP_SHADOW_END,
                 "drop_shadows/$name$DROP_SHADOW_END.png",
                 false,
@@ -224,7 +246,7 @@ class ResourceManager {
                 val fontFile = variant.get<ResourceHandle>("fontFile")
                 val imageFile = variant.get<ResourceHandle>("imageFile")
                 val size = variant.get<Long>("size").toInt()
-                val resource = FontResource(resourceHandle, imageFile, fontFile, false)
+                val resource = FontResource(from, resourceHandle, imageFile, fontFile, false)
                 resource.stayLoaded = font.getOr("stayLoaded", false)
                 resources.add(resource)
                 val variant = FontVariant(resourceHandle, size)
@@ -236,6 +258,7 @@ class ResourceManager {
 
         collected.pixmapFonts.forEach { (from, font) ->
             val resource = PixmapFontResource(
+                from,
                 font.get<String>("name"),
                 font.get<String>("fontFile")
             )
@@ -246,13 +269,13 @@ class ResourceManager {
         collected.textureAtlases.forEach { (from, obj) ->
             val name = obj.get<String>("name")
             val file = obj.get<String>("file")
-            val atlasResource = AtlasResource(name, file)
+            val atlasResource = AtlasResource(from, name, file)
             atlasResource.stayLoaded = obj.getOr("stayLoaded", false)
             val regionResources = obj.get<OnjArray>("regions").value.map {
                 it as OnjObject
                 val handle = it.get<String>("handle")
                 val regionName = it.get<String>("regionName")
-                val resource = AtlasRegionResource(handle, regionName, name)
+                val resource = AtlasRegionResource(from, handle, regionName, name)
                 resource.stayLoaded = it.getOr("stayLoaded", false)
                 resource
             }
@@ -260,8 +283,9 @@ class ResourceManager {
             resources.addAll(regionResources)
         }
 
-        collected.cursors.forEach { (name, cursor) ->
+        collected.cursors.forEach { (from, cursor) ->
             val resource = CursorResource(
+                from,
                 cursor.get<String>("name"),
                 cursor.get<String>("file"),
                 cursor.get<Long>("hotspotX").toInt(),
@@ -273,6 +297,7 @@ class ResourceManager {
 
         collected.shaders.forEach { (from, shader) ->
             val resource = ShaderResource(
+                from,
                 shader.get<String>("name"),
                 shader.get<String>("file"),
                 shader.get<OnjObject>("constantArgs").value.entries.associate { (key, value) ->
@@ -283,8 +308,9 @@ class ResourceManager {
             resources.add(resource)
         }
 
-        collected.colorTextures.forEach { (name, texture) ->
+        collected.colorTextures.forEach { (from, texture) ->
             val resource = ColorTextureResource(
+                from,
                 texture.get<String>("name"),
                 texture.get<Color>("color")
             )
@@ -292,8 +318,9 @@ class ResourceManager {
             resources.add(resource)
         }
 
-        collected.particles.forEach { (name, particle) ->
+        collected.particles.forEach { (from, particle) ->
             val resource = ParticleResource(
+                from,
                 particle.get<String>("name"),
                 particle.get<String>("file"),
                 particle.get<String>("textureDir"),
@@ -305,6 +332,7 @@ class ResourceManager {
 
         collected.ninepatches.forEach { (from, ninepatch) ->
             val resource = NinepatchResource(
+                from,
                 ninepatch.get<String>("name"),
                 ninepatch.get<String>("file"),
                 ninepatch.get<Long>("left").toInt(),
@@ -319,6 +347,7 @@ class ResourceManager {
 
         collected.frameAnimations.forEach { (from, anim) ->
             val resource = DeferredFrameAnimationResource(
+                from,
                 anim.get<String>("name"),
                 anim.get<String>("preview"),
                 anim.get<String>("atlas"),
@@ -330,6 +359,7 @@ class ResourceManager {
 
         collected.sounds.forEach { (from, sound) ->
             val resource = SoundResource(
+                from,
                 sound.get<String>("name"),
                 sound.get<String>("file")
             )
@@ -339,6 +369,7 @@ class ResourceManager {
 
         collected.music.forEach { (from, music) ->
             val resource = MusicResource(
+                from,
                 music.get<String>("name"),
                 music.get<String>("file")
             )
@@ -346,6 +377,7 @@ class ResourceManager {
             resources.add(resource)
         }
 
+        cardDirectories = collected.cardDirectories
         collected.cardDirectories.forEach { (from, directory) ->
             Gdx.files.internal(directory)
                 .file()
@@ -353,6 +385,7 @@ class ResourceManager {
                 .filter { it.isFile }
                 .forEach {
                     val resource = TextureResource(
+                        from,
                         "${Card.cardTexturePrefix}${it.nameWithoutExtension}",
                         it.path,
                         false,

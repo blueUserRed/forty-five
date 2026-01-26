@@ -69,6 +69,7 @@ class CardTextureManager {
             return pixmap.asPromise()
         }
         val message = ServiceThreadMessage.LoadCardPixmap(
+            card.namespace,
             variablePostfix?.let { "${card.name}-$it" } ?: card.name
         )
         FortyFive.serviceThread.sendMessage(message)

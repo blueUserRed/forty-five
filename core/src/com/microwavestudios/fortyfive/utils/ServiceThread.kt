@@ -69,7 +69,7 @@ class ServiceThread : Thread("ServiceThread") {
     }
 
     private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
-        val pixmap = Pixmap(Gdx.files.internal("blobs/cards/${message.name}.png"))
+        val pixmap = Pixmap(FortyFive.resourceManager.findCardFileOrError(message.namespace, message.name).handle())
         message.promise.resolve(pixmap)
     }
 
@@ -141,6 +141,7 @@ sealed class ServiceThreadMessage {
     ) : ServiceThreadMessage()
 
     class LoadCardPixmap(
+        val namespace: String?,
         val name: String,
         val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()

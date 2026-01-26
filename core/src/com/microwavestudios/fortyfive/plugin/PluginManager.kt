@@ -31,6 +31,8 @@ class PluginManager {
         plugins.forEach { it.plugin?.start() }
     }
 
+    fun findPlugin(name: String): ManagedPlugin? = _plugins.find { it.name == name }
+
     private fun createPlugin(pluginConfig: File, parentDir: File): ManagedPlugin? {
         try {
             val onj = OnjParser.parseFile(pluginConfig)
@@ -61,7 +63,7 @@ class PluginManager {
         return null
     }
 
-    fun collectCardFiles(): List<OnjObject> {
+    fun collectCardFiles(): List<Pair<String, OnjObject>> {
         return _plugins.mapNotNull { plugin ->
             val file = plugin.lookForConfigFile("cards.onj") ?: return@mapNotNull null
             try {
@@ -80,7 +82,7 @@ class PluginManager {
                 FortyFive.logger.warn(logTag, "Failed to load cards.onj")
                 FortyFive.logger.stackTrace(e)
                 null
-            }
+            }?.let { plugin.name to it }
         }
     }
 
@@ -89,7 +91,7 @@ class PluginManager {
             val file = plugin.lookForConfigFile("assets.onj") ?: return@mapNotNull null
             try {
                 val onj = OnjParser.parseFile(file)
-                cardsSchema.assertMatches(onj)
+                assetsSchema.assertMatches(onj)
                 onj as OnjObject
             } catch (e: OnjParserException) {
                 FortyFive.logger.warn(logTag, "Failed to load cards.onj")

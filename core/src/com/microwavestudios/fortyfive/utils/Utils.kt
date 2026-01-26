@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
@@ -16,6 +17,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import onj.value.OnjArray
 import onj.value.OnjString
+import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.math.abs
@@ -383,6 +385,8 @@ fun Color.interpolate(other: Color): Color {
         (this.a + other.a) / 2
     )
 }
+
+fun File.handle(): FileHandle = Gdx.files.internal(path)
 
 object Utils {
 

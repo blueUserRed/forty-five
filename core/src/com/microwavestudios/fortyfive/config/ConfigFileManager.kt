@@ -102,11 +102,11 @@ object ConfigFileManager {
     fun loadCards(initializer: (Card) -> Unit): List<CardPrototype> {
         val baseGameCards = getConfigFile("cards")
         val baseGameCardProtos = Card
-            .getFrom(baseGameCards.get<OnjArray>("cards"), initializer)
+            .getFrom(baseGameCards.get<OnjArray>("cards"), null, initializer)
             .toMutableList()
         val pluginFiles = FortyFive.pluginManager.collectCardFiles()
-        pluginFiles.forEach { obj ->
-            val protos = Card.getFrom(obj.get<OnjArray>("cards"), initializer)
+        pluginFiles.forEach { (from, obj) ->
+            val protos = Card.getFrom(obj.get<OnjArray>("cards"), from, initializer)
             baseGameCardProtos.addAll(protos)
         }
         return baseGameCardProtos
