@@ -384,24 +384,18 @@ class GameControllerImpl(
     }
 
     private fun initCards() {
-        val onj = ConfigFileManager.getConfigFile("cards")
-
         val cards = encounter.forceCards
             ?: encounterContext.forceCards
             ?: profile.currentRunDeck!!.cards
 
-        val cardsArray = onj.get<OnjArray>("cards")
-
         val stack = mutableListOf<Card>()
 
-        cardPrototypes = Card
-            .getFrom(cardsArray) { card ->
-                createdCards.add(card)
-                encounterModifiers.forEach { it.initBullet(card) }
-                screen.lifetime.tieDisposable(card)
-                card.setGame(this@GameControllerImpl)
-            }
-            .toMutableList()
+        cardPrototypes = ConfigFileManager.loadCards { card ->
+            createdCards.add(card)
+            encounterModifiers.forEach { it.initBullet(card) }
+            screen.lifetime.tieDisposable(card)
+            card.setGame(this@GameControllerImpl)
+        }
 
         cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
@@ -415,6 +409,7 @@ class GameControllerImpl(
 
         FortyFive.logger.debug(logTag, "card stack: $stack")
 
+        val onj = ConfigFileManager.getConfigFile("cards")
         val defaultBulletName = onj.get<String>("defaultBullet")
 
         defaultBullet = cardPrototypes

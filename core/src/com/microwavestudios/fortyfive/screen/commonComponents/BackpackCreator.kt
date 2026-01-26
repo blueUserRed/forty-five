@@ -36,10 +36,8 @@ object BackpackCreator {
         publicEvents: EventPipeline,
         isCollection: Boolean,
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
-
-        val cardsOnj = ConfigFileManager.getConfigFile("cards")
-        val cardPrototypes = Card
-            .getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) })
+        val cardPrototypes = ConfigFileManager
+            .loadCards { screen.addDisposable(it) }
             .associate { it.name to it }
 
         val profile = FortyFive.profileManager.currentProfile!!

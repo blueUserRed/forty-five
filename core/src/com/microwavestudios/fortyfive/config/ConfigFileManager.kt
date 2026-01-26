@@ -2,6 +2,9 @@ package com.microwavestudios.fortyfive.config
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardPrototype
+import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.Run
 import onj.parser.OnjParser
@@ -94,6 +97,20 @@ object ConfigFileManager {
     private fun configFileOrError(configFile: String): ConfigFile = configFiles
         .find { it.name == configFile }
         ?: throw RuntimeException("no config file called $configFile")
+
+
+    fun loadCards(initializer: (Card) -> Unit): List<CardPrototype> {
+        val baseGameCards = getConfigFile("cards")
+        val baseGameCardProtos = Card
+            .getFrom(baseGameCards.get<OnjArray>("cards"), initializer)
+            .toMutableList()
+        val pluginFiles = FortyFive.pluginManager.collectCardFiles()
+        pluginFiles.forEach { obj ->
+            val protos = Card.getFrom(obj.get<OnjArray>("cards"), initializer)
+            baseGameCardProtos.addAll(protos)
+        }
+        return baseGameCardProtos
+    }
 
     private data class ConfigFile(
         val name: String,

@@ -1,0 +1,4 @@
+
+name: string,
+pluginClass: string,
+jarFile: string?

@@ -12,9 +12,7 @@ import kotlin.random.Random
 object RandomCardSelection {
 
     val allCardPrototypes: List<CardPrototype> by lazy {
-        val onj = ConfigFileManager.getConfigFile("cards")
-        Card
-            .getFrom(onj.get<OnjArray>("cards"), initializer = {})
+        ConfigFileManager.loadCards(initializer =  {})
     }
 
     fun getRandomCards(

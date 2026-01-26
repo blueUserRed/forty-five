@@ -7,7 +7,7 @@ configFiles: {
     },
     cards: {
         file: "config/cards.onj",
-        validatedBy: "onjschemas/cards.onjschema",
+        validatedBy: "onjschemas/mainGame/cards.onjschema",
     },
     descriptions: {
         file: "config/descriptions.onj",

@@ -5,9 +5,11 @@ import com.badlogic.gdx.graphics.Color
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
+import kotlin.collections.map
 import kotlin.reflect.KClass
 
 /**
@@ -128,12 +130,62 @@ class ResourceManager {
         toGiveBack.giveBack(borrower)
     }
 
-    fun init() {
-        val resources = mutableListOf<Resource>()
+    private fun collectResources(): CollectedResources {
+        val pluginAssets = FortyFive.pluginManager.collectAssetFiles()
         val assets = ConfigFileManager.getConfigFile("assets")
 
-        assets.get<OnjArray>("textures").value.forEach { texture ->
-            texture as OnjObject
+        fun collectToMap(key: String): List<Pair<String?, OnjObject>> = pluginAssets
+            .associateTo(mutableMapOf<String?, List<OnjObject>>()) { (name, file) ->
+                name to file.get<OnjArray>(key).value.map { it as OnjObject }
+            }
+            .also { map ->
+                map[null] = assets.get<OnjArray>(key).value.map { it as OnjObject }
+            }
+            .flatMap { (key, value) -> value.map { key to it } }
+
+        return CollectedResources(
+            collectToMap("textures"),
+            collectToMap("fonts"),
+            collectToMap("pixmapFonts"),
+            collectToMap("textureAtlases"),
+            collectToMap("cursors"),
+            collectToMap("shaders"),
+            collectToMap("colorTextures"),
+            collectToMap("particles"),
+            collectToMap("ninepatches"),
+            collectToMap("frameAnimations"),
+            collectToMap("sounds"),
+            collectToMap("music"),
+            pluginAssets
+                .associateTo(mutableMapOf<String?, String>()) { (name, file) ->
+                    name to file.access<String>(".cards.directory")
+                }
+                .also { it[null] = assets.access<String>(".cards.directory") }
+        )
+    }
+
+    private data class CollectedResources(
+        val textures: List<Pair<String?, OnjObject>>,
+        val fonts: List<Pair<String?, OnjObject>>,
+        val pixmapFonts: List<Pair<String?, OnjObject>>,
+        val textureAtlases: List<Pair<String?, OnjObject>>,
+        val cursors: List<Pair<String?, OnjObject>>,
+        val shaders: List<Pair<String?, OnjObject>>,
+        val colorTextures: List<Pair<String?, OnjObject>>,
+        val particles: List<Pair<String?, OnjObject>>,
+        val ninepatches: List<Pair<String?, OnjObject>>,
+        val frameAnimations: List<Pair<String?, OnjObject>>,
+        val sounds: List<Pair<String?, OnjObject>>,
+        val music: List<Pair<String?, OnjObject>>,
+        val cardDirectories: Map<String?, String>
+    )
+
+    fun init() {
+        val resources = mutableListOf<Resource>()
+//        val assets = ConfigFileManager.getConfigFile("assets")
+        val collected = collectResources()
+
+        collected.textures.forEach { (from, texture) ->
             val name = texture.get<String>("name")
             val dropShadowData = texture
                 .getOr<OnjObject?>("dropShadow", null)
@@ -163,8 +215,7 @@ class ResourceManager {
         }
 
         val fonts = mutableListOf<FontGroup>()
-        assets.get<OnjArray>("fonts").value.forEach { font ->
-            font as OnjObject
+        collected.fonts.forEach { (from, font) ->
             val fontName = font.get<String>("name")
             val variants = mutableListOf<FontVariant>()
             font.get<OnjArray>("variants").value.forEach { variant ->
@@ -183,18 +234,16 @@ class ResourceManager {
         }
         this.fonts = fonts
 
-        assets.get<OnjArray>("pixmapFonts").value.forEach {
-            it as OnjObject
+        collected.pixmapFonts.forEach { (from, font) ->
             val resource = PixmapFontResource(
-                it.get<String>("name"),
-                it.get<String>("fontFile")
+                font.get<String>("name"),
+                font.get<String>("fontFile")
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = font.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("textureAtlases").value.forEach { obj ->
-            obj as OnjObject
+        collected.textureAtlases.forEach { (from, obj) ->
             val name = obj.get<String>("name")
             val file = obj.get<String>("file")
             val atlasResource = AtlasResource(name, file)
@@ -211,117 +260,111 @@ class ResourceManager {
             resources.addAll(regionResources)
         }
 
-        assets.get<OnjArray>("cursors").value.forEach {
-            it as OnjObject
+        collected.cursors.forEach { (name, cursor) ->
             val resource = CursorResource(
-                it.get<String>("name"),
-                it.get<String>("file"),
-                it.get<Long>("hotspotX").toInt(),
-                it.get<Long>("hotspotY").toInt()
+                cursor.get<String>("name"),
+                cursor.get<String>("file"),
+                cursor.get<Long>("hotspotX").toInt(),
+                cursor.get<Long>("hotspotY").toInt()
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = cursor.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("shaders").value.forEach {
-            it as OnjObject
+        collected.shaders.forEach { (from, shader) ->
             val resource = ShaderResource(
-                it.get<String>("name"),
-                it.get<String>("file"),
-                it.get<OnjObject>("constantArgs").value.entries.associate { (key, value) ->
+                shader.get<String>("name"),
+                shader.get<String>("file"),
+                shader.get<OnjObject>("constantArgs").value.entries.associate { (key, value) ->
                     "ca_$key" to value.value as Any
                 }
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = shader.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("colorTextures").value.forEach {
-            it as OnjObject
+        collected.colorTextures.forEach { (name, texture) ->
             val resource = ColorTextureResource(
-                it.get<String>("name"),
-                it.get<Color>("color")
+                texture.get<String>("name"),
+                texture.get<Color>("color")
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = texture.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("particles").value.forEach {
-            it as OnjObject
+        collected.particles.forEach { (name, particle) ->
             val resource = ParticleResource(
-                it.get<String>("name"),
-                it.get<String>("file"),
-                it.get<String>("textureDir"),
-                it.get<Double>("scale").toFloat()
+                particle.get<String>("name"),
+                particle.get<String>("file"),
+                particle.get<String>("textureDir"),
+                particle.get<Double>("scale").toFloat()
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = particle.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("ninepatches").value.forEach {
-            it as OnjObject
+        collected.ninepatches.forEach { (from, ninepatch) ->
             val resource = NinepatchResource(
-                it.get<String>("name"),
-                it.get<String>("file"),
-                it.get<Long>("left").toInt(),
-                it.get<Long>("right").toInt(),
-                it.get<Long>("top").toInt(),
-                it.get<Long>("bottom").toInt(),
-                it.getOr("scale", 1.0).toFloat()
+                ninepatch.get<String>("name"),
+                ninepatch.get<String>("file"),
+                ninepatch.get<Long>("left").toInt(),
+                ninepatch.get<Long>("right").toInt(),
+                ninepatch.get<Long>("top").toInt(),
+                ninepatch.get<Long>("bottom").toInt(),
+                ninepatch.getOr("scale", 1.0).toFloat()
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = ninepatch.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("frameAnimations").value.forEach {
-            it as OnjObject
+        collected.frameAnimations.forEach { (from, anim) ->
             val resource = DeferredFrameAnimationResource(
-                it.get<String>("name"),
-                it.get<String>("preview"),
-                it.get<String>("atlas"),
-                it.get<Long>("frameTime").toInt()
+                anim.get<String>("name"),
+                anim.get<String>("preview"),
+                anim.get<String>("atlas"),
+                anim.get<Long>("frameTime").toInt()
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = anim.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("sounds").value.forEach {
-            it as OnjObject
+        collected.sounds.forEach { (from, sound) ->
             val resource = SoundResource(
-                it.get<String>("name"),
-                it.get<String>("file")
+                sound.get<String>("name"),
+                sound.get<String>("file")
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = sound.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("music").value.forEach {
-            it as OnjObject
+        collected.music.forEach { (from, music) ->
             val resource = MusicResource(
-                it.get<String>("name"),
-                it.get<String>("file")
+                music.get<String>("name"),
+                music.get<String>("file")
             )
-            resource.stayLoaded = it.getOr("stayLoaded", false)
+            resource.stayLoaded = music.getOr("stayLoaded", false)
             resources.add(resource)
         }
 
-        val cardsFile = assets.access<String>(".cards.directory")
-        Gdx.files.internal(cardsFile)
-            .file()
-            .walk()
-            .filter { it.isFile }
-            .forEach {
-                resources.add(
-                    TextureResource(
-                    "${Card.cardTexturePrefix}${it.nameWithoutExtension}",
-                    it.path,
-                    false,
-                    1f,
-                    false,
-                    null
-                )
-                )
-            }
+        collected.cardDirectories.forEach { (from, directory) ->
+            Gdx.files.internal(directory)
+                .file()
+                .walk()
+                .filter { it.isFile }
+                .forEach {
+                    val resource = TextureResource(
+                        "${Card.cardTexturePrefix}${it.nameWithoutExtension}",
+                        it.path,
+                        false,
+                        1f,
+                        false,
+                        null
+                    )
+                    resources.add(
+                        resource
+                    )
+                }
+        }
 
         this.resources = resources
     }

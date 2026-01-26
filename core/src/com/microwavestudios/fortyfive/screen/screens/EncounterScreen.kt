@@ -896,27 +896,6 @@ class EncounterScreen : ScreenCreator() {
             centerX()
             y = -30f
             syncDimensions()
-
-            val cardSelectionModal = InputManager.Modal(
-                listOf(RevolverSlot.revolverSlotWithCardInSelectionMode),
-                screen
-            )
-
-//            gameEvents.watchFor<GameControllerImpl.Events.SelectionChangedEvent> { (_, exclude, promise) ->
-//                revolver
-//                    .slots
-//                    .forEach {
-//                        val card = it.card ?: return@forEach
-//                        if (card === exclude) return@forEach
-//                        card.enterTargetSelection(promise)
-//                        it.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
-//                    }
-//                cardSelectionModal.push()
-//                promise.then {
-//                    cardSelectionModal.finished()
-//                    revolver.slots.forEach { it.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode) }
-//                }
-//            }
         }
 
         label("red wing", "10", Color.Red, 90) {

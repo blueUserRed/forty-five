@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
+import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
@@ -52,7 +53,11 @@ object FortyFive : Game() {
 
     /** see [ScreenManager] */
     val screenManager = ScreenManager(TitleScreen, null)
+
     val globalSave = GlobalSave()
+
+    val pluginManager = PluginManager()
+
 
     private val _lifetime: EndableLifetime = EndableLifetime()
     val gameLifetime: Lifetime
@@ -158,6 +163,7 @@ object FortyFive : Game() {
         ConfigFileManager.init()
         TemplateString.init()
         logger.init()
+        pluginManager.init()
         profileManager.init()
         steamHandler = SteamHandler()
         globalSave.readFromDisk()

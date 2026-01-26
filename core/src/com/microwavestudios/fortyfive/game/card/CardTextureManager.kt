@@ -38,17 +38,14 @@ class CardTextureManager {
     val statistics: Statistics = Statistics()
 
     fun init() {
-        val cards = ConfigFileManager.getConfigFile("cards")
+        val cards = ConfigFileManager.loadCards(initializer = {})
         cards
-            .get<OnjArray>("cards")
-            .value
             .map { card ->
-                card as OnjObject
                 CardTextureData(
-                    card.get<String>("name"),
+                    card.name,
                     mutableListOf(),
-                    card.get<Long>("cost").toInt(),
-                    card.get<Long>("baseDamage").toInt(),
+                    card.baseCost,
+                    card.baseDamage,
                 )
             }
             .forEach { cardTextures.add(it) }
