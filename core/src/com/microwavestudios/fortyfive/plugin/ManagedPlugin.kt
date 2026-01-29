@@ -41,6 +41,42 @@ class ManagedPlugin(
         plugin = instance
     }
 
+    fun earlyInit() {
+        try {
+            plugin?.earlyInit()
+        } catch (e: Exception) {
+            FortyFive.logger.warn(logTag, "Exception in plugin '$name'")
+            FortyFive.logger.stackTrace(e)
+        }
+    }
+
+    fun start() {
+        try {
+            plugin?.start()
+        } catch (e: Exception) {
+            FortyFive.logger.warn(logTag, "Exception in plugin '$name'")
+            FortyFive.logger.stackTrace(e)
+        }
+    }
+
+    fun onRender() {
+        try {
+            plugin?.onRender()
+        } catch (e: Exception) {
+            FortyFive.logger.warn(logTag, "Exception in plugin '$name'")
+            FortyFive.logger.stackTrace(e)
+        }
+    }
+
+    fun onEnd() {
+        try {
+            plugin?.onEnd()
+        } catch (e: Exception) {
+            FortyFive.logger.warn(logTag, "Exception in plugin '$name'")
+            FortyFive.logger.stackTrace(e)
+        }
+    }
+
     fun lookForConfigFile(filename: String): File? {
         val file = directory.resolve("config/$filename")
         if (file.exists()) return file

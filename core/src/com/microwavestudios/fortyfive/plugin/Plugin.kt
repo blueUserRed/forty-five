@@ -2,6 +2,12 @@ package com.microwavestudios.fortyfive.plugin
 
 interface Plugin {
 
-    fun start()
+    fun earlyInit() {}
+
+    fun start() {}
+
+    fun onRender() {}
+
+    fun onEnd() {}
 
 }

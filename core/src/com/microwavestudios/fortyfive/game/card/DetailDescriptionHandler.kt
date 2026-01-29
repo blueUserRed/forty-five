@@ -1,8 +1,10 @@
 package com.microwavestudios.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Color
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.utils.AdvancedTextParser
+import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
@@ -15,27 +17,30 @@ object DetailDescriptionHandler {
 
     init {
         val onj = ConfigFileManager.getConfigFile("descriptions")
-        groups = onj
-            .get<OnjArray>("hoverDetailDescriptionGroups")
-            .value
+        val pluginFiles = FortyFive.pluginManager.collectDescriptionFiles()
+        val allFiles = pluginFiles.map { it.second } + onj
+        groups = allFiles
+            .flatMap { it.get<OnjArray>("hoverDetailDescriptionGroups").value }
             .filterIsInstance<OnjObject>()
             .associate { it.get<String>("name") to it.get<Color>("color") }
-        allTextEffects = getAllTextEffects(onj.get<OnjArray>("defaultTextEffects"))
-        descriptions = onj
-            .get<OnjArray>("hoverDetailDescriptions")
-            .value
+        allTextEffects = getAllTextEffects(
+            allFiles
+                .flatMap { it.get<OnjArray>("defaultTextEffects").value }
+        )
+        descriptions = allFiles
+            .flatMap { it.get<OnjArray>("hoverDetailDescriptions").value }
             .filterIsInstance<OnjObject>()
             .associate {
                 it.get<String>("keyword").lowercase() to (it.get<String>("groupName") to it.get<String>("description"))
             }
     }
 
-    private fun getAllTextEffects(default: OnjArray): OnjArray {
+    private fun getAllTextEffects(default: List<OnjValue>): OnjArray {
         val res = mutableListOf<OnjValue>()
         for (i in groups) {
             res.add(AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$${i.key}$", i.value).asOnjObject())
         }
-        res.addAll(default.value)
+        res.addAll(default)
         return OnjArray(res)
     }
 

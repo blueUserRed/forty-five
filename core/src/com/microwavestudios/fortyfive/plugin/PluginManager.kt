@@ -4,6 +4,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.schema.OnjSchemaException
 import onj.value.OnjObject
 import java.io.File
@@ -28,7 +29,6 @@ class PluginManager {
             .toList()
 
         plugins.forEach { it.load() }
-        plugins.forEach { it.plugin?.start() }
     }
 
     fun findPlugin(name: String): ManagedPlugin? = _plugins.find { it.name == name }
@@ -63,50 +63,54 @@ class PluginManager {
         return null
     }
 
-    fun collectCardFiles(): List<Pair<String, OnjObject>> {
-        return _plugins.mapNotNull { plugin ->
-            val file = plugin.lookForConfigFile("cards.onj") ?: return@mapNotNull null
-            try {
+    fun collectCardFiles(): List<Pair<String, OnjObject>> = doFileCollection("cards.onj", cardsSchema)
+
+    fun collectAssetFiles(): List<Pair<String, OnjObject>> = doFileCollection("assets.onj", assetsSchema)
+
+    fun collectDescriptionFiles(): List<Pair<String, OnjObject>> = doFileCollection("descriptions.onj", descriptionSchema)
+
+    private fun doFileCollection(name: String, schema: OnjSchema): List<Pair<String, OnjObject>> =
+        _plugins.mapNotNull { plugin ->
+            val file = plugin.lookForConfigFile(name) ?: return@mapNotNull null
+            catchPluginExceptions("Failed to load $name", plugin) {
                 val onj = OnjParser.parseFile(file)
-                cardsSchema.assertMatches(onj)
+                schema.assertMatches(onj)
                 onj as OnjObject
-            } catch (e: OnjParserException) {
-                FortyFive.logger.warn(logTag, "Failed to load cards.onj")
-                FortyFive.logger.stackTrace(e)
-                null
-            } catch (e: OnjSchemaException) {
-                FortyFive.logger.warn(logTag, "Failed to load cards.onj")
-                FortyFive.logger.stackTrace(e)
-                null
-            } catch (e: IOException) {
-                FortyFive.logger.warn(logTag, "Failed to load cards.onj")
-                FortyFive.logger.stackTrace(e)
-                null
             }?.let { plugin.name to it }
+        }
+
+    private inline fun <T> catchPluginExceptions(message: String, plugin: ManagedPlugin, block: () -> T): T? {
+        return try {
+            block()
+        } catch (e: OnjParserException) {
+            FortyFive.logger.warn(logTag, "${plugin.name}: $message")
+            FortyFive.logger.stackTrace(e)
+            null
+        } catch (e: OnjSchemaException) {
+            FortyFive.logger.warn(logTag, "${plugin.name}: $message")
+            FortyFive.logger.stackTrace(e)
+            null
+        } catch (e: IOException) {
+            FortyFive.logger.warn(logTag, "${plugin.name}: $message")
+            FortyFive.logger.stackTrace(e)
+            null
         }
     }
 
-    fun collectAssetFiles(): List<Pair<String, OnjObject>> {
-        return _plugins.mapNotNull { plugin ->
-            val file = plugin.lookForConfigFile("assets.onj") ?: return@mapNotNull null
-            try {
-                val onj = OnjParser.parseFile(file)
-                assetsSchema.assertMatches(onj)
-                onj as OnjObject
-            } catch (e: OnjParserException) {
-                FortyFive.logger.warn(logTag, "Failed to load cards.onj")
-                FortyFive.logger.stackTrace(e)
-                null
-            } catch (e: OnjSchemaException) {
-                FortyFive.logger.warn(logTag, "Failed to load cards.onj")
-                FortyFive.logger.stackTrace(e)
-                null
-            } catch (e: IOException) {
-                FortyFive.logger.warn(logTag, "Failed to load cards.onj")
-                FortyFive.logger.stackTrace(e)
-                null
-            }?.let { plugin.name to it }
-        }
+    fun earlyInit() {
+        plugins.forEach { it.earlyInit() }
+    }
+
+    fun start() {
+        plugins.forEach { it.start() }
+    }
+
+    fun onRender() {
+        plugins.forEach { it.onRender() }
+    }
+
+    fun onEnd() {
+        plugins.forEach { it.onEnd() }
     }
 
     companion object {
@@ -125,6 +129,10 @@ class PluginManager {
 
         private val assetsSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/assets.onjschema")
+        }
+
+        private val descriptionSchema by lazy {
+            OnjSchemaParser.parseFile("onjschemas/descriptions.onjschema")
         }
     }
 

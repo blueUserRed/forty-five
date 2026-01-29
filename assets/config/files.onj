@@ -11,7 +11,7 @@ configFiles: {
     },
     descriptions: {
         file: "config/descriptions.onj",
-        validatedBy: null,
+        validatedBy: "onjschemas/descriptions.onjschema",
     },
     enemies: {
         file: "config/enemies.onj",

@@ -51,12 +51,14 @@ import kotlin.math.absoluteValue
  */
 class CardPrototype(
     val namespace: String?,
-    val name: String,
+    val simpleName: String,
     val title: String,
     val baseCost: Int,
     val baseDamage: Int,
     val tags: List<String>,
 ) {
+
+    val name = namespace?.let { "$it:$simpleName" } ?: simpleName
 
     var creator: ((screen: OnjScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
@@ -106,7 +108,7 @@ class CardPrototype(
  */
 class Card(
     val namespace: String?,
-    val name: String,
+    val simpleName: String,
     val title: String,
     val flavourText: String,
     val shortDescription: String,
@@ -130,6 +132,8 @@ class Card(
     val isSaved: Boolean?,
     val enableHoverDetails: Boolean
 ) : Disposable {
+
+    val name: String = namespace?.let { "$it:$simpleName" } ?: simpleName
 
     /**
      * used for logging
@@ -696,7 +700,7 @@ class Card(
             val name = onj.get<String>("name")
             val card = Card(
                 namespace = prototype.namespace,
-                name = name,
+                simpleName = name,
                 title = onj.get<String>("title"),
                 flavourText = onj.get<String>("flavourText"),
                 shortDescription = onj.get<String>("description"),
