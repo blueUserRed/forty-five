@@ -6,6 +6,9 @@ import java.net.URLClassLoader
 
 class ManagedPlugin(
     val name: String,
+    val title: String,
+    val creator: String,
+    val description: String,
     val pluginClassFqdn: String,
     val directory: File,
     val jarFile: File?,
@@ -16,8 +19,17 @@ class ManagedPlugin(
     var plugin: Plugin? = null
         private set
 
+    val isRisky: Boolean
+        get() = jarFile != null
+
+    var isActive: Boolean = false
+        private set
+
     fun load() {
-        val jarFile = jarFile ?: return
+        if (jarFile == null) {
+            isActive = true
+            return
+        }
         val classLoader = URLClassLoader(
             arrayOf(jarFile.toURI().toURL()),
             ManagedPlugin::class.java.classLoader
@@ -39,6 +51,7 @@ class ManagedPlugin(
             return
         }
         plugin = instance
+        isActive = true
     }
 
     fun earlyInit() {

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.card.Card
-import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -140,7 +139,7 @@ class ResourceManager {
         val file = if (namespace == null) {
             File(cardDir).resolve("$cardName.png")
         } else {
-            val plugin = FortyFive.pluginManager.findPlugin(namespace)
+            val plugin = FortyFive.pluginManager.findActivePlugin(namespace)
                 ?: throw RuntimeException("no plugin with name $namespace")
             plugin.directory.resolve(cardDir).resolve("$cardName.png")
         }

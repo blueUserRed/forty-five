@@ -7,6 +7,7 @@ import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
+import onj.value.OnjArray
 import onj.value.OnjObject
 import java.io.File
 import java.io.IOException
@@ -25,7 +26,8 @@ class GlobalSave {
         skipIntroScreen = false,
         lastUsedProfile = null,
         useBorderlessWindowFullscreen = true,
-        fullscreen = true
+        fullscreen = true,
+        pluginConfig = mutableListOf()
     )
 
     var soundEffectVolume: Float by DataDelegate(
@@ -79,6 +81,9 @@ class GlobalSave {
                 FortyFive.logger.warn(logTag, "global save doesn't match schema:\n$result")
             }
             data = GlobalSaveData.fromOnj(onj)
+            FortyFive.soundPlayer.soundEffectVolume = soundEffectVolume
+            FortyFive.soundPlayer.musicVolume = musicVolume
+            FortyFive.soundPlayer.masterVolume = masterVolume
         } catch (e: IOException) {
             FortyFive.logger.warn(logTag, "Read of global save file failed")
             FortyFive.logger.stackTrace(e)
@@ -101,6 +106,30 @@ class GlobalSave {
             FortyFive.logger.stackTrace(e)
         }
         dirty = false
+    }
+
+    fun getPluginSaveData(name: String): PluginSaveData {
+        data.pluginConfig.find { it.name == name }?.let { return it }
+        val newData = PluginSaveData(name, false, false)
+        data.pluginConfig.add(newData)
+        dirty()
+        return newData
+    }
+
+    fun setPluginActivation(name: String, active: Boolean) {
+        val pluginData = getPluginSaveData(name)
+        val newPluginData = pluginData.copy(isDisabled = !active)
+        data.pluginConfig.remove(pluginData)
+        data.pluginConfig.add(newPluginData)
+        dirty()
+    }
+
+    fun setPluginAgreement(name: String, agreed: Boolean) {
+        val pluginData = getPluginSaveData(name)
+        val newPluginData = pluginData.copy(agreedToRisk = agreed)
+        data.pluginConfig.remove(pluginData)
+        data.pluginConfig.add(newPluginData)
+        dirty()
     }
 
     fun setToCorrectWindowMode() {
@@ -128,6 +157,7 @@ class GlobalSave {
         var lastUsedProfile: String?,
         var useBorderlessWindowFullscreen: Boolean,
         var fullscreen: Boolean,
+        var pluginConfig: MutableList<PluginSaveData>
     ) {
 
         fun asOnj(): OnjObject = buildOnjObject {
@@ -140,6 +170,7 @@ class GlobalSave {
             "lastUsedProfile" with lastUsedProfile
             "useBorderlessWindowFullscreen" with useBorderlessWindowFullscreen
             "fullscreen" with fullscreen
+            "pluginConfig" with pluginConfig.map { it.asOnj() }
         }
 
         companion object {
@@ -153,6 +184,27 @@ class GlobalSave {
                 onj.get<String?>("lastUsedProfile"),
                 onj.get<Boolean>("useBorderlessWindowFullscreen"),
                 onj.get<Boolean>("fullscreen"),
+                onj.get<OnjArray>("pluginConfig").value.map { PluginSaveData.fromOnj(it as OnjObject) }.toMutableList(),
+            )
+        }
+    }
+
+    data class PluginSaveData(
+        val name: String,
+        val isDisabled: Boolean,
+        val agreedToRisk: Boolean,
+    ) {
+        fun asOnj(): OnjObject = buildOnjObject {
+            "name" with name
+            "isDisabled" with isDisabled
+            "agreedToRisk" with agreedToRisk
+        }
+
+        companion object {
+            fun fromOnj(onj: OnjObject): PluginSaveData = PluginSaveData(
+                onj.get<String>("name"),
+                onj.get<Boolean>("isDisabled"),
+                onj.get<Boolean>("agreedToRisk"),
             )
         }
     }

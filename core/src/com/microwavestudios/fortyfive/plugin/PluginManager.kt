@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.plugin
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.screen.actors.BindTarget
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
@@ -12,13 +13,17 @@ import java.io.IOException
 
 class PluginManager {
 
-    private lateinit var _plugins: List<ManagedPlugin>
-    val plugins: List<ManagedPlugin>
-        get() = _plugins
+    private var _activePlugins: MutableList<ManagedPlugin> = mutableListOf()
+    val activePlugins: List<ManagedPlugin>
+        get() = _activePlugins
+
+    private var _allPlugins: MutableList<ManagedPlugin> = mutableListOf()
+    val allPlugins: List<ManagedPlugin>
+        get() = _allPlugins
 
     fun init() {
         val pluginDir = File(pluginPath)
-        _plugins = pluginDir
+        _allPlugins = pluginDir
             .walk()
             .maxDepth(1)
             .filter { file -> file.isDirectory && file != pluginDir }
@@ -26,12 +31,19 @@ class PluginManager {
                 val pluginConfig = file.listFiles()?.find { it.isFile && it.name == "plugin.onj" }
                 pluginConfig?.let { createPlugin(it, file) }
             }
-            .toList()
-
-        plugins.forEach { it.load() }
+            .toMutableList()
+        val activatedPlugins = mutableListOf<ManagedPlugin>()
+        _allPlugins.forEach { plugin ->
+            val data = FortyFive.globalSave.getPluginSaveData(plugin.name)
+            if (data.isDisabled) return@forEach
+            if (plugin.isRisky && !data.agreedToRisk) return@forEach
+            activatedPlugins.add(plugin)
+            plugin.load()
+        }
+        _activePlugins = activatedPlugins
     }
 
-    fun findPlugin(name: String): ManagedPlugin? = _plugins.find { it.name == name }
+    fun findActivePlugin(name: String): ManagedPlugin? = _activePlugins.find { it.name == name }
 
     private fun createPlugin(pluginConfig: File, parentDir: File): ManagedPlugin? {
         try {
@@ -46,6 +58,9 @@ class PluginManager {
             }
             return ManagedPlugin(
                 name,
+                onj.get<String>("title"),
+                onj.get<String>("creator"),
+                onj.get<String>("description"),
                 onj.get<String>("pluginClass"),
                 parentDir,
                 jarFile
@@ -70,7 +85,7 @@ class PluginManager {
     fun collectDescriptionFiles(): List<Pair<String, OnjObject>> = doFileCollection("descriptions.onj", descriptionSchema)
 
     private fun doFileCollection(name: String, schema: OnjSchema): List<Pair<String, OnjObject>> =
-        _plugins.mapNotNull { plugin ->
+        _activePlugins.mapNotNull { plugin ->
             val file = plugin.lookForConfigFile(name) ?: return@mapNotNull null
             catchPluginExceptions("Failed to load $name", plugin) {
                 val onj = OnjParser.parseFile(file)
@@ -98,20 +113,29 @@ class PluginManager {
     }
 
     fun earlyInit() {
-        plugins.forEach { it.earlyInit() }
+        activePlugins.forEach { it.earlyInit() }
     }
 
     fun start() {
-        plugins.forEach { it.start() }
+        activePlugins.forEach { it.start() }
     }
 
     fun onRender() {
-        plugins.forEach { it.onRender() }
+        activePlugins.forEach { it.onRender() }
     }
 
     fun onEnd() {
-        plugins.forEach { it.onEnd() }
+        activePlugins.forEach { it.onEnd() }
     }
+
+    fun activatedBindTargetForPlugin(plugin: ManagedPlugin): BindTarget<Boolean> = BindTarget(
+        Boolean::class,
+        { !FortyFive.globalSave.getPluginSaveData(plugin.name).isDisabled },
+        { value -> FortyFive.globalSave.setPluginActivation(plugin.name, value) },
+        mapOf(true to "enabled", false to "disabled"),
+        true,
+        plugin.isActive
+    )
 
     companion object {
 

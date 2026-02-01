@@ -10,6 +10,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
+import kotlin.math.log
 
 data class EnemyPrototype(
     val name: String,
@@ -25,7 +26,7 @@ class Enemy(
     val health: Int,
 ) {
 
-    val logTag = "enemy-$name-${++instanceCounter}"
+    val logTag = "$name-${++instanceCounter}"
 
     private var brain: EnemyBrain = NoOpEnemyBrain
 
@@ -188,6 +189,10 @@ class Enemy(
             { executeStatusEffectsAfterDamage(damage) },
             { remaining != 0 && !triggeredByStatusEffect }
         )
+    }
+
+    override fun toString(): String {
+        return logTag
     }
 
     data object HealthChangedEvent

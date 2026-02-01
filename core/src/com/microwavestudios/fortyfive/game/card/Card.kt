@@ -41,6 +41,7 @@ import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.*
 import kotlin.math.absoluteValue
+import kotlin.math.log
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -138,7 +139,7 @@ class Card(
     /**
      * used for logging
      */
-    val logTag = "card-$name-${++instanceCounter}"
+    val logTag = "$name-${++instanceCounter}"
 
     /**
      * the actor for representing the card on the screen
@@ -613,7 +614,7 @@ class Card(
     override fun dispose() = actor.dispose()
 
     override fun toString(): String {
-        return "card: $name"
+        return logTag
     }
 
     fun getKeyWordsForDescriptions(): List<String> {

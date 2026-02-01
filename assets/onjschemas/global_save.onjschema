@@ -8,6 +8,11 @@ skipIntroScreen: boolean,
 lastUsedProfile: string?,
 useBorderlessWindowFullscreen: boolean,
 fullscreen: boolean,
+pluginConfig: {
+    name: string,
+    isDisabled: boolean,
+    agreedToRisk: boolean,
+}[],
 /*
 disableRtMechanics?: boolean,
 windowMode: string,

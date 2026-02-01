@@ -148,10 +148,11 @@ class GameControllerImpl(
     private lateinit var profile: Profile
 
     override fun init(context: Any?) {
-        if (context !is EncounterContext) {
-            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-        }
+        require(context is EncounterContext) { "GameScreen needs a context of type encounterMapEvent" }
+
         encounterContext = context
+
+        FortyFive.logger.debug(logTag, "init GameController, encounter = ${context.encounter}")
 
         profile = FortyFive.profileManager.currentProfile!!
 
@@ -223,6 +224,9 @@ class GameControllerImpl(
     }
 
     private fun bindGameEventListeners() {
+        gameEvents.watchFor<Any> { e ->
+            if (e !is EncounterScreen.UpdateUiEvent) FortyFive.logger.debug(logTag, "Game Event: $e")
+        }
         gameEvents.watchFor<Events.ParryStateChange> { (inParryMenu) ->
             if (inParryMenu) gameRenderPipeline.startParryEffect() else gameRenderPipeline.stopParryEffect()
         }
@@ -418,7 +422,10 @@ class GameControllerImpl(
     }
 
     override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
-        require(card.inZone(Zone.REVOLVER))
+        if (!card.inZone(Zone.REVOLVER)) {
+            FortyFive.logger.warn(logTag, "cant destroy $card because it isn't in the revolver")
+            return@later
+        }
         val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
         includeLater({
@@ -510,9 +517,13 @@ class GameControllerImpl(
         amount: Int,
         sourceCard: Card?
     ): Timeline = Timeline.timeline { later {
-        val prototype = cardPrototypes.find { it.name == cardName } ?: throw RuntimeException("unknown card $cardName")
+        val prototype = cardPrototypes.find { it.name == cardName }
+        requireNotNull(prototype) { "unknown card $cardName" }
         val newAmount = maxSpaceInHand(amount)
-        if (newAmount == 0) return@later
+        if (newAmount == 0) {
+            FortyFive.logger.warn(logTag, "Failed to put card in hand because there isn't enough space")
+            return@later
+        }
         repeat(newAmount) {
             val card = prototype.create(screen)
             val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
@@ -729,7 +740,10 @@ class GameControllerImpl(
     override fun resurrectTimeline(intoSlot: Int): Timeline = Timeline.timeline {
         val slot = revolver.slots[intoSlot - 1]
         later {
-            if (slot.card != null) return@later
+            if (slot.card != null) {
+                FortyFive.logger.warn(logTag, "cant resurrect card into $intoSlot because it has a card")
+                return@later
+            }
             val card = afterlife.cards.firstOrNull() ?: return@later
             val info = createTriggerInfo(card)
             val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.LIMBO, true, info)
@@ -819,7 +833,10 @@ class GameControllerImpl(
         enemy: Enemy,
         source: Card?,
     ): Timeline = Timeline.timeline { later {
-        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
+        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) {
+            FortyFive.logger.debug(logTag, "cant apply status effect because they are disabled")
+            return@later
+        }
         enemy.applyEffect(statusEffect, this@GameControllerImpl)
         if (!inEnemyPhase && statusEffect.reevaluateEnemyAttack()) {
             enemy.reevaluateAction(this@GameControllerImpl)
@@ -870,7 +887,7 @@ class GameControllerImpl(
         val old = curPlayerLives
         curPlayerLives = newValue
         includeLater({
-            val info = createTriggerInfo(null)
+            val info = createTriggerInfo(null, sourceCard = source)
             val event = Events.PlayerLivesChanged(old, newValue, info)
             gameEvents.fire(event)
             event.createTimeline()
@@ -1184,11 +1201,7 @@ class GameControllerImpl(
     } }
 
     override fun shoot() {
-        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
-        appendMainTimeline(Timeline.timeline {
-            parallelActions(shootTimeline().asAction(), postProcessor)
-        })
-//        appendMainTimeline(shootTimeline())
+        appendMainTimeline(shootTimeline())
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -1223,6 +1236,7 @@ class GameControllerImpl(
         modifier: EncounterModifier,
         validityChecker: (GameController) -> Boolean
     ) {
+        FortyFive.logger.debug(logTag, "added temporary encounter modifier $modifier")
         _encounterModifiers.add(validityChecker to modifier)
         // No event in this case, because temporary encounter modifiers aren't displayed
     }
@@ -1549,6 +1563,8 @@ class GameControllerImpl(
         amountOfCardsDrawn = amountOfCardsDrawn,
         sourceCard = sourceCard
     )
+
+    override fun toString(): String = "GameController"
 
     companion object {
         const val logTag = "GameController"

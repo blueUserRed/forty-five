@@ -21,7 +21,7 @@ class Selector(
     private val arrowTextureHandle: ResourceHandle,
     private val arrowWidth: Float = 20f,
     private val arrowHeight: Float = 20f,
-    bind: String,
+    private val bindTarget: BindTarget<*>,
     private val screen: OnjScreen,
 ) : Widget(), ResourceBorrower {
 
@@ -29,8 +29,6 @@ class Selector(
     private var curOptionIndex: Int = 0
 
     private val arrowTexture: Promise<Texture> = FortyFive.resourceManager.request(this, screen.lifetime, arrowTextureHandle)
-
-    private val bindTarget: BindTarget<*> = BindTargetFactory.getAnyType(bind)
 
     private val glyphLayout: GlyphLayout = GlyphLayout()
 

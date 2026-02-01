@@ -73,31 +73,12 @@ class TitleScreen : ScreenCreator() {
             backgroundHandle = "title_screen_background"
         }
 
-        val blackOverlay = image {
-            x = 0f
-            y = 0f
-            width = worldWidth
-            height = worldHeight
-            backgroundHandle = "black_texture"
-            alpha = 0.3f
-            fixedZIndex = 100
-            isVisible = false
-            touchable = Touchable.disabled
-        }
-
         for (i in 1..15) {
             addBullet("title_screen_bullet_$i")
         }
-        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
 
-        blackOverlay.onInput(GameInputs.interact) {
-            closeSettings(blackOverlay, settingsObject)
-        }
-
-        screen.inputManager.onInput(GameInputs.cancel) {
-            closeSettings(blackOverlay, settingsObject)
-        }
-
+        lateinit var blackOverlay: CustomImageActor
+        val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight, events)
         box {
             x = 120F
             y = worldHeight * 0.65F
@@ -134,18 +115,35 @@ class TitleScreen : ScreenCreator() {
             syncDimensions()
         }
 
-        actor(settings) {
-            centerX()
-            fixedZIndex = 10000
+        blackOverlay = image {
+            x = 0f
+            y = 0f
+            width = worldWidth
+            height = worldHeight
+            backgroundHandle = "black_texture"
+            alpha = 0.3f
+            isVisible = false
+            touchable = Touchable.disabled
         }
 
-        val popup = getSharedPopup(worldWidth, worldHeight, events)
-        actor(popup)
+        blackOverlay.onInput(GameInputs.interact) {
+            closeSettings(blackOverlay, settingsObject)
+        }
+
+        screen.inputManager.onInput(GameInputs.cancel) {
+            closeSettings(blackOverlay, settingsObject)
+        }
+        actor(settings) {
+            centerX()
+//            fixedZIndex = 10000
+        }
 
         addDefaultOverlays(
             worldWidth,
             worldHeight,
             events,
+            hasBackpack = false,
+            canHaveRunBoard = false,
             hasSettings = false, // added manually
             hasNavbar = false,
             hasTutorial = false,

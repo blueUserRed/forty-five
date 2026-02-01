@@ -28,6 +28,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.commonComponents.RunBoardCreator.getSharedRunBoard
 import com.microwavestudios.fortyfive.screen.actors.*
+import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator.getSharedPopup
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.TemplateString
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -181,7 +182,7 @@ abstract class ScreenCreator : ResourceBorrower {
 
     inline fun Group.selector(
         font: String,
-        bindTarget: String,
+        bindTarget: BindTarget<*>,
         fontScale: Float = 1f,
         fontColor: Color,
         builder: (@ScreenDslMarker Selector).() -> Unit = {}
@@ -192,7 +193,7 @@ abstract class ScreenCreator : ResourceBorrower {
         val selector = Selector(
             forceLoadFont(font),
             arrowTextureHandle = "common_symbol_arrow_right",
-            bind = bindTarget,
+            bindTarget = bindTarget,
             fontScale = fontScale,
             fontColor = fontColor,
             screen = screen
@@ -200,6 +201,19 @@ abstract class ScreenCreator : ResourceBorrower {
         this.addActor(selector)
         builder(selector)
         return selector
+    }
+
+    inline fun Group.selector(
+        font: String,
+        bindTarget: String,
+        fontScale: Float = 1f,
+        fontColor: Color,
+        builder: (@ScreenDslMarker Selector).() -> Unit = {}
+    ): Selector {
+        contract {
+            callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
+        }
+        return selector(font, BindTargetFactory.getAnyType(bindTarget), fontScale, fontColor, builder)
     }
 
     inline fun Group.slider(
@@ -421,10 +435,8 @@ abstract class ScreenCreator : ResourceBorrower {
 
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
-//        if (hasTitleScreenInNavbar) navbarObjects.add(getSharedTitleScreen())
-
         val settings: CustomGroup? = if (hasSettings) {
-            val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight)
+            val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight, events)
             navbarObjects.add(settingsObject)
             settings
         } else {
@@ -502,6 +514,7 @@ abstract class ScreenCreator : ResourceBorrower {
             }
         }
 
+        actor(getSharedPopup(worldWidth, worldHeight, events))
         warnings?.let {
             actor(warnings.getActor())
         }

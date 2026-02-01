@@ -67,5 +67,10 @@ data class BindTarget<T : Any>(
     val dataClass: KClass<T>,
     val getter: () -> T,
     val setter: (T) -> Unit,
-    val mappings: Map<T, String>
-)
+    val mappings: Map<T, String>,
+    val needsApply: Boolean = false,
+    val activeValue: T? = null
+) {
+    val inSync: Boolean
+        get() = !needsApply || activeValue == getter()
+}

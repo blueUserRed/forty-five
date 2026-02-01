@@ -39,10 +39,13 @@ class ScreenManager(
     }
 
     fun newBaseScreen(screenBuilder: () -> ScreenBuilder, context: Any? = null) {
+        FortyFive.logger.debug(logTag, "new base screen")
         baseScreen = screenBuilder to context
     }
 
     fun newBaseScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+        val className = creatorCompanion.creatorClass.simpleName
+        FortyFive.logger.debug(logTag, "new base screen: $className")
         baseScreen = {
             val creator = creatorFromClass(creatorCompanion.creatorClass)
             FromKotlinScreenBuilder(creator)
@@ -54,6 +57,7 @@ class ScreenManager(
      */
     fun screenFinished() {
         val next = chain.next() ?: (baseScreen.first() to baseScreen.second)
+        FortyFive.logger.debug(logTag, "screenFinished called; new screen: ${next.first.name}")
         changeToScreen(next.first, next.second)
     }
 
@@ -61,6 +65,7 @@ class ScreenManager(
      * appends a screen to the end of the list of screens (see [ScreenManager])
      */
     fun appendScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
+        FortyFive.logger.debug(logTag, "screen appended: ${screenBuilder.name}")
         chain.append(screenBuilder, context)
     }
 
@@ -68,6 +73,7 @@ class ScreenManager(
      * appends a screen to the end of the list of screens (see [ScreenManager])
      */
     fun appendScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+        FortyFive.logger.debug(logTag, "screen appended: ${creatorCompanion.creatorClass.simpleName}")
         val creator = creatorFromClass(creatorCompanion.creatorClass)
         chain.append(FromKotlinScreenBuilder(creator), context)
     }
@@ -76,6 +82,7 @@ class ScreenManager(
      * add a screen to the start of the list of screens (see [ScreenManager])
      */
     fun ensureNextScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
+        FortyFive.logger.debug(logTag, "ensure next screen: ${screenBuilder.name}")
         chain.pushScreenToFront(screenBuilder, context)
     }
 
@@ -83,6 +90,7 @@ class ScreenManager(
      * add a screen to the start of the list of screens (see [ScreenManager])
      */
     fun ensureNextScreen(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+        FortyFive.logger.debug(logTag, "ensure next screen: ${creatorCompanion.creatorClass.simpleName}")
         val creator = creatorFromClass(creatorCompanion.creatorClass)
         chain.pushScreenToFront(FromKotlinScreenBuilder(creator), context)
     }
@@ -96,7 +104,10 @@ class ScreenManager(
     private var currentScreen: OnjScreen? = null
 
     private fun changeToScreen(screenBuilder: ScreenBuilder, context: Any?) = Gdx.app.postRunnable {
-        if (inScreenTransition) return@postRunnable
+        if (inScreenTransition) {
+            FortyFive.logger.warn(logTag, "didn't perform screen change because there is an ongoing screen transition")
+            return@postRunnable
+        }
         inScreenTransition = true
         val currentScreen = currentScreen
         val screen = screenBuilder.build(context, currentScreen)
@@ -165,6 +176,8 @@ class ScreenManager(
     )
 
     companion object {
+
+        private const val logTag = "ScreenManager"
 
         private fun creatorFromClass(creatorClass: KClass<out ScreenCreator>): ScreenCreator {
             val constructor = creatorClass.constructors.find { constructor ->

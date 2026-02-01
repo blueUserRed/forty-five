@@ -1,14 +1,19 @@
 package com.microwavestudios.fortyfive.screen.commonComponents
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.utils.Align
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.plugin.ManagedPlugin
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 
 object SettingsCreator {
@@ -17,7 +22,8 @@ object SettingsCreator {
 
     fun ScreenCreator.getSharedSettingsMenu(
         worldWidth: Float,
-        worldHeight: Float
+        worldHeight: Float,
+        events: EventPipeline
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
 
         val openTimelineCreator: () -> Timeline
@@ -34,15 +40,27 @@ object SettingsCreator {
 
             y = -height
 
-            box {
+            box(isScrollable = true) {
+                this as CustomScrollableBox
+                scrollDirectionStart = CustomDirection.TOP
+                addScrollbarFromDefaults(
+                    CustomDirection.RIGHT,
+                    "backpack_scrollbar",
+                    "backpack_scrollbar_background",
+                    barWidth = 10f
+                )
+                wrap = CustomWrap.NONE
+
                 width = (worldWidth * 0.6f) * 0.9f
                 height = worldHeight - 30f
                 centerX()
+                y = 0f
                 paddingTop = 30f
                 flexDirection = FlexDirection.COLUMN
                 horizontalAlign = CustomAlign.CENTER
                 verticalAlign = CustomAlign.START
-                settings(this@getSharedSettingsMenu, width)
+                settings(this@getSharedSettingsMenu, width * 0.9f, events)
+                verticalSpacer(200f)
             }
 
             fun getAction(to: Float) = MoveToAction().also {
@@ -87,32 +105,135 @@ object SettingsCreator {
         )
     }
 
-    fun CustomBox.settings(creator: ScreenCreator, parentWidth: Float) = with(creator) {
+    fun CustomBox.settings(creator: ScreenCreator, parentWidth: Float, events: EventPipeline) = with(creator) {
 
-        label("red wing", "General", fontSize = (32 * 1.4).toInt()) {
-            marginBottom = 10f
-            height = 50f
-            syncWidth()
-            fontColor = ScreenCreator.fortyWhite
-        }
+        header(creator, "Graphics")
 
-        singleSettingSelector(creator, parentWidth, "Show Screenshake", "enableScreenShake", true)
+        singleSettingSelector(creator, parentWidth, "Show Screenshake:", "enableScreenShake")
         singleSettingSelector(creator, parentWidth, "Skip intro Screen:", "skipIntroScreen")
         singleSettingSelector(creator, parentWidth, "Fullscreen:", "fullscreen")
         singleSettingSelector(creator, parentWidth, "Use borderless window when in fullscreen:", "useBorderlessWindowFullscreen")
 
+        header(creator, "Audio")
 
-        label("red wing", "Audio", fontSize = (32 * 1.4).toInt()) {
+        singleSettingSlider(creator, parentWidth, "Master Volume", "masterVolume", 0f, 1f)
+        singleSettingSlider(creator, parentWidth, "Music", "musicVolume", 0f, 1f)
+        singleSettingSlider(creator, parentWidth, "Sound Effects", "soundEffectsVolume", 0f, 1f)
+
+        header(creator, "Plugins")
+        box {
+            flexDirection = FlexDirection.COLUMN
+            width = parentWidth
+            syncHeight()
+            debug()
+            events.watchFor<ReloadPluginSettings> {
+                clearChildren()
+                FortyFive.pluginManager.allPlugins.forEach { plugin ->
+                    pluginSettings(creator, plugin, events, parentWidth)
+                }
+            }
+            events.fire(ReloadPluginSettings)
+        }
+    }
+
+    private fun CustomBox.header(creator: ScreenCreator, title: String) = with(creator) {
+        label("red wing", title, fontSize = (32 * 1.4).toInt()) {
             marginTop = 20f
             marginBottom = 10f
             height = 50f
             syncWidth()
             fontColor = ScreenCreator.fortyWhite
         }
+    }
 
-        singleSettingSlider(creator, parentWidth, "Master Volume", "masterVolume", 0f, 1f)
-        singleSettingSlider(creator, parentWidth, "Music", "musicVolume", 0f, 1f)
-        singleSettingSlider(creator, parentWidth, "Sound Effects", "soundEffectsVolume", 0f, 1f)
+    private fun CustomBox.pluginSettings(
+        creator: ScreenCreator,
+        plugin: ManagedPlugin,
+        events: EventPipeline,
+        parentWidth: Float
+    ) = with(creator) {
+        box {
+            flexDirection = FlexDirection.ROW
+            horizontalAlign = CustomAlign.SPACE_AROUND
+            verticalAlign = CustomAlign.CENTER
+            width = parentWidth
+            height = 300f
+            marginTop = 10f
+
+            joinGroup(settingsGroup)
+            backgroundHandle = "single_setting_background"
+
+            box {
+                relativeWidth(60f)
+                syncHeight()
+                flexDirection = FlexDirection.COLUMN
+                verticalAlign = CustomAlign.CENTER
+                horizontalAlign = CustomAlign.START
+
+                verticalSpacer(10f)
+                label("red wing", plugin.name, color = ScreenCreator.fortyWhite, fontSize = 28) {
+                    relativeWidth(95f)
+                    syncHeight()
+                    wrap = true
+                    setAlignment(Align.center)
+                }
+                label("red wing", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
+                    relativeWidth(95f)
+                    syncHeight()
+                    wrap = true
+                }
+                verticalSpacer(10f)
+            }
+            val pluginSaveData = FortyFive.globalSave.getPluginSaveData(plugin.name)
+            val needsAgreement = plugin.isRisky && !pluginSaveData.agreedToRisk
+            box {
+                relativeWidth(30f)
+                syncHeight()
+                flexDirection = FlexDirection.COLUMN
+                horizontalAlign = CustomAlign.SPACE_AROUND
+                verticalAlign = CustomAlign.CENTER
+                if (plugin.isRisky) {
+                    label("red wing", "Contains executable code!", color = Color.HemoglobinRed, fontSize = 22) {
+                        relativeWidth(100f)
+                        syncHeight()
+                        setAlignment(Align.center)
+                    }
+                }
+                if (needsAgreement) {
+                    box(backgroundHints = buttonBackgroundHints()) {
+                        defaultButtonConfig()
+                        relativeWidth(80f)
+                        height = 50f
+                        horizontalAlign = CustomAlign.CENTER
+                        verticalAlign = CustomAlign.CENTER
+                        label("red wing", "View Risk", Color.FortyWhite, 22) {
+                            touchable = Touchable.disabled
+                            syncDimensions()
+                        }
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        onInput(GameInputs.interact) {
+                            val popup = PopupCreator.ShowPopup(
+                                "Agree to plugin risk",
+                                "This plugin contains executable code. If you choose to activate it, the plugin gains" +
+                                        "full access to your computer, files, etc. Only enable plugins that are from a" +
+                                        "known origin that you can trust. After you agree to this, you still have" +
+                                        "to enable the plugin separately.",
+                                listOf(
+                                    "Agree" to true,
+                                    "Disagree" to false
+                                )
+                            ) { result ->
+                                if (!result) return@ShowPopup
+                                FortyFive.globalSave.setPluginAgreement(plugin.name, true)
+                                events.fire(ReloadPluginSettings)
+                            }
+                            events.fire(popup)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun CustomBox.singleSettingSelector(
@@ -120,9 +241,15 @@ object SettingsCreator {
         parentWidth: Float,
         name: String,
         bindTarget: String,
-        isFirst: Boolean = false,
+    ) = singleSettingSelector(creator, parentWidth, name, BindTargetFactory.getAnyType(bindTarget))
+
+    private fun CustomBox.singleSettingSelector(
+        creator: ScreenCreator,
+        parentWidth: Float,
+        name: String,
+        bindTarget: BindTarget<*>,
     ) = with(creator) {
-        box(backgroundHints = arrayOf("single_setting_background", "single_setting_background_focused")) {
+        box {
             flexDirection = FlexDirection.ROW
             horizontalAlign = CustomAlign.SPACE_BETWEEN
             verticalAlign = CustomAlign.CENTER
@@ -134,11 +261,6 @@ object SettingsCreator {
             touchable = Touchable.enabled
             joinGroup(settingsGroup)
             backgroundHandle = "single_setting_background"
-            observeInputState(
-                GameInputs.States.focused,
-                { backgroundHandle = "single_setting_background_focused" },
-                { backgroundHandle = "single_setting_background" }
-            )
 
             box {
                 flexDirection = FlexDirection.ROW
@@ -178,9 +300,8 @@ object SettingsCreator {
         bindTarget: String,
         min: Float,
         max: Float,
-        isFirst: Boolean = false,
     ) = with(creator) {
-        box(backgroundHints = arrayOf("single_setting_background", "single_setting_background_focused")) {
+        box {
             flexDirection = FlexDirection.ROW
             width = parentWidth
             height = 50f
@@ -190,11 +311,6 @@ object SettingsCreator {
             keyboardFocusable = KeyboardFocusable.LEAF
             joinGroup(settingsGroup)
             backgroundHandle = "single_setting_background"
-            observeInputState(
-                GameInputs.States.focused,
-                { backgroundHandle = "single_setting_background_focused" },
-                { backgroundHandle = "single_setting_background" }
-            )
 
             box {
                 flexDirection = FlexDirection.ROW
@@ -227,6 +343,8 @@ object SettingsCreator {
             onInput(GameInputs.switchSelectorToRight) { slider.move(0.1f) }
         }
     }
+
+    private data object ReloadPluginSettings
 
     const val settingsGroup: String = "settings-element"
 }
