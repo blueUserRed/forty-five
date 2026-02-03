@@ -185,6 +185,7 @@ abstract class ScreenCreator : ResourceBorrower {
         bindTarget: BindTarget<*>,
         fontScale: Float = 1f,
         fontColor: Color,
+        noinline settingChangedCallback: (() -> Unit)? = null,
         builder: (@ScreenDslMarker Selector).() -> Unit = {}
     ): Selector {
         contract {
@@ -196,6 +197,7 @@ abstract class ScreenCreator : ResourceBorrower {
             bindTarget = bindTarget,
             fontScale = fontScale,
             fontColor = fontColor,
+            settingChangedCallback = settingChangedCallback,
             screen = screen
         )
         this.addActor(selector)
@@ -208,12 +210,13 @@ abstract class ScreenCreator : ResourceBorrower {
         bindTarget: String,
         fontScale: Float = 1f,
         fontColor: Color,
+        noinline settingChangedCallback: (() -> Unit)? = null,
         builder: (@ScreenDslMarker Selector).() -> Unit = {}
     ): Selector {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
-        return selector(font, BindTargetFactory.getAnyType(bindTarget), fontScale, fontColor, builder)
+        return selector(font, BindTargetFactory.getAnyType(bindTarget), fontScale, fontColor, settingChangedCallback, builder)
     }
 
     inline fun Group.slider(

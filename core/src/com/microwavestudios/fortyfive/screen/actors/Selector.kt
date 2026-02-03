@@ -23,6 +23,7 @@ class Selector(
     private val arrowHeight: Float = 20f,
     private val bindTarget: BindTarget<*>,
     private val screen: OnjScreen,
+    private val settingChangedCallback: (() -> Unit)? = null,
 ) : Widget(), ResourceBorrower {
 
     private val options: List<Pair<String, Any>>
@@ -92,6 +93,7 @@ class Selector(
         curOptionIndex = (options.size + curOptionIndex + amount) % options.size
         @Suppress("UNCHECKED_CAST") // I hate generics
         (bindTarget.setter as (Any) -> Unit)(options[curOptionIndex].second)
+        settingChangedCallback?.invoke()
     }
 
     fun onClick(x: Float): Unit = when {

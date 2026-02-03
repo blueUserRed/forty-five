@@ -1,6 +1,5 @@
 package com.microwavestudios.fortyfive.screen.commonComponents
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
@@ -107,12 +106,19 @@ object SettingsCreator {
 
     fun CustomBox.settings(creator: ScreenCreator, parentWidth: Float, events: EventPipeline) = with(creator) {
 
+        val settings = mutableListOf<BindTarget<*>>()
+
+        fun singleSettingSelector(name: String, bindTarget: String) =
+            singleSettingSelector(creator, parentWidth, settings, events, name, bindTarget)
+
+        reloadBox(creator, events, parentWidth, settings)
+
         header(creator, "Graphics")
 
-        singleSettingSelector(creator, parentWidth, "Show Screenshake:", "enableScreenShake")
-        singleSettingSelector(creator, parentWidth, "Skip intro Screen:", "skipIntroScreen")
-        singleSettingSelector(creator, parentWidth, "Fullscreen:", "fullscreen")
-        singleSettingSelector(creator, parentWidth, "Use borderless window when in fullscreen:", "useBorderlessWindowFullscreen")
+        singleSettingSelector("Show Screenshake:", "enableScreenShake")
+        singleSettingSelector("Skip intro Screen:", "skipIntroScreen")
+        singleSettingSelector("Fullscreen:", "fullscreen")
+        singleSettingSelector("Use borderless window when in fullscreen:", "useBorderlessWindowFullscreen")
 
         header(creator, "Audio")
 
@@ -128,11 +134,50 @@ object SettingsCreator {
             debug()
             events.watchFor<ReloadPluginSettings> {
                 clearChildren()
-                FortyFive.pluginManager.allPlugins.forEach { plugin ->
-                    pluginSettings(creator, plugin, events, parentWidth)
+                val plugins = FortyFive.pluginManager.allPlugins
+                plugins.forEach { plugin ->
+                    pluginSettings(creator, plugin, events, settings, parentWidth)
+                }
+                if (plugins.isEmpty()) {
+                    verticalSpacer(10f)
+                    label("red wing", "No plugins found", Color.FortyWhite, 25) {
+                        syncHeight()
+                        width = parentWidth
+                        setAlignment(Align.center)
+                    }
                 }
             }
             events.fire(ReloadPluginSettings)
+        }
+    }
+
+    private fun CustomBox.reloadBox(
+        creator: ScreenCreator,
+        events: EventPipeline,
+        parentWidth: Float,
+        targets: List<BindTarget<*>>
+    ) = with(creator) {
+        box {
+            width = parentWidth
+            height = 100f
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.CENTER
+            var showsNeedRestart = false
+            events.watchFor<SettingChanged> {
+                val needsRestart = targets.any { !it.inSync }
+                if (showsNeedRestart == needsRestart) return@watchFor
+                clearChildren()
+                if (needsRestart) {
+                    showsNeedRestart = true
+                    label("red wing", "Restart required", Color.HemoglobinRed, 23) {
+                        syncDimensions()
+                        setAlignment(Align.center)
+                    }
+                } else {
+                    showsNeedRestart = false
+                }
+            }
+            events.fire(SettingChanged)
         }
     }
 
@@ -150,6 +195,7 @@ object SettingsCreator {
         creator: ScreenCreator,
         plugin: ManagedPlugin,
         events: EventPipeline,
+        settings: MutableList<BindTarget<*>>,
         parentWidth: Float
     ) = with(creator) {
         box {
@@ -157,7 +203,7 @@ object SettingsCreator {
             horizontalAlign = CustomAlign.SPACE_AROUND
             verticalAlign = CustomAlign.CENTER
             width = parentWidth
-            height = 300f
+            height = 270f
             marginTop = 10f
 
             joinGroup(settingsGroup)
@@ -177,7 +223,7 @@ object SettingsCreator {
                     wrap = true
                     setAlignment(Align.center)
                 }
-                label("red wing", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
+                label("roadgeek", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
                     relativeWidth(95f)
                     syncHeight()
                     wrap = true
@@ -193,11 +239,12 @@ object SettingsCreator {
                 horizontalAlign = CustomAlign.SPACE_AROUND
                 verticalAlign = CustomAlign.CENTER
                 if (plugin.isRisky) {
-                    label("red wing", "Contains executable code!", color = Color.HemoglobinRed, fontSize = 22) {
+                    label("red wing", "Contains executable\ncode!", color = Color.Red, fontSize = 24) {
                         relativeWidth(100f)
                         syncHeight()
                         setAlignment(Align.center)
                     }
+                    verticalSpacer(10f)
                 }
                 if (needsAgreement) {
                     box(backgroundHints = buttonBackgroundHints()) {
@@ -231,6 +278,22 @@ object SettingsCreator {
                             events.fire(popup)
                         }
                     }
+                } else {
+                    val bindTarget = FortyFive.pluginManager.activatedBindTargetForPlugin(plugin)
+                    settings.add(bindTarget)
+                    lateinit var restartLabel: NewLabel
+                    val callback = {
+                        events.fire(SettingChanged)
+                        restartLabel.isVisible = !bindTarget.inSync
+                    }
+                    selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite, callback) {
+                        height = 50f
+                        width = 250f
+                    }
+                    restartLabel = label("red wing", "Restart required", Color.HemoglobinRed, 22) {
+                        isVisible = false
+                        syncDimensions()
+                    }
                 }
             }
         }
@@ -239,16 +302,21 @@ object SettingsCreator {
     private fun CustomBox.singleSettingSelector(
         creator: ScreenCreator,
         parentWidth: Float,
+        settings: MutableList<BindTarget<*>>,
+        events: EventPipeline,
         name: String,
-        bindTarget: String,
-    ) = singleSettingSelector(creator, parentWidth, name, BindTargetFactory.getAnyType(bindTarget))
+        bindTarget: String
+    ) = singleSettingSelector(creator, parentWidth, settings, events, name, BindTargetFactory.getAnyType(bindTarget))
 
     private fun CustomBox.singleSettingSelector(
         creator: ScreenCreator,
         parentWidth: Float,
+        settings: MutableList<BindTarget<*>>,
+        events: EventPipeline,
         name: String,
-        bindTarget: BindTarget<*>,
+        bindTarget: BindTarget<*>
     ) = with(creator) {
+        settings.add(bindTarget)
         box {
             flexDirection = FlexDirection.ROW
             horizontalAlign = CustomAlign.SPACE_BETWEEN
@@ -281,7 +349,8 @@ object SettingsCreator {
                 relativeHeight(100f)
                 width = 250f
                 height = parent.height
-                selector = selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite) {
+                val callback = { events.fire(SettingChanged) }
+                selector = selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite, callback) {
                     height = parent.height
                     width = 240f
                 }
@@ -345,6 +414,7 @@ object SettingsCreator {
     }
 
     private data object ReloadPluginSettings
+    private data object SettingChanged
 
     const val settingsGroup: String = "settings-element"
 }
