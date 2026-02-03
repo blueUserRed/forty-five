@@ -32,6 +32,20 @@ class PluginManager {
                 pluginConfig?.let { createPlugin(it, file) }
             }
             .toMutableList()
+        val names = mutableSetOf<String>()
+        val nameCollisions = mutableSetOf<String>()
+        _allPlugins.forEach { plugin ->
+            if (plugin.name in names) {
+                nameCollisions.add(plugin.name)
+            } else {
+                names.add(plugin.name)
+            }
+        }
+        nameCollisions.forEach { collision ->
+            FortyFive.logger.warn(logTag, "Plugin name collision: More than one plugin with name '$collision'")
+            _allPlugins.removeIf { it.name == collision }
+        }
+        _allPlugins.forEach { FortyFive.globalSave.verifyPluginSaveData(it) }
         val activatedPlugins = mutableListOf<ManagedPlugin>()
         _allPlugins.forEach { plugin ->
             val data = FortyFive.globalSave.getPluginSaveData(plugin.name)

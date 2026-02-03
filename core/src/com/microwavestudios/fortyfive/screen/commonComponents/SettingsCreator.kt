@@ -217,7 +217,7 @@ object SettingsCreator {
                 horizontalAlign = CustomAlign.START
 
                 verticalSpacer(10f)
-                label("red wing", plugin.name, color = ScreenCreator.fortyWhite, fontSize = 28) {
+                label("red wing", plugin.title, color = ScreenCreator.fortyWhite, fontSize = 28) {
                     relativeWidth(95f)
                     syncHeight()
                     wrap = true
@@ -262,9 +262,9 @@ object SettingsCreator {
                         onInput(GameInputs.interact) {
                             val popup = PopupCreator.ShowPopup(
                                 "Agree to plugin risk",
-                                "This plugin contains executable code. If you choose to activate it, the plugin gains" +
-                                        "full access to your computer, files, etc. Only enable plugins that are from a" +
-                                        "known origin that you can trust. After you agree to this, you still have" +
+                                "This plugin contains executable code. If you choose to activate it, the plugin gains " +
+                                        "full access to your computer, files, etc. Only enable plugins that are from a " +
+                                        "known origin that you can trust. After you agree to this, you still have " +
                                         "to enable the plugin separately.",
                                 listOf(
                                     "Agree" to true,

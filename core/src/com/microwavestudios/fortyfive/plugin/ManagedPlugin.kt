@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.plugin
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.utils.Utils
 import java.io.File
 import java.net.URLClassLoader
 
@@ -24,6 +25,10 @@ class ManagedPlugin(
 
     var isActive: Boolean = false
         private set
+
+    val jarFileHash: String? by lazy {
+        jarFile?.let { Utils.hashFile(it) }
+    }
 
     fun load() {
         if (jarFile == null) {

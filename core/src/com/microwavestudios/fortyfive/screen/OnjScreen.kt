@@ -256,7 +256,7 @@ open class OnjScreen(
             val oY = actor.y
             actor.x = dragged.dragX
             actor.y = dragged.dragY
-            dragged.drawInDrag(batch)
+            dragged.drawInDrag(batch, oX, oY)
             actor.x = oX
             actor.y = oY
         }

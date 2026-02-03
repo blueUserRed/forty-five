@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.plugin.ManagedPlugin
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -108,9 +109,18 @@ class GlobalSave {
         dirty = false
     }
 
+    fun verifyPluginSaveData(plugin: ManagedPlugin) {
+        val data = getPluginSaveData(plugin.name)
+        if (data.jarFileHash == plugin.jarFileHash) return
+        val newData = PluginSaveData(plugin.name, true, false, plugin.jarFileHash)
+        this.data.pluginConfig.remove(data)
+        this.data.pluginConfig.add(newData)
+        dirty()
+    }
+
     fun getPluginSaveData(name: String): PluginSaveData {
         data.pluginConfig.find { it.name == name }?.let { return it }
-        val newData = PluginSaveData(name, false, false)
+        val newData = PluginSaveData(name, false, false, null)
         data.pluginConfig.add(newData)
         dirty()
         return newData
@@ -193,11 +203,13 @@ class GlobalSave {
         val name: String,
         val isDisabled: Boolean,
         val agreedToRisk: Boolean,
+        val jarFileHash: String?
     ) {
         fun asOnj(): OnjObject = buildOnjObject {
             "name" with name
             "isDisabled" with isDisabled
             "agreedToRisk" with agreedToRisk
+            "jarFileHash" with jarFileHash
         }
 
         companion object {
@@ -205,6 +217,7 @@ class GlobalSave {
                 onj.get<String>("name"),
                 onj.get<Boolean>("isDisabled"),
                 onj.get<Boolean>("agreedToRisk"),
+                onj.get<String?>("jarFileHash"),
             )
         }
     }

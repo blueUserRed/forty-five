@@ -79,10 +79,15 @@ interface InputActor {
 
     fun childWasKeyboardFocused(child: InputActor) {}
 
-    fun drawInDrag(batch: Batch)
+    fun drawInDrag(batch: Batch, oX: Float, oY: Float)
 
     fun onRemove()
 
+}
+
+interface ActorWithDragFeatures {
+
+    var alsoDrawOriginalInDrag: Boolean
 }
 
 enum class KeyboardFocusable {
@@ -325,7 +330,7 @@ class InputActorImpl : InputActor {
         return (actor as InputActor).childrenInCorrectOrder() ?: group.children
     }
 
-    override fun drawInDrag(batch: Batch) {
+    override fun drawInDrag(batch: Batch, oX: Float, oY: Float) {
         actor.draw(batch, 1f)
     }
 

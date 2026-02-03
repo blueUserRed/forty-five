@@ -12,6 +12,7 @@ pluginConfig: {
     name: string,
     isDisabled: boolean,
     agreedToRisk: boolean,
+    jarFileHash: string?
 }[],
 /*
 disableRtMechanics?: boolean,

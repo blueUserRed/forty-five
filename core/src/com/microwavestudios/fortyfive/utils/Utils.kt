@@ -17,9 +17,13 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import onj.value.OnjArray
 import onj.value.OnjString
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.io.encoding.Base64
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -437,6 +441,21 @@ object Utils {
         "smooth" -> Interpolation.smooth
 
         else -> throw RuntimeException("Unknown interpolation: $name")
+    }
+
+    fun hashFile(file: File): String {
+        val buffer = ByteArray(4096)
+        val stream = BufferedInputStream(FileInputStream(file))
+        val digest = MessageDigest.getInstance("MD5")
+        var count = 0
+        while (true) {
+            count = stream.read(buffer)
+            if (count <= 0) break
+            digest.update(buffer, 0, count)
+        }
+        stream.close()
+        val hash = digest.digest()
+        return Base64.encode(hash)
     }
 
 }

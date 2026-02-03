@@ -20,6 +20,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
@@ -840,7 +841,7 @@ class CardActor(
     val isDark: Boolean,
     override val screen: OnjScreen,
     val enableHoverDetails: Boolean // TODO: fix
-) : Widget(), ZIndexActor, InputActor by InputActorImpl(), Selectable<CardActor>,
+) : Widget(), ZIndexActor, InputActor by InputActorImpl(), Selectable<CardActor>, ActorWithDragFeatures,
     OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor, AnimatedActor {
 
     override var detailWidget: DetailWidget? = DetailWidget.ComplexBigDetailActor(
@@ -869,6 +870,8 @@ class CardActor(
     override var marginLeft: Float = 0F
     override var marginRight: Float = 0F
     override var positionType: PositionType = PositionType.RELATIVE
+
+    override var alsoDrawOriginalInDrag: Boolean = false
 
     override val reusableInputActor: Boolean = true
 
@@ -1039,17 +1042,17 @@ class CardActor(
         return true
     }
 
-    override fun drawInDrag(batch: Batch) {
-        doDraw(batch, 1f)
+    override fun drawInDrag(batch: Batch, oX: Float, oY: Float) {
+        doDraw(batch, 1f, x, y)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         updateAnimations()
-        if (isDragged) return
-        doDraw(batch, parentAlpha)
+        if (isDragged && !alsoDrawOriginalInDrag) return
+        doDraw(batch, parentAlpha, x, y)
     }
 
-    private fun doDraw(batch: Batch?, parentAlpha: Float) {
+    private fun doDraw(batch: Batch?, parentAlpha: Float, x: Float, y: Float) {
         validate()
         detailWidget?.updateBounds(this)
         batch ?: return
@@ -1064,8 +1067,6 @@ class CardActor(
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
         val textureSize = width
-        val x = x
-        val y = y
         dropShadow?.doDropShadow(batch, screen, TextureRegionDrawable(textureRegion), this, scaleX, scaleY, rotation)
         batch.draw(
             textureRegion,
