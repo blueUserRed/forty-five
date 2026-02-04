@@ -718,6 +718,18 @@ class MapEditorWidget(
                     recommendScale = 0.7f
                 ),
                 MapDecorationPrototype(
+                    "enemy_pyro",
+                    30f, 39.1f,
+                    false,
+                    recommendScale = 1f
+                ),
+                MapDecorationPrototype(
+                    "enemy_outlaw",
+                    20f, 43.63f,
+                    false,
+                    recommendScale = 1f
+                ),
+                MapDecorationPrototype(
                     "sheep",
                     8f, 8f,
                     false,

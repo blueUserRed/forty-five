@@ -88,6 +88,12 @@ $EnemyBrain {
         baseDamage: int[2],
         baseShield: int[2],
         scaleIncreasePerTurn: float,
+        aggressionBoostConfig: {
+            healthPercent: float,
+            normalSpecialWeightChange: float,
+            damageShieldWeightChange: float,
+            damageIncrease: int,
+        },
         actions: {
             weight: int,
             showProbability: float,

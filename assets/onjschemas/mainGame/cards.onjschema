@@ -1,0 +1,7 @@
+import "onjschemas/base/card.onjschema" as card;
+
+cards: card[],
+
+defaultBullet: string,
+
+alwaysLoadCards: string[],

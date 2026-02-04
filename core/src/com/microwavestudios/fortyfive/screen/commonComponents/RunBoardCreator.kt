@@ -137,9 +137,12 @@ object RunBoardCreator {
                     keyboardFocusable = KeyboardFocusable.LEAF
                     touchable = Touchable.enabled
                     joinGroup(buttonGroup)
-                    defaultButtonBackgrounds()
+                    defaultButtonConfig()
 
-                    label("red wing", "Cancel", Color.FortyWhite, 32)
+                    label("red wing", "Cancel", Color.FortyWhite, 32) {
+                        touchable = Touchable.disabled
+                        syncDimensions()
+                    }
 
                     onInput(GameInputs.interact) {
                         promise.resolve(false)
@@ -153,9 +156,12 @@ object RunBoardCreator {
                     keyboardFocusable = KeyboardFocusable.LEAF
                     touchable = Touchable.enabled
                     joinGroup(buttonGroup)
-                    defaultButtonBackgrounds()
+                    defaultButtonConfig()
 
-                    label("red wing", "Start", Color.FortyWhite, 32)
+                    label("red wing", "Start", Color.FortyWhite, 32) {
+                        touchable = Touchable.disabled
+                        syncDimensions()
+                    }
 
                     onInput(GameInputs.interact) {
                         promise.resolve(true)
@@ -197,6 +203,8 @@ object RunBoardCreator {
 
         val profile = FortyFive.profileManager.currentProfile ?: return@newGroup
 
+        val ready = profile.isSpecialRunCompleted("tutorial_run")
+
         box {
             flexDirection = FlexDirection.COLUMN
             width = worldWidth * 0.85f
@@ -206,7 +214,7 @@ object RunBoardCreator {
             centerY()
 
             if (!profile.isRunActive) {
-                noRunActiveBoard(this@runBoard, profile, events)
+                if (ready) noRunActiveBoard(this@runBoard, profile, events)
             } else box {
                 relativeWidth(100f)
                 relativeHeight(100f)
@@ -214,7 +222,9 @@ object RunBoardCreator {
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
 
-                label("red wing", "Current Run:", fontSize = 32)
+                label("red wing", "Current Run:", fontSize = 32) {
+                    syncDimensions()
+                }
                 actor(getSharedRunCard(profile.activeRun!!))
             }
 

@@ -105,11 +105,11 @@ object NavbarCreator {
                 backgroundHandle = "statusbar_lives"
             }
 
-            val healthLabel = label("red wing", "${profile.healthInRun}", isTemplate = true, fontSize = 32) {
+            val healthLabel = label("red wing", "${profile.healthInRun}", fontSize = 32) {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
-            profile.events.watchFor<Profile.HealthChangedEvent> { event ->
+            screen.events.watchFor<Profile.HealthChangedEvent> { event ->
                 healthLabel.setText(event.newHealth.toString())
             }
         }
@@ -134,7 +134,7 @@ object NavbarCreator {
                 fontColor = ScreenCreator.fortyWhite
                 syncDimensions()
             }
-            profile.events.watchFor<Profile.MoneyChangedEvent> { event ->
+            screen.events.watchFor<Profile.MoneyChangedEvent> { event ->
                 cashLabel.setText("\$${event.newMoney}")
             }
         }
@@ -310,6 +310,7 @@ object NavbarCreator {
             }
 
             onInput(GameInputs.interact) {
+                FortyFive.soundPlayer.situation("navbar_button_clicked", screen)
                 if (isOpen) {
                     events.fire(CloseNavBarButtons)
                     events.fire(ChangeBlackBackground(false))

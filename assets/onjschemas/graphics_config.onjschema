@@ -1,28 +1,14 @@
 
 use Common;
 
-bufferTime: float,
-
-enemyChargeAnimation: {
-    xCharge: float,
-    yCharge: float,
-    duration: float,
-    interpolation: string,
-},
-
-var iconConfig = {
-    icon: string,
-    scale: float
-};
-
 icons: {
-    burning: iconConfig,
-    poison: iconConfig,
-    fireResistance: iconConfig,
-    bewitched: iconConfig,
-    wardOfTheWitch: iconConfig,
-    wrathOfTheWitch: iconConfig,
-    shield: iconConfig,
+    burning: string,
+    poison: string,
+    fireResistance: string,
+    bewitched: string,
+    shield: string,
+    frozen: string,
+    weak: string,
 },
 
 var encounterModifierConfig = {
@@ -73,23 +59,8 @@ cardText: {
         increase: Color,
         decrease: Color,
     },
-    savedSymbol: string,
-    notSavedSymbol: string,
 },
 
-keySelect: {
-    drawable: string
-},
-
-shootPostProcessor: {
-    name: string,
-    duration: float
-},
-
-enemyGravestone: {
-    texture: string,
-    scale: float,
-},
 
 revolverSlotIcons: {
     "1": string,

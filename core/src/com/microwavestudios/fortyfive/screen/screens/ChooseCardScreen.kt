@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.screen.screens
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
@@ -46,7 +47,10 @@ class ChooseCardScreen : ScreenCreator() {
 
     override val background: String? = null
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf()
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to fadeToBlackTransition(700)
+    )
 
     private val context: ChooseCardScreenContext by lazy { context() }
 
@@ -105,6 +109,15 @@ class ChooseCardScreen : ScreenCreator() {
                     clearChildren()
                     val data = getDataForCards(cards.size)
                     var i = 0
+                    if (cards.isEmpty()) label("red wing", "No cards to collect remain!\nClick to return", fontSize = 27) {
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        syncDimensions()
+                        setAlignment(Align.center)
+                        onInput(GameInputs.interact) {
+                            FortyFive.screenManager.screenFinished()
+                        }
+                    }
                     allActors(cards.map { it.actor }) {
                         width = 160f
                         height = 160f
@@ -139,11 +152,12 @@ class ChooseCardScreen : ScreenCreator() {
                 height = 60f
                 width = 140f
                 logicalOffsetY = -30f
-                defaultButtonBackgrounds()
+                defaultButtonConfig()
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
+                    touchable = Touchable.disabled
                     syncDimensions()
                 }
                 onInput(GameInputs.interact) {
@@ -319,15 +333,15 @@ class ChooseCardScreen : ScreenCreator() {
                 allProtos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
             }
         } else {
-            val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
-                ?: return listOf()
+            val profile = FortyFive.profileManager.currentProfile!!
+            val biome = profile.currentMapSaver.currentMap.biome
+            val difficulty = profile.currentMapSaver.currentMap.majorDifficulty
             RandomCardSelection.getRandomCards(
-                screen,
                 context.types,
                 context.nbrOfCards,
-                Random(context.seed),
                 biome,
-                "chooseCard",
+                difficulty,
+                Random(context.seed),
                 unique = true
             )
         }

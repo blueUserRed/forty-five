@@ -1,0 +1,62 @@
+import "imports/run.onjschema" as _;
+
+runModifierPools: {
+    majorDifficulty: int,
+    modifierProbability: float,
+    modifiers: string[]
+}[],
+
+runModifierProbabilityIncreases: {
+    biome: string,
+    makeMoreLikely: string[]
+}[],
+
+runModifierBlacklist: string[][],
+encounterModifierBlacklist: string[][],
+
+runModifiersMax: int,
+
+
+runRewardPools: {
+    majorDifficulty: Int,
+    maxRewards: Int,
+    rewardProbability: float,
+    rewards: $RunReward[][]
+}[],
+
+encounterModifierPools: {
+    majorDifficulty: int,
+    modifierProbability: float,
+    maxModifiers: int,
+    modifiers: string[]
+}[],
+
+enemies: {
+    majorDifficulty: int,
+    amount: int[2],
+    allowedEnemies: string[],
+}[],
+
+enemyProbabilityIncrease: {
+    enemy: string,
+    biome: string,
+    bonusPoints: int,
+}[],
+
+enemyProbabilityRandomPoints: int,
+
+enemyHealthAdjustment: float,
+enemyDamageAdjustment: float,
+
+difficultyScaling: {
+    limited: {
+        relativeMin: float,
+        relativeMax: float,
+        scaling: $DifficultyScaling,
+    },
+    constructed: {
+        relativeMin: float,
+        relativeMax: float,
+        scaling: $DifficultyScaling,
+    },
+},

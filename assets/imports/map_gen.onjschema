@@ -44,9 +44,24 @@ var mapGeneratorSharedKeys = {
     firstNodeTexture: string,
     lastNodeEvent: $MapEvent,
     lastNodeTexture: string,
+    rotation: float,
 };
 
 $MapGenerator {
+
+    $PointCloud {
+        amountNodes: int,
+        roadLength: float,
+        roadHeight: float,
+        exclusionRadius: float,
+        decorations: decoration[],
+        eventSpawner: {
+            texture: string,
+            weight: int,
+            event: $MapEvent,
+        }[],
+        ...mapGeneratorSharedKeys
+    }
 
     $ThreeLine {
         roadLength: float,

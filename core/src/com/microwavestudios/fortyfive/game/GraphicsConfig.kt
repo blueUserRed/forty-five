@@ -49,23 +49,6 @@ object GraphicsConfig {
         }
     }
 
-//    fun orbAnimation(
-//        source: Vector2,
-//        target: () -> Vector2,
-//        isReserves: Boolean,
-//        renderPipeline: RenderPipeline,
-//    ) = RenderPipeline.OrbAnimation(
-//        orbTexture = if (isReserves) "reserves_orb" else "card_orb",
-//        width = 10f,
-//        height = 10f,
-//        segments = 20,
-//        renderPipeline = renderPipeline,
-//        initialPosition = source,
-//        target = target,
-//        acceleration = 30f,
-//        speedCap = 100f
-//    )
-
     fun cashOrbAnimation(
         start: Vector2,
         end: () -> Vector2,
@@ -85,9 +68,7 @@ object GraphicsConfig {
         velocityRamp = 1.2f
     )
 
-    fun iconName(name: String): String = iconConfig[name]!!.first
-
-    fun iconScale(name: String): Float = iconConfig[name]!!.second
+    fun iconName(name: String): String = iconConfig[name]!!
 
     fun encounterModifierDisplayName(modifier: EncounterModifier): String {
         val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
@@ -122,11 +103,6 @@ object GraphicsConfig {
         return if (isDark) cardFontColors["dark-$situation"]!! else cardFontColors["light-$situation"]!!
     }
 
-    fun shootShader(borrower: ResourceBorrower, lifetime: Lifetime): Promise<BetterShader> =
-        FortyFive.resourceManager.request(borrower, lifetime, shootPostProcessor)
-
-    fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
-
     fun encounterBackgroundFor(biome: String): ResourceHandle = config
         .get<OnjArray>("encounterBackgrounds")
         .value
@@ -154,10 +130,7 @@ object GraphicsConfig {
         iconConfig = config
             .get<OnjObject>("icons")
             .value
-            .mapValues {
-                val obj = it.value as OnjObject
-                obj.get<String>("icon") to obj.get<Double>("scale").toFloat()
-            }
+            .mapValues { it.value.value as String }
 
         val damageOverlay = config.get<OnjObject>("damageOverlay")
 
@@ -178,10 +151,6 @@ object GraphicsConfig {
         }
         this.cardFontColors = cardFontColors
 
-        val onShootPostProcessor = config.get<OnjObject>("shootPostProcessor")
-        shootPostProcessor = onShootPostProcessor.get<String>("name")
-        shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
-
         val slotIconConfig = config.get<OnjObject>("revolverSlotIcons")
         slotIcons = Array(5) {
             slotIconConfig.get<String>((it + 1).toString())
@@ -190,36 +159,21 @@ object GraphicsConfig {
         encounterModifierConfig = config.get<OnjObject>("encounterModifiers")
     }
 
-    private lateinit var shootPostProcessor: String
-    private var shootPostProcessorDuration: Int by Delegates.notNull()
-//
-//    private lateinit var keySelectDrawable: String
-//
     private var cardFont by Delegates.notNull<String>()
     private var cardFontScale by Delegates.notNull<Float>()
     private lateinit var cardFontColors: Map<String, Color>
-//    private lateinit var cardSavedSymbol: String
-//    private lateinit var cardNotSavedSymbol: String
-//
-    private lateinit var iconConfig: Map<String, Pair<String, Float>>
-//
-//    var bufferTime by Delegates.notNull<Int>()
-//        private set
-//
+
+    private lateinit var iconConfig: Map<String, String>
+
     private lateinit var damageOverlayTexture: String
     private var damageOverlayDuration by Delegates.notNull<Int>()
     private var damageOverlayFadeIn by Delegates.notNull<Int>()
     private var damageOverlayFadeOut by Delegates.notNull<Int>()
-//
-//    private var xCharge by Delegates.notNull<Float>()
-//    private var yCharge by Delegates.notNull<Float>()
-//    private var chargeDuration by Delegates.notNull<Float>()
-//    private lateinit var chargeInterpolation: Interpolation
-//
+
     private lateinit var slotIcons: Array<ResourceHandle>
-//
+
     private lateinit var encounterModifierConfig: OnjObject
-//
+
     private lateinit var config: OnjObject
 
 }

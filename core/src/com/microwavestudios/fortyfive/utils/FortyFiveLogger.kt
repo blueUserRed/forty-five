@@ -10,7 +10,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * utility for logging to the console or to files
+ * main logging utility for Forty-Five. Handles printing output to the console and/or writing it to files.
+ * Configuration file is `assets/logging/log_config.onj`
  */
 class FortyFiveLogger {
 
@@ -153,14 +154,6 @@ class FortyFiveLogger {
      */
     fun title(message: String) {
         writeln("-------------$message-------------")
-    }
-
-    /**
-     * logs the current frameRate, only logs when the logLevel is set to debug
-     */
-    fun fps() {
-        if (logLevel != LogLevel.DEBUG) return
-        writeln("-[fps]- ${Gdx.graphics.framesPerSecond}")
     }
 
     private fun outputOrError(config: OnjNamedObject): Pair<PrintStream, Boolean> = when (val name = config.name) {

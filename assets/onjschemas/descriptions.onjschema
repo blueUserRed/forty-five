@@ -1,0 +1,15 @@
+import "imports/advanced_text_effect.onjschema" as _;
+use Common;
+
+hoverDetailDescriptions: {
+    keyword: string,
+    groupName: string,
+    description: string
+}[],
+
+hoverDetailDescriptionGroups: {
+    name: string,
+    color: Color,
+}[],
+
+defaultTextEffects: $AdvancedTextEffect[]

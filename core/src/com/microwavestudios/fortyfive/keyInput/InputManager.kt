@@ -3,7 +3,9 @@ package com.microwavestudios.fortyfive.keyInput
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Vector2
 import java.util.Stack
 
@@ -50,6 +52,7 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         onInput(GameInputs.focusLeft) { focusNext(FocusChangeDirection.LEFT) }
         onInput(GameInputs.focusRight) { focusNext(FocusChangeDirection.RIGHT) }
         onInput(GameInputs.cancel) { cancelKeyboardDragAndDrop() }
+        onInput(GameInputs.toggleFullScreen) { FortyFive.globalSave.fullscreen = !FortyFive.globalSave.fullscreen }
     }
 
     fun recheckFocused() {
@@ -417,7 +420,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
     ): Boolean {
         cancelKeyboardDragAndDrop()
         val hit = hit(screenX, screenY)
-        if (currentlyDraggedActor != null) finishDrag(screenX, screenY, hit)
+        if (currentlyDraggedActor != null) {
+            finishDrag(screenX, screenY, hit)
+            return false
+        }
 
         fun checkInput(input: Input, isHit: Boolean, callbacks: List<() -> Unit>) {
             val cause = input.causes.filterIsInstance<Input.Cause.Mouse>().find { it.button.code == button }

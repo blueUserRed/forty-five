@@ -4,7 +4,10 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.RunModifier
+import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.utils.toIntRange
@@ -37,6 +40,7 @@ object MapEventFactory {
                 onjObject.get<Long>("rerollBasePrice").toInt(),
             )
         },
+        "EncounterPlaceholderMapEvent" to { EncounterPlaceholderMapEvent.fromOnj(it) },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
@@ -103,6 +107,8 @@ abstract class MapEvent {
     val blockConditions: List<MapPredicate>
         get() = _blockConditions
 
+    abstract val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>?
+
     /**
      * called when the start button was clicked
      */
@@ -167,6 +173,8 @@ class EmptyMapEvent : MapEvent() {
 
     override fun start() {}
 
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EmptyMapEvent")
     }
@@ -181,6 +189,8 @@ class SimpleMapEvent(
     override var currentlyBlocks: Boolean = false
     override var startable: Boolean = false
     override var isCompleted: Boolean = false
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
 
     constructor() : this(false, "", "")
 
@@ -233,6 +243,8 @@ class EncounterMapEvent(
         null
     }
 
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = EncounterScreen to this
+
     override fun start() {
         FortyFive.screenManager.appendScreen(EncounterScreen, this)
         FortyFive.screenManager.screenFinished()
@@ -260,6 +272,65 @@ class EncounterMapEvent(
     }
 }
 
+class EncounterPlaceholderMapEvent(
+    val genExtraction: Boolean,
+    val majorDifficulty: Int,
+    val unadjustedMajorDifficulty: Int,
+    val minorDifficulty: Float,
+    val runModifier: List<RunModifier>,
+    val amountEnemies: IntRange,
+    val biome: String,
+    val difficultyScaling: DifficultyScaling,
+    val scaleMin: Float,
+    val scaleMax: Float,
+    val seed: Long,
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var startable: Boolean = false
+    override var isCompleted: Boolean = false
+    override val displayDescription: Boolean = false
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+
+    override fun start() {
+        FortyFive.logger.warn("MapEvent", "EncounterPlaceholderMapEvent started")
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("EncounterPlaceholderMapEvent")
+        "genExtraction" with genExtraction
+        "majorDifficulty" with majorDifficulty
+        "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
+        "minorDifficulty" with minorDifficulty
+        "runModifier" with runModifier.map { it.name() }
+        "amountEnemies" with arrayOf(amountEnemies.first, amountEnemies.last)
+        "biome" with biome
+        "seed" with seed
+        "difficultyScaling" with difficultyScaling.toOnj()
+        "scaleMin" with scaleMin
+        "scaleMax" with scaleMax
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): EncounterPlaceholderMapEvent = EncounterPlaceholderMapEvent(
+            onj.get<Boolean>("genExtraction"),
+            onj.get<Long>("majorDifficulty").toInt(),
+            onj.get<Long>("unadjustedMajorDifficulty").toInt(),
+            onj.get<Double>("minorDifficulty").toFloat(),
+            onj.get<OnjArray>("runModifier").value.map { RunModifier.get(it.value as String) },
+            onj.get<OnjArray>("amountEnemies").toIntRange(),
+            onj.get<String>("biome"),
+            DifficultyScaling.fromOnj(onj.get<OnjNamedObject>("difficultyScaling")),
+            onj.get<Double>("scaleMin").toFloat(),
+            onj.get<Double>("scaleMax").toFloat(),
+            onj.get<Long>("seed"),
+        )
+    }
+
+}
+
 class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -271,9 +342,10 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 
     private val targetMapDisplayName: String = displayName(targetMap)
 
-    // lazy so it doesn't crash when the event is instanced
     override val displayName: String = "Enter $targetMapDisplayName"
     override val descriptionText: String = ""
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
 
     override fun start() {
         FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)
@@ -307,6 +379,8 @@ class DialogMapEvent(
     override val displayDescription: Boolean = true
 
     override val buttonText: String = "Talk"
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = DialogScreen to this
 
     override fun start() {
         FortyFive.screenManager.appendScreen(DialogScreen, this)
@@ -369,6 +443,8 @@ class ShopMapEvent(
     val currentRerollPrice: Int
         get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = ShopScreen to this
+
     override fun start() {
         FortyFive.screenManager.appendScreen(ShopScreen, this)
         FortyFive.screenManager.screenFinished()
@@ -410,6 +486,8 @@ class ChooseCardMapEvent(
     override val descriptionText: String =
         if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
     override val displayName: String = "Ominous person"
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = ChooseCardScreen to this
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ChooseCardScreen, this)
@@ -470,6 +548,8 @@ class LockNodeMapEvent(
     var locked: Boolean = initialLocked
         private set
 
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+
     override fun start() {
     }
 
@@ -518,6 +598,8 @@ class CompleteRunMapEvent(
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
 
     override fun start() {
         val map = FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap
@@ -571,6 +653,8 @@ class FinishTutorialRunMapEvent : MapEvent() {
 
     override val displayName: String = "Finish"
     override val descriptionText: String = "You completed the Tutorial!"
+
+    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
 
     override fun start() {
         val profile = FortyFive.profileManager.currentProfile!!

@@ -11,9 +11,10 @@ import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
-import com.microwavestudios.fortyfive.onjNamespaces.MapNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
+import com.microwavestudios.fortyfive.plugin.PluginManager
+import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
@@ -25,20 +26,38 @@ import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
 import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.system.measureTimeMillis
 
 object FortyFive : Game() {
 
-    const val logTag = "forty-five"
+    private const val logTag = "forty-five"
 
+    /** see [CardTextureManager] */
     val cardTextureManager = CardTextureManager()
+
+    /** see [ServiceThread] */
     val serviceThread = ServiceThread()
+
+    /** see [SoundPlayer] */
     val soundPlayer = SoundPlayer()
+
+    /** see [FortyFiveLogger] */
     val logger = FortyFiveLogger()
+
+    /** see [ResourceManager] */
     val resourceManager = ResourceManager()
+
     val profileManager = ProfileManager()
+
+    /** see [ScreenManager] */
     val screenManager = ScreenManager(TitleScreen, null)
+
+    val globalSave = GlobalSave()
+
+    val pluginManager = PluginManager()
+
 
     private val _lifetime: EndableLifetime = EndableLifetime()
     val gameLifetime: Lifetime
@@ -60,20 +79,16 @@ object FortyFive : Game() {
     private var renderCounter: Long = 0L
     val renderTimes: IntArray = IntArray(15 * 60)
 
-//    private var screenTransitionCount: Long = 0L
-    val screenTransitionTimes: IntArray = IntArray(5)
-
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
     override fun create() {
         init()
+        pluginManager.start()
 
         if (appArguments.bakeRun) {
             Oven().bake(appArguments.bakeTasks)
             return
         }
-
-//        UserPrefs.windowMode = UserPrefs.WindowMode.Window
 
         if (appArguments.mapEditor) {
             screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
@@ -83,8 +98,8 @@ object FortyFive : Game() {
             screenManager.screenFinished()
             return
         }
-
-//        screenManager.appendScreen(TestScreen)
+        globalSave.setToCorrectWindowMode()
+        if (!globalSave.skipIntroScreen) screenManager.appendScreen(IntroScreen)
         screenManager.appendScreen(TitleScreen)
         screenManager.screenFinished()
     }
@@ -110,7 +125,9 @@ object FortyFive : Game() {
     }
 
     override fun render() {
+        screenManager.update()
         val renderTime = measureTimeMillis {
+            pluginManager.onRender()
             timedCallbacks.iterateRemoving { (callback, time), remove ->
                 if (TimeUtils.millis() < time) return@iterateRemoving
                 callback()
@@ -137,38 +154,44 @@ object FortyFive : Game() {
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         currentRenderPipeline?.sizeChanged()
-        if (UserPrefs.windowMode == UserPrefs.WindowMode.Window) UserPrefs.windowWidth = width
     }
 
     private fun init() {
         ShaderProgram.pedantic = false
         with(OnjConfig) {
-            registerNameSpace("Common", CommonNamespace)
-            registerNameSpace("Cards", CardsNamespace)
-            registerNameSpace("Map", MapNamespace)
+            registerNamespace("Common", CommonNamespace)
+            registerNamespace("Cards", CardsNamespace)
         }
         ConfigFileManager.init()
         TemplateString.init()
         logger.init()
         profileManager.init()
         steamHandler = SteamHandler()
-        UserPrefs.read()
+        globalSave.readFromDisk()
+        pluginManager.init()
+        pluginManager.earlyInit()
         soundPlayer.init()
-        PermaSaveState.read()
         GraphicsConfig.init()
         resourceManager.init()
         serviceThread.start()
         cardTextureManager.init()
-        RandomCardSelection.init()
+        if (logger.versionTag != "--dev--") return
+        ConfigFileManager
+            .loadCards({})
+            .filter { "unobtainable" !in it.tags }
+            .joinToString(transform = { "'${it.name}'" }, separator = ",\n")
+            .let { println(it) }
+        File(".onj").mkdirs()
+        OnjConfig.dumpOnjEnv(File(".onj/forty-five.onjenv"))
     }
 
     override fun dispose() {
         logger.debug(logTag, "game closing")
         DebugActorImpl.dumpActorsWithDebugWarnings()
+        pluginManager.onEnd()
         profileManager.currentProfile?.write()
         profileManager.currentProfile?.writeMaps()
-        PermaSaveState.write()
-        UserPrefs.write()
+        globalSave.write()
         _lifetime.die()
         soundPlayer.end()
         currentScreen?.dispose()

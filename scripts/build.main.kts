@@ -5,15 +5,17 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 val assetDirs = arrayOf(
+    "blobs",
+    "drop_shadows",
     "config",
     "error_logs",
     "imports",
     "logging",
     "maps",
     "onjschemas",
+    "profiles",
     "saves",
     "shaders",
-    "blobs",
 )
 
 build()

@@ -19,7 +19,6 @@ import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
-import onj.value.OnjArray
 
 object BackpackCreator {
 
@@ -36,10 +35,8 @@ object BackpackCreator {
         publicEvents: EventPipeline,
         isCollection: Boolean,
     ): Pair<CustomGroup, NavbarCreator.NavBarObject> {
-
-        val cardsOnj = ConfigFileManager.getConfigFile("cards")
-        val cardPrototypes = Card
-            .getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) })
+        val cardPrototypes = ConfigFileManager
+            .loadCards { screen.addDisposable(it) }
             .associate { it.name to it }
 
         val profile = FortyFive.profileManager.currentProfile!!
@@ -294,14 +291,14 @@ object BackpackCreator {
                     paddingLeft = 10f
                     paddingRight = 10f
 
-                    label("red wing", "Sort by: ", Color.FortyWhite, 32) {
+                    label("red wing", "Sort by: ", Color.FortyWhite, 28) {
                         syncHeight()
-                        relativeWidth(22f)
+                        syncWidth()
                     }
 
-                    label("red wing", state.sortingMode.displayName, Color.Red, 32) {
+                    label("red wing", state.sortingMode.displayName, Color.Red, 28) {
                         syncHeight()
-                        relativeWidth(40f)
+                        syncWidth()
                         val modes = SortingMode.entries
                         var currentMode = 0
                         touchable = Touchable.enabled
@@ -422,21 +419,34 @@ object BackpackCreator {
 
     private fun updateCardsInCollection(state: BackpackState) {
         val allCards = if (state.functionsAsCollection) state.profile.cardCollection else state.profile.backpack!!
-        val result = allCards.toMutableList()
+        val cardsInBackpack = allCards.toMutableList()
+        state.currentDeck.checkDeck(allCards)
         val cardsInDeck = state.currentDeck.cards
-        cardsInDeck.forEach { result.remove(it) }
+        cardsInDeck.forEach { cardsInBackpack.remove(it) }
+
+        val cardMap = mutableMapOf<String, Int>()
+        cardsInBackpack.forEach { card ->
+            if (cardMap.containsKey(card)) {
+                cardMap[card] = cardMap[card]!! + 1
+            } else {
+                cardMap[card] = 1
+            }
+        }
+
+        val result = cardMap.entries.mapTo(mutableListOf()) { it.key to it.value }
 
         val protos = state.cardPrototypes
         when (state.sortingMode) {
             SortingMode.COST -> result.sortByDescending {
-                (protos[it] ?: throw RuntimeException("unknown card in backpack: $it")).baseCost
+                (protos[it.first] ?: throw RuntimeException("unknown card in backpack: $it")).baseCost
             }
             SortingMode.DAMAGE -> result.sortByDescending {
-                (protos[it] ?: throw RuntimeException("unknown card in backpack: $it")).baseDamage
+                (protos[it.first] ?: throw RuntimeException("unknown card in backpack: $it")).baseDamage
             }
-            SortingMode.NAME -> result.sortBy { it }
+            SortingMode.NAME -> result.sortBy { it.first.lowercase() }
+            SortingMode.AMOUNT -> result.sortByDescending { it.second }
         }
-        if (state.isSortingReverse) result.reverse()
+        if (state.isSortingReverse) cardsInBackpack.reverse()
 
         state.cardsInCollection = result
     }
@@ -524,10 +534,15 @@ object BackpackCreator {
         state.events.watchFor<SlotChangedEvent> { event ->
             if (event.backpack != isBackpack || (event.slot != num && event.slot != -1)) return@watchFor
 
-            val cardName = if (event.backpack) {
-                state.cardsInCollection.getOrNull(num)
+            val cardName: String?
+            val amount: Int
+            if (event.backpack) {
+                val result = state.cardsInCollection.getOrNull(num)
+                cardName = result?.first
+                amount = result?.second ?: 1
             } else {
-                state.currentDeck.cardPositions[num]
+                cardName = state.currentDeck.cardPositions[num]
+                amount = 1
             }
 
             val grid = if (isBackpack) state.backpackFocusGrid else state.deckFocusGrid
@@ -536,7 +551,18 @@ object BackpackCreator {
             grid.remove(column, row)
 
             val (_, actor) = with(parent) {
-                cardActorOrEmptySlot(cardName, cardSize, isBackpack, num, state, creator)
+                val stacked = amount != 1
+                val result = cardActorOrEmptySlot(cardName, cardSize, isBackpack, num, stacked, state, creator)
+                if (stacked) label("roadgeek", amount.toString(), Color.Black, 20) {
+                    badTexture("backpack number label", comment = "The designers can figure out how to make it look good")
+                    syncDimensions()
+                    positionType = PositionType.ABSOLUTE
+                    onLayoutAndNow {
+                        x = parent.width - width - 5f
+                        y = 5f
+                    }
+                }
+                result
             }
 
             grid.set(column, row, actor)
@@ -550,6 +576,7 @@ object BackpackCreator {
         cardSize: Float,
         isBackpack: Boolean,
         num: Int,
+        isStacked: Boolean,
         state: BackpackState,
         creator: ScreenCreator
     ): Pair<Card?, InputActor> = with(creator) {
@@ -564,6 +591,7 @@ object BackpackCreator {
                 isDropTarget = true
                 keyboardFocusable = KeyboardFocusable.LEAF
                 infoObject = CardInfoObject(isBackpack, num)
+                alsoDrawOriginalInDrag = isStacked
                 leaveAllGroups()
                 joinGroup(backpackElementsGroup)
                 joinGroup(if (isBackpack) backpackCardInCollectionGroup else backpackCardInDeckGroup )
@@ -664,7 +692,7 @@ object BackpackCreator {
                             }
                         }
                         onInput(GameInputs.interact) {
-                            if (state.currentDeck.id == n) return@onInput
+                            if (state.currentDeck.id == n - 1) return@onInput
                             switchToDeck(id, state)
                         }
                     }
@@ -678,7 +706,7 @@ object BackpackCreator {
         val profile: Profile,
         val cardPrototypes: Map<String, CardPrototype>,
         val createdCards: MutableList<Card>,
-        var cardsInCollection: List<String>,
+        var cardsInCollection: List<Pair<String, Int>>,
         val events: EventPipeline,
         val warningEvents: EventPipeline,
         val publicEvents: EventPipeline,
@@ -710,6 +738,9 @@ object BackpackCreator {
                 if (thisInfo !is CardInfoObject) return@onDrop
                 if (otherInfo !is CardInfoObject) return@onDrop
 
+                if (thisInfo.isBackpack && !otherInfo.isBackpack) {
+                    putCardFromDeckInBackpack(otherInfo.slot, state)
+                }
                 if (thisInfo.isBackpack) return@onDrop
 
                 if (!otherInfo.isBackpack) {
@@ -739,6 +770,7 @@ object BackpackCreator {
         COST("cost"),
         NAME("name"),
         DAMAGE("damage"),
+        AMOUNT("amount"),
     }
 
     private data class CardInfoObject(val isBackpack: Boolean, val slot: Int)

@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.config.Npc
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.commonComponents.AnimatedAdvancedTextWidget
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -38,7 +39,11 @@ class DialogScreen : ScreenCreator() {
     override val background: String = "background_bewitched_forest"
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
     override val playAmbientSounds: Boolean = false
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 100)
+
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
+    )
 
     private val events: EventPipeline = EventPipeline()
 
@@ -82,7 +87,6 @@ class DialogScreen : ScreenCreator() {
         width = 240f
         height = 400f
         x = worldWidth / 2 - width / 2
-//        x = worldWidth * (3.5f / 4f) - width
         y = worldHeight * 0.33f
 
         var currentPromise: Promise<String>? = null
@@ -138,7 +142,6 @@ class DialogScreen : ScreenCreator() {
 
         val right = label("red wing", "", fontSize = (32 * 0.9).toInt()) {
             backgroundHandle = "dialog_name_field"
-            setFontScale(0.9f)
             onLayoutAndNow {
                 width = prefWidth * 1.3F
                 height = prefHeight * 1.4F
@@ -240,6 +243,12 @@ class DialogScreen : ScreenCreator() {
             paddingRight = 150F
             verticalTextAlign = CustomAlign.CENTER
             backgroundHandle = "dialog_background"
+            dropShadow = BakedDropShadow(
+                "dialog_background",
+                screen,
+                0f, 0f,
+                1.34f, 1.34f
+            )
 
             box {
                 positionType = PositionType.ABSOLUTE
@@ -262,6 +271,10 @@ class DialogScreen : ScreenCreator() {
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 onInput(GameInputs.interact) {
+                    if (!advTextWidget.isFinished) return@onInput
+                    events.fire(DialogScreenController.NextClicked)
+                }
+                onInput(GameInputs.dialogContinue) {
                     if (!advTextWidget.isFinished) return@onInput
                     events.fire(DialogScreenController.NextClicked)
                 }

@@ -2,6 +2,9 @@ package com.microwavestudios.fortyfive.config
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardPrototype
+import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.Run
 import onj.parser.OnjParser
@@ -10,6 +13,14 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 
+/**
+ * retrieves, stores and caches onj config files globally. Config files are validated automatically.
+ * Use the [getConfigFile] function to retrieve a parsed config file.
+ *
+ * See `assets/config/files.onj` for available files
+ *
+ * Use [mapConfig], [runConfig] and [npcConfig] to access maps, runs and npcs.
+ */
 object ConfigFileManager {
 
     private const val logTag: String = "ConfigFileManager"
@@ -87,6 +98,20 @@ object ConfigFileManager {
         .find { it.name == configFile }
         ?: throw RuntimeException("no config file called $configFile")
 
+
+    fun loadCards(initializer: (Card) -> Unit): List<CardPrototype> {
+        val baseGameCards = getConfigFile("cards")
+        val baseGameCardProtos = Card
+            .getFrom(baseGameCards.get<OnjArray>("cards"), null, initializer)
+            .toMutableList()
+        val pluginFiles = FortyFive.pluginManager.collectCardFiles()
+        pluginFiles.forEach { (from, obj) ->
+            val protos = Card.getFrom(obj.get<OnjArray>("cards"), from, initializer)
+            baseGameCardProtos.addAll(protos)
+        }
+        return baseGameCardProtos
+    }
+
     private data class ConfigFile(
         val name: String,
         val path: String,
@@ -96,5 +121,9 @@ object ConfigFileManager {
 
 }
 
+/**
+ * retrieves the display name for [internalName]. If no name is found, a warning gets logged and [internalName]
+ * is returned. Display names are configured in `assets/config/files.onj`
+ */
 @Suppress("NOTHING_TO_INLINE")
 inline fun displayName(internalName: String): String = ConfigFileManager.getDisplayName(internalName)

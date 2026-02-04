@@ -32,16 +32,6 @@ fonts: {
         imageFile: string
     }[],
 }[],
-/*
-fonts: {
-    name: string,
-    fontFile: string,
-    imageFile: string,
-    color?: Color,
-    markupEnabled?: boolean,
-   ...resourceSharedKeys
-}[],
-*/
 pixmapFonts: {
     name: string,
     fontFile: string,

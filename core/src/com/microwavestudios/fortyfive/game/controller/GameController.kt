@@ -3,7 +3,6 @@ package com.microwavestudios.fortyfive.game.controller
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameAnimation
-import com.microwavestudios.fortyfive.game.GameDirector
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -21,6 +20,7 @@ interface GameController {
     val gameRenderPipeline: GameRenderPipeline
 
     val playerLost: Boolean
+    val hasWon: Boolean
     val curReserves: Int
     val isUIFrozen: Boolean
     val revolverRotationCounter: Int
@@ -30,6 +30,7 @@ interface GameController {
     val cardsInHand: List<Card>
     val encounterModifiers: List<EncounterModifier>
     val curPlayerLives: Int
+    val allCards: List<Card>
 
     val activeEnemies: List<Enemy>
     val allEnemies: List<Enemy>
@@ -41,13 +42,15 @@ interface GameController {
 
     val gameEvents: EventPipeline
 
-    fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline
-
     fun destroyCardTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
 
+    fun putCardsInStackTimeline(cardName: String, amount: Int, sourceCard: Card? = null, onTop: Boolean): Timeline
+
     fun bounceBulletTimeline(card: Card): Timeline
+
+    fun shuffleCardFromHandIntoStackTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     fun rotateRevolverTimeline(
         rotation: RevolverRotation,
@@ -57,25 +60,31 @@ interface GameController {
 
     fun drawCardsTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false, sourceCard: Card? = null): Timeline
 
-    fun tryApplyStatusEffectToEnemyTimeline(statusEffect: StatusEffect, enemy: Enemy): Timeline
+    fun tryApplyStatusEffectToEnemyTimeline(statusEffect: StatusEffect, enemy: Enemy, source: Card? = null): Timeline
 
     fun damagePlayerTimeline(damage: Int, triggeredByStatusEffect: Boolean = false, isPiercing: Boolean = false): Timeline
 
     fun playerDeathTimeline(): Timeline
 
-    fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline
+    fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect, source: Card? = null): Timeline
 
-    fun putCardFromStackInHandTimeline(
-        card: Card,
-        source: Card? = null,
-        cardIsntActuallyInStack: Boolean = false, // kinda stupid, but necessary when drawing the default bullet
-    ): Timeline
+    fun removeAllPlayerStatusEffectsTimeline(): Timeline
 
-    fun destroyCardInHandTimeline(card: Card): Timeline
+    fun putCardFromStackInHandTimeline(card: Card, source: Card? = null): Timeline
 
-    fun enemyAttackTimeline(damage: Int, isPiercing: Boolean = false): Timeline
+    fun switchSlotOfBulletInRevolverTimeline(card: Card, newSlot: Int): Timeline
+
+    fun destroyCardInHandTimeline(card: Card, sourceCard: Card? = null): Timeline
+
+    fun enemyAttackTimeline(damage: Int, enemy: Enemy, isPiercing: Boolean = false): Timeline
 
     fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline
+
+    fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card? = null): Timeline
+
+    fun descendBulletTimeline(): Timeline
+
+    fun resurrectTimeline(intoSlot: Int): Timeline
 
 
     fun shoot()

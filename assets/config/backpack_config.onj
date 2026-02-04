@@ -1,7 +1,0 @@
-deckNameDef: {
-    minLength: 3,
-    maxLength: 30,
-},
-
-slotsPerDeck: 35,
-minCardsPerDeck: 12,

@@ -49,13 +49,6 @@ public class DesktopLauncher {
 			//noinspection CallToPrintStackTrace
 			exception.printStackTrace();
 		}
-        if (exception != null) try {
-            FortyFive.INSTANCE.getLogger().fatal(exception);
-        } catch (Exception ignored) {
-            // "more robust logging" failed in this case
-            //noinspection CallToPrintStackTrace
-            exception.printStackTrace();
-        }
 
         if (FortyFive.INSTANCE.getCleanExit() && exception == null) return;
         boolean copiedLog = copyLogFile();

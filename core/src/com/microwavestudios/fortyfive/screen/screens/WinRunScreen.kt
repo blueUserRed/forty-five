@@ -46,7 +46,10 @@ class WinRunScreen : ScreenCreator() {
 
     override val background: String = "microwave_studios_brown_texture"
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 0)
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
+    )
 
     private val events: EventPipeline = EventPipeline()
 
@@ -131,6 +134,7 @@ class WinRunScreen : ScreenCreator() {
                 relativeWidth(100f)
                 setAlignment(Align.center)
                 centerX()
+                syncHeight()
                 onLayoutAndNow { y = parent.height - height - 30f }
             }
 
@@ -144,7 +148,6 @@ class WinRunScreen : ScreenCreator() {
 
             box(isScrollable = true) {
                 this as CustomScrollableBox
-                debug()
                 backgroundHandle = "map_extraction_card_background_white"
                 relativeWidth(75f)
                 relativeHeight(70f)
@@ -164,7 +167,6 @@ class WinRunScreen : ScreenCreator() {
                 )
                 cards.forEach { card ->
                     box {
-                        debug()
                         width = widthPerCard
                         height = widthPerCard
                         verticalAlign = CustomAlign.CENTER
@@ -187,9 +189,12 @@ class WinRunScreen : ScreenCreator() {
                 keyboardFocusable = KeyboardFocusable.LEAF
                 touchable = Touchable.enabled
                 joinGroup("extract-cards-popup-button")
-                defaultButtonBackgrounds()
+                defaultButtonConfig()
 
-                label("red wing", "Ok", Color.FortyWhite, 32)
+                label("red wing", "Ok", Color.FortyWhite, 32) {
+                    touchable = Touchable.disabled
+                    syncDimensions()
+                }
 
                 onInput(GameInputs.interact) {
                     finishedPromise.resolve(Unit)
@@ -283,17 +288,12 @@ class WinRunScreen : ScreenCreator() {
             )
         )
 
-        val redWing = FortyFive.resourceManager.forceGet<BitmapFont>(screen, screen.lifetime, "red_wing")
-
         val textEmitter = cashGroup.textEffectEmitter(mapOf(
             "cash" to TextEffectEmitter.TextAnimationConfig(
-                redWing,
+                TextEffectEmitter.roadgeek,
                 Color.DarkGreen,
-                1f,
-                speed = 150f..180f,
-                spawnVarianceX = 30f,
-                spawnVarianceY = 30f,
-                animationDuration = 1000..1500
+                0.8f,
+                positiveSpeed = 3f..5f,
             )
         ))
 
@@ -306,6 +306,7 @@ class WinRunScreen : ScreenCreator() {
             action {
                 textEmitter.playAnimation("+$amount$", "cash")
                 profile.earnMoney(amount)
+                FortyFive.soundPlayer.situation("money_earned", screen)
                 cashLabel.setText("${profile.playerMoney}$")
             }
 
@@ -329,12 +330,16 @@ class WinRunScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.CENTER
             height = 70f
-            width = 180f
+            width = 250f
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
-            defaultButtonBackgrounds()
+            defaultButtonConfig()
 
-            label("red wing", "Claim Rewards", Color.FortyWhite, 32)
+            label("red wing", "Claim Rewards", Color.FortyWhite, 32) {
+                touchable = Touchable.disabled
+                width = 200f
+                syncHeight()
+            }
 
             onInput(GameInputs.interact) {
                 val profile = FortyFive.profileManager.currentProfile!!
@@ -372,7 +377,9 @@ class WinRunScreen : ScreenCreator() {
             relativeWidth(25f)
             relativeHeight(50f)
 
-            label("red wing", "completed run:", Color.FortyWhite, 32)
+            label("red wing", "completed run:", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
             actor(getSharedRunCard(run))
         }
 
@@ -382,7 +389,9 @@ class WinRunScreen : ScreenCreator() {
             relativeWidth(25f)
             relativeHeight(50f)
 
-            label("red wing", "rewards:", Color.FortyWhite, 32)
+            label("red wing", "rewards:", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
             if (cardsToExtract.isNotEmpty()) extractCardsReward()
             rewards(run.rewards)
         }
@@ -410,7 +419,9 @@ class WinRunScreen : ScreenCreator() {
                 marginRight = 10f
             }
 
-            label("red wing", "You can keep cards!", Color.FortyWhite, 32)
+            label("red wing", "You can keep cards!", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
         }
         events.watchFor<ClaimRewardsEvent> { event -> event.append {
             later {
@@ -438,7 +449,9 @@ class WinRunScreen : ScreenCreator() {
                 marginRight = 10f
             }
 
-            label("red wing", "You get ${reward.amount}$", Color.FortyWhite, 32)
+            label("red wing", "You get ${reward.amount}$", Color.FortyWhite, 32) {
+                syncDimensions()
+            }
         }
 
         events.watchFor<ClaimRewardsEvent> { event -> event.append {

@@ -1,0 +1,763 @@
+nodes: [
+    {
+        x: -30.0,
+        y: 0.0,
+        edgesTo: [
+            1,
+        ],
+        event: $EmptyMapEvent {
+        },
+        distance: -1,
+    },
+    {
+        x: -4.90692138671875,
+        y: 12.575177192687988,
+        edgesTo: [
+            0,
+            2,
+            3,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                ],
+                encounterModifier: [
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.5,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: false,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+    {
+        x: 15.88763427734375,
+        y: 28.559036254882812,
+        edgesTo: [
+            1,
+            3,
+            7,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                ],
+                encounterModifier: [
+                    'moist',
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.5,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: false,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+    {
+        x: 30.0533447265625,
+        y: 13.7558012008667,
+        edgesTo: [
+            2,
+            4,
+            1,
+        ],
+        event: $EmptyMapEvent {
+        },
+        distance: -1,
+    },
+    {
+        x: 59.56526565551758,
+        y: 40.092838287353516,
+        edgesTo: [
+            3,
+            5,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                ],
+                encounterModifier: [
+                    'rain',
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.600000023841858,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: false,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+    {
+        x: 77.09080505371094,
+        y: 76.23814392089844,
+        edgesTo: [
+            6,
+            4,
+            8,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                ],
+                encounterModifier: [
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.7000000476837158,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: false,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+    {
+        x: 45.39954376220703,
+        y: 72.8779067993164,
+        edgesTo: [
+            7,
+            5,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                ],
+                encounterModifier: [
+                    'moist',
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.7000000476837158,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: false,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+    {
+        x: 20.609533309936523,
+        y: 57.07568359375,
+        edgesTo: [
+            2,
+            6,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                ],
+                encounterModifier: [
+                    'rain',
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.7999999523162842,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: false,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+    {
+        x: 88.25996398925781,
+        y: 96.12713623046875,
+        edgesTo: [
+            5,
+            9,
+        ],
+        event: $EmptyMapEvent {
+        },
+        distance: -1,
+    },
+    {
+        x: 89.53125,
+        y: 140.4459991455078,
+        edgesTo: [
+            8,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            startable: true,
+            isCompleted: false,
+            startConditions: [
+            ],
+            blockConditions: [
+            ],
+            encounter: {
+                enemies: [
+                    'Outlaw-1',
+                    'Pyro-1',
+                ],
+                encounterModifier: [
+                ],
+                forceCards: null,
+                shuffleCards: true,
+                unadjustedMajorDifficulty: 1,
+                majorDifficulty: 1,
+                minorDifficulty: 1.0,
+                difficultyScalingInfo: 0.0,
+                special: false,
+            },
+            isExtraction: true,
+        },
+        distance: -1,
+        nodeTexture: 'map_node_fight',
+    },
+],
+startNode: 0,
+endNode: 9,
+decorations: [
+    {
+        texture: 'map_decoration_wasteland_cactus_1',
+        baseWidth: 2.0,
+        baseHeight: 4.0,
+        drawInBackground: false,
+        positions: [
+            [
+                66.5573501586914,
+                117.01513671875,
+                3.0,
+            ],
+            [
+                59.656105041503906,
+                123.19071197509766,
+                3.0,
+            ],
+            [
+                54.48017120361328,
+                133.1806182861328,
+                3.0,
+            ],
+            [
+                53.84453201293945,
+                144.8960723876953,
+                3.0,
+            ],
+            [
+                58.112403869628906,
+                152.7971649169922,
+                3.0,
+            ],
+            [
+                65.83091735839844,
+                160.78607177734375,
+                3.0,
+            ],
+            [
+                75.72875213623047,
+                165.8748779296875,
+                3.0,
+            ],
+            [
+                85.62660217285156,
+                169.507568359375,
+                3.0,
+            ],
+            [
+                92.16462707519531,
+                170.23410034179688,
+                3.0,
+            ],
+            [
+                100.24635314941406,
+                169.87081909179688,
+                3.0,
+            ],
+            [
+                108.05564880371094,
+                167.5095672607422,
+                3.0,
+            ],
+            [
+                119.22477722167969,
+                158.97274780273438,
+                3.0,
+            ],
+            [
+                124.85475158691406,
+                146.89404296875,
+                3.0,
+            ],
+            [
+                127.0340805053711,
+                136.17758178710938,
+                3.0,
+            ],
+            [
+                124.3099136352539,
+                125.0978775024414,
+                3.0,
+            ],
+            [
+                119.4971923828125,
+                115.28959655761719,
+                3.0,
+            ],
+            [
+                72.91377258300781,
+                158.1553955078125,
+                3.0,
+            ],
+            [
+                81.35871887207031,
+                165.05752563476562,
+                3.0,
+            ],
+            [
+                112.95916748046875,
+                162.78707885742188,
+                3.0,
+            ],
+            [
+                113.32240295410156,
+                158.88192749023438,
+                3.0,
+            ],
+            [
+                118.40753173828125,
+                153.97779846191406,
+                3.0,
+            ],
+            [
+                65.19526672363281,
+                153.70535278320312,
+                3.0,
+            ],
+            [
+                58.38482666015625,
+                144.5327911376953,
+                3.0,
+            ],
+            [
+                54.11695098876953,
+                127.9132080078125,
+                3.0,
+            ],
+            [
+                58.65724563598633,
+                117.10594177246094,
+                3.0,
+            ],
+            [
+                123.03861999511719,
+                109.84056091308594,
+                3.0,
+            ],
+            [
+                127.66972351074219,
+                118.19575500488281,
+                3.0,
+            ],
+            [
+                129.2134246826172,
+                129.8203887939453,
+                3.0,
+            ],
+            [
+                131.93759155273438,
+                141.6266326904297,
+                3.0,
+            ],
+            [
+                119.4063949584961,
+                148.1654815673828,
+                3.0,
+            ],
+            [
+                62.83430862426758,
+                111.11201477050781,
+                3.0,
+            ],
+            [
+                71.6424789428711,
+                110.0221939086914,
+                3.0,
+            ],
+            [
+                114.1396484375,
+                118.46821594238281,
+                3.0,
+            ],
+            [
+                104.51422119140625,
+                117.92330169677734,
+                3.0,
+            ],
+            [
+                27.601654052734375,
+                90.3148422241211,
+                3.0,
+            ],
+            [
+                -6.904592990875244,
+                64.704345703125,
+                3.0,
+            ],
+            [
+                -2.3642945289611816,
+                40.18366241455078,
+                3.0,
+            ],
+            [
+                -14.078252792358398,
+                30.8294677734375,
+                3.0,
+            ],
+            [
+                67.64705657958984,
+                11.939458847045898,
+                3.0,
+            ],
+            [
+                82.26680755615234,
+                53.6246223449707,
+                3.0,
+            ],
+            [
+                57.02277755737305,
+                64.79515838623047,
+                3.0,
+            ],
+            [
+                32.9592170715332,
+                33.826438903808594,
+                3.0,
+            ],
+            [
+                12.981915473937988,
+                129.00302124023438,
+                3.0,
+            ],
+            [
+                32.232765197753906,
+                148.07467651367188,
+                3.0,
+            ],
+            [
+                -21.16110610961914,
+                141.3542022705078,
+                3.0,
+            ],
+            [
+                -36.598106384277344,
+                115.74369812011719,
+                3.0,
+            ],
+            [
+                -13.260992050170898,
+                100.84964752197266,
+                3.0,
+            ],
+            [
+                -47.85804748535156,
+                52.8072624206543,
+                3.0,
+            ],
+            [
+                48.66863250732422,
+                -9.130172729492188,
+                3.0,
+            ],
+            [
+                101.88089752197266,
+                35.824424743652344,
+                3.0,
+            ],
+            [
+                133.2089385986328,
+                92.22200012207031,
+                3.0,
+            ],
+            [
+                142.65274047851562,
+                54.98688888549805,
+                3.0,
+            ],
+            [
+                140.01937866210938,
+                18.65995216369629,
+                3.0,
+            ],
+        ],
+    },
+    {
+        texture: 'map_decoration_wasteland_cactus_2',
+        baseWidth: 2.0,
+        baseHeight: 4.0,
+        drawInBackground: false,
+        positions: [
+            [
+                69.553955078125,
+                170.86679077148438,
+                3.0,
+            ],
+            [
+                106.9659652709961,
+                110.0221939086914,
+                3.0,
+            ],
+            [
+                114.8660888671875,
+                110.74873352050781,
+                3.0,
+            ],
+            [
+                64.92284393310547,
+                104.02824401855469,
+                3.0,
+            ],
+            [
+                119.3156509399414,
+                37.731597900390625,
+                3.0,
+            ],
+            [
+                107.32926940917969,
+                81.95964050292969,
+                3.0,
+            ],
+            [
+                97.70384216308594,
+                12.938458442687988,
+                3.0,
+            ],
+            [
+                58.83891677856445,
+                92.67608642578125,
+                3.0,
+            ],
+            [
+                9.440496444702148,
+                88.1352310180664,
+                3.0,
+            ],
+            [
+                28.146514892578125,
+                123.46318054199219,
+                3.0,
+            ],
+            [
+                -1.3654083013534546,
+                152.16146850585938,
+                3.0,
+            ],
+            [
+                36.86387634277344,
+                174.9566192626953,
+                3.0,
+            ],
+            [
+                -31.603775024414062,
+                171.8688201904297,
+                3.0,
+            ],
+        ],
+    },
+    {
+        texture: 'map_decoration_wasteland_skull_1',
+        baseWidth: 3.0,
+        baseHeight: 3.0,
+        drawInBackground: false,
+        positions: [
+            [
+                -4.816030979156494,
+                175.31988525390625,
+                1.5,
+            ],
+            [
+                29.145370483398438,
+                167.8728485107422,
+                1.5,
+            ],
+            [
+                1.540374755859375,
+                118.46821594238281,
+                1.5,
+            ],
+            [
+                -28.970409393310547,
+                70.15338134765625,
+                1.5,
+            ],
+            [
+                8.895654678344727,
+                73.24117279052734,
+                1.5,
+            ],
+            [
+                33.86726379394531,
+                52.262359619140625,
+                1.5,
+            ],
+            [
+                -11.263272285461426,
+                1.495452880859375,
+                1.5,
+            ],
+            [
+                -27.245107650756836,
+                28.559024810791016,
+                1.5,
+            ],
+            [
+                78.54377746582031,
+                31.828454971313477,
+                1.5,
+            ],
+            [
+                126.30766296386719,
+                63.432891845703125,
+                1.5,
+            ],
+        ],
+    },
+    {
+        texture: 'map_decoration_wasteland_skull_2',
+        baseWidth: 3.0,
+        baseHeight: 3.0,
+        drawInBackground: false,
+        positions: [
+            [
+                147.1022186279297,
+                131.18264770507812,
+                1.5,
+            ],
+            [
+                125.9444580078125,
+                164.87586975097656,
+                1.5,
+            ],
+            [
+                50.666351318359375,
+                164.33096313476562,
+                1.5,
+            ],
+            [
+                9.3496675491333,
+                148.1654815673828,
+                1.5,
+            ],
+            [
+                42.947853088378906,
+                112.47425842285156,
+                1.5,
+            ],
+            [
+                114.3212890625,
+                23.38242530822754,
+                1.5,
+            ],
+        ],
+    },
+    {
+        texture: 'enemy_pyro',
+        baseWidth: 30.0,
+        baseHeight: 39.099998474121094,
+        drawInBackground: false,
+        positions: [
+            [
+                71.28741455078125,
+                136.8048858642578,
+                0.5626787543296814,
+            ],
+        ],
+    },
+    {
+        texture: 'enemy_outlaw',
+        baseWidth: 20.0,
+        baseHeight: 43.630001068115234,
+        drawInBackground: false,
+        positions: [
+            [
+                97.18360900878906,
+                148.68856811523438,
+                0.4882179796695709,
+            ],
+        ],
+    },
+],
+animatedDecorations: [
+],
+biome: 'wasteland',
+tutorialText: [
+],
+scrollable: true,
+camPosOffset: [
+    0.0,
+    0.0,
+],
+majorDifficulty: 1,

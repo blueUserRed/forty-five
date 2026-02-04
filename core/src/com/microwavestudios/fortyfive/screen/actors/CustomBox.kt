@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.screen.actors
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -16,16 +17,25 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
 import com.microwavestudios.fortyfive.utils.between
 import kotlin.math.max
 
 //TODO (optional):
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
+/**
+ * common container used to layout actors. Unlike [CustomGroup], CustomBox takes the responsibility
+ * of laying out its children. That means that you shouldn't set x and y of the children yourself,
+ * as the box will overwrite it. If you set the positionType of a child to [PositionType.ABSOLUTE],
+ * the box will ignore the child in its layout. The CustomBox is meant to be similar to the flexboxes
+ * used in webdev, although CustomBox lacks a lot of its features.
+ */
 open class CustomBox(
     screen: OnjScreen,
-    backgroundHints: Array<String> = arrayOf(),
+    backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor, DisableActor, HasPaddingActor
 {
 
@@ -507,7 +517,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
             field = value
             field?.let { addActor(it) }
         }
-    private var scrolledDistance = 0F
+    var scrolledDistance = 0F
         set(value) {
             val newField = value.between(0F, maxScrollableDistanceInDirection)
             if (field == newField) return
@@ -564,6 +574,28 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: On
         addListener(scrollListener)
         touchable = Touchable.enabled
         checkFlexDirection(scrollDirectionStart)
+    }
+
+    fun scrollToBegin() {
+        scrolledDistance = 0f
+    }
+
+    fun scrollToBeginTimeline(
+        duration: Int = 300,
+        interpolation: Interpolation = Interpolation.smooth
+    ): Timeline = Timeline.timeline {
+        later {
+            if (scrolledDistance < 0.0001f) return@later
+            val action = PropertyAction(
+                this@CustomScrollableBox,
+                ::scrolledDistance,
+                0f,
+            )
+            action.duration = (duration.toFloat() / 1000f)
+            action.interpolation = interpolation
+            addAction(action)
+            delayUntil { action.isComplete }
+        }
     }
 
     // -------------------------------------------------------------------------------------------actual code from here

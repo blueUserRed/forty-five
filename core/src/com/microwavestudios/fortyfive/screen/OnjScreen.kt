@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -14,10 +15,10 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
+import com.microwavestudios.fortyfive.particle.ParticleSystem
 import com.microwavestudios.fortyfive.rendering.*
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -34,7 +35,7 @@ open class OnjScreen(
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val namedActors: MutableMap<String, Actor>,
-    val transitionAwayTimes: Map<String, Int>,
+    val transitions: Map<String, ScreenManager.ScreenTransition>,
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
@@ -91,6 +92,12 @@ open class OnjScreen(
 
     val inputManager = InputManager(this)
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
+
+    val textEffectParticleSystem: ParticleSystem = ParticleSystem(viewport.worldWidth, viewport.worldHeight).also {
+        it.addBaseForce(0f, -1f)
+    }
+
+    val events: EventPipeline = EventPipeline()
 
     init {
         addEarlyRenderTask {
@@ -163,7 +170,7 @@ open class OnjScreen(
     fun showHoverDetail(actor: InputActor) {
         val detailWidget = actor.detailWidget ?: return
         if (detailWidget.isShown) return
-        val detailActor = detailWidget.generateDetailActor(addFadeInAction = true)
+        val detailActor = detailWidget.generateDetailActor(addFadeInAction = true) ?: return
         detailWidget.detailActor = detailActor
         detailWidget.updateBounds(actor.actor)
         actorsWithActiveHoverDetails.add(actor)
@@ -195,10 +202,14 @@ open class OnjScreen(
     }
 
     override fun show() {
-        Gdx.input.inputProcessor = inputMultiplexer
-        Utils.setCursor(defaultCursor)
         isVisible = true
         screenControllers.forEach { it.onShow() }
+    }
+
+    fun active() {
+        Gdx.input.inputProcessor = inputMultiplexer
+        Utils.setCursor(defaultCursor)
+        screenControllers.forEach { it.onActive() }
     }
 
     fun transitionAway() {
@@ -245,10 +256,12 @@ open class OnjScreen(
             val oY = actor.y
             actor.x = dragged.dragX
             actor.y = dragged.dragY
-            dragged.drawInDrag(batch)
+            dragged.drawInDrag(batch, oX, oY)
             actor.x = oX
             actor.y = oY
         }
+        textEffectParticleSystem.update()
+        textEffectParticleSystem.render(batch, this)
         batch.end()
         doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
     } catch (e: Exception) {
@@ -264,7 +277,6 @@ open class OnjScreen(
 
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
-        println("hi")
         screenEvents.fire(ScreenResizedEvent(width, height))
     }
 
@@ -310,15 +322,15 @@ open class OnjScreen(
         const val transitionAwayScreenState = "transition away"
 
         fun toggleFullScreen(forceFullscreen: Boolean = false) {
-            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
-                UserPrefs.windowMode =
-                    if (UserPrefs.lastFullScreenAsBorderless)
-                        UserPrefs.WindowMode.BorderlessWindow
-                    else
-                        UserPrefs.WindowMode.Fullscreen
-            } else {
-                UserPrefs.windowMode = UserPrefs.WindowMode.Window
-            }
+//            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
+//                UserPrefs.windowMode =
+//                    if (UserPrefs.lastFullScreenAsBorderless)
+//                        UserPrefs.WindowMode.BorderlessWindow
+//                    else
+//                        UserPrefs.WindowMode.Fullscreen
+//            } else {
+//                UserPrefs.windowMode = UserPrefs.WindowMode.Window
+//            }
         }
     }
 

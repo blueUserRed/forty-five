@@ -28,6 +28,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         val addLine1 = addAdditionalLine(mainLine, data.altLinesOffset)
         val addLine2 = addAdditionalLine(mainLine, -data.altLinesOffset)
 
+        rotateNodes()
         calculateDistances(startNode)
 
         setupBounds(data.horizontalExtension, data.verticalExtension)
@@ -42,6 +43,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         assignEvents(addLine1, eventsLine1)
         val eventsLine2 = data.events.filter { it.line == 2 }
         assignEvents(addLine2, eventsLine2)
+
+        generateEncounters(startNode)
 
         startNode.build()
 
@@ -163,6 +166,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         val mainEvent: ThreeLineMapGeneratorEventSpawner,
         val events: List<ThreeLineMapGeneratorEventSpawner>,
         val decorations: List<MapGeneratorDecoration>,
+        override val rotation: Float
     ) : BaseMapGeneratorData {
 
         override fun asOnj(): OnjObject = buildOnjObject {
@@ -217,7 +221,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
                 onj
                     .get<OnjArray>("decorations")
                     .value
-                    .map { MapGeneratorDecoration.fromOnj(it as OnjObject) }
+                    .map { MapGeneratorDecoration.fromOnj(it as OnjObject) },
+                onj.get<Double>("rotation").toFloat()
             )
         }
     }

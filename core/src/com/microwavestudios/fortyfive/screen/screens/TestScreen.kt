@@ -30,8 +30,6 @@ class TestScreen : ScreenCreator() {
 
     override val background: String = "black_texture"
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf()
-
     override fun getRoot(): Group = newGroup {
         box {
             width = worldWidth
@@ -71,7 +69,6 @@ class TestScreen : ScreenCreator() {
 
         label("red wing", "Backpack", Color.FortyWhite, fontSize = (32 * 0.7).toInt()) {
             wrap = false
-            debug()
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()

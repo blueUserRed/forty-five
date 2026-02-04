@@ -21,6 +21,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val nodes = generateNodes(data.circles)
         generateNodeConnections(startNode, nodes)
 
+        rotateNodes()
         calculateDistances(startNode)
 
         setupBounds(data.horizontalExtension, data.verticalExtension)
@@ -33,6 +34,8 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
 
         val genDecorations = decorations.map { generateDecoration(it) }
         val genAnimatedDecorations = animatedDecorations.map { generateDecoration(it) }
+
+        generateEncounters(startNode)
 
         startNode.build()
 
@@ -197,6 +200,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         override val lastNodeEvent: () -> MapEvent,
         override val lastNodeTexture: String,
         val exitNodeCircle: Int,
+        override val rotation: Float
     ) : BaseMapGeneratorData {
 
         override fun asOnj(): OnjObject = buildOnjObject {
@@ -235,7 +239,8 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 events = onj
                     .get<OnjArray>("events")
                     .value
-                    .map { RadialMapGeneratorEventSpawner.fromOnj(it as OnjObject) }
+                    .map { RadialMapGeneratorEventSpawner.fromOnj(it as OnjObject) },
+                rotation = onj.get<Double>("rotation").toFloat()
             )
         }
     }

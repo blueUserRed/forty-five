@@ -1,4 +1,4 @@
-
+///schema=onjschemas/mainGame/cards.onjschema
 use Cards;
 use Common;
 
@@ -17,10 +17,11 @@ var slot = [
     iconPrefix + graphicsConfig.revolverSlotIcons."4" + iconPrefix,
     iconPrefix + graphicsConfig.revolverSlotIcons."5" + iconPrefix,
 ];
-//bullet  bigBullet, Silberbullet, Workerbullet, Incendiary, Leaders, Bewitched
-cards: [
 
-    // Bullets ----------------------------------
+var onlySelfTriggers = isSelf();
+var allCardsTrigger = trueCardModifier();
+
+cards: [
 
     {
         name: "bullet",
@@ -47,10 +48,10 @@ cards: [
         title: "Silver Bullet",
         flavourText: "This bullet is silver and silence is golden",
         description: "$trigger$On-Placedown:$trigger$\nDraw 1 card\n$trigger$On-Shot:$trigger$\nDraw 1 card",
-        baseDamage: 7,
+        baseDamage: 2,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: draw(1#val)
             },
             {
@@ -103,11 +104,11 @@ cards: [
         baseDamage: 15,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     (inZone(zone.revolver) and not(isSelf()))#bSelect,
                     5#val,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -147,7 +148,7 @@ cards: [
         baseDamage: 23,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: draw(2#val)
             },
             {
@@ -258,11 +259,11 @@ cards: [
         baseDamage: 12,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     (inZone([zone.revolver, zone.hand, zone.afterlife]) and hasName("bullet"))#bSelect,
                     10#val,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -274,12 +275,12 @@ cards: [
         name: "bulletBullet",
         title: "Bullet Bullet",
         flavourText: "Flavortext Flavortext",
-        description: "$trigger$On-Placedown:$trigger$\nCreate 3 cards named [Bullet] in your hand",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$CREATE$keyword$ 2 cards named [Bullet] in your hand",
         baseDamage: 16,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
-                effect: putCardInHand("bullet", 3#val)
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: putCardInHand("bullet", 2#val)
             }
         ],
         cost: 2,
@@ -290,15 +291,15 @@ cards: [
         name: "undeadBullet",
         title: "Undead Bullet",
         flavourText: "Like it was alive in the first place...",
-        description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 4" + slot.4 + " gets +6 dmg",
-        baseDamage: 12,
+        description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 3" + slot.3 + " gets +5 dmg",
+        baseDamage: 9,
         traitEffects: [ "undead" ],
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmg(
-                    (inZone(zone.revolver) and inRevolverSlot(4) and not(isSelf()))#bSelect,
-                    6#val
+                    (inZone(zone.revolver) and inRevolverSlot(3) and not(isSelf()))#bSelect,
+                    5#val
                 )
             }
         ],
@@ -310,12 +311,12 @@ cards: [
         name: "poisonBullet",
         title: "Poison Bullet",
         flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
-        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (4, 3)",
-        baseDamage: 9,
+        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6)",
+        baseDamage: 4,
         effects: [
             {
                 trigger: shot(),
-                effect: giveStatus(poison(3#val, 4#val))
+                effect: giveStatus(poison(6#val))
             }
         ],
         cost: 1,
@@ -342,15 +343,15 @@ cards: [
         baseDamage: 6,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: protectLimitValidity(
                     bSelectRevolverTarget(true, true, "Choose Bullet to protect"),
                     4,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
-        cost: 3,
+        cost: 2,
         tags: ["pool1", "rarity2"],
         price: 50,
     },
@@ -359,10 +360,10 @@ cards: [
         title: "Purge Bullet",
         flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I should’t have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
         description: "$trigger$On-Placedown:$trigger$\nDestroy both bullets next to this.",
-        baseDamage: 15,
+        baseDamage: 11,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: destroy(bSelectNeighbors())
             }
         ],
@@ -378,7 +379,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: destroy(bSelectSelf())
             }
         ],
@@ -390,10 +391,20 @@ cards: [
         name: "cowardBullet",
         title: "Coward Bullet",
         flavourText: "No, don't chicken out this time! Come here you lil shit, don't run from me!",
-        description: "$trigger$While in revolver:$trigger$\nYou can replace this with any card out of your hand (you still have to pay for it). If you do, destroy this bullet.",
+        description: "$trigger$While in revolver:$trigger$\nYou can replace this with any card out of your hand (you still have to pay for it). The card that you replaced Coward Bullet with gets +6 dmg for as long as it is in the Revolver. If you do, destroy this bullet.",
         baseDamage: 1,
         traitEffects: [ "replaceable" ],
-        effects: [],
+        effects: [
+            {
+                trigger: replaced(),
+                isHidden: true,
+                effect: buffDmgLimitValidity(
+                    bSelectCachedBullets(),
+                    6#val,
+                    cardInZoneModifierPredicate(zone.revolver)
+                )
+            }
+        ],
         cost: 1,
         tags: ["pool1", "rarity2"],
         price: 40,
@@ -402,11 +413,11 @@ cards: [
         name: "luckyLukesBullet",
         title: "Lucky Dukes Bullet",
         flavourText: "",
-        description: "$trigger$On-Placedown:$trigger$\n deal 6 dmg to target enemy", // TODO: desc
+        description: "$trigger$On-Placedown:$trigger$\n deal 6 dmg to target enemy",
         baseDamage: 6,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: damageDirect(6#val, false)
             }
         ],
@@ -417,7 +428,7 @@ cards: [
     {
         name: "bull_et",
         title: "Bull et",
-        flavourText: "§§card_symbol_text_i_equals§§",
+        flavourText: "Ole! Ole! Ole! Ole!", // TODO: the fancy é
         description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
         baseDamage: 5,
         effects: [
@@ -463,7 +474,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: ["weight", "unobtainable", "not in collection"],
+        tags: ["weight", "unobtainable"],
         price: 50,
     },
     {
@@ -475,10 +486,12 @@ cards: [
         effects: [
             {
                 trigger: cardsDrawn(false, 1),
+                inZones: [zone.revolver],
                 effect: buffDmg(bSelectSelf(), 5#val)
             },
             {
                 trigger: cardsDrawn(true, 2),
+                inZones: [zone.revolver],
                 isHidden: true,
                 effect: reserveGain(value.amountOfCardsDrawn * 0.5),
             }
@@ -495,14 +508,15 @@ cards: [
         baseDamage: 20,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: killPlayer()
             },
             {
                 trigger: turnBegin(),
+                inZones: [zone.revolver],
                 effect: buffDmg(
                     (not(isSelf()) and inZone(zone.revolver))#bSelect,
-                    12#val
+                    10#val
                 )
             }
         ],
@@ -555,16 +569,16 @@ cards: [
         title: "Hollowpoint Bullet",
         flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
         description: "If the enemy has shield:\nThis Bullet has +6 dmg",
-        baseDamage: 10,
+        baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgMultiplier(
                     bSelectSelf(),
-                    6#val,
+                    1.5,
                     $TargetedEnemyShieldIsAtLeast { value: 1 }#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -576,17 +590,17 @@ cards: [
         name: "pppBullet",
         title: "+P+ Bullet",
         flavourText: "This Bullet has \"Manufactured in New Hemingway\" engraved in it. The overpressured Tip guarantees maximal effectiveness",
-        description: "If the enemy has at least 1 status effect: \nThis bullet gets +6 dmg",
+        description: "If the enemy has at least 1 status effect: \nThis bullet gets +50% dmg",
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgMultiplier(
                     bSelectSelf(),
-                    6#val,
+                    1.5,
                     $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -599,10 +613,10 @@ cards: [
         title: "Deputies Bullet",
         flavourText: "",
         description: "This Bullet can't be placed in slot 3" + slot.3 + ".\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3" + slot.3 + " to your hand",
-        baseDamage: 6,
+        baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: bounce(
                     (inZone(zone.revolver) and not(isSelf()) and inRevolverSlot(3))#bSelect
                 )
@@ -617,38 +631,34 @@ cards: [
         name: "toxicBullet",
         title: "Toxic Bullet",
         flavourText: "Still not as toxic as my ex-girlfriend",
-        description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +8 dmg",
+        description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nThe targeted enemy gets $status$POISON$status$ (5)",
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
-                isHidden: true,
-                effect: buffDmg(
-                    bSelectSelf(),
-                    8#val,
-                    $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
-                )
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: giveStatus(poison(5#val))
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool1", "rarity3"],
         price: 50,
     },
     {
         name: "fullLeadBullet",
         title: "Full Lead Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (9, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6, 3)",
-        baseDamage: 8,
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (4);\n$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (10)",
+        baseDamage: 5,
         effects: [
             {
-                trigger: shot(),
-                effect: giveStatus(poison(3#val, 6#val))
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
+                effect: giveStatus(poison(10#val))
             },
             {
                 trigger: turnBegin(),
-                effect: givePlayerStatus(poison(3#val, 9#val))
+                inZones: [zone.revolver],
+                effect: givePlayerStatus(poison(4#val))
             }
         ],
         cost: 2,
@@ -659,15 +669,15 @@ cards: [
         name: "gasBullet",
         title: "Gas Bullet",
         flavourText: "",
-        description: "$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (5, 4)",
-        baseDamage: 1,
+        description: "$trigger$On-Placedown:$trigger$\nThe enemy gets $status$POISON$status$ (5)",
+        baseDamage: 3,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
-                effect: giveStatus(poison(4#val, 5#val))
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: giveStatus(poison(5#val))
             }
         ],
-        cost: 2,
+        cost: 1,
         tags: ["pool2", "rarity2"],
         price: 50,
     },
@@ -679,7 +689,7 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: turnRevolver("left", 1)
             }
@@ -696,14 +706,14 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: cardDestroyed("onlySelf"),
+                trigger: cardDestroyed(onlySelfTriggers),
                 effect: buffDmg(
                     bSelectRevolverTarget(false, true, "Choose bullet that receives +8 dmg"),
                     8#val
                 )
             },
             {
-                trigger: cardDestroyed("onlySelf"),
+                trigger: cardDestroyed(onlySelfTriggers),
                 effect: putCardInHand("sacrificialBullet", 1#val)
             }
         ],
@@ -719,12 +729,12 @@ cards: [
         baseDamage: 1,
         effects: [
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: draw(1#val)
             },
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: buffDmg(bSelectSelf(), 8#val)
             }
@@ -741,7 +751,7 @@ cards: [
         baseDamage: 9,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: draw(value.rotationAmount)
             }
         ],
@@ -758,7 +768,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: damageDirect(7#val, false)
             }
         ],
@@ -774,13 +784,13 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
-                effect: buffDmg(
+                effect: buffDmgMultiplier(
                     bSelectSelf(),
-                    6#val,
+                    1.5,
                     $TargetedEnemyHealthAbovePercent { value: 0.5 }#modifierPredicate,
-                    sourceCardInZone(zone.revolver)
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
@@ -793,14 +803,14 @@ cards: [
         title: "Brick Bullet",
         flavourText: "I've not thrown this at a homeless man! It slipped out of my hand!",
         description: "$trigger$On-Placedown:$trigger$\n You get $status$SHIELD$status$ (6)",
-        baseDamage: 7,
+        baseDamage: 10,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
-                effect: givePlayerStatus(shield(6#val))
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: givePlayerStatus(shield(10#val))
             }
         ],
-        cost: 1,
+        cost: 2,
         tags: ["pool1", "rarity1"],
         price: 50,
     },
@@ -808,12 +818,13 @@ cards: [
         name: "shieldBullet",
         title: "Shield Bullet",
         flavourText: "",
-        description: "$trigger$On-Turn-Begin:$trigger$\nYou get $status$SHIELD$status$ (4)",
+        description: "$trigger$On-Turn-Begin:$trigger$\n$trigger$While in revolver$trigger$:\n$You get $status$SHIELD$status$ (4)",
         baseDamage: 0,
         effects: [
             {
                 trigger: turnBegin(),
-                effect: givePlayerStatus(shield(4#val))
+                inZones: [zone.revolver],
+                effect: givePlayerStatus(shield(5#val))
             }
         ],
         cost: 2,
@@ -828,11 +839,13 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: reserveGain(2#val)
             },
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: damagePlayer(1#val)
             }
         ],
@@ -845,7 +858,7 @@ cards: [
         name: "turtleBullet",
         title: "Turtle Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nYou get $status$SHIELD$status$ (x * 2), where x is the number of times this bullet has turned",
+        description: "$trigger$On-Shot:$trigger$\nYou get $status$SHIELD$status$ (x * 2), where x is the number of times this bullet has rotated",
         baseDamage: 5,
         effects: [
             {
@@ -862,12 +875,12 @@ cards: [
         name: "woodenBullet",
         title: "Wooden Bullet",
         flavourText: "Normally you would build houses or something out of wood, but I guess a bullet works too",
-        description: "$trigger$On-Leave:$trigger$\nYou get $status$SHIELD$status$ (7)",
+        description: "$trigger$On-Leave:$trigger$\nYou get $status$SHIELD$status$ (8)",
         baseDamage: 4,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
-                effect: givePlayerStatus(shield(7#val))
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
+                effect: givePlayerStatus(shield(8#val))
             }
         ],
         cost: 1,
@@ -882,11 +895,13 @@ cards: [
         baseDamage: 6,
         effects: [
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: draw(1#val)
             },
             {
-                trigger: cardReturnedHome("onlySelf"),
+                trigger: rotation() mustMatchPredicate inHomeSlot(),
+                inZones: [zone.revolver],
                 effect: buffDmg(
                     (inZone(zone.revolver))#bSelect,
                     3#val
@@ -925,12 +940,13 @@ cards: [
         baseDamage: 2,
         effects: [
             {
-                trigger: rotateIn(5, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), value.bulletInSlot2)
+                trigger: rotation() mustMatchPredicate (isSelf() and inRevolverSlot(5)),
+                inZones: [zone.revolver],
+                effect: buffDmg(bSelectSelf(), damageOfCard(inRevolverSlot(2)))
             }
         ],
         dark: true,
-        cost: 4,
+        cost: 3,
         tags: ["pool2", "rarity1"],
         price: 50,
     },
@@ -962,7 +978,7 @@ cards: [
         baseDamage: 0,
         effects: [
             {
-                trigger: leaveZone(zone.revolver, "onlySelf"),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: discharge(2#val)
             }
         ],
@@ -978,7 +994,7 @@ cards: [
         baseDamage: 4,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: protect(
                     (inRevolverSlot(3) and not(isSelf()))#bSelect,
                     1,
@@ -994,10 +1010,10 @@ cards: [
         title: "Kamikaze Bullet",
         flavourText: "Isn't like every bullet technically a kamikaze bullet?",
         description: "$trigger$On-Placedown:$trigger$\nAs an extra cost: destroy target other bullet.",
-        baseDamage: 10,
+        baseDamage: 12,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: destroy(bSelectRevolverTarget(false, true, "Choose card to destroy"))
             }
         ],
@@ -1013,7 +1029,8 @@ cards: [
         baseDamage: 10,
         effects: [
             {
-                trigger: cardDestroyed("allCards"),
+                trigger: cardDestroyed(allCardsTrigger),
+                inZones: [zone.revolver],
                 effect: damageDirect(value.sourceCardDamage * 2, false)
             }
         ],
@@ -1026,12 +1043,12 @@ cards: [
         title: "Molotov Bullet",
         flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
         description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
-        baseDamage: 6,
+        baseDamage: 2,
         traitEffects: [ "spray" ],
         effects: [
             {
                 trigger: shot(),
-                effect: giveStatus(burning(1#val, burningPercent, false))
+                effect: giveStatus(burning(2#val, burningPercent, false))
             }
         ],
         cost: 1,
@@ -1046,7 +1063,7 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
                 effect: addEncounterModifierWhileBulletIsInRevolver("drawonemorecard")
             }
@@ -1063,11 +1080,11 @@ cards: [
         baseDamage: 9,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: drawFromBottomOfDeck(1#val)
             }
         ],
-        cost: 2,
+        cost: 1,
         tags: ["pool2", "rarity1"],
         price: 40,
     },
@@ -1091,8 +1108,9 @@ cards: [
         name: "backupBullet",
         title: "Backup Bullet",
         flavourText: "Here to safe your ass",
-        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.",
-        baseDamage: 20,
+        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.\n\n$keyword$DEFENSE$keyword$ (18)",
+        baseDamage: 8,
+        parryNumber: 18,
         traitEffects: ["alwaysAtBottom"],
         effects: [
             {
@@ -1112,7 +1130,7 @@ cards: [
         baseDamage: 7,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlyOthers"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 inZones: [zone.revolver],
                 effect: buffDmg(bSelectSourceBullet(), 4#val)
             }
@@ -1129,33 +1147,33 @@ cards: [
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: buffDmgLimitValidity(
                     bSelectRevolverTarget(false, false, "Choose Bullet to buff"),
-                    10#val,
-                    sourceCardInZone(zone.revolver)
+                    8#val,
+                    sourceCardInZoneModifierPredicate(zone.revolver)
                 )
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "unobtainable", "not used", "not in collection"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
         name: "doodleBullet",
         title: "Doodle Bullet",
         flavourText: "A great activity when taking breaks from shooting people! Doodling!",
-        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +7 dmg.",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +4 dmg.",
         baseDamage: 4,
         effects: [
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
                 effect: search(1, costs(0)),
                 cacheAffectedCards: true
             },
             {
-                trigger: enterZone(zone.revolver, "onlySelf"),
-                effect: buffDmg(bSelectCachedBullets(), 7#val)
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: buffDmg(bSelectCachedBullets(), 4#val)
             }
         ],
         cost: 1,
@@ -1172,10 +1190,12 @@ cards: [
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                effect: bounce(bSelectRevolverTarget(false, false, "Choose Bullet to return to your hand"))
+                effect: bounce((
+                    inZone(zone.revolver) and (slotNumber() lessThan slotNumberOfSelf())
+                )#bSelect)
             }
         ],
-        cost: 2,
+        cost: 3,
         tags: ["pool2", "rarity1"],
         price: 50,
     },
@@ -1189,13 +1209,13 @@ cards: [
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                condition: $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) },
+                condition: $AnyEnemyHasStatusEffect { value: poison(0#val) },
                 effect: reserveGain(1#val)
             },
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                condition: $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) },
+                condition: $AnyEnemyHasStatusEffect { value: poison(0#val) },
                 effect: draw(1#val)
             }
         ],
@@ -1212,23 +1232,23 @@ cards: [
         effects: [
             {
                 trigger: cardsDrawn(false, true, true),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
-                trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                trigger: zoneChange(zone.revolver, zone.hand, false, onlySelfTriggers),
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
-                trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                trigger: zoneChange(zone.afterlife, zone.hand, false, onlySelfTriggers),
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
             {
-                trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
-                effect: buffDmg(bSelectSelf(), 9#val)
+                trigger: zoneChange(zone.limbo, zone.hand, false, onlySelfTriggers),
+                effect: buffDmg(bSelectSelf(), 4#val)
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "not used", "unobtainable", "not in collection"],
+        tags: ["pool2", "rarity1"],
         price: 50,
     },
     {
@@ -1239,20 +1259,20 @@ cards: [
         baseDamage: 2,
         effects: [
            {
-               trigger: zoneChange(zone.revolver, zone.hand, false, "onlySelf"),
+               trigger: zoneChange(zone.revolver, zone.hand, false, onlySelfTriggers),
                effect: reserveGain(1#val)
            },
            {
-               trigger: zoneChange(zone.afterlife, zone.hand, false, "onlySelf"),
+               trigger: zoneChange(zone.afterlife, zone.hand, false, onlySelfTriggers),
                effect: reserveGain(1#val)
            },
            {
-               trigger: zoneChange(zone.limbo, zone.hand, false, "onlySelf"),
+               trigger: zoneChange(zone.limbo, zone.hand, false, onlySelfTriggers),
                effect: reserveGain(1#val)
            },
         ],
         cost: 0,
-        tags: ["pool2", "rarity2", "not used", "unobtainable", "not in collection"],
+        tags: ["pool2", "rarity2", "not used", "unobtainable"],
         price: 50,
     },
     {
@@ -1264,7 +1284,7 @@ cards: [
         rightClickCost: 1,
         effects: [
             {
-                trigger: rightClicked("onlySelf"),
+                trigger: rightClicked(onlySelfTriggers),
                 inZones: [zone.revolver],
                 effect: discharge(1#val)
             }
@@ -1305,6 +1325,643 @@ cards: [
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "aircraftCarrierBullet",
+        title: "Aircraft Carrier Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\n$keyword$CREATE$keyword$ 3 [Kamikaze bullet] in your drawpile, then draw a card",
+        baseDamage: 15,
+        effects: [
+            {
+                trigger: shot(),
+                effect: shuffleCardsIntoStack("kamikazeBullet", 3#val)
+            },
+            {
+                trigger: shot(),
+                effect: draw(1#val)
+            },
+        ],
+        cost: 3,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "amethystBullet",
+        title: "Amethyst Bullet",
+        flavourText: "",
+        description: "$trigger$On-Turn-Begin:$trigger$\nyou draw 1 Card",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: draw(1#val)
+            },
+        ],
+        dark: true,
+        cost: 2,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "bulletOfSouls",
+        title: "Bullet of Souls",
+        flavourText: "",
+        description: "This bullet has +3 dmg for every Bullet currently in the Afterlife",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(inZone(zone.afterlife)) * 3,
+                    changedInOrOutOfZone(zone.afterlife, false, allCardsTrigger)
+                )
+            },
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "cupidsArrow",
+        title: "Cupid's Arrow",
+        flavourText: "\"Love is giving someone the power to hurt you, and trusting them not to use it.\" Paulo Coelho Adultery",
+        description: "$trait$EVERLASTING$trait$\n$trigger$On-Shot:$trigger$\nDeal 4 damage to yourself",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: shot(),
+                effect: damagePlayer(4#val)
+            },
+        ],
+        traitEffects: [ "everlasting" ],
+        cost: 1,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "cardBullet",
+        title: "Card Bullet",
+        flavourText: "",
+        description: "This bullet has +1 dmg for every card in your hand",
+        baseDamage: 1,
+        variableTexture: numberBasedVariableTexture(countCards(inZone(zone.hand)) atMost 20, 0),
+        effects: [
+            {
+                trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(inZone(zone.hand)),
+                    changedInOrOutOfZone(zone.hand, false, allCardsTrigger)
+                )
+            },
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "excaliBullet",
+        title: "Excalibullet",
+        flavourText: "For the king!",
+        description: "$trigger$On-Placedown:$trigger$\nThe bullet in Slot 3 " + slot.3 + " gets plus x dmg, for as long as Excalibullet is in the revolver, where x is the number of unique bullets with no duplicates currently in your drawpile",
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: buffDmgLimitValidity(
+                    (inZone(zone.revolver) and inRevolverSlot(3))#bSelect,
+                    value.uniqueCardsInTheStack,
+                    sourceCardInZoneModifierPredicate(zone.revolver)
+                )
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "hydroBullet",
+        title: "Hydro Bullet",
+        flavourText: "Don't forget to keep hydrated",
+        description: "$trigger$On-Shot:$trigger$\n$keyword$CLEANSE$keyword$",
+        baseDamage: 12,
+        effects: [
+            {
+                trigger: shot(),
+                effect: cleanse(),
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "decoyBullet",
+        title: "Decoy Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nPut target bullet into your hand",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: shot(),
+                effect: bounce(bSelectRevolverTarget(false, true, "Select bullet to put back into your hand")),
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "hyperactiveBullet",
+        title: "Hyperactive Bullet",
+        flavourText: "",
+        description: "$trigger$On-Rotate:$trigger$\nThis bullet will move to a random free slot. If there is no free slot, return this bullet to your hand.",
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: rotation(),
+                inZones: [zone.revolver],
+                effect: beHyperactive(),
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "damascusSteelBullet",
+        title: "Damascus Steel Bullet",
+        flavourText: "",
+        description: "$trait$JAMMED$trait$\n$trait$HARDENED$trait$ (2)",
+        baseDamage: 9,
+        rotation: $Dont {},
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                isHidden: true,
+                effect: protectParryOnlyLimitValidity(
+                    bSelectSelf(),
+                    2,
+                    sourceCardInZoneModifierPredicate(zone.revolver)
+                ),
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "gladiatorBullet",
+        title: "Gladiator Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nAll other bullets in the revolver get $trait$PROTECTED$trait$ (1) ",
+        baseDamage: 15,
+        effects: [
+            {
+                trigger: shot(),
+                effect: protect(
+                    (inZone(zone.revolver) and not(isSelf()))#bSelect,
+                    1,
+                )
+            }
+        ],
+        cost: 4,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "possessedBullet",
+        title: "Possessed Bullet",
+        flavourText: "",
+        description: "$trigger$On-Destroy:$trigger$\nThe revolver rotates left once",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: cardDestroyed(onlySelfTriggers),
+                effect: turnRevolver("left", 1)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "spiderBullet",
+        title: "Spider Bullet",
+        flavourText: "Im sorry to everyone with arachnophobia... tho, if I had that, i probably wouldn't look at that hairy thing just to read an apology. Ew",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet inflicts a Statuseffect:$trigger$\nThis bullet gets +5 dmg and you draw 1 card",
+        baseDamage: 3,
+        effects: [
+            {
+                trigger: statusEffectInflicted(true),
+                inZones: [zone.revolver],
+                effect: buffDmg(bSelectSelf(), 5#val)
+            },
+            {
+                trigger: statusEffectInflicted(true),
+                inZones: [zone.revolver],
+                effect: draw(1#val)
+            },
+        ],
+        cost: 2,
+        dark: true,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "steelBullet",
+        title: "Steel Bullet",
+        flavourText: "",
+        description: "$trait$HARDENED$trait$ (2)",
+        baseDamage: 12,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                isHidden: true,
+                effect: protectParryOnlyLimitValidity(
+                    bSelectSelf(),
+                    2,
+                    sourceCardInZoneModifierPredicate(zone.revolver)
+                ),
+            }
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "tellub",
+        title: "Tellub",
+        flavourText: "",
+        description: "",
+        baseDamage: 1,
+        effects: [],
+        cost: 11,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "wingedBullet",
+        title: "Winged Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nThis Bullet rotates to the right twice",
+        rotation: $Right { amount: 2 },
+        baseDamage: 5,
+        effects: [],
+        cost: 2,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "cactusBullet",
+        title: "Cactus Bullet",
+        flavourText: "",
+        description: "$trait$THORNS$trait$\n$keyword$DEFENSE$keyword$ (16)",
+        baseDamage: 8,
+        parryNumber: 16,
+        traitEffects: [ "thorns" ],
+        effects: [],
+        cost: 2,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "eepyBullet",
+        title: "Eepy Bullet",
+        flavourText: "Zzzzzzz",
+        description: "$trigger$On-Leave:$trigger$\nDraw x cards, where x is the number of turns this bullet stayed in the revolver",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
+                effect: draw(value.timeInRevolver)
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "forsakenBullet",
+        title: "Forsaken Bullet",
+        flavourText: "Sometimes you just have to let it go...",
+        description: "Destroy this bullet on its third rotation.",
+        baseDamage: 10,
+        effects: [
+            {
+                trigger: rotation() mustMatchPredicate rotationCount(3),
+                inZones: [zone.revolver],
+                effect: destroy(bSelectSelf())
+            }
+        ],
+        cost: 1,
+        tags: ["pool1", "rarity3"],
+        price: 50,
+    },
+    {
+        name: "iceBullet",
+        title: "Ice Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nYou get $status$FROZEN$status$ (2)",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: givePlayerStatus(frozen(2#val))
+            }
+        ],
+        cost: 1,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "icedOutBullet",
+        title: "Iced Out Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nin slot 4" + slot.4 + ":\nyou get $status$FROZEN$status$ (4)\n$trigger$On-Leave:$trigger$\ndraw 1 card",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers) mustMatchPredicate inRevolverSlot(4),
+                effect: givePlayerStatus(frozen(4#val))
+            },
+            {
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
+                effect: draw(1#val)
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "opalBullet",
+        title: "Opal Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\ndraw x cards, where x is the highest number of unique status effects on an enemy",
+        baseDamage: 2,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: draw(value.mostUniqueStatusEffectsOnEnemy)
+            },
+        ],
+        cost: 2,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "punkBullet",
+        title: "Punk Bullet",
+        flavourText: "",
+        description: "Nothing can stop you from playing this in the revolver",
+        baseDamage: 4,
+        traitEffects: [ "punk" ],
+        effects: [],
+        cost: 1,
+        tags: ["pool1", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "theWorldBullet",
+        title: "The World Bullet",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nIf The World Bullet hasn't rotated at least once last turn, destroy it.\n\nWhenever this bullet completes a $keyword$FULL ROTATION$keyword$ in the revolver:\nThis bullet get +50% dmg",
+        baseDamage: 12,
+        effects: [
+            {
+                trigger: turnBegin() mustMatchPredicate (lastTurnRotationCounter() equals 0),
+                inZones: [zone.revolver],
+                effect: destroy(bSelectSelf())
+            },
+            {
+                trigger: rotation() mustMatchPredicate (continuousTurnRotationCounter() equals 5),
+                inZones: [zone.revolver],
+                effect: buffDmgMultiplier(bSelectSelf(), 1.5)
+            }
+        ],
+        cost: 2,
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "stingrayBullet",
+        title: "Stingray Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nIf the enemy has $status$POISON$status$:\ntarget other bullet in the revolver gets +x, where x is half of the POISON Parameter of the enemy rounded down, for as long as it is in the revolver",
+        baseDamage: 6,
+        effects: [
+            {
+                trigger: shot(),
+                condition: $AnyEnemyHasStatusEffect {
+                    value: poison(0#val)
+                },
+                inZones: [zone.revolver],
+                effect: buffDmgLimitValidity(
+                    bSelectRevolverTarget(false, true, "Select bullet to buff"),
+                    value.highestPoison * 0.5,
+                    cardInZoneModifierPredicate(zone.revolver)
+                )
+            },
+        ],
+        cost: 3,
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
+    {
+        name: "hydraBullet",
+        title: "Hydra Bullet",
+        flavourText: "",
+        description: "$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
+                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
+            },
+            {
+                trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(hasName("hydraHeadBullet") and not(inZone(zone.stack))),
+                    changedInOrOutOfZone(zone.stack, false, allCardsTrigger)
+                )
+            },
+        ],
+        cost: 1,
+        tags: [ "pool2", "rarity1" ],
+        price: 50,
+    },
+    {
+        name: "hydraHeadBullet",
+        title: "Hydra-Head Bullet",
+        flavourText: "",
+        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        baseDamage: 0,
+        effects: [
+            {
+                trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
+                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
+            },
+            {
+                trigger: enterZone(zone.stack, onlySelfTriggers),
+                maxExecutions: 1,
+                effect: buffDmgTransformable(
+                    bSelectSelf(),
+                    countCards(hasName("hydraHeadBullet") and not(inZone(zone.stack))),
+                    changedInOrOutOfZone(zone.stack, false, allCardsTrigger)
+                )
+            },
+        ],
+        cost: 1,
+        tags: [ "unobtainable" ],
+        price: 0,
+    },
+    {
+        name: "parrabellumBullet",
+        title: "Parrabellum Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nCreate 7 [Mini Bullets] in the AFTERLIFE.\n\n\n$trigger$While in Revolver:$trigger$\n$trigger$Whenever the Revolver shoots:$trigger$\n$keyword$DESCEND$keyword$",
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: createBulletsInAfterlife("miniBullet", 7#val)
+            },
+            {
+                trigger: afterShot(allCardsTrigger),
+                inZones: [zone.revolver],
+                effect: descendBullet()
+            }
+        ],
+        cost: 1,
+        tags: [ "pool2", "rarity1" ],
+        price: 50,
+    },
+    {
+        name: "checkpointBullet",
+        title: "Checkpoint Bullet",
+        flavourText: "",
+        description: "$trigger$On-Turn-Begin:$trigger$\n$keyword$RESURRECT$keyword$.\nResurect only in slots ajacent to this bullet",
+        baseDamage: 7,
+        effects: [
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: resurrect(slotGetterAdjacentSlots("Select slot to resurrect into"))
+            },
+        ],
+        cost: 2,
+        tags: [ "pool2", "rarity1" ],
+        price: 50,
+    },
+    {
+        name: "necromancerBullet",
+        title: "Necromancer Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$RESURRECT$keyword$ three times.\nResurect only in slots smaller that the one this Bullet was placed into",
+        baseDamage: 5,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: resurrect(slotGetterSmallerSlots("Select slot to resurrect into"))
+            },
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: resurrect(slotGetterSmallerSlots("Select slot to resurrect into"))
+            },
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: resurrect(slotGetterSmallerSlots("Select slot to resurrect into"))
+            },
+        ],
+        dark: true,
+        cost: 3,
+        tags: [ "pool2", "rarity1" ],
+        price: 50,
+    },
+    {
+        name: "boo_llet",
+        title: "Boo! llet",
+        flavourText: "Ahhhh!",
+        description: "$trigger$On-Placedown:$trigger$\nThe targeted Enemy gets $status$WEAK$status$ (1)",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: giveStatus(weak(3#val))
+            },
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
+    {
+        name: "ninjaBullet",
+        title: "Ninja Bullet",
+        flavourText: "",
+        description: "$trait$PERSISTENCE$trait$\nWhenever this Bullet changes $keyword$ZONE$keyword$:\nit gets +1 dmg",
+        traitEffects: [ "persistence" ],
+        baseDamage: 1,
+        effects: [
+            {
+                trigger: leaveZone(zone.revolver, onlySelfTriggers, false),
+                effect: buffDmg(bSelectSelf(), 1#val)
+            },
+            {
+                trigger: leaveZone(zone.stack, onlySelfTriggers, false),
+                effect: buffDmg(bSelectSelf(), 1#val)
+            },
+            {
+                trigger: leaveZone(zone.hand, onlySelfTriggers, false),
+                effect: buffDmg(bSelectSelf(), 1#val)
+            },
+            {
+                trigger: leaveZone(zone.afterlife, onlySelfTriggers, false),
+                effect: buffDmg(bSelectSelf(), 1#val)
+            },
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity1" ],
+        price: 50,
+    },
+    {
+        name: "lemonBullet",
+        title: "Lemon Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$DISCARD$keyword$ target bullet",
+        baseDamage: 8,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: discard(bSelectHandTarget(false, true, "Select bullet to discard"))
+            },
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
+    {
+        name: "letterBullet",
+        title: "Letter Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nShuffle target card from your hand into your drawpile",
+        baseDamage: 4,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: shuffleCardFromHandIntoStack(bSelectHandTarget(false, true, "Select bullet to shuffle into the drawpile"))
+            },
+        ],
+        cost: 0,
+        tags: [ "pool1", "rarity3" ],
         price: 50,
     },
 

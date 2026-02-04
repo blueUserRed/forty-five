@@ -23,7 +23,7 @@ stats: {
 },
 
 position: {
-    map: "location.aqua_balle",  //TODO CHANGE BACK TO "aqua_balle"; PLEASE TELL ME THIS MARVIN
+    map: "aqua_balle",  //TODO CHANGE BACK TO "aqua_balle"; PLEASE TELL ME THIS MARVIN
     node: 0,
     lastNode: null
 },

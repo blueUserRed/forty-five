@@ -28,11 +28,14 @@ import kotlin.system.measureTimeMillis
 
 
 abstract class Resource(
+    val namespace: String?,
     val handle: String,
     var variants: List<Any> = listOf(),
     var disposables: List<Disposable> = listOf(),
     val borrowedBy: MutableSet<ResourceBorrower> = mutableSetOf(),
 ) : Disposable {
+
+    val combinedHandle: String = namespace?.let { "$namespace:$handle" } ?: handle
 
     var state: ResourceState = ResourceState.NOT_LOADED
         protected set
@@ -161,7 +164,7 @@ abstract class Resource(
         state = ResourceState.NOT_LOADED
     }
 
-    override fun toString(): String = handle
+    override fun toString(): String = combinedHandle
 
     enum class ResourceState {
         NOT_LOADED, PREPARED, LOADED
@@ -175,13 +178,14 @@ abstract class Resource(
 }
 
 class TextureResource(
+    namespace: String?,
     handle: String,
     val file: String,
     val tileable: Boolean,
     val tileScale: Float,
     val useMipMaps: Boolean,
     val dropShadowData: DropShadowData?
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var pixmap: Pixmap? = null
 
@@ -229,11 +233,12 @@ class TextureResource(
 }
 
 class FontResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val imageFile: String,
     private val fontFile: String,
     private val markupEnabled: Boolean,
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var pixmap: Pixmap? = null
     private var fontData: BitmapFontData? = null
@@ -263,9 +268,10 @@ class FontResource(
 }
 
 class AtlasResource(
+    namespace: String?,
     handle: ResourceHandle,
     val file: String
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var data: TextureAtlasData? = null
     private var pages: MutableMap<String, Pixmap>? = null
@@ -308,10 +314,11 @@ class AtlasResource(
 }
 
 class AtlasRegionResource(
+    namespace: String?,
     handle: ResourceHandle,
     val regionName: String,
     val atlasResourceHandle: String
-) : Resource(handle), ResourceBorrower {
+) : Resource(namespace, handle), ResourceBorrower {
 
     private val atlasResource: AtlasResource by lazy {
         val atlasResource = FortyFive.resourceManager.resources.find { it.handle == atlasResourceHandle }
@@ -360,11 +367,12 @@ class AtlasRegionResource(
 }
 
 class CursorResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val file: String,
     private val hotspotX: Int,
     private val hotspotY: Int
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var pixmap: Pixmap? = null
 
@@ -386,10 +394,11 @@ class CursorResource(
 }
 
 class ShaderResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val file: String,
     private val constantArgs: Map<String, Any>
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var preProcessor: BetterShaderPreProcessor? = null
     private var preProcessedCode: Pair<String, String>? = null
@@ -412,9 +421,10 @@ class ShaderResource(
 }
 
 class ColorTextureResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val color: Color
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var pixmap: Pixmap? = null
 
@@ -440,11 +450,12 @@ class ColorTextureResource(
 }
 
 class ParticleResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val file: String,
     private val textureDirectory: String,
     private val scale: Float
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     override suspend fun prepareLoadingAllThreads() {
         // TODO: figure out how to load resources early
@@ -460,6 +471,7 @@ class ParticleResource(
 }
 
 class NinepatchResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val file: String,
     private val left: Int,
@@ -467,7 +479,7 @@ class NinepatchResource(
     private val top: Int,
     private val bottom: Int,
     private val scale: Float
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var pixmap: Pixmap? = null
 
@@ -494,9 +506,10 @@ class NinepatchResource(
 }
 
 class PixmapFontResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val fontFile: String,
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var font: PixmapFont? = null
 
@@ -511,11 +524,12 @@ class PixmapFontResource(
 }
 
 class DeferredFrameAnimationResource(
+    namespace: String?,
     handle: ResourceHandle,
     val previewHandle: ResourceHandle,
     val atlasHandle: ResourceHandle,
     val frameTime: Int
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var anim: DeferredFrameAnimation? = null
 
@@ -531,9 +545,10 @@ class DeferredFrameAnimationResource(
 }
 
 class SoundResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val file: String,
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var sound: Sound? = null
 
@@ -553,9 +568,10 @@ class SoundResource(
 }
 
 class MusicResource(
+    namespace: String?,
     handle: ResourceHandle,
     private val file: String,
-) : Resource(handle) {
+) : Resource(namespace, handle) {
 
     private var music: Music? = null
 

@@ -40,8 +40,6 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         mutableMapOf()
     )
 
-    val events: EventPipeline = EventPipeline()
-
     val profilePath: File = File("profiles/$name")
 
     private var dirty: Boolean = true
@@ -51,7 +49,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     private var _playerMoney: Int by DataDelegate(
         ProfileData::playerMoney,
         onSet = { value ->
-            events.fire(MoneyChangedEvent(value))
+            FortyFive.currentScreen?.events?.fire(MoneyChangedEvent(value))
         }
     )
     val playerMoney: Int
@@ -225,7 +223,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         }
 
         val cardsToTakeAlong = if (run.type == RunType.LIMITED) {
-            listOf()
+            limitedTakeAlong.toList()
         } else {
             currentCollectionDeck.cards
         }
@@ -308,7 +306,6 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     fun extractableCards(): List<String> {
         val runSave = runSave
             ?: throw RuntimeException("Profile.extractableCards() can only be called when a run is active")
-        if (runSave.run.type == RunType.LIMITED) return currentRunDeck!!.cards
         val cardsToExtract = currentRunDeck!!.cards.toMutableList()
         runSave.cardsTakenAlong.forEach { card ->
             cardsToExtract.remove(card)
@@ -317,7 +314,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     }
 
     private fun loadAreaMap(map: String) {
-        val newMapFile = lookupAreaFile(map) ?: throw RuntimeException("no file for area: $map")
+        val newMapFile = lookupAreaFile(map)
+            ?: throw RuntimeException("no file for area: $map")
         this.currentMapFile = newMapFile
         currentAreaMap = DetailMap.readFromFile(newMapFile)
         _currentMapName = map
@@ -535,6 +533,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
         const val logTag: String = "Profile"
 
+        val limitedTakeAlong: Array<String> = arrayOf("bigBullet", "silverBullet", "workerBullet", "incendiaryBullet")
+
         val dataFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/profile_data.onjschema").file())
         }
@@ -565,6 +565,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
                 profile.loadAreaMap(profile._currentMapName)
                 return profile
             } catch (e: Exception) {
+                FortyFive.logger.severe(logTag, "Error loading profile: $profileName")
+                FortyFive.logger.stackTrace(e)
                 markVersionFileCorrupted(profileName)
                 return null
             }

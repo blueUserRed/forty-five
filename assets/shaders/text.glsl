@@ -12,17 +12,16 @@ precision mediump float;
 #define LOWP
 #endif
 
+uniform vec4 u_color;
+
+// ignore v_color and use u_color instead, because libgdx sets v_color to strange values when rendering fonts
 in LOWP vec4 v_color;
 in vec2 v_texCoords;
 uniform sampler2D u_texture;
 out vec4 outColor;
 
 void main() {
-//    vec4 color = v_color * texture2D(u_texture, v_texCoords);
-//    float value = (color.r + color.g + color.b) / 3.0;
-//    outColor = vec4(value, value, value, color.a);
     vec4 texture = texture2D(u_texture, v_texCoords);
-    //vec4 color = texture * v_color;
-    outColor = vec4(v_color.rgb, texture.a);
+    outColor = vec4(u_color.rgb, texture.a * u_color.a);
 }
 

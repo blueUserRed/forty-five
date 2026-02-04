@@ -1,3 +1,4 @@
+///schema=onjschemas/assets.onjschema
 import "imports/colors.onj" as color;
 
 use Common;
@@ -360,7 +361,8 @@ textures: [
     },
     {
         name: "map_detail_background",
-        file: "blobs/map/detail/background.png"
+        file: "blobs/map/detail/background.png",
+        dropShadow: defaultDropShadowConfig,
     },
     {
         name: "map_detail_encounter_modifier_background",
@@ -493,6 +495,7 @@ textures: [
     },
     {
         name: "map_decoration_bewitched_forest_sheep_1",
+        useMipMaps: false,
         file: "blobs/map/decorations/bewitched_forest_sheep_1.png"
     },
     {
@@ -501,6 +504,7 @@ textures: [
     },
     {
         name: "map_decoration_bewitched_forest_tree1",
+        useMipMaps: false,
         file: "blobs/map/decorations/bewitched_forest_tree1.png"
     },
     {
@@ -757,6 +761,8 @@ textures: [
     },
     {
         name: "dialog_background",
+        useMipMaps: false,
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/events/dialog/background.png"
     },
     {
@@ -965,10 +971,12 @@ textures: [
     },
     {
         name: "detail_widget_background_big",
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/cards/detail_widget/detailwidget_big.png"
     },
     {
         name: "detail_widget_background_small",
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/cards/detail_widget/detailwidget_small.png"
     },
     {
@@ -1145,6 +1153,7 @@ textures: [
     },
     {
         name: "common_popup_background_black_large",
+        dropShadow: defaultDropShadowConfig,
         file: "blobs/common/backgrounds/popup_black_large.png",
     },
     {
@@ -1243,6 +1252,10 @@ textures: [
         name: "card_symbol_text_t_equals",
         file: "blobs/cards/symbols/text/t_equals.png",
     },
+    {
+        name: "particle_rain",
+        file: "blobs/particles/rain2.png",
+    },
 ],
 
 cursors: [
@@ -1261,7 +1274,7 @@ shaders: [
         constantArgs: {
             timeOffset: 1_500,
             speed: 14.0,
-            mag: 0.2,
+            mag: 0.3,
         }
     },
     {
@@ -1313,8 +1326,8 @@ shaders: [
         }
     },
     {
-        name: "bewitched_fog_static_noise_shader",
-        file: "shaders/bewitched_fog_static_noise.glsl",
+        name: "postprocessor_shader",
+        file: "shaders/postprocessor.glsl",
         constantArgs: {
         }
     },

@@ -171,7 +171,7 @@ class WarningParent(
                 relativeWidth(72f)
                 marginLeft = 8f
 
-                label("roadgeek", text, level.fontColor, 12) {
+                label("roadgeek", text, level.fontColor, 16) {
                     relativeWidth(100f)
                     relativeHeight(100f)
                     wrap = true
