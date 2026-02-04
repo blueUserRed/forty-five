@@ -7,22 +7,45 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.OnjScreen
 
+/**
+ * enables an actor to participate in the input system
+ */
 interface InputActor {
 
     val actor: Actor
     val inputCallbacks: Map<Input, List<() -> Unit>>
     val observedStates: Set<InputState>
 
+    /**
+     * the detailWidget is shown to provide additional information, e.g. on hover
+     */
     var detailWidget: DetailWidget?
 
+    /**
+     * set to true to enable the user to drag the actor around
+     */
     var isDraggable: Boolean
+
+    /**
+     * set to true to enable the user drop another actor on this one
+     */
     var isDropTarget: Boolean
     val groups: List<String>
 
+    /**
+     * true when the actor is currently being dragged
+     */
     var isDragged: Boolean
+    /** the x position of the actor when it is currently dragged */
     var dragX: Float
+    /** the y position of the actor when it is currently dragged */
     var dragY: Float
 
+    /**
+     * sets in what way the actor participates in the selection hierarchy
+     *
+     * see [KeyboardFocusable]
+     */
     var keyboardFocusable: KeyboardFocusable
 
     var infoObject: Any?
@@ -79,12 +102,27 @@ interface InputActor {
 
     fun childWasKeyboardFocused(child: InputActor) {}
 
-    fun drawInDrag(batch: Batch)
+    fun drawInDrag(batch: Batch, oX: Float, oY: Float)
 
     fun onRemove()
 
 }
 
+interface ActorWithDragFeatures {
+
+    var alsoDrawOriginalInDrag: Boolean
+}
+
+/**
+ * what role an actor plays in the selection hierarchy
+ *
+ * GROUP is used for actors that contain children (direct or not) that can be selected
+ *
+ * LEAF is used for actors that can be selected themselves
+ *
+ * NONE is used for actors that don't participate in the selection process and don't have children that
+ * can be selected
+ */
 enum class KeyboardFocusable {
     LEAF, GROUP, NONE
 }
@@ -325,7 +363,7 @@ class InputActorImpl : InputActor {
         return (actor as InputActor).childrenInCorrectOrder() ?: group.children
     }
 
-    override fun drawInDrag(batch: Batch) {
+    override fun drawInDrag(batch: Batch, oX: Float, oY: Float) {
         actor.draw(batch, 1f)
     }
 

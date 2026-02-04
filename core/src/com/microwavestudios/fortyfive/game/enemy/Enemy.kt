@@ -10,6 +10,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
+import kotlin.math.log
 
 data class EnemyPrototype(
     val name: String,
@@ -25,7 +26,7 @@ class Enemy(
     val health: Int,
 ) {
 
-    val logTag = "enemy-$name-${++instanceCounter}"
+    val logTag = "$name-${++instanceCounter}"
 
     private var brain: EnemyBrain = NoOpEnemyBrain
 
@@ -55,42 +56,50 @@ class Enemy(
     val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
-    var additionalDamage: Int = 0
-        private set
+    private var nextActionCreator: EnemyActionCreator? = null
+    private var nextActionShown: Boolean = true
+    private var createdNextAction: EnemyAction? = null
+    private var createdWithDifficulty: Double = 1.0
 
-    fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
-        additionalDamage = 0
-        val nextAction = brain.chooseNewAction(controller, this, difficulty, otherActions)
-        if (
-            nextAction !is NextEnemyAction.ShownEnemyAction ||
-            nextAction.action.prototype !is EnemyActionPrototype.DamagePlayer
-        ) {
-            val event = EnemyActionChangedEvent(nextAction, 0, null)
-            enemyEvents.fire(event)
-            return nextAction
+    fun chooseNewAction(
+        controller: GameController,
+        difficulty: Double,
+        otherActions: List<Pair<EnemyActionPrototype, Boolean>>
+    ): Pair<EnemyActionPrototype, Boolean>? {
+        createdWithDifficulty = difficulty
+        val (actionProto, shown) = brain.chooseNewAction(controller, this, difficulty, otherActions) ?: run {
+            nextActionCreator = null
+            createdNextAction = null
+            enemyEvents.fire(EnemyActionChangedEvent(NextEnemyAction.None))
+            return null
         }
-        val additionalDmgActions = controller
-            .playerStatusEffects
-            .zip { it.additionalEnemyDamage(nextAction.action.directDamageDealt, StatusEffectTarget.PlayerTarget) }
-            .filter { it.second != 0 }
-        if (additionalDmgActions.isEmpty()) {
-            val event = EnemyActionChangedEvent(nextAction, 0, null)
-            enemyEvents.fire(event)
-            return nextAction
-        }
-        if (additionalDmgActions.size > 1) {
-            FortyFive.logger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
-        }
-        val (action, additionalDamage) = additionalDmgActions.first()
-        this.additionalDamage = additionalDamage
-        val event = EnemyActionChangedEvent(nextAction, additionalDamage, action.iconHandle)
+        val creator = actionProto.newCreator(controller, difficulty)
+        val created = creator()
+        nextActionCreator = creator
+        createdNextAction = created
+        nextActionShown = shown
+
+        val nextAction = if (shown) NextEnemyAction.ShownEnemyAction(created) else NextEnemyAction.HiddenEnemyAction
+        val event = EnemyActionChangedEvent(nextAction)
         enemyEvents.fire(event)
-        return nextAction
+        return actionProto to shown
+    }
+
+    fun reevaluateAction(controller: GameController) {
+        val newAction = nextActionCreator?.invoke()
+        createdNextAction = newAction
+        val nextAction = when {
+            newAction == null -> NextEnemyAction.None
+            nextActionShown -> NextEnemyAction.ShownEnemyAction(newAction)
+            else -> NextEnemyAction.HiddenEnemyAction
+        }
+        val event = EnemyActionChangedEvent(nextAction)
+        enemyEvents.fire(event)
     }
 
     fun resolveAction(controller: GameController, difficulty: Double): EnemyAction? {
-        val action = brain.resolveEnemyAction(controller, this, difficulty)
-        return action
+        brain.onNewTurn(controller, this)
+        return createdNextAction
     }
 
     fun applyEffect(effect: StatusEffect, controller: GameController) {
@@ -118,6 +127,10 @@ class Enemy(
         .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
+    fun executeStatusEffectsAfterShot(): Timeline = _statusEffects
+        .mapNotNull { it.executeAfterShot() }
+        .collectTimeline()
+
     fun update() {
         var change = false
         _statusEffects.removeIf { effect ->
@@ -130,13 +143,6 @@ class Enemy(
         }
         if (!change) return
         enemyEvents.fire(StatusEffectsChangedEvent)
-    }
-
-    private fun getPlayerDamagedTimeline(
-        damage: Int,
-        gameController: GameController,
-    ): Timeline = Timeline.timeline {
-        include(gameController.damagePlayerTimeline(damage))
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
@@ -185,14 +191,14 @@ class Enemy(
         )
     }
 
+    override fun toString(): String {
+        return logTag
+    }
+
     data object HealthChangedEvent
     data object StatusEffectsChangedEvent
     data class PlayChargeAnimationEvent(val timeline: Promise<Timeline> = Promise())
-    data class EnemyActionChangedEvent(
-        val nextAction: NextEnemyAction,
-        val additionalDamage: Int,
-        val additionalDamageIcon: String?
-    )
+    data class EnemyActionChangedEvent(val nextAction: NextEnemyAction)
 
     companion object {
 

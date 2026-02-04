@@ -1,10 +1,13 @@
 package com.microwavestudios.fortyfive.game.widgets
 
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
@@ -16,20 +19,22 @@ import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
 import com.microwavestudios.fortyfive.screen.actors.CustomWrap
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 
 class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
     private var actor: CustomBox? = null
 
-    private var cards: MutableList<Card> = mutableListOf()
+    private var _cards: MutableList<Card> = mutableListOf()
+    val cards: List<Card>
+        get() = _cards
 
     private val afterlifeEvents: EventPipeline = EventPipeline()
-
-    private var slots: List<CustomBox> = listOf()
 
     var isOpen: Boolean = false
         private set
@@ -40,7 +45,9 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
     var afterlifeIsVisible: Boolean = false
         private set
 
-    private val openFilter = InputManager.FocusFilter(listOf(afterliveSlotGroup), screen)
+    private val openFilter = InputManager.FocusFilter(listOf(afterlifeSlotGroup), screen)
+
+    private lateinit var slotParent: CustomScrollableBox
 
     init {
         openFilter.start()
@@ -56,12 +63,46 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
     }
 
     fun pushCard(card: Card) {
-        cards.add(card)
-        afterlifeEvents.fire(Events.CardPushed)
+        _cards.add(card)
+        afterlifeEvents.fire(Events.CardsChanged)
     }
 
-    fun removeFirst() {
+    fun scrollToBeginTimeline(): Timeline = slotParent.scrollToBeginTimeline()
 
+    fun popCardTimeline(): Timeline = Timeline.timeline {
+        later {
+            val duration = 0.3f
+            val toRemove = _cards.firstOrNull()
+            requireNotNull(toRemove) { "can't pop card, afterlife is empty" }
+
+            _cards.getOrNull(1)?.let { slotParent.liftChild = it.actor.parent }
+            _cards.forEachIndexed { index, card ->
+                if (index == 0) return@forEachIndexed
+                val cardBefore = _cards[index - 1]
+                val xBefore = cardBefore.actor.localToStageCoordinates(Vector2(cardBefore.actor.x, cardBefore.actor.y)).x
+                val thisX = card.actor.localToStageCoordinates(Vector2(card.actor.x, card.actor.y)).x
+                var diff = xBefore - thisX
+                if (index == 1) diff -= 15f
+                val action = PropertyAction(
+                    card.actor,
+                    card.actor::drawOffsetX,
+                    diff,
+                )
+                action.duration = duration
+                action.interpolation = Interpolation.pow4
+                card.actor.addAction(action)
+            }
+            delay((duration * 1000).toInt())
+        }
+        action {
+            slotParent.liftChild = null
+            _cards.forEach { card ->
+                card.actor.drawOffsetX = 0f
+                card.actor.clearActions()
+            }
+            _cards.removeFirst()
+            afterlifeEvents.fire(Events.CardsChanged)
+        }
     }
 
     fun toggleTimeline(): Timeline = Timeline.timeline { later {
@@ -111,8 +152,6 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
 
 
     private fun CustomBox.createSlots(creator: ScreenCreator) = with(creator) {
-        val slots = mutableListOf<CustomBox>()
-
         box {
             relativeWidth(100f)
             relativeHeight(100f)
@@ -127,33 +166,34 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                 backgroundHandle = "afterlife_bullet_affected"
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
-                marginBottom = 50f
+                marginBottom = 40f
 
-                val card = cards.getOrNull(0)
-                val firstSlot = box {
+                box {
                     width = 150f
                     height = 150f
                     backgroundHandle = "afterlife_card_slot"
                     verticalAlign = CustomAlign.CENTER
                     horizontalAlign = CustomAlign.CENTER
                     marginBottom = 10f
-                    joinGroup(afterliveSlotGroup)
+                    joinGroup(afterlifeSlotGroup)
                     keyboardFocusable = KeyboardFocusable.LEAF
                     observeInputState(
                         GameInputs.States.focused,
                         { debug = true },
                         { debug = false }
                     )
-                    if (card == null) return@box
-                    actor(card.actor) {
-                        width = 120f
-                        height = 120f
+                    afterlifeEvents.watchFor<Events.CardsChanged> {
+                        clearChildren()
+                        val card = _cards.getOrNull(0) ?: return@watchFor
+                        actor(card.actor) {
+                            width = 120f
+                            height = 120f
+                        }
                     }
                 }
-                slots.add(firstSlot)
             }
 
-            box(isScrollable = true) {
+            val scrollableBox = box(isScrollable = true) {
                 this as CustomScrollableBox
                 flexDirection = FlexDirection.ROW_REVERSE
                 height = 200f
@@ -167,34 +207,52 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
                     "afterlife_scrollbar",
                     "afterlife_scrollbar_background",
                 )
-                repeat(cards.size.coerceAtLeast(4)) { index ->
-                    val card = cards.getOrNull(index + 1)
-                    val slot = box {
-                        marginRight = 10f
-                        width = 120f
-                        height = 120f
-                        backgroundHandle = "afterlife_card_slot"
-                        verticalAlign = CustomAlign.CENTER
-                        horizontalAlign = CustomAlign.CENTER
-                        joinGroup(afterliveSlotGroup)
-                        keyboardFocusable = KeyboardFocusable.LEAF
-                        observeInputState(
-                            GameInputs.States.focused,
-                            { debug = true },
-                            { debug = false }
-                        )
-                        if (card == null) return@box
-                        actor(card.actor) {
-                            width = 120f
-                            height = 120f
-                        }
-                    }
-                    slots.add(slot)
+                var slotsCreated = 5
+                repeat(slotsCreated - 1) { index -> createSlot(this@box, index) }
+                invalidateHierarchy()
+                afterlifeEvents.watchFor<Events.CardsChanged> {
+                    val diff = _cards.size - slotsCreated
+                    if (diff <= 0) return@watchFor
+                    repeat(diff) { i -> createSlot(this@box, slotsCreated + i - 1) }
+                    slotsCreated += diff
                 }
             }
+            slotParent = scrollableBox as CustomScrollableBox
             layout()
         }
-        this@Afterlife.slots = slots
+    }
+
+    private fun ScreenCreator.createSlot(parent: CustomBox, index: Int) = with(parent) {
+        var card: Card?
+        box {
+            marginRight = 10f
+            width = 120f
+            height = 120f
+            backgroundHandle = "afterlife_card_slot"
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.CENTER
+            joinGroup(afterlifeSlotGroup)
+            keyboardFocusable = KeyboardFocusable.LEAF
+            observeInputState(
+                GameInputs.States.focused,
+                { debug = true },
+                { debug = false }
+            )
+            afterlifeEvents.watchFor<Events.CardsChanged> {
+                clearChildren()
+                card = _cards.getOrNull(index + 1)
+                if (card == null) return@watchFor
+                actor(card!!.actor) {
+                    width = 120f
+                    height = 120f
+                }
+            }
+            card = _cards.getOrNull(index + 1)
+            if (card != null) actor(card!!.actor) {
+                width = 120f
+                height = 120f
+            }
+        }
     }
 
     private fun ScreenCreator.createActorWithReceiver(): CustomBox = newBox {
@@ -240,32 +298,31 @@ class Afterlife(val screen: OnjScreen, val gameEvents: EventPipeline) {
             onLayoutAndNow { width = parent.width - 60f - 30f }
             relativeHeight(100f)
             flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.END
             label("red wing", "Afterlife", Color.FortyWhite, 32) {
-                relativeWidth(100f)
+                width = 250f
                 relativeHeight(20f)
+                logicalOffsetX = -300f
+                logicalOffsetY = -20f
                 setAlignment(Align.center)
             }
             box {
                 relativeWidth(100f)
                 relativeHeight(80f)
                 createSlots(this@createActorWithReceiver)
-                afterlifeEvents.watchFor<Events.CardPushed> {
-                    clearChildren()
-                    invalidate()
-                    createSlots(this@createActorWithReceiver)
-                }
             }
         }
     }
 
     companion object {
-        const val afterliveSlotGroup: String = "afterlive-slot"
+        const val afterlifeSlotGroup: String = "afterlive-slot"
     }
 
     private object Events {
         data class ChangeArrow(val open: Boolean)
-        data object CardPushed
+        data object CardsChanged
         data object MakeVisible
+        data class DescendAnim(var timeline: Timeline? = null)
     }
 
 }

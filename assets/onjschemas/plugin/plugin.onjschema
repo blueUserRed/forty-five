@@ -1,0 +1,7 @@
+
+name: string,
+title: string,
+pluginClass: string,
+jarFile: string?,
+description: string,
+creator: string,

@@ -11,7 +11,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "location.aqua_balle",
+            targetMap: "aqua_balle",
             fromEnd: true,
         }
     },
@@ -70,14 +70,7 @@ nodes: [
         edgesTo: [
             2, 3, 5
         ],
-        nodeTexture: "map_node_dialog",
-        event: $DialogMapEvent {
-            dialog: "witch_dialog",
-            canOnlyBeStartedOnce: false,
-            currentlyBlocks: false,
-            startable: true,
-            isCompleted: true
-        }
+        event: $EmptyMapEvent {}
     },
     {
         x: 85.0,
@@ -87,7 +80,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "location.salem",
+            targetMap: "salem",
             fromEnd: false,
         }
     },
@@ -142,6 +135,3 @@ decorations: [
         ],
     }
 ],
-areaConfig: {
-    completedProgressRun: false
-},

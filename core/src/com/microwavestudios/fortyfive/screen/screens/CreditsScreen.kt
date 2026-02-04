@@ -34,8 +34,9 @@ class CreditsScreen : ScreenCreator() {
 
     override val playAmbientSounds: Boolean = false
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 0
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to fadeToBlackTransition(2500)
     )
 
     private val scrollSpeed = 3f

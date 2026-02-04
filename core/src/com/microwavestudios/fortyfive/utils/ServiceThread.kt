@@ -5,12 +5,24 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.resources.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.trySendBlocking
 
+/**
+ * The ServiceThread runs in the Background alongside other worker threads and performs
+ * expensive/blocking operations outside the main thread. It handles tasks like drawing
+ * the card textures or preparing resources.
+ *
+ * Keep in mind that operations involving OpenGL have to be done on the main thread, because
+ * only that thread holds the OpenGL Context. Attempting to e.g. upload a Texture to the GPU
+ * from another thread will result in undefined behaviour.
+ *
+ * The main thread can communicate with the ServiceThread using the [sendMessage] function.
+ */
 class ServiceThread : Thread("ServiceThread") {
 
     private val channel: Channel<ServiceThreadMessage> = Channel(Channel.Factory.UNLIMITED)
@@ -57,7 +69,7 @@ class ServiceThread : Thread("ServiceThread") {
     }
 
     private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
-        val pixmap = Pixmap(Gdx.files.internal("blobs/cards/${message.name}.png"))
+        val pixmap = Pixmap(FortyFive.resourceManager.findCardFileOrError(message.namespace, message.name).handle())
         message.promise.resolve(pixmap)
     }
 
@@ -72,7 +84,14 @@ class ServiceThread : Thread("ServiceThread") {
             val isDark = card.actor.isDark
             val fontScale = card.actor.fontScale
             val savedSymbol = message.savedPixmap
-            pixmap.drawPixmap(cardTexturePixmap, 0, 0)
+            val padding = (CardTextureManager.texturePaddingFraction * cardTexturePixmap.width).toInt()
+            pixmap.drawPixmap(
+                cardTexturePixmap,
+                0, 0,
+                cardTexturePixmap.width, cardTexturePixmap.height,
+                padding, padding,
+                cardTexturePixmap.width, cardTexturePixmap.height
+            )
             val situation = when {
                 damageValue > baseDamage -> "increase"
                 damageValue < baseDamage -> "decrease"
@@ -122,6 +141,7 @@ sealed class ServiceThreadMessage {
     ) : ServiceThreadMessage()
 
     class LoadCardPixmap(
+        val namespace: String?,
         val name: String,
         val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()

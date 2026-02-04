@@ -1,7 +1,7 @@
 
-ToDel.*
-todel.*
-Todel.*
+ToDel*.*
+todel*.*
+Todel*.*
 
 assets/blobs/
 assets/cards/generated/
@@ -12,13 +12,14 @@ assets/maps/world_view/generated/*
 assets/logging/forty-five.log
 assets/maps/roads/*
 assets/maps/areas/*
-assets/large_assets/*
 assets/drop_shadows/*
+assets/plugins/*
 assets/profiles/*
 /onj/build
 assets/error_logs/*
 website/out/*
 website/assets/*
+.kotlin/*
 
 ## Java
 

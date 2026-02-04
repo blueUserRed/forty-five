@@ -91,6 +91,7 @@ class CardHand(
             else -> throw RuntimeException("card $card can't be removed because it is not the cardHand")
         }
         removeActor(card.actor)
+        card.actor.rotation = 0f
         evenOutCards()
         invalidate()
     }

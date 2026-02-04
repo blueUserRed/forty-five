@@ -24,11 +24,14 @@ data class MapNode(
     val nodeTexture: ResourceHandle?,
     val distance: Int,
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
+    val additionalEvent: MapEvent? = null,
+    val additionalNodeTexture: ResourceHandle? = null
 ) : ResourceBorrower {
 
 
     private var imageCache: Promise<Drawable>? = null
     private var nodeTextureCache: Promise<Drawable>? = null
+    private var secondaryNodeTextureCache: Promise<Drawable>? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
 
     private val mapConfig: MapConfig = ConfigFileManager.mapConfig
@@ -133,9 +136,18 @@ data class MapNode(
         return nodeTextureCache
     }
 
+    fun getSecondaryNodeTexture(screen: OnjScreen): Promise<Drawable>? {
+        val handle = additionalNodeTexture ?: return null
+        if (secondaryNodeTextureCache != null) return secondaryNodeTextureCache
+        secondaryNodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
+        screen.lifetime.onEnd { secondaryNodeTextureCache = null }
+        return secondaryNodeTextureCache
+    }
+
     fun invalidateCachedAssets() {
         imageCache = null
         nodeTextureCache = null
+        secondaryNodeTextureCache = null
     }
 
     fun getImageData(): MapImageData? =
@@ -221,7 +233,9 @@ data class MapNodeBuilder(
     var imagePos: MapNode.ImagePosition? = null,
     var nodeTexture: ResourceHandle? = null,
     var distance: Int = -1,
-    var event: MapEvent? = null // TODO: this will be non-nullable in the future
+    var event: MapEvent? = null, // TODO: this will be non-nullable in the future
+    val additionalEvent: MapEvent? = null,
+    val additionalNodeTexture: ResourceHandle? = null,
 ) : ResourceBorrower {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
@@ -280,7 +294,9 @@ data class MapNodeBuilder(
             imagePos,
             nodeTexture,
             distance,
-            event
+            event,
+            additionalEvent,
+            additionalNodeTexture
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
@@ -343,7 +359,9 @@ data class MapNodeBuilder(
                 imagePos = node.imagePos,
                 nodeTexture = node.nodeTexture,
                 distance = node.distance,
-                event = node.event
+                event = node.event,
+                additionalEvent = node.additionalEvent,
+                additionalNodeTexture = node.additionalNodeTexture,
             )
 
             val nodes = node.getUniqueNodes()

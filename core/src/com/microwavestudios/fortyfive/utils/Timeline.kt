@@ -263,6 +263,9 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
 
     companion object {
 
+        val emptyTimeline: Timeline
+            get() = timeline {}
+
         /**
          * useful for quickly creating timelines
          */

@@ -2,6 +2,7 @@ name: "tutorial_run",
 length: 'medium',
 type: 'special_not_in_board',
 difficulty: 1,
+modifiers: [],
 rewards: [
     $CashReward {
         amount: 100,

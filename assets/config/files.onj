@@ -1,3 +1,4 @@
+///schema=onjschemas/files.onjschema
 
 configFiles: {
     assets: {
@@ -6,15 +7,11 @@ configFiles: {
     },
     cards: {
         file: "config/cards.onj",
-        validatedBy: "onjschemas/cards.onjschema",
+        validatedBy: "onjschemas/mainGame/cards.onjschema",
     },
     descriptions: {
         file: "config/descriptions.onj",
-        validatedBy: null,
-    },
-    encounterDefinitions: {
-        file: "config/encounter_definitions.onj",
-        validatedBy: "onjschemas/encounter_definitions.onjschema",
+        validatedBy: "onjschemas/descriptions.onjschema",
     },
     enemies: {
         file: "config/enemies.onj",
@@ -44,37 +41,25 @@ configFiles: {
         file: "config/dialogs.onj",
         validatedBy: "onjschemas/dialogs.onjschema",
     },
-    shopConfig: {
-        file: "config/shops.onj",
-        validatedBy: "onjschemas/shops.onjschema",
-    },
-    backpackConfig: {
-        file: "config/backpack_config.onj",
-        validatedBy: "onjschemas/backpack.onjschema",
-    },
     mapConfig: {
         file: "config/map_config.onj",
         validatedBy: "onjschemas/map_config.onjschema",
     },
-    inputMaps: {
-        file: "screens/input_maps.onj",
-        validatedBy: null,
-    },
-    creditsText: {
-        file: "config/credits_text.onj",
-        validatedBy: "onjschemas/credits_text.onjschema",
-    },
     npcs: {
         file: "config/npcs.onj",
         validatedBy: "onjschemas/npcs.onjschema"
+    },
+    runGeneratorConfig: {
+        file: "config/run_generator_config.onj",
+        validatedBy: "onjschemas/run_generator_config.onjschema"
     }
 },
 
 displayNames: [
-    ["location.tabu_letter_outpost", "Tabu Letter Outpost"],
-    ["location.sqire_outpost", "Spire Outpost"],
-    ["location.salem", "Salem"],
-    ["location.aqua_balle", "Aqua Balle"],
+    ["tabu_letter_outpost", "Tabu Letter Outpost"],
+    ["sqire_outpost", "Spire Outpost"],
+    ["salem", "Salem"],
+    ["aqua_balle", "Aqua Balle"],
     ["npc.traveler_in_salem", "Random Traveler"],
     ["npc.witch", "Witch"],
     ["npc.not_yet_implemented", "Coming Soon!"],
@@ -83,60 +68,3 @@ displayNames: [
     ["npc.brother", "Brother"],
     ["npc.to_be_continued", "Developers"],
 ],
-
-screenSchema: "onjschemas/screen.onjschema",
-
-screens: [
-    {
-        name: "encounterScreen",
-        file: "screens/game_screen.onj"
-    },
-//    {
-//        name: "addMaxHPScreen",
-//        file: "screens/add_max_hp_screen.onj"
-//    },
-    {
-        name: "chooseCardScreen",
-        file: "screens/choose_card_screen.onj"
-    },
-//    {
-//        name: "creditsScreen",
-//        file: "screens/credits_screen.onj"
-//    },
-//    {
-//        name: "dialogScreen",
-//        file: "screens/dialog_screen.onj"
-//    },
-    {
-        name: "draftScreen",
-        file: "screens/draft_screen.onj"
-    },
-//    {
-//        name: "healOrMaxHPScreen",
-//        file: "screens/heal_or_max_screen.onj"
-//    },
-    {
-        name: "introScreen",
-        file: "screens/intro_screen.onj"
-    },
-    {
-        name: "looseScreen",
-        file: "screens/loose_screen.onj"
-    },
-//    {
-//        name: "mapScreen",
-//        file: "screens/map_screen.onj"
-//    },
-//    {
-//        name: "shopScreen",
-//        file: "screens/shop_screen.onj"
-//    },
-    {
-        name: "statsScreen",
-        file: "screens/stats_screen.onj"
-    },
-//    {
-//        name: "titleScreen",
-//        file: "screens/title_screen.onj"
-//    },
-]

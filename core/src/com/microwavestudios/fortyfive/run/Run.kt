@@ -3,12 +3,14 @@ package com.microwavestudios.fortyfive.run
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import onj.builder.buildOnjObject
 import onj.value.*
+import kotlin.math.pow
 
 data class Run(
     val name: String,
     val length: RunLength,
     val type: RunType,
     val difficulty: Int,
+    val modifiers: List<RunModifier>,
     val rewards: List<RunReward>,
     val biome: String,
     val fromArea: String,
@@ -22,6 +24,7 @@ data class Run(
         "length" with length.asOnj()
         "type" with type.asOnj()
         "difficulty" with difficulty
+        "modifiers" with modifiers.map { it.name() }
         "rewards" with rewards.map { it.asOnj() }
         "biome" with biome
         "fromArea" with fromArea
@@ -37,6 +40,7 @@ data class Run(
             RunLength.fromOnj(onj.get<OnjString>("length")),
             RunType.fromOnj(onj.get<OnjString>("type")),
             onj.get<Long>("difficulty").toInt(),
+            onj.get<OnjArray>("modifiers").value.map { RunModifier.get(it.value as String) },
             onj.get<OnjArray>("rewards").value.map {
                 it as OnjNamedObject
                 RunReward.fromOnj(it)
@@ -90,6 +94,45 @@ enum class RunType(private val onjName: String, val displayName: String) {
             "special_not_in_board" -> SPECIAL_NOT_IN_BOARD
             "constructed" -> CONSTRUCTED
             else -> throw RuntimeException("unknown runtype: ${onj.value}")
+        }
+    }
+}
+
+abstract class DifficultyScaling {
+
+    data object Linear : DifficultyScaling() {
+
+        override fun scale(min: Float, max: Float, percent: Float): Float {
+            return (max - min) * percent + min
+        }
+
+        override fun toOnj(): OnjObject = buildOnjObject {
+            name("LinearScaling")
+        }
+    }
+
+    data class Power(val power: Int) : DifficultyScaling() {
+
+        override fun scale(min: Float, max: Float, percent: Float): Float {
+            val adjPercent = percent.pow(power)
+            return (max - min) * adjPercent + min
+        }
+
+        override fun toOnj(): OnjObject = buildOnjObject {
+            name("PowerScaling")
+            "power" with power
+        }
+
+    }
+
+    abstract fun scale(min: Float, max: Float, percent: Float): Float
+    abstract fun toOnj(): OnjObject
+
+    companion object {
+        fun fromOnj(onj: OnjNamedObject): DifficultyScaling = when (onj.name) {
+            "LinearScaling" -> Linear
+            "PowerScaling" -> Power(onj.get<Long>("power").toInt())
+            else -> throw RuntimeException("no difficulty scaling with name: ${onj.name}")
         }
     }
 }

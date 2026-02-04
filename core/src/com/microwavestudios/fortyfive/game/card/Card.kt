@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
@@ -19,6 +20,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
@@ -30,14 +32,17 @@ import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.actors.PositionType
+import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.*
 import kotlin.math.absoluteValue
+import kotlin.math.log
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -47,14 +52,17 @@ import kotlin.math.absoluteValue
  * @param creator lambda that creates the instance
  */
 class CardPrototype(
-    val name: String,
+    val namespace: String?,
+    val simpleName: String,
     val title: String,
     val baseCost: Int,
     val baseDamage: Int,
     val tags: List<String>,
 ) {
 
-    var creator: ((screen: OnjScreen, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
+    val name = namespace?.let { "$it:$simpleName" } ?: simpleName
+
+    var creator: ((screen: OnjScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
@@ -63,9 +71,10 @@ class CardPrototype(
      */
     fun create(
         screen: OnjScreen,
+        startedInDeck: Boolean = false,
         isSaved: Boolean? = null,
         areHoverDetailsEnabled: Boolean = true
-    ): Card = creator!!(screen, isSaved, areHoverDetailsEnabled)
+    ): Card = creator!!(screen, startedInDeck, isSaved, areHoverDetailsEnabled)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -73,8 +82,12 @@ class CardPrototype(
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
 
-    fun copy(): CardPrototype = CardPrototype(name, title, baseCost, baseDamage, tags).apply {
+    fun copy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
+        this.creator = this@CardPrototype.creator
+    }
+
+    fun cleanCopy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
         this.creator = this@CardPrototype.creator
     }
 
@@ -96,7 +109,8 @@ class CardPrototype(
  * @param effects the effects of this card
  */
 class Card(
-    val name: String,
+    val namespace: String?,
+    val simpleName: String,
     val title: String,
     val flavourText: String,
     val shortDescription: String,
@@ -106,6 +120,9 @@ class Card(
     val price: Int,
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
+    val variableTexture: VariableTextureSelector?,
+    val parryNumber: Int?,
+    val startedInDeck: Boolean,
     val tags: List<String>,
     val lockedDescription: String?,
     isDark: Boolean,
@@ -118,10 +135,12 @@ class Card(
     val enableHoverDetails: Boolean
 ) : Disposable {
 
+    val name: String = namespace?.let { "$it:$simpleName" } ?: simpleName
+
     /**
      * used for logging
      */
-    val logTag = "card-$name-${++instanceCounter}"
+    val logTag = "$name-${++instanceCounter}"
 
     /**
      * the actor for representing the card on the screen
@@ -145,6 +164,12 @@ class Card(
         private set
     var isShotProtected: Boolean = false
         private set
+    var isThorns: Boolean = false
+        private set
+    var isPunk: Boolean = false
+        private set
+    var isPersistent: Boolean = false
+        private set
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -158,7 +183,10 @@ class Card(
 
     private val damageModifiers: MutableList<Pair<Int, CardDamageModifier>> = mutableListOf()
     private val costModifiers: MutableList<CardCostModifier> = mutableListOf()
+
+    // first one protects in general, for shot and parry, second one protects for parry only
     private val protectingModifiers: MutableList<ProtectingModifier> = mutableListOf()
+    private val parryOnlyProtectingModifiers: MutableList<ProtectingModifier> = mutableListOf()
 
     /**
      * first is the keyword, second is the actual text
@@ -176,6 +204,14 @@ class Card(
 
     var rotationCounter: Int = 0
         private set
+    var turnRotationCounter: Int = 0
+        private set
+    var lastTurnRotationCounter: Int = 0
+        private set
+    var continuousRotationCounter: Int = 0
+        private set
+    var lastRotationDirection: RevolverRotation = RevolverRotation.None
+        private set
 
     var isMarked: Boolean
         set(value) {
@@ -191,6 +227,9 @@ class Card(
     private var game: GameController? = null
     internal val gameEvents: EventPipeline
         get() = game!!.gameEvents
+
+    var currentVariablePostfix: String? = null
+        private set
 
     init {
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
@@ -209,15 +248,21 @@ class Card(
 
     fun setGame(game: GameController) {
         this.game = game
+        game.gameEvents.watchFor<GameControllerImpl.Events.EndTurnEvent> {
+            lastTurnRotationCounter = turnRotationCounter
+            turnRotationCounter = 0
+        }
     }
 
     fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
 
     fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
+        action { lastEffectAffectedCardsCache = listOf(replaceBy) } // Memorize replacing card
         include(controller.destroyCardTimeline(this@Card, replaceBy))
     }
 
     fun changeZone(newZone: Zone, controller: GameController) {
+        val oldZone = zone
         zone = newZone
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
@@ -233,6 +278,10 @@ class Card(
             actor.touchable = Touchable.disabled
         } else {
             actor.touchable = Touchable.enabled
+        }
+        if (oldZone == Zone.REVOLVER) {
+            rotationCounter = 0
+            continuousRotationCounter = 0
         }
     }
 
@@ -266,7 +315,8 @@ class Card(
         val somethingChanged =
             checkValiditySingleModifierList(controller, costModifiers, getter = { it }) ||
             checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) ||
-            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it })
+            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) ||
+            checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
         if (somethingChanged) modifiersChanged()
     }
 
@@ -286,6 +336,12 @@ class Card(
             modifierValuesDirty = false
             if (isRotten && newDamage == 0) controller.appendMainTimeline(controller.destroyCardTimeline(this))
         }
+        variableTexture?.let { selector ->
+            val new = selector.selector(controller, this)
+            if (new == currentVariablePostfix) return@let
+            currentVariablePostfix = new
+            updateTexture(controller)
+        }
     }
 
     fun curDamage(controller: GameController): Int = damageModifiers
@@ -304,11 +360,24 @@ class Card(
      */
     fun afterShot(
         controller: GameController,
+        wasParry: Boolean,
         putCardInTheHand: (Card) -> Timeline,
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
         action {
             if (isEverlasting && !controller.isEverlastingDisabled) {
+                skip()
+                return@action
+            }
+            if (wasParry && parryOnlyProtectingModifiers.isNotEmpty()) {
+                val effect = parryOnlyProtectingModifiers.first()
+                val newEffect = effect.copy(shots = effect.shots - 1)
+                if (newEffect.shots == 0) {
+                    parryOnlyProtectingModifiers.removeFirst()
+                } else {
+                    parryOnlyProtectingModifiers[0] = newEffect
+                }
+                modifiersChanged()
                 skip()
                 return@action
             }
@@ -323,6 +392,13 @@ class Card(
                 modifiersChanged()
                 skip()
             }
+        }
+        action {
+            if (isPersistent) return@action
+            damageModifiers.removeIf { !it.second.data.keepActive }
+            protectingModifiers.removeIf { !it.data.keepActive }
+            parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
+            modifiersChanged()
         }
         if (isUndead) include(putCardInTheHand(this@Card))
         else include(putCardInTheStack(this@Card))
@@ -339,6 +415,15 @@ class Card(
             return
         }
         protectingModifiers.add(protectingModifier.copy())
+        modifiersChanged()
+    }
+
+    fun protectParryOnly(protectingModifier: ProtectingModifier) {
+        if (isUndead) {
+            FortyFive.logger.debug(logTag, "cant protect undead bullet")
+            return
+        }
+        parryOnlyProtectingModifiers.add(protectingModifier.copy())
         modifiersChanged()
     }
 
@@ -362,10 +447,6 @@ class Card(
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
         costModifiers.add(modifier.copy())
         modifiersChanged()
-    }
-
-    fun enterTargetSelection(promise: Promise<Card>) {
-        actor.enterSelectionMode(promise)
     }
 
     private fun addRottenModifier(controller: GameController) {
@@ -395,12 +476,15 @@ class Card(
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
         rotationCounter += rotation.amount
+        turnRotationCounter += rotation.amount
+        if (rotation.directionString == lastRotationDirection.directionString) {
+            continuousRotationCounter += rotation.amount
+        } else {
+            continuousRotationCounter = 0
+            lastRotationDirection = rotation
+        }
     }
 
-    /**
-     * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
-     * effects; null if no effect was triggered
-     */
     fun checkEffects(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
@@ -410,32 +494,50 @@ class Card(
         action { checkModifierTransformers(situation, triggerInformation, controller) }
 
         val prevPosition = Vector2(actor.x, actor.y)
+        val zoneAtStart = zone
         var isInTriggerPosition = false
         effects.forEach { effect ->
             later {
                 val shouldTrigger = effect.checkTrigger(situation, triggerInformation, controller, this@Card)
                 if (!shouldTrigger) return@later
                 if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) {
-                    val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
-                    val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot)
-                    isInTriggerPosition = true
-                    val screenShakeTimeline = Timeline.timeline {
-                        delay(210)
-                        include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                    later {
+                        isInTriggerPosition = true
+
+                        val afterlifeShouldBeOpen = inZone(Zone.AFTERLIFE) || effect.animatesInAfterlife()
+                        val afterlife = controller.afterlife
+                        if (afterlife.isClosed && afterlifeShouldBeOpen) include(afterlife.openTimeline())
+                        if (afterlife.isOpen && !afterlifeShouldBeOpen) include(afterlife.closeTimeline())
+
+                        val screenShakeTimeline = Timeline.timeline {
+                            delay(210)
+                            include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                        }
+
+                        val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
+                        val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
+
+                        action { controller.dispatchAnimTimeline(screenShakeTimeline) }
+                        include(anim)
                     }
-                    action { controller.dispatchAnimTimeline(screenShakeTimeline) }
-                    includeLater(
-                        { controller.afterlife.closeTimeline() },
-                        { controller.afterlife.isOpen }
-                    )
-                    include(anim)
                 }
-                include(effect.onTrigger(this@Card, triggerInformation, controller))
+                include(effect.trigger(this@Card, triggerInformation, controller))
+                later {
+                    if (!isInTriggerPosition) return@later
+                    if (zone == zoneAtStart) return@later
+                    actor.skipAnimateBack()
+                    isInTriggerPosition = false
+                }
             }
         }
 
         later {
-            if (isInTriggerPosition) include(actor.animateBack(controller, prevPosition))
+            if (!isInTriggerPosition) return@later
+            if (zone == zoneAtStart) {
+                include(actor.animateBack(controller, prevPosition))
+            } else {
+                action { actor.skipAnimateBack() }
+            }
         }
     } }
 
@@ -499,6 +601,11 @@ class Card(
             currentEffects.add("protected" to "\$trait\$+ PROTECTED ($total)\$trait\$")
         }
 
+        if (parryOnlyProtectingModifiers.isNotEmpty()) {
+            val total = parryOnlyProtectingModifiers.sumOf { it.shots }
+            currentEffects.add("hardened" to "\$trait\$+ HARDENED ($total)\$trait\$")
+        }
+
         currentHoverTexts = currentEffects
     }
 
@@ -508,7 +615,7 @@ class Card(
     override fun dispose() = actor.dispose()
 
     override fun toString(): String {
-        return "card: $name"
+        return logTag
     }
 
     fun getKeyWordsForDescriptions(): List<String> {
@@ -557,6 +664,7 @@ class Card(
          */
         fun getFrom(
             cards: OnjArray,
+            from: String?,
             initializer: (Card) -> Unit
         ): List<CardPrototype> {
 
@@ -567,14 +675,15 @@ class Card(
                 .forEach { onj ->
                     onj as OnjObject
                     val prototype = CardPrototype(
+                        from,
                         onj.get<String>("name"),
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
                         onj.get<Long>("baseDamage").toInt(),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, isSaved, areHoverDetailsEnabled ->
-                        getCardFrom(onj, screen, initializer, prototype, isSaved, areHoverDetailsEnabled)
+                    prototype.creator = { screen, startedInDeck, isSaved, areHoverDetailsEnabled ->
+                        getCardFrom(onj, screen, initializer, prototype, startedInDeck, isSaved, areHoverDetailsEnabled)
                     }
                     prototypes.add(prototype)
                 }
@@ -586,12 +695,14 @@ class Card(
             onjScreen: OnjScreen,
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
+            startedInDeck: Boolean,
             isSaved: Boolean?,
             enableHoverDetails: Boolean
         ): Card {
             val name = onj.get<String>("name")
             val card = Card(
-                name = name,
+                namespace = prototype.namespace,
+                simpleName = name,
                 title = onj.get<String>("title"),
                 flavourText = onj.get<String>("flavourText"),
                 shortDescription = onj.get<String>("description"),
@@ -608,6 +719,7 @@ class Card(
                             isHidden = it.getOr("isHidden", false),
                             cacheAffectedCards = it.getOr("cacheAffectedCards", false),
                             canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
+                            maxExecutions = it.getOr("maxExecutions", -1L).toInt(),
                             onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
                                 arr
                                     .value
@@ -639,6 +751,9 @@ class Card(
                 screen = onjScreen,
                 isSaved = isSaved,
                 enableHoverDetails = enableHoverDetails,
+                variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
+                parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
+                startedInDeck = startedInDeck,
                 lockedDescription = onj.get<String?>("lockedDescription")
             )
             applyTraitEffects(card, onj)
@@ -662,6 +777,9 @@ class Card(
                 "reinforced" -> card.isReinforced = true
                 "shotProtected" -> card.isShotProtected = true
                 "rotten" -> card.isRotten = true
+                "thorns" -> card.isThorns = true
+                "punk" -> card.isPunk = true
+                "persistence" -> card.isPersistent = true
                 "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
                 "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
@@ -679,6 +797,11 @@ class Card(
 interface CardModifier {
     val data: CardModifierData
 }
+
+data class VariableTextureSelector(
+    val selector: (controller: GameController, card: Card) -> String,
+    val base: String
+)
 
 data class CardDamageModifier(
     val damage: Int = 0,
@@ -702,6 +825,7 @@ data class CardModifierData(
     val sourceCard: Card? = null,
     val validityChecker: CardModifierPredicate = { _, _, _ -> true },
     val activeChecker: CardModifierPredicate = { _, _, _ -> true },
+    val keepActive: Boolean = false,
     var wasActive: Boolean = true,
 )
 
@@ -715,12 +839,12 @@ class CardActor(
     val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
-    val screen: OnjScreen,
+    override val screen: OnjScreen,
     val enableHoverDetails: Boolean // TODO: fix
-) : Widget(), ZIndexActor, InputActor by InputActorImpl(),
-    OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor {
+) : Widget(), ZIndexActor, InputActor by InputActorImpl(), Selectable<CardActor>, ActorWithDragFeatures,
+    OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor, AnimatedActor {
 
-    override var detailWidget: DetailWidget? = DetailWidget.KomplexBigDetailActor(
+    override var detailWidget: DetailWidget? = DetailWidget.ComplexBigDetailActor(
         screen,
         effects = cardDetailEffects,
         text = {
@@ -731,6 +855,8 @@ class CardActor(
         },
         subtexts = getEffectTexts()
     )
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     override var fixedZIndex: Int = 0
 
@@ -745,11 +871,14 @@ class CardActor(
     override var marginRight: Float = 0F
     override var positionType: PositionType = PositionType.RELATIVE
 
+    override var alsoDrawOriginalInDrag: Boolean = false
+
     override val reusableInputActor: Boolean = true
 
     private var inDestroyAnim: Boolean = false
     private var spawnAnimStart: Long = 0L
     private var spawnAnimDuration: Int = 0
+    private var reverseSpawnAnim: Boolean = false
 
     override var dropShadow: DropShadow? = null
 
@@ -771,7 +900,26 @@ class CardActor(
 
     private var prevPosition: Vector2? = null
 
-    private var selectionPromise: Promise<Card>? = null
+    private var selectionPromise: Promise<CardActor>? = null
+
+    private var rotationOnSelectionEnter: Float = 0f
+    private val selectionAnimation: AnimatedActor.AnimationController =
+        animateRotationSinus(amplitude = Math.PI.toFloat() * 0.5f, frequency = 30f, phase = 0f)
+            .also { it.stop() }
+
+    private val selectionDropShadow = SquareDropShadow(
+        color = Color.GOLDENROD,
+        scale = 1.2f,
+        offX = 0f,
+        offY = 0f
+    )
+
+    private val defaultFocusDropShadow = SquareDropShadow(
+        color = Color.Black,
+        scale = 1.1f,
+        offX = 3f,
+        offY = -3f
+    )
 
     var playSoundsOnHover: Boolean = false
 
@@ -782,12 +930,20 @@ class CardActor(
     private var cardTexturePromise: Promise<Texture>? = null
     private var texture: Texture? = null
 
+    var inTriggerPosition: Boolean = false
+        private set
+
     init {
         initInput(this, screen)
         bindDetailToInputState(GameInputs.States.focused)
         keyboardFocusable = KeyboardFocusable.LEAF
 
-        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
+            card,
+            card.baseCost,
+            card.baseDamage,
+            card.variableTexture?.base
+        )
 
         joinGroup(cardGroup)
         startDragAndDropOn(GameInputs.initDragAndDrop)
@@ -799,30 +955,39 @@ class CardActor(
         onInput(GameInputs.interact) { clicked() }
         onInput(GameInputs.triggerCard) { rightClicked() }
 
-        val dropShadow = SquareDropShadow(
-            color = Color.Black,
-            scale = 1.1f,
-            offX = 3f,
-            offY = -3f
-        )
-        dropShadow.showDropShadow = false
         observeInputState(
             GameInputs.States.focused,
-            {
-                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
-                    return@observeInputState
-                }
-                this.dropShadow = dropShadow
-                dropShadow.showDropShadow = true
-            },
-            {
-                if (!card.inZone(Zone.REVOLVER) || (this.dropShadow != null && this.dropShadow !== dropShadow)) {
-                    return@observeInputState
-                }
-                this.dropShadow?.showDropShadow = false
-            }
+            ::focusEnter, ::focusLoss
         )
+        observeInputState(
+            GameInputs.States.inDrag,
+            { FortyFive.soundPlayer.situation("card_drag_started", screen) },
+            { FortyFive.soundPlayer.situation("card_drag_finished", screen) }
+        )
+    }
 
+    private fun focusEnter() {
+        if (selectionPromise != null) {
+            selectionAnimation.start()
+            return
+        }
+        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+            dropShadow = defaultFocusDropShadow
+            defaultFocusDropShadow.showDropShadow = true
+        }
+    }
+
+    private fun focusLoss() {
+        if (selectionPromise != null) {
+            selectionAnimation.stop()
+            selectionAnimation.reset()
+            rotation = rotationOnSelectionEnter
+            return
+        }
+        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+            dropShadow = defaultFocusDropShadow
+            defaultFocusDropShadow.showDropShadow = false
+        }
     }
 
     fun clickedViaSlot(rightClick: Boolean) {
@@ -831,7 +996,7 @@ class CardActor(
 
     private fun clicked() {
         val selectionPromise = selectionPromise ?: return
-        selectionPromise.resolve(card)
+        selectionPromise.resolve(this)
     }
 
     private fun rightClicked() {
@@ -839,9 +1004,20 @@ class CardActor(
         card.gameEvents.fire(GameControllerImpl.Events.CardRightClickEvent(card))
     }
 
-    fun enterSelectionMode(promise: Promise<Card>) {
+    override fun enterSelectionMode(promise: Promise<CardActor>) {
         selectionPromise = promise
-        promise.then { selectionPromise = null }
+        dropShadow = selectionDropShadow
+        joinGroup(selectableCardGroup)
+        rotationOnSelectionEnter = rotation
+    }
+
+    override fun exitSelectionMode() {
+        selectionPromise = null
+        dropShadow = null
+        selectionAnimation.stop()
+        selectionAnimation.reset()
+        rotation = rotationOnSelectionEnter
+        leaveGroup(selectableCardGroup)
     }
 
     private fun setupShader(batch: Batch): Boolean {
@@ -859,22 +1035,24 @@ class CardActor(
         batch.shader = shader.shader
         if (spawnAnimStart != 0L) {
             val time = TimeUtils.millis()
-            val percent = (time - spawnAnimStart).toFloat() / spawnAnimDuration.toFloat()
+            var percent = (time - spawnAnimStart).toFloat() / spawnAnimDuration.toFloat()
+            if (reverseSpawnAnim) percent = 1f - percent
             shader.shader.setUniformf("u_progress", percent)
         }
         return true
     }
 
-    override fun drawInDrag(batch: Batch) {
-        doDraw(batch, 1f)
+    override fun drawInDrag(batch: Batch, oX: Float, oY: Float) {
+        doDraw(batch, 1f, x, y)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (isDragged) return
-        doDraw(batch, parentAlpha)
+        updateAnimations()
+        if (isDragged && !alsoDrawOriginalInDrag) return
+        doDraw(batch, parentAlpha, x, y)
     }
 
-    private fun doDraw(batch: Batch?, parentAlpha: Float) {
+    private fun doDraw(batch: Batch?, parentAlpha: Float, x: Float, y: Float) {
         validate()
         detailWidget?.updateBounds(this)
         batch ?: return
@@ -888,24 +1066,13 @@ class CardActor(
         val isShaderSetup = setupShader(batch)
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
-        val width: Float
-        val height: Float
-        val x: Float = x
-        val y: Float = y
-        width = this.width
-        height = this.height
-//        if (isDragged) {
-//            x = dragX
-//            y = dragY
-//        } else {
-//            x = this.x
-//            y = this.y
+        val textureSize = width
         dropShadow?.doDropShadow(batch, screen, TextureRegionDrawable(textureRegion), this, scaleX, scaleY, rotation)
         batch.draw(
             textureRegion,
             x + drawOffsetX, y + drawOffsetY,
-            width / 2, height / 2,
-            width, height,
+            textureSize / 2, textureSize / 2,
+            textureSize, textureSize,
             scaleX, scaleY,
             rotation
         )
@@ -916,8 +1083,8 @@ class CardActor(
         markedSymbol.getOrNull()?.draw(
             batch,
             x + drawOffsetX, y + drawOffsetY,
-            width / 2, height / 2,
-            width, height,
+            textureSize / 2, textureSize / 2,
+            textureSize, textureSize,
             scaleX, scaleY,
             rotation
         )
@@ -929,7 +1096,7 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
-        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue)
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue, card.currentVariablePostfix)
     }
 
     // TODO: came up with system for animations
@@ -944,11 +1111,12 @@ class CardActor(
         action { inDestroyAnim = false }
     }
 
-    fun spawnAnimation(): Timeline = Timeline.timeline {
+    fun spawnAnimation(reverse: Boolean = false): Timeline = Timeline.timeline {
         val duration = 300
         action {
             spawnAnimStart = TimeUtils.millis()
             spawnAnimDuration = duration
+            reverseSpawnAnim = reverse
         }
         delay(duration)
         action {
@@ -956,19 +1124,27 @@ class CardActor(
         }
     }
 
-    fun animateToTriggerPosition(controller: GameController, isOnShot: Boolean): Timeline = Timeline.timeline { later {
+    fun animateToTriggerPosition(
+        controller: GameController,
+        isOnShot: Boolean,
+        afterlifeOpen: Boolean
+    ): Timeline = Timeline.timeline { later {
         prevPosition = Vector2(x, y)
         val target = when (card.zone) {
             Zone.REVOLVER -> if (isOnShot) {
                 controller.revolver.getCardOnShotTriggerPosition()
             } else {
-                controller.revolver.getCardTriggerPosition()
+                if (afterlifeOpen) {
+                    controller.revolver.getMirroredCardTriggerPosition()
+                } else {
+                    controller.revolver.getCardTriggerPosition()
+                }
             }
             Zone.HAND -> Vector2(
                 x, y + 300f
             )
             Zone.AFTERLIFE -> Vector2(
-                x, y + 300f
+                x, y + 200f
             )
             Zone.STACK, Zone.LIMBO -> return@later
         }
@@ -982,6 +1158,7 @@ class CardActor(
         scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2In
         action {
+            inTriggerPosition = true
             if (card.inZone(Zone.REVOLVER)) touchable = Touchable.enabled
             FortyFive.soundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
@@ -992,9 +1169,20 @@ class CardActor(
         action {
             removeAction(moveAction)
             removeAction(scaleAction)
+            (parent as? Layout)?.invalidate()
         }
         delay(100)
     } }
+
+    override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
+        // baaaaaaaaaad
+        if (!inTriggerPosition) super.setBounds(x, y, width, height)
+    }
+
+    fun skipAnimateBack() {
+        inTriggerPosition = false
+        setScale(1f)
+    }
 
     fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {
         val target = controller
@@ -1022,7 +1210,24 @@ class CardActor(
         action {
             removeAction(moveAction)
             removeAction(scaleAction)
+            inTriggerPosition = false
         }
+    }
+
+    fun descendAnimation(): Timeline = Timeline.timeline {
+        val action = PropertyAction(
+            this@CardActor,
+            ::drawOffsetY,
+            y - 1000f
+        )
+        action.duration = 0.4f
+        action.interpolation = Interpolation.exp10
+        action { addAction(action) }
+        delayUntil { action.isComplete }
+    }
+
+    fun resetDescendAnimation() {
+        drawOffsetY = 0f
     }
 
     override fun positionChanged() {
@@ -1055,5 +1260,6 @@ class CardActor(
         }
 
         const val cardGroup: String = "card-group"
+        const val selectableCardGroup: String = "selectable-card-group"
     }
 }

@@ -5,7 +5,7 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 
 fun interface CardPredicate {
 
-    fun check(cardToCheck: Card, controller: GameController, effectCard: Card?): Boolean
+    fun check(cardToCheck: Card, controller: GameController, self: Card?): Boolean
 
     companion object {
 
@@ -15,10 +15,23 @@ fun interface CardPredicate {
 
         fun hasName(name: String) = CardPredicate { card, _, _ -> card.name == name }
 
-        fun isSelf() = CardPredicate { card, _, effectCard -> card === effectCard }
+        fun isSelf() = CardPredicate { card, _, self -> card === self }
 
         fun inRevolverSlot(slot: Int) = CardPredicate { card, controller, _ ->
             controller.revolver.slots.find { it.card === card }?.num == slot
+        }
+
+        fun startedInDeck() = CardPredicate { card, _, _ -> card.startedInDeck }
+
+        fun rotationCount(count: Int) = CardPredicate { card, _, _ -> card.rotationCounter == count }
+
+        fun inHomeSlot() = CardPredicate { card, controller, _ ->
+            val slotNum = controller
+                .revolver
+                .slots
+                .find { it.card === card }
+                ?.num
+            card.enteredInSlot != null && card.enteredInSlot == slotNum
         }
 
         fun not(predicate: CardPredicate) = CardPredicate { card, controller, effectCard ->

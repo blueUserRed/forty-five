@@ -1,6 +1,6 @@
 package com.microwavestudios.fortyfive.screen.actors
 
-import com.microwavestudios.fortyfive.game.UserPrefs
+import com.microwavestudios.fortyfive.FortyFive
 import kotlin.reflect.KClass
 
 object BindTargetFactory {
@@ -8,54 +8,46 @@ object BindTargetFactory {
     private val bindTargets: Map<String, BindTarget<*>> = mapOf(
         "masterVolume" to BindTarget(
             Float::class,
-            getter = { UserPrefs.masterVolume },
-            setter = { UserPrefs.masterVolume = it },
+            getter = { FortyFive.globalSave.masterVolume },
+            setter = { FortyFive.globalSave.masterVolume = it },
             mapOf()
         ),
         "musicVolume" to BindTarget(
             Float::class,
-            getter = { UserPrefs.musicVolume },
-            setter = { UserPrefs.musicVolume = it },
+            getter = { FortyFive.globalSave.musicVolume },
+            setter = { FortyFive.globalSave.musicVolume = it },
             mapOf()
         ),
         "soundEffectsVolume" to BindTarget(
             Float::class,
-            getter = { UserPrefs.soundEffectsVolume },
-            setter = { UserPrefs.soundEffectsVolume = it },
+            getter = { FortyFive.globalSave.soundEffectVolume },
+            setter = { FortyFive.globalSave.soundEffectVolume = it },
             mapOf()
         ),
         "enableScreenShake" to BindTarget(
             Boolean::class,
-            getter = { UserPrefs.enableScreenShake },
-            setter = { UserPrefs.enableScreenShake = it },
+            getter = { FortyFive.globalSave.enableScreenShake },
+            setter = { FortyFive.globalSave.enableScreenShake = it },
+            mapOf(true to "yes", false to "no")
+        ),
+        "skipIntroScreen" to BindTarget(
+            Boolean::class,
+            getter = { FortyFive.globalSave.skipIntroScreen },
+            setter = { FortyFive.globalSave.skipIntroScreen = it },
+            mapOf(true to "yes", false to "no")
+        ),
+        "useBorderlessWindowFullscreen" to BindTarget(
+            Boolean::class,
+            getter = { FortyFive.globalSave.useBorderlessWindowFullscreen },
+            setter = { FortyFive.globalSave.useBorderlessWindowFullscreen = it },
+            mapOf(true to "yes", false to "no")
+        ),
+        "fullscreen" to BindTarget(
+            Boolean::class,
+            getter = { FortyFive.globalSave.fullscreen },
+            setter = { FortyFive.globalSave.fullscreen = it },
             mapOf(true to "on", false to "off")
         ),
-        "startScreen" to BindTarget(
-            UserPrefs.StartScreen::class,
-            getter = { UserPrefs.startScreen },
-            setter = { UserPrefs.startScreen = it },
-            mapOf(
-                UserPrefs.StartScreen.MAP to "Map screen",
-                UserPrefs.StartScreen.TITLE to "Title screen",
-                UserPrefs.StartScreen.INTRO to "Intro screen",
-            )
-        ),
-        "disableRt" to BindTarget(
-            Boolean::class,
-            getter = { UserPrefs.disableRtMechanics },
-            setter = { UserPrefs.disableRtMechanics = it },
-            mapOf(true to "disabled", false to "enabled")
-        ),
-        "windowMode" to BindTarget(
-            UserPrefs.WindowMode::class,
-            getter = { UserPrefs.windowMode },
-            setter = { UserPrefs.windowMode = it },
-            mapOf(
-                UserPrefs.WindowMode.Fullscreen to "fullscreen",
-                UserPrefs.WindowMode.BorderlessWindow to "borderless window",
-                UserPrefs.WindowMode.Window to "window",
-            )
-        )
     )
 
     fun <T : Any> get(name: String, clazz: KClass<T>): BindTarget<T> {
@@ -75,5 +67,10 @@ data class BindTarget<T : Any>(
     val dataClass: KClass<T>,
     val getter: () -> T,
     val setter: (T) -> Unit,
-    val mappings: Map<T, String>
-)
+    val mappings: Map<T, String>,
+    val needsApply: Boolean = false,
+    val activeValue: T? = null
+) {
+    val inSync: Boolean
+        get() = !needsApply || activeValue == getter()
+}

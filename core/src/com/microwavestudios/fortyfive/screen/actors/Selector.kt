@@ -21,16 +21,15 @@ class Selector(
     private val arrowTextureHandle: ResourceHandle,
     private val arrowWidth: Float = 20f,
     private val arrowHeight: Float = 20f,
-    bind: String,
+    private val bindTarget: BindTarget<*>,
     private val screen: OnjScreen,
+    private val settingChangedCallback: (() -> Unit)? = null,
 ) : Widget(), ResourceBorrower {
 
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
     private val arrowTexture: Promise<Texture> = FortyFive.resourceManager.request(this, screen.lifetime, arrowTextureHandle)
-
-    private val bindTarget: BindTarget<*> = BindTargetFactory.getAnyType(bind)
 
     private val glyphLayout: GlyphLayout = GlyphLayout()
 
@@ -94,6 +93,7 @@ class Selector(
         curOptionIndex = (options.size + curOptionIndex + amount) % options.size
         @Suppress("UNCHECKED_CAST") // I hate generics
         (bindTarget.setter as (Any) -> Unit)(options[curOptionIndex].second)
+        settingChangedCallback?.invoke()
     }
 
     fun onClick(x: Float): Unit = when {

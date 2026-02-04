@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.game
 
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardCostModifier
 import com.microwavestudios.fortyfive.game.card.CardDamageModifier
@@ -9,11 +10,14 @@ import com.microwavestudios.fortyfive.game.card.GameSituation
 import com.microwavestudios.fortyfive.game.card.Trigger
 import com.microwavestudios.fortyfive.game.card.TriggerInformation
 import com.microwavestudios.fortyfive.game.controller.GameController
+import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.utils.TemplateString
 import com.microwavestudios.fortyfive.utils.Timeline
+import onj.value.OnjArray
+import kotlin.collections.forEach
+import kotlin.collections.map
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -120,24 +124,27 @@ sealed class EncounterModifier {
         override val difficultyChange: Float = 0.5f
 
         private var baseTime: Long = -1
+        private var lastDigit: Int = -1
 
         override fun getModifierTypes(): List<Type> = listOf(Type.RT_BASED)
 
         override fun onStart(controller: GameController) {
-            controller.screen.enterState("steel_nerves")
+            controller.gameEvents.fire(GameControllerImpl.Events.SteelNervesCountdown(10))
         }
 
         override fun update(controller: GameController) {
             if (baseTime == -1L) return
-            TODO()
-//            if (controller.playerLost || OldGameController.showWinScreen in controller.screen.screenState) {
-//                controller.screen.leaveState("steel_nerves")
-//                baseTime = -1
-//                return
-//            }
+
+            if (controller.playerLost || controller.hasWon) {
+                baseTime = -1L
+            }
+
             val now = TimeUtils.millis()
             val diff = max(10 - ((now - baseTime).toDouble() / 1000.0).roundToInt(), 0)
-            TemplateString.updateGlobalParam("game.steelNerves.remainingTime", diff)
+            if (diff != lastDigit) {
+                lastDigit = diff
+                controller.gameEvents.fire(GameControllerImpl.Events.SteelNervesCountdown(diff))
+            }
             if (now - baseTime < 10_000) return
             if (controller.isUIFrozen) return
             baseTime = -1
@@ -147,6 +154,7 @@ sealed class EncounterModifier {
         override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
             action {
                 baseTime = TimeUtils.millis()
+                lastDigit = 10
             }
         }
 
@@ -159,6 +167,7 @@ sealed class EncounterModifier {
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             action {
                 baseTime = TimeUtils.millis()
+                lastDigit = 10
             }
         }
     }
@@ -225,16 +234,15 @@ sealed class EncounterModifier {
         override val difficultyChange: Float = 0.65f
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
-            includeLater(
-                { Timeline.timeline {
-                    include(controller.cardSelectionPopupTimeline("Select bullet to destroy"))
-                    includeLater(
-                        { controller.destroyCardTimeline(get<Card>("selectedCard")) },
-                        { true }
-                    )
-                } },
-                { controller.cardsInRevolver().isNotEmpty() }
-            )
+            later {
+                val selector = CardInRevolverSelector(controller, "Select bullet to destroy")
+                val promise = selector.startSelect()
+                waitForPromise(promise)
+                later {
+                    val result = promise.getOrNull()
+                    if (result != null) include(controller.destroyCardTimeline(result))
+                }
+            }
         }
     }
 
@@ -258,7 +266,7 @@ sealed class EncounterModifier {
     }
 
     data object Confused : EncounterModifier() {
-        override val displayName: String = "Rain"
+        override val displayName: String = "Confused"
         override val iconHandle: ResourceHandle = "encounter_modifier_rain"
         override val description: String = "The revolver rotates when a card is placed down, not when it is shot. Everlasting doesn't work."
         override val difficultyChange: Float = 0.2f
@@ -332,6 +340,38 @@ sealed class EncounterModifier {
             "sorrynotsorry" -> SorryNotSorry
             "confused" -> Confused
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
+        }
+
+        val blacklist: List<List<String>> by lazy {
+            val config = ConfigFileManager.getConfigFile("runGeneratorConfig")
+            config
+                .get<OnjArray>("encounterModifierBlacklist")
+                .value
+                .map { pool ->
+                    pool as OnjArray
+                    pool.value.map { (it.value as String).lowercase() }
+                }
+        }
+
+        fun isValid(modifiersList: List<String>): Boolean {
+            val modifiers = modifiersList.map { it.lowercase() }
+            modifiers.forEach { modifier ->
+                blacklist.forEach { list ->
+                    if (modifier !in list) return@forEach
+                    list.forEach { toCheck ->
+                        if (toCheck == modifier) return@forEach
+                        if (toCheck in modifiers) return false
+                    }
+                }
+            }
+            return true
+        }
+
+        fun isBlacklisted(m1: String, m2: String): Boolean {
+            blacklist.forEach { pool ->
+                if (m1.lowercase() in pool && m2.lowercase() in pool) return true
+            }
+            return false
         }
     }
 

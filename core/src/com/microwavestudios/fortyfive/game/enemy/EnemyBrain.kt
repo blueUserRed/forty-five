@@ -8,14 +8,14 @@ import onj.value.OnjObject
 
 abstract class EnemyBrain {
 
-    abstract fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction?
+    abstract fun onNewTurn(controller: GameController, enemy: Enemy)
 
     abstract fun chooseNewAction(
         controller: GameController,
         enemy: Enemy,
         difficulty: Double,
-        otherChosenActions: List<NextEnemyAction>
-    ): NextEnemyAction
+        otherChosenActions: List<Pair<EnemyActionPrototype, Boolean>>
+    ): Pair<EnemyActionPrototype, Boolean>?
 
     companion object {
 
@@ -28,10 +28,10 @@ abstract class EnemyBrain {
                 enemy
             )
 
-            "SniperEnemyBrain" -> SniperEnemyBrain(
-                onj,
-                enemy
-            )
+//            "SniperEnemyBrain" -> SniperEnemyBrain(
+//                onj,
+//                enemy
+//            )
 
             else -> throw RuntimeException("unknown EnemyBrain ${onj.name}")
         }
@@ -66,6 +66,11 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
     private val baseShield: IntRange = onj.get<OnjArray>("baseShield").toIntRange()
     private val scaleIncreasePerTurn: Float = onj.get<Double>("scaleIncreasePerTurn").toFloat()
 
+    private val aggressionHealthPercent: Float = onj.access<Double>(".aggressionBoostConfig.healthPercent").toFloat()
+    private val aggressionNormalSpecialWeightChange: Float = onj.access<Double>(".aggressionBoostConfig.normalSpecialWeightChange").toFloat()
+    private val aggressionDamageShieldWeightChange: Float = onj.access<Double>(".aggressionBoostConfig.damageShieldWeightChange").toFloat()
+    private val aggressionDamageIncrease: Int = onj.access<Long>(".aggressionBoostConfig.damageIncrease").toInt()
+
     private val actions: MutableList<EnemyActionConfig> = onj
         .get<OnjArray>("actions")
         .value
@@ -81,55 +86,58 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
         .toMutableList()
 
     private var currentScale: Float = 1.0f
-    private var nextAction: EnemyAction? = null
 
-    open fun prioritizeAction(controller: GameController, scale: Double): Pair<EnemyAction, Boolean>? = null
-    open fun onActionResolution(action: EnemyAction?) {}
+    open fun prioritizeAction(controller: GameController, scale: Double): Pair<EnemyActionPrototype, Boolean>? = null
 
-    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
-        val action = nextAction
-        nextAction = null
+    override fun onNewTurn(controller: GameController, enemy: Enemy) {
         currentScale += scaleIncreasePerTurn
-        onActionResolution(action)
-        return action
     }
 
     override fun chooseNewAction(
         controller: GameController,
         enemy: Enemy,
         difficulty: Double,
-        otherChosenActions: List<NextEnemyAction>
-    ): NextEnemyAction {
-        prioritizeAction(controller, difficulty * currentScale)?.let { (action, show) ->
-            nextAction = action
-            return if (show) NextEnemyAction.ShownEnemyAction(action) else NextEnemyAction.HiddenEnemyAction
+        otherChosenActions: List<Pair<EnemyActionPrototype, Boolean>>
+    ): Pair<EnemyActionPrototype, Boolean> {
+        prioritizeAction(controller, difficulty * currentScale)?.let {
+            return it
+        }
+        val aggressionHealth = enemy.health * aggressionHealthPercent
+        val aggressive = aggressionHealth >= enemy.currentHealth
+
+        val normalSpecialActionWeight = if (aggressive) {
+            (normalSpecialActionWeight + aggressionNormalSpecialWeightChange).between(0f, 1f)
+        } else {
+            normalSpecialActionWeight
+        }
+        val damageShieldWeight = if (aggressive) {
+            (damageShieldWeight + aggressionDamageShieldWeightChange).between(0f, 1f)
+        } else {
+            damageShieldWeight
         }
         val doNormalAction = Utils.coinFlip(normalSpecialActionWeight)
         if (doNormalAction) {
             val actionProto = if (Utils.coinFlip(damageShieldWeight)) {
-                damagePlayer(baseDamage, enemy)
+                val damage = if (aggressive) {
+                    baseDamage shift aggressionDamageIncrease
+                } else {
+                    baseDamage
+                }
+                damagePlayer(damage, enemy)
             } else {
                 takeCover(baseShield, enemy)
             }
-            val action = actionProto.create(controller, difficulty * currentScale)
-            nextAction = action
-            return NextEnemyAction.ShownEnemyAction(action)
+            return actionProto to true
         }
         val actionConfig = actions
             .zipToFirst { it.weight }
             .weightedRandom()
         val (_, showProb, actionProto) = actionConfig
-        val action = actionProto.create(controller, difficulty * currentScale)
-        nextAction = action
         actionConfig.executionCount++
         if (actionConfig.maxExecutions > 0 && actionConfig.executionCount >= actionConfig.maxExecutions) {
             actions.remove(actionConfig)
         }
-        return if (Utils.coinFlip(showProb)) {
-            NextEnemyAction.ShownEnemyAction(action)
-        } else {
-            NextEnemyAction.HiddenEnemyAction
-        }
+        return actionProto to Utils.coinFlip(showProb)
     }
 
     private data class EnemyActionConfig(
@@ -142,27 +150,27 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
 
 }
 
-class SniperEnemyBrain(
-    config: OnjObject,
-    enemy: Enemy
-) : NewEnemyBrain(config, enemy) {
-
-    private val goodbyesAction = EnemyActionPrototype.fromOnj(config.get<OnjNamedObject>("goodbyesAction"), enemy)
-
-    private var justExecutedHeadsUp: Boolean = false
-
-    override fun prioritizeAction(controller: GameController, scale: Double): Pair<EnemyAction, Boolean>? {
-        if (!justExecutedHeadsUp) return null
-        justExecutedHeadsUp = false
-        val action = goodbyesAction.create(controller, scale)
-        return action to true
-    }
-
-    override fun onActionResolution(action: EnemyAction?) {
-        action ?: return
-        justExecutedHeadsUp = action.prototype is EnemyActionPrototype.MarkCards
-    }
-}
+//class SniperEnemyBrain(
+//    config: OnjObject,
+//    enemy: Enemy
+//) : NewEnemyBrain(config, enemy) {
+//
+//    private val goodbyesAction = EnemyActionPrototype.fromOnj(config.get<OnjNamedObject>("goodbyesAction"), enemy)
+//
+//    private var justExecutedHeadsUp: Boolean = false
+//
+//    override fun prioritizeAction(controller: GameController, scale: Double): Pair<EnemyAction, Boolean>? {
+//        if (!justExecutedHeadsUp) return null
+//        justExecutedHeadsUp = false
+//        val action = goodbyesAction.create(controller, scale)
+//        return action to true
+//    }
+//
+//    override fun onActionResolution(action: EnemyAction?) {
+//        action ?: return
+//        justExecutedHeadsUp = action.prototype is EnemyActionPrototype.MarkCards
+//    }
+//}
 
 class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBrain() {
 
@@ -177,48 +185,37 @@ class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBra
             )
         }
 
-    private var createdAction: EnemyAction? = null
-
-    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
-        createdAction?.let {
-            createdAction = null
-            return it
-        }
-        val (_, actionProto, _) = actions
-            .find { (turn, _, _) -> turn == controller.turnCounter }
-            ?: return null
-        return actionProto.create(controller, difficulty)
+    override fun onNewTurn(
+        controller: GameController,
+        enemy: Enemy
+    ) {
     }
 
     override fun chooseNewAction(
         controller: GameController,
         enemy: Enemy,
         difficulty: Double,
-        otherChosenActions: List<NextEnemyAction>
-    ): NextEnemyAction {
+        otherChosenActions: List<Pair<EnemyActionPrototype, Boolean>>
+    ): Pair<EnemyActionPrototype, Boolean>? {
         val (_, actionProto, show) = actions
             .find { (turn, _, _) -> turn == controller.turnCounter }
-            ?: return NextEnemyAction.None
-        return if (show) {
-            val action = actionProto.create(controller, difficulty)
-            createdAction = action
-            NextEnemyAction.ShownEnemyAction(action)
-        } else {
-            createdAction = null
-            NextEnemyAction.HiddenEnemyAction
-        }
+            ?: return null
+        return actionProto to show
     }
 }
 
 object NoOpEnemyBrain : EnemyBrain() {
 
-    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = null
+    override fun onNewTurn(
+        controller: GameController,
+        enemy: Enemy
+    ) {}
 
     override fun chooseNewAction(
         controller: GameController,
         enemy: Enemy,
         difficulty: Double,
-        otherChosenActions: List<NextEnemyAction>
-    ): NextEnemyAction = NextEnemyAction.None
+        otherChosenActions: List<Pair<EnemyActionPrototype, Boolean>>
+    ): Pair<EnemyActionPrototype, Boolean>? = null
 }
 

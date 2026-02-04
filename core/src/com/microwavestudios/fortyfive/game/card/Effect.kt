@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.utils.*
 
 /**
@@ -13,11 +14,20 @@ import com.microwavestudios.fortyfive.utils.*
  */
 abstract class Effect(val data: EffectData) {
 
+    private var executionCount: Int = 0
+
     protected fun cardDescName(card: Card): String = "[${card.title}]"
 
-    abstract fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline
+    protected abstract fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline
+
+    fun trigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
+        executionCount++
+        return onTrigger(card, triggerInformation, controller)
+    }
 
     open fun blocks(card: Card, controller: GameController): Boolean = false
+
+    open fun animatesInAfterlife(): Boolean = false
 
     abstract fun useAlternateOnShotTriggerPosition(): Boolean
 
@@ -36,6 +46,7 @@ abstract class Effect(val data: EffectData) {
             if (onCard.zone !in zones) return false
         }
         if (!checkConditions(controller, onCard)) return false
+        if (data.maxExecutions != -1 && executionCount >= data.maxExecutions) return false
         if (!data.trigger.check(situation, onCard, triggerInformation, controller)) return false
         return true
     }
@@ -67,31 +78,54 @@ abstract class Effect(val data: EffectData) {
                 store("selectedCards", cards)
             }
 
-            is BulletSelector.ByPopup -> {
-                includeLater(
-                    { Timeline.timeline {
-                        include(controller.cardSelectionPopupTimeline(
-                            bulletSelector.text,
-                            if (bulletSelector.includeSelf) null else self
-                        ))
+            is BulletSelector.RevolverCardByPopup -> later {
+
+                val selector = CardInRevolverSelector(
+                    controller,
+                    bulletSelector.text,
+                    predicate = { card ->
+                        bulletSelector.includeSelf || card != self
+                    }
+                )
+                val promise = selector.startSelect()
+                waitForPromise(promise)
+                later {
+                    val result = promise.getOrNull()
+                    if (result == null) {
+                        action { store("selectedCards", listOf<Card>()) }
+                    } else {
+                        val cards = listOf(result)
                         action {
-                            val cards = listOf(get<Card>("selectedCard"))
                             cardsAffected(self, cards)
                             store("selectedCards", cards)
                         }
-                    } },
-                    { !bulletSelector.blocks(controller, self) }
-                )
-                includeLater(
-                    { Timeline.timeline {
-                       action {
-                           store("selectedCards", listOf<Card>())
-                       }
-                    } },
-                    { bulletSelector.blocks(controller, self) }
-                )
+                    }
+                }
             }
+            is BulletSelector.HandCardByPopup -> later {
 
+                val selector = CardInHandSelector(
+                    controller,
+                    bulletSelector.text,
+                    predicate = { card ->
+                        bulletSelector.includeSelf || card != self
+                    }
+                )
+                val promise = selector.startSelect()
+                waitForPromise(promise)
+                later {
+                    val result = promise.getOrNull()
+                    if (result == null) {
+                        action { store("selectedCards", listOf<Card>()) }
+                    } else {
+                        val cards = listOf(result)
+                        action {
+                            cardsAffected(self, cards)
+                            store("selectedCards", cards)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -109,7 +143,7 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = ReserveGain(amount, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
                 action { controller.gainReserves(amount, card.actor) }
             }
@@ -140,19 +174,18 @@ abstract class Effect(val data: EffectData) {
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
-        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            val modifier = CardDamageModifier(
-                damage = amount,
-                data = CardModifierData(
-                    source = cardDescName(card),
-                    sourceCard = card,
-                    validityChecker = validityChecker,
-                    activeChecker = activeChecker
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            later {
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
+                val modifier = CardDamageModifier(
+                    damage = amount,
+                    data = CardModifierData(
+                        source = cardDescName(card),
+                        sourceCard = card,
+                        validityChecker = validityChecker,
+                        activeChecker = activeChecker
+                    )
                 )
-            )
-
-            return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
@@ -180,19 +213,18 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect =
             BuffDamageMultiplier(multiplier, bulletSelector, validityChecker, activeChecker, data)
 
-        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val multiplier = multiplier * (triggerInformation.multiplier ?: 1)
-            val modifier = CardDamageModifier(
-                damageMultiplier = multiplier,
-                data = CardModifierData(
-                    source = cardDescName(card),
-                    sourceCard = card,
-                    validityChecker = validityChecker,
-                    activeChecker = activeChecker
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            later {
+                val multiplier = multiplier * (triggerInformation.multiplier ?: 1)
+                val modifier = CardDamageModifier(
+                    damageMultiplier = multiplier,
+                    data = CardModifierData(
+                        source = cardDescName(card),
+                        sourceCard = card,
+                        validityChecker = validityChecker,
+                        activeChecker = activeChecker
+                    )
                 )
-            )
-
-            return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
@@ -208,6 +240,57 @@ abstract class Effect(val data: EffectData) {
 
     }
 
+    class BuffDamageTransformable(
+        val amount: EffectValue,
+        private val bulletSelector: BulletSelector,
+        private val reevaluateOn: Trigger,
+        private val validityChecker: CardModifierPredicate,
+        private val activeChecker: CardModifierPredicate,
+        private val keepModifierActive: Boolean,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            fun amount() = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
+
+            val data = CardModifierData(
+                cardDescName(card),
+                sourceCard = card,
+                validityChecker = validityChecker,
+                activeChecker = activeChecker,
+                keepActive = keepModifierActive
+            )
+
+            val modifier = CardDamageModifier(
+                damage = amount(),
+                data = data,
+                transformers = listOf(
+                    reevaluateOn to { old, _ -> CardDamageModifier(
+                        damage = amount(),
+                        data = data,
+                        transformers = old.transformers
+                    ) }
+                )
+            )
+
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            action {
+                get<List<Card>>("selectedCards")
+                    .forEach { it.addDamageModifier(modifier) }
+            }
+        } }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect =
+            BuffDamageTransformable(amount, bulletSelector, reevaluateOn, validityChecker, activeChecker, keepModifierActive, data)
+
+    }
+
     /**
      * lets the player draw cards
      * @param amount the amount of cards to draw
@@ -218,8 +301,10 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(100)
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            include(controller.drawCardsTimeline(amount, sourceCard = card))
+            later {
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
+                include(controller.drawCardsTimeline(amount, sourceCard = card))
+            }
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -236,19 +321,25 @@ abstract class Effect(val data: EffectData) {
 
         override fun copy(data: EffectData): Effect = GiveStatus(statusEffectCreator, data)
 
-        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            triggerInformation
-                .targetedEnemies
-                .map {
-                    controller.tryApplyStatusEffectToEnemyTimeline(statusEffectCreator(
-                        controller,
-                        card,
-                        triggerInformation.isOnShot
-                    ), it)
-                }
-                .collectTimeline()
-                .let { include(it) }
-        }
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            repeat(triggerInformation.multiplierOr1) {
+                triggerInformation
+                    .targetedEnemies
+                    .map {
+                        controller.tryApplyStatusEffectToEnemyTimeline(statusEffectCreator(
+                            controller,
+                            card,
+                            triggerInformation.isOnShot
+                        ), it, card)
+                    }
+                    .collectTimeline()
+                    .let { include(it) }
+            }
+        } }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
@@ -267,17 +358,45 @@ abstract class Effect(val data: EffectData) {
         data: EffectData
     ) : Effect(data) {
 
-    override fun copy(data: EffectData): Effect = PutCardInHand(cardName, amount, data)
+        override fun copy(data: EffectData): Effect = PutCardInHand(cardName, amount, data)
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
-            include(controller.tryToPutCardsInHandTimeline(cardName, amount, sourceCard = card))
+            later {
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
+                include(controller.tryToPutCardsInHandTimeline(cardName, amount, sourceCard = card))
+            }
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun toString(): String {
-            return "PutCardInHand(amount=$amount)"
+            return "PutCardInHand(card=$cardName, amount=$amount)"
+        }
+    }
+
+    /**
+     * puts a number of specific cards in the players hand
+     */
+    class PutCardInStack(
+        val cardName: String,
+        val amount: EffectValue,
+        val onTop: Boolean,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun copy(data: EffectData): Effect = PutCardInStack(cardName, amount, onTop, data)
+
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            later {
+                val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
+                include(controller.putCardsInStackTimeline(cardName, amount, sourceCard = card, onTop = onTop))
+            }
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun toString(): String {
+            return "PutCardInStack(card=$cardName, amount=$amount)"
         }
     }
 
@@ -292,7 +411,7 @@ abstract class Effect(val data: EffectData) {
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
             val protectingModifier = ProtectingModifier(
-                shots = shots,
+                shots = shots * triggerInformation.multiplierOr1,
                 data = CardModifierData(
                     source = cardDescName(card),
                     sourceCard = card,
@@ -315,6 +434,40 @@ abstract class Effect(val data: EffectData) {
         override fun toString(): String = "Protect()"
     }
 
+    class ProtectParryOnly(
+        val bulletSelector: BulletSelector,
+        val parries: Int,
+        val validityChecker: CardModifierPredicate,
+        val activeChecker: CardModifierPredicate,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            val protectingModifier = ProtectingModifier(
+                shots = parries * triggerInformation.multiplierOr1,
+                data = CardModifierData(
+                    source = cardDescName(card),
+                    sourceCard = card,
+                    validityChecker = validityChecker,
+                    activeChecker = activeChecker
+                )
+            )
+            action {
+                get<List<Card>>("selectedCards")
+                    .forEach { it.protectParryOnly(protectingModifier) }
+            }
+        }
+
+        override fun blocks(card: Card, controller: GameController) = bulletSelector.blocks(controller, card)
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect = ProtectParryOnly(bulletSelector, parries, validityChecker, activeChecker, data)
+
+        override fun toString(): String = "ProtectParryOnly()"
+    }
+
     class Destroy(
         val bulletSelector: BulletSelector,
         data: EffectData
@@ -334,9 +487,35 @@ abstract class Effect(val data: EffectData) {
 
         override fun blocks(card: Card, controller: GameController): Boolean = bulletSelector.blocks(controller, card)
 
+        override fun animatesInAfterlife(): Boolean = true
+
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun copy(data: EffectData): Effect = Destroy(bulletSelector, data)
+    }
+
+    class CreateBulletsInAfterlife(
+        val bulletName: String,
+        val amount: EffectValue,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = controller.createBulletsInAfterlifeTimeline(
+            bulletName,
+            amount(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1,
+            card
+        )
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun animatesInAfterlife(): Boolean = true
+
+        override fun copy(data: EffectData): Effect = CreateBulletsInAfterlife(bulletName, amount, data)
+
     }
 
     class DamageDirectly(
@@ -346,7 +525,7 @@ abstract class Effect(val data: EffectData) {
     ) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            val damage = damage(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            val damage = damage(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1
             val enemies = if (isSpray) controller.allEnemies else triggerInformation.targetedEnemies
             enemies
                 .map { it.damage(damage) }
@@ -362,7 +541,11 @@ abstract class Effect(val data: EffectData) {
     class DamagePlayer(val damage: EffectValue, data: EffectData) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(controller.damagePlayerTimeline(damage(controller, card, triggerInformation)))
+            include(
+                controller.damagePlayerTimeline(
+                    damage(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1
+                )
+            )
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -410,18 +593,31 @@ abstract class Effect(val data: EffectData) {
     ) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(
-                controller.tryApplyStatusEffectToPlayerTimeline(statusEffectCreator(
-                    controller,
-                    card,
-                    triggerInformation.isOnShot
-                ))
-            )
+            repeat(triggerInformation.multiplierOr1) {
+                include(
+                    controller.tryApplyStatusEffectToPlayerTimeline(statusEffectCreator(
+                        controller,
+                        card,
+                        triggerInformation.isOnShot
+                    ), card)
+                )
+            }
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun copy(data: EffectData): Effect = GivePlayerStatus(statusEffectCreator, data)
+    }
+
+    class RemoveAllPlayerStatusEffects(data: EffectData) : Effect(data) {
+
+        override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(controller.removeAllPlayerStatusEffectsTimeline())
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = RemoveAllPlayerStatusEffects(data)
     }
 
     class TurnRevolver(
@@ -430,7 +626,7 @@ abstract class Effect(val data: EffectData) {
     ) : Effect(data) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(controller.rotateRevolverTimeline(rotation))
+            include(controller.rotateRevolverTimeline(rotation.withAmount(rotation.amount * triggerInformation.multiplierOr1)))
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -482,11 +678,12 @@ abstract class Effect(val data: EffectData) {
             triggerInformation.targetedEnemies.forEach { enemy ->
                 includeLater(
                     {
+                        val turns = turns(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1
                         enemy
                             .statusEffects
                             .filterIsInstance<Poison>()
                             .firstOrNull()
-                            ?.discharge(turns(controller, card, triggerInformation), StatusEffectTarget.EnemyTarget(enemy), controller)
+                            ?.discharge(turns, StatusEffectTarget.EnemyTarget(enemy), controller)
                             ?: Timeline()
                     },
                     { true }
@@ -525,7 +722,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun onTrigger(card: Card, triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(100)
-            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             include(controller.drawCardsTimeline(amount, fromBottom = true))
         }
 
@@ -547,22 +744,18 @@ abstract class Effect(val data: EffectData) {
             triggerInformation: TriggerInformation,
             controller: GameController
         ): Timeline = Timeline.timeline {
-            var timeline: Timeline? = null
-            action {
-                timeline = controller
+            later {
+                controller
                     .cardStack
                     .cards()
                     .filter { cardPredicate.check(it, controller, card) }
                     .shuffled()
-                    .take(amount)
+                    .take(amount * triggerInformation.multiplierOr1)
                     .also { cardsAffected(card, it) }
                     .map { controller.putCardFromStackInHandTimeline(it, card) }
                     .collectTimeline()
+                    .let { include(it) }
             }
-            includeLater(
-                { timeline!! },
-                { true }
-            )
         }
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -588,6 +781,121 @@ abstract class Effect(val data: EffectData) {
 
     }
 
+    class BeHyperactive(data: EffectData) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+           val slot = controller
+               .revolver
+               .slots
+               .filter { it.card == null }
+               .randomOrNull()
+            if (slot == null) {
+                include(controller.bounceBulletTimeline(card))
+            } else {
+                include(controller.switchSlotOfBulletInRevolverTimeline(card, slot.num))
+            }
+        } }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = BeHyperactive(data)
+    }
+
+    class DescendBullet(data: EffectData) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = controller.descendBulletTimeline()
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = DescendBullet(data)
+
+        override fun animatesInAfterlife(): Boolean = true
+    }
+
+    class Resurrect(
+        val revolverSlotGetter: RevolverSlotGetter,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            later {
+                val promise = revolverSlotGetter(controller, card, triggerInformation)
+                waitForPromise(promise)
+                later {
+                    val slot = promise.getOrNull() ?: return@later
+                    if (slot.card != null) return@later
+                    include(controller.resurrectTimeline(slot.num))
+                }
+            }
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = true
+
+        override fun copy(data: EffectData): Effect = Resurrect(revolverSlotGetter, data)
+
+        override fun animatesInAfterlife(): Boolean = true
+    }
+
+    class Discard(
+        val bulletSelector: BulletSelector,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            includeLater({
+                get<List<Card>>("selectedCards")
+                    .map { controller.destroyCardInHandTimeline(it, card) }
+                    .collectTimeline()
+            })
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect = Discard(bulletSelector, data)
+
+    }
+
+    class ShuffleCardFromHandIntoStack(
+        val bulletSelector: BulletSelector,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
+            includeLater({
+                get<List<Card>>("selectedCards")
+                    .map { controller.shuffleCardFromHandIntoStackTimeline(it, card) }
+                    .collectTimeline()
+            })
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
+        override fun copy(data: EffectData): Effect = ShuffleCardFromHandIntoStack(bulletSelector, data)
+
+    }
+
 }
 
 /**
@@ -609,14 +917,31 @@ sealed class BulletSelector {
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
     }
 
-    class ByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
+    class RevolverCardByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean {
             if (optional) return false
             val bulletsInRevolver = controller.cardsInRevolver()
             if (bulletsInRevolver.size >= 2) return false
             if (bulletsInRevolver.isEmpty()) return true
-            if (!includeSelf && bulletsInRevolver[0] === self) return true
+            if (!includeSelf && bulletsInRevolver.first() === self) return true
+            return false
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = true
+    }
+
+    class HandCardByPopup(val includeSelf: Boolean, val optional: Boolean, val text: String) : BulletSelector() {
+
+        override fun blocks(
+            controller: GameController,
+            self: Card
+        ): Boolean {
+            if (optional) return false
+            val bulletsInHand = controller.cardsInHand
+            if (bulletsInHand.size >= 2) return false
+            if (bulletsInHand.isEmpty()) return true
+            if (!includeSelf && bulletsInHand.first() === self) return true
             return false
         }
 
@@ -628,8 +953,13 @@ sealed class BulletSelector {
     abstract fun useAlternateOnShotTriggerPosition(): Boolean
 }
 
-typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?) -> Int
+typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?, self: Card?) -> Int
 
+typealias RevolverSlotGetter = (
+    controller: GameController,
+    card: Card,
+    triggerInformation: TriggerInformation
+) -> Promise<out RevolverSlot?>
 
 fun interface Trigger {
 
@@ -652,7 +982,6 @@ fun interface Trigger {
             ) -> Boolean = { _, _, _, _, -> true },
         ): Trigger = Trigger { gameSituation, card, triggerInformation, controller ->
             if (!T::class.isInstance(gameSituation)) return@Trigger false
-            @Suppress("UNCHECKED_CAST")
             block(gameSituation as T, card, triggerInformation, controller)
         }
 
@@ -665,8 +994,11 @@ sealed class GameSituation {
         val card: Card,
         val oldZone: GameControllerImpl.Zone,
         val newZone: GameControllerImpl.Zone,
-        val before: Boolean
-    ) : GameSituation()
+        val before: Boolean,
+        val afterShot: Boolean,
+    ) : GameSituation() {
+        init { require(oldZone != newZone) { "oldZone must be != newZone" } }
+    }
 
     class RevolverRotation(
         val rotation: com.microwavestudios.fortyfive.game.controller.RevolverRotation
@@ -681,13 +1013,23 @@ sealed class GameSituation {
         val cards: List<Card>
     ) : GameSituation()
 
-    class CardReturnedHome(val card: Card) : GameSituation()
+    class StatusEffectApplied(
+        val statusEffect: StatusEffect,
+        val toPlayer: Boolean,
+    ) : GameSituation()
+
+    class CardReplaced(
+        val replaced: Card,
+        val newCard: Card
+    ) : GameSituation()
 
     data object TurnEnd : GameSituation()
     data object TurnBegin : GameSituation()
 
     class OnShot(val card: Card) : GameSituation()
     class CardDestroyed(val card: Card) : GameSituation()
+
+    class AfterShot(val card: Card) : GameSituation()
 
     class CardRightClicked(val card: Card) : GameSituation()
 }
@@ -699,13 +1041,17 @@ data class TriggerInformation(
     val isOnShot: Boolean = false,
     val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null,
-)
+) {
+    val multiplierOr1: Int
+        get() = multiplier ?: 1
+}
 
 data class EffectData(
     val trigger: Trigger = Trigger.Never,
     val isHidden: Boolean = false,
     val cacheAffectedCards: Boolean = false,
     val condition: GamePredicate? = null,
+    val maxExecutions: Int = -1,
     val onlyTriggerInZones: List<GameControllerImpl.Zone>? = null,
     val canPreventEnteringGame: Boolean = false
 )

@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.onjNamespaces.OnjInterpolation
+import com.microwavestudios.fortyfive.run.EncounterGenerator
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -146,6 +147,10 @@ abstract class BaseMapGenerator {
         addNodeCollider(bounds)
     }
 
+    protected fun rotateNodes(angleRad: Double = data.rotation.toDouble() ) {
+        _allNodes.forEach { node -> node.rotate(angleRad) }
+    }
+
     protected fun newNode(
         x: Float = 0f,
         y: Float = 0f,
@@ -177,7 +182,7 @@ abstract class BaseMapGenerator {
             val newNodes = mutableListOf<MapNodeBuilder>()
             currentNodes.forEach { node ->
                 node.distance = dist
-                node.edgesTo.filter { it.distance != -1 }.let { newNodes.addAll(it) }
+                node.edgesTo.filter { it.distance == -1 }.let { newNodes.addAll(it) }
             }
             currentNodes = newNodes
             dist++
@@ -187,6 +192,16 @@ abstract class BaseMapGenerator {
     protected fun connectNodes(node1: MapNodeBuilder, node2: MapNodeBuilder) {
         node1.connect(node2)
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
+    }
+
+    fun generateEncounters(startNode: MapNodeBuilder) {
+        _allNodes.forEach { node ->
+            val event = node.event
+            if (event !is EncounterPlaceholderMapEvent) return@forEach
+            val encounter = EncounterGenerator.generate(event, node, startNode)
+            val mapEvent = EncounterMapEvent(encounter, event.genExtraction)
+            node.event = mapEvent
+        }
     }
 
     abstract fun asOnj(): OnjObject
@@ -200,6 +215,7 @@ abstract class BaseMapGenerator {
         val lastNodeEvent: () -> MapEvent
         val lastNodeTexture: String
         val majorDifficulty: Int
+        val rotation: Float
 
         fun asOnj(): OnjObject
 
@@ -212,6 +228,7 @@ abstract class BaseMapGenerator {
             "lastNodeEvent" with lastNodeEvent().asOnjObject()
             "lastNodeTexture" with lastNodeTexture
             "majorDifficulty" with majorDifficulty
+            "rotation" with rotation
         }
     }
 
@@ -343,6 +360,7 @@ abstract class BaseMapGenerator {
             "ThreeLine" -> ThreeLineMapGenerator(ThreeLineMapGenerator.ThreeLineMapGeneratorData.fromOnj(onj))
             "Radial" -> RadialMapGenerator(RadialMapGenerator.RadialMapGeneratorData.fromOnj(onj))
             "StaticMap" -> StaticMapGenerator(onj.get<String>("name"))
+            "PointCloud" -> PointCloudMapGenerator(PointCloudMapGenerator.PointCloudMapGeneratorData.fromOnj(onj))
             else -> throw RuntimeException("unknown MapGenerator: $name")
         }
 

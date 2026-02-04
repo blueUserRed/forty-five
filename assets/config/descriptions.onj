@@ -11,12 +11,12 @@ hoverDetailDescriptions: [
     {
         keyword: "POISON",
         groupName: "status",
-        description: "$status$POISON (d,t)$status$\nPoison causes d damage for t turns. d and t both stack.",
+        description: "$status$POISON (d)$status$\nOn-Turn-End: deal d dmg, then, remove 50% of d",
     },
     {
         keyword: "SHIELD",
         groupName: "status",
-        description: "$status$SHIELD (d)$status$\nShield protects from d dmg.",
+        description: "$status$SHIELD (d)$status$\nShield protects from d dmg. d halves On-Turn-Begin",
     },
     {
         keyword: "BEWITCHED",
@@ -24,14 +24,19 @@ hoverDetailDescriptions: [
         description: "$status$BEWITCHED (t, r)$status$\nAll bullets turn the revolver one to the left. Active for t turns or r rotations.",
     },
     {
+        keyword: "FROZEN",
+        groupName: "status",
+        description: "$status$FROZEN (x)$status$\nThe Revolver won't rotate for x shots. Everlasting doesn't work.",
+    },
+    {
         keyword: "PROTECTED",
-        groupName: "trait",
+        groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",
     },
     {
         keyword: "DISINTEGRATION",
         groupName: "trait",
-        description: "$trait$DISINTEGRATION$trait$\nA bullet with disintegration loses 1 dmg On-Rotate.",
+        description: "$trait$DISINTEGRATION$trait$\nA bullet with disintegration loses 1 dmg On-Rotate. When a bullet with disintegration has 0 dmg, destroy it.",
     },
     {
         keyword: "SPRAY",
@@ -54,14 +59,69 @@ hoverDetailDescriptions: [
         description: "$trait$REINFORCED$trait$\nWhen parrying with a bullet that is reinforced, no dmg will come through, even if this bullets dmg value is smaller than the attack that is being parried.",
     },
     {
+        keyword: "JAMMED",
+        groupName: "trait",
+        description: "$trait$JAMMED$trait$\nWhen shooting or parrying with this bullet, the revolver doesn’t rotate",
+    },
+    {
+        keyword: "THORNS",
+        groupName: "trait",
+        description: "$trait$THORNS$trait$\nWhen parrying with this bullet, the enemy takes x dmg, where x is the dmg value of the attack which was parried.",
+    },
+    {
+        keyword: "PERSISTENCE",
+        groupName: "trait",
+        description: "$trait$PERSISTENCE$trait$\nThis Bullet doesn't lose its buffs or debuffs when shot.",
+    },
+    {
+        keyword: "HARDENED", // TODO: Should be keyword
+        groupName: "trait",
+        description: "$trait$HARDENED (x)$trait$\nFor the next x times this bullet is used to parry, it won't leave the revolver ",
+    },
+    {
         keyword: "DISCHARGE POISON",
         groupName: "keyword",
-        description: "$trait$DISCHARGE POISON (x)$trait$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",
+        description: "$keyword$DISCHARGE POISON (x)$keyword$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",
     },
     {
         keyword: "SEARCH",
         groupName: "keyword",
-        description: "$trait$SEARCH$trait$\nPuts a random card from the deck into the players hand, that matches the requirement.",
+        description: "$keyword$SEARCH$keyword$\nPuts a random card from the deck into the players hand, that matches the requirement.",
+    },
+    {
+        keyword: "CREATE",
+        groupName: "keyword",
+        description: "$keyword$CREATE$keyword$\ncreated cards get removed after the encounter",
+    },
+    {
+        keyword: "CLEANSE",
+        groupName: "keyword",
+        description: "$keyword$CLEANSE$keyword$\nRemoves all status effects the player has",
+    },
+    {
+        keyword: "DEFENSE",
+        groupName: "keyword",
+        description: "$keyword$DEFENSE (p)$keyword$\nWhen a bullet with DEFENSE is parried with, it uses p to parry instead of its dmg",
+    },
+    {
+        keyword: "UNOBTAINABLE",
+        groupName: "keyword",
+        description: "$keyword$UNOBTAINABLE$keyword$\nCan only be added to the encounter through Bullet effects",
+    },
+    {
+        keyword: "FULL ROTATION",
+        groupName: "keyword",
+        description: "$keyword$FULL ROTATION$keyword$\nrotates 5 times in the same direction uninterupted",
+    },
+    {
+        keyword: "RESURRECT",
+        groupName: "keyword",
+        description: "$keyword$RESURRECT$keyword$\nreturn the first bullet in the Afterlife into a target revolver slot",
+    },
+    {
+        keyword: "ZONE",
+        groupName: "keyword",
+        description: "$keyword$ZONE$keyword$\nZones are the handcards, the drawpile, the revolver and the afterlife",
     },
 ],
 

@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
@@ -29,7 +30,7 @@ class RunSave private constructor(val profile: Profile) {
     var playerHealth: Int by DataDelegate(
         RunSaveData::playerHealth,
         onSet = { value ->
-            profile.events.fire(Profile.HealthChangedEvent(value))
+            FortyFive.currentScreen?.events?.fire(Profile.HealthChangedEvent(value))
         }
     )
 

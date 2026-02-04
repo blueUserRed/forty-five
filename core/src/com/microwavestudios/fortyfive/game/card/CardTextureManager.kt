@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.Texture.TextureFilter
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.utils.*
@@ -9,6 +10,27 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.RuntimeException
 
+/**
+ * loads, caches and manages textures for cards.
+ *
+ * The card textures in the
+ * `assets/blobs/cards` directory only contain the art and the name, the damage and cost
+ * information is missing. The CardTextureManager communicates with the [ServiceThread] to load
+ * these textures and draw the missing information on them dynamically. This enables cost/damage
+ * values to change mid-game.
+ *
+ * To obtain a card texture, use the [cardTextureFor] function and pass in the desired cost and
+ * damage values. If the same texture is already used, a cached version will be returned.
+ *
+ * > **Important:**
+ * > A texture obtained using [cardTextureFor] must be given back using [giveTextureBack] when
+ * > it is no longer needed. Not doing that will result in memory leaks.
+ *
+ * > _Note:_
+ * > If you want to draw a card to the screen, you shouldn't obtain the texture manually,
+ * > but instead use add the [CardActor] to the scene.
+ */
+// TODO: make sure this isn't leaking memory somehow
 class CardTextureManager {
 
     private val cardTextures: MutableList<CardTextureData> = mutableListOf()
@@ -16,42 +38,42 @@ class CardTextureManager {
     val statistics: Statistics = Statistics()
 
     fun init() {
-        val cards = ConfigFileManager.getConfigFile("cards")
+        val cards = ConfigFileManager.loadCards(initializer = {})
         cards
-            .get<OnjArray>("cards")
-            .value
             .map { card ->
-                card as OnjObject
                 CardTextureData(
-                    card.get<String>("name"),
+                    card.name,
                     mutableListOf(),
-                    card.get<Long>("cost").toInt(),
-                    card.get<Long>("baseDamage").toInt(),
+                    card.baseCost,
+                    card.baseDamage,
                 )
             }
             .forEach { cardTextures.add(it) }
     }
 
-    fun cardTextureFor(card: Card, cost: Int, damage: Int): Promise<Texture> {
+    fun cardTextureFor(card: Card, cost: Int, damage: Int, variablePostfix: String? = null): Promise<Texture> {
         statistics.lastLoadedCard = card.name
         val data = cardTextureDataFor(card)
-        val variant = data.findVariant(cost, damage) ?: run {
-            return createVariant(data, card, cost, damage)
+        val variant = data.findVariant(cost, damage, variablePostfix) ?: run {
+            return createVariant(data, card, cost, damage, variablePostfix)
         }
         variant.borrowers.add(card)
         statistics.cachedGets++
         return variant.texture
     }
 
-    private fun getCardPixmap(data: CardTextureData, card: Card): Promise<Pixmap> {
+    private fun getCardPixmap(data: CardTextureData, card: Card, variablePostfix: String?): Promise<Pixmap> {
         val pixmap = data.cardPixmap
-        pixmap?.let {
-            data.cardPixmap = it
-            return it.asPromise()
+        if (variablePostfix == null && pixmap != null) {
+            data.cardPixmap = pixmap
+            return pixmap.asPromise()
         }
-        val message = ServiceThreadMessage.LoadCardPixmap(card.name)
+        val message = ServiceThreadMessage.LoadCardPixmap(
+            card.namespace,
+            variablePostfix?.let { "${card.name}-$it" } ?: card.name
+        )
         FortyFive.serviceThread.sendMessage(message)
-        message.promise.then { data.cardPixmap = it }
+        if (variablePostfix == null) message.promise.then { data.cardPixmap = it }
         statistics.pixmapLoads++
         return message.promise
     }
@@ -60,10 +82,16 @@ class CardTextureManager {
         data: CardTextureData,
         card: Card,
         cost: Int,
-        damage: Int
+        damage: Int,
+        variablePostfix: String?
     ): Promise<Texture> {
-        val pixmapPromise = getCardPixmap(data, card).chainMainThread { cardPixmap ->
-            val pixmap = Pixmap(cardPixmap.width, cardPixmap.height, Pixmap.Format.RGBA8888)
+        val pixmapPromise = getCardPixmap(data, card, variablePostfix).chainMainThread { cardPixmap ->
+            val padding = (cardPixmap.width * texturePaddingFraction).toInt()
+            val pixmap = Pixmap(
+                cardPixmap.width + 2 * padding,
+                cardPixmap.height + 2 * padding,
+                Pixmap.Format.RGBA8888
+            )
             if (!card.actor.font.isResolved) FortyFive.resourceManager.forceResolve(card.actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
                 pixmap,
@@ -75,22 +103,20 @@ class CardTextureManager {
                 card.actor.font.getOrError()
             )
             FortyFive.serviceThread.sendMessage(message)
-//            println("start drawing ${card.name}")
             message.promise
         }
         val texturePromise = pixmapPromise.chain { pixmap ->
-//            println("finished drawing ${card.name}")
             FortyFive.mainThreadTask {
                 val texture = Texture(pixmap, true)
                 texture.setFilter(
-                    Texture.TextureFilter.MipMapLinearLinear,
-                    Texture.TextureFilter.MipMapLinearLinear
+                    TextureFilter.MipMapLinearLinear,
+                    TextureFilter.Linear
                 )
                 statistics.textureDraws++
                 texture
             }
         }
-        val variant = CardTextureVariant(cost, damage, pixmapPromise, texturePromise, mutableListOf(card))
+        val variant = CardTextureVariant(cost, damage, pixmapPromise, texturePromise, mutableListOf(card), variablePostfix)
         data.variants.add(variant)
         return texturePromise
     }
@@ -116,7 +142,7 @@ class CardTextureManager {
             return
         }
         data.variants.remove(variant)
-        variant.pixmap.getOrError().dispose()
+        if (variant.variablePostFix != null) variant.pixmap.getOrError().dispose()
         variant.texture.getOrError().dispose()
         if (data.variants.isNotEmpty()) return
         if (preventCompleteUnload) return
@@ -139,11 +165,11 @@ class CardTextureManager {
         var cardPixmap: Pixmap? = null,
     ) {
 
-        fun findVariant(cost: Int, damage: Int): CardTextureVariant? =
-            variants.find { !it.isDisposing && it.cost == cost && it.damage == damage }
+        fun findVariant(cost: Int, damage: Int, variablePostFix: String?): CardTextureVariant? =
+            variants.find { !it.isDisposing && it.cost == cost && it.damage == damage && it.variablePostFix == variablePostFix }
 
         fun isStandardVariant(variant: CardTextureVariant): Boolean =
-            variant.cost == baseCost && variant.damage == baseDamage
+            variant.variablePostFix == null && variant.cost == baseCost && variant.damage == baseDamage
     }
 
     private data class CardTextureVariant(
@@ -152,6 +178,7 @@ class CardTextureManager {
         val pixmap: Promise<Pixmap>,
         val texture: Promise<Texture>,
         val borrowers: MutableList<Card>,
+        val variablePostFix: String?,
         var isDisposing: Boolean = false,
     )
 
@@ -169,6 +196,10 @@ class CardTextureManager {
         val textureUsages: Int
             get() = cardTextures.flatMap { it.variants }.sumOf { it.borrowers.size }
 
+    }
+
+    companion object {
+        const val texturePaddingFraction: Double = 1.0 / 75.0
     }
 
 }

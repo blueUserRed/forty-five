@@ -103,7 +103,7 @@ class PropertyAction<T>(
     val property: KMutableProperty<T>,
     val end: T,
     val invalidateHierarchyOf: Layout? = null
-): TemporalAction() where T: Float?{
+): TemporalAction() where T : Float? {
 
     private var initialValue: T? = null
 

@@ -47,9 +47,9 @@ class MapScreen : ScreenCreator() {
 
     private val warningEvents: EventPipeline = EventPipeline()
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "mapScreen" to 0,
-        "*" to 200 //TODO maybe change back to 1000
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
     )
 
     private val mapSaver: MapSaver by lazy {
@@ -133,6 +133,13 @@ class MapScreen : ScreenCreator() {
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.CENTER
         verticalAlign = CustomAlign.SPACE_BETWEEN
+
+        dropShadow = BakedDropShadow(
+            "map_detail_background",
+            screen,
+            -10f, 0f,
+            1.3f, 1.3f
+        )
 
         val startButtonGroup = "map-popup-start-button"
         val startButtonFilter = InputManager.FocusFilter(listOf(startButtonGroup), screen)
@@ -220,6 +227,7 @@ class MapScreen : ScreenCreator() {
             joinGroup(startButtonGroup)
             onInput(GameInputs.interact) {
                 if (mapWidget.playerNode.event?.startable == true) {
+                    FortyFive.soundPlayer.situation("general_button_click", screen)
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
                 }
@@ -343,7 +351,7 @@ class MapScreen : ScreenCreator() {
         }
     }
 
-    override fun debugMenuPages(): List<String> = listOf("Map")
+    override fun debugMenuPages(): List<String> = listOf("Map", "Encounter Preview")
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = MapScreen::class

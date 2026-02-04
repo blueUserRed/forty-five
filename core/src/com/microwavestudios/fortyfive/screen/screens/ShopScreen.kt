@@ -52,8 +52,9 @@ class ShopScreen : ScreenCreator() {
 
     private val events: EventPipeline = EventPipeline()
 
-    override val transitionAwayTimes: Map<String, Int> = mapOf(
-        "*" to 100
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        name to noTransition(),
+        "*" to geometricFadeTransition()
     )
 
     private val dropTargetFilter: InputManager.FocusFilter by lazy {
@@ -130,13 +131,14 @@ class ShopScreen : ScreenCreator() {
                 verticalAlign = CustomAlign.CENTER
                 height = 60f
                 width = 140f
-                defaultButtonBackgrounds()
+                defaultButtonConfig()
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 logicalOffsetY = 55f
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
                     setText("reroll: ${context.currentRerollPrice}\$")
                     syncDimensions()
+                    touchable = Touchable.disabled
                 }
                 onInput(GameInputs.interact) {
                     reroll()
@@ -184,13 +186,13 @@ class ShopScreen : ScreenCreator() {
 
     private fun generateRandomCards(): List<String> {
         val amount = context.amountCards.random(random)
+        val profile = FortyFive.profileManager.currentProfile!!
         val cards = RandomCardSelection.getRandomCards(
-            screen,
             listOf(),
             amount,
+            profile.currentMapSaver.currentMap.biome,
+            profile.currentMapSaver.currentMap.majorDifficulty,
             random,
-            FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap.biome,
-            "shop",
             unique = true
         ).map { it.name }
         return cards
@@ -420,6 +422,7 @@ class ShopScreen : ScreenCreator() {
             val info = actor.infoObject as? CardDragAndDropInfo ?: return@onDrop
             val profile = FortyFive.profileManager.currentProfile!!
             if (profile.playerMoney < info.price) return@onDrop
+            FortyFive.soundPlayer.situation("card_bought", screen)
             profile.payMoney(info.price)
             val deck = currentDeck
             if (profile.isRunActive) profile.addCardToBackpack(info.card.name)

@@ -1,5 +1,7 @@
 package com.microwavestudios.fortyfive.profile
 
+import com.microwavestudios.fortyfive.FortyFive
+
 class ProfileManager {
 
     var currentProfile: Profile? = null
@@ -18,6 +20,7 @@ class ProfileManager {
     }
 
     fun deselectProfile() {
+        FortyFive.logger.debug(logTag, "deselect profile ${currentProfile?.name}")
         currentProfile?.let {
             it.write()
             it.writeMaps()
@@ -30,10 +33,18 @@ class ProfileManager {
      * @return true when the profile was loaded successfully
      */
     fun selectProfile(preview: Profile.Preview): Boolean {
-        if (!preview.loadedSuccessfully) return false
+        if (!preview.loadedSuccessfully) {
+            FortyFive.logger.warn(logTag, "can't select profile ${preview.name}")
+            return false
+        }
         deselectProfile()
         val loaded = Profile.loadProfile(preview.name)
         currentProfile = loaded
+        if (loaded == null) {
+            FortyFive.logger.debug(logTag, "failed loading profile ${preview.name}")
+        } else {
+            FortyFive.logger.warn(logTag, "loaded ${preview.name}")
+        }
         return loaded != null
     }
 
@@ -47,6 +58,10 @@ class ProfileManager {
             Profile.loadPreview("B"),
             Profile.loadPreview("C"),
         )
+    }
+
+    companion object {
+        private const val logTag = "ProfileManager"
     }
 
 }

@@ -54,9 +54,22 @@ object GameInputs {
         )
     )
 
+    val toggleFullScreen = Input(
+        "toggleFullScreen",
+        arrayOf(Input.Cause.Keyboard(Keys.F))
+    )
+
     val cancel = Input(
         "cancel",
         arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))
+    )
+
+    val enemyAnimConfirmation = Input(
+        "enemyAnimConfirmation",
+        arrayOf(
+            Input.Cause.Mouse(MouseButton.LEFT),
+            Input.Cause.Keyboard(Keys.ENTER)
+        )
     )
 
     val switchSelectorToLeft = Input(
@@ -114,6 +127,10 @@ object GameInputs {
     ))
 
     val skipCredits = Input("skipCredits", arrayOf(
+        Input.Cause.Keyboard(Keys.ENTER)
+    ))
+
+    val dialogContinue = Input("dialogContinue", arrayOf(
         Input.Cause.Keyboard(Keys.ENTER)
     ))
 

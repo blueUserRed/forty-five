@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.*
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
+import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.GameRenderPipeline
@@ -21,17 +22,21 @@ import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
+import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
 import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import kotlin.collections.map
 import kotlin.math.floor
+import kotlin.math.log
 
 class GameControllerImpl(
     override val screen: OnjScreen,
@@ -60,7 +65,8 @@ class GameControllerImpl(
         get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
-        get() = _encounterModifiers.any { it.second.disableEverlasting() }
+        get() = _encounterModifiers.any { it.second.disableEverlasting() } ||
+                _playerStatusEffects.any { it.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
@@ -104,6 +110,9 @@ class GameControllerImpl(
 
     private val createdCards: MutableList<Card> = mutableListOf()
 
+    override val allCards: List<Card>
+        get() = createdCards
+
     private lateinit var defaultBullet: CardPrototype
 
     private val mainTimeline: Timeline = Timeline().also { it.startTimeline() }
@@ -112,7 +121,7 @@ class GameControllerImpl(
     var cardsDrawn: Int = 0
         private set
 
-    val hasWon: Boolean
+    override val hasWon: Boolean
         get() = allEnemies.all { it.isDefeated }
 
     private val enemyBannerPromise: Promise<Drawable> =
@@ -132,15 +141,18 @@ class GameControllerImpl(
     )
 
     private val enemyDifficulty
-        get() = 1f + (encounter.minorDifficulty * Config.enemyAggressiveDifficultyAdjustment)
+        get() = 1f + ((encounter.minorDifficulty - 1f) * RunGeneratorConfig.enemyDamageAdjustment)
+
+    private var inEnemyPhase: Boolean = false
 
     private lateinit var profile: Profile
 
     override fun init(context: Any?) {
-        if (context !is EncounterContext) {
-            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-        }
+        require(context is EncounterContext) { "GameScreen needs a context of type encounterMapEvent" }
+
         encounterContext = context
+
+        FortyFive.logger.debug(logTag, "init GameController, encounter = ${context.encounter}")
 
         profile = FortyFive.profileManager.currentProfile!!
 
@@ -153,9 +165,7 @@ class GameControllerImpl(
 
         bindGameEventListeners()
 
-        allEnemies = encounter.createEnemies()
-        gameEvents.fire(Events.SetupEnemies(allEnemies))
-        gameEvents.fire(Events.EnemySelected(allEnemies.first()))
+        setupEnemies()
 
         initCards()
         updateReserves(Config.baseReserves)
@@ -166,6 +176,19 @@ class GameControllerImpl(
                 _encounterModifiers.forEach { it.second.onStart(this@GameControllerImpl) }
             }
             action { chooseEnemyActions() }
+            later {
+                cardStack.cards().forEach { card ->
+                    val info = createTriggerInfo(card)
+                    val eventBefore = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, true, info)
+                    val eventAfter = eventBefore.copy(before = false)
+                    gameEvents.fire(eventBefore)
+                    include(eventBefore.createTimeline())
+                    includeLater({
+                        gameEvents.fire(eventAfter)
+                        eventAfter.createTimeline()
+                    })
+                }
+            }
             includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
             later {
                 val startTriggerInformation = createTriggerInfo(null)
@@ -176,11 +199,34 @@ class GameControllerImpl(
         })
     }
 
+    private fun setupEnemies() {
+        allEnemies = encounter.createEnemies()
+        gameEvents.fire(Events.SetupEnemies(allEnemies))
+
+        var selectedEnemy: Enemy = allEnemies.first()
+        gameEvents.fire(Events.EnemySelected(selectedEnemy))
+
+        gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
+            selectedEnemy = enemy
+        }
+
+        allEnemies.forEach { enemy ->
+            enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> {
+                if (selectedEnemy != enemy || !enemy.isDefeated) return@watchFor
+                val newEnemy = allEnemies.firstOrNull { !it.isDefeated } ?: allEnemies.first()
+                gameEvents.fire(Events.EnemySelected(newEnemy))
+            }
+        }
+    }
+
     override fun onShow() {
         FortyFive.useRenderPipeline(gameRenderPipeline)
     }
 
     private fun bindGameEventListeners() {
+        gameEvents.watchFor<Any> { e ->
+            if (e !is EncounterScreen.UpdateUiEvent) FortyFive.logger.debug(logTag, "Game Event: $e")
+        }
         gameEvents.watchFor<Events.ParryStateChange> { (inParryMenu) ->
             if (inParryMenu) gameRenderPipeline.startParryEffect() else gameRenderPipeline.stopParryEffect()
         }
@@ -209,7 +255,7 @@ class GameControllerImpl(
                     }
                 }
             }
-            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before)
+            val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before, event.afterShot)
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
             }
@@ -220,28 +266,46 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.StatusEffectAppliedEvent> { event ->
+            val situation = GameSituation.StatusEffectApplied(event.statusEffect, event.toPlayer)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
+        gameEvents.watchFor<Events.CardReplacedEvent> { event ->
+            val situation = GameSituation.CardReplaced(event.replaced, event.newCard)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
         gameEvents.watchFor<Events.EndTurnEvent> { event ->
             val situation = GameSituation.TurnEnd
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
-                encounterModifiers
-                    .mapNotNull { it.executeOnEndTurn() }
-                    .collectTimeline()
-                    .let { include(it) }
+                later {
+                    encounterModifiers
+                        .mapNotNull { it.executeOnEndTurn() }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.TurnBeginEvent> { event ->
             val situation = GameSituation.TurnBegin
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
-                encounterModifiers
-                    .mapNotNull { it.executeOnPlayerTurnStart(this@GameControllerImpl) }
-                    .collectTimeline()
-                    .let { include(it) }
-                activeEnemies
-                    .map { it.executeStatusEffectsAfterTurn() }
-                    .collectTimeline()
-                    .let { include(it) }
+                later {
+                    encounterModifiers
+                        .mapNotNull { it.executeOnPlayerTurnStart(this@GameControllerImpl) }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
+                later {
+                    activeEnemies
+                        .map { it.executeStatusEffectsAfterTurn() }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
@@ -252,16 +316,12 @@ class GameControllerImpl(
                     if (timeline != null) include(timeline)
                 }
                 include(checkTrigger(situation, event.triggerInformation))
-                activeEnemies
-                    .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
-                    .collectTimeline()
-                    .let { include(it) }
-            }
-        }
-        gameEvents.watchFor<Events.CardReturnedHome> { event ->
-            val situation = GameSituation.CardReturnedHome(event.card)
-            event.append {
-                include(checkTrigger(situation, event.triggerInformation))
+                later {
+                    activeEnemies
+                        .map { it.executeStatusEffectsAfterRevolverRotation(event.rotation) }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.CardDestroyedEvent> { event ->
@@ -277,10 +337,14 @@ class GameControllerImpl(
             }
         }
         gameEvents.watchFor<Events.AfterShotEvent> { event ->
+            val situation = GameSituation.AfterShot(event.card)
             event.append {
-                _encounterModifiers.forEach { (_, modifier) ->
-                    val timeline = modifier.executeAfterRevolverWasShot(event.card, this@GameControllerImpl)
-                    if (timeline != null) include(timeline)
+                include(checkTrigger(situation, event.triggerInformation))
+                later {
+                    _encounterModifiers.forEach { (_, modifier) ->
+                        val timeline = modifier.executeAfterRevolverWasShot(event.card, this@GameControllerImpl)
+                        if (timeline != null) include(timeline)
+                    }
                 }
             }
         }
@@ -312,8 +376,7 @@ class GameControllerImpl(
     }
 
     override fun update() {
-        TemplateString.updateGlobalParam("game.cardsInStack", cardStack.size())
-
+        gameEvents.fire(EncounterScreen.UpdateUiEvent(this))
         _encounterModifiers.removeIf { (predicate, _) -> predicate != null && !predicate(this@GameControllerImpl) }
         _encounterModifiers.forEach { it.second.update(this@GameControllerImpl) }
 
@@ -325,30 +388,24 @@ class GameControllerImpl(
     }
 
     private fun initCards() {
-        val onj = ConfigFileManager.getConfigFile("cards")
-
         val cards = encounter.forceCards
             ?: encounterContext.forceCards
             ?: profile.currentRunDeck!!.cards
 
-        val cardsArray = onj.get<OnjArray>("cards")
-
         val stack = mutableListOf<Card>()
 
-        cardPrototypes = Card
-            .getFrom(cardsArray) { card ->
-                createdCards.add(card)
-                encounterModifiers.forEach { it.initBullet(card) }
-                screen.lifetime.tieDisposable(card)
-                card.setGame(this@GameControllerImpl)
-            }
-            .toMutableList()
+        cardPrototypes = ConfigFileManager.loadCards { card ->
+            createdCards.add(card)
+            encounterModifiers.forEach { it.initBullet(card) }
+            screen.lifetime.tieDisposable(card)
+            card.setGame(this@GameControllerImpl)
+        }
 
         cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            stack.add(card.create(this.screen))
+            stack.add(card.create(this.screen, true))
         }
 
         if (encounter.shuffleCards) stack.shuffle()
@@ -356,6 +413,7 @@ class GameControllerImpl(
 
         FortyFive.logger.debug(logTag, "card stack: $stack")
 
+        val onj = ConfigFileManager.getConfigFile("cards")
         val defaultBulletName = onj.get<String>("defaultBullet")
 
         defaultBullet = cardPrototypes
@@ -363,19 +421,11 @@ class GameControllerImpl(
             ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
     }
 
-    override fun cardSelectionPopupTimeline(
-        text: String,
-        exclude: Card?
-    ): Timeline = Timeline.timeline {
-        val event = Events.TargetSelectionEvent(text, exclude)
-        include(afterlife.closeTimeline())
-        action { gameEvents.fire(event) }
-        delayUntil { event.promise.isResolved }
-        action { store("selectedCard", event.promise.getOrError()) }
-    }
-
     override fun destroyCardTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
-        if (!card.inZone(Zone.REVOLVER)) return@later
+        if (!card.inZone(Zone.REVOLVER)) {
+            FortyFive.logger.warn(logTag, "cant destroy $card because it isn't in the revolver")
+            return@later
+        }
         val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
         includeLater({
@@ -402,14 +452,78 @@ class GameControllerImpl(
         }
     } }
 
+    override fun putCardsInStackTimeline(
+        cardName: String,
+        amount: Int,
+        sourceCard: Card?,
+        onTop: Boolean,
+    ): Timeline = Timeline.timeline { later {
+        val proto = cardPrototypes.find { it.name == cardName }
+        requireNotNull(proto) { "No card with name $cardName" }
+        repeat(amount) {
+            val card = proto.create(screen)
+            val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, triggerInfo)
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
+            action {
+                if (onTop){
+                    cardStack.addCardAtTop(card)
+                } else {
+                    cardStack.shuffleCardIntoStack(card)
+                }
+            }
+            later {
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
+            }
+        }
+    } }
+
+    override fun shuffleCardFromHandIntoStackTimeline(
+        card: Card,
+        sourceCard: Card?
+    ): Timeline = Timeline.timeline { later {
+        if (card !in cardsInHand) {
+            FortyFive.logger.warn(logTag, "Cant shuffle card into the stack because it isn't in the hand $card")
+            return@later
+        }
+        val info = createTriggerInfo(card, sourceCard = sourceCard)
+        val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, true, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
+        include(card.actor.spawnAnimation(true))
+        action {
+            cardHand.removeCard(card)
+            cardStack.shuffleCardIntoStack(card)
+        }
+        later {
+            val animEvent = Events.PlayCardOrbAnimation(card.actor, true)
+            gameEvents.fire(animEvent)
+            include(animEvent.orbAnimationTimeline!!)
+            val afterEvent = event.copy(before = false)
+            includeLater({
+                gameEvents.fire(afterEvent)
+                afterEvent.createTimeline()
+            })
+        }
+    } }
+
     override fun tryToPutCardsInHandTimeline(
         cardName: String,
         amount: Int,
         sourceCard: Card?
     ): Timeline = Timeline.timeline { later {
-        val prototype = cardPrototypes.find { it.name == cardName } ?: throw RuntimeException("unknown card $cardName")
+        val prototype = cardPrototypes.find { it.name == cardName }
+        requireNotNull(prototype) { "unknown card $cardName" }
         val newAmount = maxSpaceInHand(amount)
-        if (newAmount == 0) return@later
+        if (newAmount == 0) {
+            FortyFive.logger.warn(logTag, "Failed to put card in hand because there isn't enough space")
+            return@later
+        }
         repeat(newAmount) {
             val card = prototype.create(screen)
             val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
@@ -430,24 +544,54 @@ class GameControllerImpl(
     } }
 
     override fun bounceBulletTimeline(card: Card): Timeline = Timeline.timeline {
-        val info = createTriggerInfo(card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, info)
-        includeLater({
-            gameEvents.fire(beforeEvent)
-            beforeEvent.createTimeline()
-        })
-        action {
-            if (card !in revolver.slots.mapNotNull { it.card }) {
-                throw RuntimeException("cant bounce card $card because it isn't in the revolver")
+
+        later  {
+            val freeSpace = maxSpaceInHand()
+            var leaveInRevolver = freeSpace == 0
+            val triggerInformation = createTriggerInfo(card)
+            val beforeEvent = Events.CardChangeZoneEvent(
+                card,
+                Zone.REVOLVER,
+                Zone.HAND,
+                true,
+                triggerInformation
+            )
+            if (!leaveInRevolver) {
+                gameEvents.fire(beforeEvent)
+                include(beforeEvent.createTimeline())
             }
-            revolver.removeCard(card)
-            tryPutCardInHand(card)
+            if (!leaveInRevolver) later {
+                include(card.actor.spawnAnimation(reverse = true))
+                action { card.actor.alpha = 0f }
+            }
+            if (!leaveInRevolver) later {
+                val success = maxSpaceInHand() > 0
+                if (success) revolver.removeCard(card)
+                require(tryPutCardInHand(card))
+                if (!success) leaveInRevolver = true
+                if (success) {
+                    delay(200)
+                    include(card.actor.spawnAnimation())
+                    action { card.actor.alpha = 1f }
+                    delay(100)
+                } else {
+                    action { card.actor.alpha = 1f }
+                }
+            }
+            later {
+                val afterEvent = Events.CardChangeZoneEvent(
+                    card,
+                    Zone.REVOLVER,
+                    Zone.HAND,
+                    false,
+                    triggerInformation
+                )
+                if (!leaveInRevolver) {
+                    gameEvents.fire(afterEvent)
+                    include(afterEvent.createTimeline())
+                }
+            }
         }
-        includeLater({
-            val afterEvent = beforeEvent.copy(before = false)
-            gameEvents.fire(afterEvent)
-            afterEvent.createTimeline()
-        })
     }
 
     override fun rotateRevolverTimeline(
@@ -461,25 +605,14 @@ class GameControllerImpl(
             encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
         }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
+        if (newRotation.amount == 0) return@later
         include(revolver.rotate(newRotation))
         action {
             revolverRotationCounter += newRotation.amount
             cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
         }
-        if (newRotation.amount == 0) return@later
         later {
-            revolver
-                .slots
-                .filter { it.card?.enteredInSlot == it.num }
-                .forEach {
-                    val card = it.card!!
-                    val info = createTriggerInfo(card, sourceCard = sourceCard)
-                    val event = Events.CardReturnedHome(card, info)
-                    gameEvents.fire(event)
-                }
-        }
-        later {
-            val info = createTriggerInfo(null, multiplier = newRotation.amount, sourceCard = sourceCard)
+            val info = createTriggerInfo(null, sourceCard = sourceCard)
             val event = Events.RevolverRotatedEvent(rotation, info)
             gameEvents.fire(event)
             include(event.createTimeline())
@@ -516,7 +649,6 @@ class GameControllerImpl(
                 val info = createTriggerInfo(
                     null,
                     amountOfCardsDrawn = cardsToDraw,
-                    multiplier = cardsToDraw,
                     sourceCard = sourceCard
                 )
                 val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, cardAcc, info)
@@ -538,45 +670,158 @@ class GameControllerImpl(
             card?.let { cardAcc?.add(it) }
         }
         later {
-            val card = card
+            var card = card
             if (card == null) {
-                include(putCardFromStackInHandTimeline(defaultBullet.create(screen), sourceCard, cardIsntActuallyInStack = true))
-            } else {
-                include(putCardFromStackInHandTimeline(card, sourceCard))
+                // create default card and put in stack
+                val info = createTriggerInfo(card, sourceCard = sourceCard)
+                card = defaultBullet.create(screen)
+                val limboEventBefore = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, info)
+                val limboEventAfter = limboEventBefore.copy(before = false)
+                gameEvents.fire(limboEventBefore)
+                include(limboEventBefore.createTimeline())
+                action { cardStack.addCardAtBottom(card) }
+                includeLater({
+                    gameEvents.fire(limboEventAfter)
+                    limboEventAfter.createTimeline()
+                })
             }
+            include(putCardFromStackInHandTimeline(card, sourceCard))
+        }
+    }
+
+    override fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card?): Timeline = Timeline.timeline {
+        val proto = cardPrototypes.find { it.name == bulletName }
+        requireNotNull(proto) { "No bullet with name $bulletName" }
+        later {
+            if (afterlife.isClosed) include(afterlife.openTimeline())
+        }
+        repeat(amount) {
+            later {
+                val card = proto.create(screen)
+                val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+                val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.AFTERLIFE, true, triggerInfo)
+                gameEvents.fire(beforeEvent)
+                include(beforeEvent.createTimeline())
+                later {
+                    afterlife.pushCard(card)
+                    val afterEvent = beforeEvent.copy(before = false)
+                    gameEvents.fire(afterEvent)
+                    include(afterEvent.createTimeline())
+                }
+            }
+        }
+    }
+
+    override fun descendBulletTimeline(): Timeline = Timeline.timeline { later {
+        val card = afterlife.cards.firstOrNull() ?: return@later
+        val info = createTriggerInfo(card)
+        val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.LIMBO, true, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
+        include(afterlife.scrollToBeginTimeline())
+        delay(200)
+        include(card.actor.descendAnimation())
+        delay(50)
+        later {
+            val damage = card.curDamage(this@GameControllerImpl)
+            include(targetedEnemy.damage(damage * 2))
+        }
+        delay(400)
+        include(afterlife.popCardTimeline())
+        action { card.actor.resetDescendAnimation() }
+        delay(400)
+        later {
+            val afterEvent = event.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
+        }
+    } }
+
+    override fun resurrectTimeline(intoSlot: Int): Timeline = Timeline.timeline {
+        val slot = revolver.slots[intoSlot - 1]
+        later {
+            if (slot.card != null) {
+                FortyFive.logger.warn(logTag, "cant resurrect card into $intoSlot because it has a card")
+                return@later
+            }
+            val card = afterlife.cards.firstOrNull() ?: return@later
+            val info = createTriggerInfo(card)
+            val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.LIMBO, true, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+            include(afterlife.scrollToBeginTimeline())
+            delay(200)
+            include(card.actor.spawnAnimation(reverse = true))
+            action { card.actor.alpha = 0f }
+            delay(200)
+            later {
+                if (slot.card != null) { // may have changed due to bullet effects
+                    card.actor.alpha = 1f
+                    return@later
+                }
+                include(afterlife.popCardTimeline())
+                action { revolver.setCard(slot.num, card) }
+                include(card.actor.spawnAnimation())
+                action { card.actor.alpha = 1f }
+            }
+            later {
+                val afterEvent = event.copy(before = false)
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
+            }
+        }
+    }
+
+    override fun switchSlotOfBulletInRevolverTimeline(
+        card: Card,
+        newSlot: Int,
+    ): Timeline = Timeline.timeline {
+        action {
+            val currentSlot = revolver
+                .slots
+                .find { it.card === card }
+            requireNotNull(currentSlot) { "card $card not in revolver" }
+            revolver.removeCard(currentSlot.num)
+            requireNull(revolver.getCardInSlot(newSlot)) { "cant switch slot of bullet to a used one" }
+            revolver.setCard(newSlot, card)
         }
     }
 
     override fun putCardFromStackInHandTimeline(
         card: Card,
         source: Card?,
-        cardIsntActuallyInStack: Boolean, // kinda stupid, but necessary when drawing the default bullet
     ): Timeline = Timeline.timeline {
         var orbAnimationTimeline: Timeline? = null
         val info = createTriggerInfo(card, sourceCard = source)
+        var canAdd = true
+        action { if (maxSpaceInHand() == 0) canAdd = false }
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.STACK, Zone.HAND, before = true, info)
         includeLater({
             gameEvents.fire(beforeEvent)
             beforeEvent.createTimeline()
-        })
+        }, { canAdd })
         action {
-            if (!cardIsntActuallyInStack) cardStack.remove(card)
-            cardHand.addCard(card)
+            if (maxSpaceInHand() == 0) canAdd = false
+            if (canAdd) cardStack.remove(card)
+            if (!canAdd) return@action
+            require(tryPutCardInHand(card))
             card.actor.alpha = 0f
             val event = Events.PlayCardOrbAnimation(card.actor)
             gameEvents.fire(event)
             orbAnimationTimeline = event.orbAnimationTimeline
         }
-        includeLater({ Timeline.timeline {
-            include(orbAnimationTimeline!!)
-            action { card.actor.alpha = 1f }
-            include(card.actor.spawnAnimation())
-        } }, { orbAnimationTimeline != null })
+        later {
+            if (orbAnimationTimeline != null && canAdd) {
+                include(orbAnimationTimeline!!)
+                action { card.actor.alpha = 1f }
+                include(card.actor.spawnAnimation())
+            }
+        }
         includeLater({
             val afterEvent = beforeEvent.copy(before = false)
             gameEvents.fire(afterEvent)
             afterEvent.createTimeline()
-        })
+        }, { canAdd })
         action { checkCardMaximums() }
     }
 
@@ -585,10 +830,21 @@ class GameControllerImpl(
 
     override fun tryApplyStatusEffectToEnemyTimeline(
         statusEffect: StatusEffect,
-        enemy: Enemy
+        enemy: Enemy,
+        source: Card?,
     ): Timeline = Timeline.timeline { later {
-        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return@later
-        action { enemy.applyEffect(statusEffect, this@GameControllerImpl) }
+        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) {
+            FortyFive.logger.debug(logTag, "cant apply status effect because they are disabled")
+            return@later
+        }
+        enemy.applyEffect(statusEffect, this@GameControllerImpl)
+        if (!inEnemyPhase && statusEffect.reevaluateEnemyAttack()) {
+            enemy.reevaluateAction(this@GameControllerImpl)
+        }
+        val info = createTriggerInfo(null, sourceCard = source)
+        val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
     } }
 
     override fun damagePlayerTimeline(
@@ -608,7 +864,6 @@ class GameControllerImpl(
             FortyFive.soundPlayer.situation("enemy_attack", this@GameControllerImpl.screen)
             dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
             dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen, this@GameControllerImpl).wrap())
-            curPlayerLives -= newDamage
             FortyFive.logger.debug(
                 logTag,
                 "player got damaged; damage = $newDamage; curPlayerLives = $curPlayerLives"
@@ -632,7 +887,7 @@ class GameControllerImpl(
         val old = curPlayerLives
         curPlayerLives = newValue
         includeLater({
-            val info = createTriggerInfo(null)
+            val info = createTriggerInfo(null, sourceCard = source)
             val event = Events.PlayerLivesChanged(old, newValue, info)
             gameEvents.fire(event)
             event.createTimeline()
@@ -681,23 +936,31 @@ class GameControllerImpl(
                 profile.loseRun()
                 FortyFive.screenManager.ensureNextScreen(LoseRunScreen)
             }
+            FortyFive.screenManager.overrideNextTransition(ScreenManager.ScreenTransition(null, null))
             FortyFive.screenManager.screenFinished()
         }
     }
 
-    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect): Timeline = Timeline.timeline {
-        action {
+    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect, source: Card?): Timeline = Timeline.timeline {
+        later {
             FortyFive.logger.debug(logTag, "status effect $effect applied to player")
+            var stacked = false
             _playerStatusEffects
                 .find { it.canStackWith(effect) }
                 ?.let {
                     FortyFive.logger.debug(logTag, "stacked with $it")
                     it.stack(effect)
-                    return@action
+                    stacked = true
                 }
-            effect.start(this@GameControllerImpl)
-            _playerStatusEffects.add(effect)
-            gameEvents.fire(Events.AddedPlayerStatusEffect(effect))
+            if (!stacked) {
+                effect.start(this@GameControllerImpl)
+                _playerStatusEffects.add(effect)
+                gameEvents.fire(Events.AddedPlayerStatusEffect(effect)) // separate event for UI purposes
+            }
+            val info = createTriggerInfo(null, sourceCard = source)
+            val event = Events.StatusEffectAppliedEvent(effect, true, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
         }
     }
 
@@ -709,8 +972,36 @@ class GameControllerImpl(
         }
     }
 
-    override fun destroyCardInHandTimeline(card: Card): Timeline {
-        TODO("Not yet implemented")
+    override fun destroyCardInHandTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline { later {
+        if (card !in cardHand.allCards()) {
+            FortyFive.logger.warn(logTag, "cant destroy $card because it isn't in the hand")
+            return@later
+        }
+        val info = createTriggerInfo(card, sourceCard = sourceCard)
+        val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.AFTERLIFE, true, info)
+        gameEvents.fire(event)
+        include(event.createTimeline())
+        include(card.actor.destroyAnimation())
+        action { card.actor.alpha = 0f }
+        includeLater({ afterlife.openTimeline() }, { afterlife.isClosed })
+        later {
+            cardHand.removeCard(card)
+            afterlife.pushCard(card)
+            card.actor.alpha = 1f
+            checkCardMaximums()
+            val afterEvent = event.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
+        }
+    } }
+
+    override fun removeAllPlayerStatusEffectsTimeline(): Timeline = Timeline.timeline {
+        action {
+            _playerStatusEffects.iterateRemoving { effect, remover ->
+                remover()
+                gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
+            }
+        }
     }
 
     private fun parryTimeline(
@@ -719,9 +1010,9 @@ class GameControllerImpl(
         card: Card
     ): Timeline = Timeline.timeline { later {
         FortyFive.soundPlayer.situation("enter_parry", this@GameControllerImpl.screen)
-        val damageOfCard = card.curDamage(this@GameControllerImpl)
-        val remainingDamage = if (card.isReinforced) 0 else (damage - damageOfCard).coerceAtLeast(0)
-        val parryEnterEvent = Events.ParryStateChange(true, damage, damageOfCard)
+        val damageToParry = card.parryNumber ?: card.curDamage(this@GameControllerImpl)
+        val remainingDamage = if (card.isReinforced) 0 else (damage - damageToParry).coerceAtLeast(0)
+        val parryEnterEvent = Events.ParryStateChange(true, damage, damageToParry)
         val parryLeaveEvent = Events.ParryStateChange(false, 0, 0)
         parryEnterEvent.resolutionPromise.then { gameEvents.fire(parryLeaveEvent) }
         include(afterlife.closeTimeline())
@@ -730,11 +1021,12 @@ class GameControllerImpl(
         later {
             val parried = parryEnterEvent.resolutionPromise.getOrError()
             if (parried) {
-                include(card.afterShot(this@GameControllerImpl, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
-                include(rotateRevolverTimeline(card.rotationDirection))
                 if (remainingDamage > 0) {
                     include(damagePlayerTimeline(remainingDamage, false, isPiercing))
                 }
+                if (card.isThorns) include(targetedEnemy.damage(damage))
+                include(card.afterShot(this@GameControllerImpl, true, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+                include(rotateRevolverTimeline(card.rotationDirection))
             } else {
                 include(damagePlayerTimeline(damage, false, isPiercing))
             }
@@ -743,6 +1035,7 @@ class GameControllerImpl(
 
     override fun enemyAttackTimeline(
         damage: Int,
+        enemy: Enemy,
         isPiercing: Boolean
     ): Timeline = Timeline.timeline { later {
         val card = revolver.getCardInSlot(5)
@@ -751,6 +1044,7 @@ class GameControllerImpl(
         } else {
             include(parryTimeline(damage, isPiercing, card))
         }
+        later { enemy.statusEffects.forEach { it.onEnemyAttack() } }
     } }
 
     override fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline {
@@ -758,20 +1052,50 @@ class GameControllerImpl(
     }
 
     private fun putCardBackInHandAfterShot(card: Card): Timeline = Timeline.timeline {
-        val triggerInformation = createTriggerInfo(card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, triggerInformation)
-        includeLater({
+        later  {
+            val freeSpace = maxSpaceInHand()
+            var putInStackInstead = freeSpace == 0
+            val triggerInformation = createTriggerInfo(card)
+            val beforeEvent = Events.CardChangeZoneEvent(
+                card,
+                Zone.REVOLVER,
+                if (putInStackInstead) Zone.STACK else Zone.HAND,
+                true,
+                triggerInformation,
+                true
+            )
             gameEvents.fire(beforeEvent)
-            beforeEvent.createTimeline()
-        })
-        action {
-            revolver.removeCard(card)
-            tryPutCardInHand(card)
-        }
-        later {
-            val afterEvent = beforeEvent.copy(before = false)
-            gameEvents.fire(afterEvent)
-            include(afterEvent.createTimeline())
+            include(beforeEvent.createTimeline())
+            if (!putInStackInstead) later {
+                include(card.actor.spawnAnimation(reverse = true))
+                action { card.actor.alpha = 0f }
+            }
+            action { revolver.removeCard(card) }
+            if (!putInStackInstead) later {
+                val success = tryPutCardInHand(card)
+                if (!success) putInStackInstead = true
+                if (success) {
+                    delay(200)
+                    include(card.actor.spawnAnimation())
+                    action { card.actor.alpha = 1f }
+                    delay(100)
+                } else {
+                    action { card.actor.alpha = 1f }
+                }
+            }
+            later {
+                if (putInStackInstead) cardStack.addCardAtBottom(card)
+                val afterEvent = Events.CardChangeZoneEvent(
+                    card,
+                    Zone.REVOLVER,
+                    if (putInStackInstead) Zone.STACK else Zone.HAND,
+                    false,
+                    triggerInformation,
+                    true
+                )
+                gameEvents.fire(afterEvent)
+                include(afterEvent.createTimeline())
+            }
         }
     }
 
@@ -785,7 +1109,14 @@ class GameControllerImpl(
 
     private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
         val triggerInformation = createTriggerInfo(card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.STACK, before = true, triggerInformation)
+        val beforeEvent = Events.CardChangeZoneEvent(
+            card,
+            Zone.REVOLVER,
+            Zone.STACK,
+            before = true,
+            triggerInformation,
+            afterShot = true
+        )
         includeLater({
             gameEvents.fire(beforeEvent)
             beforeEvent.createTimeline()
@@ -839,7 +1170,7 @@ class GameControllerImpl(
             // Not handled via event because things like encounter modifiers or
             // status effects shouldn't hook into here
             include(checkTrigger(GameSituation.OnShot(card), triggerInfo))
-            include(card.afterShot(this@GameControllerImpl, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+            include(card.afterShot(this@GameControllerImpl, false, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
         }
         include(rotateRevolverTimeline(rotationDirection))
         includeLater(
@@ -848,18 +1179,29 @@ class GameControllerImpl(
         )
 
         if (cardToShoot != null) later {
-            val event = Events.AfterShotEvent(cardToShoot, triggerInfo)
+            val afterShotInfo = TriggerInformation(
+                controller = this@GameControllerImpl,
+                targetedEnemies = targetedEnemies,
+                sourceCard = cardToShoot,
+            )
+            val event = Events.AfterShotEvent(cardToShoot, afterShotInfo)
             gameEvents.fire(event)
             include(event.createTimeline())
+        }
+        later {
+            _playerStatusEffects
+                .mapNotNull { it.executeAfterShot() }
+                .collectTimeline()
+                .let { include(it) }
+            allEnemies
+                .map { it.executeStatusEffectsAfterShot() }
+                .collectTimeline()
+                .let { include(it) }
         }
     } }
 
     override fun shoot() {
-        val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
-        appendMainTimeline(Timeline.timeline {
-            parallelActions(shootTimeline().asAction(), postProcessor)
-        })
-//        appendMainTimeline(shootTimeline())
+        appendMainTimeline(shootTimeline())
     }
 
     override fun gainReserves(amount: Int, source: Actor?) {
@@ -894,6 +1236,7 @@ class GameControllerImpl(
         modifier: EncounterModifier,
         validityChecker: (GameController) -> Boolean
     ) {
+        FortyFive.logger.debug(logTag, "added temporary encounter modifier $modifier")
         _encounterModifiers.add(validityChecker to modifier)
         // No event in this case, because temporary encounter modifiers aren't displayed
     }
@@ -916,46 +1259,92 @@ class GameControllerImpl(
 
     override fun loadBulletFromHandInRevolver(card: Card, slot: Int) {
         if (isUIFrozen) return
-        var cardInSlot: Card? = null
-        val info = createTriggerInfo(card, sourceCard = card)
-        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
-        val timeline = Timeline.timeline {
-            skipping { skip ->
-                action {
-                    FortyFive.logger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-                    cardInSlot = revolver.getCardInSlot(slot)
-                    val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(this@GameControllerImpl, card)
-                    val shouldSkip = !card.allowsEnteringGame(this@GameControllerImpl, slot)
-                        || blockedByCard
-                        || !tryPay(card.baseCost, card.actor)
-                    if (!shouldSkip) return@action
-                    FortyFive.soundPlayer.situation("not_allowed", screen)
-                    skip()
-                }
-                includeLater({
-                    gameEvents.fire(beforeEvent)
-                    beforeEvent.createTimeline()
-                })
-                action {
-                    cardHand.removeCard(card)
-                    if (cardInSlot != null) revolver.preAddCard(slot, card)
-                    checkCardMaximums()
-                }
-                includeLater(
-                    { cardInSlot!!.replaceTimeline(this@GameControllerImpl, card) },
-                    { cardInSlot != null }
-                )
-                action {
-                    revolver.setCard(slot, card)
-                }
-                includeLater({
-                    val afterEvent = beforeEvent.copy(before = false)
-                    gameEvents.fire(afterEvent)
-                    afterEvent.createTimeline()
-                })
-            }
+        val timeline = if (card.isPunk) {
+            loadPunkBulletFromHandInRevolverTimeline(card, slot)
+        } else {
+            loadBulletFromHandInRevolverTimeline(card, slot)
         }
         appendMainTimeline(timeline)
+    }
+
+    private fun loadBulletFromHandInRevolverTimeline(card: Card, slot: Int): Timeline = Timeline.timeline {
+        skipping { skip ->
+            var cardInSlot: Card? = null
+            val info = createTriggerInfo(card, sourceCard = card)
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
+            action {
+                FortyFive.logger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
+                cardInSlot = revolver.getCardInSlot(slot)
+                val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(this@GameControllerImpl, card)
+                val shouldSkip = !card.allowsEnteringGame(this@GameControllerImpl, slot)
+                        || blockedByCard
+                        || !tryPay(card.baseCost, card.actor)
+                if (!shouldSkip) return@action
+                FortyFive.soundPlayer.situation("not_allowed", screen)
+                skip()
+            }
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
+            action {
+                cardHand.removeCard(card)
+                if (cardInSlot != null) revolver.preAddCard(slot, card)
+                checkCardMaximums()
+            }
+            later {
+                if (cardInSlot == null) return@later
+                include(cardInSlot!!.replaceTimeline(this@GameControllerImpl, card))
+                val info = createTriggerInfo(cardInSlot, sourceCard = card)
+                val event = Events.CardReplacedEvent(cardInSlot!!, card, info)
+                includeLater({
+                    gameEvents.fire(event)
+                    event.createTimeline()
+                })
+            }
+            action {
+                revolver.setCard(slot, card)
+            }
+            includeLater({
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                afterEvent.createTimeline()
+            })
+        }
+    }
+
+    private fun loadPunkBulletFromHandInRevolverTimeline(card: Card, slot: Int): Timeline = Timeline.timeline {
+        later {
+            var cardInSlot: Card? = null
+            val info = createTriggerInfo(card, sourceCard = card)
+            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
+            action {
+                FortyFive.logger.debug(logTag, "loading punk bullet $card in revolver slot $slot")
+                tryPay(card.baseCost, card.actor) // ignore return value
+                cardInSlot = revolver.getCardInSlot(slot)
+            }
+            includeLater({
+                gameEvents.fire(beforeEvent)
+                beforeEvent.createTimeline()
+            })
+            action {
+                cardHand.removeCard(card)
+                if (cardInSlot != null) revolver.preAddCard(slot, card)
+                checkCardMaximums()
+            }
+            later {
+                if (cardInSlot == null) return@later
+                include(destroyCardTimeline(cardInSlot!!, card))
+            }
+            action {
+                revolver.setCard(slot, card)
+            }
+            includeLater({
+                val afterEvent = beforeEvent.copy(before = false)
+                gameEvents.fire(afterEvent)
+                afterEvent.createTimeline()
+            })
+        }
     }
 
     private fun bannerAnimationTimeline(isPlayer: Boolean): Timeline =
@@ -970,27 +1359,34 @@ class GameControllerImpl(
             ).asTimeline(this)
         } ?: Timeline()
 
-    private fun enemyActionTimeline(): Timeline = Timeline.timeline { later {
-        activeEnemies
-            .forEach { enemy ->
-                val action = enemy.resolveAction(this@GameControllerImpl, 1.0)
-                action?.let { action ->
-                    val event = Enemy.PlayChargeAnimationEvent()
-                    enemy.enemyEvents.fire(event)
-                    action {
-                        event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
-                    }
-                    delay(200)
-                    val data = EnemyAction.ExecutionData(newDamage = action.directDamageDealt + enemy.additionalDamage)
-                    include(action.getTimeline(data))
-                    delay(400)
-                }
+    private fun enemyActionTimeline(): Timeline = Timeline.timeline {
+        activeEnemies.forEach { enemy -> later {
+            val action = enemy.resolveAction(this@GameControllerImpl, 1.0) ?: return@later
+            if (action.prototype.hasSpecialAnimation) {
+                val event = Events.PlayEnemySpecialAttackAnim(this@GameControllerImpl, action)
+                gameEvents.fire(event)
+                delay(300)
+                include(event.createTimeline())
+                delayUntil { event.finishedPromise.isResolved }
+                delay(100)
+                include(action.getTimeline())
+                delay(400)
+            } else {
+                val event = Enemy.PlayChargeAnimationEvent()
+                enemy.enemyEvents.fire(event)
                 action {
-                    val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None, 0, null)
-                    enemy.enemyEvents.fire(event)
+                    event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
                 }
+                delay(200)
+                include(action.getTimeline())
+                delay(400)
             }
-    } }
+            action {
+                val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None)
+                enemy.enemyEvents.fire(event)
+            }
+        } }
+    }
 
     private fun winTimeline(): Timeline = Timeline.timeline { later {
         val money = -allEnemies.sumOf { it.currentHealth }
@@ -1089,7 +1485,9 @@ class GameControllerImpl(
         }
 
         include(bannerAnimationTimeline(false))
+        action { inEnemyPhase = true }
         include(enemyActionTimeline())
+        action { inEnemyPhase = false }
         include(bannerAnimationTimeline(true))
 
         action {
@@ -1117,10 +1515,10 @@ class GameControllerImpl(
     }
 
     private fun chooseEnemyActions() {
-        val otherActions = mutableListOf<NextEnemyAction>()
+        val otherActions = mutableListOf<Pair<EnemyActionPrototype, Boolean>>()
         activeEnemies.forEach { enemy ->
             val action = enemy.chooseNewAction(this, enemyDifficulty.toDouble(), otherActions)
-            otherActions.add(action)
+            action?.let { otherActions.add(it) }
         }
     }
 
@@ -1166,6 +1564,8 @@ class GameControllerImpl(
         sourceCard = sourceCard
     )
 
+    override fun toString(): String = "GameController"
+
     companion object {
         const val logTag = "GameController"
     }
@@ -1175,19 +1575,16 @@ class GameControllerImpl(
     }
 
     object Config {
-        const val baseReserves = 4
+        const val baseReserves = 10
+//        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20
-//        const val cardsToDrawInFirstRound = 20
         const val cardsToDrawInFirstRound = 6
-//        const val cardsToDraw = 5
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
         const val playerGetsRewardCardChance = 1f
         const val rewardRerollPriceIncrease = 30
         const val rewardRerollBasePrice = 30
-        const val enemyHealthDifficultyAdjustment = 0.4f
-        const val enemyAggressiveDifficultyAdjustment = 0.2f
     }
 
     object Events {
@@ -1197,14 +1594,18 @@ class GameControllerImpl(
             val sourceActor: Actor? = null,
             val controller: GameController
         )
-        data class PlayCardOrbAnimation(val targetActor: Actor, var orbAnimationTimeline: Timeline? = null)
+        data class PlayCardOrbAnimation(
+            val targetActor: Actor,
+            val reverse: Boolean = false,
+            var orbAnimationTimeline: Timeline? = null
+        )
         data class ParryStateChange(
             val inParryMenu: Boolean,
             val damage: Int,
             val ableToBlock: Int,
             val resolutionPromise: Promise<Boolean /*= parried*/> = Promise()
         )
-        data class TargetSelectionEvent(val text: String, val exclude: Card?, val promise: Promise<Card> = Promise())
+        data class SelectionChangedEvent(val text: String?)
         data class SetupEnemies(val enemies: List<Enemy>)
         data class EncounterModifierAdded(val modifier: EncounterModifier)
         data class EnemySelected(val selected: Enemy)
@@ -1225,6 +1626,8 @@ class GameControllerImpl(
         data object AfterlifeOpenToggle
         data class CardRightClickEvent(val card: Card)
 
+        data class SteelNervesCountdown(val newNumber: Int)
+
         abstract class TimelineBuildingEvent {
 
             val dsl = Timeline.TimelineBuilderDSL()
@@ -1242,6 +1645,7 @@ class GameControllerImpl(
             val newZone: Zone,
             val before: Boolean,
             val triggerInformation: TriggerInformation,
+            val afterShot: Boolean = false,
         ) : TimelineBuildingEvent()
 
         data class CardsDrawnEvent(
@@ -1255,6 +1659,12 @@ class GameControllerImpl(
         data class RevolverRotatedEvent(
             val rotation: RevolverRotation,
             val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class StatusEffectAppliedEvent(
+            val statusEffect: StatusEffect,
+            val toPlayer: Boolean,
+            val triggerInformation: TriggerInformation,
         ) : TimelineBuildingEvent()
 
         data class AfterShotEvent(
@@ -1275,9 +1685,10 @@ class GameControllerImpl(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
-        data class CardReturnedHome(
-            val card: Card,
-            val triggerInformation: TriggerInformation
+        data class CardReplacedEvent(
+            val replaced: Card,
+            val newCard: Card,
+            val triggerInformation: TriggerInformation,
         ) : TimelineBuildingEvent()
 
         data class PlayerLivesChanged(
@@ -1286,5 +1697,10 @@ class GameControllerImpl(
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()
 
+        data class PlayEnemySpecialAttackAnim(
+            val controller: GameController,
+            val enemyAction: EnemyAction,
+            val finishedPromise: Promise<Unit> = Promise(),
+        ) : TimelineBuildingEvent()
     }
 }

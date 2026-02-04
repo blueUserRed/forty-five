@@ -7,13 +7,11 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.game.UserPrefs
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
-import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
@@ -37,7 +35,10 @@ class MapEditorScreen : ScreenCreator() {
     override val background: String = "white_texture"
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
     override val playAmbientSounds: Boolean = false
-    override val transitionAwayTimes: Map<String, Int> = mapOf("*" to 0)
+
+    override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
+        "*" to noTransition()
+    )
 
     private val events: EventPipeline = EventPipeline()
 

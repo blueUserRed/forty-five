@@ -1,5 +1,12 @@
 import "imports/map_predicates.onjschema" as _;
 
+$DifficultyScaling {
+    $LinearScaling {}
+    $PowerScaling {
+        power: int,
+    }
+}
+
 var mapEventStandardConfig = {
     currentlyBlocks: boolean,
     startable: boolean,
@@ -13,7 +20,10 @@ var encounter = {
     encounterModifier: string[],
     forceCards: string[]?,
     shuffleCards: boolean,
+    unadjustedMajorDifficulty: int,
+    majorDifficulty: int,
     minorDifficulty: float,
+    difficultyScalingInfo?: float,
     special: boolean,
 };
 
@@ -86,5 +96,19 @@ $MapEvent {
     }
 
     $FinishTutorialRunMapEvent { }
+
+    $EncounterPlaceholderMapEvent {
+        genExtraction: boolean,
+        majorDifficulty: int,
+        unadjustedMajorDifficulty: int,
+        minorDifficulty: float,
+        runModifier: string[],
+        amountEnemies: int[2],
+        difficultyScaling: $DifficultyScaling,
+        scaleMin: float,
+        scaleMax: float,
+        biome: string,
+        seed: int
+    }
 
 }

@@ -1,0 +1,201 @@
+///schema=onjschemas/run_generator_config.onjschema
+
+//////////////////////////////////////////////////////
+// Run Modifiers
+//////////////////////////////////////////////////////
+
+runModifierPools: [
+    {
+        majorDifficulty: 0,
+        modifierProbability: 0.0,
+        modifiers: []
+    },
+    {
+        majorDifficulty: 3,
+        modifierProbability: 0.3,
+        modifiers: [ "AllRain", "AllMoist" ]
+    },
+    {
+        majorDifficulty: 4,
+        modifierProbability: 0.4,
+        modifiers: [ "AllRain", "AllMoist", "AllBewitchedMist" ]
+    },
+    {
+        majorDifficulty: 5,
+        modifierProbability: 0.4,
+        modifiers: [ "AllBewitchedMist", "AllFrozen" ]
+    },
+],
+
+runModifierProbabilityIncreases: [
+    {
+        biome: "bewitched_forest",
+        makeMoreLikely: ["AllBewitchedMist"],
+    }
+],
+
+runModifierBlacklist: [
+    [ "allMoist", "allFrozen" ],
+    [ "allFrozen", "allBewitchedMist" ],
+],
+
+runModifiersMax: 2,
+
+
+//////////////////////////////////////////////////////
+// Run rewards
+//////////////////////////////////////////////////////
+
+
+runRewardPools: [
+    {
+        majorDifficulty: 0,
+        maxRewards: 1,
+        rewardProbability: 1.0,
+        rewards: [
+            [
+                $CashReward {
+                    amount: 200
+                },
+                $CashReward {
+                    amount: 250
+                },
+                $CashReward {
+                    amount: 300
+                },
+            ]
+        ]
+    },
+    {
+        majorDifficulty: 2,
+        maxRewards: 1,
+        rewardProbability: 1.0,
+        rewards: [
+            [
+                $CashReward {
+                    amount: 300
+                },
+                $CashReward {
+                    amount: 350
+                },
+                $CashReward {
+                    amount: 400
+                },
+            ]
+        ]
+    }
+],
+
+
+//////////////////////////////////////////////////////
+// Encounter modifier
+//////////////////////////////////////////////////////
+
+
+encounterModifierPools: [
+    {
+        majorDifficulty: 0,
+        modifierProbability: 0.0,
+        maxModifiers: 0,
+        modifiers: []
+    },
+    {
+        majorDifficulty: 2,
+        modifierProbability: 0.3,
+        maxModifiers: 1,
+        modifiers: [ "rain", "moist", "bewitchedMist" ]
+    },
+    {
+        majorDifficulty: 3,
+        modifierProbability: 0.5,
+        maxModifiers: 2,
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
+    },
+    {
+        majorDifficulty: 5,
+        modifierProbability: 0.7,
+        maxModifiers: 3,
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
+    },
+],
+
+encounterModifierBlacklist: [
+    [ "frost", "moist" ],
+    [ "frost", "bewitchedMist"],
+],
+
+//////////////////////////////////////////////////////
+// Enemies
+//////////////////////////////////////////////////////
+
+
+enemies: [
+    {
+        majorDifficulty: 0,
+        amount: [1, 1],
+        allowedEnemies: [ "Outlaw" ],
+    },
+    {
+        majorDifficulty: 2,
+        amount: [1, 2],
+        allowedEnemies: [ "Outlaw", "Pyro" ],
+    },
+    {
+        majorDifficulty: 3,
+        amount: [1, 2],
+        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
+    },
+    {
+        majorDifficulty: 4,
+        amount: [2, 3],
+        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
+    },
+],
+
+enemyProbabilityIncrease: [
+    {
+        enemy: "Outlaw",
+        biome: "wasteland",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Outlaw",
+        biome: "bewitched_forest",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Outlaw",
+        biome: "magenta_mountains",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Pyro",
+        biome: "wasteland",
+        bonusPoints: 20,
+    },
+    {
+        enemy: "Witch",
+        biome: "bewitched_forest",
+        bonusPoints: 20,
+    },
+],
+
+enemyProbabilityRandomPoints: 120,
+
+enemyHealthAdjustment: 0.6,
+enemyDamageAdjustment: 0.3,
+
+difficultyScaling: {
+    limited: {
+        relativeMin: 0.0,
+        relativeMax: 0.5,
+        scaling: $PowerScaling {
+            power: 3,
+        },
+    },
+    constructed: {
+        relativeMin: 0.3,
+        relativeMax: 0.7,
+        scaling: $LinearScaling {},
+    },
+},

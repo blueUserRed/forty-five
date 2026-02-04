@@ -1,0 +1,45 @@
+use Cards;
+
+$Rotation {
+
+    $Left {
+        amount: int
+    }
+
+    $Right {
+        amount: int
+    }
+
+    $Dont { }
+}
+
+var effectDefinition = {
+    trigger: Trigger,
+    effect: Effect,
+    inZones?: Zone[],
+    condition?: { ...* },
+    canPreventEnteringGame?: boolean,
+    isHidden?: boolean,
+    maxExecutions?: int,
+    cacheAffectedCards?: boolean,
+};
+
+name: string,
+title: string,
+flavourText: string,
+description: string,
+baseDamage: int,
+traitEffects?: string[],
+rotation?: $Rotation,
+cost: int,
+rightClickCost?: int?,
+price: int,
+dark?: boolean,
+effects?: effectDefinition[],
+tags: string[],
+parryNumber?: int,
+additionalHoverInfos?: string[],
+forbiddenSlots?: int[],
+variableTexture?: VariableTextureSelector,
+unlockConditions?: string[], //TODO this locked system, maybe with namespaces and stuff idk, the cards don't have anything either about it
+lockedDescription?: string,

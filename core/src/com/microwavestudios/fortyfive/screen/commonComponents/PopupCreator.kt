@@ -115,7 +115,7 @@ object PopupCreator {
                     touchable = Touchable.enabled
                     keyboardFocusable = KeyboardFocusable.LEAF
                     joinGroup("shared-popup-button")
-                    defaultButtonBackgrounds()
+                    defaultButtonConfig()
                     onInput(GameInputs.interact) {
                         event.callback(value)
                         events.fire(PopupHidden)

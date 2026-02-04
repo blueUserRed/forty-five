@@ -23,6 +23,8 @@ nodes: {
     event: $MapEvent?,
     distance?: int,
     nodeTexture?: string,
+    additionalEvent?: $MapEvent,
+    additionalNodeTexture?: string
 }[],
 
 decorations: {

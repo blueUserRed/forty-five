@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
@@ -16,13 +17,19 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import onj.value.OnjArray
 import onj.value.OnjString
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.io.encoding.Base64
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import kotlin.reflect.cast
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
@@ -184,6 +191,10 @@ fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
 }
 
+fun ClosedFloatingPointRange<Double>.random(random: Random = Random): Double {
+    return random.nextFloat() * (endInclusive - start) + start
+}
+
 fun <T, U> Collection<T>.slot(keyMapper: (T) -> U): Map<U, List<T>> {
     val map = mutableMapOf<U, MutableList<T>>()
     forEach {
@@ -208,6 +219,11 @@ infix fun <T> ClosedFloatingPointRange<T>.intersection(
 ): Boolean where T : Comparable<T> = this.start in other || other.start in this
 
 infix fun IntRange.intersection(other: IntRange): Boolean = this.start in other || other.start in this
+
+infix fun IntRange.shift(amount: Int): IntRange = IntRange(
+    first + amount,
+    last + amount
+)
 
 inline fun <reified T> ClosedFloatingPointRange<T>.asArray(
 ): Array<T> where T : Comparable<T> = arrayOf(this.start, this.endInclusive)
@@ -301,6 +317,8 @@ inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
     return chunks.filter { it.isNotEmpty() }
 }
 
+inline fun <T, U> Iterable<T>.zipIndexed(creator: (T, Int) -> U): List<Pair<T, U>> =
+    mapIndexed { i, element -> element to creator(element, i) }
 inline fun <T, U> Iterable<T>.zip(creator: (T) -> U): List<Pair<T, U>> = map { it to creator(it) }
 inline fun <T, U> Iterable<T>.zipToFirst(creator: (T) -> U): List<Pair<U, T>> = map { creator(it) to it }
 
@@ -356,6 +374,13 @@ fun <T> List<T>.with(element: T): List<T> {
     return MutableList(size + 1) { i -> if (i == size) element else get(i) }
 }
 
+inline fun <reified U> Iterable<*>.findInstance(): U? {
+    forEach { cur ->
+        if (cur is U) return cur
+    }
+    return null
+}
+
 fun Color.interpolate(other: Color): Color {
     return Color(
         (this.r + other.r) / 2,
@@ -365,9 +390,11 @@ fun Color.interpolate(other: Color): Color {
     )
 }
 
+fun File.handle(): FileHandle = Gdx.files.internal(path)
+
 object Utils {
 
-    fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability
+    fun coinFlip(probability: Float, random: Random = Random): Boolean = (0f..1f).random(random) < probability
 
     /**
      * sets the currently active cursor
@@ -414,6 +441,21 @@ object Utils {
         "smooth" -> Interpolation.smooth
 
         else -> throw RuntimeException("Unknown interpolation: $name")
+    }
+
+    fun hashFile(file: File): String {
+        val buffer = ByteArray(4096)
+        val stream = BufferedInputStream(FileInputStream(file))
+        val digest = MessageDigest.getInstance("MD5")
+        var count = 0
+        while (true) {
+            count = stream.read(buffer)
+            if (count <= 0) break
+            digest.update(buffer, 0, count)
+        }
+        stream.close()
+        val hash = digest.digest()
+        return Base64.encode(hash)
     }
 
 }
