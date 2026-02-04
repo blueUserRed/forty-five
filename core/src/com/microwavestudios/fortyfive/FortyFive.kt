@@ -143,9 +143,9 @@ object FortyFive : Game() {
     private fun init() {
         ShaderProgram.pedantic = false
         with(OnjConfig) {
-            registerNameSpace("Common", CommonNamespace)
-            registerNameSpace("Cards", CardsNamespace)
-            registerNameSpace("Map", MapNamespace)
+            registerNamespace("Common", CommonNamespace)
+            registerNamespace("Cards", CardsNamespace)
+            registerNamespace("Map", MapNamespace)
         }
         ConfigFileManager.init()
         TemplateString.init()

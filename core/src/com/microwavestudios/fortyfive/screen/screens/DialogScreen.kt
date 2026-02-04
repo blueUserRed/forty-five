@@ -138,7 +138,6 @@ class DialogScreen : ScreenCreator() {
 
         val right = label("red wing", "", fontSize = (32 * 0.9).toInt()) {
             backgroundHandle = "dialog_name_field"
-            setFontScale(0.9f)
             onLayoutAndNow {
                 width = prefWidth * 1.3F
                 height = prefHeight * 1.4F
