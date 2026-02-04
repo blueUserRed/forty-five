@@ -17,6 +17,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
@@ -25,9 +26,16 @@ import kotlin.math.max
 
 //TODO (optional):
 // VERY Optional:  FitParent (Fits the child-size within its line i guess and takes as much space as possible for multiple elements)
+/**
+ * common container used to layout actors. Unlike [CustomGroup], CustomBox takes the responsibility
+ * of laying out its children. That means that you shouldn't set x and y of the children yourself,
+ * as the box will overwrite it. If you set the positionType of a child to [PositionType.ABSOLUTE],
+ * the box will ignore the child in its layout. The CustomBox is meant to be similar to the flexboxes
+ * used in webdev, although CustomBox lacks a lot of its features.
+ */
 open class CustomBox(
     screen: OnjScreen,
-    backgroundHints: Array<String> = arrayOf(),
+    backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor, DisableActor, HasPaddingActor
 {
 

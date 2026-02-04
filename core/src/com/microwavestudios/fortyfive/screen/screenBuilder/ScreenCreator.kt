@@ -16,6 +16,7 @@ import com.microwavestudios.fortyfive.animation.Interpolator
 import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.OnjScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -37,6 +38,14 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.reflect.KMutableProperty
 
+/**
+ * this class can be used together with the [FromKotlinScreenBuilder] class to create screens.
+ * To add a new screen, create a new class for that screen that extends this class. Override the
+ * properties and functions here to configure you screen and override the [getRoot] function to create
+ * the screen structure and return the root of it.
+ *
+ * Additionally, this class provides an exhaustive DSL that makes creating screens as easy as possible.
+ */
 @OptIn(ExperimentalContracts::class)
 abstract class ScreenCreator : ResourceBorrower {
 
@@ -44,15 +53,30 @@ abstract class ScreenCreator : ResourceBorrower {
 
     abstract val viewport: Viewport
 
+    /**
+     * if true, the [SoundPlayer][com.microwavestudios.fortyfive.screen.SoundPlayer] plays ambient sounds
+     * in line with the biome the player is in
+     */
     abstract val playAmbientSounds: Boolean
 
-    abstract val background: String?
+    abstract val background: ResourceHandle?
 
+    /**
+     * defines what transitions should occur when transitioning away from this screen.
+     * The [ScreenManager] looks up the name of the next screen in this map and uses the provided
+     * transition. "*" can be used to add a catch-all transition. The ScreenManager also provides
+     * functions for creating predefined transitions, like [noTransition], [geometricFadeTransition],
+     * or [fadeToBlackTransition]
+     */
     open val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf()
 
     lateinit var screen: OnjScreen
         private set
 
+    /**
+     * the context for this screen. Prefer using the [context] function, as it will also
+     * automatically cast the context to the correct type.
+     */
     var _context: Any? = null
 
     private val _namedActors: MutableMap<String, Actor> = mutableMapOf()
@@ -65,14 +89,27 @@ abstract class ScreenCreator : ResourceBorrower {
         this._context = context
     }
 
+    /**
+     * called every frame as long as the screen is active
+     */
     open fun update() { }
 
+    /**
+     * Creates the screen structure and returns the root actor
+     */
     abstract fun getRoot(): Group
 
     abstract fun getScreenControllers(): List<ScreenController>
 
+    /**
+     * names of the pages that should be displayed in addition to the default debug pages in
+     * the debug menu
+     */
     open fun debugMenuPages(): List<String> = emptyList()
 
+    /**
+     * casts [_context] to [T] and returns it
+     */
     inline fun <reified T> context(): T {
         val context = _context
             ?: throw RuntimeException("screen $name expects a context, but context was null")
@@ -83,8 +120,11 @@ abstract class ScreenCreator : ResourceBorrower {
         return context
     }
 
+    /**
+     * constructs a [CustomGroup] with no parent
+     */
     inline fun newGroup(
-        backgroundHints: Array<String> = arrayOf(),
+        backgroundHints: Array<ResourceHandle> = arrayOf(),
         builder: (@ScreenDslMarker CustomGroup).() -> Unit = {}
     ): CustomGroup {
         contract {
@@ -95,8 +135,11 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
+    /**
+     * constructs a [CustomBox] with no parent
+     */
     inline fun newBox(
-        backgroundHints: Array<String> = arrayOf(),
+        backgroundHints: Array<ResourceHandle> = arrayOf(),
         builder: (@ScreenDslMarker CustomBox).() -> Unit = {}
     ): CustomBox {
         contract {
@@ -110,7 +153,12 @@ abstract class ScreenCreator : ResourceBorrower {
         return box
     }
 
-    inline fun newHorizontalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
+    /**
+     * constructs a [CustomHorizontalGroup] with no parent
+     *
+     * Note: prefer [newBox]
+     */
+    inline fun newHorizontalGroup(backgroundHints: Array<ResourceHandle> = arrayOf(), builder: CustomHorizontalGroup.() -> Unit = {}): CustomHorizontalGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -119,7 +167,12 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
-    inline fun newVerticalGroup(backgroundHints: Array<String> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
+    /**
+     * constructs a [CustomVerticalGroup] with no parent
+     *
+     * Note: prefer [newBox]
+     */
+    inline fun newVerticalGroup(backgroundHints: Array<ResourceHandle> = arrayOf(), builder: CustomVerticalGroup.() -> Unit = {}): CustomVerticalGroup {
         contract {
             callsInPlace(builder, InvocationKind.EXACTLY_ONCE)
         }
@@ -128,8 +181,11 @@ abstract class ScreenCreator : ResourceBorrower {
         return group
     }
 
+    /**
+     * constructs a [CustomGroup] with the receiver as parent
+     */
     inline fun Group.group(
-        backgroundHints: Array<String> = arrayOf(),
+        backgroundHints: Array<ResourceHandle> = arrayOf(),
         builder: (@ScreenDslMarker CustomGroup).() -> Unit = {}
     ): CustomGroup {
         contract {
@@ -146,8 +202,11 @@ abstract class ScreenCreator : ResourceBorrower {
         this.name = name
     }
 
+    /**
+     * constructs a [CustomImageActor] with the receiver as parent
+     */
     inline fun Group.image(
-        backgroundHints: Array<String> = arrayOf(),
+        backgroundHints: Array<ResourceHandle> = arrayOf(),
         builder: (@ScreenDslMarker CustomImageActor).() -> Unit = {}
     ): CustomImageActor {
         contract {
@@ -159,8 +218,11 @@ abstract class ScreenCreator : ResourceBorrower {
         return image
     }
 
+    /**
+     * constructs a [CustomBox] with the receiver as parent
+     */
     inline fun Group.box(
-        backgroundHints: Array<String> = arrayOf(),
+        backgroundHints: Array<ResourceHandle> = arrayOf(),
         isScrollable: Boolean = false,
         builder: (@ScreenDslMarker CustomBox).() -> Unit = {}
     ): CustomBox {
@@ -180,6 +242,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return box
     }
 
+    /**
+     * constructs a [Selector] with the receiver as parent
+     */
     inline fun Group.selector(
         font: String,
         bindTarget: BindTarget<*>,
@@ -205,6 +270,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return selector
     }
 
+    /**
+     * constructs a [Selector] with the receiver as parent
+     */
     inline fun Group.selector(
         font: String,
         bindTarget: String,
@@ -219,6 +287,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return selector(font, BindTargetFactory.getAnyType(bindTarget), fontScale, fontColor, settingChangedCallback, builder)
     }
 
+    /**
+     * constructs a [Slider] with the receiver as parent
+     */
     inline fun Group.slider(
         min: Float,
         max: Float,
@@ -243,11 +314,14 @@ abstract class ScreenCreator : ResourceBorrower {
         return slider
     }
 
+    /**
+     * constructs a [CustomInputField] with the receiver as parent
+     */
     inline fun Group.inputField(
         font: String,
         fontColor: Color,
         defaultText: String = "",
-        backgroundHints: Array<String> = arrayOf(),
+        backgroundHints: Array<ResourceHandle> = arrayOf(),
         builder: (@ScreenDslMarker CustomInputField).() -> Unit = {}
     ): CustomInputField {
         contract {
@@ -264,6 +338,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return inputField
     }
 
+    /**
+     * constructs a [Spacer] with the receiver as parent
+     */
     inline fun Group.horizontalSpacer(
         width: Float,
         builder: (@ScreenDslMarker Spacer).() -> Unit = {}
@@ -277,6 +354,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return spacer
     }
 
+    /**
+     * constructs a [Spacer] with the receiver as parent
+     */
     inline fun Group.verticalSpacer(
         height: Float,
         builder: (@ScreenDslMarker Spacer).() -> Unit = {}
@@ -290,6 +370,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return spacer
     }
 
+    /**
+     * constructs a [NewLabel] with the receiver as parent
+     */
     inline fun Group.label(
         font: String,
         text: String,
@@ -313,6 +396,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return label
     }
 
+    /**
+     * constructs an [AdvancedTextWidget] with the receiver as parent
+     */
     inline fun Group.advancedText(
         defaultFont: String,
         defaultColor: Color,
@@ -329,6 +415,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return advancedText
     }
 
+    /**
+     * constructs an [AdvancedTextWidget] with the receiver as parent
+     */
     inline fun Group.advancedText(
         defaults: Triple<String, Color, Int>,
         builder: (@ScreenDslMarker AdvancedTextWidget).() -> Unit = {}
@@ -350,6 +439,9 @@ abstract class ScreenCreator : ResourceBorrower {
         return actor
     }
 
+    /**
+     * adds all actors in [actors] and executes [builder] for each
+     */
     inline fun <T : Actor> Group.allActors(
         actors: Iterable<T>,
         builder: (@ScreenDslMarker T).() -> Unit = {}
@@ -361,40 +453,69 @@ abstract class ScreenCreator : ResourceBorrower {
         return actors
     }
 
+    /**
+     * sets the width to [percent] of the parent width
+     */
     fun <T> T.relativeWidth(percent: Float) where T : Actor, T : OnLayoutActor {
         onLayoutAndNow { width = parent.width * (percent / 100f) }
     }
 
+    /**
+     * sets the height to [percent] of the parent height
+     */
     fun <T> T.relativeHeight(percent: Float) where T : Actor, T : OnLayoutActor {
         onLayoutAndNow { height = parent.height * (percent / 100f) }
     }
 
+    /**
+     * executes [callback] directly when the function is called and when layout() is called on the actor
+     */
     fun <T> T.onLayoutAndNow(callback: () -> Unit) where T : Actor, T : OnLayoutActor {
         callback()
         onLayout(callback)
     }
 
+    /**
+     * sets the height to the prefHeight of the actor
+     */
     fun <T> T.syncHeight() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { height = prefHeight }
     }
 
+    /**
+     * sets the width to the prefWidth of the actor
+     */
     fun <T> T.syncWidth() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { width = prefWidth }
     }
 
+    /**
+     * calls [syncWidth] and [syncHeight]
+     */
     fun <T> T.syncDimensions() where T : Actor, T : Layout, T : OnLayoutActor {
         syncWidth()
         syncHeight()
     }
 
+    /**
+     * centers the actor on the x axies (Do not use in a box; the box handels layout itself)
+     */
     fun <T> T.centerX() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { x = parent.width / 2 - width / 2 }
     }
 
+    /**
+     * centers the actor on the y axies (Do not use in a box; the box handels layout itself)
+     */
     fun <T> T.centerY() where T : Actor, T : Layout, T : OnLayoutActor {
         onLayoutAndNow { y = parent.height / 2 - height / 2 }
     }
 
+    /**
+     * adds default button backgrounds and sound effects
+     *
+     * Use together with [buttonBackgroundHints]
+     */
     fun CustomBox.defaultButtonConfig() {
         backgroundHandle = "common_button_default"
         observeInputState(
@@ -407,8 +528,16 @@ abstract class ScreenCreator : ResourceBorrower {
         }
     }
 
+    /**
+     * see [defaultButtonConfig]
+     */
     fun buttonBackgroundHints() = arrayOf("common_button_default", "common_button_hover" )
 
+    /**
+     * adds default button backgrounds and sound effects
+     *
+     * Use together with [buttonBackgroundHints]
+     */
     fun NewLabel.defaultButtonConfig() {
         backgroundHandle = "common_button_default"
         observeInputState(
@@ -421,6 +550,11 @@ abstract class ScreenCreator : ResourceBorrower {
         }
     }
 
+    /**
+     * adds overlays that most screens have in common
+     *
+     * Call in the root group
+     */
     fun CustomGroup.addDefaultOverlays(
         worldWidth: Float,
         worldHeight: Float,
@@ -523,6 +657,9 @@ abstract class ScreenCreator : ResourceBorrower {
         }
     }
 
+    /**
+     * see [PropertyAnimation]
+     */
     inline fun <A, reified P> A.propertyAnimation(
         property: KMutableProperty<P>,
         vararg states: AnimState<P>,
@@ -547,6 +684,9 @@ abstract class ScreenCreator : ResourceBorrower {
         *states
     )
 
+    /**
+     * see [PropertyAnimation]
+     */
     inline fun <A, reified P> A.propertyAnimation(
         property: AbstractProperty<P>,
         vararg states: AnimState<P>,

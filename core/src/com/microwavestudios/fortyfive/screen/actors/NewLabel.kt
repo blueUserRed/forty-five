@@ -28,10 +28,16 @@ import com.microwavestudios.fortyfive.utils.component1
 import com.microwavestudios.fortyfive.utils.component2
 import kotlin.math.absoluteValue
 
+/**
+ * default label used for simple text
+ *
+ * Uses a font group instead of a font! The label will pick the ideal font based on the
+ * resolution/font size
+ */
 open class NewLabel(
     val screen: OnjScreen,
     text: String,
-    private val backgroundHints: Array<String> = arrayOf(),
+    private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
     DebugActor by DebugActorImpl(), InputActor by InputActorImpl(),
     KotlinStyledActor, OffSettable {
@@ -51,7 +57,7 @@ open class NewLabel(
     override var logicalOffsetY: Float = 0f
 
     val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: String? by backgroundHandleObserver
+    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     private val fontHandleObserver = SubscribeableObserver<String?>(null)
@@ -124,10 +130,6 @@ open class NewLabel(
         initInput(this, screen)
         initDebugBounds(this, screen)
         screen.screenEvents.watchFor<OnjScreen.ScreenResizedEvent> { paramsChanged() }
-    }
-
-    fun setFontScale(scale: Float) {
-        throw RuntimeException("use fontSize")
     }
 
     fun setAlignment(align: Int) {

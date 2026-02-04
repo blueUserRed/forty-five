@@ -445,9 +445,13 @@ open class CustomVerticalGroup(
     }
 }
 
+/**
+ * common container used for grouping actors together. Unlike [CustomBox], it doesn't layout its
+ * children. Layout is fully the responsibility of the programmer
+ */
 open class CustomGroup(
     override val screen: OnjScreen,
-    private val backgroundHints: Array<String> = arrayOf()
+    private val backgroundHints: Array<ResourceHandle> = arrayOf()
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor, KotlinStyledActor,
     DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugActor by DebugActorImpl() {
 
@@ -483,7 +487,7 @@ open class CustomGroup(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: String? by backgroundHandleObserver
+    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
     protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     override var dropShadow: DropShadow? = null
 
