@@ -6,8 +6,6 @@ import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.*
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -25,15 +23,27 @@ import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.microwavestudios.fortyfive.utils.*
 
+// TODO: this is one of the oldest classes in the game an contains a lot of features that have
+// been replaced by better ones. These features have been marked as Deprecated and need to be removed
+// eventually
 /**
- * a screen that was build from an onj file.
+ * represents a screen of the game that performs important management tasks like
+ * drawing and updating the actors, drawing
+ * [DetailWidgets][com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget],
+ * drawing dragged actors, distributing input events, etc.
+ * Also contains some utility functions, e.g. for callbacks.
+ *
+ * To create a screen, typically
+ * [FromKotlinScreenBuilder][com.microwavestudios.fortyfive.screen.screenBuilder.FromKotlinScreenBuilder]
+ * is used together with [ScreenCreator][com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator].
+ * What screen is shown is managed by the [ScreenManager]
  */
-open class OnjScreen(
+open class CustomScreen(
     val viewport: Viewport,
     batch: Batch,
     private val controllerContext: Any?,
-    private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
-    private val lateRenderTasks: List<OnjScreen.() -> Unit>,
+    private val earlyRenderTasks: List<CustomScreen.() -> Unit>,
+    private val lateRenderTasks: List<CustomScreen.() -> Unit>,
     private val namedActors: MutableMap<String, Actor>,
     val transitions: Map<String, ScreenManager.ScreenTransition>,
     val screenBuilder: ScreenBuilder,
@@ -60,6 +70,11 @@ open class OnjScreen(
         }
 
     private val _screenState: MutableSet<String> = mutableSetOf()
+    /**
+     * stores a collection of global screen states, to handle things like popup. Old feature,
+     * using events is typically more convenient
+     */
+    @Deprecated("Use events instead")
     val screenState: Set<String>
         get() = _screenState
 
@@ -76,11 +91,14 @@ open class OnjScreen(
         get() = findDebugMenuPage<ScreenDebugMenuPage>()?.makeLaggy?.getValue(this, this::makeLaggy) ?: false
 
     private val _lifetime: EndableLifetime = EndableLifetime()
+    /**
+     * lives as long as the screen is shown
+     */
     val lifetime: Lifetime
         get() = _lifetime
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var background: String? by backgroundHandleObserver
+    var background: ResourceHandle? by backgroundHandleObserver
 
     private val backgroundDrawable: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, lifetime, arrayOf())
 
@@ -97,6 +115,9 @@ open class OnjScreen(
         it.addBaseForce(0f, -1f)
     }
 
+    /**
+     * used to distribute events across the actor hierarchy, controllers, etc.
+     */
     val events: EventPipeline = EventPipeline()
 
     init {
@@ -122,14 +143,19 @@ open class OnjScreen(
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
 
+    /**
+     * runs [callback] after [ms] milliseconds have passed
+     */
     fun afterMs(ms: Int, callback: () -> Unit) {
         callbackAddBuffer.add((TimeUtils.millis() + ms) to callback)
     }
 
+    @Deprecated("use lifetime.tieDisposable() instead")
     fun addDisposable(disposable: Disposable) {
         additionalDisposables.add(disposable)
     }
 
+    @Deprecated("Was typically used for things like animations, but there is almost always a better solution")
     fun addActorToRoot(actor: Actor) {
         stage.root.addActor(actor)
     }
@@ -138,18 +164,21 @@ open class OnjScreen(
         stage.root.removeActor(actor)
     }
 
+    @Deprecated("use events instead")
     fun enterState(state: String) {
         if (state in _screenState) return
         _screenState.add(state)
         screenStateChangeListeners.forEach { it(true, state) }
     }
 
+    @Deprecated("use events instead")
     fun leaveState(state: String) {
         if (state !in _screenState) return
         _screenState.remove(state)
         screenStateChangeListeners.forEach { it(false, state) }
     }
 
+    @Deprecated("use events instead")
     fun addOnScreenStateChangedListener(listener: (entered: Boolean, state: String) -> Unit) {
         screenStateChangeListeners.add(listener)
     }
@@ -234,10 +263,6 @@ open class OnjScreen(
         }
     }
 
-    fun centeredStageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
-        actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
-    }
-
     override fun render(delta: Float) = try {
         if (makeLaggy) Thread.sleep(500)
         val batch = stage.batch
@@ -268,7 +293,7 @@ open class OnjScreen(
         FortyFive.logger.fatal(e)
     }
 
-    private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
+    private fun doRenderTasks(tasks: List<CustomScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
         stage.batch.begin()
         tasks.forEach { it(this) }
         additionalTasks.forEach { it(stage.batch) }
@@ -280,32 +305,6 @@ open class OnjScreen(
         screenEvents.fire(ScreenResizedEvent(width, height))
     }
 
-    fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction = TODO()
-//        object : Timeline.TimelineAction() {
-//
-//            private var finishAt: Long? = null
-//
-//            override fun start(timeline: Timeline) {
-//                super.start(timeline)
-//                maxTime?.let {
-//                    finishAt = TimeUtils.millis() + it
-//                }
-//                awaitingConfirmationClick = true
-//            }
-//
-//            override fun isFinished(timeline: Timeline): Boolean {
-//                if (!awaitingConfirmationClick) return true
-//                finishAt?.let {
-//                    if (TimeUtils.millis() >= it) return true
-//                }
-//                return false
-//            }
-//
-//            override fun end(timeline: Timeline) {
-//                awaitingConfirmationClick = false
-//            }
-//        }
-
     override fun dispose() {
         hide()
         screenControllers.forEach(ScreenController::end)
@@ -314,24 +313,11 @@ open class OnjScreen(
         _lifetime.die()
     }
 
-
     companion object {
 
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
-
-        fun toggleFullScreen(forceFullscreen: Boolean = false) {
-//            if (UserPrefs.windowMode == UserPrefs.WindowMode.Window || forceFullscreen) {
-//                UserPrefs.windowMode =
-//                    if (UserPrefs.lastFullScreenAsBorderless)
-//                        UserPrefs.WindowMode.BorderlessWindow
-//                    else
-//                        UserPrefs.WindowMode.Fullscreen
-//            } else {
-//                UserPrefs.windowMode = UserPrefs.WindowMode.Window
-//            }
-        }
     }
 
     data class ScreenResizedEvent(val width: Int, val height: Int)

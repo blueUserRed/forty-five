@@ -8,7 +8,7 @@ import com.microwavestudios.fortyfive.map.events.dialog.Dialog
 import com.microwavestudios.fortyfive.map.events.dialog.DialogPart
 import com.microwavestudios.fortyfive.map.events.dialog.NextDialogPartSelector
 import com.microwavestudios.fortyfive.run.RunType
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
@@ -19,7 +19,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 
 class DialogScreenController(
-    private val screen: OnjScreen,
+    private val screen: CustomScreen,
     private val events: EventPipeline
 ) : ScreenController() {
 

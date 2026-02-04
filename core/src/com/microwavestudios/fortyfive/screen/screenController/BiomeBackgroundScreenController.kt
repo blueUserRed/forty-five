@@ -4,12 +4,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import kotlin.math.sin
 
 class BiomeBackgroundScreenController(
-    private val screen: OnjScreen,
+    private val screen: CustomScreen,
     private val useSecondary: Boolean,
     private val zoom: Float = 1f
 ) : ScreenController() {

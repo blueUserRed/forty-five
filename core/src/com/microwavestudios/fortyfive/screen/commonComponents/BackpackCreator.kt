@@ -13,7 +13,7 @@ import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.profile.Profile
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -719,7 +719,7 @@ object BackpackCreator {
         val functionsAsCollection: Boolean,
     ) {
 
-        fun getCardInstance(name: String, screen: OnjScreen, state: BackpackState): Card {
+        fun getCardInstance(name: String, screen: CustomScreen, state: BackpackState): Card {
             val created = createdCards.find { it.name == name }
             if (created != null) {
                 createdCards.remove(created)

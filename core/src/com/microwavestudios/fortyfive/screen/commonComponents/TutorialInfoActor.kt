@@ -8,7 +8,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.BoundedActor
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.utils.Promise
@@ -18,7 +18,7 @@ class TutorialInfoActor(
     private val maskedBackgroundTextureName: ResourceHandle,
     private val circleRadiusMultiplier: Float,
     private val circleRadiusExtension: Float,
-    screen: OnjScreen
+    screen: CustomScreen
 ) : CustomBox(screen), ResourceBorrower {
 
     private val loadedBackground: Promise<Drawable> =

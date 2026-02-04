@@ -24,7 +24,7 @@ import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.DropShadowActor
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
 import com.microwavestudios.fortyfive.screen.actors.OnLayoutActor
@@ -45,7 +45,7 @@ class Revolver(
     private val slotSize: Float,
     private val animationDuration: Float,
     private val events: EventPipeline,
-    private val screen: OnjScreen
+    private val screen: CustomScreen
 ) : WidgetGroup(), ZIndexActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var fixedZIndex: Int = 0
@@ -300,7 +300,7 @@ class RevolverSlot(
     val revolver: Revolver,
     drawableHandle: ResourceHandle,
     size: Float,
-    screen: OnjScreen,
+    screen: CustomScreen,
     private val events: EventPipeline,
     private val animationDuration: Float
 ) : CustomImageActor(drawableHandle, screen), Selectable<RevolverSlot>, DropShadowActor {

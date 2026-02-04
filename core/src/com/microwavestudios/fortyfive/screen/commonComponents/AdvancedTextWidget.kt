@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.utils.AdvancedTextParser
 import com.microwavestudios.fortyfive.utils.splitAt
@@ -21,7 +21,7 @@ import kotlin.math.sin
 
 open class AdvancedTextWidget(
     private val defaults: Triple<String, Color, Int>,
-    screen: OnjScreen,
+    screen: CustomScreen,
 ) : CustomGroup(screen), HasPaddingActor {
 
     override var fixedZIndex: Int = 0
@@ -59,7 +59,7 @@ open class AdvancedTextWidget(
 
     constructor(
         defaults: OnjObject,
-        screen: OnjScreen,
+        screen: CustomScreen,
     ) : this(AdvancedText.defaultsFromOnj(defaults), screen)
 
     open fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
@@ -209,7 +209,7 @@ data class AdvancedText(
         fun readFromOnj(
             rawText: String,
             effects: OnjArray?,
-            screen: OnjScreen,
+            screen: CustomScreen,
             defaults: OnjObject
         ): AdvancedText = AdvancedTextParser(
             rawText,
@@ -258,7 +258,7 @@ class TextAdvancedTextPart(
     font: String,
     fontColor: Color,
     fontSize: Int,
-    screen: OnjScreen,
+    screen: CustomScreen,
     override val breakLine: Boolean
 ) : NewLabel(
     screen,
@@ -324,7 +324,7 @@ class TextAdvancedTextPart(
 
 class IconAdvancedTextPart(
     private val resourceHandle: ResourceHandle,
-    screen: OnjScreen,
+    screen: CustomScreen,
     private val fontSize: Int,
     override val breakLine: Boolean
 ) : CustomImageActor(resourceHandle, screen), AdvancedTextPart, ResourceBorrower {

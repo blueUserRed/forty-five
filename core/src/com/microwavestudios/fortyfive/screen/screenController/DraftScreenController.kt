@@ -2,13 +2,13 @@ package com.microwavestudios.fortyfive.screen.screenController
 
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.utils.*
 
 // TODO: adapt to new system (if the screen is still needed)
 
-class DraftScreenController(private val screen: OnjScreen) : ScreenController() {
+class DraftScreenController(private val screen: CustomScreen) : ScreenController() {
 
 //    @Inject
 //    private lateinit var card1: CustomFlexBox

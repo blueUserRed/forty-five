@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.unit
 import com.microwavestudios.fortyfive.utils.withMag
@@ -52,7 +52,7 @@ class ParticleSystem(
         }
     }
 
-    fun render(batch: Batch, screen: OnjScreen) {
+    fun render(batch: Batch, screen: CustomScreen) {
         _emitters.forEach { it.renderer?.render(batch, screen) }
     }
 

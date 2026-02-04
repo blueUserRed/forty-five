@@ -20,7 +20,7 @@ import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
@@ -69,7 +69,7 @@ object FortyFive : Game() {
     var currentRenderPipeline: RenderPipeline? = null
         private set
 
-    var currentScreen: OnjScreen? = null
+    var currentScreen: CustomScreen? = null
 
     var cleanExit: Boolean = true
     lateinit var appArguments: AppArguments

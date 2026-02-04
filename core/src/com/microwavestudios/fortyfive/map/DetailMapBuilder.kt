@@ -6,7 +6,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.DetailMap.MapDecoration
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.Promise
 
 class DetailMapBuilder(
@@ -95,7 +95,7 @@ data class MapDecorationBuilder(
 
     private var drawableCache: Promise<Drawable>? = null
 
-    fun requestDrawable(screen: OnjScreen, borrower: ResourceBorrower) {
+    fun requestDrawable(screen: CustomScreen, borrower: ResourceBorrower) {
         val handle = if (animated) {
             MapEditorWidget.animatedDecoPreviewDrawables[drawableHandle]!!
         } else {
@@ -104,7 +104,7 @@ data class MapDecorationBuilder(
         drawableCache = FortyFive.resourceManager.request<Drawable>(borrower, screen.lifetime, handle)
     }
 
-    fun getDrawable(screen: OnjScreen, borrower: ResourceBorrower): Promise<Drawable> {
+    fun getDrawable(screen: CustomScreen, borrower: ResourceBorrower): Promise<Drawable> {
         drawableCache?.let { return it }
         requestDrawable(screen, borrower)
         return drawableCache!!

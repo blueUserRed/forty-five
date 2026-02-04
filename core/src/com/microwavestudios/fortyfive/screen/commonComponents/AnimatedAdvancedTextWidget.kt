@@ -3,11 +3,11 @@ package com.microwavestudios.fortyfive.screen.commonComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.TimeUtils
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 
 class AnimatedAdvancedTextWidget(
     defaults: Triple<String, Color, Int>,
-    screen: OnjScreen,
+    screen: CustomScreen,
 ) : AdvancedTextWidget(defaults, screen) {
 
     var progressTimeMs: Int = 10

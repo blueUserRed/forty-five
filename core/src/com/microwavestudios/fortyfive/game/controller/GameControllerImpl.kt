@@ -24,7 +24,7 @@ import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.screen.Inject
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
@@ -39,7 +39,7 @@ import kotlin.math.floor
 import kotlin.math.log
 
 class GameControllerImpl(
-    override val screen: OnjScreen,
+    override val screen: CustomScreen,
     override val gameEvents: EventPipeline,
     private val warningParent: WarningParent,
     override val afterlife: Afterlife,
@@ -1047,7 +1047,7 @@ class GameControllerImpl(
         later { enemy.statusEffects.forEach { it.onEnemyAttack() } }
     } }
 
-    override fun putBulletFromRevolverUnderTheDeckTimeline(card: Card): Timeline {
+    override fun putBulletFromRevolverUnderTheStackTimeline(card: Card): Timeline {
         TODO("Not yet implemented")
     }
 

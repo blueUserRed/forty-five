@@ -265,7 +265,7 @@ sealed class EnemyActionPrototype(
                         controller
                             .cardsInHand
                             .filter { it.isMarked }
-                            .map { controller.putBulletFromRevolverUnderTheDeckTimeline(it) }
+                            .map { controller.putBulletFromRevolverUnderTheStackTimeline(it) }
                             .collectTimeline()
                     }
                 )
@@ -306,7 +306,7 @@ sealed class EnemyActionPrototype(
                     this,
                 ) {
                     controller.revolver.getCardInSlot(slot)?.let { card ->
-                        include(controller.putBulletFromRevolverUnderTheDeckTimeline(card))
+                        include(controller.putBulletFromRevolverUnderTheStackTimeline(card))
                     }
                 }
             }

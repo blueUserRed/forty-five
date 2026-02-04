@@ -31,7 +31,7 @@ import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
@@ -62,7 +62,7 @@ class CardPrototype(
 
     val name = namespace?.let { "$it:$simpleName" } ?: simpleName
 
-    var creator: ((screen: OnjScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
+    var creator: ((screen: CustomScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
@@ -70,7 +70,7 @@ class CardPrototype(
      * creates an actual instance of this card
      */
     fun create(
-        screen: OnjScreen,
+        screen: CustomScreen,
         startedInDeck: Boolean = false,
         isSaved: Boolean? = null,
         areHoverDetailsEnabled: Boolean = true
@@ -130,7 +130,7 @@ class Card(
     val additionalHoverInfos: List<String>,
     font: Promise<PixmapFont>,
     fontScale: Float,
-    screen: OnjScreen,
+    screen: CustomScreen,
     val isSaved: Boolean?,
     val enableHoverDetails: Boolean
 ) : Disposable {
@@ -692,7 +692,7 @@ class Card(
 
         private fun getCardFrom(
             onj: OnjObject,
-            onjScreen: OnjScreen,
+            customScreen: CustomScreen,
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
             startedInDeck: Boolean,
@@ -740,7 +740,7 @@ class Card(
                     ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
-                font = GraphicsConfig.cardFont(onjScreen, onjScreen),
+                font = GraphicsConfig.cardFont(customScreen, customScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.getOr<Boolean>("dark", false),
                 additionalHoverInfos = onj
@@ -748,7 +748,7 @@ class Card(
                     ?.value
                     ?.map { it.value as String }
                     ?: listOf(),
-                screen = onjScreen,
+                screen = customScreen,
                 isSaved = isSaved,
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
@@ -839,7 +839,7 @@ class CardActor(
     val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
-    override val screen: OnjScreen,
+    override val screen: CustomScreen,
     val enableHoverDetails: Boolean // TODO: fix
 ) : Widget(), ZIndexActor, InputActor by InputActorImpl(), Selectable<CardActor>, ActorWithDragFeatures,
     OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor, AnimatedActor {

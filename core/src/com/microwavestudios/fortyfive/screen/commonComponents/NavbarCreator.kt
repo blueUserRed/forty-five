@@ -12,7 +12,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -26,7 +26,7 @@ object NavbarCreator {
         worldWidth: Float,
         worldHeight: Float,
         objects: List<NavBarObject>,
-        screen: OnjScreen,
+        screen: CustomScreen,
         isLeft: Boolean = false,
     ) = newGroup {
         x = 0f
@@ -81,7 +81,7 @@ object NavbarCreator {
         }
     }
 
-    private fun boxWithTimeline(timeline: Timeline, screen: OnjScreen): CustomBox = object : CustomBox(screen) {
+    private fun boxWithTimeline(timeline: Timeline, screen: CustomScreen): CustomBox = object : CustomBox(screen) {
 
         override fun act(delta: Float) {
             timeline.updateTimeline()

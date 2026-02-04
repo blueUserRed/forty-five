@@ -5,10 +5,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 
 /**
- * enables an actor to participate in the input system
+ * Enables an actor to participate in the input system. Works together with [InputManager]
  */
 interface InputActor {
 
@@ -58,22 +58,34 @@ interface InputActor {
 
     val reusableInputActor: Boolean
 
-    fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor
+    fun <T> initInput(actor: T, screen: CustomScreen) where T : Actor, T : InputActor
 
+    /**
+     * calls [callback] when [input] is triggered
+     */
     fun onInput(input: Input, callback: () -> Unit)
 
     fun observeInputState(inputState: InputState)
 
     fun observeInputState(state: InputState, onEnter: () -> Unit, onLeave: () -> Unit)
 
+    /**
+     * calls [onEnter] when [state] is entered
+     */
     fun onEnterInputState(state: InputState, onEnter: () -> Unit)
 
-    fun onLeaveInputState(state: InputState, onEnter: () -> Unit)
+    /**
+     * calls [onLeave] when [state] is left
+     */
+    fun onLeaveInputState(state: InputState, onLeave: () -> Unit)
 
     fun notifyInputStateChanged(state: InputState, entered: Boolean)
 
     fun isInInputState(state: InputState): Boolean
 
+    /**
+     * sets the input state that controls if the [detailWidget] is shown
+     */
     fun bindDetailToInputState(state: InputState?)
 
     fun joinGroup(group: String)
@@ -100,6 +112,9 @@ interface InputActor {
 
     fun childrenInCorrectOrderOrOriginal(): Iterable<Actor>
 
+    /**
+     * called when some child of this group was focused using the keyboard
+     */
     fun childWasKeyboardFocused(child: InputActor) {}
 
     fun drawInDrag(batch: Batch, oX: Float, oY: Float)
@@ -131,6 +146,9 @@ enum class FocusAlignment {
     VERTICAL, HORIZONTAL, UNORDERED
 }
 
+/**
+ * default implementation for the [InputActor] interface
+ */
 class InputActorImpl : InputActor {
 
     private val _callbacks: MutableMap<Input, MutableList<() -> Unit>> = mutableMapOf()
@@ -168,10 +186,6 @@ class InputActorImpl : InputActor {
     override var dragY: Float = 0f
 
     override var keyboardFocusable: KeyboardFocusable = KeyboardFocusable.NONE
-        set(value) {
-            field = value
-            if (value == KeyboardFocusable.NONE) throw RuntimeException()
-        }
 
     private val _observedStates: MutableSet<InputState> = mutableSetOf()
 
@@ -179,7 +193,7 @@ class InputActorImpl : InputActor {
         get() = _actor
 
     private lateinit var _actor: Actor
-    private lateinit var screen: OnjScreen
+    private lateinit var screen: CustomScreen
 
     private var wasAdded: Boolean = false
 
@@ -198,7 +212,7 @@ class InputActorImpl : InputActor {
 
     override val reusableInputActor: Boolean = false
 
-    override fun <T> initInput(actor: T, screen: OnjScreen) where T : Actor, T : InputActor {
+    override fun <T> initInput(actor: T, screen: CustomScreen) where T : Actor, T : InputActor {
         this._actor = actor
         this.screen = screen
         observeInputState(

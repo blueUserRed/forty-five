@@ -22,11 +22,11 @@ interface DropShadow {
 
     var showDropShadow: Boolean
 
-    fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor)
+    fun doDropShadow(batch: Batch?, screen: CustomScreen, drawable: Drawable, actor: Actor)
 
     fun doDropShadow(
         batch: Batch?,
-        screen: OnjScreen,
+        screen: CustomScreen,
         drawable: TransformDrawable,
         actor: Actor,
         scaleX: Float,
@@ -37,7 +37,7 @@ interface DropShadow {
 
 class BakedDropShadow(
     background: ResourceHandle,
-    private val screen: OnjScreen,
+    private val screen: CustomScreen,
     val offX: Float = 0f,
     val offY: Float = 0f,
     var scaleX: Float = 2.0f,
@@ -52,12 +52,12 @@ class BakedDropShadow(
             "$background${ResourceManager.DROP_SHADOW_END}"
         )
 
-    override fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) =
+    override fun doDropShadow(batch: Batch?, screen: CustomScreen, drawable: Drawable, actor: Actor) =
         doDropShadow(batch, actor, 1f, 1f, 0f)
 
     override fun doDropShadow(
         batch: Batch?,
-        screen: OnjScreen,
+        screen: CustomScreen,
         drawable: TransformDrawable,
         actor: Actor,
         scaleX: Float,
@@ -93,7 +93,7 @@ class SquareDropShadow(
     override var showDropShadow: Boolean = true
 ) : DropShadow {
 
-    override fun doDropShadow(batch: Batch?, screen: OnjScreen, drawable: Drawable, actor: Actor) {
+    override fun doDropShadow(batch: Batch?, screen: CustomScreen, drawable: Drawable, actor: Actor) {
         if (!showDropShadow) return
         val scaleX2 = scale
         val scaleY2 = scale
@@ -104,7 +104,7 @@ class SquareDropShadow(
 
     override fun doDropShadow(
         batch: Batch?,
-        screen: OnjScreen,
+        screen: CustomScreen,
         drawable: TransformDrawable,
         actor: Actor,
         scaleX: Float,
@@ -133,7 +133,7 @@ class SquareDropShadow(
         return Pair(sWidth, sHeight)
     }
 
-    private inline fun doDropShadow(batch: Batch?, screen: OnjScreen, drawer: () -> Unit) {
+    private inline fun doDropShadow(batch: Batch?, screen: CustomScreen, drawer: () -> Unit) {
         batch ?: return
         val shader = dropShadowShader.getOrNull() ?: return
         batch.flush()

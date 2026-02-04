@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.game.GameAnimation
 import com.microwavestudios.fortyfive.game.controller.GameController
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import onj.value.OnjArray
 import onj.value.OnjString
 import java.io.BufferedInputStream
@@ -303,10 +303,6 @@ fun <T> Collection<T>.randomIndex(): Int = (0..this.size).random()
 fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseChar() }
 
 fun String.onjString(): OnjString = OnjString(this)
-
-fun Timeline.TimelineBuilderDSL.awaitConfirmationInput(screen: OnjScreen, maxTime: Long? = null) {
-    includeAction(screen.confirmationClickTimelineAction(maxTime))
-}
 
 inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
     val chunks = mutableListOf<MutableList<T>>(mutableListOf())
