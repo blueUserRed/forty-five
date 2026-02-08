@@ -17,7 +17,7 @@ import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.resources.ResourceManager
 import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.screen.DropShadowActor
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.SubscribeableObserver
@@ -35,7 +35,7 @@ import kotlin.math.absoluteValue
  * resolution/font size
  */
 open class NewLabel(
-    val screen: OnjScreen,
+    val screen: CustomScreen,
     text: String,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
@@ -129,7 +129,7 @@ open class NewLabel(
     init {
         initInput(this, screen)
         initDebugBounds(this, screen)
-        screen.screenEvents.watchFor<OnjScreen.ScreenResizedEvent> { paramsChanged() }
+        screen.screenEvents.watchFor<CustomScreen.ScreenResizedEvent> { paramsChanged() }
     }
 
     fun setAlignment(align: Int) {

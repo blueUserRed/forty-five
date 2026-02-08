@@ -6,14 +6,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.utils.*
 
-sealed class DetailWidget(protected val screen: OnjScreen) {
+sealed class DetailWidget(protected val screen: CustomScreen) {
 
     var detailActor: Actor? = null
 
@@ -64,7 +64,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     }
 
     class SimpleBigDetailActor(
-        screen: OnjScreen,
+        screen: CustomScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> String
@@ -87,7 +87,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     }
 
     class SimpleSmallDetailActor(
-        screen: OnjScreen,
+        screen: CustomScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> String
@@ -124,7 +124,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     }
 
     class ComplexBigDetailActor(
-        screen: OnjScreen,
+        screen: CustomScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> List<String>,
@@ -269,7 +269,7 @@ sealed class DetailWidget(protected val screen: OnjScreen) {
     }
 
     abstract class AdvancedTextDetailWidget(
-        screen: OnjScreen,
+        screen: CustomScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true
     ) : DetailWidget(screen) {

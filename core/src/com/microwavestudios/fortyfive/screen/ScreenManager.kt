@@ -100,8 +100,8 @@ class ScreenManager(
     }
 
     private var inScreenTransition: Boolean = false
-    private var nextScreen: OnjScreen? = null
-    private var currentScreen: OnjScreen? = null
+    private var nextScreen: CustomScreen? = null
+    private var currentScreen: CustomScreen? = null
 
     private fun changeToScreen(screenBuilder: ScreenBuilder, context: Any?) = Gdx.app.postRunnable {
         if (inScreenTransition) {

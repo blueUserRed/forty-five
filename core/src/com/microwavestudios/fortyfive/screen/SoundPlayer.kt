@@ -129,7 +129,7 @@ class SoundPlayer : ResourceBorrower {
 
     }.let { musicTimeline.appendAction(it.asAction()) }
 
-    fun situation(name: String, screen: OnjScreen) {
+    fun situation(name: String, screen: CustomScreen) {
         val situation = situations.find { it.name == name } ?: run {
             FortyFive.logger.warn(logTag, "No sound config for situation $name")
             return
@@ -140,14 +140,14 @@ class SoundPlayer : ResourceBorrower {
         }
     }
 
-    fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
+    fun playSoundFull(soundHandle: ResourceHandle, screen: CustomScreen) {
         val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, soundHandle)
         soundPromise.then { sound ->
             sound.play(soundEffectVolume * masterVolume)
         }
     }
 
-    fun update(screen: OnjScreen, playAmbientSounds: Boolean) {
+    fun update(screen: CustomScreen, playAmbientSounds: Boolean) {
         if (playAmbientSounds) updateAmbientSounds(screen)
         musicTimeline.updateTimeline()
 
@@ -158,7 +158,7 @@ class SoundPlayer : ResourceBorrower {
         nextMusic?.volume = musicVolume * masterVolume * transitionProgress
     }
 
-    private fun updateAmbientSounds(screen: OnjScreen) {
+    private fun updateAmbientSounds(screen: CustomScreen) {
         val now = TimeUtils.millis()
         val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
             ?: return
@@ -175,7 +175,7 @@ class SoundPlayer : ResourceBorrower {
         }
     }
 
-    fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
+    fun playMusicOnce(musicHandle: ResourceHandle, screen: CustomScreen) {
         val musicPromise = FortyFive.resourceManager.request<Music>(this, screen.lifetime, musicHandle)
         musicPromise.then { music ->
             music.play()

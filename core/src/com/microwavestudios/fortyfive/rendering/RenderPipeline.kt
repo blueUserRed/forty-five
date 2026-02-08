@@ -26,7 +26,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.*
 
 interface Renderable {
@@ -35,7 +35,7 @@ interface Renderable {
 }
 
 open class RenderPipeline(
-    protected val screen: OnjScreen,
+    protected val screen: CustomScreen,
     private val baseRenderable: Renderable
 ) : Disposable, ResourceBorrower {
 
@@ -547,7 +547,7 @@ open class RenderPipeline(
 //    }
 }
 
-class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
+class GameRenderPipeline(screen: CustomScreen) : RenderPipeline(screen, screen) {
 
     private val shootShader: Promise<BetterShader> = FortyFive.resourceManager.request(this, lifetime, "shoot_shader")
     private val shootPostProcessingStep: () -> Unit by lazy {

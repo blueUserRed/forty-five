@@ -1,11 +1,11 @@
 package com.microwavestudios.fortyfive.screen.screenBuilder
 
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 
 interface ScreenBuilder {
 
     val name: String
 
-    fun build(controllerContext: Any? = null, previousScreen: OnjScreen?): OnjScreen
+    fun build(controllerContext: Any? = null, previousScreen: CustomScreen?): CustomScreen
 
 }

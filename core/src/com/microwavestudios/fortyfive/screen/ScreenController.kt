@@ -28,7 +28,7 @@ abstract class ScreenController {
 
     open fun onTransitionAway() { }
 
-    fun injectActors(screen: OnjScreen) {
+    fun injectActors(screen: CustomScreen) {
         this::class
             .java
             .declaredFields

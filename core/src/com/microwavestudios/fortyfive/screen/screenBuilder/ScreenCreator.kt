@@ -17,7 +17,7 @@ import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.commonComponents.AdvancedTextWidget
@@ -70,7 +70,7 @@ abstract class ScreenCreator : ResourceBorrower {
      */
     open val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf()
 
-    lateinit var screen: OnjScreen
+    lateinit var screen: CustomScreen
         private set
 
     /**
@@ -84,7 +84,7 @@ abstract class ScreenCreator : ResourceBorrower {
         get() = _namedActors
 
 
-    fun start(screen: OnjScreen, context: Any?) {
+    fun start(screen: CustomScreen, context: Any?) {
         this.screen = screen
         this._context = context
     }

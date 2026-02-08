@@ -9,13 +9,13 @@ import com.microwavestudios.fortyfive.game.widgets.TextEffectEmitter.TextAnimati
 import com.microwavestudios.fortyfive.particle.ParticleSystem
 import com.microwavestudios.fortyfive.particle.TextParticleRenderer
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 
 class TextEffectEmitter(
     animationConfigs: Map<String, TextAnimationConfig>,
     private val actor: Actor,
-    private val screen: OnjScreen
+    private val screen: CustomScreen
 ) {
 
     private val animationConfigs: Map<String, TextAnimationConfig> = animationConfigs + standardTextAnimConfigs

@@ -18,16 +18,16 @@ import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.*
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.max
 
 open class CustomLabel(
-    val screen: OnjScreen,
+    val screen: CustomScreen,
     text: String,
     labelStyle: LabelStyle,
     private val isDistanceField: Boolean,
-    private val backgroundHints: Array<String> = arrayOf(),
+    private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
     DebugActor by DebugActorImpl(), InputActor by InputActorImpl(),
     KotlinStyledActor, OffSettable {
@@ -40,7 +40,7 @@ open class CustomLabel(
     var underline: Boolean = false
 
     val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: String? by backgroundHandleObserver
+    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
@@ -157,11 +157,11 @@ open class CustomLabel(
 }
 
 open class TemplateStringLabel(
-    screen: OnjScreen,
+    screen: CustomScreen,
     var templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
-    backgroundHints: Array<String> = arrayOf(),
+    backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : CustomLabel(
     screen,
     templateString.string,
@@ -186,8 +186,8 @@ open class TemplateStringLabel(
  */
 open class CustomImageActor(
     drawableHandle: ResourceHandle?,
-    override val screen: OnjScreen,
-    private val backgroundHints: Array<String> = arrayOf(),
+    override val screen: CustomScreen,
+    private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor,
     OffSettable, InputActor by InputActorImpl(), DropShadowActor,
     KotlinStyledActor, DebugActor by DebugActorImpl() {
@@ -218,7 +218,7 @@ open class CustomImageActor(
     override var logicalOffsetY: Float = 0F
 
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
-    var backgroundHandle: String? by backgroundHandleObserver
+    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
 
     val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
@@ -346,8 +346,8 @@ open class CustomImageActor(
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomHorizontalGroup(
-    val screen: OnjScreen,
-    private val backgroundHints: Array<String> = arrayOf(),
+    val screen: CustomScreen,
+    private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : HorizontalGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor,
     KotlinStyledActor {
 
@@ -367,7 +367,7 @@ open class CustomHorizontalGroup(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: String? by backgroundHandleObserver
+    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
@@ -403,8 +403,8 @@ open class CustomHorizontalGroup(
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomVerticalGroup(
-    val screen: OnjScreen,
-    private val backgroundHints: Array<String> = arrayOf()
+    val screen: CustomScreen,
+    private val backgroundHints: Array<ResourceHandle> = arrayOf()
 ) : VerticalGroup(), ZIndexGroup, ZIndexActor, OnLayoutActor {
 
     override var fixedZIndex: Int = 0
@@ -412,7 +412,7 @@ open class CustomVerticalGroup(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: String? by backgroundHandleObserver
+    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
 
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
@@ -450,7 +450,7 @@ open class CustomVerticalGroup(
  * children. Layout is fully the responsibility of the programmer
  */
 open class CustomGroup(
-    override val screen: OnjScreen,
+    override val screen: CustomScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf()
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor, KotlinStyledActor,
     DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugActor by DebugActorImpl() {

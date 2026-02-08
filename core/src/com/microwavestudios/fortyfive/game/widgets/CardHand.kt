@@ -5,13 +5,13 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.contains
 import kotlin.math.pow
 
 class CardHand(
-    screen: OnjScreen,
+    screen: CustomScreen,
     private val centerGap: Float,
     private val cardSize: Float,
     private val maxDistanceBetweenCards: Float,

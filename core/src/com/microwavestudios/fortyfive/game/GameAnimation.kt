@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.alpha
 import java.lang.Float.min
 
@@ -54,7 +54,7 @@ abstract class GameAnimation {
  */
 class BannerAnimation(
     val banner: Drawable,
-    private val screen: OnjScreen,
+    private val screen: CustomScreen,
     private val duration: Int,
     private val animationDuration: Int,
     private val beginScale: Float,
@@ -127,7 +127,7 @@ open class FadeInAndOutAnimation(
     protected val x: Float,
     protected val y: Float,
     val actor: Actor,
-    private val onjScreen: OnjScreen,
+    private val customScreen: CustomScreen,
     private val duration: Int,
     private val fadeIn : Int,
     private val fadeOut : Int,
@@ -140,7 +140,7 @@ open class FadeInAndOutAnimation(
     override fun start() {
         startTime = TimeUtils.millis()
         runUntil = startTime + duration
-        onjScreen.addActorToRoot(actor)
+        customScreen.addActorToRoot(actor)
         if (actor is Widget && fixedDimensions == null) {
             actor.width = actor.prefWidth
             actor.height = actor.prefHeight
@@ -167,7 +167,7 @@ open class FadeInAndOutAnimation(
     }
 
     override fun end() {
-        onjScreen.removeActorFromRoot(actor)
+        customScreen.removeActorFromRoot(actor)
     }
 
     override fun toString(): String = "FadeInAndOutAnimation"

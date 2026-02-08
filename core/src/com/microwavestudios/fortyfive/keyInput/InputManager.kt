@@ -4,12 +4,19 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Vector2
 import java.util.Stack
 
-class InputManager(val screen: OnjScreen) : InputProcessor {
+/**
+ * manages (most) of the inputs in the game. The input system is designed in a way that mostly
+ * doesn't care about the input method used, only one implementation should be enough to get an
+ * actor working with the mouse, the keyboard and maybe controllers in the future.
+ *
+ * To participate in the Input system actors must implement [InputActor]
+ */
+class InputManager(val screen: CustomScreen) : InputProcessor {
 
     private val actorBuffer: MutableList<Pair<Boolean, InputActor>> = mutableListOf()
     private val actors: MutableSet<InputActor> = mutableSetOf()
@@ -92,6 +99,9 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         else -> canBeFocused(actor.actor.parent as InputActor, false)
     }
 
+    /**
+     * adds a global input listener
+     */
     fun onInput(input: Input, callback: () -> Unit) {
         inputCallbacks.putIfAbsent(input, mutableListOf())
         inputCallbacks[input]!!.add(callback)
@@ -115,6 +125,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         group.remove(actor)
     }
 
+    /**
+     * adds a new [DragAndDrop] that enables dragging actors in group [source] to
+     * group [target]
+     */
     fun addDragAndDrop(source: String, target: String): DragAndDrop {
         val dragAndDrop = DragAndDrop(source, target, screen)
         dragAndDrops.add(dragAndDrop)
@@ -523,6 +537,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         return false
     }
 
+    /**
+     * contains basic input states that correspond to events coming from a specific device. Use only
+     * when it is necessary to know where a state comes from. Prefer using [GameInputs]
+     */
     object BaseStates {
 
         val mouseHover = InputState("mouseHover")
@@ -534,7 +552,13 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         val draggedHover = InputState("draggedHover")
     }
 
-    class FocusFilter(val groups: List<String>, private val screen: OnjScreen) {
+    /**
+     * FocusFilter is used to prevent actors in the groups [groups] from participating in the input
+     * system. This is useful when actors are not on-screen the whole time or can be disabled.
+     *
+     * Note: Unlike [Modal], FocusFilters stack
+     */
+    class FocusFilter(val groups: List<String>, private val screen: CustomScreen) {
 
         fun start() {
             screen.inputManager.addFilter(this)
@@ -545,7 +569,15 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         }
     }
 
-    class Modal(val allowGroups: List<String>, private val screen: OnjScreen) {
+    /**
+     * Modals are used to block all groups but [allowGroups] from participating in the input system.
+     * This can be useful when implementing popups, to only allow the user to interact with the popup
+     * and nothing else. In that case a [FocusFilter] typically has to be used as well, to block
+     * events in the popup when it isn't shown
+     *
+     * Note: Unlike [FocusFilter], only the most recent modal is active and can block events
+     */
+    class Modal(val allowGroups: List<String>, private val screen: CustomScreen) {
 
         var finished: Boolean = false
             private set
@@ -561,7 +593,10 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         }
     }
 
-    data class DragAndDrop(val source: String, val target: String, val screen: OnjScreen) {
+    /**
+     * allows enabling and disabling drag and drops
+     */
+    data class DragAndDrop(val source: String, val target: String, val screen: CustomScreen) {
 
         fun enable() {
             screen.inputManager.enableDragAndDrop(this)
@@ -572,6 +607,9 @@ class InputManager(val screen: OnjScreen) : InputProcessor {
         }
     }
 
+    /**
+     * a way of controlling the keyboard focus when a lot of elements are present in a grid-like layout
+     */
     class FocusGrid {
 
         private val columns: MutableList<MutableList<InputActor?>> = mutableListOf()

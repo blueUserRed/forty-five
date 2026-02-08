@@ -22,7 +22,7 @@ import com.microwavestudios.fortyfive.rendering.EncounterPreviewDebugMenuPage
 import com.microwavestudios.fortyfive.rendering.MapDebugMenuPage
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.OnjScreen
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.DisableActor
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
@@ -35,7 +35,7 @@ import kotlin.math.sin
  * the widget used for displaying a [DetailMap]
  */
 class DetailMapWidget(
-    private val screen: OnjScreen,
+    private val screen: CustomScreen,
     private val mapSaver: MapSaver,
     private val defaultNodeDrawableHandle: ResourceHandle,
     private val edgeTextureHandle: ResourceHandle,
