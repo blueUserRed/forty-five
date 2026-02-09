@@ -34,7 +34,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Zone" to OnjZone::class,
         "Trigger" to OnjTrigger::class,
         "VariableTextureSelector" to OnjVariableTextureSelector::class,
-        "RevolverSlotGetter" to OnjRevolverSlotGetter::class
+        "RevolverSlotGetter" to OnjRevolverSlotGetter::class,
+        "CardType" to OnjCardType::class
     )
 
     @OnjNamespaceVariables
@@ -296,8 +297,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun givePlayerStatus(effect: OnjStatusEffect): OnjEffect =
         OnjEffect(Effect.GivePlayerStatus(effect.value, EffectData()))
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
-    fun putCardInHand(name: OnjString, amount: OnjEffectValue): OnjEffect = OnjEffect(
+    @RegisterOnjFunction(schema = "use Cards; params: [CardType, EffectValue]")
+    fun putCardInHand(name: OnjCardType, amount: OnjEffectValue): OnjEffect = OnjEffect(
         Effect.PutCardInHand(
             name.value,
             amount.value,
@@ -305,8 +306,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
-    fun putCardsOnTopOfStack(name: OnjString, amount: OnjEffectValue): OnjEffect =
+    @RegisterOnjFunction(schema = "use Cards; params: [CardType, EffectValue]")
+    fun putCardsOnTopOfStack(name: OnjCardType, amount: OnjEffectValue): OnjEffect =
         OnjEffect(Effect.PutCardInStack(
             name.value,
             amount.value,
@@ -314,8 +315,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             EffectData()
         ))
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
-    fun shuffleCardsIntoStack(name: OnjString, amount: OnjEffectValue): OnjEffect =
+    @RegisterOnjFunction(schema = "use Cards; params: [CardType, EffectValue]")
+    fun shuffleCardsIntoStack(name: OnjCardType, amount: OnjEffectValue): OnjEffect =
         OnjEffect(Effect.PutCardInStack(
             name.value,
             amount.value,
@@ -424,8 +425,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         EffectData()
     ))
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
-    fun createBulletsInAfterlife(name: OnjString, amount: OnjEffectValue): OnjEffect = OnjEffect(
+    @RegisterOnjFunction(schema = "use Cards; params: [CardType, EffectValue]")
+    fun createBulletsInAfterlife(name: OnjCardType, amount: OnjEffectValue): OnjEffect = OnjEffect(
         Effect.CreateBulletsInAfterlife(name.value, amount.value, EffectData())
     )
 
@@ -982,6 +983,16 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
+    @RegisterOnjFunction(schema = "params: [{...*}]")
+    fun cardType(obj: OnjObject): OnjCardType = OnjCardType(
+        CardType.fromOnj(obj)
+    )
+
+    @RegisterOnjFunction(schema = "params: [string]", type = OnjFunctionType.CONVERSION)
+    fun card(name: OnjString): OnjCardType = OnjCardType(
+        CardType.fromString(name.value)
+    )
+
     @Suppress("NAME_SHADOWING")
     private fun getStatusEffectValue(
         effectValue: OnjEffectValue,
@@ -1091,5 +1102,13 @@ class OnjRevolverSlotGetter(
 ): OnjValue() {
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--RevolverSlotGetter--'")
+    }
+}
+
+class OnjCardType(
+    override val value: CardType
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--cardType--'")
     }
 }

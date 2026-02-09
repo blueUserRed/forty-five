@@ -3,11 +3,13 @@ package com.microwavestudios.fortyfive.game.enemy
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.StatusEffectCreator
 import com.microwavestudios.fortyfive.game.StatusEffectTarget
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import kotlin.random.Random
 
 class EnemyAction(
@@ -212,7 +214,7 @@ sealed class EnemyActionPrototype(
     }
 
     class GivePlayerCard(
-        val card: String,
+        val card: CardType,
         enemy: Enemy,
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
@@ -357,7 +359,7 @@ sealed class EnemyActionPrototype(
                 obj.get<Boolean>("hasSpecialAnimation")
             )
             "GivePlayerCard" -> GivePlayerCard(
-                obj.get<String>("card"),
+                CardType.fromOnj(obj.get<OnjObject>("card")),
                 forEnemy,
                 obj.get<Boolean>("hasSpecialAnimation")
             )

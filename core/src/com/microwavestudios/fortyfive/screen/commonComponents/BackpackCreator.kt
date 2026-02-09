@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.card.CardPrototype
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
@@ -211,7 +212,7 @@ object BackpackCreator {
             state.warningEvents.fire(warningEvent)
             return
         }
-        state.currentDeck.addToDeck(slot, card.name)
+        state.currentDeck.addToDeck(slot, card.type)
         updateCardsInCollection(state)
         with(state.events) {
             fire(CollectionChangedEvent)
@@ -243,7 +244,7 @@ object BackpackCreator {
 
     private fun swapBackpackWithDeckCard(backpackCard: Card, deckSlot: Int, state: BackpackState) {
         state.currentDeck.removeFromDeck(deckSlot)
-        state.currentDeck.addToDeck(deckSlot, backpackCard.name)
+        state.currentDeck.addToDeck(deckSlot, backpackCard.type)
         updateCardsInCollection(state)
         with(state.events) {
             fire(GiveCardBackEvent(deckSlot, false))
@@ -424,7 +425,7 @@ object BackpackCreator {
         val cardsInDeck = state.currentDeck.cards
         cardsInDeck.forEach { cardsInBackpack.remove(it) }
 
-        val cardMap = mutableMapOf<String, Int>()
+        val cardMap = mutableMapOf<CardType, Int>()
         cardsInBackpack.forEach { card ->
             if (cardMap.containsKey(card)) {
                 cardMap[card] = cardMap[card]!! + 1
@@ -438,12 +439,12 @@ object BackpackCreator {
         val protos = state.cardPrototypes
         when (state.sortingMode) {
             SortingMode.COST -> result.sortByDescending {
-                (protos[it.first] ?: throw RuntimeException("unknown card in backpack: $it")).baseCost
+                (protos[it.first.name] ?: throw RuntimeException("unknown card in backpack: $it")).baseCost
             }
             SortingMode.DAMAGE -> result.sortByDescending {
-                (protos[it.first] ?: throw RuntimeException("unknown card in backpack: $it")).baseDamage
+                (protos[it.first.name] ?: throw RuntimeException("unknown card in backpack: $it")).baseDamage
             }
-            SortingMode.NAME -> result.sortBy { it.first.lowercase() }
+            SortingMode.NAME -> result.sortBy { it.first.simpleName.lowercase() }
             SortingMode.AMOUNT -> result.sortByDescending { it.second }
         }
         if (state.isSortingReverse) cardsInBackpack.reverse()
@@ -538,10 +539,10 @@ object BackpackCreator {
             val amount: Int
             if (event.backpack) {
                 val result = state.cardsInCollection.getOrNull(num)
-                cardName = result?.first
+                cardName = result?.first?.name
                 amount = result?.second ?: 1
             } else {
-                cardName = state.currentDeck.cardPositions[num]
+                cardName = state.currentDeck.cardPositions[num]?.name
                 amount = 1
             }
 
@@ -706,7 +707,7 @@ object BackpackCreator {
         val profile: Profile,
         val cardPrototypes: Map<String, CardPrototype>,
         val createdCards: MutableList<Card>,
-        var cardsInCollection: List<Pair<String, Int>>,
+        var cardsInCollection: List<Pair<CardType, Int>>,
         val events: EventPipeline,
         val warningEvents: EventPipeline,
         val publicEvents: EventPipeline,

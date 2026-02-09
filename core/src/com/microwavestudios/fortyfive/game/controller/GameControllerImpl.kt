@@ -33,10 +33,8 @@ import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
 import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.*
-import onj.value.OnjArray
 import kotlin.collections.map
 import kotlin.math.floor
-import kotlin.math.log
 
 class GameControllerImpl(
     override val screen: CustomScreen,
@@ -453,15 +451,13 @@ class GameControllerImpl(
     } }
 
     override fun putCardsInStackTimeline(
-        cardName: String,
+        cardType: CardType,
         amount: Int,
         sourceCard: Card?,
         onTop: Boolean,
     ): Timeline = Timeline.timeline { later {
-        val proto = cardPrototypes.find { it.name == cardName }
-        requireNotNull(proto) { "No card with name $cardName" }
         repeat(amount) {
-            val card = proto.create(screen)
+            val card = createCardFromType(cardType)
             val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
             val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.STACK, before = true, triggerInfo)
             includeLater({
@@ -513,19 +509,17 @@ class GameControllerImpl(
     } }
 
     override fun tryToPutCardsInHandTimeline(
-        cardName: String,
+        cardType: CardType,
         amount: Int,
         sourceCard: Card?
     ): Timeline = Timeline.timeline { later {
-        val prototype = cardPrototypes.find { it.name == cardName }
-        requireNotNull(prototype) { "unknown card $cardName" }
         val newAmount = maxSpaceInHand(amount)
         if (newAmount == 0) {
             FortyFive.logger.warn(logTag, "Failed to put card in hand because there isn't enough space")
             return@later
         }
         repeat(newAmount) {
-            val card = prototype.create(screen)
+            val card = createCardFromType(cardType)
             val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
             val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.HAND, before = true, triggerInfo)
             includeLater({
@@ -689,15 +683,13 @@ class GameControllerImpl(
         }
     }
 
-    override fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card?): Timeline = Timeline.timeline {
-        val proto = cardPrototypes.find { it.name == bulletName }
-        requireNotNull(proto) { "No bullet with name $bulletName" }
+    override fun createBulletsInAfterlifeTimeline(cardType: CardType, amount: Int, sourceCard: Card?): Timeline = Timeline.timeline {
         later {
             if (afterlife.isClosed) include(afterlife.openTimeline())
         }
         repeat(amount) {
             later {
-                val card = proto.create(screen)
+                val card = createCardFromType(cardType)
                 val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
                 val beforeEvent = Events.CardChangeZoneEvent(card, Zone.LIMBO, Zone.AFTERLIFE, true, triggerInfo)
                 gameEvents.fire(beforeEvent)
@@ -1542,12 +1534,15 @@ class GameControllerImpl(
 
     override fun slotOfCard(card: Card): Int? = revolver.slots.find { it.card === card }?.num
 
-    override fun titleOfCard(cardName: String): String = cardPrototypes.find { it.name == cardName }?.title
-        ?: throw RuntimeException("No card with name $cardName")
+    override fun titleOfCard(cardType: CardType): String = cardPrototypes
+        .find { it.name == cardType.name }
+        ?.title
+        ?: throw RuntimeException("No card with name $cardType")
 
-    override fun end() {
-        super.end()
-    }
+    override fun createCardFromType(cardType: CardType): Card = cardPrototypes
+        .find { it.name == cardType.name }
+        ?.create(screen)
+        ?: throw RuntimeException("no card '$cardType'")
 
     private fun createTriggerInfo(
         card: Card?,

@@ -40,16 +40,45 @@ import com.microwavestudios.fortyfive.screen.actors.PositionType
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
+import onj.builder.buildOnjObject
 import onj.value.*
 import kotlin.math.absoluteValue
-import kotlin.math.log
+
+data class CardType(
+    val namespace: String?,
+    val simpleName: String,
+) {
+    val name = namespace?.let { "$it:$simpleName" } ?: simpleName
+
+    fun asOnj(): OnjObject = buildOnjObject {
+        namespace?.let { "namespace" with it }
+        "simpleName" with simpleName
+    }
+
+    override fun toString(): String = name
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): CardType = CardType(
+            onj.getOr<String?>("namespace", null),
+            onj.get<String>("name"),
+        )
+
+        fun fromString(s: String): CardType {
+            val parts = s.splitToSequence(':').toList()
+            if (parts.size == 1) return CardType(null, s)
+            require(parts.size == 2) { "Invalid card type string: '$s'" }
+            return CardType(
+                parts.first(),
+                parts[1]
+            )
+        }
+    }
+}
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
  * actual instances of the card. Prototypes can be used to create those instances
- * @param name the name of the card produced by this prototype
- * @param type the type of card (bullet or cover)
- * @param creator lambda that creates the instance
  */
 class CardPrototype(
     val namespace: String?,
@@ -62,7 +91,7 @@ class CardPrototype(
 
     val name = namespace?.let { "$it:$simpleName" } ?: simpleName
 
-    var creator: ((screen: CustomScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
+    var creator: ((screen: CustomScreen, startedInDeck: Boolean, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
@@ -72,9 +101,8 @@ class CardPrototype(
     fun create(
         screen: CustomScreen,
         startedInDeck: Boolean = false,
-        isSaved: Boolean? = null,
         areHoverDetailsEnabled: Boolean = true
-    ): Card = creator!!(screen, startedInDeck, isSaved, areHoverDetailsEnabled)
+    ): Card = creator!!(screen, startedInDeck, areHoverDetailsEnabled)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -92,6 +120,7 @@ class CardPrototype(
     }
 
     override fun equals(other: Any?): Boolean = other is CardPrototype && other.name == name
+    override fun hashCode(): Int = name.hashCode()
 
     override fun toString(): String = "CardProto($name)"
 }
@@ -102,15 +131,12 @@ class CardPrototype(
  * @param title the name but formatted, so it looks good when shown on the screen
  * @param flavourText Short phrase that (should) be funny or add to the lore
  * @param shortDescription short text explaining the effects of this card; can be left blank
- * @param type the type of card (bullet or cover)
  * @param baseDamage the damage value of the card before modifiers are applied (typically 0 when this is a cover)
- * @param coverValue the cover this card provides (typically 0 when this is a bullet)
  * @param baseCost the cost of this card in reserves
  * @param effects the effects of this card
  */
 class Card(
-    val namespace: String?,
-    val simpleName: String,
+    val type: CardType,
     val title: String,
     val flavourText: String,
     val shortDescription: String,
@@ -124,23 +150,22 @@ class Card(
     val parryNumber: Int?,
     val startedInDeck: Boolean,
     val tags: List<String>,
-    val lockedDescription: String?,
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
     val additionalHoverInfos: List<String>,
     font: Promise<PixmapFont>,
     fontScale: Float,
     screen: CustomScreen,
-    val isSaved: Boolean?,
     val enableHoverDetails: Boolean
 ) : Disposable {
 
-    val name: String = namespace?.let { "$it:$simpleName" } ?: simpleName
+    val name: String
+        get() = type.name
 
     /**
      * used for logging
      */
-    val logTag = "$name-${++instanceCounter}"
+    val logTag = "$type-${++instanceCounter}"
 
     /**
      * the actor for representing the card on the screen
@@ -312,10 +337,10 @@ class Card(
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
     private fun checkModifierValidity(controller: GameController) {
-        val somethingChanged =
-            checkValiditySingleModifierList(controller, costModifiers, getter = { it }) ||
-            checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) ||
-            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) ||
+        val somethingChanged = // use 'or' to prevent short-circuiting
+            checkValiditySingleModifierList(controller, costModifiers, getter = { it }) or
+            checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) or
+            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) or
             checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
         if (somethingChanged) modifiersChanged()
     }
@@ -674,16 +699,17 @@ class Card(
                 .value
                 .forEach { onj ->
                     onj as OnjObject
+                    val type = CardType(from, onj.get<String>("name"))
                     val prototype = CardPrototype(
-                        from,
-                        onj.get<String>("name"),
+                        type.namespace,
+                        type.simpleName,
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
                         onj.get<Long>("baseDamage").toInt(),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, startedInDeck, isSaved, areHoverDetailsEnabled ->
-                        getCardFrom(onj, screen, initializer, prototype, startedInDeck, isSaved, areHoverDetailsEnabled)
+                    prototype.creator = { screen, startedInDeck, areHoverDetailsEnabled ->
+                        getCardFrom(onj, screen, type, initializer, prototype, startedInDeck, areHoverDetailsEnabled)
                     }
                     prototypes.add(prototype)
                 }
@@ -693,16 +719,14 @@ class Card(
         private fun getCardFrom(
             onj: OnjObject,
             customScreen: CustomScreen,
+            type: CardType,
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
             startedInDeck: Boolean,
-            isSaved: Boolean?,
             enableHoverDetails: Boolean
         ): Card {
-            val name = onj.get<String>("name")
             val card = Card(
-                namespace = prototype.namespace,
-                simpleName = name,
+                type = type,
                 title = onj.get<String>("title"),
                 flavourText = onj.get<String>("flavourText"),
                 shortDescription = onj.get<String>("description"),
@@ -749,12 +773,10 @@ class Card(
                     ?.map { it.value as String }
                     ?: listOf(),
                 screen = customScreen,
-                isSaved = isSaved,
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
                 startedInDeck = startedInDeck,
-                lockedDescription = onj.get<String?>("lockedDescription")
             )
             applyTraitEffects(card, onj)
             initializer(card)

@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.screen.screenController
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.Npc
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.Completable
 import com.microwavestudios.fortyfive.map.events.dialog.Dialog
 import com.microwavestudios.fortyfive.map.events.dialog.DialogPart
@@ -152,7 +153,7 @@ class DialogScreenController(
                     override val rerollPriceIncrease: Int = 0
                     override val rerollBasePrice: Int = 0
 
-                    override val forceCards: List<String> = listOf(selector.card)
+                    override val forceCards: List<CardType> = listOf(selector.card)
 
                     override fun completed() {}
                 }

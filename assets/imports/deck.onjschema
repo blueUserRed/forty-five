@@ -1,6 +1,8 @@
+import "onjschemas/card_type.onjschema" as cardType;
+
 index: int,
 name?: string,
 cards: {
     positionId: int,
-    cardName: string,
+    card: cardType,
 }[]

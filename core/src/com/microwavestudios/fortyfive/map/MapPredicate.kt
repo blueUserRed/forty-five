@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.map
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
@@ -14,7 +15,7 @@ interface MapPredicate {
 
     fun asOnj(): OnjObject
 
-    class PlayerHasCard(val card: String) : MapPredicate {
+    class PlayerHasCard(val card: CardType) : MapPredicate {
 
         override fun check(currentMap: DetailMap): Boolean {
             val profile = FortyFive.profileManager.currentProfile ?: return false
@@ -114,7 +115,7 @@ interface MapPredicate {
 
         fun fromOnj(onj: OnjNamedObject): MapPredicate = when (onj.name) {
 
-            "PlayerHasCard" -> PlayerHasCard(onj.get<String>("card"))
+            "PlayerHasCard" -> PlayerHasCard(CardType.fromOnj(onj.get<OnjObject>("card")))
 
             "RunCompleted" -> RunCompleted(onj.get<String>("runName"))
 

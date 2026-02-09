@@ -1,5 +1,6 @@
 import "imports/run.onjschema" as run;
 import "imports/deck.onjschema" as deck;
+import "onjschemas/card_type.onjschema" as cardType;
 
 var runBoard = {
     areaName: string,
@@ -9,7 +10,7 @@ var runBoard = {
     specialRuns: run[],
 };
 
-cardCollection: string[],
+cardCollection: cardType[],
 collectionDecks: deck[],
 currentDeckId: int,
 playerMoney: int,

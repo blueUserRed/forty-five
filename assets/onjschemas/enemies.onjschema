@@ -56,7 +56,7 @@ $EnemyAction {
     }
 
     $GivePlayerCard {
-        card: string,
+        card: CardType,
         ...enemyActionSharedKeys
     }
 

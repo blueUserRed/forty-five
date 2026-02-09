@@ -176,11 +176,6 @@ object FortyFive : Game() {
         serviceThread.start()
         cardTextureManager.init()
         if (logger.versionTag != "--dev--") return
-        ConfigFileManager
-            .loadCards({})
-            .filter { "unobtainable" !in it.tags }
-            .joinToString(transform = { "'${it.name}'" }, separator = ",\n")
-            .let { println(it) }
         File(".onj").mkdirs()
         OnjConfig.dumpOnjEnv(File(".onj/forty-five.onjenv"))
     }

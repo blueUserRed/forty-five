@@ -14,6 +14,7 @@ import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
@@ -184,7 +185,7 @@ class ShopScreen : ScreenCreator() {
         updateCards(newCards)
     }
 
-    private fun generateRandomCards(): List<String> {
+    private fun generateRandomCards(): List<CardType> {
         val amount = context.amountCards.random(random)
         val profile = FortyFive.profileManager.currentProfile!!
         val cards = RandomCardSelection.getRandomCards(
@@ -194,16 +195,16 @@ class ShopScreen : ScreenCreator() {
             profile.currentMapSaver.currentMap.majorDifficulty,
             random,
             unique = true
-        ).map { it.name }
+        ).map { CardType(it.namespace, it.simpleName) }
         return cards
     }
 
-    private fun updateCards(cards: List<String>) {
+    private fun updateCards(cards: List<CardType>) {
         val protos = RandomCardSelection.allCardPrototypes
         val newLifetime = EndableLifetime()
         val guardedLifetime = newLifetime.shorter(screen.lifetime)
-        val createdCards = cards.map { name ->
-            val proto = protos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
+        val createdCards = cards.map { type ->
+            val proto = protos.find { it == type } ?: throw RuntimeException("unknown card: $type")
             val card = proto.create(screen)
             guardedLifetime.tieDisposable(card)
             card
@@ -425,10 +426,10 @@ class ShopScreen : ScreenCreator() {
             FortyFive.soundPlayer.situation("card_bought", screen)
             profile.payMoney(info.price)
             val deck = currentDeck
-            if (profile.isRunActive) profile.addCardToBackpack(info.card.name)
-            else profile.addCardToCollection(info.card.name)
+            if (profile.isRunActive) profile.addCardToBackpack(info.card.type)
+            else profile.addCardToCollection(info.card.type)
             if (addToDeck && deck.canAddCards()) {
-                deck.addToDeck(deck.nextFreeSlot(), info.card.name)
+                deck.addToDeck(deck.nextFreeSlot(), info.card.type)
             }
             context.boughtIndices.add(info.index)
             updateCardStates()

@@ -6,6 +6,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.resources.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -69,7 +70,13 @@ class ServiceThread : Thread("ServiceThread") {
     }
 
     private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
-        val pixmap = Pixmap(FortyFive.resourceManager.findCardFileOrError(message.namespace, message.name).handle())
+        val pixmap = Pixmap(
+            FortyFive.resourceManager.findCardFileOrError(
+                message.type.namespace,
+                message.type.name,
+                message.postfix
+            ).handle()
+        )
         message.promise.resolve(pixmap)
     }
 
@@ -141,8 +148,8 @@ sealed class ServiceThreadMessage {
     ) : ServiceThreadMessage()
 
     class LoadCardPixmap(
-        val namespace: String?,
-        val name: String,
+        val type: CardType,
+        val postfix: String?,
         val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()
 

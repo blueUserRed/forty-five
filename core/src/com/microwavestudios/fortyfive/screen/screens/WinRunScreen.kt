@@ -1,13 +1,8 @@
 package com.microwavestudios.fortyfive.screen.screens
 
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -15,9 +10,8 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.animation.yPositionAbstractProperty
-import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
-import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.widgets.TextEffectEmitter
 import com.microwavestudios.fortyfive.game.widgets.textEffectEmitter
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -63,7 +57,7 @@ class WinRunScreen : ScreenCreator() {
 
     private val profile = FortyFive.profileManager.currentProfile!!
 
-    private val cardsToExtract: List<String> = FortyFive.profileManager.currentProfile!!.extractableCards()
+    private val cardsToExtract: List<CardType> = FortyFive.profileManager.currentProfile!!.extractableCards()
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -111,7 +105,7 @@ class WinRunScreen : ScreenCreator() {
     private fun CustomGroup.extractionPopup() {
 
         val allCardProtos = RandomCardSelection.allCardPrototypes
-        val cardProtos = cardsToExtract.map { name -> allCardProtos.find { it.name == name }!! }
+        val cardProtos = cardsToExtract.map { type -> allCardProtos.find { it.name == type.name }!! }
         val cards = cardProtos.map { it.create(screen) }
         cards.forEach { screen.lifetime.tieDisposable(it) }
 

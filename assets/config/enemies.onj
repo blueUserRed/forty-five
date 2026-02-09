@@ -1,7 +1,7 @@
 ///schema=onjschemas/enemies.onjschema
 import "imports/colors.onj" as color;
 
-use Cards; // include Card namespace for status effects
+use Cards;
 
 enemyGroups: [
     {
@@ -72,7 +72,7 @@ enemyGroups: [
 var action = {
     pyro: {
         hotPotato: $GivePlayerCard {
-            card: "scorchingBullet",
+            card: "scorchingBullet"#card,
             icon: "enemy_action_hot_potato",
             hasSpecialAnimation: true,
             commonPanel1: "enemy_pyro_action_comic_common_panel_1",

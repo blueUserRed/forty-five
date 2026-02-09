@@ -80,7 +80,7 @@ sealed class EncounterModifier {
         override fun executeAfterBulletWasPlacedInRevolver(
             card: Card,
             controller: GameController
-        ): Timeline = controller.tryToPutCardsInHandTimeline(card.name)
+        ): Timeline = controller.tryToPutCardsInHandTimeline(card.type)
     }
 
     data object Moist : EncounterModifier() {

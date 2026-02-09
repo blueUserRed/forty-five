@@ -69,8 +69,8 @@ class CardTextureManager {
             return pixmap.asPromise()
         }
         val message = ServiceThreadMessage.LoadCardPixmap(
-            card.namespace,
-            variablePostfix?.let { "${card.name}-$it" } ?: card.name
+            card.type,
+            variablePostfix
         )
         FortyFive.serviceThread.sendMessage(message)
         if (variablePostfix == null) message.promise.then { data.cardPixmap = it }
@@ -151,7 +151,7 @@ class CardTextureManager {
     }
 
     private fun preventUnloadingOfCard(data: CardTextureData): Boolean =
-        FortyFive.profileManager.currentProfile?.currentRunDeck?.cards?.let { data.cardName in it } ?: false
+        FortyFive.profileManager.currentProfile?.currentRunDeck?.cards?.find { it.name == data.cardName } != null
 
     private fun cardTextureDataFor(card: Card): CardTextureData = cardTextures
         .find { it.cardName == card.name }

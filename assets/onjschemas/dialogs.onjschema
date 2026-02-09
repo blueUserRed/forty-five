@@ -1,5 +1,6 @@
 import "imports/advanced_text_effect.onjschema" as _;
 import "imports/map_predicates.onjschema" as _;
+import "onjschemas/card_type.onjschema" as cardType;
 
 use Common;
 
@@ -21,7 +22,7 @@ $NextDialogPartSelector {
     $EndOfDialog { }
 
     $GiftCardEnd {
-        card: string
+        card: cardType
     }
 
     $ByPredicate {

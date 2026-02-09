@@ -280,7 +280,7 @@ cards: [
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
-                effect: putCardInHand("bullet", 2#val)
+                effect: putCardInHand("bullet"#card, 2#val)
             }
         ],
         cost: 2,
@@ -714,7 +714,7 @@ cards: [
             },
             {
                 trigger: cardDestroyed(onlySelfTriggers),
-                effect: putCardInHand("sacrificialBullet", 1#val)
+                effect: putCardInHand("sacrificialBullet"#card, 1#val)
             }
         ],
         cost: 1,
@@ -1336,7 +1336,7 @@ cards: [
         effects: [
             {
                 trigger: shot(),
-                effect: shuffleCardsIntoStack("kamikazeBullet", 3#val)
+                effect: shuffleCardsIntoStack("kamikazeBullet"#card, 3#val)
             },
             {
                 trigger: shot(),
@@ -1783,7 +1783,7 @@ cards: [
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
-                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
+                effect: putCardsOnTopOfStack("hydraHeadBullet"#card, 2#val)
             },
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
@@ -1808,7 +1808,7 @@ cards: [
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
-                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
+                effect: putCardsOnTopOfStack("hydraHeadBullet"#card, 2#val)
             },
             {
                 trigger: enterZone(zone.stack, onlySelfTriggers),
@@ -1833,7 +1833,7 @@ cards: [
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
-                effect: createBulletsInAfterlife("miniBullet", 7#val)
+                effect: createBulletsInAfterlife("miniBullet"#card, 7#val)
             },
             {
                 trigger: afterShot(allCardsTrigger),
