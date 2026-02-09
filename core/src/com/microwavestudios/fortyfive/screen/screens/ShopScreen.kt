@@ -195,7 +195,7 @@ class ShopScreen : ScreenCreator() {
             profile.currentMapSaver.currentMap.majorDifficulty,
             random,
             unique = true
-        ).map { CardType(it.namespace, it.simpleName) }
+        ).map { CardType(it.namespace, it.simpleName, null) }
         return cards
     }
 
@@ -204,8 +204,8 @@ class ShopScreen : ScreenCreator() {
         val newLifetime = EndableLifetime()
         val guardedLifetime = newLifetime.shorter(screen.lifetime)
         val createdCards = cards.map { type ->
-            val proto = protos.find { it == type } ?: throw RuntimeException("unknown card: $type")
-            val card = proto.create(screen)
+            val proto = protos.find { it.name == type.name } ?: throw RuntimeException("unknown card: $type")
+            val card = proto.create(screen, type)
             guardedLifetime.tieDisposable(card)
             card
         }

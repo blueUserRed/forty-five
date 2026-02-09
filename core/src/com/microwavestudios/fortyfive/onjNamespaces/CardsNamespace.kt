@@ -689,11 +689,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     )
 
     @RegisterOnjFunction(schema = "params: []")
-    fun startedInDeck(): OnjCardPredicate = OnjCardPredicate(
-        CardPredicate.startedInDeck()
-    )
-
-    @RegisterOnjFunction(schema = "params: []")
     fun trueCardModifier(): OnjCardPredicate = OnjCardPredicate { _, _, _ -> true }
 
     @RegisterOnjFunction(schema = "params: []")

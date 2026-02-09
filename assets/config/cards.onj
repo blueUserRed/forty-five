@@ -1967,7 +1967,7 @@ cards: [
 
 ],
 
-defaultBullet: "bullet",
+defaultBullet: { name: "bullet" },
 
 alwaysLoadCards: [
 ]

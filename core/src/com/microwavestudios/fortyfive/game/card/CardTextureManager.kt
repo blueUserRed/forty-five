@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.Texture.TextureFilter
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -51,11 +52,11 @@ class CardTextureManager {
             .forEach { cardTextures.add(it) }
     }
 
-    fun cardTextureFor(card: Card, cost: Int, damage: Int, variablePostfix: String? = null): Promise<Texture> {
+    fun cardTextureFor(card: Card, cost: Int, damage: Int, stamp: ResourceHandle?, variablePostfix: String? = null): Promise<Texture> {
         statistics.lastLoadedCard = card.name
         val data = cardTextureDataFor(card)
-        val variant = data.findVariant(cost, damage, variablePostfix) ?: run {
-            return createVariant(data, card, cost, damage, variablePostfix)
+        val variant = data.findVariant(cost, damage, stamp, variablePostfix) ?: run {
+            return createVariant(data, card, cost, damage, stamp, variablePostfix)
         }
         variant.borrowers.add(card)
         statistics.cachedGets++
@@ -83,6 +84,7 @@ class CardTextureManager {
         card: Card,
         cost: Int,
         damage: Int,
+        stamp: ResourceHandle?,
         variablePostfix: String?
     ): Promise<Texture> {
         val pixmapPromise = getCardPixmap(data, card, variablePostfix).chainMainThread { cardPixmap ->
@@ -116,7 +118,12 @@ class CardTextureManager {
                 texture
             }
         }
-        val variant = CardTextureVariant(cost, damage, pixmapPromise, texturePromise, mutableListOf(card), variablePostfix)
+        val variant = CardTextureVariant(
+            cost, damage,
+            pixmapPromise, texturePromise,
+            mutableListOf(card),
+            stamp, variablePostfix
+        )
         data.variants.add(variant)
         return texturePromise
     }
@@ -165,8 +172,12 @@ class CardTextureManager {
         var cardPixmap: Pixmap? = null,
     ) {
 
-        fun findVariant(cost: Int, damage: Int, variablePostFix: String?): CardTextureVariant? =
-            variants.find { !it.isDisposing && it.cost == cost && it.damage == damage && it.variablePostFix == variablePostFix }
+        fun findVariant(cost: Int, damage: Int, stamp: ResourceHandle?, variablePostFix: String?): CardTextureVariant? =
+            variants.find {
+                !it.isDisposing && it.cost == cost &&
+                        it.damage == damage && it.variablePostFix == variablePostFix &&
+                        it.stamp == stamp
+            }
 
         fun isStandardVariant(variant: CardTextureVariant): Boolean =
             variant.variablePostFix == null && variant.cost == baseCost && variant.damage == baseDamage
@@ -179,6 +190,7 @@ class CardTextureManager {
         val texture: Promise<Texture>,
         val borrowers: MutableList<Card>,
         val variablePostFix: String?,
+        val stamp: ResourceHandle?,
         var isDisposing: Boolean = false,
     )
 

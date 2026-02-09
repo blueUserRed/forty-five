@@ -277,7 +277,12 @@ sealed class EncounterModifier {
             card: Card,
             controller: GameController
         ): Timeline = Timeline.timeline {
-            include(controller.rotateRevolverTimeline(card.rotationDirection, ignoreEncounterModifiers = true))
+            includeLater({
+                controller.rotateRevolverTimeline(
+                    card.getRotationDirection(controller),
+                    ignoreEncounterModifiers = true
+                )
+            })
         }
 
         override fun disableEverlasting(): Boolean = true

@@ -47,12 +47,14 @@ import kotlin.math.absoluteValue
 data class CardType(
     val namespace: String?,
     val simpleName: String,
+    val stamp: String?
 ) {
     val name = namespace?.let { "$it:$simpleName" } ?: simpleName
 
     fun asOnj(): OnjObject = buildOnjObject {
         namespace?.let { "namespace" with it }
-        "simpleName" with simpleName
+        stamp?.let { "stamp" with it }
+        "name" with simpleName
     }
 
     override fun toString(): String = name
@@ -62,15 +64,17 @@ data class CardType(
         fun fromOnj(onj: OnjObject): CardType = CardType(
             onj.getOr<String?>("namespace", null),
             onj.get<String>("name"),
+            onj.getOr<String?>("stamp", null),
         )
 
         fun fromString(s: String): CardType {
             val parts = s.splitToSequence(':').toList()
-            if (parts.size == 1) return CardType(null, s)
+            if (parts.size == 1) return CardType(null, s, null)
             require(parts.size == 2) { "Invalid card type string: '$s'" }
             return CardType(
                 parts.first(),
-                parts[1]
+                parts[1],
+                null
             )
         }
     }
@@ -91,7 +95,7 @@ class CardPrototype(
 
     val name = namespace?.let { "$it:$simpleName" } ?: simpleName
 
-    var creator: ((screen: CustomScreen, startedInDeck: Boolean, areHoverDetailsEnabled: Boolean) -> Card)? = null
+    var creator: CardCreator? = null
 
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
@@ -100,9 +104,12 @@ class CardPrototype(
      */
     fun create(
         screen: CustomScreen,
-        startedInDeck: Boolean = false,
+        type: CardType,
         areHoverDetailsEnabled: Boolean = true
-    ): Card = creator!!(screen, startedInDeck, areHoverDetailsEnabled)
+    ): Card {
+        require(type.name == name) { "CardType - Prototype mismatch $type != $this" }
+        return creator!!(screen, type.stamp, areHoverDetailsEnabled)
+    }
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -125,6 +132,12 @@ class CardPrototype(
     override fun toString(): String = "CardProto($name)"
 }
 
+typealias CardCreator = (
+    screen: CustomScreen,
+    withStamp: String?,
+    areHoverDetailsEnabled: Boolean
+) -> Card
+
 /**
  * represents an actual instance of a card. Can be created using [CardPrototype]
  * @param name the name of the card
@@ -142,13 +155,13 @@ class Card(
     val shortDescription: String,
     val baseDamage: Int,
     val baseCost: Int,
+    val stamp: Stamp?,
     val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
-    val rotationDirection: RevolverRotation,
+    private val rotationDirection: RevolverRotation,
     val variableTexture: VariableTextureSelector?,
     val parryNumber: Int?,
-    val startedInDeck: Boolean,
     val tags: List<String>,
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
@@ -566,6 +579,9 @@ class Card(
         }
     } }
 
+    fun getRotationDirection(controller: GameController): RevolverRotation =
+        stamp?.modifyRotationDirection(rotationDirection, controller) ?: rotationDirection
+
     private fun checkModifierTransformers(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
@@ -699,17 +715,17 @@ class Card(
                 .value
                 .forEach { onj ->
                     onj as OnjObject
-                    val type = CardType(from, onj.get<String>("name"))
+                    val name = onj.get<String>("name")
                     val prototype = CardPrototype(
-                        type.namespace,
-                        type.simpleName,
+                        from, name,
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
                         onj.get<Long>("baseDamage").toInt(),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, startedInDeck, areHoverDetailsEnabled ->
-                        getCardFrom(onj, screen, type, initializer, prototype, startedInDeck, areHoverDetailsEnabled)
+                    prototype.creator = { screen, stamp, areHoverDetailsEnabled ->
+                        val type = CardType(from, name, stamp)
+                        getCardFrom(onj, screen, type, initializer, prototype, areHoverDetailsEnabled)
                     }
                     prototypes.add(prototype)
                 }
@@ -722,7 +738,6 @@ class Card(
             type: CardType,
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
-            startedInDeck: Boolean,
             enableHoverDetails: Boolean
         ): Card {
             val card = Card(
@@ -776,7 +791,8 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
-                startedInDeck = startedInDeck,
+                stamp = type.stamp?.let { StampFactory.createStamp(it) }
+
             )
             applyTraitEffects(card, onj)
             initializer(card)
@@ -1118,7 +1134,11 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
-        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue, card.currentVariablePostfix)
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
+            card, costValue,
+            damageValue, card.stamp?.icon,
+            card.currentVariablePostfix
+        )
     }
 
     // TODO: came up with system for animations

@@ -103,10 +103,12 @@ class WinRunScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.extractionPopup() {
-
         val allCardProtos = RandomCardSelection.allCardPrototypes
-        val cardProtos = cardsToExtract.map { type -> allCardProtos.find { it.name == type.name }!! }
-        val cards = cardProtos.map { it.create(screen) }
+        val cards = cardsToExtract.map { type ->
+            val proto = allCardProtos.find { it.name == type.name }
+            requireNotNull(proto) { "no card with name $type" }
+            proto.create(screen, type)
+        }
         cards.forEach { screen.lifetime.tieDisposable(it) }
 
         val popupWidth = worldWidth * 0.6f

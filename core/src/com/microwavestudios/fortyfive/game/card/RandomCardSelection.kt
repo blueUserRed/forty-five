@@ -15,6 +15,8 @@ object RandomCardSelection {
         ConfigFileManager.loadCards(initializer =  {})
     }
 
+    // TODO: should this function generate CardTypes instead of CardPrototypes? what if something wants to select
+    // cards with stamps?
     fun getRandomCards(
         typeNames: List<String>,
         nbrOfCards: Int,

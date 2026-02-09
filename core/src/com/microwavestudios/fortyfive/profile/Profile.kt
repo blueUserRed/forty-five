@@ -24,8 +24,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     private var data: ProfileData = ProfileData(
         mutableListOf(
-            CardType(null, "bullet"),
-            CardType(null, "bigBullet")
+            CardType(null, "bullet", null),
+            CardType(null, "bigBullet", null)
         ),
         mutableListOf(
             Deck("1", 100, mutableMapOf()),

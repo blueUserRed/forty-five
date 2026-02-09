@@ -318,7 +318,7 @@ class ChooseCardScreen : ScreenCreator() {
 
     private fun initCards() {
         val cards = getCardProtos().map {
-            val card = it.create(screen)
+            val card = it.create(screen, CardType(it.namespace, it.simpleName, null))
             screen.lifetime.tieDisposable(card)
             card
         }

@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.run
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.EncounterModifier
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
@@ -18,7 +19,7 @@ import kotlin.random.Random
 data class Encounter(
     val enemies: List<String>,
     val encounterModifierNames: Set<String>,
-    val forceCards: List<String>?,
+    val forceCards: List<CardType>?,
     val shuffleCards: Boolean,
     val unadjustedMajorDifficulty: Int,
     val majorDifficulty: Int,
@@ -58,7 +59,7 @@ data class Encounter(
         fun fromOnj(onj: OnjObject): Encounter = Encounter(
             onj.get<OnjArray>("enemies").value.map { it.value as String },
             onj.get<OnjArray>("encounterModifier").value.map { it.value as String }.toSet(),
-            onj.getOr<OnjArray?>("forceCards", null)?.value?.map { it.value as String },
+            onj.getOr<OnjArray?>("forceCards", null)?.value?.map { CardType.fromOnj(it as OnjObject) },
             onj.getOr("shuffleCards", true),
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Long>("majorDifficulty").toInt(),

@@ -535,14 +535,14 @@ object BackpackCreator {
         state.events.watchFor<SlotChangedEvent> { event ->
             if (event.backpack != isBackpack || (event.slot != num && event.slot != -1)) return@watchFor
 
-            val cardName: String?
+            val cardName: CardType?
             val amount: Int
             if (event.backpack) {
                 val result = state.cardsInCollection.getOrNull(num)
-                cardName = result?.first?.name
+                cardName = result?.first
                 amount = result?.second ?: 1
             } else {
-                cardName = state.currentDeck.cardPositions[num]?.name
+                cardName = state.currentDeck.cardPositions[num]
                 amount = 1
             }
 
@@ -573,7 +573,7 @@ object BackpackCreator {
     }
 
     private fun CustomBox.cardActorOrEmptySlot(
-        cardName: String?,
+        cardType: CardType?,
         cardSize: Float,
         isBackpack: Boolean,
         num: Int,
@@ -582,8 +582,8 @@ object BackpackCreator {
         creator: ScreenCreator
     ): Pair<Card?, InputActor> = with(creator) {
         var card: Card? = null
-        val actor: InputActor = if (cardName != null)  {
-            card = state.getCardInstance(cardName, screen, state)
+        val actor: InputActor = if (cardType != null)  {
+            card = state.getCardInstance(cardType, screen, state)
             val actor = actor(card.actor) {
                 height = cardSize
                 width = cardSize
@@ -720,15 +720,15 @@ object BackpackCreator {
         val functionsAsCollection: Boolean,
     ) {
 
-        fun getCardInstance(name: String, screen: CustomScreen, state: BackpackState): Card {
-            val created = createdCards.find { it.name == name }
+        fun getCardInstance(type: CardType, screen: CustomScreen, state: BackpackState): Card {
+            val created = createdCards.find { it.name == type.name }
             if (created != null) {
                 createdCards.remove(created)
                 return created
             }
-            val proto = cardPrototypes[name]
-                ?: throw RuntimeException("unknown card $name in Backpack")
-            val card = proto.create(screen)
+            val proto = cardPrototypes[type.name]
+                ?: throw RuntimeException("unknown card $type in Backpack")
+            val card = proto.create(screen, type)
             screen.lifetime.tieDisposable(card)
 
             card.actor.onDrop { actor ->
