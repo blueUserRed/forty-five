@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
 import onj.builder.buildOnjObject
@@ -25,7 +26,7 @@ class RunSave private constructor(val profile: Profile) {
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
     var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
-    var cardsTakenAlong: List<String> by DataDelegate(RunSaveData::cardsTakenAlong)
+    var cardsTakenAlong: List<CardType> by DataDelegate(RunSaveData::cardsTakenAlong)
 
     var playerHealth: Int by DataDelegate(
         RunSaveData::playerHealth,
@@ -47,8 +48,8 @@ class RunSave private constructor(val profile: Profile) {
     val runMapFile: File = File(profile.profilePath.path + "/runMap.onj")
     val runDataFile: File = File(profile.profilePath.path + "/run_data.onj")
 
-    private var _backpack: MutableList<String> by DataDelegate(RunSaveData::backpack)
-    val backpack: List<String>
+    private var _backpack: MutableList<CardType> by DataDelegate(RunSaveData::backpack)
+    val backpack: List<CardType>
         get() = _backpack
 
     private lateinit var map: DetailMap
@@ -61,7 +62,7 @@ class RunSave private constructor(val profile: Profile) {
         map = DetailMap.readFromFile(runMapFile)
     }
 
-    fun addCardToBackpack(card: String) {
+    fun addCardToBackpack(card: CardType) {
         _backpack.add(card)
         backpackDecks.forEach { it.checkDeck(_backpack) }
         dirty()
@@ -109,7 +110,7 @@ class RunSave private constructor(val profile: Profile) {
         val run: Run
             get() = data.run
 
-        val backpack: List<String>
+        val backpack: List<CardType>
             get() = data.backpack
 
         fun read() {
@@ -136,10 +137,10 @@ class RunSave private constructor(val profile: Profile) {
         var currentNode: Int,
         var lastNode: Int?,
         var playerHealth: Int,
-        var backpack: MutableList<String>,
+        var backpack: MutableList<CardType>,
         var backpackDecks: MutableList<Deck>,
         var currentDeckId: Int,
-        var cardsTakenAlong: List<String>,
+        var cardsTakenAlong: List<CardType>,
         var run: Run
     ) {
 
@@ -147,10 +148,10 @@ class RunSave private constructor(val profile: Profile) {
             "currentNode" with currentNode
             "lastNode" with lastNode
             "playerHealth" with playerHealth
-            "backpack" with backpack
+            "backpack" with backpack.map { it.asOnj() }
             "backpackDecks" with backpackDecks.map { it.asOnjObject() }
             "currentDeckId" with currentDeckId
-            "cardsTakenAlong" with cardsTakenAlong
+            "cardsTakenAlong" with cardsTakenAlong.map { it.asOnj() }
             "run" with run.asOnj()
         }
 
@@ -160,10 +161,22 @@ class RunSave private constructor(val profile: Profile) {
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),
                 onj.get<Long>("playerHealth").toInt(),
-                onj.get<OnjArray>("backpack").value.map { it.value as String }.toMutableList(),
-                onj.get<OnjArray>("backpackDecks").value.map { Deck.getFromOnj(it as OnjObject) }.toMutableList(),
+                onj
+                    .get<OnjArray>("backpack")
+                    .value
+                    .map { CardType.fromOnj(it as OnjObject) }
+                    .toMutableList(),
+                onj
+                    .get<OnjArray>("backpackDecks")
+                    .value
+                    .map { Deck.getFromOnj(it as OnjObject) }
+                    .toMutableList(),
                 onj.get<Long>("currentDeckId").toInt(),
-                onj.get<OnjArray>("cardsTakenAlong").value.map { it.value as String },
+                onj
+                    .get<OnjArray>("cardsTakenAlong")
+                    .value
+                    .map { CardType.fromOnj(it as OnjObject) }
+                    .toMutableList(),
                 Run.fromOnj(onj.get<OnjObject>("run"))
             )
         }
@@ -205,7 +218,7 @@ class RunSave private constructor(val profile: Profile) {
 
         fun loadPreview(profilePreview: Profile.Preview): Preview? = Preview.loadPreview(profilePreview)
 
-        fun newRun(profile: Profile, run: Run, cardsToTakeAlong: List<String>): RunSave {
+        fun newRun(profile: Profile, run: Run, cardsToTakeAlong: List<CardType>): RunSave {
             val mapGenerator = run.mapGenerator
             val map = mapGenerator.generate("run_map", TimeUtils.millis())
             val save = RunSave(profile)
@@ -233,7 +246,6 @@ class RunSave private constructor(val profile: Profile) {
             save.map = map
             return save
         }
-
     }
 
 }

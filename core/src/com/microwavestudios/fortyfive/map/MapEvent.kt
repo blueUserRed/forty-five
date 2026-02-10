@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.map
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
@@ -34,7 +35,9 @@ object MapEventFactory {
                 onjObject.get<String>("person"),
                 onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
                 onjObject.get<OnjArray>("amountCards").toIntRange(),
-                onjObject.get<OnjArray?>("currentCards")?.value?.map { it.value as String },
+                onjObject.get<OnjArray?>("currentCards")
+                    ?.value
+                    ?.map { CardType.fromOnj(it as OnjObject) },
                 onjObject.get<Long>("amountOfRerolls").toInt(),
                 onjObject.get<Long>("rerollPriceIncrease").toInt(),
                 onjObject.get<Long>("rerollBasePrice").toInt(),
@@ -424,7 +427,7 @@ class ShopMapEvent(
     val person: String,
     val boughtIndices: MutableSet<Int>,
     val amountCards: IntRange,
-    var currentCards: List<String>?,
+    var currentCards: List<CardType>?,
     var amountOfRerolls: Int,
     val rerollPriceIncrease: Int,
     val rerollBasePrice: Int,
@@ -456,7 +459,7 @@ class ShopMapEvent(
         "person" with person
         "amountCards" with arrayOf(amountCards.first, amountCards.last)
         "boughtIndices" with boughtIndices
-        "currentCards" with currentCards
+        "currentCards" with currentCards?.map { it.asOnj() }
         "amountOfRerolls" with amountOfRerolls
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice

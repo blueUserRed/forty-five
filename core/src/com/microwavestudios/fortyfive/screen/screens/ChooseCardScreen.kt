@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.card.CardPrototype
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
@@ -240,7 +241,7 @@ class ChooseCardScreen : ScreenCreator() {
                 if (isDisabled) return@onDrop
                 if (actor !is CardActor) return@onDrop
                 actor.isVisible = false
-                getCard(actor.card.name, true)
+                getCard(actor.card.type, true)
             }
 
             observeInputState(
@@ -296,7 +297,7 @@ class ChooseCardScreen : ScreenCreator() {
                 if (isDisabled) return@onDrop
                 if (actor !is CardActor) return@onDrop
                 actor.isVisible = false
-                getCard(actor.card.name, false)
+                getCard(actor.card.type, false)
             }
 
             observeInputState(
@@ -307,7 +308,7 @@ class ChooseCardScreen : ScreenCreator() {
         }
     }
 
-    private fun getCard(card: String, addToDeck: Boolean) {
+    private fun getCard(card: CardType, addToDeck: Boolean) {
         FortyFive.logger.debug(name, "Chose card: $card")
         profile.getCardForRun(card)
         if (addToDeck) currentDeck.addToDeck(currentDeck.nextFreeSlot(), card)
@@ -317,7 +318,7 @@ class ChooseCardScreen : ScreenCreator() {
 
     private fun initCards() {
         val cards = getCardProtos().map {
-            val card = it.create(screen)
+            val card = it.create(screen, CardType(it.namespace, it.simpleName, null))
             screen.lifetime.tieDisposable(card)
             card
         }
@@ -330,7 +331,7 @@ class ChooseCardScreen : ScreenCreator() {
         return if (forcedCards != null) {
             val allProtos = RandomCardSelection.allCardPrototypes
             forcedCards.map { name ->
-                allProtos.find { it.name == name } ?: throw RuntimeException("unknown card: $name")
+                allProtos.find { it.name == name.name } ?: throw RuntimeException("unknown card: $name")
             }
         } else {
             val profile = FortyFive.profileManager.currentProfile!!
@@ -399,7 +400,7 @@ interface ChooseCardScreenContext {
     val currentRerollPrice: Int
         get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
-    val forceCards: List<String>?
+    val forceCards: List<CardType>?
         get() = null
 
     fun completed()

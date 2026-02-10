@@ -1,0 +1,3 @@
+namespace?: string?,
+name: string,
+stamp?: string?

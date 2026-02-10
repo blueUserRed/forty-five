@@ -1,11 +1,12 @@
 import "imports/run.onjschema" as run;
+import "onjschemas/card_type.onjschema" as cardType;
 import "imports/deck.onjschema" as deck;
 
 currentNode: int,
 lastNode: int?,
 playerHealth: int,
-backpack: string[],
+backpack: cardType[],
 backpackDecks: deck[],
 currentDeckId: int,
-cardsTakenAlong: string[],
+cardsTakenAlong: cardType[],
 run: run,

@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameAnimation
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.rendering.GameRenderPipeline
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
@@ -86,15 +87,15 @@ interface GameController {
     fun destroyCardTimeline(card: Card, sourceCard: Card? = null): Timeline
 
     /**
-     * puts [amount] of cards with name [cardName] in the hand of the player
+     * puts [amount] of cards with type [cardType] in the hand of the player
      */
-    fun tryToPutCardsInHandTimeline(cardName: String, amount: Int = 1, sourceCard: Card? = null): Timeline
+    fun tryToPutCardsInHandTimeline(cardType: CardType, amount: Int = 1, sourceCard: Card? = null): Timeline
 
     /**
-     * puts [amount] of cards with name [cardName] in the stack. If [onTop] is false, the cards will instead
+     * puts [amount] of cards with type [cardType] in the stack. If [onTop] is false, the cards will instead
      * be put on the bottom.
      */
-    fun putCardsInStackTimeline(cardName: String, amount: Int, sourceCard: Card? = null, onTop: Boolean): Timeline
+    fun putCardsInStackTimeline(cardType: CardType, amount: Int, sourceCard: Card? = null, onTop: Boolean): Timeline
 
     /**
      * puts [card] from the revolver back into the hand
@@ -166,9 +167,9 @@ interface GameController {
     fun putBulletFromRevolverUnderTheStackTimeline(card: Card): Timeline
 
     /**
-     * puts [amount] of cards with name [bulletName] directly into the afterlife
+     * puts [amount] of cards with name [cardType] directly into the afterlife
      */
-    fun createBulletsInAfterlifeTimeline(bulletName: String, amount: Int, sourceCard: Card? = null): Timeline
+    fun createBulletsInAfterlifeTimeline(cardType: CardType, amount: Int, sourceCard: Card? = null): Timeline
 
     /**
      * descends the front-most bullet in the afterlife, dealing damage and putting the card in [GameControllerImpl.Zone.LIMBO]
@@ -227,6 +228,8 @@ interface GameController {
 
     fun slotOfCard(card: Card): Int?
 
-    fun titleOfCard(cardName: String): String
+    fun titleOfCard(cardType: CardType): String
+
+    fun createCardFromType(cardType: CardType): Card
 
 }

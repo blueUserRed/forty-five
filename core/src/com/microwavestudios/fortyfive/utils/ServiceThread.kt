@@ -6,6 +6,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.resources.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -69,7 +70,13 @@ class ServiceThread : Thread("ServiceThread") {
     }
 
     private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
-        val pixmap = Pixmap(FortyFive.resourceManager.findCardFileOrError(message.namespace, message.name).handle())
+        val pixmap = Pixmap(
+            FortyFive.resourceManager.findCardFileOrError(
+                message.type.namespace,
+                message.type.name,
+                message.postfix
+            ).handle()
+        )
         message.promise.resolve(pixmap)
     }
 
@@ -83,7 +90,6 @@ class ServiceThread : Thread("ServiceThread") {
             val baseDamage = card.baseDamage
             val isDark = card.actor.isDark
             val fontScale = card.actor.fontScale
-            val savedSymbol = message.savedPixmap
             val padding = (CardTextureManager.texturePaddingFraction * cardTexturePixmap.width).toInt()
             pixmap.drawPixmap(
                 cardTexturePixmap,
@@ -101,11 +107,12 @@ class ServiceThread : Thread("ServiceThread") {
             val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
             message.font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
             message.font.write(pixmap, costValue.toString(), 490, 28, fontScale, reserveFontColor)
-            if (savedSymbol != null) {
+            val stampPixmap = message.stampPixmap
+            if (stampPixmap != null) {
                 pixmap.drawPixmap(
-                    savedSymbol,
+                    stampPixmap,
                     0, 0,
-                    savedSymbol.width, savedSymbol.height,
+                    stampPixmap.width, stampPixmap.height,
                     450, 440,
                     100, 100
                 )
@@ -135,14 +142,14 @@ sealed class ServiceThreadMessage {
         val card: Card,
         val damageValue: Int,
         val costValue: Int,
-        val savedPixmap: Pixmap?,
+        val stampPixmap: Pixmap?,
         val font: PixmapFont,
         val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()
 
     class LoadCardPixmap(
-        val namespace: String?,
-        val name: String,
+        val type: CardType,
+        val postfix: String?,
         val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()
 

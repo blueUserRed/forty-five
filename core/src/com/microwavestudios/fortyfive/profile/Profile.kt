@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
@@ -22,7 +23,10 @@ import kotlin.reflect.KProperty
 class Profile private constructor(val name: String, private var runSave: RunSave?) {
 
     private var data: ProfileData = ProfileData(
-        mutableListOf("bullet", "bigBullet"),
+        mutableListOf(
+            CardType(null, "bullet", null),
+            CardType(null, "bigBullet", null)
+        ),
         mutableListOf(
             Deck("1", 100, mutableMapOf()),
             Deck("2", 101, mutableMapOf()),
@@ -55,8 +59,8 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     val playerMoney: Int
         get() = _playerMoney
 
-    private var _cardCollection: MutableList<String> by DataDelegate(ProfileData::cardCollection)
-    val cardCollection: List<String>
+    private var _cardCollection: MutableList<CardType> by DataDelegate(ProfileData::cardCollection)
+    val cardCollection: List<CardType>
         get() = _cardCollection
 
     private var _collectionDecks: MutableList<Deck> by DataDelegate(ProfileData::collectionDecks)
@@ -91,7 +95,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             runSave.currentDeckId = value?.id ?: throw RuntimeException("can't set currentRunDeck to 'null'")
         }
 
-    val backpack: List<String>?
+    val backpack: List<CardType>?
         get() = runSave?.backpack
 
     val backpackDecks: List<Deck>?
@@ -138,13 +142,13 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     fun isSpecialRunCompleted(runName: String): Boolean = runName in data.completedSpecialRuns
 
-    fun addCardToBackpack(card: String) {
+    fun addCardToBackpack(card: CardType) {
         if (!isRunActive) throw RuntimeException("not in run")
         runSave!!.addCardToBackpack(card)
         checkDecks()
     }
 
-    fun addCardToCollection(card: String) {
+    fun addCardToCollection(card: CardType) {
         _cardCollection.add(card)
         checkDecks()
     }
@@ -292,7 +296,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         _playerMoney -= amount
     }
 
-    fun getCardForRun(card: String) {
+    fun getCardForRun(card: CardType) {
         val runSave = runSave ?: throw RuntimeException("not in a run")
         runSave.addCardToBackpack(card)
         checkDecks()
@@ -303,7 +307,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         runSave?.checkDecks()
     }
 
-    fun extractableCards(): List<String> {
+    fun extractableCards(): List<CardType> {
         val runSave = runSave
             ?: throw RuntimeException("Profile.extractableCards() can only be called when a run is active")
         val cardsToExtract = currentRunDeck!!.cards.toMutableList()
@@ -380,7 +384,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         var runPreview: RunSave.Preview? = null
             private set
 
-        val collection: List<String>?
+        val collection: List<CardType>?
             get() = data?.cardCollection
 
         val currentArea: String?
@@ -459,7 +463,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     }
 
     data class ProfileData(
-        var cardCollection: MutableList<String>,
+        var cardCollection: MutableList<CardType>,
         var collectionDecks: MutableList<Deck>,
         var completedSpecialRuns: MutableList<String>,
         var currentDeckId: Int,
@@ -472,7 +476,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     ) {
 
         fun asOnj(): OnjObject = buildOnjObject {
-            "cardCollection" with cardCollection
+            "cardCollection" with cardCollection.map { it.asOnj() }
             "collectionDecks" with collectionDecks.map { it.asOnjObject() }
             "completedSpecialRuns" with completedSpecialRuns
             "currentDeckId" with currentDeckId
@@ -487,7 +491,10 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         companion object {
 
             fun fromOnj(onj: OnjObject): ProfileData = ProfileData(
-                onj.get<OnjArray>("cardCollection").value.map { it.value as String }.toMutableList(),
+                onj.get<OnjArray>("cardCollection")
+                    .value
+                    .map { CardType.fromOnj(it as OnjObject) }.
+                    toMutableList(),
                 onj.get<OnjArray>("collectionDecks").value.map { Deck.getFromOnj(it as OnjObject) }.toMutableList(),
                 onj.get<OnjArray>("completedSpecialRuns").value.map { it.value as String }.toMutableList(),
                 onj.get<Long>("currentDeckId").toInt(),
@@ -533,7 +540,12 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
         const val logTag: String = "Profile"
 
-        val limitedTakeAlong: Array<String> = arrayOf("bigBullet", "silverBullet", "workerBullet", "incendiaryBullet")
+        val limitedTakeAlong: Array<CardType> = arrayOf(
+            CardType.fromString("bigBullet"),
+            CardType.fromString("silverBullet"),
+            CardType.fromString("workerBullet"),
+            CardType.fromString("incendiaryBullet")
+        )
 
         val dataFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/profile_data.onjschema").file())

@@ -1256,6 +1256,10 @@ textures: [
         name: "particle_rain",
         file: "blobs/particles/rain2.png",
     },
+    {
+        name: "card_stamp_test",
+        file: "blobs/cards/symbols/stamps/test_stamp.png",
+    },
 ],
 
 cursors: [
@@ -1677,7 +1681,6 @@ music: [
         file: "blobs/music/microwave.wav"
     },
 ],
-
 cards: {
     directory: "blobs/cards",
 }

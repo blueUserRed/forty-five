@@ -40,16 +40,55 @@ import com.microwavestudios.fortyfive.screen.actors.PositionType
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
+import onj.builder.buildOnjObject
 import onj.value.*
+import kotlin.collections.map
 import kotlin.math.absoluteValue
-import kotlin.math.log
 
 /**
- * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
- * actual instances of the card. Prototypes can be used to create those instances
- * @param name the name of the card produced by this prototype
- * @param type the type of card (bullet or cover)
- * @param creator lambda that creates the instance
+ * contains all information needed to construct a specific card. Stores the namespace, name, and
+ * possibly the stamp of the card. Can be serialized to/deserialized from onj. To construct an instance
+ * of a card, the corresponding [CardPrototype] is needed
+ */
+data class CardType(
+    val namespace: String?,
+    val simpleName: String,
+    val stamp: String?
+) {
+    val name = namespace?.let { "$it:$simpleName" } ?: simpleName
+
+    fun asOnj(): OnjObject = buildOnjObject {
+        namespace?.let { "namespace" with it }
+        stamp?.let { "stamp" with it }
+        "name" with simpleName
+    }
+
+    override fun toString(): String = stamp?.let { stamp -> "$name-$stamp" } ?: name
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): CardType = CardType(
+            onj.getOr<String?>("namespace", null),
+            onj.get<String>("name"),
+            onj.getOr<String?>("stamp", null),
+        )
+
+        fun fromString(s: String): CardType {
+            val parts = s.splitToSequence(':').toList()
+            if (parts.size == 1) return CardType(null, s, null)
+            require(parts.size == 2) { "Invalid card type string: '$s'" }
+            return CardType(
+                parts.first(),
+                parts[1],
+                null
+            )
+        }
+    }
+}
+
+/**
+ * represents a card as declared in the cards.onj file. Can be used together with [CardType] to construct
+ * an actual instance of [Card]
  */
 class CardPrototype(
     val namespace: String?,
@@ -62,19 +101,21 @@ class CardPrototype(
 
     val name = namespace?.let { "$it:$simpleName" } ?: simpleName
 
-    var creator: ((screen: CustomScreen, startedInDeck: Boolean, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
+    var creator: CardCreator? = null
 
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
     /**
-     * creates an actual instance of this card
+     * creates an actual instance of this card. [type] should match this prototype
      */
     fun create(
         screen: CustomScreen,
-        startedInDeck: Boolean = false,
-        isSaved: Boolean? = null,
+        type: CardType,
         areHoverDetailsEnabled: Boolean = true
-    ): Card = creator!!(screen, startedInDeck, isSaved, areHoverDetailsEnabled)
+    ): Card {
+        require(type.name == name) { "CardType - Prototype mismatch $type != $this" }
+        return creator!!(screen, type.stamp, areHoverDetailsEnabled)
+    }
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -92,55 +133,51 @@ class CardPrototype(
     }
 
     override fun equals(other: Any?): Boolean = other is CardPrototype && other.name == name
+    override fun hashCode(): Int = name.hashCode()
 
     override fun toString(): String = "CardProto($name)"
 }
 
+typealias CardCreator = (
+    screen: CustomScreen,
+    withStamp: String?,
+    areHoverDetailsEnabled: Boolean
+) -> Card
+
 /**
  * represents an actual instance of a card. Can be created using [CardPrototype]
- * @param name the name of the card
- * @param title the name but formatted, so it looks good when shown on the screen
- * @param flavourText Short phrase that (should) be funny or add to the lore
- * @param shortDescription short text explaining the effects of this card; can be left blank
- * @param type the type of card (bullet or cover)
- * @param baseDamage the damage value of the card before modifiers are applied (typically 0 when this is a cover)
- * @param coverValue the cover this card provides (typically 0 when this is a bullet)
- * @param baseCost the cost of this card in reserves
- * @param effects the effects of this card
  */
 class Card(
-    val namespace: String?,
-    val simpleName: String,
+    val type: CardType,
     val title: String,
     val flavourText: String,
     val shortDescription: String,
-    val baseDamage: Int,
-    val baseCost: Int,
+    val originalBaseDamage: Int,
+    val originalBaseCost: Int,
+    val stamp: Stamp?,
     val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
-    val rotationDirection: RevolverRotation,
+    private val rotationDirection: RevolverRotation,
     val variableTexture: VariableTextureSelector?,
     val parryNumber: Int?,
-    val startedInDeck: Boolean,
     val tags: List<String>,
-    val lockedDescription: String?,
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
     val additionalHoverInfos: List<String>,
     font: Promise<PixmapFont>,
     fontScale: Float,
     screen: CustomScreen,
-    val isSaved: Boolean?,
     val enableHoverDetails: Boolean
 ) : Disposable {
 
-    val name: String = namespace?.let { "$it:$simpleName" } ?: simpleName
+    val name: String
+        get() = type.name
 
     /**
      * used for logging
      */
-    val logTag = "$name-${++instanceCounter}"
+    val logTag = "$type-${++instanceCounter}"
 
     /**
      * the actor for representing the card on the screen
@@ -173,6 +210,9 @@ class Card(
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
+
+    val baseDamage: Int = stamp?.modifyBaseDamage(this, originalBaseDamage) ?: originalBaseDamage
+    val baseCost: Int = stamp?.modifyBaseCost(this, originalBaseCost) ?: originalBaseCost
 
     private var lastDamageValue: Int = baseDamage
     private var lastCostValue: Int = baseCost
@@ -312,10 +352,10 @@ class Card(
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
     private fun checkModifierValidity(controller: GameController) {
-        val somethingChanged =
-            checkValiditySingleModifierList(controller, costModifiers, getter = { it }) ||
-            checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) ||
-            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) ||
+        val somethingChanged = // use 'or' to prevent short-circuiting
+            checkValiditySingleModifierList(controller, costModifiers, getter = { it }) or
+            checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) or
+            checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) or
             checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
         if (somethingChanged) modifiersChanged()
     }
@@ -349,6 +389,16 @@ class Card(
         .sortedBy { it.first }
         .fold(baseDamage) { acc, (_, modifier) -> ((acc + modifier.damage) * modifier.damageMultiplier).toInt() }
         .coerceAtLeast(0)
+
+    fun curOnShotDamage(controller: GameController): Int {
+        val damage = curDamage(controller)
+        return stamp?.modifyOnShotDamage(this, controller, damage) ?: damage
+    }
+
+    fun curParryValue(controller: GameController): Int {
+        val parryValue = parryNumber ?: curDamage(controller)
+        return stamp?.modifyParryValue(this, controller, parryValue) ?: parryValue
+    }
 
     fun curCost(controller: GameController): Int = costModifiers
         .filter { (_, modifier) -> modifier.activeChecker(controller, this, modifier) }
@@ -541,6 +591,9 @@ class Card(
         }
     } }
 
+    fun getRotationDirection(controller: GameController): RevolverRotation =
+        stamp?.modifyRotationDirection(rotationDirection, controller) ?: rotationDirection
+
     private fun checkModifierTransformers(
         situation: GameSituation,
         triggerInformation: TriggerInformation,
@@ -674,16 +727,17 @@ class Card(
                 .value
                 .forEach { onj ->
                     onj as OnjObject
+                    val name = onj.get<String>("name")
                     val prototype = CardPrototype(
-                        from,
-                        onj.get<String>("name"),
+                        from, name,
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
                         onj.get<Long>("baseDamage").toInt(),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, startedInDeck, isSaved, areHoverDetailsEnabled ->
-                        getCardFrom(onj, screen, initializer, prototype, startedInDeck, isSaved, areHoverDetailsEnabled)
+                    prototype.creator = { screen, stamp, areHoverDetailsEnabled ->
+                        val type = CardType(from, name, stamp)
+                        getCardFrom(onj, screen, type, initializer, prototype, areHoverDetailsEnabled)
                     }
                     prototypes.add(prototype)
                 }
@@ -693,42 +747,22 @@ class Card(
         private fun getCardFrom(
             onj: OnjObject,
             customScreen: CustomScreen,
+            type: CardType,
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
-            startedInDeck: Boolean,
-            isSaved: Boolean?,
             enableHoverDetails: Boolean
         ): Card {
-            val name = onj.get<String>("name")
+            val stamp = type.stamp?.let { StampFactory.createStamp(it) }
             val card = Card(
-                namespace = prototype.namespace,
-                simpleName = name,
+                type = type,
                 title = onj.get<String>("title"),
                 flavourText = onj.get<String>("flavourText"),
                 shortDescription = onj.get<String>("description"),
-                baseDamage = onj.get<Long>("baseDamage").toInt(),
-                baseCost = onj.get<Long>("cost").toInt(),
+                originalBaseDamage = onj.get<Long>("baseDamage").toInt(),
+                originalBaseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
-                effects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
-                    .map {
-                        it as OnjObject
-                        val effect = it.get<Effect>("effect")
-                        val data = EffectData(
-                            trigger = it.get<Trigger>("trigger"),
-                            isHidden = it.getOr("isHidden", false),
-                            cacheAffectedCards = it.getOr("cacheAffectedCards", false),
-                            canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
-                            maxExecutions = it.getOr("maxExecutions", -1L).toInt(),
-                            onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
-                                arr
-                                    .value
-                                    .map { (it as OnjZone).value }
-                            },
-                            condition = it.getOr<OnjNamedObject?>("condition", null)?.let { GamePredicate.fromOnj(it) }
-                        )
-                        effect.copy(data)
-                    },
+                effects = getEffects(onj, stamp),
                 rotationDirection = onj.getOr<OnjNamedObject?>("rotation", null)
                     ?.let { RevolverRotation.fromOnj(it) }
                     ?: RevolverRotation.Right(1),
@@ -739,7 +773,6 @@ class Card(
                     ?.map { (it.value as Long).toInt() }
                     ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
-                //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(customScreen, customScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.getOr<Boolean>("dark", false),
@@ -749,42 +782,71 @@ class Card(
                     ?.map { it.value as String }
                     ?: listOf(),
                 screen = customScreen,
-                isSaved = isSaved,
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
-                startedInDeck = startedInDeck,
-                lockedDescription = onj.get<String?>("lockedDescription")
+                stamp = stamp
+
             )
-            applyTraitEffects(card, onj)
+            applyTraitEffects(card, onj, stamp)
             initializer(card)
             return card
         }
 
-        private fun applyTraitEffects(card: Card, onj: OnjObject) {
-            val effects = onj
+        private fun getEffects(onj: OnjObject, stamp: Stamp?): List<Effect> {
+            val baseEffects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
+                .map {
+                    it as OnjObject
+                    val effect = it.get<Effect>("effect")
+                    val data = EffectData(
+                        trigger = it.get<Trigger>("trigger"),
+                        isHidden = it.getOr("isHidden", false),
+                        cacheAffectedCards = it.getOr("cacheAffectedCards", false),
+                        canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
+                        maxExecutions = it.getOr("maxExecutions", -1L).toInt(),
+                        onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
+                            arr
+                                .value
+                                .map { (it as OnjZone).value }
+                        },
+                        condition = it.getOr<OnjNamedObject?>("condition", null)?.let { GamePredicate.fromOnj(it) }
+                    )
+                    effect.copy(data)
+                }
+            val stampEffects = stamp?.additionalEffects()
+            return if (stampEffects == null) {
+                baseEffects
+            } else {
+                baseEffects + stampEffects
+            }
+        }
+
+        private fun applyTraitEffects(card: Card, onj: OnjObject, stamp: Stamp?) {
+            onj
                 .getOr<OnjArray?>("traitEffects", null)
                 ?.value
                 ?.map { it.value as String }
-                ?: listOf()
+                ?.forEach { applyTraitEffect(it, card) }
+            stamp
+                ?.additionalTraitEffects()
+                ?.forEach { applyTraitEffect(it, card) }
+        }
 
-            for (effect in effects) when (effect) {
+        private fun applyTraitEffect(effect: String, card: Card): Unit = when (effect) {
+            "everlasting" -> card.isEverlasting = true
+            "undead" -> card.isUndead = true
+            "replaceable" -> card.isReplaceable = true
+            "spray" -> card.isSpray = true
+            "reinforced" -> card.isReinforced = true
+            "shotProtected" -> card.isShotProtected = true
+            "rotten" -> card.isRotten = true
+            "thorns" -> card.isThorns = true
+            "punk" -> card.isPunk = true
+            "persistence" -> card.isPersistent = true
+            "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
+            "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
-                "everlasting" -> card.isEverlasting = true
-                "undead" -> card.isUndead = true
-                "replaceable" -> card.isReplaceable = true
-                "spray" -> card.isSpray = true
-                "reinforced" -> card.isReinforced = true
-                "shotProtected" -> card.isShotProtected = true
-                "rotten" -> card.isRotten = true
-                "thorns" -> card.isThorns = true
-                "punk" -> card.isPunk = true
-                "persistence" -> card.isPersistent = true
-                "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
-                "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
-
-                else -> throw RuntimeException("unknown trait effect $effect")
-            }
+            else -> throw RuntimeException("unknown trait effect $effect")
         }
     }
 
@@ -940,6 +1002,7 @@ class CardActor(
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
             card,
+            screen,
             card.baseCost,
             card.baseDamage,
             card.variableTexture?.base
@@ -1096,7 +1159,11 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
-        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue, card.currentVariablePostfix)
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
+            card, screen, costValue,
+            damageValue,
+            card.currentVariablePostfix
+        )
     }
 
     // TODO: came up with system for animations
@@ -1244,10 +1311,18 @@ class CardActor(
         val allKeys = card.getKeyWordsForDescriptions()
         val texts: MutableList<String> = mutableListOf()
 
+        card.stamp?.let { stamp ->
+            texts.add("\$stamp$§§${stamp.icon}§§  ${stamp.title}\$stamp$\n\n\n${stamp.description}")
+            DetailDescriptionHandler
+                .getKeyWordsFromDescription(stamp.description)
+                .mapNotNull { DetailDescriptionHandler.descriptions[it] }
+                .forEach { texts.add(it.second) }
+        }
+
         texts.addAll(DetailDescriptionHandler
             .descriptions
             .filter { it.key in allKeys }.map { it.value.second })
-            texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+        texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
         texts
     }
 

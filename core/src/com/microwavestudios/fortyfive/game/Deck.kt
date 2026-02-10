@@ -1,18 +1,19 @@
 package com.microwavestudios.fortyfive.game
 
+import com.microwavestudios.fortyfive.game.card.CardType
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjObject
 
-class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap<Int, String>) {
+class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap<Int, CardType>) {
 
     var deckDirty: Boolean = true
         private set
 
-    val cardPositions: Map<Int, String>
+    val cardPositions: Map<Int, CardType>
         get() = _cardPositions
 
-    val cards: List<String>
+    val cards: List<CardType>
         get() = _cardPositions.map { it.value }
 
 
@@ -24,9 +25,9 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
         deckDirty = true
     }
 
-    fun checkDeck(availableCards: List<String>) {
+    fun checkDeck(availableCards: List<CardType>) {
         if (cardPositions.size < minDeckSize && cardPositions.size < availableCards.size) {
-            val onlyBackpackCards = mutableListOf<String>()
+            val onlyBackpackCards = mutableListOf<CardType>()
             val curDeck = cards.toMutableList()
             for (i in availableCards) {
                 if (i in curDeck) {
@@ -74,9 +75,9 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
         dirty()
     }
 
-    fun addToDeck(index: Int, name: String) {
+    fun addToDeck(index: Int, type: CardType) {
         if (index >= 0) {
-            _cardPositions[index] = name
+            _cardPositions[index] = type
             dirty()
         }
     }
@@ -91,14 +92,14 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
         _cardPositions.forEach {
             deck.add(buildOnjObject {
                 "positionId" with it.key
-                "cardName" with it.value
+                "card" with it.value.asOnj()
             })
         }
         deck.sortBy { it.get<Long>("positionId") }
         return buildOnjObject {
             "index" with id
             "name" with name
-            "cards" with OnjArray(deck)
+            "cards" with deck
         }
     }
 
@@ -120,10 +121,10 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
         fun getFromOnj(onj: OnjObject): Deck {
             val id = onj.get<Long>("index").toInt()
             val name = onj.get<String?>("name") ?: "Deck $id"
-            val cardPositions: MutableMap<Int, String> = mutableMapOf()
+            val cardPositions: MutableMap<Int, CardType> = mutableMapOf()
             onj.get<OnjArray>("cards").value.forEach {
                 it as OnjObject
-                cardPositions[it.get<Long>("positionId").toInt()] = it.get<String>("cardName")
+                cardPositions[it.get<Long>("positionId").toInt()] = CardType.fromOnj(it.get<OnjObject>("card"))
             }
             return Deck(name, id, cardPositions)
         }

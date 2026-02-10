@@ -280,7 +280,7 @@ cards: [
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
-                effect: putCardInHand("bullet", 2#val)
+                effect: putCardInHand("bullet"#card, 2#val)
             }
         ],
         cost: 2,
@@ -568,19 +568,23 @@ cards: [
         name: "hollowpointBullet",
         title: "Hollowpoint Bullet",
         flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
-        description: "If the enemy has shield:\nThis Bullet has +6 dmg",
+        description: "If the enemy has shield:\nThis Bullet has +50 percent dmg",
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                trigger: leaveZone(zone.limbo, onlySelfTriggers),
+                maxExecutions: 1,
                 isHidden: true,
-                effect: buffDmgMultiplier(
+                effect: buffDmgTransformable(
                     bSelectSelf(),
+                    0#val,
                     1.5,
+                    triggerNever(),
                     $TargetedEnemyShieldIsAtLeast { value: 1 }#modifierPredicate,
-                    sourceCardInZoneModifierPredicate(zone.revolver)
+                    alwaysTrueModifierPredicate(),
+                    true
                 )
-            }
+            },
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],
@@ -594,15 +598,19 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                trigger: leaveZone(zone.limbo, onlySelfTriggers),
+                maxExecutions: 1,
                 isHidden: true,
-                effect: buffDmgMultiplier(
+                effect: buffDmgTransformable(
                     bSelectSelf(),
+                    0#val,
                     1.5,
+                    triggerNever(),
                     $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
-                    sourceCardInZoneModifierPredicate(zone.revolver)
+                    alwaysTrueModifierPredicate(),
+                    true
                 )
-            }
+            },
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],
@@ -714,7 +722,7 @@ cards: [
             },
             {
                 trigger: cardDestroyed(onlySelfTriggers),
-                effect: putCardInHand("sacrificialBullet", 1#val)
+                effect: putCardInHand("sacrificialBullet"#card, 1#val)
             }
         ],
         cost: 1,
@@ -1336,7 +1344,7 @@ cards: [
         effects: [
             {
                 trigger: shot(),
-                effect: shuffleCardsIntoStack("kamikazeBullet", 3#val)
+                effect: shuffleCardsIntoStack("kamikazeBullet"#card, 3#val)
             },
             {
                 trigger: shot(),
@@ -1783,7 +1791,7 @@ cards: [
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
-                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
+                effect: putCardsOnTopOfStack("hydraHeadBullet"#card, 2#val)
             },
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
@@ -1803,12 +1811,12 @@ cards: [
         name: "hydraHeadBullet",
         title: "Hydra-Head Bullet",
         flavourText: "",
-        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this encounter that is not currently within your drawpile",
         baseDamage: 0,
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
-                effect: putCardsOnTopOfStack("hydraHeadBullet", 2#val)
+                effect: putCardsOnTopOfStack("hydraHeadBullet"#card, 2#val)
             },
             {
                 trigger: enterZone(zone.stack, onlySelfTriggers),
@@ -1833,7 +1841,7 @@ cards: [
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
-                effect: createBulletsInAfterlife("miniBullet", 7#val)
+                effect: createBulletsInAfterlife("miniBullet"#card, 7#val)
             },
             {
                 trigger: afterShot(allCardsTrigger),
@@ -1967,7 +1975,7 @@ cards: [
 
 ],
 
-defaultBullet: "bullet",
+defaultBullet: { name: "bullet" },
 
 alwaysLoadCards: [
 ]

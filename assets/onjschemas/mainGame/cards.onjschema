@@ -1,7 +1,8 @@
 import "onjschemas/base/card.onjschema" as card;
+import "onjschemas/card_type.onjschema" as cardType;
 
 cards: card[],
 
-defaultBullet: string,
+defaultBullet: cardType,
 
 alwaysLoadCards: string[],

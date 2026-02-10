@@ -134,14 +134,15 @@ class ResourceManager {
         toGiveBack.giveBack(borrower)
     }
 
-    fun findCardFileOrError(namespace: String?, cardName: String): File {
+    fun findCardFileOrError(namespace: String?, cardName: String, postfix: String?): File {
         val cardDir = cardDirectories[namespace] ?: throw RuntimeException("no card directory for namespace $namespace")
+        val fileName = postfix?.let { "$cardName-$it.png" } ?: "$cardName.png"
         val file = if (namespace == null) {
-            File(cardDir).resolve("$cardName.png")
+            File(cardDir).resolve(fileName)
         } else {
             val plugin = FortyFive.pluginManager.findActivePlugin(namespace)
                 ?: throw RuntimeException("no plugin with name $namespace")
-            plugin.directory.resolve(cardDir).resolve("$cardName.png")
+            plugin.directory.resolve(cardDir).resolve(fileName)
         }
         if (!file.exists()) {
             throw RuntimeException("couldn't find card texture at: $file")

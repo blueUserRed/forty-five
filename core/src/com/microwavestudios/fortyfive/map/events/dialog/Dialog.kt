@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.map.events.dialog
 
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.MapPredicate
 import com.microwavestudios.fortyfive.screen.commonComponents.AdvancedText
 import com.microwavestudios.fortyfive.screen.CustomScreen
@@ -90,7 +91,7 @@ data class Dialog(
                 )
 
                 "GiftCardEnd" -> NextDialogPartSelector.GiftCardEnd(
-                    nextSelector.get<String>("card"),
+                    CardType.fromOnj(nextSelector.get<OnjObject>("card"))
                 )
 
                 else -> throw RuntimeException("unknown next dialog part selector: ${nextSelector.name}")
@@ -132,7 +133,7 @@ sealed class NextDialogPartSelector {
 
     data object End : NextDialogPartSelector()
 
-    class GiftCardEnd(val card: String) : NextDialogPartSelector()
+    class GiftCardEnd(val card: CardType) : NextDialogPartSelector()
 
     class StartSpecialRunEnd(val run: String) : NextDialogPartSelector()
 

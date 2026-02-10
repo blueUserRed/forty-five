@@ -41,5 +41,3 @@ parryNumber?: int,
 additionalHoverInfos?: string[],
 forbiddenSlots?: int[],
 variableTexture?: VariableTextureSelector,
-unlockConditions?: string[], //TODO this locked system, maybe with namespaces and stuff idk, the cards don't have anything either about it
-lockedDescription?: string,

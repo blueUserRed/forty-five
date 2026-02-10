@@ -80,7 +80,7 @@ sealed class EncounterModifier {
         override fun executeAfterBulletWasPlacedInRevolver(
             card: Card,
             controller: GameController
-        ): Timeline = controller.tryToPutCardsInHandTimeline(card.name)
+        ): Timeline = controller.tryToPutCardsInHandTimeline(card.type)
     }
 
     data object Moist : EncounterModifier() {
@@ -277,7 +277,12 @@ sealed class EncounterModifier {
             card: Card,
             controller: GameController
         ): Timeline = Timeline.timeline {
-            include(controller.rotateRevolverTimeline(card.rotationDirection, ignoreEncounterModifiers = true))
+            includeLater({
+                controller.rotateRevolverTimeline(
+                    card.getRotationDirection(controller),
+                    ignoreEncounterModifiers = true
+                )
+            })
         }
 
         override fun disableEverlasting(): Boolean = true
