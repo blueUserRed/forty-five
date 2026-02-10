@@ -58,7 +58,9 @@ abstract class Resource(
         if (state != ResourceState.LOADED) {
             runBlocking { load() }
         }
-        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
+        for (variant in variants) {
+            if (variantType.isInstance(variant)) return variantType.cast(variant)
+        }
         return null
     }
 
@@ -194,13 +196,14 @@ class TextureResource(
     }
 
     override fun finishLoadingMainThread() {
+        val pixmap = pixmap!!
         val texture = Texture(pixmap, useMipMaps)
         if (useMipMaps) texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.Linear)
         val region = TextureRegion(texture)
         val drawable =
             if (tileable) TiledDrawable(region).apply { scale = tileScale } else TextureRegionDrawable(region)
         disposables = listOf(texture)
-        variants = listOf(texture, region, drawable)
+        variants = listOf(texture, region, drawable, pixmap)
     }
 
     override fun dispose() {
@@ -563,7 +566,7 @@ class SoundResource(
 
     override fun dispose() {
         super.dispose()
-        sound?.dispose()
+        sound = null
     }
 }
 
@@ -587,6 +590,29 @@ class MusicResource(
 
     override fun dispose() {
         super.dispose()
-        music?.dispose()
+        music = null
+    }
+}
+
+class PixmapResource(
+    namespace: String?,
+    handle: ResourceHandle,
+    private val file: String,
+) : Resource(namespace, handle) {
+
+    private var pixmap: Pixmap? = null
+
+    override suspend fun prepareLoadingAllThreads() {
+        pixmap = Pixmap(Gdx.files.internal(file))
+    }
+
+    override fun finishLoadingMainThread() {
+        variants = listOf(pixmap!!)
+        disposables = listOf(pixmap!!)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        pixmap = null
     }
 }

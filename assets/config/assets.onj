@@ -1681,7 +1681,6 @@ music: [
         file: "blobs/music/microwave.wav"
     },
 ],
-
 cards: {
     directory: "blobs/cards",
 }

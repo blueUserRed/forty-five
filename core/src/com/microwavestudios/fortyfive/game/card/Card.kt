@@ -978,6 +978,7 @@ class CardActor(
 
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
             card,
+            screen,
             card.baseCost,
             card.baseDamage,
             card.variableTexture?.base
@@ -1135,8 +1136,8 @@ class CardActor(
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
         cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(
-            card, costValue,
-            damageValue, card.stamp?.icon,
+            card, screen, costValue,
+            damageValue,
             card.currentVariablePostfix
         )
     }
@@ -1289,7 +1290,10 @@ class CardActor(
         texts.addAll(DetailDescriptionHandler
             .descriptions
             .filter { it.key in allKeys }.map { it.value.second })
-            texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+        texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+        card.stamp?.let { stamp ->
+            texts.add("\$stamp$§§${stamp.icon}§§  ${stamp.title}\$stamp$\n\n\n${stamp.description}")
+        }
         texts
     }
 

@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.Texture.TextureFilter
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -32,7 +34,7 @@ import java.lang.RuntimeException
  * > but instead use add the [CardActor] to the scene.
  */
 // TODO: make sure this isn't leaking memory somehow
-class CardTextureManager {
+class CardTextureManager : ResourceBorrower {
 
     private val cardTextures: MutableList<CardTextureData> = mutableListOf()
 
@@ -52,42 +54,66 @@ class CardTextureManager {
             .forEach { cardTextures.add(it) }
     }
 
-    fun cardTextureFor(card: Card, cost: Int, damage: Int, stamp: ResourceHandle?, variablePostfix: String? = null): Promise<Texture> {
+    fun cardTextureFor(
+        card: Card,
+        screen: CustomScreen,
+        cost: Int,
+        damage: Int,
+        variablePostfix: String? = null
+    ): Promise<Texture> {
         statistics.lastLoadedCard = card.name
         val data = cardTextureDataFor(card)
-        val variant = data.findVariant(cost, damage, stamp, variablePostfix) ?: run {
-            return createVariant(data, card, cost, damage, stamp, variablePostfix)
+        val variant = data.findVariant(cost, damage, card.stamp?.icon, variablePostfix) ?: run {
+            return createVariant(data, screen, card, cost, damage, card.stamp?.icon, variablePostfix)
         }
         variant.borrowers.add(card)
         statistics.cachedGets++
         return variant.texture
     }
 
-    private fun getCardPixmap(data: CardTextureData, card: Card, variablePostfix: String?): Promise<Pixmap> {
+    private fun getCardPixmap(
+        data: CardTextureData,
+        screen: CustomScreen,
+        card: Card,
+        variablePostfix: String?
+    ): Promise<Pair<Pixmap, Pixmap?>> {
         val pixmap = data.cardPixmap
-        if (variablePostfix == null && pixmap != null) {
+        val stamp = card.stamp?.icon
+        val promise = if (variablePostfix == null && pixmap != null && stamp == null) {
             data.cardPixmap = pixmap
-            return pixmap.asPromise()
+            pixmap.asPromise()
+        } else {
+            val message = ServiceThreadMessage.LoadCardPixmap(
+                card.type,
+                variablePostfix
+            )
+            FortyFive.serviceThread.sendMessage(message)
+            if (variablePostfix == null) message.promise.then { data.cardPixmap = it }
+            statistics.pixmapLoads++
+            message.promise
         }
-        val message = ServiceThreadMessage.LoadCardPixmap(
-            card.type,
-            variablePostfix
-        )
-        FortyFive.serviceThread.sendMessage(message)
-        if (variablePostfix == null) message.promise.then { data.cardPixmap = it }
-        statistics.pixmapLoads++
-        return message.promise
+        return promise.chain { cardPixmap ->
+            if (stamp != null) {
+                FortyFive
+                    .resourceManager
+                    .request<Pixmap>(this, screen.lifetime, stamp)
+                    .map { cardPixmap to it }
+            } else {
+                (cardPixmap to null).asPromise()
+            }
+        }
     }
 
     private fun createVariant(
         data: CardTextureData,
+        screen: CustomScreen,
         card: Card,
         cost: Int,
         damage: Int,
         stamp: ResourceHandle?,
         variablePostfix: String?
     ): Promise<Texture> {
-        val pixmapPromise = getCardPixmap(data, card, variablePostfix).chainMainThread { cardPixmap ->
+        val pixmapPromise = getCardPixmap(data, screen, card, variablePostfix).chainMainThread { (cardPixmap, stampPixmap) ->
             val padding = (cardPixmap.width * texturePaddingFraction).toInt()
             val pixmap = Pixmap(
                 cardPixmap.width + 2 * padding,
@@ -101,7 +127,7 @@ class CardTextureManager {
                 card,
                 damage,
                 cost,
-                null,
+                stampPixmap,
                 card.actor.font.getOrError()
             )
             FortyFive.serviceThread.sendMessage(message)

@@ -36,6 +36,10 @@ object StampFactory {
 
     private val stampCreator: MutableMap<String, () -> Stamp> = mutableMapOf()
 
+    init {
+        addStampCreator(Stamp.Bewitched.name) { Stamp.Bewitched }
+    }
+
     fun addStampCreator(name: String, creator: () -> Stamp) {
         require(!stampCreator.containsKey(name)) { "Stamp with name '$name' already exists" }
         stampCreator[name] = creator

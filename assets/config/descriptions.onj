@@ -152,6 +152,16 @@ defaultTextEffects: [
     },
 
     $Color {
+        indicator:"$stamp$",
+        color: color.magenta,
+    },
+
+    $FontSize {
+        indicator:"$stamp$",
+        fontSize: (24 * 0.89)#int,
+    },
+
+    $Color {
         indicator:"$dmgBuff$",
         color: color.green,
     },
