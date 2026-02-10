@@ -711,7 +711,7 @@ class GameControllerImpl(
         include(card.actor.descendAnimation())
         delay(50)
         later {
-            val damage = card.curDamage(controller)
+            val damage = card.curOnShotDamage(controller)
             include(targetedEnemy.damage(damage * 2))
         }
         delay(400)
@@ -998,7 +998,7 @@ class GameControllerImpl(
         card: Card
     ): Timeline = Timeline.timeline { later {
         FortyFive.soundPlayer.situation("enter_parry", controller.screen)
-        val damageToParry = card.parryNumber ?: card.curDamage(controller)
+        val damageToParry = card.curParryValue(controller)
         val remainingDamage = if (card.isReinforced) 0 else (damage - damageToParry).coerceAtLeast(0)
         val parryEnterEvent = Events.ParryStateChange(true, damage, damageToParry)
         val parryLeaveEvent = Events.ParryStateChange(false, 0, 0)
@@ -1152,7 +1152,7 @@ class GameControllerImpl(
         }
         cardToShoot?.let { card ->
             targetedEnemies
-                .map { it.damage(cardToShoot.curDamage(controller)) }
+                .map { it.damage(cardToShoot.curOnShotDamage(controller)) }
                 .collectTimeline()
                 .let { include(it) }
             // Not handled via event because things like encounter modifiers or

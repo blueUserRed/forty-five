@@ -1803,7 +1803,7 @@ cards: [
         name: "hydraHeadBullet",
         title: "Hydra-Head Bullet",
         flavourText: "",
-        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
+        description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this encounter that is not currently within your drawpile",
         baseDamage: 0,
         effects: [
             {

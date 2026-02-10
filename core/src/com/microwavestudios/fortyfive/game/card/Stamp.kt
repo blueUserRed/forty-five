@@ -17,6 +17,13 @@ abstract class Stamp(
         controller: GameController
     ): RevolverRotation = direction
 
+    open fun additionalEffects(): List<Effect>? = null
+
+    open fun modifyBaseDamage(card: Card, original: Int): Int = original
+    open fun modifyBaseCost(card: Card, original: Int): Int = original
+
+    open fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int = damage
+    open fun modifyParryValue(card: Card, controller: GameController, parryValue: Int): Int = parryValue
 
     object Bewitched : Stamp("bewitched", "Bewitched") {
 

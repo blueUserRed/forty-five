@@ -42,6 +42,7 @@ import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.buildOnjObject
 import onj.value.*
+import kotlin.collections.map
 import kotlin.math.absoluteValue
 
 data class CardType(
@@ -140,21 +141,14 @@ typealias CardCreator = (
 
 /**
  * represents an actual instance of a card. Can be created using [CardPrototype]
- * @param name the name of the card
- * @param title the name but formatted, so it looks good when shown on the screen
- * @param flavourText Short phrase that (should) be funny or add to the lore
- * @param shortDescription short text explaining the effects of this card; can be left blank
- * @param baseDamage the damage value of the card before modifiers are applied (typically 0 when this is a cover)
- * @param baseCost the cost of this card in reserves
- * @param effects the effects of this card
  */
 class Card(
     val type: CardType,
     val title: String,
     val flavourText: String,
     val shortDescription: String,
-    val baseDamage: Int,
-    val baseCost: Int,
+    val originalBaseDamage: Int,
+    val originalBaseCost: Int,
     val stamp: Stamp?,
     val rightClickCost: Int?,
     val price: Int,
@@ -211,6 +205,9 @@ class Card(
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
+
+    val baseDamage: Int = stamp?.modifyBaseDamage(this, originalBaseDamage) ?: originalBaseDamage
+    val baseCost: Int = stamp?.modifyBaseCost(this, originalBaseCost) ?: originalBaseCost
 
     private var lastDamageValue: Int = baseDamage
     private var lastCostValue: Int = baseCost
@@ -387,6 +384,16 @@ class Card(
         .sortedBy { it.first }
         .fold(baseDamage) { acc, (_, modifier) -> ((acc + modifier.damage) * modifier.damageMultiplier).toInt() }
         .coerceAtLeast(0)
+
+    fun curOnShotDamage(controller: GameController): Int {
+        val damage = curDamage(controller)
+        return stamp?.modifyOnShotDamage(this, controller, damage) ?: damage
+    }
+
+    fun curParryValue(controller: GameController): Int {
+        val parryValue = parryNumber ?: curDamage(controller)
+        return stamp?.modifyParryValue(this, controller, parryValue) ?: parryValue
+    }
 
     fun curCost(controller: GameController): Int = costModifiers
         .filter { (_, modifier) -> modifier.activeChecker(controller, this, modifier) }
@@ -740,34 +747,17 @@ class Card(
             prototype: CardPrototype,
             enableHoverDetails: Boolean
         ): Card {
+            val stamp = type.stamp?.let { StampFactory.createStamp(it) }
             val card = Card(
                 type = type,
                 title = onj.get<String>("title"),
                 flavourText = onj.get<String>("flavourText"),
                 shortDescription = onj.get<String>("description"),
-                baseDamage = onj.get<Long>("baseDamage").toInt(),
-                baseCost = onj.get<Long>("cost").toInt(),
+                originalBaseDamage = onj.get<Long>("baseDamage").toInt(),
+                originalBaseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
-                effects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
-                    .map {
-                        it as OnjObject
-                        val effect = it.get<Effect>("effect")
-                        val data = EffectData(
-                            trigger = it.get<Trigger>("trigger"),
-                            isHidden = it.getOr("isHidden", false),
-                            cacheAffectedCards = it.getOr("cacheAffectedCards", false),
-                            canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
-                            maxExecutions = it.getOr("maxExecutions", -1L).toInt(),
-                            onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
-                                arr
-                                    .value
-                                    .map { (it as OnjZone).value }
-                            },
-                            condition = it.getOr<OnjNamedObject?>("condition", null)?.let { GamePredicate.fromOnj(it) }
-                        )
-                        effect.copy(data)
-                    },
+                effects = getEffects(onj, stamp),
                 rotationDirection = onj.getOr<OnjNamedObject?>("rotation", null)
                     ?.let { RevolverRotation.fromOnj(it) }
                     ?: RevolverRotation.Right(1),
@@ -778,7 +768,6 @@ class Card(
                     ?.map { (it.value as Long).toInt() }
                     ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
-                //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(customScreen, customScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.getOr<Boolean>("dark", false),
@@ -791,12 +780,40 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
-                stamp = type.stamp?.let { StampFactory.createStamp(it) }
+                stamp = stamp
 
             )
             applyTraitEffects(card, onj)
             initializer(card)
             return card
+        }
+
+        private fun getEffects(onj: OnjObject, stamp: Stamp?): List<Effect> {
+            val baseEffects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
+                .map {
+                    it as OnjObject
+                    val effect = it.get<Effect>("effect")
+                    val data = EffectData(
+                        trigger = it.get<Trigger>("trigger"),
+                        isHidden = it.getOr("isHidden", false),
+                        cacheAffectedCards = it.getOr("cacheAffectedCards", false),
+                        canPreventEnteringGame = it.getOr("canPreventEnteringGame", false),
+                        maxExecutions = it.getOr("maxExecutions", -1L).toInt(),
+                        onlyTriggerInZones = it.ifHas<OnjArray, List<Zone>>("inZones") { arr ->
+                            arr
+                                .value
+                                .map { (it as OnjZone).value }
+                        },
+                        condition = it.getOr<OnjNamedObject?>("condition", null)?.let { GamePredicate.fromOnj(it) }
+                    )
+                    effect.copy(data)
+                }
+            val stampEffects = stamp?.additionalEffects()
+            return if (stampEffects == null) {
+                baseEffects
+            } else {
+                baseEffects + stampEffects
+            }
         }
 
         private fun applyTraitEffects(card: Card, onj: OnjObject) {
