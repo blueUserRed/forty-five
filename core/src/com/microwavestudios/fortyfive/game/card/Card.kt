@@ -45,6 +45,11 @@ import onj.value.*
 import kotlin.collections.map
 import kotlin.math.absoluteValue
 
+/**
+ * contains all information needed to construct a specific card. Stores the namespace, name, and
+ * possibly the stamp of the card. Can be serialized to/deserialized from onj. To construct an instance
+ * of a card, the corresponding [CardPrototype] is needed
+ */
 data class CardType(
     val namespace: String?,
     val simpleName: String,
@@ -58,7 +63,7 @@ data class CardType(
         "name" with simpleName
     }
 
-    override fun toString(): String = name
+    override fun toString(): String = stamp?.let { stamp -> "$name-$stamp" } ?: name
 
     companion object {
 
@@ -82,8 +87,8 @@ data class CardType(
 }
 
 /**
- * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
- * actual instances of the card. Prototypes can be used to create those instances
+ * represents a card as declared in the cards.onj file. Can be used together with [CardType] to construct
+ * an actual instance of [Card]
  */
 class CardPrototype(
     val namespace: String?,
@@ -101,7 +106,7 @@ class CardPrototype(
     private val priceModifiers: MutableList<(Int) -> Int> = mutableListOf()
 
     /**
-     * creates an actual instance of this card
+     * creates an actual instance of this card. [type] should match this prototype
      */
     fun create(
         screen: CustomScreen,
@@ -783,7 +788,7 @@ class Card(
                 stamp = stamp
 
             )
-            applyTraitEffects(card, onj)
+            applyTraitEffects(card, onj, stamp)
             initializer(card)
             return card
         }
@@ -816,30 +821,32 @@ class Card(
             }
         }
 
-        private fun applyTraitEffects(card: Card, onj: OnjObject) {
-            val effects = onj
+        private fun applyTraitEffects(card: Card, onj: OnjObject, stamp: Stamp?) {
+            onj
                 .getOr<OnjArray?>("traitEffects", null)
                 ?.value
                 ?.map { it.value as String }
-                ?: listOf()
+                ?.forEach { applyTraitEffect(it, card) }
+            stamp
+                ?.additionalTraitEffects()
+                ?.forEach { applyTraitEffect(it, card) }
+        }
 
-            for (effect in effects) when (effect) {
+        private fun applyTraitEffect(effect: String, card: Card): Unit = when (effect) {
+            "everlasting" -> card.isEverlasting = true
+            "undead" -> card.isUndead = true
+            "replaceable" -> card.isReplaceable = true
+            "spray" -> card.isSpray = true
+            "reinforced" -> card.isReinforced = true
+            "shotProtected" -> card.isShotProtected = true
+            "rotten" -> card.isRotten = true
+            "thorns" -> card.isThorns = true
+            "punk" -> card.isPunk = true
+            "persistence" -> card.isPersistent = true
+            "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
+            "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
 
-                "everlasting" -> card.isEverlasting = true
-                "undead" -> card.isUndead = true
-                "replaceable" -> card.isReplaceable = true
-                "spray" -> card.isSpray = true
-                "reinforced" -> card.isReinforced = true
-                "shotProtected" -> card.isShotProtected = true
-                "rotten" -> card.isRotten = true
-                "thorns" -> card.isThorns = true
-                "punk" -> card.isPunk = true
-                "persistence" -> card.isPersistent = true
-                "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
-                "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
-
-                else -> throw RuntimeException("unknown trait effect $effect")
-            }
+            else -> throw RuntimeException("unknown trait effect $effect")
         }
     }
 
@@ -1304,13 +1311,18 @@ class CardActor(
         val allKeys = card.getKeyWordsForDescriptions()
         val texts: MutableList<String> = mutableListOf()
 
+        card.stamp?.let { stamp ->
+            texts.add("\$stamp$§§${stamp.icon}§§  ${stamp.title}\$stamp$\n\n\n${stamp.description}")
+            DetailDescriptionHandler
+                .getKeyWordsFromDescription(stamp.description)
+                .mapNotNull { DetailDescriptionHandler.descriptions[it] }
+                .forEach { texts.add(it.second) }
+        }
+
         texts.addAll(DetailDescriptionHandler
             .descriptions
             .filter { it.key in allKeys }.map { it.value.second })
         texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
-        card.stamp?.let { stamp ->
-            texts.add("\$stamp$§§${stamp.icon}§§  ${stamp.title}\$stamp$\n\n\n${stamp.description}")
-        }
         texts
     }
 

@@ -238,6 +238,29 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     ): OnjEffect = OnjEffect(
         Effect.BuffDamageTransformable(
             amount.value,
+            1f,
+            bulletSelector.value,
+            reevaluateOn = reevaluateOn.value,
+            activeChecker = activeChecker.value,
+            validityChecker = validityChecker.value,
+            keepModifierActive = keepModifierActive.value,
+            data = EffectData()
+        )
+    )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [BulletSelector, EffectValue, float, Trigger, CardModifierPredicate, CardModifierPredicate, boolean]")
+    fun buffDmgTransformable(
+        bulletSelector: OnjBulletSelector,
+        amount: OnjEffectValue,
+        multiplier: OnjFloat,
+        reevaluateOn: OnjTrigger,
+        activeChecker: OnjCardModifierPredicate,
+        validityChecker: OnjCardModifierPredicate,
+        keepModifierActive: OnjBoolean
+    ): OnjEffect = OnjEffect(
+        Effect.BuffDamageTransformable(
+            amount.value,
+            multiplier.value.toFloat(),
             bulletSelector.value,
             reevaluateOn = reevaluateOn.value,
             activeChecker = activeChecker.value,
@@ -256,6 +279,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     ): OnjEffect = OnjEffect(
         Effect.BuffDamageTransformable(
             amount.value,
+            1f,
             bulletSelector.value,
             reevaluateOn = reevaluateOn.value,
             activeChecker = activeChecker.value,
@@ -273,6 +297,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     ): OnjEffect = OnjEffect(
         Effect.BuffDamageTransformable(
             amount.value,
+            1f,
             bulletSelector.value,
             reevaluateOn = reevaluateOn.value,
             activeChecker = { _, _, _ -> true },
@@ -291,7 +316,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "use Cards; params: [StatusEffect]")
     fun giveStatus(effect: OnjStatusEffect): OnjEffect =
-        OnjEffect(Effect.GiveStatus(effect.value, EffectData()))
+        OnjEffect(Effect.GiveStatus(effect.value, false, EffectData()))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [StatusEffect, boolean]")
+    fun giveStatus(effect: OnjStatusEffect, onlyStacks: OnjBoolean): OnjEffect =
+        OnjEffect(Effect.GiveStatus(effect.value, onlyStacks.value, EffectData()))
 
     @RegisterOnjFunction(schema = "use Cards; params: [StatusEffect]")
     fun givePlayerStatus(effect: OnjStatusEffect): OnjEffect =
@@ -476,6 +505,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             EffectData()
         )
     )
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun triggerNever(): OnjTrigger = OnjTrigger(Trigger.Never)
 
     @RegisterOnjFunction(schema = "params: []")
     fun shot(): OnjTrigger = OnjTrigger(
@@ -966,6 +998,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun modifierPredicate(value: OnjNamedObject): OnjCardModifierPredicate {
         val predicate = GamePredicate.fromOnj(value)
         return OnjCardModifierPredicate { controller, _, _ -> predicate.check(controller) }
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun alwaysTrueModifierPredicate(): OnjCardModifierPredicate {
+        return OnjCardModifierPredicate { _, _, _ -> true }
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]")

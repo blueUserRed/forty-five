@@ -568,19 +568,23 @@ cards: [
         name: "hollowpointBullet",
         title: "Hollowpoint Bullet",
         flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
-        description: "If the enemy has shield:\nThis Bullet has +6 dmg",
+        description: "If the enemy has shield:\nThis Bullet has +50 percent dmg",
         baseDamage: 5,
         effects: [
             {
-                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                trigger: leaveZone(zone.limbo, onlySelfTriggers),
+                maxExecutions: 1,
                 isHidden: true,
-                effect: buffDmgMultiplier(
+                effect: buffDmgTransformable(
                     bSelectSelf(),
+                    0#val,
                     1.5,
+                    triggerNever(),
                     $TargetedEnemyShieldIsAtLeast { value: 1 }#modifierPredicate,
-                    sourceCardInZoneModifierPredicate(zone.revolver)
+                    alwaysTrueModifierPredicate(),
+                    true
                 )
-            }
+            },
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],
@@ -594,15 +598,19 @@ cards: [
         baseDamage: 8,
         effects: [
             {
-                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                trigger: leaveZone(zone.limbo, onlySelfTriggers),
+                maxExecutions: 1,
                 isHidden: true,
-                effect: buffDmgMultiplier(
+                effect: buffDmgTransformable(
                     bSelectSelf(),
+                    0#val,
                     1.5,
+                    triggerNever(),
                     $TargetedEnemyHasAnyStatusEffect {}#modifierPredicate,
-                    sourceCardInZoneModifierPredicate(zone.revolver)
+                    alwaysTrueModifierPredicate(),
+                    true
                 )
-            }
+            },
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],
