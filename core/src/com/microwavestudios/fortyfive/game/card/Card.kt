@@ -157,7 +157,7 @@ class Card(
     val stamp: Stamp?,
     val rightClickCost: Int?,
     val price: Int,
-    val effects: List<Effect>,
+    effects: List<Effect>,
     private val rotationDirection: RevolverRotation,
     val variableTexture: VariableTextureSelector?,
     val parryNumber: Int?,
@@ -187,19 +187,15 @@ class Card(
     val inGame: Boolean
         get() = game != null
 
-    var isEverlasting: Boolean = false
-        private set
-    var isUndead: Boolean = false
-        private set
+    private val _effects: MutableList<Effect> = effects.toMutableList()
+    val effects: List<Effect>
+        get() = _effects
+
     var isRotten: Boolean = false
-        private set
-    var isReplaceable: Boolean = false
         private set
     var isSpray: Boolean = false
         private set
     var isReinforced: Boolean = false
-        private set
-    var isShotProtected: Boolean = false
         private set
     var isThorns: Boolean = false
         private set
@@ -207,6 +203,8 @@ class Card(
         private set
     var isPersistent: Boolean = false
         private set
+
+    private val behaviours: MutableList<BulletBehaviour> = mutableListOf()
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -294,7 +292,13 @@ class Card(
         }
     }
 
-    fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
+    fun canBeReplaced(controller: GameController, by: Card): Boolean =
+        behaviours.any { it.canBeReplaced(controller, this, by) }
+
+    fun clearProtectingModifiers() {
+        protectingModifiers.clear()
+        parryOnlyProtectingModifiers.clear()
+    }
 
     fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
         action { lastEffectAffectedCardsCache = listOf(replaceBy) } // Memorize replacing card
@@ -360,7 +364,7 @@ class Card(
         if (somethingChanged) modifiersChanged()
     }
 
-    fun canBeShot(controller: GameController): Boolean = !(isShotProtected && controller.turnCounter == enteredOnTurn)
+    fun canBeShot(controller: GameController): Boolean = behaviours.none { it.preventsShooting(controller, this) }
 
     fun update(controller: GameController) {
         checkModifierValidity(controller)
@@ -384,6 +388,15 @@ class Card(
         }
     }
 
+    fun addBehaviour(behaviour: BulletBehaviour) {
+        require(behaviour.supportsBeingAddedLater || !inGame) {
+            "can't add behaviour $behaviour after initialization of card"
+        }
+        behaviours.add(behaviour)
+        behaviour.additionalEffects()?.let { _effects.addAll(it) }
+        behaviour.init(this)
+    }
+
     fun curDamage(controller: GameController): Int = damageModifiers
         .filter { (_, modifier) -> modifier.data.activeChecker(controller, this, modifier.data) }
         .sortedBy { it.first }
@@ -392,12 +405,12 @@ class Card(
 
     fun curOnShotDamage(controller: GameController): Int {
         val damage = curDamage(controller)
-        return stamp?.modifyOnShotDamage(this, controller, damage) ?: damage
+        return behaviours.fold(damage) { acc, cur -> cur.modifyOnShotDamage(this, controller, acc) }
     }
 
     fun curParryValue(controller: GameController): Int {
         val parryValue = parryNumber ?: curDamage(controller)
-        return stamp?.modifyParryValue(this, controller, parryValue) ?: parryValue
+        return behaviours.fold(parryValue) { acc, cur -> cur.modifyParryValue(this, controller, acc) }
     }
 
     fun curCost(controller: GameController): Int = costModifiers
@@ -415,7 +428,7 @@ class Card(
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
         action {
-            if (isEverlasting && !controller.isEverlastingDisabled) {
+            if (behaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry) }) {
                 skip()
                 return@action
             }
@@ -450,8 +463,11 @@ class Card(
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
             modifiersChanged()
         }
-        if (isUndead) include(putCardInTheHand(this@Card))
-        else include(putCardInTheStack(this@Card))
+        if (behaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry) }) {
+            include(putCardInTheHand(this@Card))
+        } else {
+            include(putCardInTheStack(this@Card))
+        }
     } }
 
     fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
@@ -460,8 +476,7 @@ class Card(
     }
 
     fun protect(protectingModifier: ProtectingModifier) {
-        if (isUndead) {
-            FortyFive.logger.debug(logTag, "cant protect undead bullet")
+        if (behaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         protectingModifiers.add(protectingModifier.copy())
@@ -469,8 +484,7 @@ class Card(
     }
 
     fun protectParryOnly(protectingModifier: ProtectingModifier) {
-        if (isUndead) {
-            FortyFive.logger.debug(logTag, "cant protect undead bullet")
+        if (behaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         parryOnlyProtectingModifiers.add(protectingModifier.copy())
@@ -592,7 +606,7 @@ class Card(
     } }
 
     fun getRotationDirection(controller: GameController): RevolverRotation =
-        stamp?.modifyRotationDirection(rotationDirection, controller) ?: rotationDirection
+        behaviours.fold(rotationDirection) { acc, cur -> cur.modifyRotationDirection(this, controller, acc) }
 
     private fun checkModifierTransformers(
         situation: GameSituation,
@@ -762,7 +776,7 @@ class Card(
                 originalBaseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
-                effects = getEffects(onj, stamp),
+                effects = getEffects(onj),
                 rotationDirection = onj.getOr<OnjNamedObject?>("rotation", null)
                     ?.let { RevolverRotation.fromOnj(it) }
                     ?: RevolverRotation.Right(1),
@@ -789,12 +803,15 @@ class Card(
 
             )
             applyTraitEffects(card, onj, stamp)
+            stamp?.behaviours()?.let { behaviours ->
+                behaviours.forEach { card.addBehaviour(it) }
+            }
             initializer(card)
             return card
         }
 
-        private fun getEffects(onj: OnjObject, stamp: Stamp?): List<Effect> {
-            val baseEffects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
+        private fun getEffects(onj: OnjObject): List<Effect> {
+            val effects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
                 .map {
                     it as OnjObject
                     val effect = it.get<Effect>("effect")
@@ -813,12 +830,7 @@ class Card(
                     )
                     effect.copy(data)
                 }
-            val stampEffects = stamp?.additionalEffects()
-            return if (stampEffects == null) {
-                baseEffects
-            } else {
-                baseEffects + stampEffects
-            }
+            return effects
         }
 
         private fun applyTraitEffects(card: Card, onj: OnjObject, stamp: Stamp?) {
@@ -827,18 +839,15 @@ class Card(
                 ?.value
                 ?.map { it.value as String }
                 ?.forEach { applyTraitEffect(it, card) }
-            stamp
-                ?.additionalTraitEffects()
-                ?.forEach { applyTraitEffect(it, card) }
         }
 
         private fun applyTraitEffect(effect: String, card: Card): Unit = when (effect) {
-            "everlasting" -> card.isEverlasting = true
-            "undead" -> card.isUndead = true
-            "replaceable" -> card.isReplaceable = true
+            "everlasting" -> card.addBehaviour(BulletBehaviour.Everlasting)
+            "undead" -> card.addBehaviour(BulletBehaviour.Undead)
+            "replaceable" -> card.addBehaviour(BulletBehaviour.Replaceable)
             "spray" -> card.isSpray = true
             "reinforced" -> card.isReinforced = true
-            "shotProtected" -> card.isShotProtected = true
+            "shotProtected" -> card.addBehaviour(BulletBehaviour.ShotProtected)
             "rotten" -> card.isRotten = true
             "thorns" -> card.isThorns = true
             "punk" -> card.isPunk = true
