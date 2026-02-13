@@ -712,7 +712,11 @@ class GameControllerImpl(
         delay(50)
         later {
             val damage = card.curOnShotDamage(controller)
-            include(targetedEnemy.damage(damage * 2))
+            card
+                .targetedEnemies(controller)
+                .map { it.damage(damage * 2) }
+                .collectTimeline()
+                .let { include(it) }
         }
         delay(400)
         include(afterlife.popCardTimeline())
@@ -1012,8 +1016,7 @@ class GameControllerImpl(
                 if (remainingDamage > 0) {
                     include(damagePlayerTimeline(remainingDamage, false, isPiercing))
                 }
-                if (card.isThorns) include(targetedEnemy.damage(damage))
-                include(card.afterShot(controller, true, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+                include(card.afterShot(controller, true, damage, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
                 include(rotateRevolverTimeline(card.getRotationDirection(controller)))
             } else {
                 include(damagePlayerTimeline(damage, false, isPiercing))
@@ -1136,7 +1139,7 @@ class GameControllerImpl(
             return@later
         }
 
-        val targetedEnemies = if (cardToShoot?.isSpray ?: false) allEnemies else listOf(targetedEnemy())
+        val targetedEnemies = cardToShoot?.targetedEnemies(controller) ?: listOf(targetedEnemy)
 
         val triggerInfo = TriggerInformation(
             controller = controller,
@@ -1158,7 +1161,7 @@ class GameControllerImpl(
             // Not handled via event because things like encounter modifiers or
             // status effects shouldn't hook into here
             include(checkTrigger(GameSituation.OnShot(card), triggerInfo))
-            include(card.afterShot(controller, false, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+            include(card.afterShot(controller, false, 0, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
         }
         include(rotateRevolverTimeline(rotationDirection))
         includeLater(
@@ -1548,7 +1551,7 @@ class GameControllerImpl(
         sourceCard: Card? = null,
     ): TriggerInformation = TriggerInformation(
         controller = this,
-        targetedEnemies = if (card?.isSpray == true) allEnemies else listOf(targetedEnemy),
+        targetedEnemies = card?.targetedEnemies(controller) ?: listOf(targetedEnemy),
         multiplier = multiplier,
         isOnShot = isOnShot,
         amountOfCardsDrawn = amountOfCardsDrawn,

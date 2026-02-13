@@ -20,6 +20,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
@@ -157,7 +158,7 @@ class Card(
     val stamp: Stamp?,
     val rightClickCost: Int?,
     val price: Int,
-    val effects: List<Effect>,
+    effects: List<Effect>,
     private val rotationDirection: RevolverRotation,
     val variableTexture: VariableTextureSelector?,
     val parryNumber: Int?,
@@ -187,26 +188,20 @@ class Card(
     val inGame: Boolean
         get() = game != null
 
-    var isEverlasting: Boolean = false
-        private set
-    var isUndead: Boolean = false
-        private set
+    private val _effects: MutableList<Effect> = effects.toMutableList()
+    val effects: List<Effect>
+        get() = _effects
+
     var isRotten: Boolean = false
         private set
-    var isReplaceable: Boolean = false
-        private set
-    var isSpray: Boolean = false
-        private set
     var isReinforced: Boolean = false
-        private set
-    var isShotProtected: Boolean = false
-        private set
-    var isThorns: Boolean = false
         private set
     var isPunk: Boolean = false
         private set
     var isPersistent: Boolean = false
         private set
+
+    private val behaviours: MutableSet<BulletBehaviour> = mutableSetOf()
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -294,7 +289,13 @@ class Card(
         }
     }
 
-    fun canBeReplaced(controller: GameController, by: Card): Boolean = isReplaceable
+    fun canBeReplaced(controller: GameController, by: Card): Boolean =
+        behaviours.any { it.canBeReplaced(controller, this, by) }
+
+    fun clearProtectingModifiers() {
+        protectingModifiers.clear()
+        parryOnlyProtectingModifiers.clear()
+    }
 
     fun replaceTimeline(controller: GameController, replaceBy: Card): Timeline = Timeline.timeline {
         action { lastEffectAffectedCardsCache = listOf(replaceBy) } // Memorize replacing card
@@ -360,7 +361,7 @@ class Card(
         if (somethingChanged) modifiersChanged()
     }
 
-    fun canBeShot(controller: GameController): Boolean = !(isShotProtected && controller.turnCounter == enteredOnTurn)
+    fun canBeShot(controller: GameController): Boolean = behaviours.none { it.preventsShooting(controller, this) }
 
     fun update(controller: GameController) {
         checkModifierValidity(controller)
@@ -384,6 +385,16 @@ class Card(
         }
     }
 
+    fun addBehaviour(behaviour: BulletBehaviour) {
+        if (behaviour in behaviours) return
+        require(behaviour.supportsBeingAddedLater || !inGame) {
+            "can't add behaviour $behaviour after initialization of card"
+        }
+        behaviours.add(behaviour)
+        behaviour.additionalEffects()?.let { _effects.addAll(it) }
+        behaviour.init(this)
+    }
+
     fun curDamage(controller: GameController): Int = damageModifiers
         .filter { (_, modifier) -> modifier.data.activeChecker(controller, this, modifier.data) }
         .sortedBy { it.first }
@@ -392,12 +403,12 @@ class Card(
 
     fun curOnShotDamage(controller: GameController): Int {
         val damage = curDamage(controller)
-        return stamp?.modifyOnShotDamage(this, controller, damage) ?: damage
+        return behaviours.fold(damage) { acc, cur -> cur.modifyOnShotDamage(this, controller, acc) }
     }
 
     fun curParryValue(controller: GameController): Int {
         val parryValue = parryNumber ?: curDamage(controller)
-        return stamp?.modifyParryValue(this, controller, parryValue) ?: parryValue
+        return behaviours.fold(parryValue) { acc, cur -> cur.modifyParryValue(this, controller, acc) }
     }
 
     fun curCost(controller: GameController): Int = costModifiers
@@ -411,11 +422,18 @@ class Card(
     fun afterShot(
         controller: GameController,
         wasParry: Boolean,
+        parryDamage: Int,
         putCardInTheHand: (Card) -> Timeline,
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
+        later {
+            behaviours
+                .mapNotNull { it.afterShotTimeline(this@Card, controller, wasParry, parryDamage) }
+                .collectTimeline()
+                .let { include(it) }
+        }
         action {
-            if (isEverlasting && !controller.isEverlastingDisabled) {
+            if (behaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
                 skip()
                 return@action
             }
@@ -450,8 +468,11 @@ class Card(
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
             modifiersChanged()
         }
-        if (isUndead) include(putCardInTheHand(this@Card))
-        else include(putCardInTheStack(this@Card))
+        if (behaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }) {
+            include(putCardInTheHand(this@Card))
+        } else {
+            include(putCardInTheStack(this@Card))
+        }
     } }
 
     fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
@@ -460,8 +481,7 @@ class Card(
     }
 
     fun protect(protectingModifier: ProtectingModifier) {
-        if (isUndead) {
-            FortyFive.logger.debug(logTag, "cant protect undead bullet")
+        if (behaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         protectingModifiers.add(protectingModifier.copy())
@@ -469,12 +489,18 @@ class Card(
     }
 
     fun protectParryOnly(protectingModifier: ProtectingModifier) {
-        if (isUndead) {
-            FortyFive.logger.debug(logTag, "cant protect undead bullet")
+        if (behaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         parryOnlyProtectingModifiers.add(protectingModifier.copy())
         modifiersChanged()
+    }
+
+    fun targetedEnemies(controller: GameController): List<Enemy> {
+        behaviours.forEach { behaviour ->
+            behaviour.targetedEnemies(controller, this)?.let { return it }
+        }
+        return listOf(controller.targetedEnemy())
     }
 
     /**
@@ -592,7 +618,7 @@ class Card(
     } }
 
     fun getRotationDirection(controller: GameController): RevolverRotation =
-        stamp?.modifyRotationDirection(rotationDirection, controller) ?: rotationDirection
+        behaviours.fold(rotationDirection) { acc, cur -> cur.modifyRotationDirection(this, controller, acc) }
 
     private fun checkModifierTransformers(
         situation: GameSituation,
@@ -762,7 +788,7 @@ class Card(
                 originalBaseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
-                effects = getEffects(onj, stamp),
+                effects = getEffects(onj),
                 rotationDirection = onj.getOr<OnjNamedObject?>("rotation", null)
                     ?.let { RevolverRotation.fromOnj(it) }
                     ?: RevolverRotation.Right(1),
@@ -789,12 +815,15 @@ class Card(
 
             )
             applyTraitEffects(card, onj, stamp)
+            stamp?.behaviours()?.let { behaviours ->
+                behaviours.forEach { card.addBehaviour(it) }
+            }
             initializer(card)
             return card
         }
 
-        private fun getEffects(onj: OnjObject, stamp: Stamp?): List<Effect> {
-            val baseEffects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
+        private fun getEffects(onj: OnjObject): List<Effect> {
+            val effects = (onj.getOr<OnjArray?>("effects", null)?.value ?: listOf())
                 .map {
                     it as OnjObject
                     val effect = it.get<Effect>("effect")
@@ -813,12 +842,7 @@ class Card(
                     )
                     effect.copy(data)
                 }
-            val stampEffects = stamp?.additionalEffects()
-            return if (stampEffects == null) {
-                baseEffects
-            } else {
-                baseEffects + stampEffects
-            }
+            return effects
         }
 
         private fun applyTraitEffects(card: Card, onj: OnjObject, stamp: Stamp?) {
@@ -827,20 +851,17 @@ class Card(
                 ?.value
                 ?.map { it.value as String }
                 ?.forEach { applyTraitEffect(it, card) }
-            stamp
-                ?.additionalTraitEffects()
-                ?.forEach { applyTraitEffect(it, card) }
         }
 
         private fun applyTraitEffect(effect: String, card: Card): Unit = when (effect) {
-            "everlasting" -> card.isEverlasting = true
-            "undead" -> card.isUndead = true
-            "replaceable" -> card.isReplaceable = true
-            "spray" -> card.isSpray = true
+            "everlasting" -> card.addBehaviour(BulletBehaviour.Everlasting)
+            "undead" -> card.addBehaviour(BulletBehaviour.Undead)
+            "replaceable" -> card.addBehaviour(BulletBehaviour.Replaceable)
+            "spray" -> card.addBehaviour(BulletBehaviour.Spray)
             "reinforced" -> card.isReinforced = true
-            "shotProtected" -> card.isShotProtected = true
+            "shotProtected" -> card.addBehaviour(BulletBehaviour.ShotProtected)
             "rotten" -> card.isRotten = true
-            "thorns" -> card.isThorns = true
+            "thorns" -> card.addBehaviour(BulletBehaviour.Thorns)
             "punk" -> card.isPunk = true
             "persistence" -> card.isPersistent = true
             "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
@@ -914,6 +935,11 @@ class CardActor(
             list.add(card.shortDescription)
             list.add(card.flavourText)
             list
+        },
+        topText = {
+            card.stamp?.let { stamp ->
+                $$"$stamp$§§$${stamp.icon}§§  $${stamp.title}$stamp$\n\n\n$${stamp.description}"
+            } ?: ""
         },
         subtexts = getEffectTexts()
     )
@@ -1308,21 +1334,31 @@ class CardActor(
     }
 
     private fun getEffectTexts(): () -> List<String> = {
-        val allKeys = card.getKeyWordsForDescriptions()
+        val allKeys = card.getKeyWordsForDescriptions() +
+                DetailDescriptionHandler.getKeyWordsFromDescription(card.stamp?.description ?: "")
         val texts: MutableList<String> = mutableListOf()
 
-        card.stamp?.let { stamp ->
-            texts.add("\$stamp$§§${stamp.icon}§§  ${stamp.title}\$stamp$\n\n\n${stamp.description}")
-            DetailDescriptionHandler
-                .getKeyWordsFromDescription(stamp.description)
-                .mapNotNull { DetailDescriptionHandler.descriptions[it] }
-                .forEach { texts.add(it.second) }
-        }
-
-        texts.addAll(DetailDescriptionHandler
-            .descriptions
-            .filter { it.key in allKeys }.map { it.value.second })
         texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+
+        val addedDescriptions = mutableSetOf<String>()
+        allKeys.forEach { key ->
+            if (key in addedDescriptions) return@forEach
+            addedDescriptions.add(key)
+            DetailDescriptionHandler.descriptions[key]?.let { texts.add(it.second) }
+        }
+        while (true) {
+            val keywords = texts.flatMap { text ->
+                DetailDescriptionHandler.getKeyWordsFromDescription(text)
+            }
+            var addedText = false
+            keywords.forEach { keyword ->
+                if (keyword in addedDescriptions) return@forEach
+                addedDescriptions.add(keyword)
+                addedText = true
+                DetailDescriptionHandler.descriptions[keyword]?.let { texts.add(it.second) }
+            }
+            if (!addedText) break
+        }
         texts
     }
 

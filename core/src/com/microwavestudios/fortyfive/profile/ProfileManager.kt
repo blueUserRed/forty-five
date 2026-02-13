@@ -41,9 +41,9 @@ class ProfileManager {
         val loaded = Profile.loadProfile(preview.name)
         currentProfile = loaded
         if (loaded == null) {
-            FortyFive.logger.debug(logTag, "failed loading profile ${preview.name}")
+            FortyFive.logger.warn(logTag, "failed loading profile ${preview.name}")
         } else {
-            FortyFive.logger.warn(logTag, "loaded ${preview.name}")
+            FortyFive.logger.debug(logTag, "loaded profile ${preview.name}")
         }
         return loaded != null
     }
