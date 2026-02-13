@@ -38,6 +38,9 @@ abstract class Stamp(
      */
     open fun modifyBaseCost(card: Card, original: Int): Int = original
 
+    /**
+     * behaviours returned here will be added to the card
+     */
     open fun behaviours(): List<BulletBehaviour>? = null
 
 

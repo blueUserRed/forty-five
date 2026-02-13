@@ -99,6 +99,9 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         parryDamage: Int
     ): Timeline? = null
 
+    abstract override fun equals(other: Any?): Boolean
+
+    override fun hashCode(): Int = this::class.qualifiedName!!.hashCode()
 
     object Bewitched : BulletBehaviour(true) {
 
@@ -110,18 +113,18 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             if (direction is RevolverRotation.Right) return RevolverRotation.Left(direction.amount)
             return direction
         }
+
+        override fun equals(other: Any?): Boolean = other is Bewitched
     }
 
     object PoisonTip : BulletBehaviour(true) {
 
         override fun additionalEffects(): List<Effect> = Effect.GiveStatus(
             { controller, card, _ -> Poison(card!!.curDamage(controller!!)) },
-            true,
+            false,
             EffectData(
-                trigger = Trigger.triggerForSituation<GameSituation.OnShot> { situation, card, triggerInfo, _ ->
-                    situation.card === card && triggerInfo.targetedEnemies.any { enemy ->
-                        enemy.statusEffects.any { it is Poison }
-                    }
+                trigger = Trigger.triggerForSituation<GameSituation.OnShot> { situation, card, _, _ ->
+                    situation.card === card
                 }
             )
         ).let { listOf(it) }
@@ -131,6 +134,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             controller: GameController,
             damage: Int
         ): Int = 0
+
+        override fun equals(other: Any?): Boolean = other is PoisonTip
     }
 
     object Everlasting : BulletBehaviour(true) {
@@ -141,6 +146,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             wasParry: Boolean,
             parryDamage: Int
         ): Boolean = !controller.isEverlastingDisabled
+
+        override fun equals(other: Any?): Boolean = other is Everlasting
     }
 
     object Undead : BulletBehaviour(true) {
@@ -157,6 +164,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun init(card: Card) {
             card.clearProtectingModifiers()
         }
+
+        override fun equals(other: Any?): Boolean = other is Undead
     }
 
     object ShotProtected : BulletBehaviour(true) {
@@ -165,6 +174,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             controller: GameController,
             card: Card
         ): Boolean = controller.turnCounter == card.enteredOnTurn
+
+        override fun equals(other: Any?): Boolean = other is ShotProtected
     }
 
     object Replaceable : BulletBehaviour(true) {
@@ -174,6 +185,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             card: Card,
             by: Card
         ): Boolean = true
+
+        override fun equals(other: Any?): Boolean = other is Replaceable
     }
 
     object Spray : BulletBehaviour(true) {
@@ -182,6 +195,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             controller: GameController,
             card: Card
         ): List<Enemy> = controller.allEnemies
+
+        override fun equals(other: Any?): Boolean = other is Spray
     }
 
     object Thorns : BulletBehaviour(true) {
@@ -198,5 +213,7 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
                 .map { it.damage(parryDamage) }
                 .collectTimeline()
         }
+
+        override fun equals(other: Any?): Boolean = other is Thorns
     }
 }

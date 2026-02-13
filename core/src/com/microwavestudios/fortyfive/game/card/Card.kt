@@ -201,7 +201,7 @@ class Card(
     var isPersistent: Boolean = false
         private set
 
-    private val behaviours: MutableList<BulletBehaviour> = mutableListOf()
+    private val behaviours: MutableSet<BulletBehaviour> = mutableSetOf()
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -386,6 +386,7 @@ class Card(
     }
 
     fun addBehaviour(behaviour: BulletBehaviour) {
+        if (behaviour in behaviours) return
         require(behaviour.supportsBeingAddedLater || !inGame) {
             "can't add behaviour $behaviour after initialization of card"
         }
