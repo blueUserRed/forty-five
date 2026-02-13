@@ -1506,7 +1506,7 @@ cards: [
         name: "damascusSteelBullet",
         title: "Damascus Steel Bullet",
         flavourText: "",
-        description: "$trait$JAMMED$trait$\n$trait$HARDENED$trait$ (2)",
+        description: "$trait$JAMMED$trait$\n$keyword$HARDENED$keyword$ (2)",
         baseDamage: 9,
         rotation: $Dont {},
         effects: [
@@ -1586,7 +1586,7 @@ cards: [
         name: "steelBullet",
         title: "Steel Bullet",
         flavourText: "",
-        description: "$trait$HARDENED$trait$ (2)",
+        description: "$keyword$HARDENED$keyword (2)",
         baseDamage: 12,
         effects: [
             {

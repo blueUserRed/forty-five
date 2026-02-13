@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
+import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.utils.*
 
@@ -41,7 +42,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
         if (detailActor !is Layout) return
         detailActor.validate()
         val width = detailActor.width
-        val height = detailActor.height
+        val height = detailActor.prefHeight
 
         val (x, y) = original.localToStageCoordinates(Vector2(0, 0))
         val yCoordinate =
@@ -128,137 +129,192 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> List<String>,
+        private val topText: () -> String = { "" },
         private val subtexts: () -> List<String> = { listOf() },
     ) : AdvancedTextDetailWidget(screen, effects, useDefaultEffects) {
 
         private var subtextParent: CustomBox? = null
-        private val distanceBetweenMainAndSub: Float = 10F
+        private var columns: Int = 0
 
         override fun generateDetailActor(addFadeInAction: Boolean): Actor? {
-            val texts = text.invoke().filter { it.isNotBlank() }
-            val width = 300F
-            generateSubtexts(width * 3 / 5)
+            val texts = text().filter { it.isNotBlank() }
+            val topText = topText()
+            val subtexts = subtexts()
 
-            if (subtextParent == null && texts.isEmpty()) return null
+            val subtextSplit = if (subtexts.size > 3) subtexts.size / 2 else 0
+            val firstSubtexts = subtexts.subList(0, subtextSplit)
+            val secondSubtexts = subtexts.subList(subtextSplit, subtexts.size)
+
+            val width = 300F
+
+            if (subtexts.isEmpty() && texts.isEmpty() && topText.isBlank()) return null
+
+            var actualWidth = 0f
 
             val parent = CustomBox(screen)
+            parent.flexDirection = FlexDirection.ROW
+            parent.horizontalAlign = CustomAlign.CENTER
             parent.verticalAlign = CustomAlign.START
-            parent.setPadding(15F)
-            parent.width = width
-            parent.onLayout { parent.height = parent.prefHeight.coerceAtLeast(200f) }
-            parent.minVerticalDistBetweenElements = 5f
-            parent.backgroundHandle = defBackground
-            parent.dropShadow = BakedDropShadow(
+            parent.fitContentInFlexDirection = true
+
+            val smallFontSize = 16
+            val bigFontSize = 18
+
+            if (firstSubtexts.isNotEmpty()) with(CustomBox(screen)) {
+                flexDirection = FlexDirection.COLUMN
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.END
+                this.width = width
+                onLayout { height = prefHeight }
+
+                firstSubtexts.forEach {
+                    val actor = AdvancedTextWidget(
+                        Triple("roadgeek", Color.FortyWhite, smallFontSize), screen
+                    )
+                    actor.marginBottom = 20f
+                    actor.backgroundHandle = defBackgroundSmall
+                    actor.dropShadow = BakedDropShadow(
+                        defBackgroundSmall,
+                        screen,
+                        0f, 0f,
+                        1.33f, 1.33f
+                    )
+                    actor.width = width
+                    actor.setRawText(it, effects)
+                    actor.fitContentHeight = true
+                    actor.setPadding(13F)
+                    addActor(actor)
+                }
+                actualWidth += width
+                parent.addActor(this)
+            }
+
+            val middleParent = CustomBox(screen)
+            middleParent.width = width
+            middleParent.flexDirection = FlexDirection.COLUMN
+            middleParent.fitContentInFlexDirection = true
+
+            if (topText.isNotBlank()) with(CustomBox(screen)) {
+                setPadding(15F)
+                this.width = width
+                fitContentInFlexDirection = true
+                backgroundHandle = defBackground
+                dropShadow = BakedDropShadow(
+                    defBackground,
+                    screen,
+                    0f, 0f,
+                    1.33f, 1.33f
+                )
+                val actor = AdvancedTextWidget(
+                    Triple("roadgeek", Color.FortyWhite, bigFontSize),
+                    screen
+                )
+                actor.width = 260f
+                actor.setRawText(topText, effects)
+                actor.fitContentHeight = true
+                addActor(actor)
+                middleParent.addActor(this)
+            }
+
+            val mainText = CustomBox(screen)
+            mainText.verticalAlign = CustomAlign.START
+            mainText.setPadding(15F)
+            mainText.width = width
+            mainText.onLayout { mainText.height = mainText.prefHeight.coerceAtLeast(200f) }
+            mainText.minVerticalDistBetweenElements = 5f
+            mainText.backgroundHandle = defBackground
+            mainText.dropShadow = BakedDropShadow(
                 defBackground,
                 screen,
                 0f, 0f,
                 1.33f, 1.33f
             )
-
-            val innerWidth = parent.width - parent.paddingLeft - parent.paddingRight
+            val innerWidth = mainText.width - mainText.paddingLeft - mainText.paddingRight
             texts.forEachIndexed { i, it ->
                 if (i != 0) {
                     val imgActor = CustomImageActor("forty_white_rounded", screen)
                     imgActor.width = innerWidth
                     imgActor.height = 2f
-                    parent.addActor(imgActor)
+                    mainText.addActor(imgActor)
                 }
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek", Color.FortyWhite, if (i == 0) 16 else 14),
+                    Triple("roadgeek", Color.FortyWhite, if (i == 0) bigFontSize else smallFontSize),
                     screen
                 )
                 actor.width = innerWidth
                 actor.setRawText(it, effects)
                 actor.fitContentHeight = true
-//                actor.paddingRight = 40f
-                parent.addActor(actor)
+                mainText.addActor(actor)
             }
+            middleParent.addActor(mainText)
+
+            parent.addActor(middleParent)
+            actualWidth += width
+
+            if (secondSubtexts.isNotEmpty()) with(CustomBox(screen)) {
+                flexDirection = FlexDirection.COLUMN
+                horizontalAlign = CustomAlign.CENTER
+                verticalAlign = CustomAlign.END
+                this.width = width
+                onLayout { height = prefHeight }
+
+                secondSubtexts.forEach {
+                    val actor = AdvancedTextWidget(
+                        Triple("roadgeek", Color.FortyWhite, smallFontSize), screen
+                    )
+                    actor.marginBottom = 20f
+                    actor.backgroundHandle = defBackgroundSmall
+                    actor.dropShadow = BakedDropShadow(
+                        defBackgroundSmall,
+                        screen,
+                        0f, 0f,
+                        1.33f, 1.33f
+                    )
+                    actor.width = width
+                    actor.setRawText(it, effects)
+                    actor.fitContentHeight = true
+                    actor.setPadding(13F)
+                    addActor(actor)
+                }
+                actualWidth += width
+                parent.addActor(this)
+            }
+
+            parent.width = actualWidth
+            columns = (actualWidth / width).toInt()
             if (addFadeInAction) addFadeInAction(parent)
             return parent
         }
 
-        @Suppress("SameParameterValue")
-        private fun generateSubtexts(width: Float) {
-            val texts = subtexts.invoke().filter { it.isNotBlank() }
-            if (texts.isEmpty()) {
-                subtextParent = null
-                return
-            }
-            val parent = CustomBox(screen)
-            parent.width = width
-            parent.minVerticalDistBetweenElements = 10F
-
-            texts.forEach {
-                val actor = AdvancedTextWidget(
-                    Triple("roadgeek", Color.FortyWhite, 14), screen
-                )
-                actor.backgroundHandle = defBackgroundSmall
-                actor.dropShadow = BakedDropShadow(
-                    defBackgroundSmall,
-                    screen,
-                    0f, 0f,
-                    1.33f, 1.33f
-                )
-                actor.width = width
-                actor.setRawText(it, effects)
-                actor.setPadding(13F)
-                parent.addActor(actor)
-                actor.fitContentHeight = true
-            }
-            parent.fitContentInFlexDirection = true
-            subtextParent = parent
-        }
-
-        @Suppress("SameParameterValue")
-        private fun getSingleTextParent(text: List<String>): Actor {
-            val actor = AdvancedTextWidget(
-                Triple("red wing", Color.FortyWhite, 15),
-                screen
-            )
-            val group = CustomGroup(screen)
-            group.backgroundHandle = defBackgroundSmall
-            group.dropShadow = BakedDropShadow(
-                defBackgroundSmall,
-                screen,
-                0f, 0f,
-                1.33f, 1.33f
-            )
-            group.width = 200F
-            group.height = 150F
-            actor.width = group.width
-            actor.setRawText(text.firstOrNull() ?: "", effects)
-            actor.setPadding(15F)
-            group.addActor(actor)
-            actor.onLayout {
-                actor.height = actor.prefHeight
-                actor.x = group.width / 2f - actor.width / 2f
-                actor.y = group.height / 2f - actor.height / 2f
-            }
-            return group
-        }
 
         override fun drawDetailActor(batch: Batch) {
             val shownAlpha1 = shownAlpha
             detailActor?.draw(batch, shownAlpha1)
-            subtextParent?.draw(batch, shownAlpha1)
         }
 
         override fun updateBounds(original: Actor) {
             super.updateBounds(original)
-            val sub = subtextParent ?: return
-            val main = detailActor ?: return
-            val worldWidth = screen.stage.viewport.worldWidth
-            val x = if (main.x + main.width + sub.width + distanceBetweenMainAndSub >= worldWidth) {
-                main.x - sub.width - distanceBetweenMainAndSub
-            } else {
-                main.x + main.width + distanceBetweenMainAndSub
-            }
-            val y = (main.y + main.height - sub.prefHeight).between(0F, screen.stage.viewport.worldHeight)
-            sub.setBounds(
-                x,
-                y,
-                sub.width,
-                sub.prefHeight
+            val detailActor = detailActor
+            if (detailActor !is Layout) return
+            detailActor.validate()
+            val width = detailActor.width
+            val height = detailActor.prefHeight
+
+            val (x, y) = original.localToStageCoordinates(Vector2(0, 0))
+            val yCoordinate =
+                if (y + original.height + height > screen.stage.viewport.worldHeight) {
+                    y - height
+                } else {
+                    y + original.height
+                }
+            var xCoordinate = (x + original.width / 2 - width / 2)
+            if (columns == 2) xCoordinate += 150
+            xCoordinate = xCoordinate.between(0F, screen.stage.viewport.worldWidth - width)
+            detailActor.setBounds(
+                xCoordinate,
+                yCoordinate,
+                width,
+                height
             )
         }
 

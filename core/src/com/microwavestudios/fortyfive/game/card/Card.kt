@@ -20,6 +20,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
@@ -193,11 +194,7 @@ class Card(
 
     var isRotten: Boolean = false
         private set
-    var isSpray: Boolean = false
-        private set
     var isReinforced: Boolean = false
-        private set
-    var isThorns: Boolean = false
         private set
     var isPunk: Boolean = false
         private set
@@ -424,11 +421,18 @@ class Card(
     fun afterShot(
         controller: GameController,
         wasParry: Boolean,
+        parryDamage: Int,
         putCardInTheHand: (Card) -> Timeline,
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
+        later {
+            behaviours
+                .mapNotNull { it.afterShotTimeline(this@Card, controller, wasParry, parryDamage) }
+                .collectTimeline()
+                .let { include(it) }
+        }
         action {
-            if (behaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry) }) {
+            if (behaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
                 skip()
                 return@action
             }
@@ -463,7 +467,7 @@ class Card(
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
             modifiersChanged()
         }
-        if (behaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry) }) {
+        if (behaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }) {
             include(putCardInTheHand(this@Card))
         } else {
             include(putCardInTheStack(this@Card))
@@ -489,6 +493,13 @@ class Card(
         }
         parryOnlyProtectingModifiers.add(protectingModifier.copy())
         modifiersChanged()
+    }
+
+    fun targetedEnemies(controller: GameController): List<Enemy> {
+        behaviours.forEach { behaviour ->
+            behaviour.targetedEnemies(controller, this)?.let { return it }
+        }
+        return listOf(controller.targetedEnemy())
     }
 
     /**
@@ -845,11 +856,11 @@ class Card(
             "everlasting" -> card.addBehaviour(BulletBehaviour.Everlasting)
             "undead" -> card.addBehaviour(BulletBehaviour.Undead)
             "replaceable" -> card.addBehaviour(BulletBehaviour.Replaceable)
-            "spray" -> card.isSpray = true
+            "spray" -> card.addBehaviour(BulletBehaviour.Spray)
             "reinforced" -> card.isReinforced = true
             "shotProtected" -> card.addBehaviour(BulletBehaviour.ShotProtected)
             "rotten" -> card.isRotten = true
-            "thorns" -> card.isThorns = true
+            "thorns" -> card.addBehaviour(BulletBehaviour.Thorns)
             "punk" -> card.isPunk = true
             "persistence" -> card.isPersistent = true
             "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
@@ -923,6 +934,11 @@ class CardActor(
             list.add(card.shortDescription)
             list.add(card.flavourText)
             list
+        },
+        topText = {
+            card.stamp?.let { stamp ->
+                $$"$stamp$§§$${stamp.icon}§§  $${stamp.title}$stamp$\n\n\n$${stamp.description}"
+            } ?: ""
         },
         subtexts = getEffectTexts()
     )
@@ -1317,21 +1333,31 @@ class CardActor(
     }
 
     private fun getEffectTexts(): () -> List<String> = {
-        val allKeys = card.getKeyWordsForDescriptions()
+        val allKeys = card.getKeyWordsForDescriptions() +
+                DetailDescriptionHandler.getKeyWordsFromDescription(card.stamp?.description ?: "")
         val texts: MutableList<String> = mutableListOf()
 
-        card.stamp?.let { stamp ->
-            texts.add("\$stamp$§§${stamp.icon}§§  ${stamp.title}\$stamp$\n\n\n${stamp.description}")
-            DetailDescriptionHandler
-                .getKeyWordsFromDescription(stamp.description)
-                .mapNotNull { DetailDescriptionHandler.descriptions[it] }
-                .forEach { texts.add(it.second) }
-        }
-
-        texts.addAll(DetailDescriptionHandler
-            .descriptions
-            .filter { it.key in allKeys }.map { it.value.second })
         texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
+
+        val addedDescriptions = mutableSetOf<String>()
+        allKeys.forEach { key ->
+            if (key in addedDescriptions) return@forEach
+            addedDescriptions.add(key)
+            DetailDescriptionHandler.descriptions[key]?.let { texts.add(it.second) }
+        }
+        while (true) {
+            val keywords = texts.flatMap { text ->
+                DetailDescriptionHandler.getKeyWordsFromDescription(text)
+            }
+            var addedText = false
+            keywords.forEach { keyword ->
+                if (keyword in addedDescriptions) return@forEach
+                addedDescriptions.add(keyword)
+                addedText = true
+                DetailDescriptionHandler.descriptions[keyword]?.let { texts.add(it.second) }
+            }
+            if (!addedText) break
+        }
         texts
     }
 

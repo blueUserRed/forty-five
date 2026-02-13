@@ -16,6 +16,7 @@ abstract class Stamp(
     /**
      * Short description of what the stamp does. Uses
      * [AdvancedText][com.microwavestudios.fortyfive.screen.commonComponents.AdvancedText] formatting.
+     * Can reference keywords/traits or status effects from descriptions.onj
      */
     abstract val description: String
     /**
@@ -42,7 +43,10 @@ abstract class Stamp(
 
     object Bewitched : Stamp("bewitched", "Bewitched") {
 
-        override val description: String = "The revolver rotates left instead of right"
+        override val description: String = """
+            The revolver rotates left instead of right when shooting or parrying with this bullet.
+        """.trimIndent().replace('\n', ' ')
+
         override val icon: ResourceHandle = "card_stamp_test"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Bewitched)
@@ -51,8 +55,7 @@ abstract class Stamp(
     object PoisonTip : Stamp("poisonTip", "Poison Tip") {
 
         override val description: String = $$"""
-            When $status$POISON$status$ is active, adds the dmg value to the dmg value of the poison
-            status effect instead of dealing dmg On-Shot
+           This Bullet has $keyword$POISON TIP$keyword$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"

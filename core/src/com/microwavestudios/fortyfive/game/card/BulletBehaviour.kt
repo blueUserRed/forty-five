@@ -3,6 +3,9 @@ package com.microwavestudios.fortyfive.game.card
 import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.collectTimeline
 
 abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
 
@@ -26,6 +29,9 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
      */
     open fun modifyParryValue(card: Card, controller: GameController, parryValue: Int): Int = parryValue
 
+    /**
+     * called immediately after the behaviour is added to the bullet
+     */
     open fun init(card: Card) {}
 
     /**
@@ -37,23 +43,62 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         direction: RevolverRotation
     ): RevolverRotation = direction
 
+    /**
+     * called after the bullet is shot or parried with. When true is returned, the bullet will remain in the revolver
+     * and not protecting modifiers will be used up
+     */
     open fun keepInRevolverAfterShot(
         card: Card,
         controller: GameController,
-        wasParry: Boolean
+        wasParry: Boolean,
+        parryDamage: Int,
     ): Boolean = false
 
+    /**
+     * called after the bullet is shot or parried with. When true is returned, the bullet is put in the hand, when
+     * false is returned, the bullet is put in the drawpile (the normal behaviour)
+     */
     open fun putInHandInsteadOfStackAfterShot(
         card: Card,
         controller: GameController,
-        wasParry: Boolean
+        wasParry: Boolean,
+        parryDamage: Int,
     ): Boolean = false
 
+    /**
+     * called when something tries to apply a protecting modifier to the bullet. If true is returned, the modifier
+     * will not be applied
+     */
     open fun disableProtectingModifiers(): Boolean = false
 
+    /**
+     * called when this bullet is in the revolver and the player drags another bullet from the hand to this bullet.
+     * If the function returns true, this bullet will be replaced by the other bullet
+     */
     open fun canBeReplaced(controller: GameController, card: Card, by: Card): Boolean = false
 
+    /**
+     * called when the bullet is about to be shot. If true is returned, the player is not allowed to shoot the revolver
+     */
     open fun preventsShooting(controller: GameController, card: Card): Boolean = false
+
+    /**
+     * overrides the enemies targeted by the bullet. If null is returned, `controller.targetedEnemy()` is used. If
+     * multiple behaviours override this function, the first behaviour that doesn't return null takes priority
+     */
+    open fun targetedEnemies(controller: GameController, card: Card): List<Enemy>? = null
+
+    /**
+     * called after the bullet was shot or parried with, but before it is returned to the drawpile/hand. If a
+     * timeline is returned, it will be included in the GameControllers main-timeline.
+     */
+    open fun afterShotTimeline(
+        card: Card,
+        controller: GameController,
+        wasParry: Boolean,
+        parryDamage: Int
+    ): Timeline? = null
+
 
     object Bewitched : BulletBehaviour(true) {
 
@@ -66,7 +111,6 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             return direction
         }
     }
-
 
     object PoisonTip : BulletBehaviour(true) {
 
@@ -94,7 +138,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun keepInRevolverAfterShot(
             card: Card,
             controller: GameController,
-            wasParry: Boolean
+            wasParry: Boolean,
+            parryDamage: Int
         ): Boolean = !controller.isEverlastingDisabled
     }
 
@@ -103,7 +148,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun putInHandInsteadOfStackAfterShot(
             card: Card,
             controller: GameController,
-            wasParry: Boolean
+            wasParry: Boolean,
+            parryDamage: Int
         ): Boolean = true
 
         override fun disableProtectingModifiers(): Boolean = true
@@ -130,4 +176,27 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         ): Boolean = true
     }
 
+    object Spray : BulletBehaviour(true) {
+
+        override fun targetedEnemies(
+            controller: GameController,
+            card: Card
+        ): List<Enemy> = controller.allEnemies
+    }
+
+    object Thorns : BulletBehaviour(true) {
+
+        override fun afterShotTimeline(
+            card: Card,
+            controller: GameController,
+            wasParry: Boolean,
+            parryDamage: Int
+        ): Timeline? {
+            if (!wasParry) return null
+            return card
+                .targetedEnemies(controller)
+                .map { it.damage(parryDamage) }
+                .collectTimeline()
+        }
+    }
 }
