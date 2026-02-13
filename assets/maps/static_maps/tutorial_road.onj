@@ -8,7 +8,20 @@ var encounter = [
         minorDifficulty: 1.0,
         unadjustedMajorDifficulty: 0,
         majorDifficulty: 0,
-        forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ],
+        forceCards: [
+            {
+                name: "bullet"
+            },
+            {
+                name: "bullet"
+            },
+            {
+                name: "bullet"
+            },
+            {
+                name: "bigBullet"
+            }
+        ],
     },
     {
         enemies: ["tutorial_enemy_2"],
@@ -18,7 +31,12 @@ var encounter = [
         minorDifficulty: 1.0,
         unadjustedMajorDifficulty: 0,
         majorDifficulty: 0,
-        forceCards: [ "bullet", "bigBullet", "bullet", "bullet" ],
+        forceCards: [
+            { name: "bullet" },
+            { name: "bigBullet" },
+            { name: "bullet" },
+            { name: "bullet" }
+        ],
     },
     {
         // TODO: encounter is beatable without using silver bullet
@@ -29,7 +47,13 @@ var encounter = [
         minorDifficulty: 1.0,
         unadjustedMajorDifficulty: 0,
         majorDifficulty: 0,
-        forceCards: [ "bullet", "bullet", "bullet", "bigBullet", "silverBullet" ],
+        forceCards: [
+            { name: "bullet" },
+            { name: "bullet" },
+            { name: "bullet" },
+            { name: "bigBullet" },
+            { name: "silverBullet" }
+        ],
     },
     {
         enemies: ["tutorial_enemy_4"],
@@ -40,7 +64,12 @@ var encounter = [
         unadjustedMajorDifficulty: 0,
         majorDifficulty: 0,
         forceCards: [
-            "bigBullet", "silverBullet", "workerBullet", "bullet", "bullet", "bullet",
+            { name: "bigBullet" },
+            { name: "silverBullet" },
+            { name: "workerBullet" },
+            { name: "bullet" },
+            { name: "bullet" },
+            { name: "bullet" },
         ],
     },
     {
@@ -52,7 +81,13 @@ var encounter = [
         unadjustedMajorDifficulty: 0,
         majorDifficulty: 0,
         forceCards: [
-            "bullet", "bullet", "bigBullet", "incendiaryBullet", "workerBullet", "bullet", "silverBullet",
+            { name: "bullet" },
+            { name: "bullet" },
+            { name: "bigBullet" },
+            { name: "incendiaryBullet" },
+            { name: "workerBullet" },
+            { name: "bullet" },
+            { name: "silverBullet" },
         ],
     },
     {
@@ -64,7 +99,14 @@ var encounter = [
         unadjustedMajorDifficulty: 0,
         majorDifficulty: 0,
         forceCards: [
-            "bullet", "leadersBullet", "bigBullet", "incendiaryBullet", "workerBullet", "bullet", "bullet", "silverBullet",
+            { name: "bullet" },
+            { name: "leadersBullet" },
+            { name: "bigBullet" },
+            { name: "incendiaryBullet" },
+            { name: "workerBullet" },
+            { name: "bullet" },
+            { name: "bullet" },
+            { name: "silverBullet" },
         ],
     },
 ];

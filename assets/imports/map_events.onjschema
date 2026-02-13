@@ -1,4 +1,5 @@
 import "imports/map_predicates.onjschema" as _;
+import "onjschemas/card_type.onjschema" as cardType;
 
 $DifficultyScaling {
     $LinearScaling {}
@@ -18,7 +19,7 @@ var mapEventStandardConfig = {
 var encounter = {
     enemies: string[],
     encounterModifier: string[],
-    forceCards: string[]?,
+    forceCards: cardType[]?,
     shuffleCards: boolean,
     unadjustedMajorDifficulty: int,
     majorDifficulty: int,
