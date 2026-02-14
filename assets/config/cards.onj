@@ -1972,6 +1972,36 @@ cards: [
         tags: [ "pool1", "rarity3" ],
         price: 50,
     },
+    {
+        name: "amplifyingBullet",
+        title: "Amplifying Bullet",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\nWhenever a bullet gets a buff that is caused by another Bulleteffect:\nit additionally gets +4 dmg",
+        baseDamage: 6,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                isHidden: true,
+                effect: addTemporaryBehaviourLimitBySourceBullet(
+                    amplifyBehaviour(4),
+                    inZone(zone.revolver)#bSelect,
+                    inZone(zone.revolver)
+                )
+            },
+            {
+                trigger: enterZone(zone.revolver, allCardsTrigger) mustMatchPredicate inZone(zone.revolver),
+                isHidden: true,
+                effect: addTemporaryBehaviourLimitBySourceBullet(
+                    amplifyBehaviour(4),
+                    bSelectSituationBullets(),
+                    inZone(zone.revolver)
+                )
+            },
+        ],
+        cost: 2,
+        tags: [ "pool1", "rarity1" ],
+        price: 50,
+    },
 
 ],
 

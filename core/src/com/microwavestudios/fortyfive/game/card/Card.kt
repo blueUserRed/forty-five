@@ -201,7 +201,9 @@ class Card(
     var isPersistent: Boolean = false
         private set
 
-    private val behaviours: MutableSet<BulletBehaviour> = mutableSetOf()
+    private val behaviours: MutableMap<BulletBehaviour, Pair<Boolean, MutableList<() -> Boolean>>> = mutableMapOf()
+    private val activeBehaviours: Set<BulletBehaviour>
+        get() = behaviours.keys
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -290,7 +292,7 @@ class Card(
     }
 
     fun canBeReplaced(controller: GameController, by: Card): Boolean =
-        behaviours.any { it.canBeReplaced(controller, this, by) }
+        activeBehaviours.any { it.canBeReplaced(controller, this, by) }
 
     fun clearProtectingModifiers() {
         protectingModifiers.clear()
@@ -349,6 +351,19 @@ class Card(
         return somethingChanged
     }
 
+    private fun checkTemporaryBehaviours(): Boolean {
+        var somethingChanged = false
+        behaviours.iterateRemoving { (_, value), remover ->
+            val (permanent, conditions) = value
+            if (permanent) return@iterateRemoving
+            conditions.removeIf { !it() }
+            if (conditions.isNotEmpty()) return@iterateRemoving
+            somethingChanged = true
+            remover()
+        }
+        return somethingChanged
+    }
+
     /**
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
@@ -357,11 +372,13 @@ class Card(
             checkValiditySingleModifierList(controller, costModifiers, getter = { it }) or
             checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) or
             checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) or
-            checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
+            checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it }) or
+            checkTemporaryBehaviours()
         if (somethingChanged) modifiersChanged()
     }
 
-    fun canBeShot(controller: GameController): Boolean = behaviours.none { it.preventsShooting(controller, this) }
+    fun canBeShot(controller: GameController): Boolean =
+        activeBehaviours.none { it.preventsShooting(controller, this) }
 
     fun update(controller: GameController) {
         checkModifierValidity(controller)
@@ -390,7 +407,22 @@ class Card(
         require(behaviour.supportsBeingAddedLater || !inGame) {
             "can't add behaviour $behaviour after initialization of card"
         }
-        behaviours.add(behaviour)
+        behaviours[behaviour] = true to mutableListOf()
+        behaviour.additionalEffects()?.let { _effects.addAll(it) }
+        behaviour.init(this)
+    }
+
+    fun addTemporaryBehaviour(behaviour: BulletBehaviour, condition: () -> Boolean) {
+        require(behaviour.supportsBeingAddedLater) {
+            "can't add temporary behaviour $behaviour after initialization of card"
+        }
+        if (behaviour in behaviours) {
+            val (permanent, conditions) = behaviours[behaviour]!!
+            if (permanent) return
+            conditions.add(condition)
+            return
+        }
+        behaviours[behaviour] = true to mutableListOf(condition)
         behaviour.additionalEffects()?.let { _effects.addAll(it) }
         behaviour.init(this)
     }
@@ -403,12 +435,12 @@ class Card(
 
     fun curOnShotDamage(controller: GameController): Int {
         val damage = curDamage(controller)
-        return behaviours.fold(damage) { acc, cur -> cur.modifyOnShotDamage(this, controller, acc) }
+        return activeBehaviours.fold(damage) { acc, cur -> cur.modifyOnShotDamage(this, controller, acc) }
     }
 
     fun curParryValue(controller: GameController): Int {
         val parryValue = parryNumber ?: curDamage(controller)
-        return behaviours.fold(parryValue) { acc, cur -> cur.modifyParryValue(this, controller, acc) }
+        return activeBehaviours.fold(parryValue) { acc, cur -> cur.modifyParryValue(this, controller, acc) }
     }
 
     fun curCost(controller: GameController): Int = costModifiers
@@ -427,13 +459,13 @@ class Card(
         putCardInTheStack: (Card) -> Timeline
     ): Timeline = Timeline.timeline { skipping { skip ->
         later {
-            behaviours
+            activeBehaviours
                 .mapNotNull { it.afterShotTimeline(this@Card, controller, wasParry, parryDamage) }
                 .collectTimeline()
                 .let { include(it) }
         }
         action {
-            if (behaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
+            if (activeBehaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
                 skip()
                 return@action
             }
@@ -468,7 +500,9 @@ class Card(
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
             modifiersChanged()
         }
-        if (behaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }) {
+        val putInHand =
+            activeBehaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }
+        if (putInHand) {
             include(putCardInTheHand(this@Card))
         } else {
             include(putCardInTheStack(this@Card))
@@ -481,7 +515,7 @@ class Card(
     }
 
     fun protect(protectingModifier: ProtectingModifier) {
-        if (behaviours.any { it.disableProtectingModifiers() }) {
+        if (activeBehaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         protectingModifiers.add(protectingModifier.copy())
@@ -489,7 +523,7 @@ class Card(
     }
 
     fun protectParryOnly(protectingModifier: ProtectingModifier) {
-        if (behaviours.any { it.disableProtectingModifiers() }) {
+        if (activeBehaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         parryOnlyProtectingModifiers.add(protectingModifier.copy())
@@ -497,7 +531,7 @@ class Card(
     }
 
     fun targetedEnemies(controller: GameController): List<Enemy> {
-        behaviours.forEach { behaviour ->
+        activeBehaviours.forEach { behaviour ->
             behaviour.targetedEnemies(controller, this)?.let { return it }
         }
         return listOf(controller.targetedEnemy())
@@ -513,9 +547,11 @@ class Card(
             .none { it.blocks(this, controller) }
     }
 
-    fun addDamageModifier(modifier: CardDamageModifier) {
+    fun addDamageModifier(modifier: CardDamageModifier, controller: GameController) {
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
-        damageModifiers.add(++damageModifierCounter to modifier.copy())
+        var newModifier = modifier.copy()
+        newModifier = activeBehaviours.fold(newModifier) { acc, cur -> cur.modifyDamageModifier(this, controller, acc) }
+        damageModifiers.add(++damageModifierCounter to newModifier)
         modifiersChanged()
     }
 
@@ -544,7 +580,7 @@ class Card(
                 Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
             )
         )
-        addDamageModifier(modifier)
+        addDamageModifier(modifier, controller)
     }
 
     /**
@@ -597,7 +633,7 @@ class Card(
                         include(anim)
                     }
                 }
-                include(effect.trigger(this@Card, triggerInformation, controller))
+                include(effect.trigger(this@Card, triggerInformation, controller, situation))
                 later {
                     if (!isInTriggerPosition) return@later
                     if (zone == zoneAtStart) return@later
@@ -618,7 +654,7 @@ class Card(
     } }
 
     fun getRotationDirection(controller: GameController): RevolverRotation =
-        behaviours.fold(rotationDirection) { acc, cur -> cur.modifyRotationDirection(this, controller, acc) }
+        activeBehaviours.fold(rotationDirection) { acc, cur -> cur.modifyRotationDirection(this, controller, acc) }
 
     private fun checkModifierTransformers(
         situation: GameSituation,

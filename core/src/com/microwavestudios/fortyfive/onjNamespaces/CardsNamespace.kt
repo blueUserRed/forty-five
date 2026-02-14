@@ -35,7 +35,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Trigger" to OnjTrigger::class,
         "VariableTextureSelector" to OnjVariableTextureSelector::class,
         "RevolverSlotGetter" to OnjRevolverSlotGetter::class,
-        "CardType" to OnjCardType::class
+        "CardType" to OnjCardType::class,
+        "Behaviour" to OnjBulletBehaviour::class
     )
 
     @OnjNamespaceVariables
@@ -506,6 +507,18 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Behaviour, BulletSelector, CardPredicate]")
+    fun addTemporaryBehaviourLimitBySourceBullet(
+        behaviour: OnjBulletBehaviour,
+        targetSelector: OnjBulletSelector,
+        sourceCardPredicate: OnjCardPredicate
+    ): OnjEffect = OnjEffect(Effect.AddTemporaryBehaviour(
+        behaviour.value,
+        targetSelector.value,
+        sourceCardPredicate.value,
+        EffectData()
+    ))
+
     @RegisterOnjFunction(schema = "params: []")
     fun triggerNever(): OnjTrigger = OnjTrigger(Trigger.Never)
 
@@ -700,6 +713,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [Trigger, CardPredicate]", type = OnjFunctionType.INFIX)
     fun mustMatchPredicate(toModify: OnjTrigger, predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
         Trigger { situation, card, information, controller ->
+            println(card)
             val originalTrigger = toModify.value.check(situation, card, information, controller)
             if (!originalTrigger) return@Trigger false
             predicate.value.check(card, controller, card)
@@ -779,9 +793,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun or(first: OnjCardPredicate, second: OnjCardPredicate): OnjCardPredicate =
         OnjCardPredicate(CardPredicate.or(first.value, second.value))
 
+
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]", type = OnjFunctionType.CONVERSION)
     fun bSelect(predicate: OnjCardPredicate): OnjBulletSelector = OnjBulletSelector(
-        BulletSelector.ByLambda { info, card ->
+        BulletSelector.ByLambda { info, card, _ ->
             val p = predicate.value
             val controller = info.controller
             controller.allCards.filter { cardToCheck ->
@@ -789,7 +804,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
         }
     )
-
 
     @RegisterOnjFunction(schema = "params: [boolean, boolean, string]")
     fun bSelectRevolverTarget(includeSelf: OnjBoolean, optional: OnjBoolean, text: OnjString): OnjBulletSelector =
@@ -800,7 +814,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         OnjBulletSelector(BulletSelector.HandCardByPopup(includeSelf.value, optional.value, text.value))
 
     @RegisterOnjFunction(schema = "params: []")
-    fun bSelectSourceBullet(): OnjBulletSelector = OnjBulletSelector(BulletSelector.ByLambda { info, card ->
+    fun bSelectSourceBullet(): OnjBulletSelector = OnjBulletSelector(BulletSelector.ByLambda { info, card, _ ->
         listOf(
             info.sourceCard ?: throw RuntimeException("effect of $card doesn't result in any source bullet")
         )
@@ -820,13 +834,25 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction("params: []")
     fun bSelectSelf(): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { _, card -> listOf(card) })
+        return OnjBulletSelector(BulletSelector.ByLambda { _, card, _ -> listOf(card) })
     }
 
     @RegisterOnjFunction("params: []")
     fun bSelectCachedBullets() = OnjBulletSelector(
-        BulletSelector.ByLambda { _, card -> card.lastEffectAffectedCardsCache }
+        BulletSelector.ByLambda { _, card, _ -> card.lastEffectAffectedCardsCache }
     )
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectAllBullets() = OnjBulletSelector(
+        BulletSelector.ByLambda { info, card, _ -> info.controller.allCards }
+    )
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectSituationBullets() = OnjBulletSelector(
+        BulletSelector.ByLambda { info, card, situation -> situation.relevantCards }
+    )
+
+
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun poison(damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
@@ -899,6 +925,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             skipFirstRotation
         )
     }
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun amplifyBehaviour(damage: OnjInt): OnjBulletBehaviour = OnjBulletBehaviour(
+        BulletBehaviour.Amplify(damage.value.toInt())
+    )
 
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
@@ -1142,5 +1173,13 @@ class OnjCardType(
 ) : OnjValue() {
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--cardType--'")
+    }
+}
+
+class OnjBulletBehaviour(
+    override val value: BulletBehaviour
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--bulletBehaviour--'")
     }
 }
