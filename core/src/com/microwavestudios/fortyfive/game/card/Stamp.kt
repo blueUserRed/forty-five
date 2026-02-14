@@ -66,6 +66,94 @@ abstract class Stamp(
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.PoisonTip)
     }
 
+    object Jammed : Stamp("jammed", "Jammed") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$Jammed$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Jammed)
+    }
+
+    object Undead : Stamp("undead", "Undead") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$Undead$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Undead)
+    }
+
+    object Gauge : Stamp("gauge", "Gauge") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$Spray$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spray)
+    }
+
+    object HighVelocity : Stamp("highVelocity", "High Velocity") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$High Velocity$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.HighVelocity)
+    }
+
+    object Phantom : Stamp("phantom", "Phantom") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$Phantom$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Phantom)
+    }
+
+    object Catalyst : Stamp("catalyst", "Catalyst") {
+
+        override val description: String = """
+            When shooting this Bullet at an enemy, add 1 to every parameter of all status effects this enemy has.
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Catalyst)
+    }
+
+    object Spirit : Stamp("spirit", "Spirit") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$Spirit$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spirit)
+    }
+
+    object FiftyCal : Stamp("fiftyCal", ".50 Cal") {
+
+        override val description: String = $$"""
+            This bullet has $keyword$Piercing$keyword$
+        """.trimIndent().replace('\n', ' ')
+
+        override val icon: ResourceHandle = "card_stamp_test"
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.FiftyCal)
+    }
+
 }
 
 /**
@@ -78,6 +166,14 @@ object StampFactory {
     init {
         addStampCreator(Stamp.Bewitched.name) { Stamp.Bewitched }
         addStampCreator(Stamp.PoisonTip.name) { Stamp.PoisonTip }
+        addStampCreator(Stamp.Jammed.name) { Stamp.Jammed }
+        addStampCreator(Stamp.Undead.name) { Stamp.Undead }
+        addStampCreator(Stamp.Gauge.name) { Stamp.Gauge }
+        addStampCreator(Stamp.HighVelocity.name) { Stamp.HighVelocity }
+        addStampCreator(Stamp.Phantom.name) { Stamp.Phantom }
+        addStampCreator(Stamp.Catalyst.name) { Stamp.Catalyst }
+        addStampCreator(Stamp.Spirit.name) { Stamp.Spirit }
+        addStampCreator(Stamp.FiftyCal.name) { Stamp.FiftyCal }
     }
 
     fun addStampCreator(name: String, creator: () -> Stamp) {
