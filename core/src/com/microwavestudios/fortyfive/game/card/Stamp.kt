@@ -85,7 +85,7 @@ abstract class Stamp(
 
         override val icon: ResourceHandle = "card_stamp_test"
 
-        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Undead)
+        override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Undead)
     }
 
     object Gauge : Stamp("gauge", "Gauge") {
@@ -96,7 +96,7 @@ abstract class Stamp(
 
         override val icon: ResourceHandle = "card_stamp_test"
 
-        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spray)
+        override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spray)
     }
 
     object HighVelocity : Stamp("highVelocity", "High Velocity") {

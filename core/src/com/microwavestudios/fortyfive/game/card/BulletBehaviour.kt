@@ -216,4 +216,17 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
 
         override fun equals(other: Any?): Boolean = other is Thorns
     }
+
+    // Unsure if this works
+    object Jammed : BulletBehaviour(supportsBeingAddedLater = true) {
+        override fun modifyRotationDirection(
+            card: Card,
+            controller: GameController,
+            direction: RevolverRotation
+        ): RevolverRotation {
+            return RevolverRotation.None
+        }
+
+        override fun equals(other: Any?): Boolean = other is Jammed
+    }
 }
