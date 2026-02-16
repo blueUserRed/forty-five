@@ -60,6 +60,11 @@ abstract class StatusEffect(
     override fun hashCode(): Int {
         return this::class.qualifiedName?.hashCode() ?: 0
     }
+
+    open fun increment(amount: Int)
+    {
+        //Idk what to put in here, just used as a placeholder to override in child classes that need it
+    }
 }
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
@@ -92,7 +97,7 @@ abstract class RotationBasedStatusEffect(
         "inf"
     }
 
-    public fun extendDuration(extension: Int) {
+    protected fun extendDuration(extension: Int) {
         duration += extension
     }
 
@@ -103,6 +108,10 @@ abstract class RotationBasedStatusEffect(
     protected fun stackRotationEffect(other: RotationBasedStatusEffect) {
         duration += other.duration
         if (other.continueForever) continueForever = true
+    }
+
+    override fun increment(amount: Int) {
+        extendDuration(amount)
     }
 }
 
@@ -136,7 +145,7 @@ abstract class TurnBasedStatusEffect(
         "inf"
     }
 
-    public fun extendDuration(extension: Int) {
+    protected fun extendDuration(extension: Int) {
         duration += extension
     }
 
@@ -151,6 +160,10 @@ abstract class TurnBasedStatusEffect(
     protected fun stackTurnEffect(other: TurnBasedStatusEffect) {
         duration += other.duration
         if (other.continueForever) continueForever = true
+    }
+
+    override fun increment(amount: Int) {
+        extendDuration(amount)
     }
 }
 
@@ -266,9 +279,8 @@ class Poison(
         damage += other.damage
     }
 
-    override fun modifyDamage(newDamage: Int): Int {
-        damage = newDamage
-        return damage
+    override fun increment(amount: Int) {
+        damage += amount
     }
 
     override fun isStillValid(): Boolean = damage > 0

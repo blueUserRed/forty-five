@@ -249,24 +249,27 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             {
                 for(status in enemy.statusEffects)
                 {
-                    //TODO: Surely a better way than this
-                    val rot = status as? RotationBasedStatusEffect
-                    rot?.extendDuration(1)
-
-                    val turn = status as? TurnBasedStatusEffect
-                    turn?.extendDuration(1)
-
-                    val poison = status as? Poison
-                    poison?.modifyDamage(poison.damage + 1)
+                    status.increment(1)
                 }
             }
 
             return super.modifyOnShotDamage(card, controller, damage)
         }
-
-//
-
-
         override fun equals(other: Any?): Boolean = other is Catalyst
+    }
+
+    object Spirit : BulletBehaviour(supportsBeingAddedLater = true) {
+
+        //Check how the card was drawn, if != drawfromtop, deal damage
+        var drawnFromTop: Boolean = false
+
+
+
+        //Does no damage on shot
+        override fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int {
+            return 0
+        }
+
+        override fun equals(other: Any?): Boolean = other is Spirit
     }
 }
