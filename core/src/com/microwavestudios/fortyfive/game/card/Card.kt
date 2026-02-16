@@ -200,6 +200,8 @@ class Card(
         private set
     var isPersistent: Boolean = false
         private set
+    var isPiercing: Boolean = false
+        private set
 
     private val behaviours: MutableSet<BulletBehaviour> = mutableSetOf()
 
@@ -866,6 +868,7 @@ class Card(
             "persistence" -> card.isPersistent = true
             "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
             "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
+            "piercing" -> card.isPiercing = true
 
             else -> throw RuntimeException("unknown trait effect $effect")
         }

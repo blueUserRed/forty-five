@@ -1155,7 +1155,7 @@ class GameControllerImpl(
         }
         cardToShoot?.let { card ->
             targetedEnemies
-                .map { it.damage(cardToShoot.curOnShotDamage(controller)) }
+                .map { it.damage(cardToShoot.curOnShotDamage(controller), cardToShoot.isPiercing) }
                 .collectTimeline()
                 .let { include(it) }
             // Not handled via event because things like encounter modifiers or

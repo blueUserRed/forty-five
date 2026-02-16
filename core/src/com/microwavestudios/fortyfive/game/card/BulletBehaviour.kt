@@ -217,7 +217,6 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun equals(other: Any?): Boolean = other is Thorns
     }
 
-    // Unsure if this works
     object Jammed : BulletBehaviour(supportsBeingAddedLater = true) {
         override fun modifyRotationDirection(
             card: Card,
@@ -228,5 +227,14 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         }
 
         override fun equals(other: Any?): Boolean = other is Jammed
+    }
+
+    //Not functional yet
+    object Piercing : BulletBehaviour(supportsBeingAddedLater = true) {
+        //override fun additionalEffects(): List<Effect>? = Effect.GiveStatus
+
+
+
+        override fun equals(other: Any?): Boolean = other is Piercing
     }
 }

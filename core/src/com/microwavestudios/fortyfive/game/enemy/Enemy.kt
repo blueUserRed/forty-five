@@ -159,22 +159,32 @@ class Enemy(
     /**
      * reduces the enemies lives by [damage]
      */
-    fun damage(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
+    fun damage(damage: Int, triggeredByStatusEffect: Boolean = false, isPiercing: Boolean = false): Timeline = Timeline.timeline {
         var remaining = 0
 
-        action {
-            remaining = max(damage - currentCover, 0)
+        if(!isPiercing)
+        {
+            action {
+                remaining = max(damage - currentCover, 0)
+            }
+
+            includeLater(
+                { Timeline.timeline {
+                    action {
+                        currentCover -= damage
+                        if (currentCover < 0) currentCover = 0
+                    }
+                } },
+                { currentCover != 0 }
+            )
+        }
+        else
+        {
+            action {
+                remaining = max(damage, 0)
+            }
         }
 
-        includeLater(
-            { Timeline.timeline {
-                action {
-                    currentCover -= damage
-                    if (currentCover < 0) currentCover = 0
-                }
-            } },
-            { currentCover != 0 }
-        )
 
         includeLater(
             { Timeline.timeline {
