@@ -92,7 +92,7 @@ abstract class RotationBasedStatusEffect(
         "inf"
     }
 
-    protected fun extendDuration(extension: Int) {
+    public fun extendDuration(extension: Int) {
         duration += extension
     }
 
@@ -136,7 +136,7 @@ abstract class TurnBasedStatusEffect(
         "inf"
     }
 
-    protected fun extendDuration(extension: Int) {
+    public fun extendDuration(extension: Int) {
         duration += extension
     }
 
@@ -264,6 +264,11 @@ class Poison(
     override fun stack(other: StatusEffect) {
         other as Poison
         damage += other.damage
+    }
+
+    override fun modifyDamage(newDamage: Int): Int {
+        damage = newDamage
+        return damage
     }
 
     override fun isStillValid(): Boolean = damage > 0

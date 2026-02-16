@@ -1,6 +1,8 @@
 package com.microwavestudios.fortyfive.game.card
 
 import com.microwavestudios.fortyfive.game.Poison
+import com.microwavestudios.fortyfive.game.RotationBasedStatusEffect
+import com.microwavestudios.fortyfive.game.TurnBasedStatusEffect
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -233,8 +235,38 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
     object Piercing : BulletBehaviour(supportsBeingAddedLater = true) {
         //override fun additionalEffects(): List<Effect>? = Effect.GiveStatus
 
-
+        //TODO: find a way to give the card the piercing effect
 
         override fun equals(other: Any?): Boolean = other is Piercing
+    }
+
+    object Catalyst : BulletBehaviour(supportsBeingAddedLater = true) {
+
+        //Loop over targeted enemy/enemies and if they have status effects, add 1 to them
+        override fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int {
+
+            for(enemy in card.targetedEnemies(controller))
+            {
+                for(status in enemy.statusEffects)
+                {
+                    //TODO: Surely a better way than this
+                    val rot = status as? RotationBasedStatusEffect
+                    rot?.extendDuration(1)
+
+                    val turn = status as? TurnBasedStatusEffect
+                    turn?.extendDuration(1)
+
+                    val poison = status as? Poison
+                    poison?.modifyDamage(poison.damage + 1)
+                }
+            }
+
+            return super.modifyOnShotDamage(card, controller, damage)
+        }
+
+//
+
+
+        override fun equals(other: Any?): Boolean = other is Catalyst
     }
 }

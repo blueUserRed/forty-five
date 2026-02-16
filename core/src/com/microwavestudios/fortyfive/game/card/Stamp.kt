@@ -129,7 +129,7 @@ abstract class Stamp(
 
         override val icon: ResourceHandle = "card_stamp_test"
 
-        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Catalyst)
+        override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Catalyst)
     }
 
     object Spirit : Stamp("spirit", "Spirit") {
