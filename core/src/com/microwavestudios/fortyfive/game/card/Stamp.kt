@@ -43,6 +43,10 @@ abstract class Stamp(
      */
     open fun behaviours(): List<BulletBehaviour>? = null
 
+    open fun traitEffects(): List<String>
+    {
+        return emptyList()
+    }
 
     object Bewitched : Stamp("bewitched", "Bewitched") {
 
@@ -151,7 +155,11 @@ abstract class Stamp(
 
         override val icon: ResourceHandle = "card_stamp_test"
 
-        override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Piercing)
+        override fun traitEffects(): List<String> {
+            return listOf("piercing")
+        }
+
+        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Piercing)
     }
 
 }

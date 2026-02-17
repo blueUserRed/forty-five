@@ -853,6 +853,11 @@ class Card(
                 ?.value
                 ?.map { it.value as String }
                 ?.forEach { applyTraitEffect(it, card) }
+
+            for(trait in stamp?.traitEffects() ?: emptyList())
+            {
+                applyTraitEffect(trait, card)
+            }
         }
 
         private fun applyTraitEffect(effect: String, card: Card): Unit = when (effect) {
