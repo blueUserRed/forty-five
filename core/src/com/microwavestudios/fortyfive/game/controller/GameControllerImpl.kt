@@ -273,6 +273,12 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.FullRotationEvent> { event ->
+            val situation = GameSituation.CardCompletedFullRotation(event.card)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
         gameEvents.watchFor<Events.CardReplacedEvent> { event ->
             val situation = GameSituation.CardReplaced(event.replaced, event.newCard)
             event.append {
@@ -599,7 +605,20 @@ class GameControllerImpl(
         include(revolver.rotate(newRotation))
         action {
             revolverRotationCounter += newRotation.amount
-            cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
+        }
+        val fullRotationTimelineCreator = { card: Card -> Timeline.timeline {
+            later {
+                val info = createTriggerInfo(card, sourceCard = sourceCard)
+                val event = Events.FullRotationEvent(card, info)
+                gameEvents.fire(event)
+                include(event.createTimeline())
+            }
+        } }
+        later {
+            cardsInRevolver()
+                .map { it.onRevolverRotationTimeline(newRotation, fullRotationTimelineCreator) }
+                .collectTimeline()
+                .let { include(it) }
         }
         later {
             val info = createTriggerInfo(null, sourceCard = sourceCard)
@@ -1675,6 +1694,11 @@ class GameControllerImpl(
         ) : TimelineBuildingEvent()
 
         data class CardDestroyedEvent(
+            val card: Card,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class FullRotationEvent(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()

@@ -245,7 +245,7 @@ class Card(
         private set
     var lastTurnRotationCounter: Int = 0
         private set
-    var continuousRotationCounter: Int = 0
+    var fullRotationCounter: Int = 0
         private set
     var lastRotationDirection: RevolverRotation = RevolverRotation.None
         private set
@@ -324,7 +324,7 @@ class Card(
         }
         if (oldZone == Zone.REVOLVER) {
             rotationCounter = 0
-            continuousRotationCounter = 0
+            fullRotationCounter = 0
         }
     }
 
@@ -586,14 +586,30 @@ class Card(
     /**
      * called when the revolver rotates (but not when this card was shot)
      */
-    fun onRevolverRotation(rotation: RevolverRotation) {
-        rotationCounter += rotation.amount
-        turnRotationCounter += rotation.amount
-        if (rotation.directionString == lastRotationDirection.directionString) {
-            continuousRotationCounter += rotation.amount
-        } else {
-            continuousRotationCounter = 0
-            lastRotationDirection = rotation
+    fun onRevolverRotationTimeline(
+        rotation: RevolverRotation,
+        fullRotationTimelineCreator: (Card) -> Timeline
+    ): Timeline = Timeline.timeline {
+        var prevFullRotCounter = fullRotationCounter
+        action {
+            prevFullRotCounter = fullRotationCounter
+
+            rotationCounter += rotation.amount
+            turnRotationCounter += rotation.amount
+            if (rotation.directionString == lastRotationDirection.directionString) {
+                fullRotationCounter += rotation.amount
+            } else {
+                fullRotationCounter = rotation.amount
+                lastRotationDirection = rotation
+            }
+        }
+        later {
+            val prevFullRotations = prevFullRotCounter / 5
+            val currentFullRotations = fullRotationCounter / 5
+            if (currentFullRotations <= prevFullRotations) return@later
+            repeat(currentFullRotations - prevFullRotations) {
+                include(fullRotationTimelineCreator(this@Card))
+            }
         }
     }
 

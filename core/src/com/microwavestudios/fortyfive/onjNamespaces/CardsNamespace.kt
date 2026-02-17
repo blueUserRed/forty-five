@@ -667,6 +667,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
+    fun fullRotation(predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardCompletedFullRotation> { situation, card, triggerInformation, controller ->
+            predicate.value.check(situation.card, controller, card)
+        }
+    )
+
     @RegisterOnjFunction(schema = "params: []")
     fun rotation(): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.RevolverRotation>()
@@ -713,7 +720,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [Trigger, CardPredicate]", type = OnjFunctionType.INFIX)
     fun mustMatchPredicate(toModify: OnjTrigger, predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
         Trigger { situation, card, information, controller ->
-            println(card)
             val originalTrigger = toModify.value.check(situation, card, information, controller)
             if (!originalTrigger) return@Trigger false
             predicate.value.check(card, controller, card)
@@ -747,7 +753,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun costs(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
 
     @RegisterOnjFunction(schema = "params: [int]")
-    fun rotationCount(count: OnjInt) = OnjCardPredicate(CardPredicate.rotationCount(count.value.toInt()))
+    fun rotationCountEquals(count: OnjInt) = OnjCardPredicate(CardPredicate.rotationCount(count.value.toInt()))
 
     @RegisterOnjFunction(schema = "params: []")
     fun inHomeSlot() = OnjCardPredicate(CardPredicate.inHomeSlot())
@@ -972,6 +978,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: []")
+    fun rotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
+        card?.rotationCounter ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
     fun lastTurnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
         card?.lastTurnRotationCounter ?: 0
     }
@@ -983,7 +994,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: []")
     fun continuousTurnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
-        card?.continuousRotationCounter ?: 0
+        card?.fullRotationCounter ?: 0
     }
 
     @RegisterOnjFunction(schema = "params: []")

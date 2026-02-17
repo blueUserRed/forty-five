@@ -1195,6 +1195,8 @@ sealed class GameSituation(val relevantCards: List<Card>) {
     class AfterShot(val card: Card) : GameSituation(listOf(card))
 
     class CardRightClicked(val card: Card) : GameSituation(listOf(card))
+
+    class CardCompletedFullRotation(val card: Card) : GameSituation(listOf(card))
 }
 
 data class TriggerInformation(
