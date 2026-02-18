@@ -270,7 +270,7 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
                     false,
                     EffectData(
                         trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
-                            situation.oldZone != Zone.STACK && situation.newZone == Zone.HAND
+                            !situation.before && situation.oldZone != Zone.STACK && situation.newZone == Zone.HAND
                         }
                     )
                 )
