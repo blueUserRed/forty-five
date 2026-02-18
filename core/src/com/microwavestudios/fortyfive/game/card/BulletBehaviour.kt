@@ -270,7 +270,9 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
                     false,
                     EffectData(
                         trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
-                            !situation.before && situation.oldZone != Zone.STACK && situation.newZone == Zone.HAND
+                            !situation.before && situation.card === card &&
+                                    situation.oldZone != Zone.STACK &&
+                                    situation.newZone == Zone.HAND
                         }
                     )
                 )
@@ -300,8 +302,10 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
             damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
             false,
             EffectData(
-                trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
-                    situation.oldZone === Zone.REVOLVER
+                trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, cont ->
+                    !situation.before && situation.card === card &&
+                            situation.oldZone == Zone.REVOLVER &&
+                            situation.newZone != Zone.REVOLVER
                 }
             )
         ).let { listOf(it) }
