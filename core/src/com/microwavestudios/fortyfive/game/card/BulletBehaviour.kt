@@ -1,13 +1,17 @@
 package com.microwavestudios.fortyfive.game.card
 
+import com.badlogic.gdx.utils.Predicate
 import com.microwavestudios.fortyfive.game.Poison
-import com.microwavestudios.fortyfive.game.RotationBasedStatusEffect
-import com.microwavestudios.fortyfive.game.TurnBasedStatusEffect
 import com.microwavestudios.fortyfive.game.controller.GameController
+import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.collectTimeline
+import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
+import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace.damage
+import com.microwavestudios.fortyfive.onjNamespaces.OnjCardPredicate
+import com.microwavestudios.fortyfive.onjNamespaces.OnjZone
 
 abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
 
@@ -231,20 +235,11 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun equals(other: Any?): Boolean = other is Jammed
     }
 
-    //Not functional yet
-    object Piercing : BulletBehaviour(supportsBeingAddedLater = true) {
-        //override fun additionalEffects(): List<Effect>? = Effect.GiveStatus
-
-        //TODO: find a way to give the card the piercing effect
-
-        override fun equals(other: Any?): Boolean = other is Piercing
-    }
 
     object Catalyst : BulletBehaviour(supportsBeingAddedLater = true) {
 
         //Loop over targeted enemy/enemies and if they have status effects, add 1 to them
         override fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int {
-
             for(enemy in card.targetedEnemies(controller))
             {
                 for(status in enemy.statusEffects)
@@ -258,18 +253,59 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun equals(other: Any?): Boolean = other is Catalyst
     }
 
-    object Spirit : BulletBehaviour(supportsBeingAddedLater = true) {
-
-        //Check how the card was drawn, if != drawfromtop, deal damage
-        var drawnFromTop: Boolean = false
-
+    object Phantom : BulletBehaviour(supportsBeingAddedLater = true) {
+        //if !drawnfromtop, deal damage
+        override fun additionalEffects(): List<Effect> =
+            listOf(
+                Effect.DamageDirectly(
+                damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
+                false,
+                EffectData(
+                    trigger = Trigger.triggerForSituation<GameSituation.CardsDrawn> { situation, card, _, _ ->
+                        (card.enteredOnTurn ?: 0) > 1 && situation.isSpecial || situation.isFromBottom
+                    }
+                )),
+                Effect.DamageDirectly(
+                    damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
+                    false,
+                    EffectData(
+                        trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
+                            situation.oldZone != Zone.STACK && situation.newZone == Zone.HAND
+                        }
+                    )
+                )
+            )
 
 
         //Does no damage on shot
-        override fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int {
-            return 0
-        }
+        override fun modifyOnShotDamage(
+            card: Card,
+            controller: GameController,
+            damage: Int
+        ): Int = 0
 
-        override fun equals(other: Any?): Boolean = other is Spirit
+        override fun equals(other: Any?): Boolean = other is Phantom
+    }
+
+    object HighVelocity : BulletBehaviour(supportsBeingAddedLater = true) {
+        //Does no damage on shot
+        override fun modifyOnShotDamage(
+            card: Card,
+            controller: GameController,
+            damage: Int
+        ): Int = 0
+
+        //TODO: Needs to check for if bullet has been removed from chamber
+        override fun additionalEffects(): List<Effect> = Effect.DamageDirectly(
+            damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
+            false,
+            EffectData(
+                trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
+                    situation.oldZone === Zone.REVOLVER
+                }
+            )
+        ).let { listOf(it) }
+
+        override fun equals(other: Any?): Boolean = other is HighVelocity
     }
 }
