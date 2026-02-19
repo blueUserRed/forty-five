@@ -457,16 +457,17 @@ class Card(
         parryDamage: Int,
         putCardInTheHand: (Card) -> Timeline,
         putCardInTheStack: (Card) -> Timeline
-    ): Timeline = Timeline.timeline { skipping { skip ->
+    ): Timeline = Timeline.timeline {
         later {
             activeBehaviours
                 .mapNotNull { it.afterShotTimeline(this@Card, controller, wasParry, parryDamage) }
                 .collectTimeline()
                 .let { include(it) }
         }
+        var leaveInRevolver = false
         action {
             if (activeBehaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
-                skip()
+                leaveInRevolver = true
                 return@action
             }
             if (wasParry && parryOnlyProtectingModifiers.isNotEmpty()) {
@@ -478,7 +479,7 @@ class Card(
                     parryOnlyProtectingModifiers[0] = newEffect
                 }
                 modifiersChanged()
-                skip()
+                leaveInRevolver = true
                 return@action
             }
             if (protectingModifiers.isNotEmpty()) {
@@ -490,24 +491,26 @@ class Card(
                     protectingModifiers[0] = newEffect
                 }
                 modifiersChanged()
-                skip()
+                leaveInRevolver = true
+                return@action
             }
-        }
-        action {
             if (isPersistent) return@action
             damageModifiers.removeIf { !it.second.data.keepActive }
             protectingModifiers.removeIf { !it.data.keepActive }
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
             modifiersChanged()
         }
-        val putInHand =
-            activeBehaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }
-        if (putInHand) {
-            include(putCardInTheHand(this@Card))
-        } else {
-            include(putCardInTheStack(this@Card))
+        later {
+            if (leaveInRevolver) return@later
+            val putInHand =
+                activeBehaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }
+            if (putInHand) {
+                include(putCardInTheHand(this@Card))
+            } else {
+                include(putCardInTheStack(this@Card))
+            }
         }
-    } }
+    }
 
     fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
         this.stackPosition = stackPosition
