@@ -78,6 +78,15 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
     open fun disableProtectingModifiers(): Boolean = false
 
     /**
+     * gives the behaviour the opportunity to change a modifier before it is added to the card
+     */
+    open fun modifyDamageModifier(
+        card: Card,
+        controller: GameController,
+        modifier: CardDamageModifier
+    ): CardDamageModifier = modifier
+
+    /**
      * called when this bullet is in the revolver and the player drags another bullet from the hand to this bullet.
      * If the function returns true, this bullet will be replaced by the other bullet
      */
@@ -311,5 +320,23 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         ).let { listOf(it) }
 
         override fun equals(other: Any?): Boolean = other is HighVelocity
+    }
+
+    class Amplify(val damageIncrease: Int) : BulletBehaviour(true) {
+
+        override fun modifyDamageModifier(
+            card: Card,
+            controller: GameController,
+            modifier: CardDamageModifier
+        ): CardDamageModifier {
+            if (modifier.damage == 0 && modifier.damageMultiplier == 1f) return modifier
+            if (modifier.damage < 0 || modifier.damageMultiplier < 1f) return modifier
+            val newModifier = modifier.copy(damage = modifier.damage + damageIncrease)
+            return newModifier
+        }
+
+        override fun equals(other: Any?): Boolean = other is Amplify && other.damageIncrease == damageIncrease
+
+        override fun hashCode(): Int = super.hashCode() * damageIncrease.hashCode()
     }
 }

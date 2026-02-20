@@ -111,7 +111,7 @@ sealed class EncounterModifier {
                     Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
                 )
             )
-            card.addDamageModifier(modifier)
+            card.addDamageModifier(modifier, controller)
         }
 
 

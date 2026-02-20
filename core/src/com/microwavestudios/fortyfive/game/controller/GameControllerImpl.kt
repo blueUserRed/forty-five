@@ -273,6 +273,12 @@ class GameControllerImpl(
                 include(checkTrigger(situation, event.triggerInformation))
             }
         }
+        gameEvents.watchFor<Events.FullRotationEvent> { event ->
+            val situation = GameSituation.CardCompletedFullRotation(event.card)
+            event.append {
+                include(checkTrigger(situation, event.triggerInformation))
+            }
+        }
         gameEvents.watchFor<Events.CardReplacedEvent> { event ->
             val situation = GameSituation.CardReplaced(event.replaced, event.newCard)
             event.append {
@@ -599,7 +605,20 @@ class GameControllerImpl(
         include(revolver.rotate(newRotation))
         action {
             revolverRotationCounter += newRotation.amount
-            cardsInRevolver().forEach { it.onRevolverRotation(newRotation)  }
+        }
+        val fullRotationTimelineCreator = { card: Card -> Timeline.timeline {
+            later {
+                val info = createTriggerInfo(card, sourceCard = sourceCard)
+                val event = Events.FullRotationEvent(card, info)
+                gameEvents.fire(event)
+                include(event.createTimeline())
+            }
+        } }
+        later {
+            cardsInRevolver()
+                .map { it.onRevolverRotationTimeline(newRotation, fullRotationTimelineCreator) }
+                .collectTimeline()
+                .let { include(it) }
         }
         later {
             val info = createTriggerInfo(null, sourceCard = sourceCard)
@@ -632,19 +651,16 @@ class GameControllerImpl(
         repeat(cardsToDraw) {
             include(drawCardTimeline(fromBottom, sourceCard, cardAcc))
         }
-
-        skipping { skip ->
-            action { if (cardsToDraw <= 0) skip() }
-            later {
-                val info = createTriggerInfo(
-                    null,
-                    amountOfCardsDrawn = cardsToDraw,
-                    sourceCard = sourceCard
-                )
-                val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, cardAcc, info)
-                gameEvents.fire(event)
-                include(event.createTimeline())
-            }
+        later {
+            if (cardsToDraw <= 0) return@later
+            val info = createTriggerInfo(
+                null,
+                amountOfCardsDrawn = cardsToDraw,
+                sourceCard = sourceCard
+            )
+            val event = Events.CardsDrawnEvent(cardsToDraw, isSpecial, fromBottom, cardAcc, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
         }
     } }
 
@@ -1259,10 +1275,11 @@ class GameControllerImpl(
     }
 
     private fun loadBulletFromHandInRevolverTimeline(card: Card, slot: Int): Timeline = Timeline.timeline {
-        skipping { skip ->
-            var cardInSlot: Card? = null
-            val info = createTriggerInfo(card, sourceCard = card)
-            val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
+        var skip = false
+        var cardInSlot: Card? = null
+        val info = createTriggerInfo(card, sourceCard = card)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
+        later {
             action {
                 FortyFive.logger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
                 cardInSlot = revolver.getCardInSlot(slot)
@@ -1272,8 +1289,11 @@ class GameControllerImpl(
                         || !tryPay(card.baseCost, card.actor)
                 if (!shouldSkip) return@action
                 FortyFive.soundPlayer.situation("not_allowed", screen)
-                skip()
+                skip = true
             }
+        }
+        later {
+            if (skip) return@later
             includeLater({
                 gameEvents.fire(beforeEvent)
                 beforeEvent.createTimeline()
@@ -1675,6 +1695,11 @@ class GameControllerImpl(
         ) : TimelineBuildingEvent()
 
         data class CardDestroyedEvent(
+            val card: Card,
+            val triggerInformation: TriggerInformation
+        ) : TimelineBuildingEvent()
+
+        data class FullRotationEvent(
             val card: Card,
             val triggerInformation: TriggerInformation
         ) : TimelineBuildingEvent()

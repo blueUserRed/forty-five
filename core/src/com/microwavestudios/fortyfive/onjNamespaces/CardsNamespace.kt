@@ -35,7 +35,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Trigger" to OnjTrigger::class,
         "VariableTextureSelector" to OnjVariableTextureSelector::class,
         "RevolverSlotGetter" to OnjRevolverSlotGetter::class,
-        "CardType" to OnjCardType::class
+        "CardType" to OnjCardType::class,
+        "Behaviour" to OnjBulletBehaviour::class
     )
 
     @OnjNamespaceVariables
@@ -506,6 +507,18 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     )
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Behaviour, BulletSelector, CardPredicate]")
+    fun addTemporaryBehaviourLimitBySourceBullet(
+        behaviour: OnjBulletBehaviour,
+        targetSelector: OnjBulletSelector,
+        sourceCardPredicate: OnjCardPredicate
+    ): OnjEffect = OnjEffect(Effect.AddTemporaryBehaviour(
+        behaviour.value,
+        targetSelector.value,
+        sourceCardPredicate.value,
+        EffectData()
+    ))
+
     @RegisterOnjFunction(schema = "params: []")
     fun triggerNever(): OnjTrigger = OnjTrigger(Trigger.Never)
 
@@ -654,6 +667,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")
+    fun fullRotation(predicate: OnjCardPredicate): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.CardCompletedFullRotation> { situation, card, triggerInformation, controller ->
+            predicate.value.check(situation.card, controller, card)
+        }
+    )
+
     @RegisterOnjFunction(schema = "params: []")
     fun rotation(): OnjTrigger = OnjTrigger(
         triggerForSituation<GameSituation.RevolverRotation>()
@@ -733,7 +753,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun costs(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
 
     @RegisterOnjFunction(schema = "params: [int]")
-    fun rotationCount(count: OnjInt) = OnjCardPredicate(CardPredicate.rotationCount(count.value.toInt()))
+    fun rotationCountEquals(count: OnjInt) = OnjCardPredicate(CardPredicate.rotationCount(count.value.toInt()))
 
     @RegisterOnjFunction(schema = "params: []")
     fun inHomeSlot() = OnjCardPredicate(CardPredicate.inHomeSlot())
@@ -779,9 +799,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun or(first: OnjCardPredicate, second: OnjCardPredicate): OnjCardPredicate =
         OnjCardPredicate(CardPredicate.or(first.value, second.value))
 
+
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]", type = OnjFunctionType.CONVERSION)
     fun bSelect(predicate: OnjCardPredicate): OnjBulletSelector = OnjBulletSelector(
-        BulletSelector.ByLambda { info, card ->
+        BulletSelector.ByLambda { info, card, _ ->
             val p = predicate.value
             val controller = info.controller
             controller.allCards.filter { cardToCheck ->
@@ -789,7 +810,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
         }
     )
-
 
     @RegisterOnjFunction(schema = "params: [boolean, boolean, string]")
     fun bSelectRevolverTarget(includeSelf: OnjBoolean, optional: OnjBoolean, text: OnjString): OnjBulletSelector =
@@ -800,7 +820,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         OnjBulletSelector(BulletSelector.HandCardByPopup(includeSelf.value, optional.value, text.value))
 
     @RegisterOnjFunction(schema = "params: []")
-    fun bSelectSourceBullet(): OnjBulletSelector = OnjBulletSelector(BulletSelector.ByLambda { info, card ->
+    fun bSelectSourceBullet(): OnjBulletSelector = OnjBulletSelector(BulletSelector.ByLambda { info, card, _ ->
         listOf(
             info.sourceCard ?: throw RuntimeException("effect of $card doesn't result in any source bullet")
         )
@@ -820,13 +840,25 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction("params: []")
     fun bSelectSelf(): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { _, card -> listOf(card) })
+        return OnjBulletSelector(BulletSelector.ByLambda { _, card, _ -> listOf(card) })
     }
 
     @RegisterOnjFunction("params: []")
     fun bSelectCachedBullets() = OnjBulletSelector(
-        BulletSelector.ByLambda { _, card -> card.lastEffectAffectedCardsCache }
+        BulletSelector.ByLambda { _, card, _ -> card.lastEffectAffectedCardsCache }
     )
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectAllBullets() = OnjBulletSelector(
+        BulletSelector.ByLambda { info, card, _ -> info.controller.allCards }
+    )
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectSituationBullets() = OnjBulletSelector(
+        BulletSelector.ByLambda { info, card, situation -> situation.relevantCards }
+    )
+
+
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun poison(damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
@@ -900,6 +932,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun amplifyBehaviour(damage: OnjInt): OnjBulletBehaviour = OnjBulletBehaviour(
+        BulletBehaviour.Amplify(damage.value.toInt())
+    )
+
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
         name("NegatePredicate")
@@ -941,6 +978,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: []")
+    fun rotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
+        card?.rotationCounter ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
     fun lastTurnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
         card?.lastTurnRotationCounter ?: 0
     }
@@ -952,7 +994,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: []")
     fun continuousTurnRotationCounter(): OnjEffectValue = OnjEffectValue { _, card, _, self ->
-        card?.continuousRotationCounter ?: 0
+        card?.fullRotationCounter ?: 0
     }
 
     @RegisterOnjFunction(schema = "params: []")
@@ -1142,5 +1184,13 @@ class OnjCardType(
 ) : OnjValue() {
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--cardType--'")
+    }
+}
+
+class OnjBulletBehaviour(
+    override val value: BulletBehaviour
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--bulletBehaviour--'")
     }
 }
