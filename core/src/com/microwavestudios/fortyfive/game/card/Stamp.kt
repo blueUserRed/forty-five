@@ -144,7 +144,18 @@ abstract class Stamp(
 
         override val icon: ResourceHandle = "card_stamp_test"
 
-        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spirit)
+        override fun modifyBaseCost(card: Card, original: Int): Int {
+            if(original > 1)
+            {
+                val newCost = original - 1
+                return newCost
+            }
+
+            //Runs if base cost is 1 or less
+            return original
+        }
+
+        override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spirit)
     }
 
     object FiftyCal : Stamp("fiftyCal", ".50 Cal") {

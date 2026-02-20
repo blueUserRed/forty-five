@@ -27,6 +27,7 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
      */
     open fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int = damage
 
+
     /**
      * Modifies the amount the card parries for. Called when an enemy attacks and this card is in slot 5. This
      * functions modifies the parry value just for one specific parry event. The [parryValue] passed is either
@@ -338,5 +339,17 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         override fun equals(other: Any?): Boolean = other is Amplify && other.damageIncrease == damageIncrease
 
         override fun hashCode(): Int = super.hashCode() * damageIncrease.hashCode()
+    }
+
+
+    object Spirit : BulletBehaviour(supportsBeingAddedLater = true) {
+        //Does no damage on shot
+        override fun modifyOnShotDamage(
+            card: Card,
+            controller: GameController,
+            damage: Int
+        ): Int = 0
+
+        override fun equals(other: Any?): Boolean = other is Spirit
     }
 }
