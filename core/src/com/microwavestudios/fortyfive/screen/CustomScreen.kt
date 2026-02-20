@@ -307,6 +307,7 @@ open class CustomScreen(
 
     override fun dispose() {
         hide()
+        inputManager.end()
         screenControllers.forEach(ScreenController::end)
         stage.dispose()
         additionalDisposables.forEach(Disposable::dispose)

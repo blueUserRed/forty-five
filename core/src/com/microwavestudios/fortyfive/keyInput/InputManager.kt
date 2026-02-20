@@ -1,6 +1,9 @@
 package com.microwavestudios.fortyfive.keyInput
 
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.controllers.ControllerListener
+import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
@@ -51,7 +54,14 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     private var awaitingDrop: List<InputActor>? = null
     private var lastDraggedOver: InputActor? = null
 
+    private val controllerListener = ControllerListenerImpl()
+    private var activeController: Controller? = null
+
     init {
+        // TODO: remove
+        activeController = Controllers.getControllers().firstOrNull()
+        activeController?.addListener(controllerListener)
+
         onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
         onInput(GameInputs.focusPrevious) { focusNext(FocusChangeDirection.PREVIOUS) }
         onInput(GameInputs.focusUp) { focusNext(FocusChangeDirection.UP) }
@@ -536,6 +546,88 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     override fun scrolled(amountX: Float, amountY: Float): Boolean {
         return false
     }
+
+    fun end() {
+        activeController?.removeListener(controllerListener)
+    }
+
+
+    private inner class ControllerListenerImpl : ControllerListener {
+
+        override fun connected(controller: Controller?) {
+        }
+
+        override fun disconnected(controller: Controller?) {
+        }
+
+        override fun buttonDown(
+            controller: Controller?,
+            buttonCode: Int
+        ): Boolean = false
+
+        override fun buttonUp(
+            controller: Controller?,
+            buttonCode: Int
+        ): Boolean {
+            controller ?: return false
+
+            fun checkInput(input: Input, actor: InputActor?): Boolean = input
+                .causes
+                .filterIsInstance<Input.Cause.ControllerButtonBased>()
+                .any { cause ->
+                    cause.button.getCode(controller.mapping) == buttonCode &&
+                            cause.requireStates.all { actor?.isInInputState(it) ?: false }
+                }
+
+            val mapping = controller.mapping
+            when (buttonCode) {
+                mapping.buttonStart -> "buttonStart"
+                mapping.buttonL1 -> "buttonL1"
+                mapping.buttonDpadDown -> "buttonDpadDown"
+                mapping.buttonDpadUp -> "buttonDpadUp"
+                mapping.buttonDpadLeft -> "buttonDpadLeft"
+                mapping.buttonDpadRight -> "buttonDpadRight"
+                mapping.buttonR1 -> "buttonR1"
+                mapping.buttonA -> "buttonA"
+                mapping.buttonB -> "buttonB"
+                mapping.buttonX -> "buttonX"
+                mapping.buttonY -> "buttonY"
+                mapping.buttonBack -> "buttonBack"
+                mapping.buttonRightStick -> "buttonRightStick"
+                mapping.buttonLeftStick -> "buttonLeftStick"
+                else -> buttonCode.toString()
+            }.let { println(it) }
+
+            val inDragAndDrop = currentDragAndDropModal != null
+            actors.forEach { actor ->
+                actor.inputCallbacks.forEach { (input, callbacks) ->
+                    val matches = checkInput(input, actor)
+                    if (!matches) return@forEach
+                    if (inDragAndDrop) {
+                        if (input == GameInputs.confirmDragAndDrop) finishKeyboardDragAndDrop(actor)
+                        return@forEach
+                    }
+                    callbacks.forEach { it() }
+                }
+            }
+
+            inputCallbacks.forEach { (input, callbacks) ->
+                val matches = checkInput(input, null)
+                if (!matches) return@forEach
+                callbacks.forEach { it() }
+            }
+
+            return false
+        }
+
+        override fun axisMoved(
+            controller: Controller?,
+            axisCode: Int,
+            value: Float
+        ): Boolean = false
+
+    }
+
 
     /**
      * contains basic input states that correspond to events coming from a specific device. Use only
