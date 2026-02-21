@@ -645,28 +645,6 @@ object BackpackCreator {
                 height = 40f
             }
 
-//            inputField("red_wing", Color.Black, backgroundHints = arrayOf("black_texture")) {
-//                maxLength = 20
-//                touchable = Touchable.enabled
-//                joinGroup(backpackElementsGroup)
-//                keyboardFocusable = KeyboardFocusable.LEAF
-//                setText("Hello World")
-//                width = 200f
-//                height = 40f
-//                isDisabled = true
-//                observeInputState(
-//                    GameInputs.States.focused,
-//                    {
-//                        isDisabled = false
-//                        backgroundHandle = "black_texture"
-//                    },
-//                    {
-//                        isDisabled = true
-//                        backgroundHandle = null
-//                    }
-//                )
-//            }
-
             box {
                 flexDirection = FlexDirection.ROW
                 height = 50f
