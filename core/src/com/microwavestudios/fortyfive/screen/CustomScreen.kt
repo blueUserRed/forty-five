@@ -265,6 +265,7 @@ open class CustomScreen(
 
     override fun render(delta: Float) = try {
         if (makeLaggy) Thread.sleep(500)
+        inputManager.update()
         val batch = stage.batch
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         if (batch.isDrawing) batch.end()

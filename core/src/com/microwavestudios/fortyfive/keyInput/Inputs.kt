@@ -9,6 +9,8 @@ class Input(val name: String, val causes: Array<Cause>) {
 
     override fun equals(other: Any?): Boolean = other is Input && other.name == name
 
+    override fun hashCode(): Int = name.hashCode()
+
     sealed class Cause {
 
         class Keyboard(
@@ -17,10 +19,18 @@ class Input(val name: String, val causes: Array<Cause>) {
             val requireStates: Array<InputState> = arrayOf()
         ) : Cause()
 
+        class KeyHeldDown(val key: KeyCode) : Cause()
+
         class Mouse(val button: MouseButton, val requireDirectHit: Boolean = true) : Cause()
 
         class ControllerButtonBased(
             val button: ControllerButton,
+            val requireStates: Array<InputState> = arrayOf()
+        ) : Cause()
+
+        class ControllerAxisFlick(
+            val axis: ControllerAxis,
+            val threshold: Float,
             val requireStates: Array<InputState> = arrayOf()
         ) : Cause()
     }
@@ -44,6 +54,27 @@ enum class ModifierKey(val codes: Array<KeyCode>) {
     SHIFT(arrayOf(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT)),
     CTRL(arrayOf(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT)),
     ALT(arrayOf(Keys.ALT_LEFT, Keys.ALT_RIGHT))
+}
+
+enum class ControllerAxis {
+
+    LEFT_X {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisLeftX
+    },
+    LEFT_Y {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisLeftY
+    },
+
+    RIGHT_X {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisRightX
+    },
+    RIGHT_Y {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisRightY
+    },
+
+    ;
+
+    abstract fun getCode(mapping: ControllerMapping): Int
 }
 
 enum class ControllerButton {

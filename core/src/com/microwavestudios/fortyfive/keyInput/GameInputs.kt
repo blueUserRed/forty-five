@@ -33,39 +33,71 @@ object GameInputs {
         )
     )
 
+    val scrollUp = Input(
+        "scrollUp",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.UP),
+//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_UP)
+        )
+    )
+
+    val scrollDown = Input(
+        "scrollDown",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.DOWN),
+//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_DOWN)
+        )
+    )
+
+    val scrollLeft = Input(
+        "scrollLeft",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.LEFT),
+//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_LEFT)
+        )
+    )
+
+    val scrollRight = Input(
+        "scrollRight",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.RIGHT),
+//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_RIGHT)
+        )
+    )
+
     val focusUp = Input(
         "focusUp",
         arrayOf(
-            Input.Cause.Keyboard(Keys.UP),
             Input.Cause.Keyboard(Keys.W),
-            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_UP)
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_UP),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_Y, -0.6f)
         )
     )
 
     val focusDown = Input(
         "focusDown",
         arrayOf(
-            Input.Cause.Keyboard(Keys.DOWN),
             Input.Cause.Keyboard(Keys.S),
-            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_DOWN)
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_DOWN),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_Y, 0.6f)
         )
     )
 
     val focusLeft = Input(
         "focusLeft",
         arrayOf(
-            Input.Cause.Keyboard(Keys.LEFT),
             Input.Cause.Keyboard(Keys.A),
-            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_LEFT)
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_LEFT),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_X, -0.6f)
         )
     )
 
     val focusRight = Input(
         "focusRight",
         arrayOf(
-            Input.Cause.Keyboard(Keys.RIGHT),
             Input.Cause.Keyboard(Keys.D),
-            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_RIGHT)
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_RIGHT),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_X, 0.6f)
         )
     )
 
@@ -102,6 +134,11 @@ object GameInputs {
             Input.Cause.ControllerButtonBased(
                 ControllerButton.DPAD_LEFT,
                 requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisFlick(
+                ControllerAxis.LEFT_X,
+                -0.6f,
+                requireStates = arrayOf(States.trueFocused)
             )
         )
     )
@@ -113,6 +150,11 @@ object GameInputs {
             Input.Cause.Keyboard(Keys.D, requireStates = arrayOf(States.trueFocused)),
             Input.Cause.ControllerButtonBased(
                 ControllerButton.DPAD_RIGHT,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisFlick(
+                ControllerAxis.LEFT_X,
+                0.6f,
                 requireStates = arrayOf(States.trueFocused)
             )
         )

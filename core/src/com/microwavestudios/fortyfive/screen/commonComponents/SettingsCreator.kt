@@ -131,7 +131,6 @@ object SettingsCreator {
             flexDirection = FlexDirection.COLUMN
             width = parentWidth
             syncHeight()
-            debug()
             events.watchFor<ReloadPluginSettings> {
                 clearChildren()
                 val plugins = FortyFive.pluginManager.allPlugins
@@ -221,6 +220,9 @@ object SettingsCreator {
                     relativeWidth(95f)
                     syncHeight()
                     wrap = true
+                    joinGroup(settingsGroup)
+                    keyboardFocusable = KeyboardFocusable.LEAF
+                    touchable = Touchable.enabled
                     setAlignment(Align.center)
                 }
                 label("roadgeek", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
@@ -257,6 +259,7 @@ object SettingsCreator {
                             touchable = Touchable.disabled
                             syncDimensions()
                         }
+                        joinGroup(settingsGroup)
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
                         onInput(GameInputs.interact) {
@@ -289,6 +292,11 @@ object SettingsCreator {
                     selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite, callback) {
                         height = 50f
                         width = 250f
+                        joinGroup(settingsGroup)
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        onInput(GameInputs.switchSelectorToLeft) { switch(-1) }
+                        onInput(GameInputs.switchSelectorToRight) { switch(1) }
                     }
                     restartLabel = label("red wing", "Restart required", Color.HemoglobinRed, 22) {
                         isVisible = false
