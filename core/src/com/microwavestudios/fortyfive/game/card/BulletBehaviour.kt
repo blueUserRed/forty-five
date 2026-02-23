@@ -272,7 +272,7 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
                 false,
                 EffectData(
                     trigger = Trigger.triggerForSituation<GameSituation.CardsDrawn> { situation, card, _, _ ->
-                        (card.enteredOnTurn ?: 0) > 1 && situation.isSpecial || situation.isFromBottom
+                        card in situation.cards && situation.isFromBottom
                     }
                 )),
                 Effect.DamageDirectly(
