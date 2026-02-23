@@ -1,11 +1,17 @@
 package com.microwavestudios.fortyfive.game.card
 
+import com.badlogic.gdx.utils.Predicate
 import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.controller.GameController
+import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.collectTimeline
+import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
+import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace.damage
+import com.microwavestudios.fortyfive.onjNamespaces.OnjCardPredicate
+import com.microwavestudios.fortyfive.onjNamespaces.OnjZone
 
 abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
 
@@ -20,6 +26,7 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
      * damage value written on the card. The [damage] value received already has all CardModifiers applied.
      */
     open fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int = damage
+
 
     /**
      * Modifies the amount the card parries for. Called when an enemy attacks and this card is in slot 5. This
@@ -70,6 +77,15 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
      * will not be applied
      */
     open fun disableProtectingModifiers(): Boolean = false
+
+    /**
+     * gives the behaviour the opportunity to change a modifier before it is added to the card
+     */
+    open fun modifyDamageModifier(
+        card: Card,
+        controller: GameController,
+        modifier: CardDamageModifier
+    ): CardDamageModifier = modifier
 
     /**
      * called when this bullet is in the revolver and the player drags another bullet from the hand to this bullet.
@@ -215,5 +231,125 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         }
 
         override fun equals(other: Any?): Boolean = other is Thorns
+    }
+
+    object Jammed : BulletBehaviour(supportsBeingAddedLater = true) {
+        override fun modifyRotationDirection(
+            card: Card,
+            controller: GameController,
+            direction: RevolverRotation
+        ): RevolverRotation {
+            return RevolverRotation.None
+        }
+
+        override fun equals(other: Any?): Boolean = other is Jammed
+    }
+
+
+    object Catalyst : BulletBehaviour(supportsBeingAddedLater = true) {
+
+        //Loop over targeted enemy/enemies and if they have status effects, add 1 to them
+        override fun modifyOnShotDamage(card: Card, controller: GameController, damage: Int): Int {
+            for(enemy in card.targetedEnemies(controller))
+            {
+                for(status in enemy.statusEffects)
+                {
+                    status.increment(1)
+                }
+            }
+
+            return super.modifyOnShotDamage(card, controller, damage)
+        }
+        override fun equals(other: Any?): Boolean = other is Catalyst
+    }
+
+    object Phantom : BulletBehaviour(supportsBeingAddedLater = true) {
+        //if !drawnfromtop, deal damage
+        override fun additionalEffects(): List<Effect> =
+            listOf(
+                Effect.DamageDirectly(
+                damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
+                false,
+                EffectData(
+                    trigger = Trigger.triggerForSituation<GameSituation.CardsDrawn> { situation, card, _, _ ->
+                        card in situation.cards && situation.isFromBottom
+                    }
+                )),
+                Effect.DamageDirectly(
+                    damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
+                    false,
+                    EffectData(
+                        trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, _ ->
+                            !situation.before && situation.card === card &&
+                                    situation.oldZone != Zone.STACK &&
+                                    situation.newZone == Zone.HAND
+                        }
+                    )
+                )
+            )
+
+
+        //Does no damage on shot
+        override fun modifyOnShotDamage(
+            card: Card,
+            controller: GameController,
+            damage: Int
+        ): Int = 0
+
+        override fun equals(other: Any?): Boolean = other is Phantom
+    }
+
+    object HighVelocity : BulletBehaviour(supportsBeingAddedLater = true) {
+        //Does no damage on shot
+        override fun modifyOnShotDamage(
+            card: Card,
+            controller: GameController,
+            damage: Int
+        ): Int = 0
+
+        //TODO: Needs to check for if bullet has been removed from chamber
+        override fun additionalEffects(): List<Effect> = Effect.DamageDirectly(
+            damage = {cont,_,_,self -> self?.curDamage(cont) ?: 0},
+            false,
+            EffectData(
+                trigger = Trigger.triggerForSituation<GameSituation.ZoneChange> { situation, card, _, cont ->
+                    !situation.before && situation.card === card &&
+                            situation.oldZone == Zone.REVOLVER &&
+                            situation.newZone != Zone.REVOLVER
+                }
+            )
+        ).let { listOf(it) }
+
+        override fun equals(other: Any?): Boolean = other is HighVelocity
+    }
+
+    class Amplify(val damageIncrease: Int) : BulletBehaviour(true) {
+
+        override fun modifyDamageModifier(
+            card: Card,
+            controller: GameController,
+            modifier: CardDamageModifier
+        ): CardDamageModifier {
+            if (modifier.damage == 0 && modifier.damageMultiplier == 1f) return modifier
+            if (modifier.damage < 0 || modifier.damageMultiplier < 1f) return modifier
+            val newModifier = modifier.copy(damage = modifier.damage + damageIncrease)
+            return newModifier
+        }
+
+        override fun equals(other: Any?): Boolean = other is Amplify && other.damageIncrease == damageIncrease
+
+        override fun hashCode(): Int = super.hashCode() * damageIncrease.hashCode()
+    }
+
+
+    object Spirit : BulletBehaviour(supportsBeingAddedLater = true) {
+        //Does no damage on shot
+        override fun modifyOnShotDamage(
+            card: Card,
+            controller: GameController,
+            damage: Int
+        ): Int = 0
+
+        override fun equals(other: Any?): Boolean = other is Spirit
     }
 }

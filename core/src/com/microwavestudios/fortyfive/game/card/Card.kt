@@ -200,8 +200,12 @@ class Card(
         private set
     var isPersistent: Boolean = false
         private set
+    var isPiercing: Boolean = false
+        private set
 
-    private val behaviours: MutableSet<BulletBehaviour> = mutableSetOf()
+    private val behaviours: MutableMap<BulletBehaviour, Pair<Boolean, MutableList<() -> Boolean>>> = mutableMapOf()
+    private val activeBehaviours: Set<BulletBehaviour>
+        get() = behaviours.keys
 
     var stackPosition: StackPosition = StackPosition.NORMAL
         private set
@@ -243,7 +247,7 @@ class Card(
         private set
     var lastTurnRotationCounter: Int = 0
         private set
-    var continuousRotationCounter: Int = 0
+    var fullRotationCounter: Int = 0
         private set
     var lastRotationDirection: RevolverRotation = RevolverRotation.None
         private set
@@ -290,7 +294,7 @@ class Card(
     }
 
     fun canBeReplaced(controller: GameController, by: Card): Boolean =
-        behaviours.any { it.canBeReplaced(controller, this, by) }
+        activeBehaviours.any { it.canBeReplaced(controller, this, by) }
 
     fun clearProtectingModifiers() {
         protectingModifiers.clear()
@@ -322,7 +326,7 @@ class Card(
         }
         if (oldZone == Zone.REVOLVER) {
             rotationCounter = 0
-            continuousRotationCounter = 0
+            fullRotationCounter = 0
         }
     }
 
@@ -349,6 +353,19 @@ class Card(
         return somethingChanged
     }
 
+    private fun checkTemporaryBehaviours(): Boolean {
+        var somethingChanged = false
+        behaviours.iterateRemoving { (_, value), remover ->
+            val (permanent, conditions) = value
+            if (permanent) return@iterateRemoving
+            conditions.removeIf { !it() }
+            if (conditions.isNotEmpty()) return@iterateRemoving
+            somethingChanged = true
+            remover()
+        }
+        return somethingChanged
+    }
+
     /**
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
@@ -357,11 +374,13 @@ class Card(
             checkValiditySingleModifierList(controller, costModifiers, getter = { it }) or
             checkValiditySingleModifierList(controller, damageModifiers, getter = { it.second }) or
             checkValiditySingleModifierList(controller, protectingModifiers, getter = { it }) or
-            checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it })
+            checkValiditySingleModifierList(controller, parryOnlyProtectingModifiers, getter = { it }) or
+            checkTemporaryBehaviours()
         if (somethingChanged) modifiersChanged()
     }
 
-    fun canBeShot(controller: GameController): Boolean = behaviours.none { it.preventsShooting(controller, this) }
+    fun canBeShot(controller: GameController): Boolean =
+        activeBehaviours.none { it.preventsShooting(controller, this) }
 
     fun update(controller: GameController) {
         checkModifierValidity(controller)
@@ -390,7 +409,22 @@ class Card(
         require(behaviour.supportsBeingAddedLater || !inGame) {
             "can't add behaviour $behaviour after initialization of card"
         }
-        behaviours.add(behaviour)
+        behaviours[behaviour] = true to mutableListOf()
+        behaviour.additionalEffects()?.let { _effects.addAll(it) }
+        behaviour.init(this)
+    }
+
+    fun addTemporaryBehaviour(behaviour: BulletBehaviour, condition: () -> Boolean) {
+        require(behaviour.supportsBeingAddedLater) {
+            "can't add temporary behaviour $behaviour after initialization of card"
+        }
+        if (behaviour in behaviours) {
+            val (permanent, conditions) = behaviours[behaviour]!!
+            if (permanent) return
+            conditions.add(condition)
+            return
+        }
+        behaviours[behaviour] = true to mutableListOf(condition)
         behaviour.additionalEffects()?.let { _effects.addAll(it) }
         behaviour.init(this)
     }
@@ -403,12 +437,12 @@ class Card(
 
     fun curOnShotDamage(controller: GameController): Int {
         val damage = curDamage(controller)
-        return behaviours.fold(damage) { acc, cur -> cur.modifyOnShotDamage(this, controller, acc) }
+        return activeBehaviours.fold(damage) { acc, cur -> cur.modifyOnShotDamage(this, controller, acc) }
     }
 
     fun curParryValue(controller: GameController): Int {
         val parryValue = parryNumber ?: curDamage(controller)
-        return behaviours.fold(parryValue) { acc, cur -> cur.modifyParryValue(this, controller, acc) }
+        return activeBehaviours.fold(parryValue) { acc, cur -> cur.modifyParryValue(this, controller, acc) }
     }
 
     fun curCost(controller: GameController): Int = costModifiers
@@ -425,16 +459,17 @@ class Card(
         parryDamage: Int,
         putCardInTheHand: (Card) -> Timeline,
         putCardInTheStack: (Card) -> Timeline
-    ): Timeline = Timeline.timeline { skipping { skip ->
+    ): Timeline = Timeline.timeline {
         later {
-            behaviours
+            activeBehaviours
                 .mapNotNull { it.afterShotTimeline(this@Card, controller, wasParry, parryDamage) }
                 .collectTimeline()
                 .let { include(it) }
         }
+        var leaveInRevolver = false
         action {
-            if (behaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
-                skip()
+            if (activeBehaviours.any { it.keepInRevolverAfterShot(this@Card, controller, wasParry, parryDamage) }) {
+                leaveInRevolver = true
                 return@action
             }
             if (wasParry && parryOnlyProtectingModifiers.isNotEmpty()) {
@@ -446,7 +481,7 @@ class Card(
                     parryOnlyProtectingModifiers[0] = newEffect
                 }
                 modifiersChanged()
-                skip()
+                leaveInRevolver = true
                 return@action
             }
             if (protectingModifiers.isNotEmpty()) {
@@ -458,22 +493,26 @@ class Card(
                     protectingModifiers[0] = newEffect
                 }
                 modifiersChanged()
-                skip()
+                leaveInRevolver = true
+                return@action
             }
-        }
-        action {
             if (isPersistent) return@action
             damageModifiers.removeIf { !it.second.data.keepActive }
             protectingModifiers.removeIf { !it.data.keepActive }
             parryOnlyProtectingModifiers.removeIf { !it.data.keepActive }
             modifiersChanged()
         }
-        if (behaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }) {
-            include(putCardInTheHand(this@Card))
-        } else {
-            include(putCardInTheStack(this@Card))
+        later {
+            if (leaveInRevolver) return@later
+            val putInHand =
+                activeBehaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }
+            if (putInHand) {
+                include(putCardInTheHand(this@Card))
+            } else {
+                include(putCardInTheStack(this@Card))
+            }
         }
-    } }
+    }
 
     fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
         this.stackPosition = stackPosition
@@ -481,7 +520,7 @@ class Card(
     }
 
     fun protect(protectingModifier: ProtectingModifier) {
-        if (behaviours.any { it.disableProtectingModifiers() }) {
+        if (activeBehaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         protectingModifiers.add(protectingModifier.copy())
@@ -489,7 +528,7 @@ class Card(
     }
 
     fun protectParryOnly(protectingModifier: ProtectingModifier) {
-        if (behaviours.any { it.disableProtectingModifiers() }) {
+        if (activeBehaviours.any { it.disableProtectingModifiers() }) {
             return
         }
         parryOnlyProtectingModifiers.add(protectingModifier.copy())
@@ -497,7 +536,7 @@ class Card(
     }
 
     fun targetedEnemies(controller: GameController): List<Enemy> {
-        behaviours.forEach { behaviour ->
+        activeBehaviours.forEach { behaviour ->
             behaviour.targetedEnemies(controller, this)?.let { return it }
         }
         return listOf(controller.targetedEnemy())
@@ -513,9 +552,11 @@ class Card(
             .none { it.blocks(this, controller) }
     }
 
-    fun addDamageModifier(modifier: CardDamageModifier) {
+    fun addDamageModifier(modifier: CardDamageModifier, controller: GameController) {
         FortyFive.logger.debug(logTag, "card got new modifier: $modifier")
-        damageModifiers.add(++damageModifierCounter to modifier.copy())
+        var newModifier = modifier.copy()
+        newModifier = activeBehaviours.fold(newModifier) { acc, cur -> cur.modifyDamageModifier(this, controller, acc) }
+        damageModifiers.add(++damageModifierCounter to newModifier)
         modifiersChanged()
     }
 
@@ -544,20 +585,36 @@ class Card(
                 Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
             )
         )
-        addDamageModifier(modifier)
+        addDamageModifier(modifier, controller)
     }
 
     /**
      * called when the revolver rotates (but not when this card was shot)
      */
-    fun onRevolverRotation(rotation: RevolverRotation) {
-        rotationCounter += rotation.amount
-        turnRotationCounter += rotation.amount
-        if (rotation.directionString == lastRotationDirection.directionString) {
-            continuousRotationCounter += rotation.amount
-        } else {
-            continuousRotationCounter = 0
-            lastRotationDirection = rotation
+    fun onRevolverRotationTimeline(
+        rotation: RevolverRotation,
+        fullRotationTimelineCreator: (Card) -> Timeline
+    ): Timeline = Timeline.timeline {
+        var prevFullRotCounter = fullRotationCounter
+        action {
+            prevFullRotCounter = fullRotationCounter
+
+            rotationCounter += rotation.amount
+            turnRotationCounter += rotation.amount
+            if (rotation.directionString == lastRotationDirection.directionString) {
+                fullRotationCounter += rotation.amount
+            } else {
+                fullRotationCounter = rotation.amount
+                lastRotationDirection = rotation
+            }
+        }
+        later {
+            val prevFullRotations = prevFullRotCounter / 5
+            val currentFullRotations = fullRotationCounter / 5
+            if (currentFullRotations <= prevFullRotations) return@later
+            repeat(currentFullRotations - prevFullRotations) {
+                include(fullRotationTimelineCreator(this@Card))
+            }
         }
     }
 
@@ -597,7 +654,7 @@ class Card(
                         include(anim)
                     }
                 }
-                include(effect.trigger(this@Card, triggerInformation, controller))
+                include(effect.trigger(this@Card, triggerInformation, controller, situation))
                 later {
                     if (!isInTriggerPosition) return@later
                     if (zone == zoneAtStart) return@later
@@ -618,7 +675,7 @@ class Card(
     } }
 
     fun getRotationDirection(controller: GameController): RevolverRotation =
-        behaviours.fold(rotationDirection) { acc, cur -> cur.modifyRotationDirection(this, controller, acc) }
+        activeBehaviours.fold(rotationDirection) { acc, cur -> cur.modifyRotationDirection(this, controller, acc) }
 
     private fun checkModifierTransformers(
         situation: GameSituation,
@@ -851,6 +908,11 @@ class Card(
                 ?.value
                 ?.map { it.value as String }
                 ?.forEach { applyTraitEffect(it, card) }
+
+            for(trait in stamp?.traitEffects() ?: emptyList())
+            {
+                applyTraitEffect(trait, card)
+            }
         }
 
         private fun applyTraitEffect(effect: String, card: Card): Unit = when (effect) {
@@ -866,6 +928,7 @@ class Card(
             "persistence" -> card.isPersistent = true
             "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
             "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
+            "piercing" -> card.isPiercing = true
 
             else -> throw RuntimeException("unknown trait effect $effect")
         }

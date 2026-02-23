@@ -45,7 +45,7 @@ data class Encounter(
     fun asOnj(): OnjObject = buildOnjObject {
         "enemies" with enemies
         "encounterModifier" with encounterModifierNames
-        "forceCards" with forceCards
+        "forceCards" with forceCards?.map { it.asOnj() }
         "shuffleCards" with shuffleCards
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "majorDifficulty" with majorDifficulty

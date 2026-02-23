@@ -218,7 +218,9 @@ dialogs: [
                 rightNpc: "npc.brother",
                 leftNpc: null,
                 next: $GiftCardEnd {
-                    card: "incendiaryBullet",
+                    card: {
+                        name: "incendiaryBullet"
+                    }
                 }
             },
         ],
@@ -429,7 +431,7 @@ dialogs: [
                     },
                 ],
                 next: $GiftCardEnd {
-                    card: "guardianAngelBullet",
+                    card: { name: "guardianAngelBullet" },
                 }
             },
         ],

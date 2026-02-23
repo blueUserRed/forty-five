@@ -60,6 +60,8 @@ abstract class StatusEffect(
     override fun hashCode(): Int {
         return this::class.qualifiedName?.hashCode() ?: 0
     }
+
+    abstract fun increment(amount: Int)
 }
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
@@ -103,6 +105,10 @@ abstract class RotationBasedStatusEffect(
     protected fun stackRotationEffect(other: RotationBasedStatusEffect) {
         duration += other.duration
         if (other.continueForever) continueForever = true
+    }
+
+    override fun increment(amount: Int) {
+        extendDuration(amount)
     }
 }
 
@@ -151,6 +157,10 @@ abstract class TurnBasedStatusEffect(
     protected fun stackTurnEffect(other: TurnBasedStatusEffect) {
         duration += other.duration
         if (other.continueForever) continueForever = true
+    }
+
+    override fun increment(amount: Int) {
+        extendDuration(amount)
     }
 }
 
@@ -266,6 +276,10 @@ class Poison(
         damage += other.damage
     }
 
+    override fun increment(amount: Int) {
+        damage += amount
+    }
+
     override fun isStillValid(): Boolean = damage > 0
 
     override fun getDisplayText(): String = damage.toString()
@@ -348,6 +362,11 @@ class Bewitched(
         else -> rotation
     }
 
+    override fun increment(amount: Int) {
+        turnsDuration += amount
+        rotationDuration += amount
+    }
+
     override fun equals(other: Any?): Boolean = other is Bewitched
 
 }
@@ -383,6 +402,10 @@ class Shield(
     override fun isStillValid(): Boolean = shield > 0
 
     override fun getDisplayText(): String = shield.toString()
+
+    override fun increment(amount: Int) {
+        shield += amount
+    }
 
     override fun equals(other: Any?): Boolean = other is Shield
 
@@ -423,6 +446,10 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
     override fun getDisplayText(): String = shots.toString()
 
+    override fun increment(amount: Int) {
+        shots += amount
+    }
+
     override fun equals(other: Any?): Boolean = other is Frozen
 
 }
@@ -455,6 +482,10 @@ class Weak(attacks: Int) : StatusEffect(GraphicsConfig.iconName("weak")) {
     override fun isStillValid(): Boolean = attacks > 0
 
     override fun getDisplayText(): String = attacks.toString()
+
+    override fun increment(amount: Int) {
+        attacks += amount
+    }
 
     override fun equals(other: Any?): Boolean = other is Weak
 
