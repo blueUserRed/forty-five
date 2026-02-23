@@ -61,10 +61,7 @@ abstract class StatusEffect(
         return this::class.qualifiedName?.hashCode() ?: 0
     }
 
-    open fun increment(amount: Int)
-    {
-        //Idk what to put in here, just used as a placeholder to override in child classes that need it
-    }
+    abstract fun increment(amount: Int)
 }
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
@@ -365,6 +362,11 @@ class Bewitched(
         else -> rotation
     }
 
+    override fun increment(amount: Int) {
+        turnsDuration += amount
+        rotationDuration += amount
+    }
+
     override fun equals(other: Any?): Boolean = other is Bewitched
 
 }
@@ -400,6 +402,10 @@ class Shield(
     override fun isStillValid(): Boolean = shield > 0
 
     override fun getDisplayText(): String = shield.toString()
+
+    override fun increment(amount: Int) {
+        shield += amount
+    }
 
     override fun equals(other: Any?): Boolean = other is Shield
 
@@ -440,6 +446,10 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
     override fun getDisplayText(): String = shots.toString()
 
+    override fun increment(amount: Int) {
+        shots += amount
+    }
+
     override fun equals(other: Any?): Boolean = other is Frozen
 
 }
@@ -472,6 +482,10 @@ class Weak(attacks: Int) : StatusEffect(GraphicsConfig.iconName("weak")) {
     override fun isStillValid(): Boolean = attacks > 0
 
     override fun getDisplayText(): String = attacks.toString()
+
+    override fun increment(amount: Int) {
+        attacks += amount
+    }
 
     override fun equals(other: Any?): Boolean = other is Weak
 
