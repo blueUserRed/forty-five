@@ -78,7 +78,7 @@ class EncounterScreen : ScreenCreator() {
     private lateinit var deckAnimationTarget: Actor
 
     private val warningParent: WarningParent by lazy {
-        WarningParent(this, screen, gameEvents)
+        WarningParent(this, screen, screen.events)
     }
 
     private lateinit var enemyParent: CustomGroup
@@ -202,7 +202,7 @@ class EncounterScreen : ScreenCreator() {
 
         addDefaultOverlays(
             worldWidth, worldHeight,
-            gameEvents,
+            screen.events,
             navbarIsLeft = true,
             hasTitleScreen = false,
             hasBackpack = true,

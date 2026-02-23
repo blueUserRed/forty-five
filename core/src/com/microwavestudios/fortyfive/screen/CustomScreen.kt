@@ -125,6 +125,7 @@ open class CustomScreen(
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
+        inputManager.init()
         inputMultiplexer.addProcessor(inputManager)
         inputMultiplexer.addProcessor(stage)
         inputManager.onInput(GameInputs.toggleDebugMenu) { debugMenu?.toggle() }

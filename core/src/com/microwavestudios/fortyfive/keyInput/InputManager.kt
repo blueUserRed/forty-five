@@ -11,6 +11,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
+import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.utils.Vector2
 import com.microwavestudios.fortyfive.utils.epsilonEquals
 import java.util.Stack
@@ -61,10 +62,6 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     private var activeController: Controller? = null
 
     init {
-        // TODO: remove
-        activeController = Controllers.getControllers().firstOrNull()
-        activeController?.addListener(controllerListener)
-
         onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
         onInput(GameInputs.focusPrevious) { focusNext(FocusChangeDirection.PREVIOUS) }
         onInput(GameInputs.focusUp) { focusNext(FocusChangeDirection.UP) }
@@ -77,6 +74,34 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         onInput(GameInputs.scrollLeft) { scroll(false, true) }
         onInput(GameInputs.scrollRight) { scroll(true, true) }
         onInput(GameInputs.toggleFullScreen) { FortyFive.globalSave.fullscreen = !FortyFive.globalSave.fullscreen }
+    }
+
+    fun controllerConnected(controller: Controller) {
+        val event = WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "New Controller connected!")
+        screen.events.fire(event)
+        screen.events.fire(ControllersChangedEvent)
+        if (FortyFive.globalSave.currentControllerUid != null) return
+        screen.events.fire(NewControllerSelectedEvent(controller.uniqueId))
+    }
+
+    fun controllerDisconnected(controller: Controller) {
+        val isActiveController = controller == activeController
+        val event = if (isActiveController) {
+            WarningParent.ShowWarningEvent(WarningParent.Level.HIGH, "Active controller disconnected!")
+        } else {
+            WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "Controller disconnected!")
+        }
+        screen.events.fire(event)
+        screen.events.fire(ControllersChangedEvent)
+        if (!isActiveController) return
+        val nextBestController = Controllers.getControllers().firstOrNull()
+        screen.events.fire(NewControllerSelectedEvent(nextBestController?.uniqueId))
+    }
+
+    private fun makeControllerActive(controller: Controller) {
+        activeController?.removeListener(controllerListener)
+        activeController = controller
+        controller.addListener(controllerListener)
     }
 
     fun recheckFocused() {
@@ -105,6 +130,20 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         val removed = filters.remove(filter)
         if (!removed) return
         recheckFocused()
+    }
+
+    fun init() {
+        screen.events.watchFor<NewControllerSelectedEvent> { (uid) ->
+            FortyFive.globalSave.currentControllerUid = uid
+            val controller = Controllers.getControllers().find { it.uniqueId == uid }
+                ?: return@watchFor
+            makeControllerActive(controller)
+        }
+        val currentControllerUid = FortyFive.globalSave.currentControllerUid
+            ?: return
+        val controller = Controllers.getControllers().find { it.uniqueId == currentControllerUid }
+            ?: return
+        makeControllerActive(controller)
     }
 
     fun update() {
@@ -470,7 +509,6 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     }
 
     override fun keyTyped(character: Char): Boolean {
-        println(character)
         return false
     }
 
@@ -874,6 +912,9 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         }
 
     }
+
+    data class NewControllerSelectedEvent(val uid: String?)
+    data object ControllersChangedEvent
 
     enum class FocusChangeDirection {
         LEFT, RIGHT, UP, DOWN, NEXT, PREVIOUS

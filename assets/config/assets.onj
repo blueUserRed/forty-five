@@ -1479,6 +1479,14 @@ colorTextures: [
     {
         name: "microwave_studios_brown_texture",
         color: color.microwaveStudiosBrown
+    },
+    {
+        name: "dark_brown_grey_texture",
+        color: color("1a1716")
+    },
+    {
+        name: "lighter_brown_grey_texture",
+        color: color("2D2826")
     }
 ],
 

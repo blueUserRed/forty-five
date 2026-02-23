@@ -59,6 +59,9 @@ class GlobalSave {
         onSet = { setToCorrectWindowMode() }
     )
 
+    // not stored in the savefile but still important to persist between screens
+    var currentControllerUid: String? = null
+
     private fun dirty() {
         dirty = true
     }
