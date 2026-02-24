@@ -1,6 +1,8 @@
 package com.microwavestudios.fortyfive.map
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.controllers.ControllerAdapter
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
@@ -26,6 +28,8 @@ import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.DisableActor
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.utils.*
+import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -185,6 +189,20 @@ class DetailMapWidget(
         }
     }
 
+    private val controllerListener = object : ControllerAdapter() {
+
+        override fun axisMoved(
+            controller: Controller?,
+            axisIndex: Int,
+            value: Float
+        ): Boolean {
+            controller ?: return false
+            val mapping = controller.mapping
+            if (axisIndex == mapping.axisLeftY || axisIndex == mapping.axisLeftX) leftStickChanged(controller)
+            return true
+        }
+    }
+
     private val debugMenuPage: MapDebugMenuPage =
         screen.findDebugMenuPage<MapDebugMenuPage>()!!
     private val encounterDebugMenuPage: EncounterPreviewDebugMenuPage =
@@ -192,10 +210,14 @@ class DetailMapWidget(
 
     private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
 
+    private var ignoreLeftStick: Boolean = false
+
     init {
         map.decorations.forEach { it.requestDrawable(screen, this) }
         addListener(dragListener)
         addListener(clickListener)
+        screen.inputManager.addControllerListener(controllerListener)
+        screen.inputManager.disableStick(true)
         invalidateHierarchy()
 
         encounterDebugMenuPage.encounter = (playerNode.event as? EncounterMapEvent)?.encounter
@@ -218,6 +240,35 @@ class DetailMapWidget(
         events.watchFor<PlayerChangedNodeEvent> { event ->
             event.newNode.event?.onPlayerMovedToNode(map)
         }
+    }
+
+    private fun leftStickChanged(controller: Controller) {
+        val x = controller.getAxis(controller.mapping.axisLeftX)
+        val y = controller.getAxis(controller.mapping.axisLeftY)
+        val stickDir = Vector2(x, -y)
+        val mag = stickDir.len()
+        if (mag.epsilonEquals(0f, 0.1f)) {
+            ignoreLeftStick = false
+            return
+        }
+        if (ignoreLeftStick) return
+        if (mag < 0.7f) return
+
+        ignoreLeftStick = true
+
+        val dir = stickDir.unit
+        val playerNodePosition = scaledNodePos(playerNode)
+        var bestMatchValue = -1f
+        var bestMatch: MapNode? = null
+        playerNode.edgesTo.forEach { node ->
+            val nodeDirection = (scaledNodePos(node) - playerNodePosition).unit
+            val result = dir dot nodeDirection
+            if (result > bestMatchValue) {
+                bestMatch = node
+                bestMatchValue = result
+            }
+        }
+        if (bestMatch != null) goToNode(bestMatch)
     }
 
     fun moveToNextNode(mapNode: MapNode) {

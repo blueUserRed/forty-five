@@ -60,6 +60,8 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
 
     private val controllerListener = ControllerListenerImpl()
     private var activeController: Controller? = null
+    private val additionalControllerListeners: MutableList<ControllerListener> = mutableListOf()
+    private val disabledControllerAxis: MutableSet<ControllerAxis> = mutableSetOf()
 
     init {
         onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
@@ -74,6 +76,30 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         onInput(GameInputs.scrollLeft) { scroll(false, true) }
         onInput(GameInputs.scrollRight) { scroll(true, true) }
         onInput(GameInputs.toggleFullScreen) { FortyFive.globalSave.fullscreen = !FortyFive.globalSave.fullscreen }
+    }
+
+    fun addControllerListener(listener: ControllerListener) {
+        activeController?.addListener(listener)
+        additionalControllerListeners.add(listener)
+    }
+
+    fun removeControllerListener(listener: ControllerListener) {
+        activeController?.removeListener(listener)
+        additionalControllerListeners.remove(listener)
+    }
+
+    fun disableAxis(axis: ControllerAxis) {
+        disabledControllerAxis.add(axis)
+    }
+
+    fun disableStick(left: Boolean) {
+        if (left) {
+            disabledControllerAxis.add(ControllerAxis.LEFT_X)
+            disabledControllerAxis.add(ControllerAxis.LEFT_Y)
+        } else {
+            disabledControllerAxis.add(ControllerAxis.RIGHT_X)
+            disabledControllerAxis.add(ControllerAxis.RIGHT_Y)
+        }
     }
 
     fun controllerConnected(controller: Controller) {
@@ -99,9 +125,13 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     }
 
     private fun makeControllerActive(controller: Controller) {
-        activeController?.removeListener(controllerListener)
+        activeController?.let { activeController ->
+            activeController.removeListener(controllerListener)
+            additionalControllerListeners.forEach { activeController.removeListener(it) }
+        }
         activeController = controller
         controller.addListener(controllerListener)
+        additionalControllerListeners.forEach { controller.addListener(it) }
     }
 
     fun recheckFocused() {
@@ -715,6 +745,9 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
             value: Float
         ): Boolean {
             controller ?: return false
+            disabledControllerAxis.forEach { controllerAxis ->
+                if (controllerAxis.getCode(controller.mapping) == axisCode) return false
+            }
             if (axisCode in ignoreAxis) {
                 if (value.epsilonEquals(0f, 0.1f)) ignoreAxis.remove(axisCode)
                 return false
