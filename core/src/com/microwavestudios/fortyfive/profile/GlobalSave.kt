@@ -28,6 +28,7 @@ class GlobalSave {
         lastUsedProfile = null,
         useBorderlessWindowFullscreen = true,
         fullscreen = true,
+        enableControllerVibration = true,
         pluginConfig = mutableListOf()
     )
 
@@ -61,6 +62,10 @@ class GlobalSave {
 
     // not stored in the savefile but still important to persist between screens
     var currentControllerUid: String? = null
+
+    var enableControllerVibration: Boolean by DataDelegate(
+        GlobalSaveData::enableControllerVibration
+    )
 
     private fun dirty() {
         dirty = true
@@ -170,6 +175,7 @@ class GlobalSave {
         var lastUsedProfile: String?,
         var useBorderlessWindowFullscreen: Boolean,
         var fullscreen: Boolean,
+        var enableControllerVibration: Boolean,
         var pluginConfig: MutableList<PluginSaveData>
     ) {
 
@@ -183,6 +189,7 @@ class GlobalSave {
             "lastUsedProfile" with lastUsedProfile
             "useBorderlessWindowFullscreen" with useBorderlessWindowFullscreen
             "fullscreen" with fullscreen
+            "enableControllerVibration" with enableControllerVibration
             "pluginConfig" with pluginConfig.map { it.asOnj() }
         }
 
@@ -197,6 +204,7 @@ class GlobalSave {
                 onj.get<String?>("lastUsedProfile"),
                 onj.get<Boolean>("useBorderlessWindowFullscreen"),
                 onj.get<Boolean>("fullscreen"),
+                onj.get<Boolean>("enableControllerVibration"),
                 onj.get<OnjArray>("pluginConfig").value.map { PluginSaveData.fromOnj(it as OnjObject) }.toMutableList(),
             )
         }

@@ -14,9 +14,4 @@ pluginConfig: {
     agreedToRisk: boolean,
     jarFileHash: string?
 }[],
-/*
-disableRtMechanics?: boolean,
-windowMode: string,
-windowWidth: int,
-lastFullScreenAsBorderless: boolean,
-*/
+enableControllerVibration: boolean,

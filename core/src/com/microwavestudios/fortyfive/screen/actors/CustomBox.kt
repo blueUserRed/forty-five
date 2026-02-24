@@ -526,6 +526,9 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Cu
         }
     private var maxScrollableDistanceInDirection = 0F
 
+    val canBeScrolled: Boolean
+        get() = maxScrollableDistanceInDirection > 0f
+
     private var defaultsForScrollLayout: (() -> Unit)? = null
 
     private val scrollListener = object : InputListener() {

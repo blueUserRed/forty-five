@@ -1,7 +1,6 @@
 package com.microwavestudios.fortyfive.keyInput
 
 import com.badlogic.gdx.Input.Keys
-import com.microwavestudios.fortyfive.keyInput.Input
 
 object GameInputs {
 

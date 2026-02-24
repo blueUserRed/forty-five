@@ -199,7 +199,10 @@ open class RenderPipeline(
         if (!screenShakeShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakeShader)
         val screenShakeShader = screenShakeShader.getOrError()
         action { screenShakeShader.resetReferenceTime() }
-        action { postPreprocessingSteps.add(screenShakePostProcessingStep) }
+        action {
+            postPreprocessingSteps.add(screenShakePostProcessingStep)
+            screen.inputManager.vibrateController(200, 0.3f)
+        }
         delay(200)
         action { postPreprocessingSteps.remove(screenShakePostProcessingStep) }
     } else Timeline()
@@ -208,7 +211,10 @@ open class RenderPipeline(
         if (!screenShakePopoutShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakePopoutShader)
         val screenShakePopoutShader = screenShakeShader.getOrError()
         action { screenShakePopoutShader.resetReferenceTime() }
-        action { postPreprocessingSteps.add(screenShakePopoutPostProcessingStep) }
+        action {
+            postPreprocessingSteps.add(screenShakePopoutPostProcessingStep)
+            screen.inputManager.vibrateController(100, 0.6f)
+        }
         delay(((1f / 30f) * 1000f).toInt())
         action { postPreprocessingSteps.remove(screenShakePopoutPostProcessingStep) }
     } else Timeline()
@@ -566,6 +572,7 @@ class GameRenderPipeline(screen: CustomScreen) : RenderPipeline(screen, screen) 
         action {
             shootShader.resetReferenceTime()
             postPreprocessingSteps.add(shootPostProcessingStep)
+            screen.inputManager.vibrateController(duration, 0.5f)
         }
         delay(duration)
         action {

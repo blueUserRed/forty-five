@@ -117,6 +117,7 @@ object SettingsCreator {
 
         header(creator, "Controllers")
         controllers(creator, events, parentWidth)
+        singleSettingSelector("Controller Vibration:", "controllerVibration")
 
         header(creator, "Audio")
         singleSettingSlider(creator, parentWidth, "Master Volume", "masterVolume", 0f, 1f)
@@ -148,7 +149,9 @@ object SettingsCreator {
                 barWidth = 10f
             )
             wrap = CustomWrap.NONE
-            touchable = Touchable.enabled
+            onLayoutAndNow {
+                touchable = if (canBeScrolled) Touchable.enabled else Touchable.disabled
+            }
             flexDirection = FlexDirection.ROW
             verticalAlign = CustomAlign.CENTER
             height = 230f
@@ -184,6 +187,7 @@ object SettingsCreator {
     ) = with(creator) {
         var isSelected = FortyFive.globalSave.currentControllerUid == controller.uniqueId
         box(backgroundHints = arrayOf("dark_brown_grey_texture", "lighter_brown_grey_texture")) {
+
             backgroundHandle = if (isSelected) {
                 "lighter_brown_grey_texture"
             } else {
@@ -197,10 +201,14 @@ object SettingsCreator {
 
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
+            joinGroup(settingsGroup)
 
             onInput(GameInputs.interact) {
-                if (isSelected) return@onInput
-                events.fire(InputManager.NewControllerSelectedEvent(controller.uniqueId))
+                if (isSelected) {
+                    events.fire(InputManager.NewControllerSelectedEvent(null))
+                } else {
+                    events.fire(InputManager.NewControllerSelectedEvent(controller.uniqueId))
+                }
             }
 
             events.watchFor<InputManager.NewControllerSelectedEvent> { (uid) ->
@@ -218,6 +226,7 @@ object SettingsCreator {
                 height = 50f
             }
             verticalSpacer(10f)
+
             label("red wing", controller.name, Color.FortyWhite, 22) {
                 touchable = Touchable.disabled
                 width = size * 0.9f

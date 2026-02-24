@@ -8,6 +8,7 @@ import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
@@ -90,6 +91,12 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
 
     fun disableAxis(axis: ControllerAxis) {
         disabledControllerAxis.add(axis)
+    }
+
+    fun vibrateController(duration: Int, strength: Float) {
+        if (!FortyFive.globalSave.enableControllerVibration) return
+        val controller = activeController ?: return
+        controller.startVibration(duration, strength)
     }
 
     fun disableStick(left: Boolean) {
