@@ -224,6 +224,7 @@ object SettingsCreator {
                 backgroundHandle = "white_texture"
                 width = 50f
                 height = 50f
+                badTexture("controller icon")
             }
             verticalSpacer(10f)
 
@@ -270,7 +271,7 @@ object SettingsCreator {
 
     private fun CustomBox.header(creator: ScreenCreator, title: String) = with(creator) {
         label("red wing", title, fontSize = (32 * 1.4).toInt()) {
-            marginTop = 20f
+            marginTop = 50f
             marginBottom = 10f
             height = 50f
             syncWidth()

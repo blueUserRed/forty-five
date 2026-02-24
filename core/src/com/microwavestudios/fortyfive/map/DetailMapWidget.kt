@@ -198,7 +198,10 @@ class DetailMapWidget(
         ): Boolean {
             controller ?: return false
             val mapping = controller.mapping
-            if (axisIndex == mapping.axisLeftY || axisIndex == mapping.axisLeftX) leftStickChanged(controller)
+            if (axisIndex == mapping.axisLeftY || axisIndex == mapping.axisLeftX) {
+                leftStickChanged(controller)
+            }
+
             return true
         }
     }
@@ -218,6 +221,7 @@ class DetailMapWidget(
         addListener(clickListener)
         screen.inputManager.addControllerListener(controllerListener)
         screen.inputManager.disableStick(true)
+        screen.inputManager.disableStick(false)
         invalidateHierarchy()
 
         encounterDebugMenuPage.encounter = (playerNode.event as? EncounterMapEvent)?.encounter
@@ -399,6 +403,7 @@ class DetailMapWidget(
         }
 
         validate()
+        updateControllerBasedScroll()
         updatePlayerMovement()
         updateScreenMovement()
         batch ?: return
@@ -426,6 +431,19 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun updateControllerBasedScroll() {
+        val speed = 20f
+
+        if (moveScreenToPoint != null) return
+        val controller = screen.inputManager.activeController ?: return
+        val mapping = controller.mapping
+        val x = controller.getAxis(mapping.axisRightX)
+        val y = controller.getAxis(mapping.axisRightY)
+        val direction = Vector2(-x, y)
+        if (direction.len() < 0.2f) return
+        mapOffset += direction * speed
     }
 
     private fun updateScreenMovement() {

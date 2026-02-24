@@ -199,11 +199,10 @@ open class RenderPipeline(
         if (!screenShakeShader.isResolved) FortyFive.resourceManager.forceResolve(screenShakeShader)
         val screenShakeShader = screenShakeShader.getOrError()
         action { screenShakeShader.resetReferenceTime() }
-        action {
-            postPreprocessingSteps.add(screenShakePostProcessingStep)
-            screen.inputManager.vibrateController(200, 0.3f)
-        }
-        delay(200)
+        action { postPreprocessingSteps.add(screenShakePostProcessingStep) }
+        delay(50)
+        action { screen.inputManager.vibrateController(50, 0.6f) }
+        delay(150)
         action { postPreprocessingSteps.remove(screenShakePostProcessingStep) }
     } else Timeline()
 

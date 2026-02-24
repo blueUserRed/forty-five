@@ -33,6 +33,12 @@ class Input(val name: String, val causes: Array<Cause>) {
             val threshold: Float,
             val requireStates: Array<InputState> = arrayOf()
         ) : Cause()
+
+        class ControllerAxisHeld(
+            val axis: ControllerAxis,
+            val threshold: Float,
+        ) : Cause()
+
     }
 
 }

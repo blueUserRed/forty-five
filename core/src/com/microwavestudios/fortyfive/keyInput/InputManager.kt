@@ -59,8 +59,10 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     private var awaitingDrop: List<InputActor>? = null
     private var lastDraggedOver: InputActor? = null
 
+    var activeController: Controller? = null
+        private set
+
     private val controllerListener = ControllerListenerImpl()
-    private var activeController: Controller? = null
     private val additionalControllerListeners: MutableList<ControllerListener> = mutableListOf()
     private val disabledControllerAxis: MutableSet<ControllerAxis> = mutableSetOf()
 
@@ -184,6 +186,39 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     }
 
     fun update() {
+        checkKeyHeldDown()
+        checkAxisHeld()
+    }
+
+    private fun checkAxisHeld() {
+
+        val controller = activeController ?: return
+        val mapping = controller.mapping
+
+        fun checkInput(input: Input): Boolean = input
+            .causes
+            .filterIsInstance<Input.Cause.ControllerAxisHeld>()
+            .any { cause ->
+                val value = controller.getAxis(cause.axis.getCode(mapping))
+                val valueMatch = if (cause.threshold < 0) {
+                    value < cause.threshold
+                } else {
+                    value > cause.threshold
+                }
+                valueMatch
+            }
+
+        inputCallbacks.forEach { (input, callbacks) ->
+            if (checkInput(input)) callbacks.forEach { it() }
+        }
+        actors.forEach { actor ->
+            actor.inputCallbacks.forEach { (input, callbacks) ->
+                if (checkInput(input)) callbacks.forEach { it() }
+            }
+        }
+    }
+
+    private fun checkKeyHeldDown() {
 
         fun checkInput(input: Input): Boolean = input
             .causes

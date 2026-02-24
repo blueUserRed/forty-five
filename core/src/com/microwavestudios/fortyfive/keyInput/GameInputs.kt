@@ -36,7 +36,7 @@ object GameInputs {
         "scrollUp",
         arrayOf(
             Input.Cause.KeyHeldDown(Keys.UP),
-//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_UP)
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_Y, -0.3f)
         )
     )
 
@@ -44,7 +44,7 @@ object GameInputs {
         "scrollDown",
         arrayOf(
             Input.Cause.KeyHeldDown(Keys.DOWN),
-//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_DOWN)
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_Y, 0.3f)
         )
     )
 
@@ -52,7 +52,7 @@ object GameInputs {
         "scrollLeft",
         arrayOf(
             Input.Cause.KeyHeldDown(Keys.LEFT),
-//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_LEFT)
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_X, -0.3f)
         )
     )
 
@@ -60,7 +60,7 @@ object GameInputs {
         "scrollRight",
         arrayOf(
             Input.Cause.KeyHeldDown(Keys.RIGHT),
-//            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_RIGHT)
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_X, 0.3f)
         )
     )
 
@@ -125,6 +125,7 @@ object GameInputs {
         )
     )
 
+    // TODO: use keyHeldDown instead
     val switchSelectorToLeft = Input(
         "switchToLeft",
         arrayOf(
