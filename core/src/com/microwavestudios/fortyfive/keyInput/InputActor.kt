@@ -215,11 +215,6 @@ class InputActorImpl : InputActor {
     override fun <T> initInput(actor: T, screen: CustomScreen) where T : Actor, T : InputActor {
         this._actor = actor
         this.screen = screen
-        observeInputState(
-            InputManager.BaseStates.keyboardFocus,
-            { actor.debug = true },
-            { actor.debug = false },
-        )
     }
 
     override fun onInput(input: Input, callback: () -> Unit) {
