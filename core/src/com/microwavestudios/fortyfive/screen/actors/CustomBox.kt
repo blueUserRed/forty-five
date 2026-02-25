@@ -526,19 +526,25 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Cu
         }
     private var maxScrollableDistanceInDirection = 0F
 
+    val canBeScrolled: Boolean
+        get() = maxScrollableDistanceInDirection > 0f
+
     private var defaultsForScrollLayout: (() -> Unit)? = null
 
     private val scrollListener = object : InputListener() {
+
         override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
-            stage.scrollFocus = this@CustomScrollableBox
+            if (stage.scrollFocus == null) stage.scrollFocus = this@CustomScrollableBox
         }
 
         override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
-            if (x > width || x < 0 || y > height || y < 0) stage?.scrollFocus = null
+            stage?.scrollFocus = null
         }
 
         override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
-            this@CustomScrollableBox.scrolledBy(amountY)
+            if (stage?.scrollFocus === this@CustomScrollableBox) {
+                this@CustomScrollableBox.scrolledBy(amountY)
+            }
             return true
         }
     }

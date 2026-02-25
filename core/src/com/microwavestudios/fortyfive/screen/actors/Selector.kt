@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.keyInput.InputActor
+import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.CustomScreen
@@ -24,7 +26,7 @@ class Selector(
     private val bindTarget: BindTarget<*>,
     private val screen: CustomScreen,
     private val settingChangedCallback: (() -> Unit)? = null,
-) : Widget(), ResourceBorrower {
+) : Widget(), InputActor by InputActorImpl(), ResourceBorrower {
 
     private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
@@ -44,6 +46,7 @@ class Selector(
     private var lastValue: Any = Unit
 
     init {
+        initInput(this, screen)
         addListener(clickListener)
         options = bindTarget
             .mappings

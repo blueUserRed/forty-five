@@ -1123,7 +1123,10 @@ class CardActor(
             selectionAnimation.start()
             return
         }
-        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+        if (
+            (!card.inGame || card.inZone(Zone.REVOLVER)) &&
+            (dropShadow == null || dropShadow == defaultFocusDropShadow)
+        ) {
             dropShadow = defaultFocusDropShadow
             defaultFocusDropShadow.showDropShadow = true
         }
@@ -1136,7 +1139,10 @@ class CardActor(
             rotation = rotationOnSelectionEnter
             return
         }
-        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+        if (
+            (!card.inGame || card.inZone(Zone.REVOLVER)) &&
+            (dropShadow == null || dropShadow == defaultFocusDropShadow)
+        ) {
             dropShadow = defaultFocusDropShadow
             defaultFocusDropShadow.showDropShadow = false
         }

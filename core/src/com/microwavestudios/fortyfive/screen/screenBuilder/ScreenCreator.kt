@@ -564,12 +564,12 @@ abstract class ScreenCreator : ResourceBorrower {
         hasCollection: Boolean = false,
         hasNavbar: Boolean = true,
         navbarIsLeft: Boolean = false,
-        warnings: WarningParent? = null,
+        warnings: WarningParent? = WarningParent(this@ScreenCreator, screen, events),
         hasTutorial: Boolean = true,
         hasTitleScreen: Boolean = true,
         canHaveRunBoard: Boolean = false,
     ) {
-
+        screen.events.link(events)
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
         val settings: CustomGroup? = if (hasSettings) {

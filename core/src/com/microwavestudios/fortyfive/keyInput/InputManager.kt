@@ -1,12 +1,20 @@
 package com.microwavestudios.fortyfive.keyInput
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.controllers.ControllerListener
+import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.screen.CustomScreen
-import com.microwavestudios.fortyfive.utils.FortyFiveLogger
+import com.microwavestudios.fortyfive.screen.actors.CustomDirection
+import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
+import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.utils.Vector2
+import com.microwavestudios.fortyfive.utils.epsilonEquals
 import java.util.Stack
 
 /**
@@ -51,6 +59,13 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     private var awaitingDrop: List<InputActor>? = null
     private var lastDraggedOver: InputActor? = null
 
+    var activeController: Controller? = null
+        private set
+
+    private val controllerListener = ControllerListenerImpl()
+    private val additionalControllerListeners: MutableList<ControllerListener> = mutableListOf()
+    private val disabledControllerAxis: MutableSet<ControllerAxis> = mutableSetOf()
+
     init {
         onInput(GameInputs.focusNext) { focusNext(FocusChangeDirection.NEXT) }
         onInput(GameInputs.focusPrevious) { focusNext(FocusChangeDirection.PREVIOUS) }
@@ -59,7 +74,73 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         onInput(GameInputs.focusLeft) { focusNext(FocusChangeDirection.LEFT) }
         onInput(GameInputs.focusRight) { focusNext(FocusChangeDirection.RIGHT) }
         onInput(GameInputs.cancel) { cancelKeyboardDragAndDrop() }
+        onInput(GameInputs.scrollUp) { scroll(true, false) }
+        onInput(GameInputs.scrollDown) { scroll(false, false) }
+        onInput(GameInputs.scrollLeft) { scroll(false, true) }
+        onInput(GameInputs.scrollRight) { scroll(true, true) }
         onInput(GameInputs.toggleFullScreen) { FortyFive.globalSave.fullscreen = !FortyFive.globalSave.fullscreen }
+    }
+
+    fun addControllerListener(listener: ControllerListener) {
+        activeController?.addListener(listener)
+        additionalControllerListeners.add(listener)
+    }
+
+    fun removeControllerListener(listener: ControllerListener) {
+        activeController?.removeListener(listener)
+        additionalControllerListeners.remove(listener)
+    }
+
+    fun disableAxis(axis: ControllerAxis) {
+        disabledControllerAxis.add(axis)
+    }
+
+    fun vibrateController(duration: Int, strength: Float) {
+        if (!FortyFive.globalSave.enableControllerVibration) return
+        val controller = activeController ?: return
+        controller.startVibration(duration, strength)
+    }
+
+    fun disableStick(left: Boolean) {
+        if (left) {
+            disabledControllerAxis.add(ControllerAxis.LEFT_X)
+            disabledControllerAxis.add(ControllerAxis.LEFT_Y)
+        } else {
+            disabledControllerAxis.add(ControllerAxis.RIGHT_X)
+            disabledControllerAxis.add(ControllerAxis.RIGHT_Y)
+        }
+    }
+
+    fun controllerConnected(controller: Controller) {
+        val event = WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "New Controller connected!")
+        screen.events.fire(event)
+        screen.events.fire(ControllersChangedEvent)
+        if (FortyFive.globalSave.currentControllerUid != null) return
+        screen.events.fire(NewControllerSelectedEvent(controller.uniqueId))
+    }
+
+    fun controllerDisconnected(controller: Controller) {
+        val isActiveController = controller == activeController
+        val event = if (isActiveController) {
+            WarningParent.ShowWarningEvent(WarningParent.Level.HIGH, "Active controller disconnected!")
+        } else {
+            WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "Controller disconnected!")
+        }
+        screen.events.fire(event)
+        screen.events.fire(ControllersChangedEvent)
+        if (!isActiveController) return
+        val nextBestController = Controllers.getControllers().firstOrNull()
+        screen.events.fire(NewControllerSelectedEvent(nextBestController?.uniqueId))
+    }
+
+    private fun makeControllerActive(controller: Controller) {
+        activeController?.let { activeController ->
+            activeController.removeListener(controllerListener)
+            additionalControllerListeners.forEach { activeController.removeListener(it) }
+        }
+        activeController = controller
+        controller.addListener(controllerListener)
+        additionalControllerListeners.forEach { controller.addListener(it) }
     }
 
     fun recheckFocused() {
@@ -88,6 +169,80 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         val removed = filters.remove(filter)
         if (!removed) return
         recheckFocused()
+    }
+
+    fun init() {
+        screen.events.watchFor<NewControllerSelectedEvent> { (uid) ->
+            FortyFive.globalSave.currentControllerUid = uid
+            val controller = Controllers.getControllers().find { it.uniqueId == uid }
+                ?: return@watchFor
+            makeControllerActive(controller)
+        }
+        val currentControllerUid = FortyFive.globalSave.currentControllerUid
+            ?: return
+        val controller = Controllers.getControllers().find { it.uniqueId == currentControllerUid }
+            ?: return
+        makeControllerActive(controller)
+    }
+
+    fun update() {
+        checkKeyHeldDown()
+        checkAxisHeld()
+    }
+
+    private fun checkAxisHeld() {
+
+        val controller = activeController ?: return
+        val mapping = controller.mapping
+
+        fun checkInput(input: Input, actor: InputActor?): Boolean = input
+            .causes
+            .filterIsInstance<Input.Cause.ControllerAxisHeld>()
+            .any { cause ->
+                val value = controller.getAxis(cause.axis.getCode(mapping))
+                val valueMatch = if (cause.threshold < 0) {
+                    value < cause.threshold
+                } else {
+                    value > cause.threshold
+                }
+                if (!valueMatch) return@any false
+                if (cause.requireStates.isEmpty()) return@any true
+                if (actor == null) return@any false
+                cause.requireStates.all { actor.isInInputState(it) }
+            }
+
+        inputCallbacks.forEach { (input, callbacks) ->
+            if (checkInput(input, null)) callbacks.forEach { it() }
+        }
+        actors.forEach { actor ->
+            actor.inputCallbacks.forEach { (input, callbacks) ->
+                if (checkInput(input, actor)) callbacks.forEach { it() }
+            }
+        }
+    }
+
+    private fun checkKeyHeldDown() {
+
+        fun checkInput(input: Input, actor: InputActor?): Boolean = input
+            .causes
+            .filterIsInstance<Input.Cause.KeyHeldDown>()
+            .any { cause ->
+                if (!Gdx.input.isKeyPressed(cause.key)) return@any false
+                if (cause.requireStates.isEmpty()) return@any true
+                if (actor == null) return@any false
+                cause.requireStates.all {
+                    actor.isInInputState(it)
+                }
+            }
+
+        inputCallbacks.forEach { (input, callbacks) ->
+            if (checkInput(input, null)) callbacks.forEach { it() }
+        }
+        actors.forEach { actor ->
+            actor.inputCallbacks.forEach { (input, callbacks) ->
+                if (checkInput(input, actor)) callbacks.forEach { it() }
+            }
+        }
     }
 
     private fun canBeFocused(actor: InputActor, enforceLeaf: Boolean = true): Boolean = when {
@@ -271,6 +426,27 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         changeKeyboardFocusedActor(to, true)
     }
 
+    private fun scroll(forward: Boolean, horizontal: Boolean) {
+        val focused = keyboardFocused?.actor ?: return
+        var cur: Actor? = focused
+        while (cur != null && cur !is CustomScrollableBox) {
+            cur = cur.parent
+        }
+        cur ?: return
+        val dir = cur.scrollDirectionStart
+        if (horizontal) {
+            if (dir == CustomDirection.BOTTOM || dir == CustomDirection.TOP) return
+        } else {
+            if (dir == CustomDirection.LEFT || dir == CustomDirection.RIGHT) return
+        }
+        val amount = 1f
+        if (forward) {
+            cur.scrolledBy(-amount)
+        } else {
+            cur.scrolledBy(amount)
+        }
+    }
+
     private fun changeKeyboardFocusedActor(to: InputActor?, checkIfActorCanBeFocused: Boolean) {
         if (checkIfActorCanBeFocused && to != null && !canBeFocused(to)) return
         val lastHovered = lastHovered
@@ -284,10 +460,11 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         keyboardFocused = this.keyboardFocused
         if (keyboardFocused != null) {
             keyboardFocused.enterInputStateManually(BaseStates.keyboardFocus)
-            var parent = keyboardFocused.actor.parent
-            while (parent is InputActor) {
-                parent.childWasKeyboardFocused(keyboardFocused)
-                parent = parent.parent
+            var cur = keyboardFocused
+            while (cur is InputActor) {
+                val parent = cur.actor.parent as? InputActor ?: break
+                parent.childWasKeyboardFocused(cur)
+                cur = parent
             }
         }
     }
@@ -377,7 +554,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
                 }
                 val modifierSize = cause.modifierKeys.size
                 val stateSize = cause.requireStates.size
-                var priority = modifierSize * 1000 + stateSize
+                val priority = modifierSize * 1000 + stateSize
                 if (priority > highestPriority) highestPriority = priority
             }
             return highestPriority
@@ -537,6 +714,138 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         return false
     }
 
+    fun end() {
+        activeController?.removeListener(controllerListener)
+    }
+
+
+    private inner class ControllerListenerImpl : ControllerListener {
+
+        private val ignoreAxis: MutableSet<Int> = mutableSetOf()
+
+        override fun connected(controller: Controller?) {
+        }
+
+        override fun disconnected(controller: Controller?) {
+        }
+
+        override fun buttonDown(
+            controller: Controller?,
+            buttonCode: Int
+        ): Boolean = false
+
+        override fun buttonUp(
+            controller: Controller?,
+            buttonCode: Int
+        ): Boolean {
+            controller ?: return false
+
+            fun checkInput(input: Input, actor: InputActor?): Boolean = input
+                .causes
+                .filterIsInstance<Input.Cause.ControllerButtonBased>()
+                .any { cause ->
+                    cause.button.getCode(controller.mapping) == buttonCode &&
+                            cause.requireStates.all { actor?.isInInputState(it) ?: false }
+                }
+
+//            val mapping = controller.mapping
+//            when (buttonCode) {
+//                mapping.buttonStart -> "buttonStart"
+//                mapping.buttonL1 -> "buttonL1"
+//                mapping.buttonDpadDown -> "buttonDpadDown"
+//                mapping.buttonDpadUp -> "buttonDpadUp"
+//                mapping.buttonDpadLeft -> "buttonDpadLeft"
+//                mapping.buttonDpadRight -> "buttonDpadRight"
+//                mapping.buttonR1 -> "buttonR1"
+//                mapping.buttonA -> "buttonA"
+//                mapping.buttonB -> "buttonB"
+//                mapping.buttonX -> "buttonX"
+//                mapping.buttonY -> "buttonY"
+//                mapping.buttonBack -> "buttonBack"
+//                mapping.buttonRightStick -> "buttonRightStick"
+//                mapping.buttonLeftStick -> "buttonLeftStick"
+//                else -> buttonCode.toString()
+//            }.let { println(it) }
+
+            var foundInput = false
+            val inDragAndDrop = currentDragAndDropModal != null
+            actors.forEach { actor ->
+                actor.inputCallbacks.forEach { (input, callbacks) ->
+                    val matches = checkInput(input, actor)
+                    if (!matches) return@forEach
+                    if (inDragAndDrop) {
+                        if (input == GameInputs.confirmDragAndDrop) finishKeyboardDragAndDrop(actor)
+                        return@forEach
+                    }
+                    foundInput = true
+                    callbacks.forEach { it() }
+                }
+            }
+            if (foundInput) return false
+            inputCallbacks.forEach { (input, callbacks) ->
+                val matches = checkInput(input, null)
+                if (!matches) return@forEach
+                callbacks.forEach { it() }
+            }
+
+            return false
+        }
+
+        override fun axisMoved(
+            controller: Controller?,
+            axisCode: Int,
+            value: Float
+        ): Boolean {
+            controller ?: return false
+            disabledControllerAxis.forEach { controllerAxis ->
+                if (controllerAxis.getCode(controller.mapping) == axisCode) return false
+            }
+            if (axisCode in ignoreAxis) {
+                if (value.epsilonEquals(0f, 0.1f)) ignoreAxis.remove(axisCode)
+                return false
+            }
+
+            fun checkInput(input: Input, actor: InputActor?): Boolean {
+                val result = input
+                    .causes
+                    .filterIsInstance<Input.Cause.ControllerAxisFlick>()
+                    .any { cause ->
+                        val valueMatch = if (cause.threshold < 0) {
+                            value < cause.threshold
+                        } else {
+                            value > cause.threshold
+                        }
+                        cause.axis.getCode(controller.mapping) == axisCode &&
+                                cause.requireStates.all { actor?.isInInputState(it) ?: false } &&
+                                valueMatch
+                    }
+                if (!result) return false
+                ignoreAxis.add(axisCode)
+                return true
+            }
+
+            var foundMatch = false
+            actors.forEach { actor ->
+                actor.inputCallbacks.forEach { (input, callbacks) ->
+                    val matches = checkInput(input, actor)
+                    if (!matches) return@forEach
+                    foundMatch = true
+                    callbacks.forEach { it() }
+                }
+            }
+            if (foundMatch) return false
+            inputCallbacks.forEach { (input, callbacks) ->
+                val matches = checkInput(input, null)
+                if (!matches) return@forEach
+                callbacks.forEach { it() }
+            }
+
+            return false
+        }
+
+    }
+
+
     /**
      * contains basic input states that correspond to events coming from a specific device. Use only
      * when it is necessary to know where a state comes from. Prefer using [GameInputs]
@@ -688,6 +997,9 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         }
 
     }
+
+    data class NewControllerSelectedEvent(val uid: String?)
+    data object ControllersChangedEvent
 
     enum class FocusChangeDirection {
         LEFT, RIGHT, UP, DOWN, NEXT, PREVIOUS
