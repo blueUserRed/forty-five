@@ -227,7 +227,7 @@ class InputActorImpl : InputActor {
         _callbacks[input]!!.add(callback)
         addToInputManagerIfNecessary()
         input.causes.forEach { cause ->
-            if (cause !is Input.Cause.Keyboard) return@forEach
+            if (cause !is Input.Cause.RequiresStates) return@forEach
             cause.requireStates.forEach { observeInputState(it) }
         }
     }

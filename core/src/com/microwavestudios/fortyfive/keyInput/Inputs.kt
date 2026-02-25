@@ -11,33 +11,41 @@ class Input(val name: String, val causes: Array<Cause>) {
 
     override fun hashCode(): Int = name.hashCode()
 
-    sealed class Cause {
+    abstract class Cause {
+
+        interface RequiresStates {
+            abstract val requireStates: Array<InputState>
+        }
 
         class Keyboard(
             val primaryKey: KeyCode,
             val modifierKeys: Array<ModifierKey> = arrayOf(),
-            val requireStates: Array<InputState> = arrayOf()
-        ) : Cause()
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
 
-        class KeyHeldDown(val key: KeyCode) : Cause()
+        class KeyHeldDown(
+            val key: KeyCode,
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
 
         class Mouse(val button: MouseButton, val requireDirectHit: Boolean = true) : Cause()
 
         class ControllerButtonBased(
             val button: ControllerButton,
-            val requireStates: Array<InputState> = arrayOf()
-        ) : Cause()
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
 
         class ControllerAxisFlick(
             val axis: ControllerAxis,
             val threshold: Float,
-            val requireStates: Array<InputState> = arrayOf()
-        ) : Cause()
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
 
         class ControllerAxisHeld(
             val axis: ControllerAxis,
             val threshold: Float,
-        ) : Cause()
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
 
     }
 

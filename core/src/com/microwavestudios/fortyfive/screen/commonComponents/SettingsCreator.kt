@@ -19,7 +19,7 @@ import com.microwavestudios.fortyfive.utils.Timeline
 
 object SettingsCreator {
 
-    private const val settingsOpenScreenState = "settingsAreOpen"
+    const val settingsOpenScreenState = "settingsAreOpen"
 
     fun ScreenCreator.getSharedSettingsMenu(
         worldWidth: Float,
@@ -504,6 +504,7 @@ object SettingsCreator {
             marginTop = 10f
 
             keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
             joinGroup(settingsGroup)
             backgroundHandle = "single_setting_background"
 
@@ -534,8 +535,8 @@ object SettingsCreator {
                 horizontalSpacer(10f)
             }
 
-            onInput(GameInputs.switchSelectorToLeft) { slider.move(-0.1f) } // TODO: veeeeryyy baad
-            onInput(GameInputs.switchSelectorToRight) { slider.move(0.1f) }
+            onInput(GameInputs.moveSliderToLeft) { slider.move(-0.04f) }
+            onInput(GameInputs.moveSliderToRight) { slider.move(0.04f) }
         }
     }
 

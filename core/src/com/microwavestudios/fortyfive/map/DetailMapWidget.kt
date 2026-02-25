@@ -27,6 +27,7 @@ import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.DisableActor
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
+import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.abs
 import kotlin.math.absoluteValue
@@ -197,6 +198,7 @@ class DetailMapWidget(
             value: Float
         ): Boolean {
             controller ?: return false
+            if (SettingsCreator.settingsOpenScreenState in screen.screenState) return false
             val mapping = controller.mapping
             if (axisIndex == mapping.axisLeftY || axisIndex == mapping.axisLeftX) {
                 leftStickChanged(controller)
@@ -436,6 +438,7 @@ class DetailMapWidget(
     private fun updateControllerBasedScroll() {
         val speed = 20f
 
+        if (SettingsCreator.settingsOpenScreenState in screen.screenState) return
         if (moveScreenToPoint != null) return
         val controller = screen.inputManager.activeController ?: return
         val mapping = controller.mapping

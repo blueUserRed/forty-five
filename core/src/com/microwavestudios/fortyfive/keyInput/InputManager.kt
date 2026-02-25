@@ -195,7 +195,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
         val controller = activeController ?: return
         val mapping = controller.mapping
 
-        fun checkInput(input: Input): Boolean = input
+        fun checkInput(input: Input, actor: InputActor?): Boolean = input
             .causes
             .filterIsInstance<Input.Cause.ControllerAxisHeld>()
             .any { cause ->
@@ -205,32 +205,42 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
                 } else {
                     value > cause.threshold
                 }
-                valueMatch
+                if (!valueMatch) return@any false
+                if (cause.requireStates.isEmpty()) return@any true
+                if (actor == null) return@any false
+                cause.requireStates.all { actor.isInInputState(it) }
             }
 
         inputCallbacks.forEach { (input, callbacks) ->
-            if (checkInput(input)) callbacks.forEach { it() }
+            if (checkInput(input, null)) callbacks.forEach { it() }
         }
         actors.forEach { actor ->
             actor.inputCallbacks.forEach { (input, callbacks) ->
-                if (checkInput(input)) callbacks.forEach { it() }
+                if (checkInput(input, actor)) callbacks.forEach { it() }
             }
         }
     }
 
     private fun checkKeyHeldDown() {
 
-        fun checkInput(input: Input): Boolean = input
+        fun checkInput(input: Input, actor: InputActor?): Boolean = input
             .causes
             .filterIsInstance<Input.Cause.KeyHeldDown>()
-            .any { Gdx.input.isKeyPressed(it.key) }
+            .any { cause ->
+                if (!Gdx.input.isKeyPressed(cause.key)) return@any false
+                if (cause.requireStates.isEmpty()) return@any true
+                if (actor == null) return@any false
+                cause.requireStates.all {
+                    actor.isInInputState(it)
+                }
+            }
 
         inputCallbacks.forEach { (input, callbacks) ->
-            if (checkInput(input)) callbacks.forEach { it() }
+            if (checkInput(input, null)) callbacks.forEach { it() }
         }
         actors.forEach { actor ->
             actor.inputCallbacks.forEach { (input, callbacks) ->
-                if (checkInput(input)) callbacks.forEach { it() }
+                if (checkInput(input, actor)) callbacks.forEach { it() }
             }
         }
     }

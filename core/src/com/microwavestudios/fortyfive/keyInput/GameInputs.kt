@@ -125,7 +125,7 @@ object GameInputs {
         )
     )
 
-    // TODO: use keyHeldDown instead
+
     val switchSelectorToLeft = Input(
         "switchToLeft",
         arrayOf(
@@ -154,6 +154,42 @@ object GameInputs {
             ),
             Input.Cause.ControllerAxisFlick(
                 ControllerAxis.LEFT_X,
+                0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            )
+        )
+    )
+
+    val moveSliderToLeft = Input(
+        "moveSliderToLeft",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.LEFT, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.KeyHeldDown(Keys.A, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.LEFT_X,
+                -0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.RIGHT_X,
+                -0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            )
+        )
+    )
+
+    val moveSliderToRight = Input(
+        "moveSliderToRight",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.RIGHT, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.KeyHeldDown(Keys.D, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.LEFT_X,
+                0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.RIGHT_X,
                 0.6f,
                 requireStates = arrayOf(States.trueFocused)
             )
