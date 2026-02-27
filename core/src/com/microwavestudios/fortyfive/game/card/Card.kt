@@ -97,6 +97,7 @@ class CardPrototype(
     val title: String,
     val baseCost: Int,
     val baseDamage: Int,
+    val deckMaximum: Int,
     val tags: List<String>,
 ) {
 
@@ -124,12 +125,12 @@ class CardPrototype(
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
 
-    fun copy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
+    fun copy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, deckMaximum, tags).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
         this.creator = this@CardPrototype.creator
     }
 
-    fun cleanCopy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
+    fun cleanCopy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, deckMaximum, tags).apply {
         this.creator = this@CardPrototype.creator
     }
 
@@ -169,6 +170,7 @@ class Card(
     font: Promise<PixmapFont>,
     fontScale: Float,
     screen: CustomScreen,
+    val deckMaximum: Int,
     val enableHoverDetails: Boolean
 ) : Disposable {
 
@@ -816,6 +818,7 @@ class Card(
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
                         onj.get<Long>("baseDamage").toInt(),
+                        onj.get<Long?>("deckMaximum")?.toInt() ?: -1,
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
                     prototype.creator = { screen, stamp, areHoverDetailsEnabled ->
@@ -868,8 +871,8 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
-                stamp = stamp
-
+                stamp = stamp,
+                deckMaximum = prototype.deckMaximum,
             )
             applyTraitEffects(card, onj, stamp)
             stamp?.behaviours()?.let { behaviours ->
@@ -996,7 +999,8 @@ class CardActor(
         text = {
             val list = card.currentHoverTexts.map { it.second }.toMutableList()
             list.add(card.shortDescription)
-            list.add(card.flavourText)
+            if (card.flavourText.isNotBlank()) list.add("\$flavourText$${card.flavourText}\$flavourText$")
+            list.add("allowed in deck: ${if (card.deckMaximum == -1) "unlimited" else card.deckMaximum }")
             list
         },
         topText = {

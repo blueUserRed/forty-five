@@ -20,6 +20,7 @@ import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.pluralS
 
 object BackpackCreator {
 
@@ -212,6 +213,14 @@ object BackpackCreator {
             state.warningEvents.fire(warningEvent)
             return
         }
+        val deckMaximum = card.deckMaximum
+        if (deckMaximum != -1 && state.currentDeck.countCards(card.name) + 1 > deckMaximum) {
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${card.title} allowed in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.addToDeck(slot, card.type)
         updateCardsInCollection(state)
         with(state.events) {
@@ -243,6 +252,14 @@ object BackpackCreator {
     }
 
     private fun swapBackpackWithDeckCard(backpackCard: Card, deckSlot: Int, state: BackpackState) {
+        val deckMaximum = backpackCard.deckMaximum
+        if (deckMaximum != -1 && state.currentDeck.countCards(backpackCard.name) + 1 > deckMaximum) {
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${backpackCard.title} allowed in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.removeFromDeck(deckSlot)
         state.currentDeck.addToDeck(deckSlot, backpackCard.type)
         updateCardsInCollection(state)

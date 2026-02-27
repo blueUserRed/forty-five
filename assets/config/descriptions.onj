@@ -188,6 +188,11 @@ defaultTextEffects: [
         fontSize: 21,
     },
 
+    $FontSize {
+        indicator:"$flavourText$",
+        fontSize: 16,
+    },
+
     $Color {
         indicator:"$dmgBuff$",
         color: color.green,

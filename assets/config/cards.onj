@@ -32,6 +32,7 @@ cards: [
         cost: 1,
         tags: ["pool0", "unobtainable"],
         price: 50,
+        deckMaximum: null
     },
     {
         name: "bigBullet",
@@ -42,6 +43,7 @@ cards: [
         cost: 2,
         tags: ["pool0", "rarity3"],
         price: 50,
+        deckMaximum: null
     },
     {
         name: "silverBullet",
@@ -49,6 +51,7 @@ cards: [
         flavourText: "This bullet is silver and silence is golden",
         description: "$trigger$On-Placedown:$trigger$\nDraw 1 card\n$trigger$On-Shot:$trigger$\nDraw 1 card",
         baseDamage: 2,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -69,6 +72,7 @@ cards: [
         flavourText: "There are rumors that all those cursed bullets that can be found in the frontier are the work of Witches... I wonder why they would make bullets of all things...",
         description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nGain 1 reserve",
         baseDamage: 5,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: turnBegin(),
@@ -86,6 +90,7 @@ cards: [
         flavourText: '"I\'m pretty sure this is a warcrime"',
         description: '$trigger$On-Shot:$trigger$\nThe enemy gets $status$BURNING$status$ (3)',
         baseDamage: 7,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: shot(),
@@ -102,6 +107,7 @@ cards: [
         flavourText: "I wonder what happened, that a bullet like Leaders Bullet exists.",
         description: "$trigger$On-Placedown:$trigger$\nAll other bullets get +5 dmg as long as Leaders Bullet is in the revolver",
         baseDamage: 15,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -125,6 +131,7 @@ cards: [
         baseDamage: 7,
         effects: [],
         cost: 1,
+        deckMaximum: 3,
         tags: ["pool1", "rarity3"],
         price: 50,
     },
@@ -137,6 +144,7 @@ cards: [
         traitEffects: [ "rotten" ],
         effects: [],
         cost: 1,
+        deckMaximum: 3,
         tags: ["pool1", "rarity2"],
         price: 40,
     },
@@ -146,6 +154,7 @@ cards: [
         flavourText: "Shiny",
         description: "$trigger$On-Placedown:$trigger$\nDraw 2 cards;\n$trigger$On-Shot:$trigger$\nDraw 1 card",
         baseDamage: 23,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -166,6 +175,7 @@ cards: [
         flavourText: "Holds its promise. Just ask the residents of New Hemingway. Wait, you can't",
         description: "$trait$SPRAY$trait$\n\n$trigger$On-shot:$trigger$\nThe enemy gets $status$BURNING$status$ (2)",
         baseDamage: 18,
+        deckMaximum: 2,
         traitEffects: ["spray"],
         effects: [
             {
@@ -183,6 +193,7 @@ cards: [
         flavourText: "Have you actually tried shooting an arrow with a revolver? No? Then stop saying it won't work",
         description: "$trait$EVERLASTING$trait$",
         baseDamage: 5,
+        deckMaximum: 1,
         traitEffects: [ "everlasting" ],
         effects: [],
         cost: 1,
@@ -195,6 +206,7 @@ cards: [
         flavourText: "Big Fucking Bullet",
         description: "",
         baseDamage: 50,
+        deckMaximum: 2,
         effects: [],
         cost: 5,
         tags: ["pool1", "rarity1"],
@@ -206,6 +218,7 @@ cards: [
         flavourText: "no, you CAN'T make a portal out of it",
         description: "$trait$REINFORCED$trait$",
         baseDamage: 10,
+        deckMaximum: 3,
         traitEffects: ["reinforced"],
         effects: [],
         cost: 3,
@@ -218,6 +231,7 @@ cards: [
         flavourText: "those fucking kids with their rain dances",
         description: "$trait$DISINTEGRATION$trait$",
         baseDamage: 4,
+        deckMaximum: 3,
         traitEffects: [ "rotten" ],
         effects: [],
         cost: 0,
@@ -231,6 +245,7 @@ cards: [
         description: "",
         baseDamage: 0,
         effects: [ ],
+        deckMaximum: null,
         cost: 0,
         tags: ["pool1", "rarity1"],
         price: 30,
@@ -241,6 +256,7 @@ cards: [
         flavourText: "Scammer get scammed",
         description: "$trigger$On-Shot:$trigger$\nGain 2 reserves",
         baseDamage: 0,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: shot(),
@@ -257,6 +273,7 @@ cards: [
         flavourText: "All good things come in threes",
         description: "$trigger$On-Placedown:$trigger$\nAll other bullets named [Bullet] get +10 dmg as long as this bullet is in the revolver",
         baseDamage: 12,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -277,6 +294,7 @@ cards: [
         flavourText: "Flavortext Flavortext",
         description: "$trigger$On-Placedown:$trigger$\n$keyword$CREATE$keyword$ 2 cards named [Bullet] in your hand",
         baseDamage: 16,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -293,6 +311,7 @@ cards: [
         flavourText: "Like it was alive in the first place...",
         description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 3" + slot.3 + " gets +5 dmg",
         baseDamage: 9,
+        deckMaximum: 2,
         traitEffects: [ "undead" ],
         effects: [
             {
@@ -313,6 +332,7 @@ cards: [
         flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
         description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6)",
         baseDamage: 4,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: shot(),
@@ -330,6 +350,7 @@ cards: [
         description: "$trigger$On-Shot:$trigger$\nInstead of turning right, the revolver turns left twice.",
         baseDamage: 14,
         rotation: $Left { amount: 2 },
+        deckMaximum: 2,
         effects: [],
         cost: 2,
         tags: ["pool2", "rarity3"],
@@ -341,6 +362,7 @@ cards: [
         flavourText: "This Bullet still can't protect you from the truth: That you are bad at this game",
         description: "$trigger$On-Placedown:$trigger$\nTarget bullet gets $trait$PROTECTED$trait$ (4) as long as this bullet is in the revolver.",
         baseDamage: 6,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -361,6 +383,7 @@ cards: [
         flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I should’t have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
         description: "$trigger$On-Placedown:$trigger$\nDestroy both bullets next to this.",
         baseDamage: 11,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -377,6 +400,7 @@ cards: [
         flavourText: "Aaaand it's dead",
         description: "$trigger$On-Placedown:$trigger$\nThis Bullet destroys itself",
         baseDamage: 0,
+        deckMaximum: null,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -393,6 +417,7 @@ cards: [
         flavourText: "No, don't chicken out this time! Come here you lil shit, don't run from me!",
         description: "$trigger$While in revolver:$trigger$\nYou can replace this with any card out of your hand (you still have to pay for it). The card that you replaced Coward Bullet with gets +6 dmg for as long as it is in the Revolver. If you do, destroy this bullet.",
         baseDamage: 1,
+        deckMaximum: 3,
         traitEffects: [ "replaceable" ],
         effects: [
             {
@@ -415,6 +440,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\n deal 6 dmg to target enemy",
         baseDamage: 6,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -431,6 +457,7 @@ cards: [
         flavourText: "Ole! Ole! Ole! Ole!", // TODO: the fancy é
         description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
         baseDamage: 5,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: rotation(),
@@ -448,6 +475,7 @@ cards: [
         flavourText: "This is definitely more than unpleasant. This is a hate crime",
         description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 8 dmg to the target enemies",
         baseDamage: 5,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
@@ -465,6 +493,7 @@ cards: [
         flavourText: "§§card_symbol_text_t_equals§§",
         description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
         baseDamage: 0,
+        deckMaximum: null,
         effects: [
             {
                 trigger: turnEnd(),
@@ -483,6 +512,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\nWhenever you draw one or more cards: +5 dmg\n$trigger$While in Revolver:$trigger$\nWhenever you draw two or more cards, excluding the first time in a turn:\n\nGain half as many reserves as the number of cards drawn, rounded down.",
         baseDamage: 0,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: cardsDrawn(false, 1),
@@ -506,6 +536,7 @@ cards: [
         flavourText: "\"He came to our land, married on of our own and then brought war. We forged bullets to defend ourselves. But this was his plan all along. An empire, built with our bullets...\" - a forgotten note",
         description: "$trigger$On-Leave:$trigger$\nYou lose the game\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +12 dmg",
         baseDamage: 20,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -530,6 +561,7 @@ cards: [
         flavourText: "",
         description: "",
         baseDamage: 3,
+        deckMaximum: 3,
         effects: [],
         cost: 0,
         tags: ["pool2", "rarity2"],
@@ -541,6 +573,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nDraw x cards, where x is the cost value of the card with the highest cost value in the revolver.",
         baseDamage: 16,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: shot(),
@@ -558,6 +591,7 @@ cards: [
         flavourText: "",
         description: "$trait$SPRAY$trait$",
         baseDamage: 20,
+        deckMaximum: 2,
         traitEffects: [ "spray" ],
         effects: [],
         cost: 3,
@@ -570,6 +604,7 @@ cards: [
         flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
         description: "If the enemy has shield:\nThis Bullet has +50 percent dmg",
         baseDamage: 5,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers),
@@ -596,6 +631,7 @@ cards: [
         flavourText: "This Bullet has \"Manufactured in New Hemingway\" engraved in it. The overpressured Tip guarantees maximal effectiveness",
         description: "If the enemy has at least 1 status effect: \nThis bullet gets +50% dmg",
         baseDamage: 8,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers),
@@ -622,6 +658,7 @@ cards: [
         flavourText: "",
         description: "This Bullet can't be placed in slot 3" + slot.3 + ".\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3" + slot.3 + " to your hand",
         baseDamage: 8,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -641,6 +678,7 @@ cards: [
         flavourText: "Still not as toxic as my ex-girlfriend",
         description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nThe targeted enemy gets $status$POISON$status$ (5)",
         baseDamage: 5,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: turnBegin(),
@@ -656,8 +694,9 @@ cards: [
         name: "fullLeadBullet",
         title: "Full Lead Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (4);\n$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (10)",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (4)\n$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (10)",
         baseDamage: 5,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -679,6 +718,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\nThe enemy gets $status$POISON$status$ (5)",
         baseDamage: 3,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -695,6 +735,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nTurn the revolver 1 to the left.",
         baseDamage: 8,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: cardDestroyed(allCardsTrigger),
@@ -712,6 +753,7 @@ cards: [
         flavourText: "§§card_symbol_text_a_equals§§",
         description: "$trigger$On-Destroy:$trigger$\nTarget bullet gets +8 dmg, then, return this bullet to your hand.",
         baseDamage: 7,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: cardDestroyed(onlySelfTriggers),
@@ -735,6 +777,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in revolver:$trigger$ $trigger$Whenever a bullet is destroyed:$trigger$\nDraw a card and this bullet gets +8 dmg.",
         baseDamage: 1,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: cardDestroyed(allCardsTrigger),
@@ -757,6 +800,7 @@ cards: [
         flavourText: "Not everything that glitters is gold. This is tho",
         description: "$trigger$On-Leave:$trigger$\nDraw x cards, x being the number of times this bullet has turned in the revolver.",
         baseDamage: 9,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -774,6 +818,7 @@ cards: [
         flavourText: "This uniquely shaped bullet is lighter than the usual caliber and is equipped with a higher dose of propellant, allowing it to travel faster and cover greater distances. It was manufactured in New Hemingway before the Incident",
         description: "$trigger$On-Leave:$trigger$\nDeal 7 dmg to the target enemy",
         baseDamage: 0,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -790,6 +835,7 @@ cards: [
         flavourText: "\"We can't afford to lose! Those stupid witches have the upper hand on us with their bullets. How is project New Hemingway coming along? We need those projectiles as soon as possible\" -Letter to the old World",
         description: "If a enemy has more than 50% health, this does 6 dmg more.",
         baseDamage: 7,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -811,6 +857,7 @@ cards: [
         title: "Brick Bullet",
         flavourText: "I've not thrown this at a homeless man! It slipped out of my hand!",
         description: "$trigger$On-Placedown:$trigger$\n You get $status$SHIELD$status$ (6)",
+        deckMaximum: 3,
         baseDamage: 10,
         effects: [
             {
@@ -828,6 +875,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Turn-Begin:$trigger$\n$trigger$While in revolver$trigger$:\n$You get $status$SHIELD$status$ (4)",
         baseDamage: 0,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: turnBegin(),
@@ -845,6 +893,7 @@ cards: [
         flavourText: "Haaaaappy Birthdaaay!!",
         description: "Whenever this bullet rotates into the slot that it was originally placed into:\nGain 2 reserves, then: you loose 1 life",
         baseDamage: 5,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: rotation() mustMatchPredicate inHomeSlot(),
@@ -868,6 +917,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nYou get $status$SHIELD$status$ (x * 2), where x is the number of times this bullet has rotated",
         baseDamage: 5,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: shot(),
@@ -885,6 +935,7 @@ cards: [
         flavourText: "Normally you would build houses or something out of wood, but I guess a bullet works too",
         description: "$trigger$On-Leave:$trigger$\nYou get $status$SHIELD$status$ (8)",
         baseDamage: 4,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -901,6 +952,7 @@ cards: [
         flavourText: "If you think about it, a revolver is just a really deadly carousel for bullets",
         description: "Whenever this rotates into the slot that it was originally placed into:\nDraw one card and all bullets in the revolver gain +3 dmg",
         baseDamage: 6,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: rotation() mustMatchPredicate inHomeSlot(),
@@ -927,6 +979,7 @@ cards: [
         flavourText: "\"We lost. The bullets are lost or scattered and Salem is destroyed. The only thing left is tears and the thirst for blood\" -written on the bullet",
         description: "Can't be shot in the same turn that it entered the revolver.\n$trigger$While in Revolver:$trigger$\n$trigger$At the beginning of turn:$trigger$\nDestroy target bullet. If you are unable to destroy another bullet, this bullet destroys itself.",
         baseDamage: 22,
+        deckMaximum: 1,
         traitEffects: ["shotProtected"],
         effects: [
             {
@@ -946,6 +999,7 @@ cards: [
         flavourText: "Sometimes, darkness will overpower the light, just as the sun is bound to be swallowed by shadow in the wake of an Eclipse. - translation of an old Onathahan saying",
         description: "$trigger$Whenever this rotates into Slot 5" + slot.5 + ":$trigger$\nThis bullet gets plus x damage, where x is the damage value of the bullet in slot 2" + slot.2 + ".",
         baseDamage: 2,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: rotation() mustMatchPredicate (isSelf() and inRevolverSlot(5)),
@@ -964,6 +1018,7 @@ cards: [
         flavourText: "\"Please mother, I beg you. I love him. And I know, he is from the old world. But he is a traveler, a camper, he means no harm! He is kind, loving and is here to learn more about these lands. Please… Let Jake and me marry. I beg you\" -Letter to Salem",
         description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nAll other Bullets get +4 dmg",
         baseDamage: 5,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
@@ -984,6 +1039,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Leave:$trigger$\n$keyword$DISCHARGE POISON$keyword$ (2)",
         baseDamage: 0,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -1000,6 +1056,7 @@ cards: [
         flavourText: "\"My husband Jake gave me this. Back at his home, he told me that this bullet is said to watch over a person, protecting them from evil. May it protect all Onathahans as well\" -Note found with the bullet",
         description: "$trigger$On-Place-Down:$trigger$\nThe Bullet in Slot 3" + slot.3 + " gets $trait$PROTECTED$trait$ (1)\nCan't protect itself.",
         baseDamage: 4,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1019,10 +1076,12 @@ cards: [
         flavourText: "Isn't like every bullet technically a kamikaze bullet?",
         description: "$trigger$On-Placedown:$trigger$\nAs an extra cost: destroy target other bullet.",
         baseDamage: 12,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
-                effect: destroy(bSelectRevolverTarget(false, true, "Choose card to destroy"))
+                canPreventEnteringGame: true,
+                effect: destroy(bSelectRevolverTarget(false, false, "Choose card to destroy"))
             }
         ],
         cost: 1,
@@ -1032,9 +1091,10 @@ cards: [
     {
         name: "vengeanceBullet",
         title: "Vengeance Bullet",
-        flavourText: "\"When I get my hands on you Jake… You’ll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
+        flavourText: "\"When I get my hands on you Jake... You'll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
         description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nDeal x dmg to the enemy, where x is the dmg value of the destroyed bullet times 2",
         baseDamage: 10,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: cardDestroyed(allCardsTrigger),
@@ -1052,6 +1112,7 @@ cards: [
         flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
         description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
         baseDamage: 2,
+        deckMaximum: 3,
         traitEffects: [ "spray" ],
         effects: [
             {
@@ -1069,6 +1130,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\nWhenever you draw one or more cards: draw one extra card.",
         baseDamage: 8,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1086,6 +1148,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\nDraw a card from the bottom of the deck",
         baseDamage: 9,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1102,6 +1165,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet",
         baseDamage: 11,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: shot(),
@@ -1119,6 +1183,7 @@ cards: [
         description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.\n\n$keyword$DEFENSE$keyword$ (18)",
         baseDamage: 8,
         parryNumber: 18,
+        deckMaximum: 1,
         traitEffects: ["alwaysAtBottom"],
         effects: [
             {
@@ -1136,6 +1201,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet enters the revolver:$trigger$\nThe bullet that entered gets +4 dmg",
         baseDamage: 7,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1164,6 +1230,7 @@ cards: [
             }
         ],
         cost: 1,
+        deckMaximum: 2,
         tags: ["pool1", "rarity2"],
         price: 50,
     },
@@ -1173,6 +1240,7 @@ cards: [
         flavourText: "A great activity when taking breaks from shooting people! Doodling!",
         description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +4 dmg.",
         baseDamage: 4,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1194,6 +1262,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nReturn target bullet to your hand",
         baseDamage: 10,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
@@ -1213,6 +1282,7 @@ cards: [
         flavourText: "I guess we should rename it now since the name doesn't really fit anymore. Finally Found Bullet or something like that.",
         description: "$trigger$While in Revolver:$trigger$\nAs long as the enemy has the Statuseffect $status$POISON$status$:\n$trigger$On-Turn-Begin:$trigger$\nYou gain 1 reserve and draw 1 card",
         baseDamage: 3,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
@@ -1237,6 +1307,7 @@ cards: [
         flavourText: "",
         description: "If this card enters your hand in any other way than drawing cards from top of your deck:\nThis Bullet gets +9",
         baseDamage: 5,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: cardsDrawn(false, true, true),
@@ -1265,6 +1336,7 @@ cards: [
         flavourText: "",
         description: "If this bullet enters your hand except through drawing cards:\nGain 1 reserve",
         baseDamage: 2,
+        deckMaximum: 1,
         effects: [
            {
                trigger: zoneChange(zone.revolver, zone.hand, false, onlySelfTriggers),
@@ -1290,6 +1362,7 @@ cards: [
         description: "$trigger$While in revolver:$trigger$\n$trigger$On-Right-Click:$trigger$\nPay 1 reserve and $keyword$DISCHARGE POISON$keyword$ (1)",
         baseDamage: 4,
         rightClickCost: 1,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: rightClicked(onlySelfTriggers),
@@ -1308,6 +1381,7 @@ cards: [
         description: "$trait$DISINTEGRATION$trait$\n$trait$EVERLASTING$trait$",
         baseDamage: 8,
         traitEffects: [ "rotten", "everlasting" ],
+        deckMaximum: 1,
         effects: [
         ],
         dark: false,
@@ -1321,6 +1395,7 @@ cards: [
         flavourText: "Try hard enough and the damn gun might just fly away",
         description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Rotate:$trigger$\nEvery other bullet in the revolver gets +1 dmg",
         baseDamage: 4,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: rotation(),
@@ -1341,6 +1416,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\n$keyword$CREATE$keyword$ 3 [Kamikaze bullet] in your drawpile, then draw a card",
         baseDamage: 15,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: shot(),
@@ -1361,6 +1437,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Turn-Begin:$trigger$\nyou draw 1 Card",
         baseDamage: 1,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: turnBegin(),
@@ -1379,6 +1456,7 @@ cards: [
         flavourText: "",
         description: "This bullet has +3 dmg for every Bullet currently in the Afterlife",
         baseDamage: 1,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
@@ -1397,9 +1475,10 @@ cards: [
     {
         name: "cupidsArrow",
         title: "Cupid's Arrow",
-        flavourText: "\"Love is giving someone the power to hurt you, and trusting them not to use it.\" Paulo Coelho Adultery",
+        flavourText: "\"Love is giving someone the power to hurt you, and trusting them not to use it.\"\nPaulo Coelho Adultery",
         description: "$trait$EVERLASTING$trait$\n$trigger$On-Shot:$trigger$\nDeal 4 damage to yourself",
         baseDamage: 8,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: shot(),
@@ -1417,6 +1496,7 @@ cards: [
         flavourText: "",
         description: "This bullet has +1 dmg for every card in your hand",
         baseDamage: 1,
+        deckMaximum: 1,
         variableTexture: numberBasedVariableTexture(countCards(inZone(zone.hand)) atMost 20, 0),
         effects: [
             {
@@ -1439,6 +1519,7 @@ cards: [
         flavourText: "For the king!",
         description: "$trigger$On-Placedown:$trigger$\nThe bullet in Slot 3 " + slot.3 + " gets plus x dmg, for as long as Excalibullet is in the revolver, where x is the number of unique bullets with no duplicates currently in your drawpile",
         baseDamage: 7,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1459,6 +1540,7 @@ cards: [
         flavourText: "Don't forget to keep hydrated",
         description: "$trigger$On-Shot:$trigger$\n$keyword$CLEANSE$keyword$",
         baseDamage: 12,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: shot(),
@@ -1475,6 +1557,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nPut target bullet into your hand",
         baseDamage: 8,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: shot(),
@@ -1491,6 +1574,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Rotate:$trigger$\nThis bullet will move to a random free slot. If there is no free slot, return this bullet to your hand.",
         baseDamage: 7,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: rotation(),
@@ -1508,6 +1592,7 @@ cards: [
         flavourText: "",
         description: "$trait$JAMMED$trait$\n$keyword$HARDENED$keyword$ (2)",
         baseDamage: 9,
+        deckMaximum: 1,
         rotation: $Dont {},
         effects: [
             {
@@ -1530,6 +1615,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nAll other bullets in the revolver get $trait$PROTECTED$trait$ (1) ",
         baseDamage: 15,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: shot(),
@@ -1549,6 +1635,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Destroy:$trigger$\nThe revolver rotates left once",
         baseDamage: 5,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: cardDestroyed(onlySelfTriggers),
@@ -1565,6 +1652,7 @@ cards: [
         flavourText: "Im sorry to everyone with arachnophobia... tho, if I had that, i probably wouldn't look at that hairy thing just to read an apology. Ew",
         description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet inflicts a Statuseffect:$trigger$\nThis bullet gets +5 dmg and you draw 1 card",
         baseDamage: 3,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: statusEffectInflicted(true),
@@ -1588,6 +1676,7 @@ cards: [
         flavourText: "",
         description: "$keyword$HARDENED$keyword (2)",
         baseDamage: 12,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1609,6 +1698,7 @@ cards: [
         flavourText: "",
         description: "",
         baseDamage: 1,
+        deckMaximum: 1,
         effects: [],
         cost: 11,
         tags: ["pool1", "rarity1"],
@@ -1621,6 +1711,7 @@ cards: [
         description: "$trigger$On-Shot:$trigger$\nThis Bullet rotates to the right twice",
         rotation: $Right { amount: 2 },
         baseDamage: 5,
+        deckMaximum: 2,
         effects: [],
         cost: 2,
         tags: ["pool1", "rarity1"],
@@ -1633,6 +1724,7 @@ cards: [
         description: "$trait$THORNS$trait$\n$keyword$DEFENSE$keyword$ (16)",
         baseDamage: 8,
         parryNumber: 16,
+        deckMaximum: 2,
         traitEffects: [ "thorns" ],
         effects: [],
         cost: 2,
@@ -1645,6 +1737,7 @@ cards: [
         flavourText: "Zzzzzzz",
         description: "$trigger$On-Leave:$trigger$\nDraw x cards, where x is the number of turns this bullet stayed in the revolver",
         baseDamage: 0,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),
@@ -1661,6 +1754,7 @@ cards: [
         flavourText: "Sometimes you just have to let it go...",
         description: "Destroy this bullet on its third rotation.",
         baseDamage: 10,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: rotation() mustMatchPredicate (rotationCounter() moreThan 2),
@@ -1678,6 +1772,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\nYou get $status$FROZEN$status$ (2)",
         baseDamage: 4,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1694,6 +1789,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\nin slot 4" + slot.4 + ":\nyou get $status$FROZEN$status$ (4)\n$trigger$On-Leave:$trigger$\ndraw 1 card",
         baseDamage: 1,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers) mustMatchPredicate inRevolverSlot(4),
@@ -1714,6 +1810,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\ndraw x cards, where x is the highest number of unique status effects on an enemy",
         baseDamage: 2,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1730,6 +1827,7 @@ cards: [
         flavourText: "",
         description: "Nothing can stop you from playing this in the revolver",
         baseDamage: 4,
+        deckMaximum: 1,
         traitEffects: [ "punk" ],
         effects: [],
         cost: 1,
@@ -1742,6 +1840,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nIf The World Bullet hasn't rotated at least once last turn, destroy it.\n\nWhenever this bullet completes a $keyword$FULL ROTATION$keyword$ in the revolver:\nThis bullet get +50% dmg",
         baseDamage: 12,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: turnBegin() mustMatchPredicate (lastTurnRotationCounter() equals 0),
@@ -1764,6 +1863,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nIf the enemy has $status$POISON$status$:\ntarget other bullet in the revolver gets +x, where x is half of the POISON Parameter of the enemy rounded down, for as long as it is in the revolver",
         baseDamage: 6,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: shot(),
@@ -1788,6 +1888,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this combat that is not currently within your drawpile",
         baseDamage: 0,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
@@ -1813,6 +1914,7 @@ cards: [
         flavourText: "",
         description: "$keyword$UNOBTAINABLE$keyword$, created by Hydra Bullet\n\n\n$trigger$On-Leave except shooting:$trigger$\nCreate 2 [Hydra-Head Bullets] on top of your drawpile.\n\n\nThis bullet has +1 dmg for every [Hydra-Head Bullet] created this encounter that is not currently within your drawpile",
         baseDamage: 0,
+        deckMaximum: null,
         effects: [
             {
                 trigger: leaveZoneNoShot(zone.revolver, onlySelfTriggers),
@@ -1838,6 +1940,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\nCreate 7 [Mini Bullets] in the AFTERLIFE.\n\n\n$trigger$While in Revolver:$trigger$\n$trigger$Whenever the Revolver shoots:$trigger$\n$keyword$DESCEND$keyword$",
         baseDamage: 1,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1859,6 +1962,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Turn-Begin:$trigger$\n$keyword$RESURRECT$keyword$.\nResurect only in slots adjacent to this bullet",
         baseDamage: 7,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
@@ -1876,6 +1980,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\n$keyword$RESURRECT$keyword$ three times.\nResurect only in slots smaller that the one this Bullet was placed into",
         baseDamage: 5,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1901,6 +2006,7 @@ cards: [
         flavourText: "Ahhhh!",
         description: "$trigger$On-Placedown:$trigger$\nThe targeted Enemy gets $status$WEAK$status$ (1)",
         baseDamage: 4,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1918,6 +2024,7 @@ cards: [
         description: "$trait$PERSISTENCE$trait$\nWhenever this Bullet changes $keyword$ZONE$keyword$:\nit gets +1 dmg",
         traitEffects: [ "persistence" ],
         baseDamage: 1,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers, false),
@@ -1946,6 +2053,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\n$keyword$DISCARD$keyword$ target bullet",
         baseDamage: 8,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1962,6 +2070,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Placedown:$trigger$\nShuffle target card from your hand into your drawpile",
         baseDamage: 4,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1978,6 +2087,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\nWhenever a bullet gets a buff that is caused by another Bulleteffect:\nit additionally gets +4 dmg",
         baseDamage: 6,
+        deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),

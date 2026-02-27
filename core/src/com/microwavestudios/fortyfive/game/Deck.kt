@@ -1,6 +1,8 @@
 package com.microwavestudios.fortyfive.game
 
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.utils.iterateRemoving
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -26,33 +28,40 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
     }
 
     fun checkDeck(availableCards: List<CardType>) {
-        if (cardPositions.size < minDeckSize && cardPositions.size < availableCards.size) {
-            val onlyBackpackCards = mutableListOf<CardType>()
-            val curDeck = cards.toMutableList()
-            for (i in availableCards) {
-                if (i in curDeck) {
-                    curDeck.removeAt(curDeck.indexOf(i))
-                } else {
-                    onlyBackpackCards.add(i)
-                }
+        val availableCards = availableCards.toMutableList()
+        val allCardProtos = RandomCardSelection.allCardPrototypes
+
+        var numberOfCards = 0
+        val cardAmounts = mutableMapOf<String, Int>()
+        _cardPositions.iterateRemoving { value, remover ->
+            val (_, card) = value
+            val maxAmount = allCardProtos.find { it.name == card.name }?.deckMaximum
+            requireNotNull(maxAmount) { "unknown card in deck: ${card.name}" }
+            cardAmounts.putIfAbsent(card.name, 0)
+            val available = availableCards.find { it.name == card.name }
+            if (
+                (maxAmount != -1 && cardAmounts[card.name]!! >= maxAmount) ||
+                available == null ||
+                numberOfCards >= numberOfSlots
+            ) {
+                remover()
+                return@iterateRemoving
             }
-            while (cards.size < minDeckSize && onlyBackpackCards.isNotEmpty()) {
-                val cur = onlyBackpackCards[0]
-                _cardPositions[nextFreeSlot()] = cur
-                onlyBackpackCards.removeAt(onlyBackpackCards.indexOf(cur))
-            }
-            dirty()
+            numberOfCards++
+            availableCards.remove(available)
+            cardAmounts[card.name] = cardAmounts[card.name]!! + 1
         }
-        //TODO ugly, this code should never be necessary
-        val remainingCards = availableCards.toMutableList()
-        val iterator = _cardPositions.iterator()
-        while (iterator.hasNext()) {
-            val it = iterator.next()
-            if (it.value in remainingCards) {
-                remainingCards.remove(it.value)
-            } else {
-                iterator.remove()
+
+        if (_cardPositions.size >= minDeckSize) return
+
+        availableCards.forEach { candidate ->
+            val amountInDeck = cardAmounts[candidate.name]
+            val maxAmount = allCardProtos.find { it.name == candidate.name }?.deckMaximum
+            requireNotNull(maxAmount) { "unknown card in backpack: ${candidate.name}" }
+            if (maxAmount == -1 || (amountInDeck != null && amountInDeck < maxAmount)) {
+                addToDeck(nextFreeSlot(), candidate)
             }
+            if (_cardPositions.size >= minDeckSize) return
         }
     }
 
@@ -115,6 +124,8 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
     fun hasEnoughCards(): Boolean = cards.size >= minDeckSize
 
     fun canAddCards(): Boolean = cards.size < numberOfSlots
+
+    fun countCards(name: String) = cards.count { it.name == name }
 
     companion object {
 
