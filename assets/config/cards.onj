@@ -754,6 +754,7 @@ cards: [
         description: "$trigger$On-Destroy:$trigger$\nTarget bullet gets +8 dmg, then, return this bullet to your hand.",
         baseDamage: 7,
         deckMaximum: 3,
+        traitEffects: [ "putInHandAfterDestroy" ],
         effects: [
             {
                 trigger: cardDestroyed(onlySelfTriggers),
@@ -762,10 +763,6 @@ cards: [
                     8#val
                 )
             },
-            {
-                trigger: cardDestroyed(onlySelfTriggers),
-                effect: putCardInHand("sacrificialBullet"#card, 1#val)
-            }
         ],
         cost: 1,
         tags: ["pool1", "rarity2"],

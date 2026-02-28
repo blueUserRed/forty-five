@@ -58,7 +58,7 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
             val amountInDeck = cardAmounts[candidate.name]
             val maxAmount = allCardProtos.find { it.name == candidate.name }?.deckMaximum
             requireNotNull(maxAmount) { "unknown card in backpack: ${candidate.name}" }
-            if (maxAmount == -1 || (amountInDeck != null && amountInDeck < maxAmount)) {
+            if (maxAmount == -1 || amountInDeck == null || amountInDeck < maxAmount) {
                 addToDeck(nextFreeSlot(), candidate)
             }
             if (_cardPositions.size >= minDeckSize) return

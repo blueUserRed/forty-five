@@ -91,12 +91,15 @@ class GameControllerImpl(
 
     @Inject(name = "shoot_button")
     override lateinit var shootButton: Actor
+        private set
 
     @Inject
     override lateinit var revolver: Revolver
+        private set
 
     @Inject
-    private lateinit var cardHand: CardHand
+    override lateinit var cardHand: CardHand
+        private set
 
     override lateinit var encounterContext: EncounterContext
         private set
@@ -426,6 +429,40 @@ class GameControllerImpl(
             FortyFive.logger.warn(logTag, "cant destroy $card because it isn't in the revolver")
             return@later
         }
+        include(card.afterDestroyed(
+            card, controller, sourceCard,
+            ::putCardInAfterlifeAfterDestroyTimeline,
+            ::putCardInHandAfterDestroyTimeline
+        ))
+    } }
+
+    private fun putCardInHandAfterDestroyTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline {
+        val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+        val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, triggerInfo)
+        includeLater({
+            gameEvents.fire(beforeEvent)
+            beforeEvent.createTimeline()
+        })
+        include(card.actor.destroyAnimation())
+        action { card.actor.alpha = 0f }
+        action {
+            revolver.removeCard(card)
+            tryPutCardInHand(card)
+            card.actor.alpha = 1f
+        }
+        later {
+            val afterEvent = beforeEvent.copy(before = false)
+            gameEvents.fire(afterEvent)
+            include(afterEvent.createTimeline())
+        }
+        later {
+            val event = Events.CardDestroyedEvent(card, triggerInfo)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+        }
+    }
+
+    private fun putCardInAfterlifeAfterDestroyTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline {
         val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
         includeLater({
@@ -450,7 +487,7 @@ class GameControllerImpl(
             gameEvents.fire(event)
             include(event.createTimeline())
         }
-    } }
+    }
 
     override fun putCardsInStackTimeline(
         cardType: CardType,

@@ -516,6 +516,22 @@ class Card(
         }
     }
 
+    fun afterDestroyed(
+        card: Card,
+        controller: GameController,
+        sourceCard: Card?,
+        putCardInAfterlife: (card: Card, sourceCard: Card?) -> Timeline,
+        putCardInHand: (card: Card, sourceCard: Card?) -> Timeline,
+    ): Timeline = Timeline.timeline {
+        includeLater({
+            if (activeBehaviours.any { it.putInHandAfterDestroy(card, controller) }) {
+                putCardInHand(card, sourceCard)
+            } else {
+                putCardInAfterlife(card, sourceCard)
+            }
+        })
+    }
+
     fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
         this.stackPosition = stackPosition
         controller.cardStack.dirty()
@@ -932,6 +948,7 @@ class Card(
             "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
             "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
             "piercing" -> card.isPiercing = true
+            "putInHandAfterDestroy" -> card.addBehaviour(BulletBehaviour.PutInHandAfterDestroy)
 
             else -> throw RuntimeException("unknown trait effect $effect")
         }
@@ -1306,9 +1323,7 @@ class CardActor(
                     controller.revolver.getCardTriggerPosition()
                 }
             }
-            Zone.HAND -> Vector2(
-                x, y + 300f
-            )
+            Zone.HAND -> controller.cardHand.triggerPositionForCardActor(this@CardActor)
             Zone.AFTERLIFE -> Vector2(
                 x, y + 200f
             )

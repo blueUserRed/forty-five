@@ -1,8 +1,10 @@
 package com.microwavestudios.fortyfive.game.widgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.CustomScreen
@@ -96,8 +98,24 @@ class CardHand(
         invalidate()
     }
 
-    private fun evenOutCards() {
+    fun triggerPositionForCardActor(card: CardActor): Vector2 {
+        val handMiddle = x + width / 2
+        val extendedGap = centerGap + 330
+        val isLeft = card.x < handMiddle
+        var x = card.x
+        if (isLeft) x += card.width
+        if (isLeft) {
+            if (x > handMiddle - extendedGap / 2) x = handMiddle - extendedGap / 2
+        } else {
+            if (x < handMiddle + extendedGap / 2) x = handMiddle + extendedGap / 2
+        }
+        if (isLeft) x -= card.width
+        val y = card.y + 300
+        return Vector2(x, y)
+    }
 
+    private fun evenOutCards() {
+        // philip said cards shouldn't jump between sides
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
