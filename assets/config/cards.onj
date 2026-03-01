@@ -1257,7 +1257,7 @@ cards: [
         name: "sheriffsBullet",
         title: "Sheriffs Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nReturn target bullet to your hand",
+        description: "$trigger$While in Revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nReturn all bullets in a smaller slot than Sherrifs Bullet to your hand",
         baseDamage: 10,
         deckMaximum: 2,
         effects: [
