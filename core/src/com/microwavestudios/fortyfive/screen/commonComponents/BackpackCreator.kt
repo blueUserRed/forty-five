@@ -746,6 +746,12 @@ object BackpackCreator {
                 }
             }
 
+            card.actor.observeInputState(
+                InputManager.BaseStates.keyboardDrag,
+                {},
+                { screen.inputManager.changeKeyboardFocusedActor(card.actor) }
+            )
+
             state.events.watchFor<GiveCardBackEvent> { event ->
                 val info = card.actor.infoObject
                 if (info !is CardInfoObject) return@watchFor

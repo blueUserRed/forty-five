@@ -47,6 +47,8 @@ abstract class StatusEffect(
 
     open fun reevaluateEnemyAttack(): Boolean = false
 
+    open fun onEnemyDeath(target: StatusEffectTarget): Timeline? = null
+
     abstract fun canStackWith(other: StatusEffect): Boolean
 
     abstract fun stack(other: StatusEffect)
@@ -488,6 +490,52 @@ class Weak(attacks: Int) : StatusEffect(GraphicsConfig.iconName("weak")) {
     }
 
     override fun equals(other: Any?): Boolean = other is Weak
+
+}
+
+class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("bounty")) {
+
+    var turns: Int = turns
+        private set
+
+    var reserves: Int = reserves
+        private set
+
+    private var enemyDied: Boolean = false
+
+    override val name: String = "bounty"
+    override val effectType: StatusEffectType = StatusEffectType.OTHER
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Bounty
+
+    override fun stack(other: StatusEffect) {
+        other as Bounty
+        turns = other.turns
+        reserves = other.reserves
+    }
+
+    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        action { turns-- }
+    }
+
+    override fun onEnemyDeath(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        require(target is StatusEffectTarget.EnemyTarget) { "Bounty can only be used on enemy" }
+        action {
+            enemyDied = true
+            controller.gainReserves(reserves, target.enemy.actor)
+        }
+    }
+
+    override fun isStillValid(): Boolean = turns > 0 && !enemyDied
+
+    override fun getDisplayText(): String = "$turns, $reserves"
+
+    override fun equals(other: Any?): Boolean = other is Bounty
+
+    override fun increment(amount: Int) {
+        turns += amount
+        reserves += amount
+    }
 
 }
 

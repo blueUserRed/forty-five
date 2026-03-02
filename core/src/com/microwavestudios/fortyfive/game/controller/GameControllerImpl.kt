@@ -215,8 +215,8 @@ class GameControllerImpl(
         }
 
         allEnemies.forEach { enemy ->
-            enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> {
-                if (selectedEnemy != enemy || !enemy.isDefeated) return@watchFor
+            enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
+                if (selectedEnemy != enemy) return@watchFor
                 val newEnemy = allEnemies.firstOrNull { !it.isDefeated } ?: allEnemies.first()
                 gameEvents.fire(Events.EnemySelected(newEnemy))
             }
@@ -1626,7 +1626,7 @@ class GameControllerImpl(
     }
 
     object Config {
-        const val baseReserves = 10
+        const val baseReserves = 20
 //        const val baseReserves = 4
         const val softMaxCards = 12
         const val hardMaxCards = 20

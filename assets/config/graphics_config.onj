@@ -9,6 +9,7 @@ icons: {
     shield: "shield_icon",
     frozen: "encounter_modifier_frost",
     weak: "burning_icon",
+    bounty: "burning_icon"
 },
 
 encounterModifiers: {

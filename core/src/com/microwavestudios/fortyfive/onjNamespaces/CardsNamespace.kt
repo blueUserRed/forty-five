@@ -319,6 +319,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun giveStatus(effect: OnjStatusEffect): OnjEffect =
         OnjEffect(Effect.GiveStatus(effect.value, false, EffectData()))
 
+    @RegisterOnjFunction(schema = "use Cards; params: [StatusEffect]")
+    fun giveStatusToRandomEnemy(effect: OnjStatusEffect): OnjEffect =
+        OnjEffect(Effect.GiveStatusToRandomEnemy(effect.value, EffectData()))
+
     @RegisterOnjFunction(schema = "use Cards; params: [StatusEffect, boolean]")
     fun giveStatus(effect: OnjStatusEffect, onlyStacks: OnjBoolean): OnjEffect =
         OnjEffect(Effect.GiveStatus(effect.value, onlyStacks.value, EffectData()))
@@ -891,6 +895,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         attacks: OnjEffectValue
     ): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Weak(getStatusEffectValue(attacks, controller, card, 1))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
+    fun bounty(
+        turns: OnjEffectValue,
+        reserves: OnjEffectValue
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
+        Bounty(getStatusEffectValue(turns, controller, card, 1), getStatusEffectValue(reserves, controller, card, 1))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")

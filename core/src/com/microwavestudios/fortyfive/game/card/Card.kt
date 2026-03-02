@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
+import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.onjNamespaces.OnjZone
 import com.microwavestudios.fortyfive.rendering.BetterShader
@@ -1105,6 +1106,8 @@ class CardActor(
     var inTriggerPosition: Boolean = false
         private set
 
+    private var inKeyboardDrag: Boolean = false
+
     init {
         initInput(this, screen)
         bindDetailToInputState(GameInputs.States.focused)
@@ -1136,6 +1139,11 @@ class CardActor(
             GameInputs.States.inDrag,
             { FortyFive.soundPlayer.situation("card_drag_started", screen) },
             { FortyFive.soundPlayer.situation("card_drag_finished", screen) }
+        )
+        observeInputState(
+            InputManager.BaseStates.keyboardDrag,
+            { inKeyboardDrag = true },
+            { inKeyboardDrag = false }
         )
     }
 
@@ -1243,8 +1251,9 @@ class CardActor(
         val texture = texture ?: return
         val textureRegion = TextureRegion(texture)
         val isShaderSetup = setupShader(batch)
+        val dragAlpha = if (inKeyboardDrag) 0.66f else 1f
         val c = batch.color.cpy()
-        batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
+        batch.setColor(c.r, c.g, c.b, alpha * parentAlpha * dragAlpha)
         val textureSize = width
         dropShadow?.doDropShadow(batch, screen, TextureRegionDrawable(textureRegion), this, scaleX, scaleY, rotation)
         batch.draw(

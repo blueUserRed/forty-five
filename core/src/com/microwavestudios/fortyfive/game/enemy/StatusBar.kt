@@ -39,7 +39,6 @@ class StatusBar(screen: CustomScreen, private val enemy: Enemy) : CustomGroup(sc
     private val whiteTexture: Promise<TextureRegion> = resourceManager.request(this, screen.lifetime, "white_texture")
     private val sliderShader: Promise<BetterShader> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_shader")
 
-    // TODO: add a smaller version of roadgeek
     private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen.lifetime, "roadgeek60")
 
     private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Color.FortyWhite, 100f, Align.center, false)

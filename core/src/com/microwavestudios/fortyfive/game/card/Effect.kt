@@ -395,6 +395,31 @@ abstract class Effect(val data: EffectData) {
 
     }
 
+    class GiveStatusToRandomEnemy(
+        val statusEffectCreator: StatusEffectCreator,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController,
+            situation: GameSituation
+        ): Timeline = Timeline.timeline {
+            later {
+                val enemies = controller.activeEnemies
+                if (enemies.isEmpty()) return@later
+                val statusEffect = statusEffectCreator(controller, card, triggerInformation.isOnShot)
+                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemies.random(), card))
+            }
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = GiveStatusToRandomEnemy(statusEffectCreator, data)
+
+    }
+
     /**
      * puts a number of specific cards in the players hand
      */

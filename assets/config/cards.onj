@@ -2109,6 +2109,23 @@ cards: [
         tags: [ "pool1", "rarity1" ],
         price: 50,
     },
+    {
+        name: "bountyBullet",
+        title: "Bounty Bullet",
+        flavourText: "Dead or alive. In our case dead tho, no reserves if he is still breathing.",
+        description: "$trigger$On-Placedown:$trigger$\na random enemy gets  $status$BOUNTY$status$ (2, 3) ",
+        baseDamage: 4,
+        deckMaximum: 3,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                effect: giveStatusToRandomEnemy(bounty(2#val, 3#val))
+            }
+        ],
+        cost: 2,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
 
 ],
 

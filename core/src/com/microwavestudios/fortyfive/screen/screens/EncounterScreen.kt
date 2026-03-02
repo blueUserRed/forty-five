@@ -590,6 +590,7 @@ class EncounterScreen : ScreenCreator() {
         var enemySelected = false
 
         box {
+            enemy.actor = this
             flexDirection = FlexDirection.COLUMN
             this.x = x
             this.y = y
@@ -738,8 +739,7 @@ class EncounterScreen : ScreenCreator() {
                         width = height * (drawable.minWidth / drawable.minHeight)
                     }
 
-                    enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { event ->
-                        if (!enemy.isDefeated) return@watchFor
+                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
                         backgroundHandle = "enemy_gravestone"
                         heightPercent = 0.6f
                         invalidate()
