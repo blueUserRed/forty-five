@@ -643,15 +643,20 @@ class Card(
         controller: GameController,
     ): Timeline = Timeline.timeline { later {
 
-        action { checkModifierTransformers(situation, triggerInformation, controller) }
+        checkModifierTransformers(situation, triggerInformation, controller)
 
         val prevPosition = Vector2(actor.x, actor.y)
         val zoneAtStart = zone
         var isInTriggerPosition = false
-        effects.forEach { effect ->
+        val triggeredEffects = effects.filter {
+            it.checkTrigger(situation, triggerInformation, controller, this@Card)
+        }
+        if (situation is GameSituation.CardRightClicked && triggeredEffects.isNotEmpty()) {
+            val result = controller.tryPay(rightClickCost ?: 0, actor)
+            if (!result) FortyFive.logger.warn(logTag, "Right Click triggered but can't pay for it")
+        }
+        triggeredEffects.forEach { effect ->
             later {
-                val shouldTrigger = effect.checkTrigger(situation, triggerInformation, controller, this@Card)
-                if (!shouldTrigger) return@later
                 if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) {
                     later {
                         isInTriggerPosition = true

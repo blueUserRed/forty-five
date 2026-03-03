@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.findInstance
 import com.microwavestudios.fortyfive.utils.toIntRange
 import com.microwavestudios.fortyfive.utils.unreachable
 import onj.builder.buildOnjObject
@@ -470,6 +471,10 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun damagePlayer(damage: OnjEffectValue): OnjEffect = OnjEffect(Effect.DamagePlayer(damage.value, EffectData()))
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
+    fun removePoisonFromTargetedEnemy(damage: OnjEffectValue): OnjEffect =
+        OnjEffect(Effect.RemovePoisonFromTargetedEnemy(damage.value, EffectData()))
 
     @RegisterOnjFunction(schema = "params: []")
     fun killPlayer(): OnjEffect = OnjEffect(Effect.KillPlayer(EffectData()))
@@ -1027,6 +1032,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             .find { it.card == self }
             ?.num
         num?.let { Utils.convertSlotRepresentation(it) } ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun  poisonNumberOfTargetedEnemy(): OnjEffectValue = OnjEffectValue { controller, _, _, _ ->
+        controller.targetedEnemy().statusEffects.findInstance<Poison>()?.damage ?: 0
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")

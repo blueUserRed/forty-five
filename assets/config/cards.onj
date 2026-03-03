@@ -2126,6 +2126,28 @@ cards: [
         tags: [ "pool1", "rarity3" ],
         price: 50,
     },
+    {
+        name: "snakeskinBullet",
+        title: "Snakeskin Bullet",
+        flavourText: "",
+        description: "$trigger$On-Right-Click:$trigger$\nIf the targeted enemy has poison:\nRemove 8 Poison: You get 1 reserve",
+        rightClickCost: 0,
+        baseDamage: 4,
+        deckMaximum: 3,
+        effects: [
+            {
+                trigger: rightClicked(onlySelfTriggers) mustMatchPredicate (poisonNumberOfTargetedEnemy() moreThan 7#val),
+                effect: removePoisonFromTargetedEnemy(8#val)
+            },
+            {
+                trigger: rightClicked(onlySelfTriggers) mustMatchPredicate (poisonNumberOfTargetedEnemy() moreThan 7#val),
+                effect: reserveGain(1#val)
+            },
+        ],
+        cost: 2,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
 
 ],
 

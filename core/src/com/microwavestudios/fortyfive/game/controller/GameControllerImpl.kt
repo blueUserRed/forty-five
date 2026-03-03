@@ -364,11 +364,8 @@ class GameControllerImpl(
             val triggerInformation = createTriggerInfo(card)
             val situation = GameSituation.CardRightClicked(card)
             appendMainTimeline(Timeline.timeline { later {
-                val anyEffectTriggers = card.effects.any {
-                    it.checkTrigger(situation, triggerInformation, controller, card)
-                }
-                if (anyEffectTriggers && tryPay(card.rightClickCost, card.actor)) {
-                    include(checkTrigger(situation, triggerInformation))
+                if (card.rightClickCost <= curReserves) {
+                    include(card.checkEffects(situation, triggerInformation, controller))
                 }
             } })
         }

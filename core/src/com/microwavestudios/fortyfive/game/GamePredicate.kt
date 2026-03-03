@@ -28,7 +28,7 @@ fun interface GamePredicate {
             controller.activeEnemies.any { statusEffect in it.statusEffects }
         } }
 
-        val enemyDoesNotHaveStatusEffect = { statusEffect: StatusEffect, enemy: Enemy -> GamePredicate {
+        val enemyHasStatusEffect = { statusEffect: StatusEffect, enemy: Enemy -> GamePredicate {
             statusEffect in enemy.statusEffects
         } }
 
@@ -77,7 +77,7 @@ fun interface GamePredicate {
             )
             "AliveEnemyCountIn" -> aliveEnemyCountIn(obj.get<OnjArray>("value").toIntRange())
             "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null, false))
-            "EnemyDoesNotHaveStatusEffect" -> enemyDoesNotHaveStatusEffect(
+            "EnemyHasStatusEffect" -> enemyHasStatusEffect(
                 obj.get<StatusEffectCreator>("value")(null, null, false),
                 inContextOfEnemy ?: throw RuntimeException("EnemyDoesNotHaveStatusEffect Predicate can only be created" +
                         " when an enemy is passed into the fromOnj function")

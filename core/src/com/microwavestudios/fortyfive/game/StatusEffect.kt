@@ -271,6 +271,10 @@ class Poison(
         }
     }
 
+    fun removeValue(amount: Int): Timeline = Timeline.timeline {
+        action { damage = (damage - amount).coerceAtLeast(0) }
+    }
+
     override fun canStackWith(other: StatusEffect): Boolean = other is Poison
 
     override fun stack(other: StatusEffect) {
