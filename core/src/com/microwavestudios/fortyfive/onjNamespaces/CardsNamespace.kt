@@ -768,33 +768,33 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun inHomeSlot() = OnjCardPredicate(CardPredicate.inHomeSlot())
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
-    fun equals(rhs: OnjEffectValue, lhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
-        rhs.value(controller, card, null, self) == lhs.value(controller, card, null, self)
+    fun equals(lhs: OnjEffectValue, rhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        lhs.value(controller, card, null, self) == rhs.value(controller, card, null, self)
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
-    fun equals(rhs: OnjEffectValue, lhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
-        rhs.value(controller, card, null, self) == lhs.value.toInt()
+    fun equals(lhs: OnjEffectValue, rhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        lhs.value(controller, card, null, self) == rhs.value.toInt()
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
-    fun lessThan(rhs: OnjEffectValue, lhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
-        rhs.value(controller, card, null, self) < lhs.value(controller, card, null, self)
+    fun lessThan(lhs: OnjEffectValue, rhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        lhs.value(controller, card, null, self) < rhs.value(controller, card, null, self)
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
-    fun lessThan(rhs: OnjEffectValue, lhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
-        rhs.value(controller, card, null, self) < lhs.value.toInt()
+    fun lessThan(lhs: OnjEffectValue, rhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        lhs.value(controller, card, null, self) < rhs.value.toInt()
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
-    fun moreThan(rhs: OnjEffectValue, lhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
-        rhs.value(controller, card, null, self) > lhs.value(controller, card, null, self)
+    fun moreThan(lhs: OnjEffectValue, rhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        lhs.value(controller, card, null, self) > rhs.value(controller, card, null, self)
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.INFIX)
-    fun moreThan(rhs: OnjEffectValue, lhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
-        rhs.value(controller, card, null, self) > lhs.value.toInt()
+    fun moreThan(lhs: OnjEffectValue, rhs: OnjInt): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
+        lhs.value(controller, card, null, self) > rhs.value.toInt()
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [CardPredicate]")

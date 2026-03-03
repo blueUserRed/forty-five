@@ -1066,7 +1066,12 @@ class GameControllerImpl(
                 if (remainingDamage > 0) {
                     include(damagePlayerTimeline(remainingDamage, false, isPiercing))
                 }
-                include(card.afterShot(controller, true, damage, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+                val triggerInfo = createTriggerInfo(card, isOnShot = true)
+                include(card.afterShot(
+                    controller, true, damage,
+                    triggerInfo,
+                    ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot
+                ))
                 include(rotateRevolverTimeline(card.getRotationDirection(controller)))
             } else {
                 include(damagePlayerTimeline(damage, false, isPiercing))
@@ -1092,17 +1097,16 @@ class GameControllerImpl(
         TODO("Not yet implemented")
     }
 
-    private fun putCardBackInHandAfterShot(card: Card): Timeline = Timeline.timeline {
+    private fun putCardBackInHandAfterShot(card: Card, triggerInfo: TriggerInformation): Timeline = Timeline.timeline {
         later  {
             val freeSpace = maxSpaceInHand()
             var putInStackInstead = freeSpace == 0
-            val triggerInformation = createTriggerInfo(card)
             val beforeEvent = Events.CardChangeZoneEvent(
                 card,
                 Zone.REVOLVER,
                 if (putInStackInstead) Zone.STACK else Zone.HAND,
                 true,
-                triggerInformation,
+                triggerInfo,
                 true
             )
             gameEvents.fire(beforeEvent)
@@ -1131,7 +1135,7 @@ class GameControllerImpl(
                     Zone.REVOLVER,
                     if (putInStackInstead) Zone.STACK else Zone.HAND,
                     false,
-                    triggerInformation,
+                    triggerInfo,
                     true
                 )
                 gameEvents.fire(afterEvent)
@@ -1148,14 +1152,13 @@ class GameControllerImpl(
         return true
     }
 
-    private fun putCardInTheStackAfterShot(card: Card): Timeline = Timeline.timeline {
-        val triggerInformation = createTriggerInfo(card)
+    private fun putCardInTheStackAfterShot(card: Card, triggerInfo: TriggerInformation): Timeline = Timeline.timeline {
         val beforeEvent = Events.CardChangeZoneEvent(
             card,
             Zone.REVOLVER,
             Zone.STACK,
             before = true,
-            triggerInformation,
+            triggerInfo,
             afterShot = true
         )
         includeLater({
@@ -1211,7 +1214,11 @@ class GameControllerImpl(
             // Not handled via event because things like encounter modifiers or
             // status effects shouldn't hook into here
             include(checkTrigger(GameSituation.OnShot(card), triggerInfo))
-            include(card.afterShot(controller, false, 0, ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot))
+            include(card.afterShot(
+                controller, false, 0,
+                triggerInfo,
+                ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot
+            ))
         }
         include(rotateRevolverTimeline(rotationDirection))
         includeLater(

@@ -424,6 +424,9 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
     private var skipped: Boolean = false
 
+    private val active: Boolean
+        get() = !skipFirstRotation || skipped
+
     override val name: String = "Frost"
 
     override val effectType: StatusEffectType = StatusEffectType.OTHER
@@ -444,9 +447,10 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
         }
     }
 
-    override fun disableEverlasting(): Boolean = true
+    override fun disableEverlasting(): Boolean = active
 
-    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
+    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation =
+        if (active) RevolverRotation.None else rotation
 
     override fun isStillValid(): Boolean = shots > 0
 

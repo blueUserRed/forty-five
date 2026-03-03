@@ -460,8 +460,9 @@ class Card(
         controller: GameController,
         wasParry: Boolean,
         parryDamage: Int,
-        putCardInTheHand: (Card) -> Timeline,
-        putCardInTheStack: (Card) -> Timeline
+        triggerInfo: TriggerInformation,
+        putCardInTheHand: (Card, TriggerInformation) -> Timeline,
+        putCardInTheStack: (Card, TriggerInformation) -> Timeline
     ): Timeline = Timeline.timeline {
         later {
             activeBehaviours
@@ -510,9 +511,9 @@ class Card(
             val putInHand =
                 activeBehaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }
             if (putInHand) {
-                include(putCardInTheHand(this@Card))
+                include(putCardInTheHand(this@Card, triggerInfo))
             } else {
-                include(putCardInTheStack(this@Card))
+                include(putCardInTheStack(this@Card, triggerInfo))
             }
         }
     }

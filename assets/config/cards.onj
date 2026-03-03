@@ -2132,19 +2132,40 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Right-Click:$trigger$\nIf the targeted enemy has poison:\nRemove 8 Poison: You get 1 reserve",
         rightClickCost: 0,
-        baseDamage: 4,
+        baseDamage: 2,
         deckMaximum: 3,
         effects: [
             {
-                trigger: rightClicked(onlySelfTriggers) mustMatchPredicate (poisonNumberOfTargetedEnemy() moreThan 7#val),
+                trigger: rightClicked(onlySelfTriggers) mustMatchPredicate (poisonNumberOfTargetedEnemy() moreThan 7),
                 effect: removePoisonFromTargetedEnemy(8#val)
             },
             {
-                trigger: rightClicked(onlySelfTriggers) mustMatchPredicate (poisonNumberOfTargetedEnemy() moreThan 7#val),
+                trigger: rightClicked(onlySelfTriggers) mustMatchPredicate (poisonNumberOfTargetedEnemy() moreThan 7),
                 effect: reserveGain(1#val)
             },
         ],
-        cost: 2,
+        cost: 1,
+        tags: [ "pool1", "rarity3" ],
+        price: 50,
+    },
+    {
+        name: "snowball",
+        title: "Snowball",
+        flavourText: "",
+        description: "$trigger$On-Leave:$trigger$\nYou get $status$FROZEN$status$ (2)\ndeal 3 dmg to targeted enemy",
+        baseDamage: 3,
+        deckMaximum: 3,
+        effects: [
+            {
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
+                effect: givePlayerStatus(frozen(2#val))
+            },
+            {
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
+                effect: damageDirect(3#val, false)
+            },
+        ],
+        cost: 1,
         tags: [ "pool1", "rarity3" ],
         price: 50,
     },
