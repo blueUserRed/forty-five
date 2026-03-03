@@ -34,6 +34,11 @@ hoverDetailDescriptions: [
         description: "$status$BOUNTY (t, r)$status$\nFor t turns, when an enemy with the BOUNTY statuseffect dies: the player gets r reserves. This statuseffect doesn't stack.",
     },
     {
+        keyword: "WEAK",
+        groupName: "status",
+        description: "$status$WEAK (t)$status$\ndmg of attacks are halfed rounded down for t turns",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",

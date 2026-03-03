@@ -126,7 +126,7 @@ cards: [
         name: "bewitchedBullet",
         title: "Bewitched Bullet",
         flavourText: "\"Be at ease little sister, support is on the way, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\" -Letter to Salem",
-        description: "$trigger$On-Shot:$trigger$\nInstead of turning right, the revolver turns left.",
+        description: "Instead of rotating right, the revolver rotates left.",
         rotation: $Left { amount: 1 },
         baseDamage: 7,
         effects: [],
@@ -347,7 +347,7 @@ cards: [
         name: "enchantedBullet",
         title: "Enchanted Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nInstead of turning right, the revolver turns left twice.",
+        description: "$trigger$On-Shot:$trigger$\nInstead of rotating right, the revolver rotates left twice.",
         baseDamage: 14,
         rotation: $Left { amount: 2 },
         deckMaximum: 2,
@@ -455,7 +455,7 @@ cards: [
         name: "bull_et",
         title: "Bull et",
         flavourText: "Ole! Ole! Ole! Ole!", // TODO: the fancy é
-        description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
+        description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the targeted enemy",
         baseDamage: 5,
         deckMaximum: 2,
         effects: [
@@ -657,7 +657,7 @@ cards: [
         title: "Deputies Bullet",
         flavourText: "",
         description: "This Bullet can't be placed in slot 3" + slot.3 + ".\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3" + slot.3 + " to your hand",
-        baseDamage: 8,
+        baseDamage: 4,
         deckMaximum: 2,
         effects: [
             {
@@ -667,7 +667,7 @@ cards: [
                 )
             }
         ],
-        cost: 1,
+        cost: 0,
         forbiddenSlots: [3],
         tags: ["pool1", "rarity3"],
         price: 50,
@@ -1160,7 +1160,7 @@ cards: [
         name: "carnageBullet",
         title: "Carnage Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet",
+        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet in the revolver",
         baseDamage: 11,
         deckMaximum: 3,
         effects: [
