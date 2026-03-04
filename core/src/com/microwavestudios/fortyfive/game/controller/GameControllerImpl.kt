@@ -231,6 +231,22 @@ class GameControllerImpl(
         gameEvents.watchFor<Any> { e ->
             if (e !is EncounterScreen.UpdateUiEvent) FortyFive.logger.debug(logTag, "Game Event: $e")
         }
+        gameEvents.watchFor<Events.TimelineBuildingEvent> { event ->
+            event.append { later {
+                allEnemies.forEach { enemy ->
+                    val removed = enemy.checkStatusEffectValidity()
+                    if (removed.isEmpty()) return@forEach
+                    val info = createTriggerInfo(null)
+                    removed
+                        .map { effect ->
+                            val situation = GameSituation.EnemyStatusEffectsChanged(enemy, effect, false)
+                            checkTrigger(situation, info)
+                        }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
+            } }
+        }
         gameEvents.watchFor<Events.ParryStateChange> { (inParryMenu) ->
             if (inParryMenu) gameRenderPipeline.startParryEffect() else gameRenderPipeline.stopParryEffect()
         }
@@ -310,12 +326,6 @@ class GameControllerImpl(
                         .collectTimeline()
                         .let { include(it) }
                 }
-                later {
-                    activeEnemies
-                        .map { it.executeStatusEffectsAfterTurn() }
-                        .collectTimeline()
-                        .let { include(it) }
-                }
             }
         }
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
@@ -391,7 +401,6 @@ class GameControllerImpl(
         mainTimeline.updateTimeline()
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
-        allEnemies.forEach { it.update() }
     }
 
     private fun initCards() {
@@ -887,6 +896,8 @@ class GameControllerImpl(
         val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
         gameEvents.fire(event)
         include(event.createTimeline())
+        val situation = GameSituation.EnemyStatusEffectsChanged(enemy, statusEffect, true)
+        include(checkTrigger(situation, info))
     } }
 
     override fun damagePlayerTimeline(
@@ -1497,6 +1508,20 @@ class GameControllerImpl(
         if (hasWon) {
             include(winTimeline())
             return@later
+        }
+
+        later {
+            activeEnemies
+                .map { it.executeStatusEffectsAfterTurn() }
+                .collectTimeline()
+                .let { include(it) }
+        }
+
+        later {
+            playerStatusEffects
+                .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.PlayerTarget) }
+                .collectTimeline()
+                .let { include(it) }
         }
 
         later {

@@ -253,8 +253,10 @@ class Poison(
     override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         later {
             if (target.isBlocked(this@Poison, controller)) return@later
+            delay(200)
             include(target.damage(damage, controller))
             action { damage /= 2 }
+            delay(600)
         }
     }
 

@@ -2169,6 +2169,43 @@ cards: [
         tags: [ "pool1", "rarity3" ],
         price: 50,
     },
+    {
+        name: "poisonArrow",
+        title: "Poison Arrow",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\nAs long as at least one enemy has $status$POISON$status$:\nPoison Arrow has $trait$EVERLASTING$trait$.\n\nWhen no enemy has $status$POISON$status$:\nDestroy Poison Arrow\n\n$trigger$On-Turn-Begin$trigger$:\nYou get $status$POISON$status$ (2)",
+        baseDamage: 2,
+        deckMaximum: 1,
+        effects: [
+            {
+                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                isHidden: true,
+                effect: addTemporaryBehaviourLimitBySourceBullet(
+                    everlastingBehaviour(),
+                    bSelectSelf(),
+                    inZone(zone.revolver) and ($AnyEnemyHasStatusEffect { value: poison(0#val) }#cardPredicate)
+                )
+            },
+            {
+                trigger: (
+                    enterZone(zone.revolver, onlySelfTriggers) or
+                    enemyStatusEffectChanged()
+                ) mustMatchPredicate $NegatePredicate {
+                    value: $AnyEnemyHasStatusEffect { value: poison(0#val) }
+                }#cardPredicate,
+                inZones: [zone.revolver],
+                effect: destroy(bSelectSelf())
+            },
+            {
+                trigger: turnBegin(),
+                inZones: [zone.revolver],
+                effect: givePlayerStatus(poison(2#val))
+            }
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity1" ],
+        price: 50,
+    },
 
 ],
 

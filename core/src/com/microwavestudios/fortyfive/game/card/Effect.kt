@@ -1251,6 +1251,12 @@ sealed class GameSituation(val relevantCards: List<Card>) {
     class CardRightClicked(val card: Card) : GameSituation(listOf(card))
 
     class CardCompletedFullRotation(val card: Card) : GameSituation(listOf(card))
+
+    class EnemyStatusEffectsChanged(
+        val enemy: Enemy,
+        val effect: StatusEffect,
+        val added: Boolean
+    ) : GameSituation(listOf())
 }
 
 data class TriggerInformation(

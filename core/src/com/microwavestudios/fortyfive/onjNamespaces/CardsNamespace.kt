@@ -563,6 +563,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
     )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun enemyStatusEffectChanged(): OnjTrigger = OnjTrigger(
+        triggerForSituation<GameSituation.EnemyStatusEffectsChanged>()
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Zone, Zone, boolean, CardPredicate]")
     fun zoneChange(
         oldZone: OnjZone,
@@ -734,6 +739,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             predicate.value.check(card, controller, card)
         }
     )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Trigger, Trigger]", type = OnjFunctionType.INFIX)
+    fun or(lhs: OnjTrigger, rhs: OnjTrigger): OnjTrigger =
+        OnjTrigger { situation, card, triggerInfo, controller ->
+            lhs.value.check(situation, card, triggerInfo, controller) ||
+                    rhs.value.check(situation, card, triggerInfo, controller)
+        }
 
     @RegisterOnjFunction(schema = "use Cards; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
@@ -954,6 +966,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         BulletBehaviour.Amplify(damage.value.toInt())
     )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun everlastingBehaviour(): OnjBulletBehaviour = OnjBulletBehaviour(BulletBehaviour.Everlasting)
+
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
         name("NegatePredicate")
@@ -1062,6 +1077,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun modifierPredicate(value: OnjNamedObject): OnjCardModifierPredicate {
         val predicate = GamePredicate.fromOnj(value)
         return OnjCardModifierPredicate { controller, _, _ -> predicate.check(controller) }
+    }
+
+    @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
+    fun cardPredicate(value: OnjNamedObject): OnjCardPredicate {
+        val predicate = GamePredicate.fromOnj(value)
+        return OnjCardPredicate { _, controller, _ -> predicate.check(controller) }
     }
 
     @RegisterOnjFunction(schema = "params: []")

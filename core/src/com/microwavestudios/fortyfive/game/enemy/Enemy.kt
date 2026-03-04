@@ -11,7 +11,6 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
-import kotlin.math.log
 
 data class EnemyPrototype(
     val name: String,
@@ -136,18 +135,11 @@ class Enemy(
         .mapNotNull { it.executeAfterShot() }
         .collectTimeline()
 
-    fun update() {
-        var change = false
-        _statusEffects.removeIf { effect ->
-            if (!effect.isStillValid()) {
-                change = true
-                true
-            } else {
-                false
-            }
-        }
-        if (!change) return
-        enemyEvents.fire(StatusEffectsChangedEvent)
+    fun checkStatusEffectValidity(): List<StatusEffect> {
+        val toRemove = _statusEffects.filter { !it.isStillValid() }
+        _statusEffects.removeAll(toRemove)
+        if (toRemove.isNotEmpty()) enemyEvents.fire(StatusEffectsChangedEvent)
+        return toRemove
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
