@@ -2206,6 +2206,27 @@ cards: [
         tags: [ "pool1", "rarity1" ],
         price: 50,
     },
+    {
+        name: "zombieBullet",
+        title: "Zombie Bullet",
+        flavourText: ".Forty-Five: Undead Nightmare",
+        description: "When this is the first in the AFTERLIFE, and there is at least one other card in the Afterlife:\n$keyword$RESURRECT$keyword$",
+        baseDamage: 7,
+        deckMaximum: 2,
+        effects: [
+            {
+                trigger: changedInOrOutOfZone(zone.afterlife, false, allCardsTrigger) mustMatchPredicate (
+                    inZone(zone.afterlife) and
+                    (countCards(inZone(zone.afterlife)) moreThan 1) and
+                    (afterlifeSlotNumber() equals 0)
+                ),
+                effect: resurrect(slotGetter("Select slot to resurrect into"))
+            }
+        ],
+        cost: 1,
+        tags: [ "pool1", "rarity1" ],
+        price: 50,
+    },
 
 ],
 

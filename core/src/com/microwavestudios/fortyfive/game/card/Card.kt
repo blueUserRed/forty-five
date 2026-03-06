@@ -312,6 +312,7 @@ class Card(
     fun changeZone(newZone: Zone, controller: GameController) {
         val oldZone = zone
         zone = newZone
+        if (actor.inTriggerPosition) actor.skipAnimateBack()
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
             enteredOnTurn = controller.turnCounter
@@ -681,10 +682,8 @@ class Card(
                 }
                 include(effect.trigger(this@Card, triggerInformation, controller, situation))
                 later {
-                    if (!isInTriggerPosition) return@later
-                    if (zone == zoneAtStart) return@later
-                    actor.skipAnimateBack()
-                    isInTriggerPosition = false
+                    // changeZone calls skipAnimateBack if the card left the zone during the event
+                    if (!actor.inTriggerPosition) isInTriggerPosition = true
                 }
             }
         }
@@ -1378,6 +1377,7 @@ class CardActor(
     fun skipAnimateBack() {
         inTriggerPosition = false
         setScale(1f)
+        invalidateHierarchy()
     }
 
     fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {

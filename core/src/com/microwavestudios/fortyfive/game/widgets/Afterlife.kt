@@ -177,11 +177,6 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
                     marginBottom = 10f
                     joinGroup(afterlifeSlotGroup)
                     keyboardFocusable = KeyboardFocusable.LEAF
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
                     afterlifeEvents.watchFor<Events.CardsChanged> {
                         clearChildren()
                         val card = _cards.getOrNull(0) ?: return@watchFor
@@ -233,11 +228,6 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
             horizontalAlign = CustomAlign.CENTER
             joinGroup(afterlifeSlotGroup)
             keyboardFocusable = KeyboardFocusable.LEAF
-            observeInputState(
-                GameInputs.States.focused,
-                { debug = true },
-                { debug = false }
-            )
             afterlifeEvents.watchFor<Events.CardsChanged> {
                 clearChildren()
                 card = _cards.getOrNull(index + 1)

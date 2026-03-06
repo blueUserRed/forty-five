@@ -111,6 +111,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         }
         selector.startSelect()
     }
+
     @RegisterOnjFunction(schema = "params: [string]")
     fun slotGetterSmallerSlots(
         text: OnjString
@@ -121,6 +122,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
         val selector = RevolverSlotSelector(controller, text.value) { slot ->
             slot.card == null && Utils.convertSlotRepresentation(slot.num) < thisSlotNum
+        }
+        selector.startSelect()
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun slotGetter(text: OnjString): OnjRevolverSlotGetter = OnjRevolverSlotGetter { controller, card, triggerInformation ->
+        val selector = RevolverSlotSelector(controller, text.value) { slot ->
+            slot.card == null
         }
         selector.startSelect()
     }
@@ -1071,6 +1080,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             if (p.check(cardToCheck, controller, card)) count++
         }
         count
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun afterlifeSlotNumber(): OnjEffectValue = OnjEffectValue { controller, card, _, self ->
+        val card = card ?: self ?: throw RuntimeException("afterlifeSlotNumber cant be used in this context; requires card")
+        controller.afterlife.cards.indexOf(card)
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
