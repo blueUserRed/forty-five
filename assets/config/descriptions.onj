@@ -99,6 +99,11 @@ hoverDetailDescriptions: [
         description: "$keyword$SEARCH$keyword$\nPuts a random card from the deck into the players hand, that matches the requirement.",
     },
     {
+        keyword: "DISCARD",
+        groupName: "keyword",
+        description: "$keyword$DISCARD$keyword$\nPut a bullet from your hand into the afterlife",
+    },
+    {
         keyword: "CREATE",
         groupName: "keyword",
         description: "$keyword$CREATE$keyword$\ncreated cards get removed after the encounter",

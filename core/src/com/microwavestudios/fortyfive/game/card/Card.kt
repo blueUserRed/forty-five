@@ -681,15 +681,11 @@ class Card(
                     }
                 }
                 include(effect.trigger(this@Card, triggerInformation, controller, situation))
-                later {
-                    // changeZone calls skipAnimateBack if the card left the zone during the event
-                    if (!actor.inTriggerPosition) isInTriggerPosition = true
-                }
             }
         }
 
         later {
-            if (!isInTriggerPosition) return@later
+            if (!actor.inTriggerPosition) return@later
             if (zone == zoneAtStart) {
                 include(actor.animateBack(controller, prevPosition))
             } else {

@@ -15,6 +15,7 @@ val assetDirs = arrayOf(
     "onjschemas",
     "profiles",
     "saves",
+    "plugins",
     "shaders",
 )
 
@@ -107,11 +108,24 @@ fun cleanupAssets(tmpDir: File) {
         .listFiles()!!
         .forEach { it.deleteRecursively() }
 
+    debug("removing onj env")
+    (tmpDir / ".onj")
+        .deleteRecursively()
+
+    debug("removing plugins")
+    (tmpDir / "plugins")
+        .listFiles()
+        ?.forEach { it.deleteRecursively() }
+
     debug("removing font files")
     (tmpDir / "blobs/fonts2")
         .listFiles()!!
         .filter { it.extension in arrayOf("ttf", "otf") }
         .forEach { it.delete() }
+
+    (tmpDir / "error_logs").let { errorLogs ->
+        if (!errorLogs.exists()) errorLogs.mkdir()
+    }
 }
 
 fun changeLoggingVersionTag(tmpDir: File, newTag: String) {
