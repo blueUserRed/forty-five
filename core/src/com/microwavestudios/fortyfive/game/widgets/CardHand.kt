@@ -32,6 +32,13 @@ class CardHand(
     private var orderedChildrenDirty: Boolean = true
     private var childrenInCorrectOrderCache: MutableList<Actor> = mutableListOf()
 
+    init {
+        focusShortcut(
+            GameInputs.focusShortcutCardHand,
+            variableActor = { leftSide.lastOrNull()?.actor ?: rightSide.firstOrNull()?.actor }
+        )
+    }
+
     fun allCards(): List<Card> = leftSide + rightSide
 
     fun addCard(card: Card) {

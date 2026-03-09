@@ -333,6 +333,8 @@ class RevolverSlot(
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
         joinGroup(revolverSlotGroup)
+        val slotNum = Utils.convertSlotRepresentation(num)
+        focusShortcut(GameInputs.focusShortcutRevolverSlots[slotNum - 1])
         observeInputState(
             GameInputs.States.focused,
             {

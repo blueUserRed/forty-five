@@ -22,6 +22,7 @@ import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
 import com.microwavestudios.fortyfive.utils.between
+import com.microwavestudios.fortyfive.utils.epsilonEquals
 import kotlin.math.max
 
 //TODO (optional):
@@ -53,11 +54,12 @@ open class CustomBox(
     var flexDirection = FlexDirection.COLUMN
         set(value) {
             field = value
-            childrenFocusAlignment = if (flexDirection.isColumn) {
+            childrenFocusAlignment = if (value.isColumn) {
                 FocusAlignment.VERTICAL
             } else {
                 FocusAlignment.HORIZONTAL
             }
+            childrenFocusReversed = value.isReverse
         }
 
     var wrap = CustomWrap.NONE
@@ -457,7 +459,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Cu
     var scrollDirectionStart: CustomDirection = CustomDirection.TOP
         set(value) {
             field = value
-            checkFlexDirection(value)
+//            checkFlexDirection(value)
             invalidate()
         }
 
@@ -579,7 +581,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Cu
     init {
         addListener(scrollListener)
         touchable = Touchable.enabled
-        checkFlexDirection(scrollDirectionStart)
+//        checkFlexDirection(scrollDirectionStart)
     }
 
     fun scrollToBegin() {
@@ -591,11 +593,15 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Cu
         interpolation: Interpolation = Interpolation.smooth
     ): Timeline = Timeline.timeline {
         later {
-            if (scrolledDistance < 0.0001f) return@later
+            val reverse =
+                (scrollDirectionStart == CustomDirection.TOP || scrollDirectionStart == CustomDirection.LEFT) xor
+                        flexDirection.isReverse
+            val target = if (reverse) maxScrollableDistanceInDirection else 0f
+            if (scrolledDistance.epsilonEquals(target, 0.0001f)) return@later
             val action = PropertyAction(
                 this@CustomScrollableBox,
                 ::scrolledDistance,
-                0f,
+                target,
             )
             action.duration = (duration.toFloat() / 1000f)
             action.interpolation = interpolation
@@ -731,31 +737,31 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Cu
         } else children.filterIsInstance<OffSettable>().forEach { it.logicalOffsetY = scrolledPart }
     }
 
-    private fun checkFlexDirection(scrollDirection: CustomDirection) {
-        if (scrollDirection.isHorizontal && !flexDirection.isColumn) {
-            flexDirection = if (flexDirection.isReverse) {
-                FlexDirection.COLUMN_REVERSE
-            } else {
-                FlexDirection.COLUMN
-            }
-        } else if (!scrollDirection.isHorizontal && flexDirection.isColumn) {
-            flexDirection = if (flexDirection.isReverse) {
-                FlexDirection.ROW_REVERSE
-            } else {
-                FlexDirection.ROW
-            }
-        }
-        wrap =
-            if (scrollDirection == CustomDirection.BOTTOM || scrollDirection == CustomDirection.RIGHT) CustomWrap.WRAP_REVERSE
-            else CustomWrap.WRAP
-
-
-        if (scrollDirection.isHorizontal) {
-            horizontalAlign = if (scrollDirection == CustomDirection.RIGHT) CustomAlign.END else CustomAlign.START
-        } else {
-            verticalAlign = if (scrollDirection == CustomDirection.BOTTOM) CustomAlign.END else CustomAlign.START
-        }
-    }
+//    private fun checkFlexDirection(scrollDirection: CustomDirection) {
+//        if (scrollDirection.isHorizontal && !flexDirection.isColumn) {
+//            flexDirection = if (flexDirection.isReverse) {
+//                FlexDirection.COLUMN_REVERSE
+//            } else {
+//                FlexDirection.COLUMN
+//            }
+//        } else if (!scrollDirection.isHorizontal && flexDirection.isColumn) {
+//            flexDirection = if (flexDirection.isReverse) {
+//                FlexDirection.ROW_REVERSE
+//            } else {
+//                FlexDirection.ROW
+//            }
+//        }
+//        wrap =
+//            if (scrollDirection == CustomDirection.BOTTOM || scrollDirection == CustomDirection.RIGHT) CustomWrap.WRAP_REVERSE
+//            else CustomWrap.WRAP
+//
+//
+//        if (scrollDirection.isHorizontal) {
+//            horizontalAlign = if (scrollDirection == CustomDirection.RIGHT) CustomAlign.END else CustomAlign.START
+//        } else {
+//            verticalAlign = if (scrollDirection == CustomDirection.BOTTOM) CustomAlign.END else CustomAlign.START
+//        }
+//    }
 
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
