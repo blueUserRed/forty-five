@@ -84,6 +84,31 @@ hoverDetailDescriptions: [
         description: "$trait$PERSISTENCE$trait$\nThis Bullet doesn't lose its buffs or debuffs when shot.",
     },
     {
+        keyword: "POISON TIP",
+        groupName: "trait",
+        description: "$trait$POISON TIP$trait$\nA bullet with Poison Tip doesn't deal dmg when it is shot. Instead, the enemy gets $status$POISON$status$ (x), where x is this Bullets dmg value. ",
+    },
+    {
+        keyword: "HIGH VELOCITY",
+        groupName: "trait",
+        description: "$trait$HIGH VELOCITY$trait$\nThis bullet deals dmg when leaving the revolver instead of only when being shot. ",
+    },
+    {
+        keyword: "PHANTOM",
+        groupName: "trait",
+        description: "$trait$PHANTOM$trait$\nThis Bullet deals dmg when entering the hand in any way other than drawing cards from the top of your drawpile, instead of when being shot. ",
+    },
+    {
+        keyword: "SPIRIT",
+        groupName: "trait",
+        description: "$trait$SPIRIT$trait$\nThis Bullet costs 1 less but doesn’t deal dmg when it is shot (Reserve costs can’t be reduced to less than 1 this way.)(Only spawns on 2+ cost bullets) ",
+    },
+    {
+        keyword: "PIERCING",
+        groupName: "trait",
+        description: "$trait$PIERCING$trait$\nA bullet with piercing ignores enemy shields and always deals dmg to the hp of the enemy. ",
+    },
+    {
         keyword: "HARDENED", // TODO: Should be keyword
         groupName: "keyword",
         description: "$keyword$HARDENED (x)$keyword$\nFor the next x times this bullet is used to parry, it won't leave the revolver ",
@@ -138,33 +163,6 @@ hoverDetailDescriptions: [
         groupName: "keyword",
         description: "$keyword$ZONE$keyword$\nZones are the handcards, the drawpile, the revolver and the afterlife",
     },
-    {
-        keyword: "POISON TIP",
-        groupName: "keyword",
-        description: "$keyword$POISON TIP$keyword$\nA bullet with Poison Tip doesn't deal dmg when it is shot. Instead, the enemy gets $status$POISON$status$ (x), where x is this Bullets dmg value. ",
-    },
-    {
-        keyword: "HIGH VELOCITY",
-        groupName: "keyword",
-        description: "$keyword$HIGH VELOCITY$keyword$\nThis bullet deals dmg when leaving the revolver instead of only when being shot. ",
-    },
-    {
-        keyword: "PHANTOM",
-        groupName: "keyword",
-        description: "$keyword$PHANTOM$keyword$\nThis Bullet deals dmg when entering the hand in any way other than drawing cards from the top of your drawpile, instead of when being shot. ",
-    },
-    {
-        keyword: "SPIRIT",
-        groupName: "keyword",
-        description: "$keyword$SPIRIT$keyword$\nThis Bullet costs 1 less but doesn’t deal dmg when it is shot (Reserve costs can’t be reduced to less than 1 this way.)(Only spawns on 2+ cost bullets) ",
-    },
-    {
-        keyword: "PIERCING",
-        groupName: "keyword",
-        description: "$keyword$PIERCING$keyword$\nA bullet with piercing ignores enemy shields and always deals dmg to the hp of the enemy. ",
-    },
-
-
 ],
 
 hoverDetailDescriptionGroups: [

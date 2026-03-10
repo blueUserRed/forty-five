@@ -38,7 +38,7 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
             val maxAmount = allCardProtos.find { it.name == card.name }?.deckMaximum
             requireNotNull(maxAmount) { "unknown card in deck: ${card.name}" }
             cardAmounts.putIfAbsent(card.name, 0)
-            val available = availableCards.find { it.name == card.name }
+            val available = availableCards.find { it == card }
             if (
                 (maxAmount != -1 && cardAmounts[card.name]!! >= maxAmount) ||
                 available == null ||

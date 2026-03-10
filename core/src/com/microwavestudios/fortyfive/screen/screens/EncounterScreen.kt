@@ -388,7 +388,7 @@ class EncounterScreen : ScreenCreator() {
             val text = DetailDescriptionHandler.descriptions[effect.name.lowercase()]?.second
             detailWidget = DetailWidget.SimpleSmallDetailActor(
                 screen,
-                effects = CardActor.cardDetailEffects // card detail effects contains all necessary text effects for status effects
+                effects = DetailDescriptionHandler.allTextEffects
             ) { text ?: "" }
             bindDetailToInputState(GameInputs.States.focused)
             image {

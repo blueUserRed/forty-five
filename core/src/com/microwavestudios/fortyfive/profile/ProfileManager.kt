@@ -21,10 +21,7 @@ class ProfileManager {
 
     fun deselectProfile() {
         FortyFive.logger.debug(logTag, "deselect profile ${currentProfile?.name}")
-        currentProfile?.let {
-            it.write()
-            it.writeMaps()
-        }
+        currentProfile?.write()
         currentProfile = null
         rereadPreviews()
     }

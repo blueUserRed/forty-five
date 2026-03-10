@@ -1479,7 +1479,6 @@ class GameControllerImpl(
         action {
             encounterContext.completed()
             profile.write()
-            profile.writeMaps()
 
             val chooseCardContext = object : ChooseCardScreenContext {
                 override var seed: Long = TimeUtils.millis()

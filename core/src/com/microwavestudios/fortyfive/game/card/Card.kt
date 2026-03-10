@@ -774,10 +774,10 @@ class Card(
         return logTag
     }
 
-    fun getKeyWordsForDescriptions(): List<String> {
+    fun getAllHoverTexts(): List<String> {
         val res = mutableListOf<String>()
-        res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
-        res.addAll(currentHoverTexts.map { it.first })
+        res.add(shortDescription)
+        res.addAll(currentHoverTexts.map { it.second })
         return res
     }
 
@@ -1014,7 +1014,7 @@ class CardActor(
 
     override var detailWidget: DetailWidget? = DetailWidget.ComplexBigDetailActor(
         screen,
-        effects = cardDetailEffects,
+        effects = DetailDescriptionHandler.allTextEffects,
         text = {
             val list = card.currentHoverTexts.map { it.second }.toMutableList()
             list.add(card.shortDescription)
@@ -1433,42 +1433,16 @@ class CardActor(
     }
 
     private fun getEffectTexts(): () -> List<String> = {
-        val allKeys = card.getKeyWordsForDescriptions() +
-                DetailDescriptionHandler.getKeyWordsFromDescription(card.stamp?.description ?: "")
+        val allHoverTexts = card.getAllHoverTexts().toMutableList()
+        card.stamp?.description?.let { allHoverTexts.add(it) }
+
         val texts: MutableList<String> = mutableListOf()
-
+        texts.addAll(DetailDescriptionHandler.extractAllExtraDescriptions(allHoverTexts))
         texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
-
-        val addedDescriptions = mutableSetOf<String>()
-        allKeys.forEach { key ->
-            if (key in addedDescriptions) return@forEach
-            addedDescriptions.add(key)
-            DetailDescriptionHandler.descriptions[key]?.let { texts.add(it.second) }
-        }
-        while (true) {
-            val keywords = texts.flatMap { text ->
-                DetailDescriptionHandler.getKeyWordsFromDescription(text)
-            }
-            var addedText = false
-            keywords.forEach { keyword ->
-                if (keyword in addedDescriptions) return@forEach
-                addedDescriptions.add(keyword)
-                addedText = true
-                DetailDescriptionHandler.descriptions[keyword]?.let { texts.add(it.second) }
-            }
-            if (!addedText) break
-        }
         texts
     }
 
     companion object {
-
-        val cardDetailEffects by lazy {
-            DetailDescriptionHandler.allTextEffects.value.map {
-                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
-            }
-        }
-
         const val cardGroup: String = "card-group"
         const val selectableCardGroup: String = "selectable-card-group"
     }
