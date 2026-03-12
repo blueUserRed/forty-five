@@ -482,14 +482,11 @@ class GameControllerImpl(
             revolver.removeCard(card)
             afterlife.pushCard(card)
             card.actor.alpha = 1f
-            println("hi1")
         }
         later {
             val afterEvent = beforeEvent.copy(before = false)
             gameEvents.fire(afterEvent)
-            println("hi2")
             include(afterEvent.createTimeline())
-            action { println("hi3") }
         }
         later {
             val event = Events.CardDestroyedEvent(card, triggerInfo)

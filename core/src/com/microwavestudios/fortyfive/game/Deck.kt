@@ -32,6 +32,7 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
         val allCardProtos = RandomCardSelection.allCardPrototypes
 
         var numberOfCards = 0
+        val usedStamps = mutableListOf<String>()
         val cardAmounts = mutableMapOf<String, Int>()
         _cardPositions.iterateRemoving { value, remover ->
             val (_, card) = value
@@ -42,12 +43,14 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
             if (
                 (maxAmount != -1 && cardAmounts[card.name]!! >= maxAmount) ||
                 available == null ||
-                numberOfCards >= numberOfSlots
+                numberOfCards >= numberOfSlots ||
+                (card.stamp != null && card.stamp in usedStamps)
             ) {
                 remover()
                 return@iterateRemoving
             }
             numberOfCards++
+            card.stamp?.let { usedStamps.add(it) }
             availableCards.remove(available)
             cardAmounts[card.name] = cardAmounts[card.name]!! + 1
         }
@@ -58,7 +61,10 @@ class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap
             val amountInDeck = cardAmounts[candidate.name]
             val maxAmount = allCardProtos.find { it.name == candidate.name }?.deckMaximum
             requireNotNull(maxAmount) { "unknown card in backpack: ${candidate.name}" }
-            if (maxAmount == -1 || amountInDeck == null || amountInDeck < maxAmount) {
+            if (
+                (maxAmount == -1 || amountInDeck == null || amountInDeck < maxAmount) &&
+                !(candidate.stamp != null && candidate.stamp in usedStamps)
+            ) {
                 addToDeck(nextFreeSlot(), candidate)
             }
             if (_cardPositions.size >= minDeckSize) return

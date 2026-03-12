@@ -221,6 +221,14 @@ object BackpackCreator {
             state.warningEvents.fire(warningEvent)
             return
         }
+        card.stamp?.let { stamp ->
+            if (!state.currentDeck.cards.any { it.stamp == stamp.name }) return@let
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.addToDeck(slot, card.type)
         updateCardsInCollection(state)
         with(state.events) {
@@ -256,6 +264,14 @@ object BackpackCreator {
         if (deckMaximum != -1 && state.currentDeck.countCards(backpackCard.name) + 1 > deckMaximum) {
             val warningEvent = WarningParent.ShowWarningEvent(
                 WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${backpackCard.title} allowed in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
+        backpackCard.stamp?.let { stamp ->
+            if (!state.currentDeck.cards.any { it.stamp == stamp.name }) return@let
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
             )
             state.warningEvents.fire(warningEvent)
             return
