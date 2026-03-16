@@ -143,14 +143,28 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     fun isSpecialRunCompleted(runName: String): Boolean = runName in data.completedSpecialRuns
 
     fun addCardToBackpack(card: CardType) {
-        if (!isRunActive) throw RuntimeException("not in run")
+        require(isRunActive) { "not in run" }
         runSave!!.addCardToBackpack(card)
         checkDecks()
+    }
+
+    fun swapCardInBackpack(old: CardType, new: CardType) {
+        require(isRunActive) { "not in run" }
+        runSave!!.swapCardInBackpack(old, new)
     }
 
     fun addCardToCollection(card: CardType) {
         _cardCollection.add(card)
         checkDecks()
+        dirty()
+    }
+
+    fun swapCardInCollection(old: CardType, new: CardType) {
+        val result = _cardCollection.remove(old)
+        require(result) { "card $old not in collection" }
+        _cardCollection.add(new)
+        checkDecks()
+        dirty()
     }
 
     fun changeToMap(map: String, fromEnd: Boolean = false) {
@@ -350,6 +364,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     }
 
     fun write() {
+        writeMaps()
         checkDecks()
         runSave?.write()
         if (!dirty && !data.collectionDecks.any { it.deckDirty }) return
@@ -363,7 +378,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         dataFile.writeText(data.asOnj().toString())
     }
 
-    fun writeMaps() {
+    private fun writeMaps() {
         runSave?.writeRunMap()
         val currentFile = currentMapFile ?: return
         currentFile.writeText(currentAreaMap.asOnjObject().toMinifiedString())

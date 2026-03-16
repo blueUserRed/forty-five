@@ -115,6 +115,8 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
         parryDamage: Int
     ): Timeline? = null
 
+    open fun putInHandAfterDestroy(card: Card, controller: GameController): Boolean = false
+
     abstract override fun equals(other: Any?): Boolean
 
     override fun hashCode(): Int = this::class.qualifiedName!!.hashCode()
@@ -352,4 +354,15 @@ abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
 
         override fun equals(other: Any?): Boolean = other is Spirit
     }
+
+    object PutInHandAfterDestroy : BulletBehaviour(true) {
+
+        override fun putInHandAfterDestroy(
+            card: Card,
+            controller: GameController
+        ): Boolean = true
+
+        override fun equals(other: Any?): Boolean = other is PutInHandAfterDestroy
+    }
+
 }

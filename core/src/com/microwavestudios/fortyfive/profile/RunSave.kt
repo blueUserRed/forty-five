@@ -68,6 +68,14 @@ class RunSave private constructor(val profile: Profile) {
         dirty()
     }
 
+    fun swapCardInBackpack(old: CardType, new: CardType) {
+        val result = _backpack.remove(old)
+        require(result) { "card $old not in backpack" }
+        _backpack.add(new)
+        dirty()
+        checkDecks()
+    }
+
     fun readFromDisc() {
         dirty = false
         if (!runDataFile.exists()) {

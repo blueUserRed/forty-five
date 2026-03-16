@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
+import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
@@ -91,7 +92,6 @@ object FortyFive : Game() {
             Oven().bake(appArguments.bakeTasks)
             return
         }
-
         if (appArguments.mapEditor) {
             screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
                 override val map: DetailMap? = null
@@ -100,6 +100,7 @@ object FortyFive : Game() {
             screenManager.screenFinished()
             return
         }
+
         globalSave.setToCorrectWindowMode()
         if (!globalSave.skipIntroScreen) screenManager.appendScreen(IntroScreen)
         screenManager.appendScreen(TitleScreen)
@@ -206,7 +207,6 @@ object FortyFive : Game() {
         DebugActorImpl.dumpActorsWithDebugWarnings()
         pluginManager.onEnd()
         profileManager.currentProfile?.write()
-        profileManager.currentProfile?.writeMaps()
         globalSave.write()
         _lifetime.die()
         soundPlayer.end()

@@ -100,6 +100,57 @@ object GameInputs {
         )
     )
 
+    val focusShortcutShootButton = Input(
+        "focusShortcutShootButton",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.S, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+    val focusShortcutHolsterButton = Input(
+        "focusShortcutHolsterButton",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.H, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+   val focusShortcutCardHand = Input(
+        "focusShortcutCardHand",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.C, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+   val focusShortcutAfterlife = Input(
+        "focusShortcutAfterlife",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.A, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+    val focusShortcutRevolverSlots = arrayOf(
+        Input(
+            "focusShortcutRevolverSlot-1",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_1)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-2",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_2)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-3",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_3)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-4",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_4)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-5",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_5)),
+        ),
+    )
+
     val toggleFullScreen = Input(
         "toggleFullScreen",
         arrayOf(

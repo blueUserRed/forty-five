@@ -9,6 +9,7 @@ icons: {
     shield: string,
     frozen: string,
     weak: string,
+    bounty: string,
 },
 
 var encounterModifierConfig = {

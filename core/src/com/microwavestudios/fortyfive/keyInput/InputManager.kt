@@ -349,7 +349,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
             actor as? Group ?: throw RuntimeException("keyboardFocusable.Group should only be set on groups")
             val orderedChildren = inputActor.childrenInCorrectOrderOrOriginal()
             val alignment = inputActor.childrenFocusAlignment
-            val children: Iterable<Actor>
+            var children: Iterable<Actor>
             when (direction) {
                 FocusChangeDirection.DOWN -> {
                     children = if (alignment == FocusAlignment.HORIZONTAL && strictVerticalHorizontal) {
@@ -386,6 +386,8 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
                     children = orderedChildren.reversed()
                 }
             }
+
+            if (inputActor.childrenFocusReversed) children = children.reversed()
             val searchAfterIndex = children.indexOf(searchAfter?.actor)
             children.forEachIndexed { index, child ->
                 if (searchAfter != null && searchAfterIndex != -1 && index <= searchAfterIndex) return@forEachIndexed

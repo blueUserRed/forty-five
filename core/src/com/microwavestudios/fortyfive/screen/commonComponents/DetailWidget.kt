@@ -217,7 +217,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
             }
 
             val mainText = CustomBox(screen)
-            mainText.verticalAlign = CustomAlign.START
+            mainText.verticalAlign = CustomAlign.SPACE_AROUND
             mainText.setPadding(15F)
             mainText.width = width
             mainText.onLayout { mainText.height = mainText.prefHeight.coerceAtLeast(200f) }
@@ -238,7 +238,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
                     mainText.addActor(imgActor)
                 }
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek", Color.FortyWhite, if (i == 0) bigFontSize else smallFontSize),
+                    Triple("roadgeek", Color.FortyWhite, bigFontSize),
                     screen
                 )
                 actor.width = innerWidth

@@ -388,7 +388,7 @@ class EncounterScreen : ScreenCreator() {
             val text = DetailDescriptionHandler.descriptions[effect.name.lowercase()]?.second
             detailWidget = DetailWidget.SimpleSmallDetailActor(
                 screen,
-                effects = CardActor.cardDetailEffects // card detail effects contains all necessary text effects for status effects
+                effects = DetailDescriptionHandler.allTextEffects
             ) { text ?: "" }
             bindDetailToInputState(GameInputs.States.focused)
             image {
@@ -590,6 +590,7 @@ class EncounterScreen : ScreenCreator() {
         var enemySelected = false
 
         box {
+            enemy.actor = this
             flexDirection = FlexDirection.COLUMN
             this.x = x
             this.y = y
@@ -738,8 +739,7 @@ class EncounterScreen : ScreenCreator() {
                         width = height * (drawable.minWidth / drawable.minHeight)
                     }
 
-                    enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { event ->
-                        if (!enemy.isDefeated) return@watchFor
+                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
                         backgroundHandle = "enemy_gravestone"
                         heightPercent = 0.6f
                         invalidate()
@@ -989,6 +989,7 @@ class EncounterScreen : ScreenCreator() {
             joinGroup("shoot-button")
             val filter = InputManager.FocusFilter(listOf("shoot-button"), screen)
             touchable = Touchable.enabled
+            focusShortcut(GameInputs.focusShortcutShootButton)
             x = 370f
             y = 50f
             var closed = false
@@ -1045,6 +1046,7 @@ class EncounterScreen : ScreenCreator() {
             filter.start()
             var closed = true
             touchable = Touchable.disabled
+            focusShortcut(GameInputs.focusShortcutShootButton)
             x = 600f
             y = 50f
             val xAnim = propertyAnimation<CustomGroup, Float>(
@@ -1109,6 +1111,7 @@ class EncounterScreen : ScreenCreator() {
             var closed = false
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
+            focusShortcut(GameInputs.focusShortcutHolsterButton)
             x = 990f
             y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(
@@ -1166,6 +1169,7 @@ class EncounterScreen : ScreenCreator() {
             var closed = true
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.disabled
+            focusShortcut(GameInputs.focusShortcutHolsterButton)
             x = 990f
             y = 60f
             val xAnim = propertyAnimation<CustomGroup, Float>(

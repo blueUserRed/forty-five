@@ -51,6 +51,7 @@ interface InputActor {
     var infoObject: Any?
 
     var childrenFocusAlignment: FocusAlignment
+    var childrenFocusReversed: Boolean
 
     var partOfFocusGrid: InputManager.FocusGrid?
     var focusGridX: Int
@@ -68,6 +69,9 @@ interface InputActor {
     fun observeInputState(inputState: InputState)
 
     fun observeInputState(state: InputState, onEnter: () -> Unit, onLeave: () -> Unit)
+
+    fun focusShortcut(input: Input)
+    fun focusShortcut(input: Input, variableActor: () -> InputActor?)
 
     /**
      * calls [onEnter] when [state] is entered
@@ -205,6 +209,7 @@ class InputActorImpl : InputActor {
     override var infoObject: Any? = null
 
     override var childrenFocusAlignment: FocusAlignment = FocusAlignment.UNORDERED
+    override var childrenFocusReversed: Boolean = false
 
     override var partOfFocusGrid: InputManager.FocusGrid? = null
     override var focusGridX: Int = 0
@@ -224,6 +229,24 @@ class InputActorImpl : InputActor {
         input.causes.forEach { cause ->
             if (cause !is Input.Cause.RequiresStates) return@forEach
             cause.requireStates.forEach { observeInputState(it) }
+        }
+    }
+
+    override fun focusShortcut(input: Input) {
+        val inputManager = screen.inputManager
+        inputManager.onInput(input) {
+            inputManager.changeKeyboardFocusedActor(actor as InputActor)
+        }
+    }
+
+    override fun focusShortcut(
+        input: Input,
+        variableActor: () -> InputActor?
+    ) {
+        val inputManager = screen.inputManager
+        inputManager.onInput(input) {
+            val actor = variableActor() ?: return@onInput
+            inputManager.changeKeyboardFocusedActor(actor.actor as InputActor)
         }
     }
 

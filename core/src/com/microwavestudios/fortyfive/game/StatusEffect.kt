@@ -47,6 +47,8 @@ abstract class StatusEffect(
 
     open fun reevaluateEnemyAttack(): Boolean = false
 
+    open fun onEnemyDeath(target: StatusEffectTarget): Timeline? = null
+
     abstract fun canStackWith(other: StatusEffect): Boolean
 
     abstract fun stack(other: StatusEffect)
@@ -251,8 +253,10 @@ class Poison(
     override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         later {
             if (target.isBlocked(this@Poison, controller)) return@later
+            delay(200)
             include(target.damage(damage, controller))
             action { damage /= 2 }
+            delay(600)
         }
     }
 
@@ -267,6 +271,10 @@ class Poison(
             this@Poison.damage = damage
             include(target.damage(damageAcc, controller))
         }
+    }
+
+    fun removeValue(amount: Int): Timeline = Timeline.timeline {
+        action { damage = (damage - amount).coerceAtLeast(0) }
     }
 
     override fun canStackWith(other: StatusEffect): Boolean = other is Poison
@@ -418,6 +426,9 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
     private var skipped: Boolean = false
 
+    private val active: Boolean
+        get() = !skipFirstRotation || skipped
+
     override val name: String = "Frost"
 
     override val effectType: StatusEffectType = StatusEffectType.OTHER
@@ -438,9 +449,10 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
         }
     }
 
-    override fun disableEverlasting(): Boolean = true
+    override fun disableEverlasting(): Boolean = active
 
-    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
+    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation =
+        if (active) RevolverRotation.None else rotation
 
     override fun isStillValid(): Boolean = shots > 0
 
@@ -488,6 +500,52 @@ class Weak(attacks: Int) : StatusEffect(GraphicsConfig.iconName("weak")) {
     }
 
     override fun equals(other: Any?): Boolean = other is Weak
+
+}
+
+class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("bounty")) {
+
+    var turns: Int = turns
+        private set
+
+    var reserves: Int = reserves
+        private set
+
+    private var enemyDied: Boolean = false
+
+    override val name: String = "bounty"
+    override val effectType: StatusEffectType = StatusEffectType.OTHER
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Bounty
+
+    override fun stack(other: StatusEffect) {
+        other as Bounty
+        turns = other.turns
+        reserves = other.reserves
+    }
+
+    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        action { turns-- }
+    }
+
+    override fun onEnemyDeath(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        require(target is StatusEffectTarget.EnemyTarget) { "Bounty can only be used on enemy" }
+        action {
+            enemyDied = true
+            controller.gainReserves(reserves, target.enemy.actor)
+        }
+    }
+
+    override fun isStillValid(): Boolean = turns > 0 && !enemyDied
+
+    override fun getDisplayText(): String = "$turns, $reserves"
+
+    override fun equals(other: Any?): Boolean = other is Bounty
+
+    override fun increment(amount: Int) {
+        turns += amount
+        reserves += amount
+    }
 
 }
 
