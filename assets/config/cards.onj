@@ -30,7 +30,7 @@ cards: [
         description: "",
         baseDamage: 6,
         cost: 1,
-        tags: ["pool0", "unobtainable"],
+        tags: ["pool0", "unobtainable", "basic"],
         price: 50,
         deckMaximum: null
     },
@@ -41,7 +41,7 @@ cards: [
         description: "Don't ask me how it fits, it just does.",
         baseDamage: 16,
         cost: 2,
-        tags: ["pool0", "rarity3"],
+        tags: ["pool0", "rarity3", "basic"],
         price: 50,
         deckMaximum: null
     },
@@ -63,7 +63,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool0", "rarity2"],
+        tags: ["pool0", "rarity2", "basics"],
         price: 60,
     },
     {
@@ -81,7 +81,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool0", "rarity3"],
+        tags: ["pool0", "rarity3", "basic"],
         price: 50,
     },
     {
@@ -98,7 +98,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool0", "rarity2"],
+        tags: ["pool0", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -119,7 +119,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "other"],
         price: 50,
     },
     {
@@ -132,7 +132,7 @@ cards: [
         effects: [],
         cost: 1,
         deckMaximum: 3,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "rotate"],
         price: 50,
     },
     {
@@ -145,7 +145,7 @@ cards: [
         effects: [],
         cost: 1,
         deckMaximum: 3,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "other"],
         price: 40,
     },
     {
@@ -166,7 +166,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 100,
     },
     {
@@ -184,7 +184,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "statuseffect"],
         price: 50,
     },
     {
@@ -197,7 +197,7 @@ cards: [
         traitEffects: [ "everlasting" ],
         effects: [],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 50,
     },
     {
@@ -209,7 +209,7 @@ cards: [
         deckMaximum: 2,
         effects: [],
         cost: 5,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 60,
     },
     {
@@ -222,7 +222,7 @@ cards: [
         traitEffects: ["reinforced"],
         effects: [],
         cost: 3,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 50,
     },
     {
@@ -235,7 +235,7 @@ cards: [
         traitEffects: [ "rotten" ],
         effects: [],
         cost: 0,
-        tags: [ "pool1", "rarity2" ],
+        tags: [ "pool1", "rarity2", "other" ],
         price: 30,
     },
     {
@@ -247,7 +247,7 @@ cards: [
         effects: [ ],
         deckMaximum: null,
         cost: 0,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 30,
     },
     {
@@ -264,7 +264,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "other"],
         price: 60,
     },
     {
@@ -285,7 +285,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "other"],
         price: 50,
     },
     {
@@ -302,7 +302,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "explore"],
         price: 50,
     },
     {
@@ -323,7 +323,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -340,7 +340,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "statuseffect"],
         price: 50,
     },
     {
@@ -353,7 +353,7 @@ cards: [
         deckMaximum: 2,
         effects: [],
         cost: 2,
-        tags: ["pool2", "rarity3"],
+        tags: ["pool2", "rarity3", "rotate"],
         price: 50,
     },
     {
@@ -374,7 +374,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -391,7 +391,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "destroy"],
         price: 50,
     },
     {
@@ -408,7 +408,7 @@ cards: [
             }
         ],
         cost: 0,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "destroy"],
         price: 40,
     },
     {
@@ -431,7 +431,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "destroy"],
         price: 40,
     },
     {
@@ -448,7 +448,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "no-shot", "destroy", "other"],
         price: 60,
     },
     {
@@ -466,7 +466,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -484,7 +484,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "no-shot"],
         price: 50,
     },
     {
@@ -503,7 +503,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: ["weight", "unobtainable"],
+        tags: ["weight", "unobtainable", "other"],
         price: 50,
     },
     {
@@ -527,7 +527,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "other"],
         price: 50,
     },
     {
@@ -552,7 +552,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "no-shot", "other"],
         price: 50,
     },
     {
@@ -564,7 +564,7 @@ cards: [
         deckMaximum: 3,
         effects: [],
         cost: 0,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "basic"],
         price: 40,
     },
     {
@@ -581,7 +581,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "basic"],
         additionalHoverInfos: ["mostExpensiveBullet"],
         price: 50,
     },
@@ -595,7 +595,7 @@ cards: [
         traitEffects: [ "spray" ],
         effects: [],
         cost: 3,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "other"],
         price: 50,
     },
     {
@@ -622,7 +622,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "other"],
         price: 50,
     },
     {
@@ -649,7 +649,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -669,7 +669,7 @@ cards: [
         ],
         cost: 0,
         forbiddenSlots: [3],
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "no-shot"],
         price: 50,
     },
     {
@@ -687,7 +687,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "statuseffect"],
         price: 50,
     },
     {
@@ -709,7 +709,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 60,
     },
     {
@@ -726,7 +726,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -744,7 +744,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "destroy", "rotate"],
         price: 50,
     },
     {
@@ -765,7 +765,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -788,7 +788,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -806,7 +806,7 @@ cards: [
         ],
         cost: 3,
         additionalHoverInfos: ["rotations"],
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 70,
     },
     {
@@ -823,7 +823,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "no-shot", "destroy", "explore"],
         price: 50,
     },
     {
@@ -846,7 +846,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "other"],
         price: 50,
     },
     {
@@ -863,7 +863,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 50,
     },
     {
@@ -881,7 +881,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -905,7 +905,7 @@ cards: [
         ],
         additionalHoverInfos: ["home"],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -923,7 +923,7 @@ cards: [
         ],
         cost: 2,
         additionalHoverInfos: ["rotations"],
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -940,7 +940,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "basic"],
         price: 40,
     },
     {
@@ -967,7 +967,7 @@ cards: [
         ],
         cost: 2,
         additionalHoverInfos: ["home"],
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -987,7 +987,7 @@ cards: [
         ],
         dark: true,
         cost: 2,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "destroy"],
         price: 50,
     },
     {
@@ -1006,7 +1006,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -1027,7 +1027,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -1044,7 +1044,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1064,7 +1064,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -1082,7 +1082,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -1100,7 +1100,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "destroy"],
         price: 70,
     },
     {
@@ -1118,7 +1118,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1136,7 +1136,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "other", "explore"],
         price: 80,
     },
     {
@@ -1153,7 +1153,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "explore"],
         price: 40,
     },
     {
@@ -1170,7 +1170,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "destroy"],
         price: 50,
     },
     {
@@ -1189,7 +1189,7 @@ cards: [
             }
         ],
         cost: 0,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "explore", "other"],
         price: 50,
     },
     {
@@ -1207,7 +1207,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -1228,7 +1228,7 @@ cards: [
         ],
         cost: 1,
         deckMaximum: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "other"],
         price: 50,
     },
     {
@@ -1250,7 +1250,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "explore"],
         price: 50,
     },
     {
@@ -1270,7 +1270,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "no-shot"],
         price: 50,
     },
     {
@@ -1295,7 +1295,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "explore"],
         price: 50,
     },
     {
@@ -1324,7 +1324,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "explore"],
         price: 50,
     },
     {
@@ -1349,7 +1349,7 @@ cards: [
            },
         ],
         cost: 0,
-        tags: ["pool2", "rarity2", "not used", "unobtainable"],
+        tags: ["pool2", "rarity2", "not used", "unobtainable", "explore"],
         price: 50,
     },
     {
@@ -1368,7 +1368,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "statuseffect"],
         price: 50,
     },
     {
@@ -1383,7 +1383,7 @@ cards: [
         ],
         dark: false,
         cost: 2,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "other"],
         price: 50,
     },
     {
@@ -1404,7 +1404,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -1425,7 +1425,7 @@ cards: [
             },
         ],
         cost: 3,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "destroy", "explore"],
         price: 50,
     },
     {
@@ -1444,7 +1444,7 @@ cards: [
         ],
         dark: true,
         cost: 2,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "basic"],
         price: 50,
     },
     {
@@ -1466,7 +1466,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -1484,7 +1484,7 @@ cards: [
         ],
         traitEffects: [ "everlasting" ],
         cost: 1,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "rotate", "basic"],
         price: 50,
     },
     {
@@ -1507,7 +1507,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "explore"],
         price: 50,
     },
     {
@@ -1528,7 +1528,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "explore"],
         price: 50,
     },
     {
@@ -1545,7 +1545,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "statuseffect"],
         price: 50,
     },
     {
@@ -1562,7 +1562,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "no-shot"],
         price: 50,
     },
     {
@@ -1580,7 +1580,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -1603,7 +1603,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "no-shot", "basic"],
         price: 50,
     },
     {
@@ -1640,7 +1640,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "destroy", "rotate"],
         price: 50,
     },
     {
@@ -1664,7 +1664,7 @@ cards: [
         ],
         cost: 2,
         dark: true,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1686,7 +1686,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "basic"],
         price: 50,
     },
     {
@@ -1698,7 +1698,7 @@ cards: [
         deckMaximum: 1,
         effects: [],
         cost: 11,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -1711,7 +1711,7 @@ cards: [
         deckMaximum: 2,
         effects: [],
         cost: 2,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -1725,7 +1725,7 @@ cards: [
         traitEffects: [ "thorns" ],
         effects: [],
         cost: 2,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "basic"],
         price: 50,
     },
     {
@@ -1742,7 +1742,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "no-shot", "basic"],
         price: 50,
     },
     {
@@ -1760,7 +1760,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3"],
+        tags: ["pool1", "rarity3", "destroy"],
         price: 50,
     },
     {
@@ -1777,7 +1777,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "no-shot"],
         price: 50,
     },
     {
@@ -1798,7 +1798,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "no-shot"],
         price: 50,
     },
     {
@@ -1815,7 +1815,7 @@ cards: [
             },
         ],
         cost: 2,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1828,7 +1828,7 @@ cards: [
         traitEffects: [ "punk" ],
         effects: [],
         cost: 1,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -1851,7 +1851,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity2"],
+        tags: ["pool2", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -1876,7 +1876,7 @@ cards: [
             },
         ],
         cost: 3,
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1902,7 +1902,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool2", "rarity1" ],
+        tags: [ "pool2", "rarity1", "explore", "other" ],
         price: 50,
     },
     {
@@ -1928,7 +1928,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "unobtainable" ],
+        tags: [ "unobtainable", "explore", "other" ],
         price: 0,
     },
     {
@@ -1950,7 +1950,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: [ "pool2", "rarity1" ],
+        tags: [ "pool2", "rarity1", "destroy" ],
         price: 50,
     },
     {
@@ -1968,7 +1968,7 @@ cards: [
             },
         ],
         cost: 2,
-        tags: [ "pool2", "rarity1" ],
+        tags: [ "pool2", "rarity1", "destroy" ],
         price: 50,
     },
     {
@@ -1994,7 +1994,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: [ "pool2", "rarity1" ],
+        tags: [ "pool2", "rarity1", "destroy" ],
         price: 50,
     },
     {
@@ -2011,7 +2011,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3" ],
+        tags: [ "pool1", "rarity3", "basic", "statuseffect" ],
         price: 50,
     },
     {
@@ -2041,7 +2041,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity1" ],
+        tags: [ "pool1", "rarity1", "other" ],
         price: 50,
     },
     {
@@ -2058,7 +2058,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3" ],
+        tags: [ "pool1", "rarity3", "destroy" ],
         price: 50,
     },
     {
@@ -2075,7 +2075,7 @@ cards: [
             },
         ],
         cost: 0,
-        tags: [ "pool1", "rarity3" ],
+        tags: [ "pool1", "rarity3", "explore" ],
         price: 50,
     },
     {
@@ -2106,7 +2106,7 @@ cards: [
             },
         ],
         cost: 2,
-        tags: [ "pool1", "rarity1" ],
+        tags: [ "pool1", "rarity1", "other" ],
         price: 50,
     },
     {
@@ -2123,7 +2123,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: [ "pool1", "rarity3" ],
+        tags: [ "pool1", "rarity3", "basic", "statuseffect" ],
         price: 50,
     },
     {
@@ -2145,7 +2145,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3" ],
+        tags: [ "pool1", "rarity3", "statuseffect" ],
         price: 50,
     },
     {
@@ -2166,7 +2166,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3" ],
+        tags: [ "pool1", "rarity3", "no-shot" ],
         price: 50,
     },
     {
@@ -2203,7 +2203,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: [ "pool1", "rarity1" ],
+        tags: [ "pool1", "rarity1", "statuseffect" ],
         price: 50,
     },
     {
@@ -2224,7 +2224,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: [ "pool1", "rarity1" ],
+        tags: [ "pool1", "rarity1", "destroy" ],
         price: 50,
     },
 
