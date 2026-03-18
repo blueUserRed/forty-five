@@ -249,6 +249,7 @@ class EncounterMapEvent(
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = EncounterScreen to this
 
     override fun start() {
+        FortyFive.profileManager.currentProfile?.encounterStarted()
         FortyFive.screenManager.appendScreen(EncounterScreen, this)
         FortyFive.screenManager.screenFinished()
     }

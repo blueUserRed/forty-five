@@ -245,7 +245,7 @@ class EncounterPreviewDebugMenuPage : DebugMenuPage("Encounter Preview") {
 
     override fun getText(screen: CustomScreen): String = encounter?.let { encounter ->
         """
-            enemies: ${encounter.enemies.joinToString(separator = ", ")}
+            enemies: ${encounter.enemiesGroups.joinToString(separator = ", ")}
             modifier: ${encounter.encounterModifierNames.joinToString(separator = ", ")}
             major difficulty: ${encounter.majorDifficulty}
             minor difficulty: ${encounter.minorDifficulty}
