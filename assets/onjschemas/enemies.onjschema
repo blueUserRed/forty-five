@@ -138,6 +138,7 @@ var enemy = {
     baseHealth: int,
     texture: string,
     brain: $EnemyBrain,
+    riggedAnimation?: string,
 };
 
 enemies: enemy[],

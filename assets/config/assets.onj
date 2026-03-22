@@ -1443,6 +1443,15 @@ shaders: [
 animations: [
 ],
 
+riggedAnimations: [
+    {
+        name: "test_anim",
+        skeletonFile: "blobs/animations/TestAnims/Blue_Guppy.json",
+        atlasFile: "blobs/animations/TestAnims/Blue_Guppy.atlas",
+        defaultAnimation: "idle",
+    }
+],
+
 colorTextures: [
     {
         name: "transparent_black_texture",

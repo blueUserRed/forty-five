@@ -69,6 +69,15 @@ animations: {
     frameTime: int,
     ...resourceSharedKeys
 }[],
+riggedAnimations: {
+    name: string,
+    skeletonFile: string,
+    atlasFile: string,
+    defaultAnimation: string,
+    scale?: float,
+    skin?: string,
+    ...resourceSharedKeys
+}[],
 colorTextures: {
     name: string,
     color: Color,
