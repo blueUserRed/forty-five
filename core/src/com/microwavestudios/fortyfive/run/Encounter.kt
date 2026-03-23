@@ -20,6 +20,7 @@ data class Encounter(
     val enemiesGroups: List<String>,
     val encounterModifierNames: Set<String>,
     val forceCards: List<CardType>?,
+    val forceConcreteEnemies: List<String>?,
     val shuffleCards: Boolean,
     val unadjustedMajorDifficulty: Int,
     val majorDifficulty: Int,
@@ -40,7 +41,8 @@ data class Encounter(
         val enemiesOnj = ConfigFileManager.getConfigFile("enemies")
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         val healthMultiplier = 1f + ((minorDifficulty - 1f) * RunGeneratorConfig.enemyHealthAdjustment)
-        val enemies = EncounterGenerator.generateConcreteEnemies(enemiesGroups, majorDifficulty)
+        val enemies = forceConcreteEnemies ?:
+            EncounterGenerator.generateConcreteEnemies(enemiesGroups, majorDifficulty)
         return enemies
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
             .map { it.create((it.baseHealth * healthMultiplier).toInt()) }
@@ -50,6 +52,7 @@ data class Encounter(
         "enemies" with enemiesGroups
         "encounterModifier" with encounterModifierNames
         "forceCards" with forceCards?.map { it.asOnj() }
+        forceConcreteEnemies?.let { "forceConcreteEnemies" with forceConcreteEnemies }
         "shuffleCards" with shuffleCards
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "majorDifficulty" with majorDifficulty
@@ -64,6 +67,7 @@ data class Encounter(
             onj.get<OnjArray>("enemies").value.map { it.value as String },
             onj.get<OnjArray>("encounterModifier").value.map { it.value as String }.toSet(),
             onj.getOr<OnjArray?>("forceCards", null)?.value?.map { CardType.fromOnj(it as OnjObject) },
+            onj.getOr<OnjArray?>("forceConcreteEnemies", null)?.value?.map { it.value as String },
             onj.getOr("shuffleCards", true),
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Long>("majorDifficulty").toInt(),
@@ -238,7 +242,7 @@ object EncounterGenerator {
         return Encounter(
             enemies,
             modifiers.toSet(),
-            null,
+            null, null,
             true,
             placeholder.unadjustedMajorDifficulty,
             majorDifficulty,
@@ -309,6 +313,7 @@ object EncounterGenerator {
 
         var configurations: List<List<String>>? = null
         enemyAmountGenerationOrder.forEach { amount ->
+            if (configurations != null) return@forEach
             val configurationsWithCorrectSize = allowedConfigurations.filter { it.size == amount }
             if (configurationsWithCorrectSize.isEmpty()) return@forEach
             configurations = configurationsWithCorrectSize

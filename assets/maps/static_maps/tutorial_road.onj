@@ -1,7 +1,8 @@
 
 var encounter = [
     {
-        enemies: ["tutorial_enemy_1"], // currently unused
+        forceConcreteEnemies: ["tutorial_enemy_1"], // currently unused
+        enemies: [],
         encounterModifier: [],
         special: true,
         shuffleCards: false,
@@ -24,7 +25,8 @@ var encounter = [
         ],
     },
     {
-        enemies: ["tutorial_enemy_2"],
+        forceConcreteEnemies: ["tutorial_enemy_2"],
+        enemies: [],
         encounterModifier: [],
         special: true,
         shuffleCards: false,
@@ -40,7 +42,8 @@ var encounter = [
     },
     {
         // TODO: encounter is beatable without using silver bullet
-        enemies: ["tutorial_enemy_3"],
+        forceConcreteEnemies: ["tutorial_enemy_3"],
+        enemies: [],
         encounterModifier: [],
         special: true,
         shuffleCards: false,
@@ -56,7 +59,8 @@ var encounter = [
         ],
     },
     {
-        enemies: ["tutorial_enemy_4"],
+        forceConcreteEnemies: ["tutorial_enemy_4"],
+        enemies: [],
         encounterModifier: [],
         special: true,
         shuffleCards: false,
@@ -73,7 +77,8 @@ var encounter = [
         ],
     },
     {
-        enemies: ["tutorial_enemy_5"],
+        forceConcreteEnemies: ["tutorial_enemy_5"],
+        enemies: [],
         encounterModifier: [],
         special: true,
         shuffleCards: false,
@@ -91,7 +96,8 @@ var encounter = [
         ],
     },
     {
-        enemies: ["tutorial_enemy_6"],
+        forceConcreteEnemies: ["tutorial_enemy_6"],
+        enemies: [],
         encounterModifier: [],
         special: true,
         shuffleCards: false,
