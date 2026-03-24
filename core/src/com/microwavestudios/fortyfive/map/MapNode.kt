@@ -21,11 +21,11 @@ data class MapNode(
     val y: Float,
     val imageName: String?,
     val imagePos: ImagePosition?,
-    val nodeTexture: ResourceHandle?,
+//    val nodeTexture: ResourceHandle?,
     val distance: Int,
-    val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
+    val event: MapEvent? = null,
     val additionalEvent: MapEvent? = null,
-    val additionalNodeTexture: ResourceHandle? = null
+//    val additionalNodeTexture: ResourceHandle? = null
 ) : ResourceBorrower {
 
 
@@ -129,7 +129,7 @@ data class MapNode(
     }
 
     fun getNodeTexture(screen: CustomScreen): Promise<Drawable>? {
-        if (nodeTexture == null) return null
+        val nodeTexture = event?.nodeTexture ?: return null
         if (nodeTextureCache != null) return nodeTextureCache
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
         screen.lifetime.onEnd { nodeTextureCache = null }
@@ -137,7 +137,7 @@ data class MapNode(
     }
 
     fun getSecondaryNodeTexture(screen: CustomScreen): Promise<Drawable>? {
-        val handle = additionalNodeTexture ?: return null
+        val handle = event?.secondaryNodeTexture ?: return null
         if (secondaryNodeTextureCache != null) return secondaryNodeTextureCache
         secondaryNodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
         screen.lifetime.onEnd { secondaryNodeTextureCache = null }
@@ -231,11 +231,11 @@ data class MapNodeBuilder(
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition? = null,
-    var nodeTexture: ResourceHandle? = null,
+//    var nodeTexture: ResourceHandle? = null,
     var distance: Int = -1,
-    var event: MapEvent? = null, // TODO: this will be non-nullable in the future
+    var event: MapEvent? = null,
     val additionalEvent: MapEvent? = null,
-    val additionalNodeTexture: ResourceHandle? = null,
+//    val additionalNodeTexture: ResourceHandle? = null,
 ) : ResourceBorrower {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
@@ -250,7 +250,7 @@ data class MapNodeBuilder(
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
     fun getNodeTexture(screen: CustomScreen): Promise<Drawable>? {
-        val nodeTexture = nodeTexture ?: return null
+        val nodeTexture = event?.nodeTexture ?: return null
         if (nodeTextureCache != null) return nodeTextureCache
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
         screen.lifetime.onEnd { nodeTextureCache = null }
@@ -292,11 +292,9 @@ data class MapNodeBuilder(
             x, y,
             imageName,
             imagePos,
-            nodeTexture,
             distance,
             event,
             additionalEvent,
-            additionalNodeTexture
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
@@ -325,13 +323,11 @@ data class MapNodeBuilder(
         return javaClass.simpleName + "{x: $x, y: $y, neighbors: $cur}"
     }
 
-    override fun equals(other: Any?): Boolean {
-        return other != null &&
-                other is MapNodeBuilder &&
-                other.x == this.x &&
-                other.y == this.y &&
-                other.index == this.index
-    }
+    override fun equals(other: Any?): Boolean = other != null &&
+        other is MapNodeBuilder &&
+        other.x == this.x &&
+        other.y == this.y &&
+        other.index == this.index
 
     override fun hashCode(): Int {
         return (x * 1000 + y * 20).toInt() + index * 222
@@ -357,11 +353,9 @@ data class MapNodeBuilder(
                 node.x, node.y,
                 imageName = node.imageName,
                 imagePos = node.imagePos,
-                nodeTexture = node.nodeTexture,
                 distance = node.distance,
                 event = node.event,
                 additionalEvent = node.additionalEvent,
-                additionalNodeTexture = node.additionalNodeTexture,
             )
 
             val nodes = node.getUniqueNodes()

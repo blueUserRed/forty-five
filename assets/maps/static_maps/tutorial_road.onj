@@ -180,7 +180,6 @@ nodes: [
         edgesTo: [
             1, 2, 4
         ],
-        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
 //            currentlyBlocks: false,
             currentlyBlocks: true,
@@ -196,7 +195,6 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        nodeTexture: "map_node_choose_card",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_silver_bullet"],
             seed: 0,
@@ -216,7 +214,6 @@ nodes: [
         edgesTo: [
             4, 6
         ],
-        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
             startable: true,
@@ -231,7 +228,6 @@ nodes: [
         edgesTo: [
             5, 7,
         ],
-        nodeTexture: "map_node_choose_card",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_worker_bullet"],
             seed: 0,
@@ -251,7 +247,6 @@ nodes: [
         edgesTo: [
             6, 8
         ],
-        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
             startable: true,
@@ -266,7 +261,6 @@ nodes: [
         edgesTo: [
             7, 9
         ],
-        nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "talk_with_brother",
             displayName: "Your Brother",
@@ -286,7 +280,6 @@ nodes: [
         ],
         image: "aqua_balle",
         imagePos: "RIGHT",
-        nodeTexture: "map_node_exit",
         event: $FinishTutorialRunMapEvent {
         },
     },

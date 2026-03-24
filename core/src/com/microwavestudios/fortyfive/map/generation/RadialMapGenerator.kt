@@ -143,10 +143,8 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         override val locationSignProtectedAreaWidth: Float,
         override val locationSignProtectedAreaHeight: Float,
         override val firstNodeEvent: () -> MapEvent,
-        override val firstNodeTexture: String,
         override val lastNodeEvent: () -> MapEvent,
         override val randomStepsToLastNode: Int,
-        override val lastNodeTexture: String,
         override val rotation: Float,
         override val fillEvents: List<MapGeneratorFillEvent>,
         override val fixedEvents: List<MapGeneratorFixedEvent>
@@ -172,9 +170,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 locationSignProtectedAreaWidth = onj.get<Double>("locationSignProtectedAreaWidth").toFloat(),
                 locationSignProtectedAreaHeight = onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
                 firstNodeEvent = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("firstNodeEvent")) },
-                firstNodeTexture = onj.get<String>("firstNodeTexture"),
                 lastNodeEvent = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("lastNodeEvent")) },
-                lastNodeTexture = onj.get<String>("lastNodeTexture"),
                 circles = onj
                     .get<OnjArray>("circles")
                     .value

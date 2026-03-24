@@ -34,7 +34,6 @@ var decoration = {
 
 var fixedEvent = {
     nodeEvent: $MapEvent,
-    nodeTexture: string,
     minDistance: int?,
     maxDistance: int?,
     amount: int
@@ -42,7 +41,6 @@ var fixedEvent = {
 
 var fillEvent = {
     nodeEvent: $MapEvent,
-    nodeTexture: string,
     minDistance: int?,
     maxDistance: int?,
     weight: int
@@ -57,9 +55,7 @@ var mapGeneratorSharedKeys = {
     locationSignProtectedAreaHeight: float,
     nodeProtectedArea: float,
     firstNodeEvent: $MapEvent,
-    firstNodeTexture: string,
     lastNodeEvent: $MapEvent,
-    lastNodeTexture: string,
     randomStepsToLastNode: int,
     rotation: float,
     fixedEvents: fixedEvent[],

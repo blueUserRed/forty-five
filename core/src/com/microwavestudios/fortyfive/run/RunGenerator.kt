@@ -279,7 +279,6 @@ class RunGenerator {
                         random.nextLong()
                     )
                 },
-                "map_node_fight",
                 null, null,
                 100
             ),
@@ -294,18 +293,19 @@ class RunGenerator {
                         3
                     )
                 },
-                "map_node_choose_card",
                 2, null,
                 20
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 { EmptyMapEvent() },
-                "map_node_default",
                 2, 4,
                 20
             ),
         )
 
+        // parameters for symmetry with fillEvents() and in case encounters will be added, in which case
+        // the parameters will be needed
+        @Suppress("unused")
         fun fixedEvents(
             random: Random,
             majorDifficulty: Int,
@@ -331,7 +331,6 @@ class RunGenerator {
                         20,
                     )
                 },
-                "map_node_shop",
                 4, null,
                 1
             )
@@ -356,9 +355,7 @@ class RunGenerator {
             exclusionRadius = 10f,
             locationSignProtectedAreaWidth = 25f,
             locationSignProtectedAreaHeight = 30f,
-            firstNodeTexture = "map_node_default",
             firstNodeEvent = { EmptyMapEvent() },
-            lastNodeTexture = "map_node_exit",
             lastNodeEvent = {
                 EncounterPlaceholderMapEvent(
                     true,
@@ -432,9 +429,7 @@ class RunGenerator {
             verticalExtension = 50f,
             locationSignProtectedAreaWidth = 25f,
             locationSignProtectedAreaHeight = 30f,
-            firstNodeTexture = "map_node_default",
             firstNodeEvent = { EmptyMapEvent() },
-            lastNodeTexture = "map_node_exit",
             lastNodeEvent = {
                 EncounterPlaceholderMapEvent(
                     true,
@@ -498,9 +493,7 @@ class RunGenerator {
             verticalExtension = 50f,
             locationSignProtectedAreaWidth = 25f,
             locationSignProtectedAreaHeight = 30f,
-            firstNodeTexture = "map_node_default",
             firstNodeEvent = { EmptyMapEvent() },
-            lastNodeTexture = "map_node_exit",
             lastNodeEvent = {
                 EncounterPlaceholderMapEvent(
                     true,

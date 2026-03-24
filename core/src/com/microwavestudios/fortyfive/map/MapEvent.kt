@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunModifier
@@ -112,6 +113,9 @@ abstract class MapEvent {
 
     abstract val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>?
 
+    abstract val nodeTexture: ResourceHandle
+    open val secondaryNodeTexture: ResourceHandle? = null
+
     /**
      * called when the start button was clicked
      */
@@ -177,6 +181,7 @@ class EmptyMapEvent : MapEvent() {
     override fun start() {}
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EmptyMapEvent")
@@ -194,6 +199,7 @@ class SimpleMapEvent(
     override var isCompleted: Boolean = false
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
     constructor() : this(false, "", "")
 
@@ -242,6 +248,13 @@ class EncounterMapEvent(
     override val warningText: String? = if (isExtraction) {
         "Last encounter:\nAfter this Encounter, all cards in your current deck will be added to your collection. All" +
                 "other cards will be lost!"
+    } else {
+        null
+    }
+
+    override val nodeTexture: ResourceHandle = "map_node_fight"
+    override val secondaryNodeTexture: ResourceHandle? = if (isExtraction) {
+        "map_node_exit"
     } else {
         null
     }
@@ -296,6 +309,7 @@ class EncounterPlaceholderMapEvent(
     override val displayDescription: Boolean = false
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
     override fun start() {
         FortyFive.logger.warn("MapEvent", "EncounterPlaceholderMapEvent started")
@@ -348,6 +362,7 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 
     override val displayName: String = "Enter $targetMapDisplayName"
     override val descriptionText: String = ""
+    override val nodeTexture: ResourceHandle = "map_node_exit"
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
 
@@ -385,6 +400,7 @@ class DialogMapEvent(
     override val buttonText: String = "Talk"
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = DialogScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_dialog"
 
     override fun start() {
         FortyFive.screenManager.appendScreen(DialogScreen, this)
@@ -448,6 +464,7 @@ class ShopMapEvent(
         get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = ShopScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_shop"
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ShopScreen, this)
@@ -492,6 +509,7 @@ class ChooseCardMapEvent(
     override val displayName: String = "Ominous person"
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = ChooseCardScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_choose_card"
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ChooseCardScreen, this)
@@ -553,6 +571,7 @@ class LockNodeMapEvent(
         private set
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
     override fun start() {
     }
@@ -604,6 +623,7 @@ class CompleteRunMapEvent(
     override val displayDescription: Boolean = true
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_exit"
 
     override fun start() {
         val map = FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap
@@ -659,6 +679,7 @@ class FinishTutorialRunMapEvent : MapEvent() {
     override val descriptionText: String = "You completed the Tutorial!"
 
     override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_exit"
 
     override fun start() {
         val profile = FortyFive.profileManager.currentProfile!!

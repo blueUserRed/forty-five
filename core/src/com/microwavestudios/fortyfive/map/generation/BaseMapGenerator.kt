@@ -172,13 +172,11 @@ abstract class BaseMapGenerator {
 
     private fun setupLastNode(node: MapNodeBuilder) {
         node.event = data.lastNodeEvent()
-        node.nodeTexture = data.lastNodeTexture
         endNode = node
     }
 
     private fun setupFirstNode(node: MapNodeBuilder) {
         node.event = data.firstNodeEvent()
-        node.nodeTexture = data.firstNodeTexture
         startNode = node
     }
 
@@ -225,7 +223,6 @@ abstract class BaseMapGenerator {
                 .zipToFirst { it.weight }
                 .weightedRandom(random)
             node.event = chosen.nodeEvent()
-            node.nodeTexture = chosen.nodeTexture
         }
 
         val availableNodes = _allNodes.toMutableList()
@@ -245,7 +242,6 @@ abstract class BaseMapGenerator {
                     return@forEach
                 }
                 val node = possibleNodes.random(random)
-                node.nodeTexture = event.nodeTexture
                 node.event = event.nodeEvent()
                 availableNodes.remove(node)
             }
@@ -285,10 +281,8 @@ abstract class BaseMapGenerator {
         val locationSignProtectedAreaWidth: Float
         val locationSignProtectedAreaHeight: Float
         val firstNodeEvent: () -> MapEvent
-        val firstNodeTexture: String
         val lastNodeEvent: () -> MapEvent
         val randomStepsToLastNode: Int
-        val lastNodeTexture: String
         val majorDifficulty: Int
         val rotation: Float
         val fillEvents: List<MapGeneratorFillEvent>
@@ -301,10 +295,8 @@ abstract class BaseMapGenerator {
             "locationSignProtectedAreaWidth" with locationSignProtectedAreaWidth
             "locationSignProtectedAreaHeight" with locationSignProtectedAreaHeight
             "firstNodeEvent" with firstNodeEvent().asOnjObject()
-            "firstNodeTexture" with firstNodeTexture
             "lastNodeEvent" with lastNodeEvent().asOnjObject()
             "randomStepsToLastNode" with randomStepsToLastNode
-            "lastNodeTexture" with lastNodeTexture
             "majorDifficulty" with majorDifficulty
             "rotation" with rotation
             "fillEvents" with fillEvents.map { it.asOnj() }
@@ -314,14 +306,12 @@ abstract class BaseMapGenerator {
 
     data class MapGeneratorFixedEvent(
         val nodeEvent: () -> MapEvent,
-        val nodeTexture: String,
         val minDistance: Int?,
         val maxDistance: Int?,
         val amount: Int
     ) {
         fun asOnj(): OnjObject = buildOnjObject {
             "nodeEvent" with nodeEvent().asOnjObject()
-            "nodeTexture" with nodeTexture
             "minDistance" with minDistance
             "maxDistance" with maxDistance
             "amount" with amount
@@ -330,7 +320,6 @@ abstract class BaseMapGenerator {
         companion object {
             fun fromOnj(onj: OnjObject): MapGeneratorFixedEvent = MapGeneratorFixedEvent(
                 { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("nodeEvent")) },
-                onj.get<String>("nodeTexture"),
                 onj.get<Long?>("minDistance")?.toInt(),
                 onj.get<Long?>("maxDistance")?.toInt(),
                 onj.get<Long>("amount").toInt(),
@@ -340,14 +329,12 @@ abstract class BaseMapGenerator {
 
     data class MapGeneratorFillEvent(
         val nodeEvent: () -> MapEvent,
-        val nodeTexture: String,
         val minDistance: Int?,
         val maxDistance: Int?,
         val weight: Int
     ) {
         fun asOnj(): OnjObject = buildOnjObject {
             "nodeEvent" with nodeEvent().asOnjObject()
-            "nodeTexture" with nodeTexture
             "minDistance" with minDistance
             "maxDistance" with maxDistance
             "weight" with weight
@@ -356,7 +343,6 @@ abstract class BaseMapGenerator {
         companion object {
             fun fromOnj(onj: OnjObject): MapGeneratorFillEvent = MapGeneratorFillEvent(
                 { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("nodeEvent")) },
-                onj.get<String>("nodeTexture"),
                 onj.get<Long?>("minDistance")?.toInt(),
                 onj.get<Long?>("maxDistance")?.toInt(),
                 onj.get<Long>("weight").toInt(),
