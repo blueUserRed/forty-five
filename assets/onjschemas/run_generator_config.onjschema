@@ -43,6 +43,8 @@ enemyProbabilityIncrease: {
     bonusPoints: int,
 }[],
 
+allowedEnemyConfigurations: string[][],
+
 enemyProbabilityRandomPoints: int,
 
 enemyHealthAdjustment: float,
@@ -50,11 +52,13 @@ enemyDamageAdjustment: float,
 
 difficultyScaling: {
     limited: {
+        encounterStartedScale: float,
         relativeMin: float,
         relativeMax: float,
         scaling: $DifficultyScaling,
     },
     constructed: {
+        encounterStartedScale: float,
         relativeMin: float,
         relativeMax: float,
         scaling: $DifficultyScaling,

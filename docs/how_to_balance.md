@@ -6,7 +6,7 @@ related properties_
 
 ## Terminology
 - **major difficulty:** <br />
-    an integer >= 0 describing the difficulty of an encounter/area/run. Enemies are chosen based
+    an integer $\geq 0$ describing the difficulty of an encounter/area/run. Enemies are chosen based
     on the major difficulty, so e.g. an encounter with major difficulty 2 could have one difficulty 2
     enemy or two difficulty 1 enemies.
     The major difficulty may be adjusted in the generation progress. For example, if there are
@@ -19,14 +19,14 @@ related properties_
     run/encounter modifiers are allowed to spawn, which rewards the player can get, which cards can
     appear in shops, etc.
 - **minor difficulty** <br />
-    a floating point number, where 0 < f < 2. It can be understood as a multiplier, meaning a minor difficulty
+    a floating point number, where $0 < f < 2$. It can be understood as a multiplier, meaning a minor difficulty
     of 1 would leave the encounter unchanged, a difficulty less than one would make it easier, and a difficulty
     greater than one makes the encounter harder. It mainly affects how much health the enemy has, how much
     damage it deals and how much shield it can give itself. It does not affect special actions of
     enemies. The game uses the minor difficulty to counterbalance modifiers that make an encounter easier/harder,
     or to make encounters more difficult as the player gets near the end of a road. It can also increase the 
     difficulty of an encounter, when no difficult enough enemies are available
-    (should only happen when major difficulty > 12).
+    (should only happen when major difficulty $> 12$).
 - **enemy groups/variants** <br />
     each enemy group (e.g. "Witch", "Outlaw") consists of multiple variants (e.g. "Outlaw-1" or "Witch-2").
     Each variant of the group has associated difficulty. The encounter generator picks enemy variants so that
@@ -40,8 +40,8 @@ related properties_
 
 This file contains most of the available configuration for the encounter/run generation.
 
-It can be found at: assets/config/run_generator_config.onj <br />
-schema file: assets/onjschemas/run_generator_config.onjschema
+It can be found at: ``assets/config/run_generator_config.onj`` <br />
+schema file: ``assets/onjschemas/run_generator_config.onjschema``
 
 ### Configuring Run Modifiers
 
@@ -49,7 +49,7 @@ schema file: assets/onjschemas/run_generator_config.onjschema
 
 #### Run Modifier Pools:
 onj key:
-```
+```onjschema
 runModifierPools: [
     {
         majorDifficulty: int,
@@ -73,7 +73,7 @@ n times, where n is the maximum amount of modifiers a run can have.
 #### Increasing likelihood of a Run Modifier spawning in a biome:
 
 onj key:
-```
+```onjschema
 runModifierProbabilityIncreases: [
     {
         biome: string,
@@ -93,7 +93,7 @@ modifier more likely to get one out of the matching biome.
 ####  Blacklisting run modifier combinations
 
 onj key:
-```
+```onjschema
 runModifierBlacklist: string[][],
 ```
 `runModifierBlacklist` is typically a list of pairs, but the arrays can have an arbitrary length.
@@ -120,7 +120,7 @@ The maximum amount of modifiers a run can have.
 #### Run reward pools
 
 onj key:
-````
+````onjschema
 runRewardPools: [
     {
         majorDifficulty: Int,
@@ -152,7 +152,7 @@ same group, so a run with two cash rewards is impossible.
 #### Encounter Modifier pools
 
 onj key:
-````
+````onjschema
 encounterModifierPools: [
     {
         majorDifficulty: int,
@@ -180,7 +180,7 @@ will only be rolled ``maxModifiers`` - n times, where n is the amount of modifie
 ####  Blacklisting encounter modifier combinations
 
 onj key:
-```
+```onjschema
 encounterModifierBlacklist: string[][],
 ```
 `encounterModifierBlacklist` is typically a list of pairs, but the arrays can have an arbitrary length.
@@ -196,7 +196,7 @@ If two encounter modifiers are in the same list, that means that they can never 
 #### Enemy Pools
 
 onj key:
-````
+````onjschema
 enemies: [
     {
         majorDifficulty: int,
@@ -217,44 +217,36 @@ one, the upper bound must be at most three. <br />
 
 <br />
 
-#### Aside: The enemy selection algorithm
+#### Enemy - Configurations
 
-This sections aims to explain how the game selects the enemies for an encounter, so that the next configuration
-parameters can be more easily understood.
+onj key: 
+````onjschema
+allowedEnemyConfigurations: string[][]
+````
+This key specifies in what configurations enemies are allowed to appear in. Each entry in the array is an
+array of one to three enemy groups, that can appear together. The Encounter Generator will only choose a 
+configuration if all of its enemies are allowed to appear at the current difficulty, as defined in ``enemies``.
 
-
-> [!NOTE]
-> Some details have been left out.
-
-<br />
-
-**Step 1:** The game looks up what enemy groups are allowed to appear based on the current unadjusted major
-difficulty and stores all their variants in a list. <br />
-**Step 2:** The game randomly selects the amount of enemies for the encounter based on the range specified in the
-pool. <br />
-**Step 3:** Let n be the amount of enemies for the encounter. The game generates all combinations of n
-enemy variants such that their difficulties add up the (adjusted!) major difficulty. E.g. If n is 2, and the difficulty
-is 3, possible combinations would be: (Pyro-2, Outlaw-1), (Outlaw-2, Outlaw-1), (Witch-1, Pyro-2), etc. <br />
-**Step 4:** The game awards each configuration points, based on how 'interesting' it is, plus some randomness.
-(more blow) <br />
-**Step 5:** The configuration with the most points is selected as the winner and the enemies are used for the encounter.
+Enemy Configurations are selected using a point system, where each configuration receives a score and the one
+with the highest score wins. If a configuration has distinct enemies, up to 100 bonus points are awarded. Also,
+a customizable amount of points are awarded for enemies appearing in specific biomes. Also, a customizable
+amount of random points are awarded to each configuration, to ensure that the theoretically "most optimal"
+configuration is not picked every time.
 
 <br />
 
-**How points are awarded:** <br />
-A configuration where all enemies are from different groups receives 100 points, if they are all from the same group,
-0 points are awarded. For a configuration of three enemies, if two match, but not three, 50 points are awarded. <br />
-Points are also awarded if the enemy variants have different difficulties, based on the same schema as above. The points
-a configuration can achieve are: 40, 20, or 0. <br />
-Bonus points are awarded if a specific enemy appears in a specific biome. This can be configured. <br />
-Each configuration receives a random amount of bonus points. This can also be configured.
+#### Selecting Enemies
+
+When the run is generated, the game decides what enemy **groups** appear in each encounter. What variants represent
+the group and their minor difficulties are decided once the encounter actually starts. This allows scaling enemies
+based on how many encounters have been started in the run before.
 
 <br />
 
 #### Enemy - Biome bonus points
 
 onj key:
-````
+````onjschema
 enemyProbabilityIncrease: [
     {
         enemy: string,
@@ -272,7 +264,7 @@ Configures how many bonus points an enemy generates when they appear in a specif
 #### Configuring the randomness of enemy selection
 
 onj key:
-````
+````onjschema
 enemyProbabilityRandomPoints: int,
 ````
 
@@ -287,7 +279,7 @@ be picked as well.
 #### Configuring how the minor difficulty affects enemies
 
 onj keys:
-`````
+`````onjschema
 enemyHealthAdjustment: float,
 enemyDamageAdjustment: float,
 `````
@@ -296,24 +288,25 @@ Both numbers are generally in the range from 0 to 1. <br />
 These properties control how aggressively the health/damage of an enemy changes as the minor difficulty changes.
 <br />
 Changes to the health/damage are achieved by multiplying them with a specific factor. The factor is calculated with
-the formula below:
-````
-1 + ((minorDifficulty - 1) * adjustment)
-````
+this formula:
+$1+\text{adjustment}\cdot(\text{minorDifficulty}-1)$
+
 where ``adjustment`` is the either ``enemyHealthAdjustment`` or ``enemyDamageAdjustment``, based on the context.
 The higher the adjustment-value, the more impact the minor difficulty has on the enemies.
 
 #### Difficulty Scaling
 
 onj key:
-````
+````onjschema
 difficultyScaling: {
     limited: {
+        encounterStartedScale: float,
         relativeMin: float,
         relativeMax: float,
         scaling: $DifficultyScaling,
     },
     constructed: {
+        encounterStartedScale: float,
         relativeMin: float,
         relativeMax: float,
         scaling: $DifficultyScaling,
@@ -326,10 +319,15 @@ run. All encounters between the start and the end will have a value between the 
 difficulty. <br />
 ``scaling`` dictates how the values of the encounters between the start and the end are calculated. There are currently
 two options: 
-- ``$LinearScaling``: difficulty increases linearly from the start to the end. Formula: ``(max - min) * percent + min``
+- ``$LinearScaling``: difficulty increases linearly from the start to the end. Formula:
+$(\text{max}-\text{min})\cdot\text{percent}+\text{min}$
 - ``$PowerScaling``: difficulty stays low for most of the run and then increases sharply towards the end. This Scaling
     option takes an additional parameter ``power``. The higher the value of ``power``, the more pronounced this 
-    behaviour will be. If power == 1, the scaling will be linear again. Formula: ``(max - min) * percent ^ power + min``.
+    behaviour will be. If power == 1, the scaling will be linear again. Formula:
+$(\text{max}-\text{min})\cdot\text{percent}^\text{power}+\text{min}$
+
+``encounterStartedScale``: This factor is multiplied with the amount of encounters that were already started this run
+and then gets added to the total difficulty of an encounter, just before it begins.
 
 <br />
 
@@ -338,14 +336,14 @@ two options:
 This file configures which enemies exist, their properties and how they behave.
 
 It can be found at: assets/config/enemies.onj <br />
-schema file: assets/onjschemas/enemies.onjschema
+schema file: ``assets/onjschemas/enemies.onjschema``
 
 <br />
 
 ### Enemy Groups
 
 onj key:
-````
+````onjschema
 enemyGroups: [
     {
         groupName: string,
@@ -394,12 +392,8 @@ Some important keys for balancing:
 - ``action``: the action itself.
 
 <br />
-<br />
 
 ------------------
-
-<br />
-
 ### Important:
 
 These configurations do ***not*** affect special runs (like the tutorial) or progress runs. <br />
@@ -407,5 +401,5 @@ These runs are designed and configured manually.
 <br />
 <br />
 The files for these runs can be found here: <br />
-assets/maps/runs
-assets/maps/static_maps
+``assets/maps/runs`` <br />
+``assets/maps/static_maps``

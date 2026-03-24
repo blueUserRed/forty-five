@@ -24,6 +24,7 @@ class RunSave private constructor(val profile: Profile) {
 
     var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
+    var encountersStarted: Int by DataDelegate(RunSaveData::encountersStarted)
     var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
     var cardsTakenAlong: List<CardType> by DataDelegate(RunSaveData::cardsTakenAlong)
@@ -148,6 +149,7 @@ class RunSave private constructor(val profile: Profile) {
         var backpack: MutableList<CardType>,
         var backpackDecks: MutableList<Deck>,
         var currentDeckId: Int,
+        var encountersStarted: Int,
         var cardsTakenAlong: List<CardType>,
         var run: Run
     ) {
@@ -156,6 +158,7 @@ class RunSave private constructor(val profile: Profile) {
             "currentNode" with currentNode
             "lastNode" with lastNode
             "playerHealth" with playerHealth
+            "encountersStarted" with encountersStarted
             "backpack" with backpack.map { it.asOnj() }
             "backpackDecks" with backpackDecks.map { it.asOnjObject() }
             "currentDeckId" with currentDeckId
@@ -180,6 +183,7 @@ class RunSave private constructor(val profile: Profile) {
                     .map { Deck.getFromOnj(it as OnjObject) }
                     .toMutableList(),
                 onj.get<Long>("currentDeckId").toInt(),
+                onj.get<Long>("encountersStarted").toInt(),
                 onj
                     .get<OnjArray>("cardsTakenAlong")
                     .value
@@ -242,6 +246,7 @@ class RunSave private constructor(val profile: Profile) {
                     Deck("4", 3, mutableMapOf()),
                     Deck("5", 4, mutableMapOf()),
                 ),
+                0,
                 0,
                 cardsToTakeAlong,
                 run

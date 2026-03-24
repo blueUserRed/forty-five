@@ -101,6 +101,9 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     val backpackDecks: List<Deck>?
         get() = runSave?.backpackDecks
 
+    val encountersStartedInRun: Int?
+        get() = runSave?.encountersStarted
+
     var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
     var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
@@ -246,6 +249,11 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             currentCollectionDeck.cards
         }
         runSave = RunSave.newRun(this, run, cardsToTakeAlong)
+    }
+
+    fun encounterStarted() {
+        val runSave = runSave ?: return
+        runSave.encountersStarted++
     }
 
     fun loseRun() {

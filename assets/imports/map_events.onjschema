@@ -20,6 +20,7 @@ var encounter = {
     enemies: string[],
     encounterModifier: string[],
     forceCards: cardType[]?,
+    forceConcreteEnemies?: string[],
     shuffleCards: boolean,
     unadjustedMajorDifficulty: int,
     majorDifficulty: int,

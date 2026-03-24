@@ -152,6 +152,20 @@ enemies: [
     },
 ],
 
+allowedEnemyConfigurations: [
+    [ "Outlaw" ],
+    [ "Outlaw", "Outlaw" ],
+    [ "Outlaw", "Outlaw", "Outlaw" ],
+    [ "Outlaw", "Witch" ],
+    [ "Outlaw", "Witch", "Witch" ],
+    [ "Outlaw", "Outlaw", "Witch" ],
+    [ "Pyro" ],
+    [ "Outlaw", "Pyro" ],
+    [ "Outlaw", "Outlaw", "Pyro" ],
+    [ "Outlaw", "Pyro", "Pyro" ],
+    [ "Outlaw", "Pyro", "Witch" ],
+],
+
 enemyProbabilityIncrease: [
     {
         enemy: "Outlaw",
@@ -187,6 +201,7 @@ enemyDamageAdjustment: 0.3,
 
 difficultyScaling: {
     limited: {
+        encounterStartedScale: 0.17,
         relativeMin: 0.0,
         relativeMax: 0.5,
         scaling: $PowerScaling {
@@ -194,6 +209,7 @@ difficultyScaling: {
         },
     },
     constructed: {
+        encounterStartedScale: 0.17,
         relativeMin: 0.3,
         relativeMax: 0.7,
         scaling: $LinearScaling {},
