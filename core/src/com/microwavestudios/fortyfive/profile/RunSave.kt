@@ -235,7 +235,7 @@ class RunSave private constructor(val profile: Profile) {
             val map = mapGenerator.generate("run_map", TimeUtils.millis())
             val save = RunSave(profile)
             save.data = RunSaveData(
-                0,
+                map.startNode.index,
                 null,
                 run.initialPlayerHealth,
                 cardsToTakeAlong.toMutableList(),
