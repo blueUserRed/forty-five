@@ -57,6 +57,7 @@ class RunGenerator {
             RunLength.MEDIUM,
             type,
             forDifficulty,
+            8, 20,
             modifiers,
             rewards,
             forBiome,

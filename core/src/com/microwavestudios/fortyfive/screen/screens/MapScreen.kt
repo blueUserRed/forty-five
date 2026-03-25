@@ -17,6 +17,7 @@ import com.microwavestudios.fortyfive.map.DetailMapWidget
 import com.microwavestudios.fortyfive.map.EncounterMapEvent
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.profile.MapSaver
+import com.microwavestudios.fortyfive.profile.RunSave
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
@@ -105,6 +106,31 @@ class MapScreen : ScreenCreator() {
                 "bewitched_forest" -> "map_background_bewitched_forest_tileable"
                 "magenta_mountains" -> "map_background_magenta_mountains_tileable"
                 else -> null
+            }
+        }
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile) { "MapScreen can only be used with profile" }
+        if (profile.isRunActive) {
+            val run = profile.activeRun!!
+            if (run.minSteps != -1) box {
+                x = 0f
+                y = 0f
+                width = 300f
+                height = 200f
+                backgroundHandle = "white_texture"
+                flexDirection = FlexDirection.COLUMN
+                verticalAlign = CustomAlign.SPACE_AROUND
+                horizontalAlign = CustomAlign.CENTER
+
+                label("red wing", "used steps: ${profile.usedSteps}", Color.Black, 24) {
+                    syncDimensions()
+                    screen.events.watchFor<RunSave.UsedStepsChangedEvent> { event ->
+                        setText("used steps: ${event.newUsedSteps}")
+                    }
+                }
+                label("red wing", "min/max: ${run.minSteps}/${run.maxSteps}", Color.Black, 24) {
+                    syncDimensions()
+                }
             }
         }
         getInfoPopup()

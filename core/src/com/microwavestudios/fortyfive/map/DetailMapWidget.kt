@@ -382,6 +382,7 @@ class DetailMapWidget(
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
         FortyFive.soundPlayer.situation("walk", screen)
+        FortyFive.profileManager.currentProfile?.stepTaken()
         if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
     }
