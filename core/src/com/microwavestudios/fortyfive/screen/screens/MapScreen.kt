@@ -31,6 +31,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.requireNot
 import kotlin.reflect.KClass
 
 class MapScreen : ScreenCreator() {
@@ -222,25 +223,7 @@ class MapScreen : ScreenCreator() {
             encounterModifiers()
         }
 
-        fun updateDescription(node: MapNode) {
-            val event = node.event ?: return
-            if (!event.displayDescription) return
-            eventName.setText(event.displayName)
-            if (event.isCompleted) {
-                eventDescription.setText(event.completedDescriptionText)
-            } else {
-                eventDescription.setText(event.descriptionText)
-            }
-        }
-
-        updateDescription(mapWidget.playerNode)
-
-        mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
-            updateOpenClosed(node)
-            updateDescription(node)
-        }
-
-        label("red wing", "Start", fontSize = 32) {
+        val startButton = label("red wing", "Start", fontSize = 32) {
             name("StartButton")
             setAlignment(Align.center)
             width = 200f * 0.8f
@@ -251,8 +234,11 @@ class MapScreen : ScreenCreator() {
             keyboardFocusable = KeyboardFocusable.LEAF
             marginBottom = 27f
             joinGroup(startButtonGroup)
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile) { "MapScreen can only be used with profile" }
+            val map = profile.currentMapSaver.currentMap
             onInput(GameInputs.interact) {
-                if (mapWidget.playerNode.event?.startable == true) {
+                if (mapWidget.playerNode.event?.canBeStarted(map) == true) {
                     FortyFive.soundPlayer.situation("general_button_click", screen)
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
@@ -285,6 +271,26 @@ class MapScreen : ScreenCreator() {
                     dropShadow.showDropShadow = false
                 },
             )
+        }
+
+        fun updateDescription(node: MapNode) {
+            eventName.setText("")
+            eventDescription.setText("")
+            startButton.setText("")
+            val event = node.event ?: return
+            if (!event.displayDescription) return
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile) { "MapScreen can only be used with profile" }
+            val map = profile.currentMapSaver.currentMap
+            startButton.setText(event.buttonText)
+            eventName.setText(event.displayName)
+            eventDescription.setText(event.currentDescription(map))
+        }
+
+        updateDescription(mapWidget.playerNode)
+        mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
+            updateOpenClosed(node)
+            updateDescription(node)
         }
     }
 

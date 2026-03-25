@@ -297,19 +297,7 @@ class DetailMapWidget(
         if (btn is DisableActor && btn.isDisabled) return
         if (playerNode.event?.canBeStarted(map)?.not() ?: true) return
         val event = playerNode.event
-        val additionalEvent = playerNode.additionalEvent
-        if (additionalEvent == null) {
-            event?.start()
-        } else {
-            requireNotNull(event) { "node cant have additional event without primary event" }
-            val firstScreen = event.chainScreen
-            val secondScreen = additionalEvent.chainScreen
-            requireNotNull(firstScreen) { "event: $event cant be chained" }
-            requireNotNull(secondScreen) { "event: $additionalEvent cant be chained" }
-            FortyFive.screenManager.appendScreen(firstScreen.first, firstScreen.second)
-            FortyFive.screenManager.appendScreen(secondScreen.first, secondScreen.second)
-            FortyFive.screenManager.screenFinished()
-        }
+        event?.start()
     }
 
     private fun updateDirectionIndicator(pointerPosition: Vector2) {

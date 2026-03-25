@@ -117,6 +117,43 @@ var encounter = [
     },
 ];
 
+var encounterKeys = {
+    startConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    blockConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    descriptionText: [
+        {
+            predicate: $CurrentNodeBlocks {},
+            text: "Defeat enemies to progress"
+        }
+    ],
+};
+
+var chooseCardKeys = {
+    seed: 0,
+    nbrOfCards: 1,
+    startConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    blockConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    descriptionText: [
+        {
+            predicate: $Always {},
+            text: "You get a card!"
+        }
+    ],
+    amountOfRerolls: 0,
+    rerollPriceIncrease: 30,
+    rerollBasePrice: 30,
+    enableRerolls: false,
+    isCompleted: false
+};
+
 majorDifficulty: 1,
 tutorialText: [
     {
@@ -181,12 +218,10 @@ nodes: [
             1, 2, 4
         ],
         event: $EncounterMapEvent {
-//            currentlyBlocks: false,
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             encounter: encounter.1,
             isExtraction: false,
+            ...encounterKeys
         }
     },
     {
@@ -197,15 +232,7 @@ nodes: [
         ],
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_silver_bullet"],
-            seed: 0,
-            nbrOfCards: 1,
-            currentlyBlocks: true,
-            startable: true,
-            amountOfRerolls: 0,
-            rerollPriceIncrease: 30,
-            rerollBasePrice: 30,
-            enableRerolls: false,
-            isCompleted: false
+            ...chooseCardKeys
         },
     },
     {
@@ -215,11 +242,10 @@ nodes: [
             4, 6
         ],
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             encounter: encounter.2,
             isExtraction: false,
+            ...encounterKeys
         }
     },
     {
@@ -230,15 +256,7 @@ nodes: [
         ],
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_worker_bullet"],
-            seed: 0,
-            nbrOfCards: 1,
-            currentlyBlocks: true,
-            startable: true,
-            amountOfRerolls: 0,
-            rerollPriceIncrease: 30,
-            rerollBasePrice: 30,
-            enableRerolls: false,
-            isCompleted: false
+            ...chooseCardKeys
         },
     },
     {
@@ -248,11 +266,10 @@ nodes: [
             6, 8
         ],
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             encounter: encounter.3,
             isExtraction: false,
+            ...encounterKeys
         }
     },
     {
@@ -264,11 +281,18 @@ nodes: [
         event: $DialogMapEvent {
             dialog: "talk_with_brother",
             displayName: "Your Brother",
-            descriptionText: "Your Brother wants to talk to you",
-            completedDescriptionText: "",
-            canOnlyBeStartedOnce: true,
-            currentlyBlocks: true,
-            startable: true,
+            descriptionText: [
+                {
+                    predicate: $Always {},
+                    text: "Your Brother wants to talk to you"
+                }
+            ],
+            startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
             isCompleted: false
         }
     },
