@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
 import com.microwavestudios.fortyfive.run.RunGenerator.Companion.logTag
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.fractionalPart
 import com.microwavestudios.fortyfive.utils.unreachable
 import com.microwavestudios.fortyfive.utils.zip
 import onj.builder.buildOnjObject
@@ -37,7 +38,7 @@ data class Encounter(
     fun createEnemies(): List<Enemy> {
         val difficultyAdjustment = EncounterGenerator.justInTimeDifficultyAddition()
         val majorDifficulty = (majorDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
-        val minorDifficulty = (minorDifficulty + (difficultyAdjustment % 1))
+        val minorDifficulty = minorDifficulty + difficultyAdjustment.fractionalPart()
         val enemiesOnj = ConfigFileManager.getConfigFile("enemies")
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         val healthMultiplier = 1f + ((minorDifficulty - 1f) * RunGeneratorConfig.enemyHealthAdjustment)
@@ -235,7 +236,7 @@ object EncounterGenerator {
         difficultyAdjustment += difficultyScaling
 
         majorDifficulty = (majorDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
-        minorDifficulty = (minorDifficulty + (difficultyAdjustment % 1)).toFloat()
+        minorDifficulty = (minorDifficulty + difficultyAdjustment.fractionalPart()).toFloat()
 
         val enemies = generateEnemies(random, placeholder)
 

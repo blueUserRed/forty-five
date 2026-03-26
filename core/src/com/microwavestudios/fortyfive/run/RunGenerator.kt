@@ -28,7 +28,7 @@ class RunGenerator {
 
         val difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
         val majorDifficulty = (forDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
-        val minorDifficulty = 1f + (difficultyAdjustment % 1).toFloat()
+        val minorDifficulty = 1f + difficultyAdjustment.fractionalPart().toFloat()
 
         val rewards = generateRunRewards(forDifficulty)
 
