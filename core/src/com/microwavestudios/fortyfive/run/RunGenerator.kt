@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.map.generation.PointCloudMapGenerator
 import com.microwavestudios.fortyfive.map.generation.RadialMapGenerator
 import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.fractionalPart
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.unreachable
 import com.microwavestudios.fortyfive.utils.weightedRandom
