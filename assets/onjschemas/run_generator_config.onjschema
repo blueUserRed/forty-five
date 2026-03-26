@@ -50,6 +50,16 @@ enemyProbabilityRandomPoints: int,
 enemyHealthAdjustment: float,
 enemyDamageAdjustment: float,
 
+var stepConfig = {
+    minSteps: int[2],
+    maxSteps: int[2],
+};
+
+stepConfig: {
+    limited: stepConfig,
+    constructed: stepConfig
+},
+
 difficultyScaling: {
     limited: {
         encounterStartedScale: float,

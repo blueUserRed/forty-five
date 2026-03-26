@@ -54,12 +54,19 @@ class RunGenerator {
             forBiome
         )
 
+        val (minStepRange, maxStepRange) = if (type == RunType.CONSTRUCTED) {
+            RunGeneratorConfig.stepsConstructed
+        } else {
+            RunGeneratorConfig.stepsLimited
+        }
+
         return Run(
             "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,
-            8, 20,
+            minStepRange.random(random),
+            maxStepRange.random(random),
             modifiers,
             rewards,
             forBiome,
