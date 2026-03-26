@@ -214,6 +214,7 @@ class DetailMapWidget(
     private var maxStepsReached: Boolean = false
 
     private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
+    private var countSteps: Boolean by debugMenuPage.countSteps
 
     private var ignoreLeftStick: Boolean = false
 
@@ -370,7 +371,7 @@ class DetailMapWidget(
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
         FortyFive.soundPlayer.situation("walk", screen)
-        FortyFive.profileManager.currentProfile?.stepTaken()
+        if (countSteps) FortyFive.profileManager.currentProfile?.stepTaken()
         checkMaxSteps()
         if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
