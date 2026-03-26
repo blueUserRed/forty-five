@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Align
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
@@ -58,40 +59,48 @@ object PopupCreator {
         box {
             backgroundHandle = "detail_widget_background_big"
             width = worldWidth * 0.5f
-            syncHeight()
+            onLayoutAndNow { height = prefHeight.coerceAtLeast(width * 0.5f) }
             centerX()
             centerY()
             flexDirection = FlexDirection.COLUMN
             horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.SPACE_BETWEEN
 
-            verticalSpacer(50f)
+            dropShadow = BakedDropShadow(
+                "detail_widget_background_big",
+                screen,
+                0f, 0f,
+                1.33f, 1.33f
+            )
 
-            val title = label("red wing", "", Color.FortyWhite, (32 * 1.4).toInt()) {
-                setAlignment(Align.center)
-                relativeWidth(90f)
+            box {
+                flexDirection = FlexDirection.COLUMN
+                horizontalAlign = CustomAlign.CENTER
+                relativeWidth(100f)
                 syncHeight()
+                verticalSpacer(50f)
+                val title = label("red wing", "", Color.FortyWhite, (32 * 1.4).toInt()) {
+                    setAlignment(Align.center)
+                    relativeWidth(90f)
+                    syncHeight()
+                }
+                verticalSpacer(20f)
+                val body = label(
+                    "roadgeek",
+                    "",
+                    Color.FortyWhite,
+                    28
+                ) {
+                    wrap = true
+                    relativeWidth(90f)
+                    setAlignment(Align.center)
+                    syncHeight()
+                }
+                events.watchFor<ShowPopup<*>> { popup ->
+                    title.setText(popup.title)
+                    body.setText(popup.body)
+                }
             }
-
-            verticalSpacer(20f)
-
-            val body = label(
-                "roadgeek",
-                "",
-                Color.FortyWhite,
-                28
-            ) {
-                wrap = true
-                relativeWidth(90f)
-                setAlignment(Align.center)
-                syncHeight()
-            }
-
-            events.watchFor<ShowPopup<*>> { popup ->
-                title.setText(popup.title)
-                body.setText(popup.body)
-            }
-
-            verticalSpacer(60f)
 
             box { buttonContainer(this@getSharedPopup, events) }
         }

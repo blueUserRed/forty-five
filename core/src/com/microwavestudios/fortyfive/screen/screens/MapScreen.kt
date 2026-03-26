@@ -27,6 +27,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.NewLabel
 import com.microwavestudios.fortyfive.screen.actors.setText
+import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -146,6 +147,19 @@ class MapScreen : ScreenCreator() {
             hasCollection = !inRun,
             warnings = WarningParent(this@MapScreen, screen, warningEvents)
         )
+
+        mapWidget.events.watchFor<DetailMapWidget.MaxStepsReachedEvent> { maxStepsReached() }
+    }
+
+    private fun maxStepsReached() {
+        val event = PopupCreator.ShowPopup(
+            "Maximum Steps reached",
+            "The final encounter will now start",
+            listOf("Ok" to Unit)
+        ) {
+            mapWidget.startLastEvent()
+        }
+        warningEvents.fire(event)
     }
 
     private fun Group.getInfoPopup() = box {
