@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.map.generation
 
 import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.map.*
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.splitInTwo
 import com.microwavestudios.fortyfive.utils.toIntRange
@@ -12,8 +13,8 @@ import onj.value.OnjObject
 
 class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String, seed: Long): DetailMap {
-        setup(name, data, seed)
+    override fun generate(name: String, run: Run, seed: Long): DetailMap {
+        setup(name, data, run, seed)
 
         val firstNode = newNode(x = 0f, y = 0f)
         val lastNode = newNode(x = data.roadLength, y = 0f)

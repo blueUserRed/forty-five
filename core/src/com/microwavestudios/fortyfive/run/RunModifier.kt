@@ -5,22 +5,12 @@ import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.utils.unreachable
 import onj.value.OnjArray
 
-abstract class RunModifier {
+abstract class RunModifier(val name: String, val behaviours: List<RunBehaviour>) {
 
-    abstract class ModifyAllEncounters(val encounterModifier: String) : RunModifier() {
-        override val difficultyAdjustment: Float = 0f // handled by encounter
-        override fun addModifier(): String? = encounterModifier
-    }
-
-    data object AllRain : ModifyAllEncounters("rain")
-    data object AllMoist : ModifyAllEncounters("moist")
-    data object AllBewitchedMist : ModifyAllEncounters("bewitchedMist")
-    data object AllFrozen : ModifyAllEncounters("frost")
-
-
-    abstract val difficultyAdjustment: Float
-
-    open fun addModifier(): String? = null
+    data object AllRain : RunModifier("allRain", listOf(RunBehaviour.ModifyAllEncounters("rain")))
+    data object AllMoist : RunModifier("allMoist", listOf(RunBehaviour.ModifyAllEncounters("moist")))
+    data object AllBewitchedMist : RunModifier("allBewitchedMist", listOf(RunBehaviour.ModifyAllEncounters("bewitchedMist")))
+    data object AllFrozen : RunModifier("allFrozen", listOf(RunBehaviour.ModifyAllEncounters("frozen")))
 
     open fun name(): String = this::class.simpleName ?: unreachable()
 

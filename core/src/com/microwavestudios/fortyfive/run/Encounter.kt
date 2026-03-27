@@ -212,6 +212,7 @@ object EncounterGenerator {
         placeholder: EncounterPlaceholderMapEvent,
         node: MapNodeBuilder,
         startNode: MapNodeBuilder,
+        run: Run
     ): Encounter {
 
         val random = Random(placeholder.seed)
@@ -219,9 +220,9 @@ object EncounterGenerator {
         var majorDifficulty = placeholder.majorDifficulty
         var minorDifficulty = placeholder.minorDifficulty
 
-        var baseModifiers = placeholder.runModifier.mapNotNull { it.addModifier() }
+        var baseModifiers = run.behaviours.mapNotNull { it.addEncounterModifier() }
         if (!EncounterModifier.isValid(baseModifiers)) {
-            FortyFive.logger.warn("EncounterGen", "Run modifiers generated invalid list of encounter modifiers: ${placeholder.runModifier}")
+            FortyFive.logger.warn("EncounterGen", "Run behaviours generated invalid list of encounter modifiers: ${run.behaviours}")
             baseModifiers = listOf()
         }
 

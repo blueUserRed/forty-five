@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.RunBehaviour
 import com.microwavestudios.fortyfive.run.RunModifier
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -278,7 +279,6 @@ class EncounterPlaceholderMapEvent(
     val majorDifficulty: Int,
     val unadjustedMajorDifficulty: Int,
     val minorDifficulty: Float,
-    val runModifier: List<RunModifier>,
     val amountEnemies: IntRange,
     val biome: String,
     val difficultyScaling: DifficultyScaling,
@@ -302,7 +302,6 @@ class EncounterPlaceholderMapEvent(
         "majorDifficulty" with majorDifficulty
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "minorDifficulty" with minorDifficulty
-        "runModifier" with runModifier.map { it.name() }
         "amountEnemies" with arrayOf(amountEnemies.first, amountEnemies.last)
         "biome" with biome
         "seed" with seed
@@ -318,7 +317,6 @@ class EncounterPlaceholderMapEvent(
             onj.get<Long>("majorDifficulty").toInt(),
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Double>("minorDifficulty").toFloat(),
-            onj.get<OnjArray>("runModifier").value.map { RunModifier.get(it.value as String) },
             onj.get<OnjArray>("amountEnemies").toIntRange(),
             onj.get<String>("biome"),
             DifficultyScaling.fromOnj(onj.get<OnjNamedObject>("difficultyScaling")),

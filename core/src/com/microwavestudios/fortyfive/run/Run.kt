@@ -21,6 +21,10 @@ data class Run(
     val mapGenerator: BaseMapGenerator
 ) {
 
+    val behaviours: List<RunBehaviour> by lazy {
+        accumulateBehaviours(modifiers, type, difficulty)
+    }
+
     fun asOnj(): OnjObject = buildOnjObject {
         "name" with name
         "length" with length.asOnj()
@@ -38,6 +42,14 @@ data class Run(
     }
 
     companion object {
+
+        fun accumulateBehaviours(
+            modifiers: List<RunModifier>,
+            runType: RunType,
+            difficulty: Int
+        ): List<RunBehaviour> {
+            return modifiers.flatMap { it.behaviours }
+        }
 
         fun fromOnj(onj: OnjObject): Run = Run(
             onj.get<String>("name"),
