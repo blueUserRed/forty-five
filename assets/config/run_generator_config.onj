@@ -143,7 +143,6 @@ stepConfig: {
 // Enemies
 //////////////////////////////////////////////////////
 
-
 enemies: [
     {
         majorDifficulty: 0,
@@ -230,3 +229,14 @@ difficultyScaling: {
         scaling: $LinearScaling {},
     },
 },
+
+//////////////////////////////////////////////////////
+// Limited Challenges
+//////////////////////////////////////////////////////
+
+limitedChallenges: [
+    {
+        addAtDifficulty: 0,
+        challenges: []
+    }
+]

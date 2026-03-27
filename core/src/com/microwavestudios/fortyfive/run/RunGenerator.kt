@@ -27,14 +27,15 @@ class RunGenerator {
         }
 
         val modifiers = generateRunModifiers(forBiome, forDifficulty)
-        val behaviours = Run.accumulateBehaviours(modifiers, type, forDifficulty)
+        val challenges = generateChallenges(type, forDifficulty)
+        val behaviours = Run.accumulateBehaviours(modifiers, challenges)
 
         val baseDifficulty = if (type == RunType.CONSTRUCTED) {
             forDifficulty
         } else {
             1
         }
-        val difficultyAdjustment = -behaviours.sumOf { it.difficultyAdjustment.toDouble() }
+        val difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
         val majorDifficulty = (baseDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         val minorDifficulty = 1f + (difficultyAdjustment % 1).toFloat()
 
@@ -65,14 +66,17 @@ class RunGenerator {
             RunGeneratorConfig.stepsLimited
         }
 
+        val minSteps = behaviours.fold(minStepRange.random(random)) { acc, cur -> cur.modifyMinSteps(acc) }
+        val maxSteps = behaviours.fold(maxStepRange.random(random)) { acc, cur -> cur.modifyMaxSteps(acc) }
+
         return Run(
             "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,
-            minStepRange.random(random),
-            maxStepRange.random(random),
+            minSteps, maxSteps,
             modifiers,
+            challenges,
             rewards,
             forBiome,
             forArea,
@@ -80,6 +84,17 @@ class RunGenerator {
             100,
             mapGenerator
         )
+    }
+
+    private fun generateChallenges(type: RunType, difficulty: Int): List<RunChallenge> {
+        val result = mutableListOf<RunChallenge>()
+        if (type != RunType.LIMITED) return result
+        val challenges = RunGeneratorConfig.limitedChallenges
+        challenges.forEach { (addAtDiff, challenges) ->
+            if (addAtDiff > difficulty) return@forEach
+            result.addAll(challenges)
+        }
+        return result
     }
 
     private fun enemyAmountRange(majorDifficulty: Int): IntRange {

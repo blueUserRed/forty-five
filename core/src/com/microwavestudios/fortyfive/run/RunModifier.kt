@@ -5,14 +5,42 @@ import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.utils.unreachable
 import onj.value.OnjArray
 
-abstract class RunModifier(val name: String, val behaviours: List<RunBehaviour>) {
+abstract class RunModifier(val name: String) {
 
-    data object AllRain : RunModifier("allRain", listOf(RunBehaviour.ModifyAllEncounters("rain")))
-    data object AllMoist : RunModifier("allMoist", listOf(RunBehaviour.ModifyAllEncounters("moist")))
-    data object AllBewitchedMist : RunModifier("allBewitchedMist", listOf(RunBehaviour.ModifyAllEncounters("bewitchedMist")))
-    data object AllFrozen : RunModifier("allFrozen", listOf(RunBehaviour.ModifyAllEncounters("frozen")))
+    data object AllRain : RunModifier("allRain") {
+
+        override val difficultyAdjustment: Float = 0f // handled by encounter
+        override val description: String = "All Encounters have the Rain Modifier"
+        override fun behaviours(): List<RunBehaviour> = listOf(RunBehaviour.ModifyAllEncounters("rain"))
+    }
+
+    data object AllMoist : RunModifier("allMoist") {
+
+        override val difficultyAdjustment: Float = 0f // handled by encounter
+        override val description: String = "All Encounters have the Moist Modifier"
+        override fun behaviours(): List<RunBehaviour> = listOf(RunBehaviour.ModifyAllEncounters("moist"))
+    }
+
+    data object AllBewitchedMist : RunModifier("allBewitchedMist") {
+
+        override val difficultyAdjustment: Float = 0f // handled by encounter
+        override val description: String = "All Encounters have the Bewitched Mist Modifier"
+        override fun behaviours(): List<RunBehaviour> = listOf(RunBehaviour.ModifyAllEncounters("bewitchedMist"))
+    }
+
+    data object AllFrozen : RunModifier("allFrozen") {
+
+        override val difficultyAdjustment: Float = 0f // handled by encounter
+        override val description: String = "All Encounters have the Frozen Modifier"
+        override fun behaviours(): List<RunBehaviour> = listOf(RunBehaviour.ModifyAllEncounters("frozen"))
+    }
+
+    abstract val description: String
+
+    abstract val difficultyAdjustment: Float
 
     open fun name(): String = this::class.simpleName ?: unreachable()
+    open fun behaviours(): List<RunBehaviour> = listOf()
 
     companion object {
 

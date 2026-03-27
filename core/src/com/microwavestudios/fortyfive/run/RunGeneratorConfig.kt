@@ -7,7 +7,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.collections.associate
 import kotlin.collections.map
-import kotlin.math.pow
 
 object RunGeneratorConfig {
 
@@ -191,6 +190,20 @@ object RunGeneratorConfig {
     val stepsConstructed: Pair<IntRange, IntRange> by lazy {
         configFile.access<OnjArray>(".stepConfig.constructed.minSteps").toIntRange() to
             configFile.access<OnjArray>(".stepConfig.constructed.maxSteps").toIntRange()
+    }
+
+    val limitedChallenges: List<Pair<Int, List<RunChallenge>>> by lazy {
+        val config = configFile.get<OnjArray>("limitedChallenges")
+        config
+            .value
+            .map { obj ->
+                obj as OnjObject
+                val difficulty = obj.get<Long>("addAtDifficulty").toInt()
+                val challenges = obj.get<OnjArray>("challenges").value.map {
+                    RunChallengeFactory.get(it as OnjNamedObject)
+                }
+                difficulty to challenges
+            }
     }
 
 }

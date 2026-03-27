@@ -3,12 +3,17 @@ package com.microwavestudios.fortyfive.run
 abstract class RunBehaviour {
 
     class ModifyAllEncounters(val encounterModifier: String) : RunBehaviour() {
-        override val difficultyAdjustment: Float = 0f // handled by encounter
-        override fun addEncounterModifier(): String? = encounterModifier
+        override fun addEncounterModifier(): String = encounterModifier
     }
 
-    abstract val difficultyAdjustment: Float
+    class ModifySteps(val stepChange: Int) : RunBehaviour() {
+        override fun modifyMinSteps(original: Int): Int = original + stepChange
+        override fun modifyMaxSteps(original: Int): Int = original + stepChange
+    }
 
     open fun addEncounterModifier(): String? = null
+
+    open fun modifyMinSteps(original: Int): Int = original
+    open fun modifyMaxSteps(original: Int): Int = original
 
 }

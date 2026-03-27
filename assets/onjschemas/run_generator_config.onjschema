@@ -74,3 +74,8 @@ difficultyScaling: {
         scaling: $DifficultyScaling,
     },
 },
+
+limitedChallenges: {
+    addAtDifficulty: int,
+    challenges: $RunChallenge[]
+}[],

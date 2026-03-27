@@ -13,6 +13,7 @@ data class Run(
     val minSteps: Int,
     val maxSteps: Int,
     val modifiers: List<RunModifier>,
+    val challenges: List<RunChallenge>,
     val rewards: List<RunReward>,
     val biome: String,
     val fromArea: String,
@@ -22,7 +23,7 @@ data class Run(
 ) {
 
     val behaviours: List<RunBehaviour> by lazy {
-        accumulateBehaviours(modifiers, type, difficulty)
+        accumulateBehaviours(modifiers, challenges)
     }
 
     fun asOnj(): OnjObject = buildOnjObject {
@@ -32,6 +33,7 @@ data class Run(
         "difficulty" with difficulty
         "modifiers" with modifiers.map { it.name() }
         "rewards" with rewards.map { it.asOnj() }
+        "challenges" with challenges.map { it.asOnj() }
         "biome" with biome
         "minSteps" with minSteps
         "maxSteps" with maxSteps
@@ -45,11 +47,9 @@ data class Run(
 
         fun accumulateBehaviours(
             modifiers: List<RunModifier>,
-            runType: RunType,
-            difficulty: Int
-        ): List<RunBehaviour> {
-            return modifiers.flatMap { it.behaviours }
-        }
+            challenges: List<RunChallenge>
+        ): List<RunBehaviour> = modifiers.flatMap { it.behaviours() } +
+                challenges.flatMap { it.behaviours() }
 
         fun fromOnj(onj: OnjObject): Run = Run(
             onj.get<String>("name"),
@@ -59,6 +59,9 @@ data class Run(
             onj.get<Long>("minSteps").toInt(),
             onj.get<Long>("maxSteps").toInt(),
             onj.get<OnjArray>("modifiers").value.map { RunModifier.get(it.value as String) },
+            onj.get<OnjArray>("challenges")
+                .value
+                .map { RunChallengeFactory.get(it.value as OnjNamedObject) },
             onj.get<OnjArray>("rewards").value.map {
                 it as OnjNamedObject
                 RunReward.fromOnj(it)
