@@ -395,8 +395,7 @@ class DialogMapEvent(
 }
 
 /**
- * event that opens a shop where the player can buy up to 8 cards
- * @param type which type the restrictions are
+ * event that opens a shop where the player can buy cards
  */
 class ShopMapEvent(
     val types: Set<String>,

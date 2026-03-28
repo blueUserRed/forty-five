@@ -11,9 +11,15 @@ abstract class RunBehaviour {
         override fun modifyMaxSteps(original: Int): Int = original + stepChange
     }
 
+    class PriceChange(val multiplier: Double) : RunBehaviour() {
+        override fun modifyPrice(original: Int): Int = (original * multiplier).toInt()
+    }
+
     open fun addEncounterModifier(): String? = null
 
     open fun modifyMinSteps(original: Int): Int = original
     open fun modifyMaxSteps(original: Int): Int = original
+
+    open fun modifyPrice(original: Int): Int = original
 
 }

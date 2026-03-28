@@ -73,11 +73,15 @@ class ShopScreen : ScreenCreator() {
 
     private lateinit var currentDeck: Deck
 
+    private var rerollPrice: Int = 0
+
     override fun getScreenControllers(): List<ScreenController> = listOf(
         BiomeBackgroundScreenController(screen, true)
     )
 
     override fun getRoot(): Group = newGroup {
+        setRerollPrice()
+
         x = 0f
         y = 0f
         width = worldWidth
@@ -137,13 +141,13 @@ class ShopScreen : ScreenCreator() {
                 keyboardFocusable = KeyboardFocusable.LEAF
                 logicalOffsetY = 55f
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
-                    setText("reroll: ${context.currentRerollPrice}\$")
+                    setText("reroll: $rerollPrice\$")
                     syncDimensions()
                     touchable = Touchable.disabled
                 }
                 onInput(GameInputs.interact) {
                     reroll()
-                    label.setText("reroll: ${context.currentRerollPrice}\$")
+                    label.setText("reroll: $rerollPrice\$")
                 }
             }
 
@@ -170,15 +174,22 @@ class ShopScreen : ScreenCreator() {
         updateCards(cards)
     }
 
+    private fun setRerollPrice() {
+        val profile = FortyFive.profileManager.currentProfile!!
+        rerollPrice = profile.activeRun?.let {
+            it.behaviours.fold(context.currentRerollPrice) { acc, cur -> cur.modifyPrice(acc) }
+        } ?: context.currentRerollPrice
+    }
+
     private fun reroll() {
         val profile = FortyFive.profileManager.currentProfile!!
-        val price = context.currentRerollPrice
-        if (profile.playerMoney < price) {
+        if (profile.playerMoney < rerollPrice) {
             FortyFive.soundPlayer.situation("not_allowed", screen)
             return
         }
-        profile.payMoney(price)
+        profile.payMoney(rerollPrice)
         context.amountOfRerolls++
+        setRerollPrice()
         val newCards = generateRandomCards()
         context.boughtIndices.clear()
         context.currentCards = newCards
@@ -272,7 +283,7 @@ class ShopScreen : ScreenCreator() {
         width = 130f
         height = 190f
         flexDirection = FlexDirection.COLUMN
-        val actor = actor (card.actor) {
+        val actor = actor(card.actor) {
             width = 130f
             height = 130f
             touchable = Touchable.enabled
@@ -283,9 +294,12 @@ class ShopScreen : ScreenCreator() {
             height = 60f
             setAlignment(Align.center)
         }
+        val modifiedPrice = FortyFive.profileManager.currentProfile?.activeRun?.let { run ->
+            run.behaviours.fold(card.price) { acc, cur -> cur.modifyPrice(acc) }
+        } ?: card.price
         val stateChangeCallback: () -> Unit = {
             val profile = FortyFive.profileManager.currentProfile!!
-            val buyable = profile.playerMoney >= card.price
+            val buyable = profile.playerMoney >= modifiedPrice
             val bought = index in context.boughtIndices
             actor.leaveGroup("buyable")
             actor.infoObject = null
@@ -298,15 +312,15 @@ class ShopScreen : ScreenCreator() {
                 }
                 buyable -> {
                     actor.isDraggable = true
-                    label.setText("\$${card.price}")
+                    label.setText("\$$modifiedPrice")
                     label.alpha = 1f
                     actor.isGrayScale = false
                     actor.joinGroup("buyable")
-                    actor.infoObject = CardDragAndDropInfo(card, card.price, index)
+                    actor.infoObject = CardDragAndDropInfo(card, modifiedPrice, index)
                 }
                 else -> {
                     actor.isDraggable = false
-                    label.setText("\$${card.price}")
+                    label.setText("\$$modifiedPrice")
                     label.alpha = 0.5f
                     actor.isGrayScale = false
                 }

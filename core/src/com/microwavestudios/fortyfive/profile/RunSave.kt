@@ -242,7 +242,7 @@ class RunSave private constructor(val profile: Profile) {
 
         fun newRun(profile: Profile, run: Run, cardsToTakeAlong: List<CardType>): RunSave {
             val mapGenerator = run.mapGenerator
-            val map = mapGenerator.generate("run_map", TimeUtils.millis())
+            val map = mapGenerator.generate("run_map", run, TimeUtils.millis())
             val save = RunSave(profile)
             save.data = RunSaveData(
                 map.startNode.index,
