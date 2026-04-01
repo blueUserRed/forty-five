@@ -23,9 +23,7 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
         setup(name, data, seed)
 
         val startNode = newNode(x = -40f, y = 0f)
-        setupFirstNode(startNode)
         val endNode = newNode(x = data.roadLength + 40f, y = 0f)
-        setupLastNode(endNode)
 
         val nodes = generateNodes()
         doInitialNodeConnections(nodes, startNode, endNode)
@@ -33,11 +31,10 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
         connectGroups(groups)
 
         rotateNodes()
-        calculateDistances(startNode)
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
-        assignEvents(nodes)
-        generateEncounters(startNode)
+        generateMapEvents()
+        generateEncounters()
 
         startNode.build()
 
@@ -50,8 +47,8 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
 
         return DetailMap(
             name = name,
-            startNode = startNode.asNode!!,
-            endNode = endNode.asNode!!,
+            startNode = this.startNode!!.asNode!!,
+            endNode = this.endNode!!.asNode!!,
             decorations = genDecorations,
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
@@ -60,14 +57,6 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
             majorDifficulty = data.majorDifficulty,
             camPosOffset = Vector2(0f, 0f),
         )
-    }
-
-    private fun assignEvents(nodes: List<MapNodeBuilder>) {
-        nodes.forEach { node ->
-            val event = data.eventSpawner.zipToFirst { it.weight }.weightedRandom(random)
-            node.nodeTexture = event.texture
-            node.event = event.eventCreator()
-        }
     }
 
     private fun connectGroups(groups: MutableList<MutableList<MapNodeBuilder>>) {
@@ -204,16 +193,16 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
         override val locationSignProtectedAreaWidth: Float,
         override val locationSignProtectedAreaHeight: Float,
         override val firstNodeEvent: () -> MapEvent,
-        override val firstNodeTexture: String,
         override val lastNodeEvent: () -> MapEvent,
-        override val lastNodeTexture: String,
+        override val randomStepsToLastNode: Int,
         override val majorDifficulty: Int,
         val horizontalExtension: Float,
         val verticalExtension: Float,
-        val eventSpawner: List<EventSpawner>,
         val decorations: List<MapGeneratorDecoration>,
         val biome: String,
-        override val rotation: Float
+        override val rotation: Float,
+        override val fillEvents: List<MapGeneratorFillEvent>,
+        override val fixedEvents: List<MapGeneratorFixedEvent>
     ) : BaseMapGeneratorData {
 
         override fun asOnj(): OnjObject = buildOnjObject {
@@ -225,7 +214,6 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
             "verticalExtension" with verticalExtension
             "decorations" with decorations.map { it.asOnj() }
             "biome" with biome
-            "eventSpawner" with eventSpawner.map { it.asOnj() }
             includeBaseData()
         }
 
@@ -239,41 +227,20 @@ class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGene
                 onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
                 onj.get<Double>("exclusionRadius").toFloat(),
                 { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("firstNodeEvent")) },
-                onj.get<String>("firstNodeTexture"),
                 { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("lastNodeEvent")) },
-                onj.get<String>("lastNodeTexture"),
+                onj.get<Long>("randomStepsToLastNode").toInt(),
                 onj.get<Long>("majorDifficulty").toInt(),
                 onj.get<Double>("horizontalExtension").toFloat(),
                 onj.get<Double>("verticalExtension").toFloat(),
-                onj.get<OnjArray>("eventSpawner").value.map { EventSpawner.fromOnj(it as OnjObject) },
                 onj
                     .get<OnjArray>("decorations")
                     .value
                     .map { MapGeneratorDecoration.fromOnj(it as OnjObject) },
                 onj.get<String>("biome"),
-                onj.get<Double>("rotation").toFloat()
+                onj.get<Double>("rotation").toFloat(),
+                onj.get<OnjArray>("fillEvents").value.map { MapGeneratorFillEvent.fromOnj(it as OnjObject) },
+                onj.get<OnjArray>("fixedEvents").value.map { MapGeneratorFixedEvent.fromOnj(it as OnjObject) },
             )
         }
     }
-
-    data class EventSpawner(
-        val eventCreator: () -> MapEvent,
-        val texture: String,
-        val weight: Int,
-    ) {
-        fun asOnj(): OnjObject = buildOnjObject {
-            "event" with eventCreator().asOnjObject()
-            "weight" with weight
-            "texture" with texture
-        }
-
-        companion object {
-            fun fromOnj(onj: OnjObject): EventSpawner = EventSpawner(
-                { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("event")) },
-                onj.get<String>("texture"),
-                onj.get<Long>("weight").toInt(),
-            )
-        }
-    }
-
 }

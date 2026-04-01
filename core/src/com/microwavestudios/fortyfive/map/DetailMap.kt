@@ -96,13 +96,11 @@ data class DetailMap(
                     "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
                     "event" with node.event?.asOnjObject()
                     "distance" with node.distance
-                    node.nodeTexture?.let { "nodeTexture" with node.nodeTexture }
                     node.imageName?.let {
                         "image" with it
                         "imagePos" with (node.imagePos?.name ?: "up")
                     }
                     if (node.additionalEvent != null) "additionalEvent" with node.additionalEvent
-                    if (node.additionalNodeTexture != null) "additionalNodeTexture" with node.additionalNodeTexture
                 }
             }
             .toOnjArray()
@@ -148,7 +146,6 @@ data class DetailMap(
                             mutableListOf(),
                             nodeOnj.getOr<String?>("image", null),
                             MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
-                            nodeOnj.getOr<String?>("nodeTexture", null),
                             nodeOnj.getOr<Long?>("distance", null)?.toInt() ?: -1,
                             if (nodeOnj.hasKey<OnjNull>("event")) {
                                 EmptyMapEvent()
@@ -156,7 +153,6 @@ data class DetailMap(
                                 MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
                             },
                             nodeOnj.getOr<OnjNamedObject?>("additionalEvent", null)?.let { MapEventFactory.getMapEvent(it) },
-                            nodeOnj.getOr<String?>("additionalNodeTexture", null)
                         )
                     )
                 }

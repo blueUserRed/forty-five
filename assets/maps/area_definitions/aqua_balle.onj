@@ -27,7 +27,6 @@ nodes: [
         edgesTo: [
             1, 3
         ],
-        nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "tutorial_dialog",
             displayName: "Your Brother",
@@ -64,7 +63,6 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "aqua_balle_progress_dialog",
             displayName: "Stranger",
@@ -82,7 +80,6 @@ nodes: [
         edgesTo: [
             4, 6
         ],
-        nodeTexture: "map_node_default",
         event: $SimpleMapEvent {
             displayDescription: true,
             displayName: "Progress Run",
@@ -103,7 +100,6 @@ nodes: [
         edgesTo: [
             5
         ],
-        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "tabu_letter_outpost",
             fromEnd: false,
