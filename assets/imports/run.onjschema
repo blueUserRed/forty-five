@@ -9,6 +9,19 @@ $RunReward {
 }
 
 $RunChallenge {
+
+    $ReduceStepAmount {
+        reduceBy: int
+    }
+
+    $PriceIncrease {
+        multitplier: float
+    }
+
+    $DifficultyIncrease {
+        increase: float
+    }
+
 }
 
 name: string,

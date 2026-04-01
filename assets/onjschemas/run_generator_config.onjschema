@@ -3,6 +3,9 @@ import "imports/run.onjschema" as _;
 runModifierPools: {
     majorDifficulty: int,
     modifierProbability: float,
+    maxModifiers: int,
+    onlyLimited?: boolean,
+    onlyConstructed?: boolean,
     modifiers: string[]
 }[],
 
@@ -13,9 +16,6 @@ runModifierProbabilityIncreases: {
 
 runModifierBlacklist: string[][],
 encounterModifierBlacklist: string[][],
-
-runModifiersMax: int,
-
 
 runRewardPools: {
     majorDifficulty: Int,

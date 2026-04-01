@@ -26,7 +26,7 @@ class RunGenerator {
             "generateRun only works for Limited and Constructed Runs"
         }
 
-        val modifiers = generateRunModifiers(forBiome, forDifficulty)
+        val modifiers = generateRunModifiers(forBiome, forDifficulty, type)
         val challenges = generateChallenges(type, forDifficulty)
         val behaviours = Run.accumulateBehaviours(modifiers, challenges)
 
@@ -35,7 +35,8 @@ class RunGenerator {
         } else {
             1
         }
-        val difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
+        var difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
+        difficultyAdjustment += behaviours.sumOf { it.difficultyAddition().toDouble() }
         val majorDifficulty = (baseDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         val minorDifficulty = 1f + (difficultyAdjustment % 1).toFloat()
 
@@ -145,29 +146,35 @@ class RunGenerator {
         return rewards
     }
 
-    private fun generateRunModifiers(biome: String, majorDifficulty: Int): List<RunModifier> {
+    private fun generateRunModifiers(biome: String, majorDifficulty: Int, type: RunType): List<RunModifier> {
         var checkDifficulty = majorDifficulty
-        lateinit var pool: Pair<Float, List<String>>
+        lateinit var pool: RunModifierPool
         while (true) {
             if (checkDifficulty < 0) {
                 throw RuntimeException("no run modifier pool for major difficulty $majorDifficulty")
             }
-            val checkPool = RunGeneratorConfig.runModifierPools[checkDifficulty]
+            val checkPool = RunGeneratorConfig
+                .runModifierPools
+                .find { it.majorDifficulty == checkDifficulty }
             checkDifficulty--
             checkPool ?: continue
+            when {
+                checkPool.onlyConstructed && type != RunType.CONSTRUCTED -> continue
+                checkPool.onlyLimited && type != RunType.LIMITED -> continue
+            }
             pool = checkPool
             break
         }
         val probabilityIncrease = RunGeneratorConfig.runModifierProbabilityChanges[biome]
         val modifiers = if (probabilityIncrease == null) {
-            pool.second
+            pool.modifiers
         } else {
-            pool.second + probabilityIncrease.filter { it in pool.second }
+            pool.modifiers + probabilityIncrease.filter { it in pool.modifiers }
         }.map { RunModifier.get(it) }
 
         val selectedModifiers = mutableListOf<RunModifier>()
-        repeat(RunGeneratorConfig.runModifiersMax) {
-            if (!Utils.coinFlip(pool.first, random)) return@repeat
+        repeat(pool.maxModifiers) {
+            if (!Utils.coinFlip(pool.modifierProbability, random)) return@repeat
 
             val start = modifiers.indices.random(random)
             var current = start

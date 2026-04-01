@@ -43,20 +43,20 @@ object RunGeneratorConfig {
             }
     }
 
-    val runModifiersMax: Int by lazy { configFile.get<Long>("runModifiersMax").toInt() }
-
-    val runModifierPools: Map<Int, Pair<Float, List<String>>> by lazy {
+    val runModifierPools: List<RunModifierPool> by lazy {
         configFile
             .get<OnjArray>("runModifierPools")
             .value
-            .associate { pool ->
-                pool as OnjObject
-                val modifiers = pool
-                    .get<OnjArray>("modifiers")
-                    .value
-                    .map { it.value as String }
-                val majDifficulty = pool.get<Long>("majorDifficulty").toInt()
-                majDifficulty to (pool.get<Double>("modifierProbability").toFloat() to modifiers)
+            .map { obj ->
+                obj as OnjObject
+                RunModifierPool(
+                    obj.get<Long>("majorDifficulty").toInt(),
+                    obj.get<Double>("modifierProbability").toFloat(),
+                    obj.get<Long>("maxModifiers").toInt(),
+                    obj.getOr<Boolean>("onlyLimited", false),
+                    obj.getOr<Boolean>("onlyConstructed", false),
+                    obj.get<OnjArray>("modifiers").value.map { it.value as String }
+                )
             }
     }
 
@@ -231,6 +231,15 @@ data class EncounterModifierPool(
     val majorDifficulty: Int,
     val modifierProbability: Float,
     val maxModifiers: Int,
+    val modifiers: List<String>
+)
+
+data class RunModifierPool(
+    val majorDifficulty: Int,
+    val modifierProbability: Float,
+    val maxModifiers: Int,
+    val onlyLimited: Boolean,
+    val onlyConstructed: Boolean,
     val modifiers: List<String>
 )
 

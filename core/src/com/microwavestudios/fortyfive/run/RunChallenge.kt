@@ -41,6 +41,18 @@ abstract class RunChallenge {
         }
     }
 
+    class DifficultyIncrease(val increase: Float) : RunChallenge() {
+
+        override val description: String = "The difficulty of enemies increases"
+
+        override fun behaviours(): List<RunBehaviour> = listOf(RunBehaviour.DifficultyChange(increase))
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("DifficultyIncrease")
+            "increase" with increase
+        }
+    }
+
     abstract val description: String
 
     open fun behaviours(): List<RunBehaviour> = listOf()
@@ -59,6 +71,9 @@ object RunChallengeFactory {
         }
         registerRunChallenge("PriceIncrease") { obj ->
             RunChallenge.PriceIncrease(obj.get<Double>("multiplier"))
+        }
+        registerRunChallenge("DifficultyIncrease") { obj ->
+            RunChallenge.DifficultyIncrease(obj.get<Double>("increase").toFloat())
         }
     }
 

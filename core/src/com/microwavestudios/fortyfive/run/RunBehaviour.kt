@@ -15,11 +15,17 @@ abstract class RunBehaviour {
         override fun modifyPrice(original: Int): Int = (original * multiplier).toInt()
     }
 
+    class DifficultyChange(val change: Float) : RunBehaviour() {
+        override fun difficultyAddition(): Float = change
+    }
+
     open fun addEncounterModifier(): String? = null
 
     open fun modifyMinSteps(original: Int): Int = original
     open fun modifyMaxSteps(original: Int): Int = original
 
     open fun modifyPrice(original: Int): Int = original
+
+    open fun difficultyAddition(): Float = 0f
 
 }
