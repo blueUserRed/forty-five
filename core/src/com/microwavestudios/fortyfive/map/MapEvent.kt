@@ -230,7 +230,7 @@ class EncounterMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val displayName: String = "Encounter"
+    override val displayName: String = if (encounter.isHard) "Hard Encounter" else "Encounter"
 
     override val buttonText: String = "Fight!"
 
@@ -242,6 +242,7 @@ class EncounterMapEvent(
     }
 
     override val nodeTexture: ResourceHandle = "map_node_fight"
+
     override val secondaryNodeTexture: ResourceHandle? = if (isExtraction) {
         "map_node_exit"
     } else {
@@ -276,6 +277,7 @@ class EncounterMapEvent(
 
 class EncounterPlaceholderMapEvent(
     val genExtraction: Boolean,
+    val genHard: Boolean,
     val majorDifficulty: Int,
     val unadjustedMajorDifficulty: Int,
     val minorDifficulty: Float,
@@ -299,6 +301,7 @@ class EncounterPlaceholderMapEvent(
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterPlaceholderMapEvent")
         "genExtraction" with genExtraction
+        "genHard" with genHard
         "majorDifficulty" with majorDifficulty
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "minorDifficulty" with minorDifficulty
@@ -314,6 +317,7 @@ class EncounterPlaceholderMapEvent(
 
         fun fromOnj(onj: OnjObject): EncounterPlaceholderMapEvent = EncounterPlaceholderMapEvent(
             onj.get<Boolean>("genExtraction"),
+            onj.get<Boolean>("genHard"),
             onj.get<Long>("majorDifficulty").toInt(),
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Double>("minorDifficulty").toFloat(),

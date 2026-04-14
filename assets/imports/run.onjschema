@@ -15,7 +15,7 @@ $RunChallenge {
     }
 
     $PriceIncrease {
-        multitplier: float
+        multiplier: float
     }
 
     $DifficultyIncrease {

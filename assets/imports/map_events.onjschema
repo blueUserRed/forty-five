@@ -27,6 +27,7 @@ var encounter = {
     unadjustedMajorDifficulty: int,
     majorDifficulty: int,
     minorDifficulty: float,
+    isHard?: boolean,
     difficultyScalingInfo?: float,
     special: boolean,
 };

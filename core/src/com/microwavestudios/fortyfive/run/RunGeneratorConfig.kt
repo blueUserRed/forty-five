@@ -206,6 +206,10 @@ object RunGeneratorConfig {
             }
     }
 
+    val hardEncounterDifficultyMultiplier: Float by lazy {
+        configFile.get<Double>("hardEncounterDifficultyMultiplier").toFloat()
+    }
+
 }
 
 data class DifficultyScalingData(

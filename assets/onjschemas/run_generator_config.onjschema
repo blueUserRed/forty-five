@@ -50,6 +50,8 @@ enemyProbabilityRandomPoints: int,
 enemyHealthAdjustment: float,
 enemyDamageAdjustment: float,
 
+hardEncounterDifficultyMultiplier: float,
+
 var stepConfig = {
     minSteps: int[2],
     maxSteps: int[2],
