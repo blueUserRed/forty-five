@@ -268,7 +268,6 @@ abstract class BaseMapGenerator {
         _allNodes.forEach { node ->
             val event = node.event
             if (event !is EncounterPlaceholderMapEvent) return@forEach
-            println(event)
             val encounter = EncounterGenerator.generate(event, node, startNode)
             val encounterEvent = EncounterMapEvent(encounter, event.genExtraction)
             event.startConditions.forEach { encounterEvent.addStartCondition(it) }
