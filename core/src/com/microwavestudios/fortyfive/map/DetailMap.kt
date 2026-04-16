@@ -100,7 +100,6 @@ data class DetailMap(
                         "image" with it
                         "imagePos" with (node.imagePos?.name ?: "up")
                     }
-                    if (node.additionalEvent != null) "additionalEvent" with node.additionalEvent
                 }
             }
             .toOnjArray()

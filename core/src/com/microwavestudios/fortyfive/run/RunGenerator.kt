@@ -4,6 +4,8 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
 import com.microwavestudios.fortyfive.map.EmptyMapEvent
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
+import com.microwavestudios.fortyfive.map.MapEvent
+import com.microwavestudios.fortyfive.map.MapPredicate
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import com.microwavestudios.fortyfive.map.generation.PointCloudMapGenerator
@@ -53,11 +55,19 @@ class RunGenerator {
             forBiome
         )
 
+        val (minStepRange, maxStepRange) = if (type == RunType.CONSTRUCTED) {
+            RunGeneratorConfig.stepsConstructed
+        } else {
+            RunGeneratorConfig.stepsLimited
+        }
+
         return Run(
             "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,
+            minStepRange.random(random),
+            maxStepRange.random(random),
             modifiers,
             rewards,
             forBiome,
@@ -278,7 +288,13 @@ class RunGenerator {
                         minDiff,
                         maxDiff,
                         random.nextLong()
-                    )
+                    ).also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.setDescriptionText(listOf(
+                            MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
+                        ))
+                    }
                 },
                 null, null,
                 100
@@ -337,6 +353,39 @@ class RunGenerator {
             )
         )
 
+        fun lastEncounter(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            runModifier: List<RunModifier>,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): MapEvent = EncounterPlaceholderMapEvent(
+            true,
+            majorDifficulty,
+            unadjustedMajorDifficulty,
+            minorDifficulty,
+            runModifier,
+            enemyAmountRange,
+            biome,
+            difficultyScaling,
+            minDiff,
+            maxDiff,
+            random.nextLong()
+        ).also {
+            // extraction encounters don't block
+            it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+            it.addStartCondition(MapPredicate.MinStepsReached)
+            it.setDescriptionText(listOf(
+                MapPredicate.Not(MapPredicate.MinStepsReached) to "Walk the minimum number of steps to start the final encounter",
+                MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
+            ))
+        }
+
         fun pointCloudMapGen(
             random: Random,
             majorDifficulty: Int,
@@ -358,18 +407,17 @@ class RunGenerator {
             locationSignProtectedAreaHeight = 30f,
             firstNodeEvent = { EmptyMapEvent() },
             lastNodeEvent = {
-                EncounterPlaceholderMapEvent(
-                    true,
+                lastEncounter(
+                    random,
                     majorDifficulty,
                     unadjustedMajorDifficulty,
                     minorDifficulty,
-                    runModifier,
                     enemyAmountRange,
-                    biome,
-                    difficultyScaling,
+                    runModifier,
                     minDiff,
                     maxDiff,
-                    random.nextLong()
+                    difficultyScaling,
+                    biome
                 )
             },
             randomStepsToLastNode = 4,
@@ -432,18 +480,17 @@ class RunGenerator {
             locationSignProtectedAreaHeight = 30f,
             firstNodeEvent = { EmptyMapEvent() },
             lastNodeEvent = {
-                EncounterPlaceholderMapEvent(
-                    true,
+                lastEncounter(
+                    random,
                     majorDifficulty,
                     unadjustedMajorDifficulty,
                     minorDifficulty,
-                    runModifier,
                     enemyAmountRange,
-                    biome,
-                    difficultyScaling,
+                    runModifier,
                     minDiff,
                     maxDiff,
-                    random.nextLong()
+                    difficultyScaling,
+                    biome
                 )
             },
             randomStepsToLastNode = 4,
@@ -496,18 +543,17 @@ class RunGenerator {
             locationSignProtectedAreaHeight = 30f,
             firstNodeEvent = { EmptyMapEvent() },
             lastNodeEvent = {
-                EncounterPlaceholderMapEvent(
-                    true,
+                lastEncounter(
+                    random,
                     majorDifficulty,
                     unadjustedMajorDifficulty,
                     minorDifficulty,
-                    runModifier,
                     enemyAmountRange,
-                    biome,
-                    difficultyScaling,
+                    runModifier,
                     minDiff,
                     maxDiff,
-                    random.nextLong()
+                    difficultyScaling,
+                    biome
                 )
             },
             circles = listOf(

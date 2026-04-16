@@ -183,6 +183,16 @@ object RunGeneratorConfig {
         )
     }
 
+    val stepsLimited: Pair<IntRange, IntRange> by lazy {
+        configFile.access<OnjArray>(".stepConfig.limited.minSteps").toIntRange() to
+            configFile.access<OnjArray>(".stepConfig.limited.maxSteps").toIntRange()
+    }
+
+    val stepsConstructed: Pair<IntRange, IntRange> by lazy {
+        configFile.access<OnjArray>(".stepConfig.constructed.minSteps").toIntRange() to
+            configFile.access<OnjArray>(".stepConfig.constructed.maxSteps").toIntRange()
+    }
+
 }
 
 data class DifficultyScalingData(

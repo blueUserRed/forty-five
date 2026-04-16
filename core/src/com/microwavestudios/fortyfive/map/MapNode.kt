@@ -21,11 +21,8 @@ data class MapNode(
     val y: Float,
     val imageName: String?,
     val imagePos: ImagePosition?,
-//    val nodeTexture: ResourceHandle?,
     val distance: Int,
     val event: MapEvent? = null,
-    val additionalEvent: MapEvent? = null,
-//    val additionalNodeTexture: ResourceHandle? = null
 ) : ResourceBorrower {
 
 
@@ -294,7 +291,6 @@ data class MapNodeBuilder(
             imagePos,
             distance,
             event,
-            additionalEvent,
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
@@ -355,7 +351,6 @@ data class MapNodeBuilder(
                 imagePos = node.imagePos,
                 distance = node.distance,
                 event = node.event,
-                additionalEvent = node.additionalEvent,
             )
 
             val nodes = node.getUniqueNodes()

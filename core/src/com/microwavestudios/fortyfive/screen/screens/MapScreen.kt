@@ -17,6 +17,7 @@ import com.microwavestudios.fortyfive.map.DetailMapWidget
 import com.microwavestudios.fortyfive.map.EncounterMapEvent
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.profile.MapSaver
+import com.microwavestudios.fortyfive.profile.RunSave
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
@@ -26,10 +27,12 @@ import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.NewLabel
 import com.microwavestudios.fortyfive.screen.actors.setText
+import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.requireNot
 import kotlin.reflect.KClass
 
 class MapScreen : ScreenCreator() {
@@ -107,6 +110,31 @@ class MapScreen : ScreenCreator() {
                 else -> null
             }
         }
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile) { "MapScreen can only be used with profile" }
+        if (profile.isRunActive) {
+            val run = profile.activeRun!!
+            if (run.minSteps != -1) box {
+                x = 0f
+                y = 0f
+                width = 300f
+                height = 200f
+                backgroundHandle = "white_texture"
+                flexDirection = FlexDirection.COLUMN
+                verticalAlign = CustomAlign.SPACE_AROUND
+                horizontalAlign = CustomAlign.CENTER
+
+                label("red wing", "used steps: ${profile.usedSteps}", Color.Black, 24) {
+                    syncDimensions()
+                    screen.events.watchFor<RunSave.UsedStepsChangedEvent> { event ->
+                        setText("used steps: ${event.newUsedSteps}")
+                    }
+                }
+                label("red wing", "min/max: ${run.minSteps}/${run.maxSteps}", Color.Black, 24) {
+                    syncDimensions()
+                }
+            }
+        }
         getInfoPopup()
 
         val inRun = FortyFive.profileManager.currentProfile!!.isRunActive
@@ -119,6 +147,19 @@ class MapScreen : ScreenCreator() {
             hasCollection = !inRun,
             warnings = WarningParent(this@MapScreen, screen, warningEvents)
         )
+
+        mapWidget.events.watchFor<DetailMapWidget.MaxStepsReachedEvent> { maxStepsReached() }
+    }
+
+    private fun maxStepsReached() {
+        val event = PopupCreator.ShowPopup(
+            "Maximum Steps reached",
+            "The final encounter will now start",
+            listOf("Ok" to Unit)
+        ) {
+            mapWidget.startLastEvent()
+        }
+        warningEvents.fire(event)
     }
 
     private fun Group.getInfoPopup() = box {
@@ -196,25 +237,7 @@ class MapScreen : ScreenCreator() {
             encounterModifiers()
         }
 
-        fun updateDescription(node: MapNode) {
-            val event = node.event ?: return
-            if (!event.displayDescription) return
-            eventName.setText(event.displayName)
-            if (event.isCompleted) {
-                eventDescription.setText(event.completedDescriptionText)
-            } else {
-                eventDescription.setText(event.descriptionText)
-            }
-        }
-
-        updateDescription(mapWidget.playerNode)
-
-        mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
-            updateOpenClosed(node)
-            updateDescription(node)
-        }
-
-        label("red wing", "Start", fontSize = 32) {
+        val startButton = label("red wing", "Start", fontSize = 32) {
             name("StartButton")
             setAlignment(Align.center)
             width = 200f * 0.8f
@@ -225,8 +248,11 @@ class MapScreen : ScreenCreator() {
             keyboardFocusable = KeyboardFocusable.LEAF
             marginBottom = 27f
             joinGroup(startButtonGroup)
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile) { "MapScreen can only be used with profile" }
+            val map = profile.currentMapSaver.currentMap
             onInput(GameInputs.interact) {
-                if (mapWidget.playerNode.event?.startable == true) {
+                if (mapWidget.playerNode.event?.canBeStarted(map) == true) {
                     FortyFive.soundPlayer.situation("general_button_click", screen)
                     mapWidget.onStartButtonClicked(this@label)
                     isDisabled = true
@@ -259,6 +285,26 @@ class MapScreen : ScreenCreator() {
                     dropShadow.showDropShadow = false
                 },
             )
+        }
+
+        fun updateDescription(node: MapNode) {
+            eventName.setText("")
+            eventDescription.setText("")
+            startButton.setText("")
+            val event = node.event ?: return
+            if (!event.displayDescription) return
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile) { "MapScreen can only be used with profile" }
+            val map = profile.currentMapSaver.currentMap
+            startButton.setText(event.buttonText)
+            eventName.setText(event.displayName)
+            eventDescription.setText(event.currentDescription(map))
+        }
+
+        updateDescription(mapWidget.playerNode)
+        mapWidget.events.watchFor<DetailMapWidget.PlayerChangedNodeEvent> { (node) ->
+            updateOpenClosed(node)
+            updateDescription(node)
         }
     }
 

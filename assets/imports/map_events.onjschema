@@ -9,9 +9,11 @@ $DifficultyScaling {
 }
 
 var mapEventStandardConfig = {
-    currentlyBlocks: boolean,
-    startable: boolean,
     isCompleted: boolean,
+    descriptionText: {
+        predicate: $MapPredicate,
+        text: string,
+    }[],
     startConditions?: $MapPredicate[],
     blockConditions?: $MapPredicate[],
 };
@@ -36,7 +38,6 @@ $MapEvent {
     $SimpleMapEvent {
         ...mapEventStandardConfig,
         displayDescription?: boolean,
-        descriptionText?: string,
         displayName?: string
     }
 
@@ -54,9 +55,6 @@ $MapEvent {
     $DialogMapEvent {
         dialog: string,
         displayName: string,
-        descriptionText: string,
-        completedDescriptionText: string,
-        canOnlyBeStartedOnce: boolean,
         ...mapEventStandardConfig
     }
 
@@ -82,18 +80,9 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
-    $LockNodeMapEvent {
-        conditions: $MapPredicate[],
-        locked: boolean,
-        lockedDescription: string,
-        openDescription: string,
-    }
-
     $CompleteRunMapEvent {
         runName: string,
         displayName: string,
-        descriptionText: string,
-        completedDescriptionText: string,
         ...mapEventStandardConfig
     }
 

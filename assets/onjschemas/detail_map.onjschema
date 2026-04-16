@@ -22,7 +22,6 @@ nodes: {
     imagePos?: string,
     event: $MapEvent?,
     distance?: int,
-    additionalEvent?: $MapEvent,
 }[],
 
 decorations: {

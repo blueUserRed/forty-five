@@ -269,8 +269,11 @@ abstract class BaseMapGenerator {
             val event = node.event
             if (event !is EncounterPlaceholderMapEvent) return@forEach
             val encounter = EncounterGenerator.generate(event, node, startNode)
-            val mapEvent = EncounterMapEvent(encounter, event.genExtraction)
-            node.event = mapEvent
+            val encounterEvent = EncounterMapEvent(encounter, event.genExtraction)
+            event.startConditions.forEach { encounterEvent.addStartCondition(it) }
+            event.blockConditions.forEach { encounterEvent.addBlockCondition(it) }
+            encounterEvent.setDescriptionText(event.descriptionText)
+            node.event = encounterEvent
         }
     }
 
