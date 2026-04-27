@@ -7,7 +7,6 @@ import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
-import com.microwavestudios.fortyfive.rendering.GameRenderPipeline
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
@@ -29,7 +28,6 @@ interface GameController {
 
     val screen: CustomScreen
     val encounterContext: EncounterContext
-    val gameRenderPipeline: GameRenderPipeline
 
     val playerLost: Boolean
 

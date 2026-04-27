@@ -13,7 +13,6 @@ import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.rendering.BetterShader
-import com.microwavestudios.fortyfive.rendering.GameRenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
@@ -43,8 +42,6 @@ class GameControllerImpl(
     private val warningParent: WarningParent,
     override val afterlife: Afterlife,
 ) : ScreenController(), GameController, ResourceBorrower {
-
-    override val gameRenderPipeline: GameRenderPipeline = GameRenderPipeline(screen)
 
     override val playerLost: Boolean = false
 
@@ -224,7 +221,7 @@ class GameControllerImpl(
     }
 
     override fun onShow() {
-        FortyFive.useRenderPipeline(gameRenderPipeline)
+//        FortyFive.useRenderPipeline(gameRenderPipeline)
     }
 
     private fun bindGameEventListeners() {
@@ -248,7 +245,8 @@ class GameControllerImpl(
             } }
         }
         gameEvents.watchFor<Events.ParryStateChange> { (inParryMenu) ->
-            if (inParryMenu) gameRenderPipeline.startParryEffect() else gameRenderPipeline.stopParryEffect()
+            val renderPipeline = FortyFive.currentRenderPipeline ?: return@watchFor
+            if (inParryMenu) renderPipeline.startParryEffect() else renderPipeline.stopParryEffect()
         }
         gameEvents.watchFor<CardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.ShootButtonPressed> { if (!isUIFrozen) shoot() }
@@ -915,7 +913,7 @@ class GameControllerImpl(
         include(updatePlayerLivesTimeline(curPlayerLives - newDamage))
         action {
             FortyFive.soundPlayer.situation("enemy_attack", controller.screen)
-            dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
+            dispatchAnimTimeline(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
             dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen, controller).wrap())
             FortyFive.logger.debug(
                 logTag,
@@ -969,7 +967,7 @@ class GameControllerImpl(
             ).asTimeline(controller).asAction()
             val postProcessorAction = Timeline.timeline {
                 delay(100)
-                include(gameRenderPipeline.getScreenShakePopoutTimeline())
+                include(FortyFive.currentRenderPipeline!!.getScreenShakePopoutTimeline())
                 delay(50)
                 action { FortyFive.soundPlayer.situation("shield_anim", screen) }
             }.asAction()
@@ -982,7 +980,7 @@ class GameControllerImpl(
             FortyFive.logger.debug(logTag, "player lost")
             animTimelines.forEach(Timeline::stopTimeline)
         }
-        include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
+        include(FortyFive.currentRenderPipeline!!.getFadeToBlackTimeline(2000, stayBlack = true))
         delay(500)
         action {
             if (profile.isRunActive) {
@@ -1214,7 +1212,7 @@ class GameControllerImpl(
 
         action {
             FortyFive.soundPlayer.situation("revolver_shot", screen)
-            val postProcessor = gameRenderPipeline.getOnShotPostProcessingTimeline()
+            val postProcessor = FortyFive.currentRenderPipeline!!.getOnShotPostProcessingTimeline()
             dispatchAnimTimeline(postProcessor)
         }
         cardToShoot?.let { card ->

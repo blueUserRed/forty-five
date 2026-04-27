@@ -132,7 +132,7 @@ class ScreenManager(
                 this@ScreenManager.currentScreen = screen
                 FortyFive.currentScreen = screen
                 nextScreen = null
-                FortyFive.useRenderPipeline(RenderPipeline(screen, screen))
+                FortyFive.useRenderPipeline(RenderPipeline(screen))
                 FortyFive.setScreen(screen)
             }
             transition?.transitionTo?.let {

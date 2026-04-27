@@ -297,7 +297,7 @@ class EncounterScreen : ScreenCreator() {
                         addAction(action)
                         event.controller.dispatchAnimTimeline(Timeline.timeline {
                             delay(200)
-                            include(event.controller.gameRenderPipeline.getScreenShakeTimeline())
+                            include(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
                         })
                     }
                     delayUntil { action.isComplete }

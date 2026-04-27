@@ -50,7 +50,7 @@ open class CustomScreen(
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
-) : ScreenAdapter(), Renderable, ResourceBorrower {
+) : ScreenAdapter(), ResourceBorrower {
 
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -272,8 +272,9 @@ open class CustomScreen(
         inputManager.update()
         val batch = stage.batch
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        batch.enableBlending()
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         if (batch.isDrawing) batch.end()
-        stage.viewport.apply()
         doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
         stage.draw()
         drawFocusedActorBox()
