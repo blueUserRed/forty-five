@@ -61,16 +61,19 @@ class GameControllerImpl(
         get() = _playerStatusEffects
 
     override val isEverlastingDisabled: Boolean
-        get() = _encounterModifiers.any { it.second.disableEverlasting() } ||
+        get() = _encounterBehaviours.any { it.second.disableEverlasting() } ||
                 _playerStatusEffects.any { it.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
 
-    private val _encounterModifiers: MutableList<Pair<((GameController) -> Boolean)?, EncounterModifier>> = mutableListOf()
-
+    private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
     override val encounterModifiers: List<EncounterModifier>
-        get() = _encounterModifiers.map { it.second }
+        get() = _encounterModifiers
+
+    private val _encounterBehaviours: MutableList<Pair<(GameController) -> Boolean, EncounterBehaviour>> = mutableListOf()
+    override val encounterBehaviours: List<EncounterBehaviour>
+        get() = _encounterBehaviours.map { it.second }
 
     override var curPlayerLives: Int
         get() = profile.healthInRun!!
@@ -173,9 +176,6 @@ class GameControllerImpl(
         appendMainTimeline(Timeline.timeline {
             delay(300)
             updateReserves(Config.baseReserves)
-            action {
-                _encounterModifiers.forEach { it.second.onStart(controller) }
-            }
             action { chooseEnemyActions() }
             later {
                 cardStack.cards().forEach { card ->
@@ -267,8 +267,8 @@ class GameControllerImpl(
             if (!event.before) {
                 event.card.changeZone(event.newZone, this)
                 if (event.newZone == Zone.REVOLVER) event.append {
-                    _encounterModifiers.forEach { (_, modifier) ->
-                        val timeline = modifier.executeAfterBulletWasPlacedInRevolver(event.card, controller)
+                    _encounterBehaviours.forEach { (_, behaviour) ->
+                        val timeline = behaviour.executeAfterBulletWasPlacedInRevolver(event.card, controller)
                         if (timeline != null) include(timeline)
                     }
                 }
@@ -307,7 +307,7 @@ class GameControllerImpl(
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
                 later {
-                    encounterModifiers
+                    encounterBehaviours
                         .mapNotNull { it.executeOnEndTurn() }
                         .collectTimeline()
                         .let { include(it) }
@@ -319,7 +319,7 @@ class GameControllerImpl(
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
                 later {
-                    encounterModifiers
+                    encounterBehaviours
                         .mapNotNull { it.executeOnPlayerTurnStart(controller) }
                         .collectTimeline()
                         .let { include(it) }
@@ -329,8 +329,8 @@ class GameControllerImpl(
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
             val situation = GameSituation.RevolverRotation(event.rotation)
             event.append {
-                _encounterModifiers.forEach { (_, modifier) ->
-                    val timeline = modifier.executeAfterRevolverRotated(event.rotation, controller)
+                _encounterBehaviours.forEach { (_, behaviour) ->
+                    val timeline = behaviour.executeAfterRevolverRotated(event.rotation, controller)
                     if (timeline != null) include(timeline)
                 }
                 include(checkTrigger(situation, event.triggerInformation))
@@ -359,8 +359,8 @@ class GameControllerImpl(
             event.append {
                 include(checkTrigger(situation, event.triggerInformation))
                 later {
-                    _encounterModifiers.forEach { (_, modifier) ->
-                        val timeline = modifier.executeAfterRevolverWasShot(event.card, controller)
+                    _encounterBehaviours.forEach { (_, behaviour) ->
+                        val timeline = behaviour.executeAfterRevolverWasShot(event.card, controller)
                         if (timeline != null) include(timeline)
                     }
                 }
@@ -392,8 +392,8 @@ class GameControllerImpl(
 
     override fun update() {
         gameEvents.fire(EncounterScreen.UpdateUiEvent(this))
-        _encounterModifiers.removeIf { (predicate, _) -> predicate != null && !predicate(controller) }
-        _encounterModifiers.forEach { it.second.update(controller) }
+        _encounterBehaviours.removeIf { (predicate, _) -> !predicate(controller) }
+        _encounterBehaviours.forEach { it.second.update(controller) }
 
         animTimelines.forEach(Timeline::updateTimeline)
         mainTimeline.updateTimeline()
@@ -410,7 +410,7 @@ class GameControllerImpl(
 
         cardPrototypes = ConfigFileManager.loadCards { card ->
             createdCards.add(card)
-            encounterModifiers.forEach { it.initBullet(card) }
+            encounterBehaviours.forEach { it.initBullet(card) }
             screen.lifetime.tieDisposable(card)
             card.setGame(controller)
         }
@@ -639,7 +639,7 @@ class GameControllerImpl(
         var newRotation = if (ignoreEncounterModifiers) {
             rotation
         } else {
-            encounterModifiers.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
+            encounterBehaviours.fold(rotation) { acc, cur -> cur.modifyRevolverRotation(acc) }
         }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
         if (newRotation.amount == 0) return@later
@@ -677,11 +677,11 @@ class GameControllerImpl(
     ): Timeline = Timeline.timeline { later {
 
         var cardsToDraw = amount
-        cardsToDraw += encounterModifiers.sumOf {
+        cardsToDraw += encounterBehaviours.sumOf {
             if (isSpecial) it.additionalCardsToDrawInSpecialDraw() else it.additionalCardsToDrawInNormalDraw()
         }
         cardsToDraw = floor(
-            encounterModifiers
+            encounterBehaviours
                 .fold(cardsToDraw.toFloat()) { acc, cur ->
                     acc * (if (isSpecial) cur.cardsInSpecialDrawMultiplier() else cur.cardsInNormalDrawMultiplier())
                 }
@@ -882,7 +882,7 @@ class GameControllerImpl(
         enemy: Enemy,
         source: Card?,
     ): Timeline = Timeline.timeline { later {
-        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) {
+        if (encounterBehaviours.any { !it.shouldApplyStatusEffects() }) {
             FortyFive.logger.debug(logTag, "cant apply status effect because they are disabled")
             return@later
         }
@@ -1187,7 +1187,7 @@ class GameControllerImpl(
 
     private fun shootTimeline(): Timeline = Timeline.timeline { later {
 
-        if (encounterModifiers.any { !it.canShootRevolver(controller) }) return@later
+        if (encounterBehaviours.any { !it.canShootRevolver(controller) }) return@later
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.getRotationDirection(controller) ?: RevolverRotation.Right(1)
 
@@ -1289,17 +1289,19 @@ class GameControllerImpl(
         }
     }
 
-    override fun addTemporaryEncounterModifier(
-        modifier: EncounterModifier,
+    override fun addTemporaryEncounterBehaviour(
+        behaviour: EncounterBehaviour,
         validityChecker: (GameController) -> Boolean
     ) {
-        FortyFive.logger.debug(logTag, "added temporary encounter modifier $modifier")
-        _encounterModifiers.add(validityChecker to modifier)
+        FortyFive.logger.debug(logTag, "added temporary encounter behaviour $behaviour")
+        _encounterBehaviours.add(validityChecker to behaviour)
         // No event in this case, because temporary encounter modifiers aren't displayed
     }
 
     override fun addEncounterModifier(modifier: EncounterModifier) {
-        _encounterModifiers.add(null to modifier)
+        _encounterModifiers.add(modifier)
+        val alwaysTrue = { _: GameController -> true }
+        modifier.behaviours().forEach { _encounterBehaviours.add(alwaysTrue to it) }
         gameEvents.fire(Events.EncounterModifierAdded(modifier))
     }
 

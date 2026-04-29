@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.game.controller
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.microwavestudios.fortyfive.game.EncounterBehaviour
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameAnimation
 import com.microwavestudios.fortyfive.game.StatusEffect
@@ -62,6 +63,8 @@ interface GameController {
     val isEverlastingDisabled: Boolean
     val cardsInHand: List<Card>
     val encounterModifiers: List<EncounterModifier>
+
+    val encounterBehaviours: List<EncounterBehaviour>
 
     val curPlayerLives: Int
 
@@ -195,10 +198,9 @@ interface GameController {
     fun tryPay(cost: Int, animTarget: Actor? = null): Boolean
 
     /**
-     * adds an encounter modifier and removes it again one [validityChecker] is not true anymore. Encounter
-     * Modifier added like this are not displayed in the UI
+     * adds an encounter behaviour and removes it again one [validityChecker] is not true anymore
      */
-    fun addTemporaryEncounterModifier(modifier: EncounterModifier, validityChecker: (GameController) -> Boolean)
+    fun addTemporaryEncounterBehaviour(behaviour: EncounterBehaviour, validityChecker: (GameController) -> Boolean)
 
     fun addEncounterModifier(modifier: EncounterModifier)
 

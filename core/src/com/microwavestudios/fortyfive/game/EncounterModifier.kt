@@ -1,42 +1,20 @@
 package com.microwavestudios.fortyfive.game
 
-import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardCostModifier
-import com.microwavestudios.fortyfive.game.card.CardDamageModifier
 import com.microwavestudios.fortyfive.game.card.CardModifierData
-import com.microwavestudios.fortyfive.game.card.GameSituation
-import com.microwavestudios.fortyfive.game.card.Trigger
-import com.microwavestudios.fortyfive.game.card.TriggerInformation
 import com.microwavestudios.fortyfive.game.controller.GameController
-import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
-import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.Timeline
 import onj.value.OnjArray
 import kotlin.collections.forEach
 import kotlin.collections.map
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 sealed class EncounterModifier {
 
-    private val _types: MutableList<Type> = mutableListOf()
-
-    val types: List<Type>
-        get() = _types
-
-    val isRtBased: Boolean
-        get() = Type.RT_BASED in _types
-
     abstract val difficultyChange: Float
-
-    init {
-        @Suppress("LeakingThis")
-        _types.addAll(getModifierTypes())
-    }
 
     data object Rain : EncounterModifier() {
         override val displayName: String = "Rain"
@@ -44,7 +22,7 @@ sealed class EncounterModifier {
         override val description: String = "Status effects don't work."
         override val difficultyChange: Float = 0.2f
 
-        override fun shouldApplyStatusEffects(): Boolean = false
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.NoStatusEffects)
     }
 
     data object Frost : EncounterModifier() {
@@ -53,9 +31,7 @@ sealed class EncounterModifier {
         override val description: String = "The revolver doesn't turn. Everlasting doesn't work."
         override val difficultyChange: Float = 1f
 
-        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
-
-        override fun disableEverlasting(): Boolean = true
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.NoRevolverRotation)
     }
 
     data object BewitchedMist : EncounterModifier() {
@@ -64,11 +40,7 @@ sealed class EncounterModifier {
         override val description: String = "Revolver rotations are inverted."
         override val difficultyChange: Float = 0.1f
 
-        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
-            is RevolverRotation.Right -> RevolverRotation.Left(rotation.amount)
-            is RevolverRotation.Left -> RevolverRotation.Right(rotation.amount)
-            else -> rotation
-        }
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.MirrorRevolverRotations)
     }
 
     data object Lookalike : EncounterModifier() {
@@ -77,10 +49,7 @@ sealed class EncounterModifier {
         override val description: String = "Whenever you place a bullet in the revolver, you get a copy of it in your hand."
         override val difficultyChange: Float = 0f // this modifier is so broken that correcting for it would be useless anyway
 
-        override fun executeAfterBulletWasPlacedInRevolver(
-            card: Card,
-            controller: GameController
-        ): Timeline = controller.tryToPutCardsInHandTimeline(card.type)
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.Lookalike)
     }
 
     data object Moist : EncounterModifier() {
@@ -89,32 +58,7 @@ sealed class EncounterModifier {
         override val description: String = "Every bullet in the revolver loses one damage every time it turns."
         override val difficultyChange: Float = 0.5f
 
-        override fun executeAfterBulletWasPlacedInRevolver(
-            card: Card,
-            controller: GameController
-        ): Timeline = Timeline.timeline {
-            val rotationTransformer = { old: CardDamageModifier, triggerInformation: TriggerInformation -> CardDamageModifier(
-                damage = old.damage - (triggerInformation.multiplier ?: 1),
-                data = CardModifierData(
-                    source = old.data.source,
-                    validityChecker = old.data.validityChecker,
-                ),
-                transformers = old.transformers
-            )}
-            val modifier = CardDamageModifier(
-                damage = 0,
-                data = CardModifierData(
-                    source = "moist modifier",
-                    validityChecker = { _, _, _ -> card.inZone(Zone.REVOLVER) },
-                ),
-                transformers = listOf(
-                    Trigger.triggerForSituation<GameSituation.RevolverRotation>() to rotationTransformer
-                )
-            )
-            card.addDamageModifier(modifier, controller)
-        }
-
-
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.Moist("moist modifier"))
     }
 
     class SteelNerves : EncounterModifier() {
@@ -123,53 +67,7 @@ sealed class EncounterModifier {
         override val description: String = "The revolver shoots automatically every ten seconds."
         override val difficultyChange: Float = 0.5f
 
-        private var baseTime: Long = -1
-        private var lastDigit: Int = -1
-
-        override fun getModifierTypes(): List<Type> = listOf(Type.RT_BASED)
-
-        override fun onStart(controller: GameController) {
-            controller.gameEvents.fire(GameControllerImpl.Events.SteelNervesCountdown(10))
-        }
-
-        override fun update(controller: GameController) {
-            if (baseTime == -1L) return
-
-            if (controller.playerLost || controller.hasWon) {
-                baseTime = -1L
-            }
-
-            val now = TimeUtils.millis()
-            val diff = max(10 - ((now - baseTime).toDouble() / 1000.0).roundToInt(), 0)
-            if (diff != lastDigit) {
-                lastDigit = diff
-                controller.gameEvents.fire(GameControllerImpl.Events.SteelNervesCountdown(diff))
-            }
-            if (now - baseTime < 10_000) return
-            if (controller.isUIFrozen) return
-            baseTime = -1
-            controller.shoot()
-        }
-
-        override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
-            action {
-                baseTime = TimeUtils.millis()
-                lastDigit = 10
-            }
-        }
-
-        override fun executeOnEndTurn(): Timeline = Timeline.timeline {
-            action {
-                baseTime = -1
-            }
-        }
-
-        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
-            action {
-                baseTime = TimeUtils.millis()
-                lastDigit = 10
-            }
-        }
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.SteelNerves())
     }
 
     data object DrawOneMoreCard : EncounterModifier() {
@@ -178,8 +76,7 @@ sealed class EncounterModifier {
         override val description: String = ""
         override val difficultyChange: Float = 0f
 
-        override fun additionalCardsToDrawInSpecialDraw(): Int = 1
-        override fun additionalCardsToDrawInNormalDraw(): Int = 1
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.DrawMoreCards(1))
     }
 
     data object Draft : EncounterModifier() {
@@ -197,24 +94,10 @@ sealed class EncounterModifier {
         override val description: String = "All bullets cost 1 less, but shooting the revolver costs 1 reserve."
         override val difficultyChange: Float = -0.2f
 
-        override fun initBullet(card: Card) {
-            card.addCostModifier(
-                CardCostModifier(
-                    data = CardModifierData(
-                        source = "An offer you cant refuse",
-                    ),
-                    costChange = -1,
-                )
-            )
-        }
-
-        override fun canShootRevolver(controller: GameController): Boolean {
-            return controller.curReserves >= 1
-        }
-
-        override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
-            controller.tryPay(1, controller.shootButton)
-        }
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.ChangeBulletCost(-1, "An offer you cant refuse"),
+            EncounterBehaviour.ShootingRevolverCostsReserves(1)
+        )
     }
 
     data object BulletSkipping : EncounterModifier() {
@@ -223,8 +106,7 @@ sealed class EncounterModifier {
         override val description: String = "When a bullet shoots, it turns twice, skipping the slot in between."
         override val difficultyChange: Float = -0.2f
 
-        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation =
-            rotation.withAmount(rotation.amount * 2)
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.BulletSkipping)
     }
 
     data object Sacrifice : EncounterModifier() {
@@ -233,17 +115,7 @@ sealed class EncounterModifier {
         override val description: String = "At the beginning of every turn, destroy target bullet."
         override val difficultyChange: Float = 0.65f
 
-        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
-            later {
-                val selector = CardInRevolverSelector(controller, "Select bullet to destroy")
-                val promise = selector.startSelect()
-                waitForPromise(promise)
-                later {
-                    val result = promise.getOrNull()
-                    if (result != null) include(controller.destroyCardTimeline(result))
-                }
-            }
-        }
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.Sacrifice)
     }
 
     data object SorryNotSorry : EncounterModifier() {
@@ -252,17 +124,7 @@ sealed class EncounterModifier {
         override val description: String = "At the beginning of every turn, return a random Bullet back to your hand."
         override val difficultyChange: Float = 0.0f
 
-        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
-            var card: Card? = null
-            action {
-                card = controller.cardsInRevolver().randomOrNull()
-            }
-            includeLater(
-                { controller.bounceBulletTimeline(card!!) },
-                { card != null }
-            )
-        }
-
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.SorryNotSorry)
     }
 
     data object Confused : EncounterModifier() {
@@ -271,62 +133,16 @@ sealed class EncounterModifier {
         override val description: String = "The revolver rotates when a card is placed down, not when it is shot. Everlasting doesn't work."
         override val difficultyChange: Float = 0.2f
 
-        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
-
-        override fun executeAfterBulletWasPlacedInRevolver(
-            card: Card,
-            controller: GameController
-        ): Timeline = Timeline.timeline {
-            includeLater({
-                controller.rotateRevolverTimeline(
-                    card.getRotationDirection(controller),
-                    ignoreEncounterModifiers = true
-                )
-            })
-        }
-
-        override fun disableEverlasting(): Boolean = true
+        override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.Confused)
     }
 
     abstract val displayName: String
     abstract val iconHandle: ResourceHandle
     abstract val description: String
 
-    open fun getModifierTypes(): List<Type> = listOf()
-
-    open fun update(controller: GameController) {}
-
-    open fun onStart(controller: GameController) {}
-
-    open fun executeOnEndTurn(): Timeline? = null
-
-    open fun executeOnPlayerTurnStart(controller: GameController): Timeline? = null
-
-    open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
-
-    open fun shouldApplyStatusEffects(): Boolean = true
-
-    open fun disableEverlasting(): Boolean = false
-
-    open fun executeAfterBulletWasPlacedInRevolver(card: Card, controller: GameController): Timeline? = null
-
-    open fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline? = null
-
-    open fun executeAfterRevolverRotated(rotation: RevolverRotation, controller: GameController): Timeline? = null
-
-    open fun cardsInSpecialDrawMultiplier(): Float = 1f
-
-    open fun cardsInNormalDrawMultiplier(): Float = 1f
-
-    open fun additionalCardsToDrawInSpecialDraw(): Int = 0
-
-    open fun additionalCardsToDrawInNormalDraw(): Int = 0
+    open fun behaviours(): List<EncounterBehaviour> = listOf()
 
     open fun intermediateScreen(): String? = null
-
-    open fun initBullet(card: Card) {}
-
-    open fun canShootRevolver(controller: GameController): Boolean = true
 
     companion object {
 
@@ -378,9 +194,5 @@ sealed class EncounterModifier {
             }
             return false
         }
-    }
-
-    enum class Type {
-        RT_BASED
     }
 }

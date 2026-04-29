@@ -1132,7 +1132,7 @@ cards: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
-                effect: addEncounterModifierWhileBulletIsInRevolver("drawonemorecard")
+                effect: drawOneMoreCardWhileBulletIsInRevolver()
             }
         ],
         cost: 3,

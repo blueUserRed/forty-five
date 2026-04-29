@@ -834,10 +834,7 @@ abstract class Effect(val data: EffectData) {
         override fun copy(data: EffectData): Effect = DischargePoison(turns, data)
     }
 
-    class AddEncounterModifierWhileBulletIsInRevolver(
-        private val encounterModifierName: String,
-        data: EffectData
-    ) : Effect(data) {
+    class DrawOneMoreCardWhileBulletIsInRevolver(data: EffectData) : Effect(data) {
 
         override fun onTrigger(
             card: Card,
@@ -846,8 +843,8 @@ abstract class Effect(val data: EffectData) {
             situation: GameSituation
         ): Timeline = Timeline.timeline {
             action {
-                controller.addTemporaryEncounterModifier(
-                    modifier = EncounterModifier.getFromName(encounterModifierName),
+                controller.addTemporaryEncounterBehaviour(
+                    behaviour = EncounterBehaviour.DrawMoreCards(1),
                     validityChecker = { card.inZone(GameControllerImpl.Zone.REVOLVER) }
                 )
             }
@@ -855,8 +852,7 @@ abstract class Effect(val data: EffectData) {
 
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
-        override fun copy(data: EffectData): Effect =
-            AddEncounterModifierWhileBulletIsInRevolver(encounterModifierName, data)
+        override fun copy(data: EffectData): Effect = DrawOneMoreCardWhileBulletIsInRevolver(data)
     }
 
     class DrawFromBottomOfDeck(val amount: EffectValue, data: EffectData) : Effect(data) {
