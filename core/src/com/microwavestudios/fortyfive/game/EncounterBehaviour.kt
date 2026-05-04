@@ -224,7 +224,7 @@ abstract class EncounterBehaviour {
         override fun additionalCardsToDrawInInitialDraw(): Int = additionalCards
     }
 
-    class FieldRations(val initialReserves: Int) : EncounterBehaviour() {
+    class FieldRations(initialReserves: Int) : EncounterBehaviour() {
 
         private var currentReserves = initialReserves.coerceAtLeast(2)
 
@@ -236,6 +236,53 @@ abstract class EncounterBehaviour {
             controller: GameController,
             reserves: Int
         ): Int = currentReserves
+    }
+
+    class SleepingBag : EncounterBehaviour() {
+
+        private var lastRevolverTurn = -1
+
+        override fun executeAfterRevolverRotated(
+            rotation: RevolverRotation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            action { lastRevolverTurn = controller.turnCounter }
+        }
+
+        override fun modifyReserves(
+            controller: GameController,
+            reserves: Int
+        ): Int {
+            val rotatedLastTurn = controller.turnCounter - 1 == lastRevolverTurn
+            return if (rotatedLastTurn) reserves else reserves + 1
+        }
+    }
+
+    class Lasso : EncounterBehaviour() {
+
+        override fun onStart(controller: GameController) {
+            controller.gameEvents.watchFor<GameControllerImpl.Events.CardChangeZoneEvent> { event ->
+                if (event.before || event.newZone != Zone.REVOLVER) return@watchFor
+                event.append { selectAndBounceBullet(controller, event) }
+            }
+        }
+
+        private fun Timeline.TimelineBuilderDSL.selectAndBounceBullet(
+            controller: GameController,
+            event: GameControllerImpl.Events.CardChangeZoneEvent
+        ) {
+            val targetSelector = CardInRevolverSelector(
+                controller,
+                "Choose bullet to return to your hand",
+                predicate = { it != event.card }
+            )
+            val promise = targetSelector.startSelect()
+            waitForPromise(promise)
+            later {
+                val card = promise.getOrNull() ?: return@later
+                include(controller.bounceBulletTimeline(card))
+            }
+        }
     }
 
     open fun update(controller: GameController) {}

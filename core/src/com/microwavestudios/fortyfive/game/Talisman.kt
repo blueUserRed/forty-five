@@ -48,6 +48,33 @@ abstract class Talisman {
         )
     }
 
+    object SleepingBag : Talisman() {
+
+        override val name: String = "sleepingBag"
+        override val title: String = "Sleeping Bag"
+        override val description: String = """
+            You start the turn with +1 reserves, as long as the revolver didn't rotate last turn.
+        """.trimIndent().replace('\n', ' ')
+
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.SleepingBag()
+        )
+    }
+
+    object Lasso : Talisman() {
+
+        override val name: String = "lasso"
+        override val title: String = "Lasso"
+        override val description: String = """
+            Whenever you place a bullet in the revolver,
+            return a different bullet from the revolver to your hand.
+        """.trimIndent().replace('\n', ' ')
+
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.Lasso()
+        )
+    }
+
 }
 
 object TalismanFactory {
@@ -58,6 +85,8 @@ object TalismanFactory {
         addTalisman(Talisman.TalismanBullet)
         addTalisman(Talisman.GoldNugget)
         addTalisman(Talisman.FieldRations)
+        addTalisman(Talisman.SleepingBag)
+        addTalisman(Talisman.Lasso)
     }
 
     fun addTalisman(talisman: Talisman) {

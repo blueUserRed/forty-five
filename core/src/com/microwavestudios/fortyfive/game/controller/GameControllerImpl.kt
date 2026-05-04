@@ -324,6 +324,16 @@ class GameControllerImpl(
         gameEvents.watchFor<Events.TurnBeginEvent> { event ->
             val situation = GameSituation.TurnBegin
             event.append {
+                action {
+                    // update ui in case base reserves changed
+                    gameEvents.fire(Events.ReservesChanged(
+                        curReserves,
+                        curReserves,
+                        currentTurnStartReserves(),
+                        null,
+                        controller
+                    ))
+                }
                 include(checkTrigger(situation, event.triggerInformation))
                 later {
                     encounterBehaviours
@@ -334,6 +344,7 @@ class GameControllerImpl(
             }
         }
         gameEvents.watchFor<Events.RevolverRotatedEvent> { event ->
+            if (event.rotation.amount == 0) return@watchFor
             val situation = GameSituation.RevolverRotation(event.rotation)
             event.append {
                 _encounterBehaviours.forEach { (_, behaviour) ->
