@@ -202,6 +202,11 @@ interface GameController {
      */
     fun addTemporaryEncounterBehaviour(behaviour: EncounterBehaviour, validityChecker: (GameController) -> Boolean)
 
+    /**
+     * add an encounter behaviour that stays active for the duration of the encounter
+     */
+    fun addEncounterBehaviour(behaviour: EncounterBehaviour)
+
     fun addEncounterModifier(modifier: EncounterModifier)
 
     fun initEnemyArea(enemies: List<Enemy>)

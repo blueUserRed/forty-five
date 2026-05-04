@@ -166,6 +166,9 @@ class GameControllerImpl(
         encounter.encounterModifier.forEach {
             addEncounterModifier(it)
         }
+        profile.talismans.forEach {
+            addTalisman(it)
+        }
 
         bindGameEventListeners()
 
@@ -410,7 +413,7 @@ class GameControllerImpl(
 
         cardPrototypes = ConfigFileManager.loadCards { card ->
             createdCards.add(card)
-            encounterBehaviours.forEach { it.initBullet(card) }
+            encounterBehaviours.forEach { it.initBullet(card, controller) }
             screen.lifetime.tieDisposable(card)
             card.setGame(controller)
         }
@@ -1295,14 +1298,25 @@ class GameControllerImpl(
     ) {
         FortyFive.logger.debug(logTag, "added temporary encounter behaviour $behaviour")
         _encounterBehaviours.add(validityChecker to behaviour)
+        behaviour.onStart(controller)
         // No event in this case, because temporary encounter modifiers aren't displayed
+    }
+
+    override fun addEncounterBehaviour(behaviour: EncounterBehaviour) {
+        val alwaysTrue = { _: GameController -> true }
+        _encounterBehaviours.add(alwaysTrue to behaviour)
+        behaviour.onStart(controller)
     }
 
     override fun addEncounterModifier(modifier: EncounterModifier) {
         _encounterModifiers.add(modifier)
-        val alwaysTrue = { _: GameController -> true }
-        modifier.behaviours().forEach { _encounterBehaviours.add(alwaysTrue to it) }
+        modifier.behaviours().forEach { addEncounterBehaviour(it) }
         gameEvents.fire(Events.EncounterModifierAdded(modifier))
+    }
+
+    private fun addTalisman(talisman: Talisman) {
+        // TODO: display
+        talisman.behaviours().forEach { addEncounterBehaviour(it) }
     }
 
     override fun initEnemyArea(enemies: List<Enemy>) {

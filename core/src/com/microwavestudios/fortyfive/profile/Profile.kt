@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
+import com.microwavestudios.fortyfive.game.Talisman
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
@@ -103,6 +104,9 @@ class Profile private constructor(val name: String, private var runSave: RunSave
 
     val encountersStartedInRun: Int?
         get() = runSave?.encountersStarted
+
+    val talismans: List<Talisman>
+        get() = runSave?.talismans ?: listOf()
 
     var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 

@@ -130,11 +130,12 @@ abstract class EncounterBehaviour {
 
     class ChangeBulletCost(val costChange: Int, val sourceName: String) : EncounterBehaviour() {
 
-        override fun initBullet(card: Card) {
+        override fun initBullet(card: Card, controller: GameController) {
             card.addCostModifier(
                 CardCostModifier(
                     data = CardModifierData(
                         source = sourceName,
+                        keepActive = true
                     ),
                     costChange = costChange,
                 )
@@ -204,6 +205,20 @@ abstract class EncounterBehaviour {
         override fun disableEverlasting(): Boolean = true
     }
 
+    class ChangeDamageOfAllBullets(val change: Int, val source: String) : EncounterBehaviour() {
+
+        override fun initBullet(card: Card, controller: GameController) {
+            val modifier = CardDamageModifier(
+                damage = change,
+                data = CardModifierData(
+                    source = source,
+                    keepActive = true
+                )
+            )
+            card.addDamageModifier(modifier, controller)
+        }
+    }
+
     open fun update(controller: GameController) {}
 
     open fun onStart(controller: GameController) {}
@@ -232,7 +247,7 @@ abstract class EncounterBehaviour {
 
     open fun additionalCardsToDrawInNormalDraw(): Int = 0
 
-    open fun initBullet(card: Card) {}
+    open fun initBullet(card: Card, controller: GameController) {}
 
     open fun canShootRevolver(controller: GameController): Boolean = true
 
