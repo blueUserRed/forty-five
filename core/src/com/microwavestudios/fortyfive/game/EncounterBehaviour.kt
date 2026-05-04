@@ -219,6 +219,25 @@ abstract class EncounterBehaviour {
         }
     }
 
+    class AddCardsInInitialDraw(val additionalCards: Int) : EncounterBehaviour() {
+
+        override fun additionalCardsToDrawInInitialDraw(): Int = additionalCards
+    }
+
+    class FieldRations(val initialReserves: Int) : EncounterBehaviour() {
+
+        private var currentReserves = initialReserves.coerceAtLeast(2)
+
+        override fun executeOnEndTurn(): Timeline = Timeline.timeline {
+            action { currentReserves = (currentReserves - 1).coerceAtLeast(2) }
+        }
+
+        override fun modifyReserves(
+            controller: GameController,
+            reserves: Int
+        ): Int = currentReserves
+    }
+
     open fun update(controller: GameController) {}
 
     open fun onStart(controller: GameController) {}
@@ -247,8 +266,12 @@ abstract class EncounterBehaviour {
 
     open fun additionalCardsToDrawInNormalDraw(): Int = 0
 
+    open fun additionalCardsToDrawInInitialDraw(): Int = 0
+
     open fun initBullet(card: Card, controller: GameController) {}
 
     open fun canShootRevolver(controller: GameController): Boolean = true
+
+    open fun modifyReserves(controller: GameController, reserves: Int): Int = reserves
 
 }

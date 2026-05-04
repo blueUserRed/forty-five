@@ -178,7 +178,7 @@ class GameControllerImpl(
         updateReserves(Config.baseReserves)
         appendMainTimeline(Timeline.timeline {
             delay(300)
-            updateReserves(Config.baseReserves)
+            updateReserves(currentTurnStartReserves())
             action { chooseEnemyActions() }
             later {
                 cardStack.cards().forEach { card ->
@@ -193,7 +193,11 @@ class GameControllerImpl(
                     })
                 }
             }
-            includeLater({ drawCardsTimeline(Config.cardsToDrawInFirstRound) })
+            includeLater({
+                val toDraw = Config.cardsToDrawInFirstRound +
+                        _encounterBehaviours.sumOf { it.second.additionalCardsToDrawInInitialDraw() }
+                drawCardsTimeline(toDraw)
+            })
             later {
                 val startTriggerInformation = createTriggerInfo(null)
                 val startEvent = Events.TurnBeginEvent(startTriggerInformation)
@@ -390,7 +394,13 @@ class GameControllerImpl(
         if (curReserves == newReserves) return
         val prevReserves = curReserves
         curReserves = newReserves
-        gameEvents.fire(Events.ReservesChanged(prevReserves, newReserves, sourceActor, this))
+        gameEvents.fire(Events.ReservesChanged(
+            prevReserves,
+            newReserves,
+            currentTurnStartReserves(),
+            sourceActor,
+            this
+        ))
     }
 
     override fun update() {
@@ -1587,7 +1597,7 @@ class GameControllerImpl(
         action {
             chooseEnemyActions()
             FortyFive.soundPlayer.situation("turn_begin", screen)
-            updateReserves(Config.baseReserves, revolver)
+            updateReserves(currentTurnStartReserves(), revolver)
         }
 
         includeLater({ drawCardsTimeline(Config.cardsToDraw) })
@@ -1599,6 +1609,10 @@ class GameControllerImpl(
             include(event.createTimeline())
         }
     } }
+
+    private fun currentTurnStartReserves(): Int = encounterBehaviours.fold(Config.baseReserves) { acc, cur ->
+        cur.modifyReserves(controller, acc)
+    }
 
     private fun endTurn() {
         appendMainTimeline(endTurnTimeline())
@@ -1684,6 +1698,7 @@ class GameControllerImpl(
         data class ReservesChanged(
             val old: Int,
             val new: Int,
+            val base: Int,
             val sourceActor: Actor? = null,
             val controller: GameController
         )

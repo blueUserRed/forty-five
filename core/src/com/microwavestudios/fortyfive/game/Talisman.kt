@@ -22,6 +22,32 @@ abstract class Talisman {
         )
     }
 
+    object GoldNugget : Talisman() {
+
+        override val name: String = "goldNugget"
+        override val title: String = "Gold Nugget"
+        override val description: String = "Start the Encounter with +2 handcards"
+
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.AddCardsInInitialDraw(2)
+        )
+    }
+
+    object FieldRations : Talisman() {
+
+        override val name: String = "fieldRations"
+        override val title: String = "Field Rations"
+        override val description: String = """
+            You start the encounter with 8 reserves in a turn.
+            Every turn, you start the turn with 1 less.
+            This can't reduce reserves to less than 2.
+        """.trimIndent().replace('\n', ' ')
+
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.FieldRations(8)
+        )
+    }
+
 }
 
 object TalismanFactory {
@@ -30,6 +56,8 @@ object TalismanFactory {
 
     init {
         addTalisman(Talisman.TalismanBullet)
+        addTalisman(Talisman.GoldNugget)
+        addTalisman(Talisman.FieldRations)
     }
 
     fun addTalisman(talisman: Talisman) {

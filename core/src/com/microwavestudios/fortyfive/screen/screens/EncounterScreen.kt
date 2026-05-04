@@ -940,8 +940,8 @@ class EncounterScreen : ScreenCreator() {
             label("red wing", "0/0", Color.White, (32 * 1.1).toInt()) {
                 centerX()
                 centerY()
-                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new) ->
-                    setText("${new}/${GameControllerImpl.Config.baseReserves}")
+                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
+                    setText("${new}/$base")
                 }
                 syncDimensions()
             }
@@ -1506,7 +1506,7 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun reservesChangedAnim(event: GameControllerImpl.Events.ReservesChanged) {
-        val (old, new, source, controller) = event
+        val (old, new, _, source, controller) = event
         source ?: return
         val amount = new - old
         val anim = when {
