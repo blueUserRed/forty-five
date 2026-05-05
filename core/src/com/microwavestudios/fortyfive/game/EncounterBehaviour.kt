@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.game
 
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.game.EncounterBehaviour.Lasso.selectAndBounceBullet
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardCostModifier
 import com.microwavestudios.fortyfive.game.card.CardDamageModifier
@@ -258,7 +259,7 @@ abstract class EncounterBehaviour {
         }
     }
 
-    class Lasso : EncounterBehaviour() {
+    object Lasso : EncounterBehaviour() {
 
         override fun onStart(controller: GameController) {
             controller.gameEvents.watchFor<GameControllerImpl.Events.CardChangeZoneEvent> { event ->
@@ -281,6 +282,23 @@ abstract class EncounterBehaviour {
             later {
                 val card = promise.getOrNull() ?: return@later
                 include(controller.bounceBulletTimeline(card))
+            }
+        }
+    }
+
+    class WintersGrace : EncounterBehaviour() {
+
+        private var addFrozen = false
+
+        override fun onStart(controller: GameController) {
+            controller.gameEvents.watchFor<GameControllerImpl.Events.CardChangeZoneEvent> { event ->
+                if (event.before || event.newZone != Zone.REVOLVER) return@watchFor
+                event.append { later {
+                    if (addFrozen) {
+                        include(controller.tryApplyStatusEffectToPlayerTimeline(Frozen(1, false)))
+                    }
+                    addFrozen = !addFrozen
+                } }
             }
         }
     }

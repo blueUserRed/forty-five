@@ -71,7 +71,21 @@ abstract class Talisman {
         """.trimIndent().replace('\n', ' ')
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
-            EncounterBehaviour.Lasso()
+            EncounterBehaviour.Lasso
+        )
+    }
+
+    object WintersGrace : Talisman() {
+
+        override val name: String = "wintersGrace"
+        override val title: String = "Winter's Grace"
+        override val description: String = $$"""
+            Every second Bullet that enters the revolver: 
+            You get status $status$FROZEN$status$(1)
+        """.trimIndent().replace('\n', ' ')
+
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.WintersGrace()
         )
     }
 
@@ -87,6 +101,7 @@ object TalismanFactory {
         addTalisman(Talisman.FieldRations)
         addTalisman(Talisman.SleepingBag)
         addTalisman(Talisman.Lasso)
+        addTalisman(Talisman.WintersGrace)
     }
 
     fun addTalisman(talisman: Talisman) {
