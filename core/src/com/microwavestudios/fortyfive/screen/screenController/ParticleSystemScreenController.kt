@@ -1,12 +1,12 @@
 package com.microwavestudios.fortyfive.screen.screenController
 
 import com.microwavestudios.fortyfive.particle.ParticleSystem
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 
 class ParticleSystemScreenController(
     val system: ParticleSystem,
-    private val screen: CustomScreen
+    private val screen: RenderableScreen
 ) : ScreenController() {
 
     override fun onShow() {

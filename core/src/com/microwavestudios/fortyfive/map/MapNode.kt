@@ -10,7 +10,7 @@ import com.microwavestudios.fortyfive.map.generation.Direction
 import com.microwavestudios.fortyfive.map.generation.Line
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.Promise
 import kotlin.math.*
 
@@ -116,7 +116,7 @@ data class MapNode(
         return curBestPos to (distance + curBestDist)
     }
 
-    fun getImage(screen: CustomScreen): Promise<Drawable>? {
+    fun getImage(screen: RenderableScreen): Promise<Drawable>? {
         if (imageName == null) return null
         if (imageCache != null) return imageCache
         val handle = getImageData()?.resourceHandle
@@ -128,7 +128,7 @@ data class MapNode(
         return imageCache
     }
 
-    fun getNodeTexture(screen: CustomScreen): Promise<Drawable>? {
+    fun getNodeTexture(screen: RenderableScreen): Promise<Drawable>? {
         if (nodeTexture == null) return null
         if (nodeTextureCache != null) return nodeTextureCache
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
@@ -136,7 +136,7 @@ data class MapNode(
         return nodeTextureCache
     }
 
-    fun getSecondaryNodeTexture(screen: CustomScreen): Promise<Drawable>? {
+    fun getSecondaryNodeTexture(screen: RenderableScreen): Promise<Drawable>? {
         val handle = additionalNodeTexture ?: return null
         if (secondaryNodeTextureCache != null) return secondaryNodeTextureCache
         secondaryNodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, handle)
@@ -249,7 +249,7 @@ data class MapNodeBuilder(
 
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
-    fun getNodeTexture(screen: CustomScreen): Promise<Drawable>? {
+    fun getNodeTexture(screen: RenderableScreen): Promise<Drawable>? {
         val nodeTexture = nodeTexture ?: return null
         if (nodeTextureCache != null) return nodeTextureCache
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)

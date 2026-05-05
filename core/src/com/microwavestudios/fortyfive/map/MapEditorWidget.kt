@@ -22,7 +22,7 @@ import com.microwavestudios.fortyfive.keyInput.MouseButton
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.screen.screens.MapEditorScreen
 import com.microwavestudios.fortyfive.utils.*
@@ -32,7 +32,7 @@ import kotlin.math.ceil
 class MapEditorWidget(
     val mapBuilder: DetailMapBuilder,
     private val mapScale: Float,
-    private val screen: CustomScreen,
+    private val screen: RenderableScreen,
     private val nodeSize: Float,
     private val lineWidth: Float,
     private val events: EventPipeline

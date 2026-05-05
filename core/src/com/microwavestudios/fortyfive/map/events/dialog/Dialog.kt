@@ -3,7 +3,7 @@ package com.microwavestudios.fortyfive.map.events.dialog
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.MapPredicate
 import com.microwavestudios.fortyfive.screen.commonComponents.AdvancedText
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -18,7 +18,7 @@ data class Dialog(
 
     companion object {
 
-        fun readFromOnj(onj: OnjObject, screen: CustomScreen): Dialog {
+        fun readFromOnj(onj: OnjObject, screen: RenderableScreen): Dialog {
             val defaults = onj.get<OnjObject>("defaults")
             val parts = onj.get<OnjArray>("parts")
                 .value
@@ -26,7 +26,7 @@ data class Dialog(
             return Dialog(parts, onj.get<String>("name"))
         }
 
-        private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: CustomScreen): DialogPart {
+        private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: RenderableScreen): DialogPart {
             val text = AdvancedText.readFromOnj(
                 onj.get<String>("rawText"),
                 onj.get<OnjArray?>("effects"),

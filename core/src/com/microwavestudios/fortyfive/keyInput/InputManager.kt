@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.profile.GlobalSave
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
@@ -24,7 +24,7 @@ import java.util.Stack
  *
  * To participate in the Input system actors must implement [InputActor]
  */
-class InputManager(val screen: CustomScreen) : InputProcessor {
+class InputManager(val screen: RenderableScreen) : InputProcessor {
 
     private val actorBuffer: MutableList<Pair<Boolean, InputActor>> = mutableListOf()
     private val actors: MutableSet<InputActor> = mutableSetOf()
@@ -869,7 +869,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
      *
      * Note: Unlike [Modal], FocusFilters stack
      */
-    class FocusFilter(val groups: List<String>, private val screen: CustomScreen) {
+    class FocusFilter(val groups: List<String>, private val screen: RenderableScreen) {
 
         fun start() {
             screen.inputManager.addFilter(this)
@@ -888,7 +888,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
      *
      * Note: Unlike [FocusFilter], only the most recent modal is active and can block events
      */
-    class Modal(val allowGroups: List<String>, private val screen: CustomScreen) {
+    class Modal(val allowGroups: List<String>, private val screen: RenderableScreen) {
 
         var finished: Boolean = false
             private set
@@ -907,7 +907,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     /**
      * allows enabling and disabling drag and drops
      */
-    data class DragAndDrop(val source: String, val target: String, val screen: CustomScreen) {
+    data class DragAndDrop(val source: String, val target: String, val screen: RenderableScreen) {
 
         fun enable() {
             screen.inputManager.enableDragAndDrop(this)

@@ -3,7 +3,7 @@ package com.microwavestudios.fortyfive.screen.screenBuilder
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.rendering.DebugMenu
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 
 class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
 
@@ -13,8 +13,8 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
 
     private val commonDebugMenuPages: List<String> = listOf("Basic infos", "Screen/Input", "Card Textures", "Resources")
 
-    override fun build(controllerContext: Any?, previousScreen: CustomScreen?): CustomScreen {
-        val screen = CustomScreen(
+    override fun build(controllerContext: Any?, previousScreen: RenderableScreen?): RenderableScreen {
+        val screen = RenderableScreen(
             viewport = creator.viewport,
             batch = SpriteBatch(),
             controllerContext = controllerContext,

@@ -11,7 +11,7 @@ import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 
@@ -27,7 +27,7 @@ import com.microwavestudios.fortyfive.utils.Timeline
  */
 interface GameController {
 
-    val screen: CustomScreen
+    val screen: IScreen
     val encounterContext: EncounterContext
 
     val playerLost: Boolean
@@ -189,13 +189,13 @@ interface GameController {
     /**
      * gives the player more reserves. [source] is used for animations
      */
-    fun gainReserves(amount: Int, source: Actor? = null)
+    fun gainReserves(amount: Int, source: (() -> Actor)? = null)
 
     /**
      * removes [cost] reserves, or returns false if the player didn't have enough reserves.
      * [animTarget] is used for animations
      */
-    fun tryPay(cost: Int, animTarget: Actor? = null): Boolean
+    fun tryPay(cost: Int, animTarget: (() -> Actor)? = null): Boolean
 
     /**
      * adds an encounter behaviour and removes it again one [validityChecker] is not true anymore

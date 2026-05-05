@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 
 /**
  * Enables an actor to participate in the input system. Works together with [InputManager]
@@ -59,7 +59,7 @@ interface InputActor {
 
     val reusableInputActor: Boolean
 
-    fun <T> initInput(actor: T, screen: CustomScreen) where T : Actor, T : InputActor
+    fun <T> initInput(actor: T, screen: RenderableScreen) where T : Actor, T : InputActor
 
     /**
      * calls [callback] when [input] is triggered
@@ -197,7 +197,7 @@ class InputActorImpl : InputActor {
         get() = _actor
 
     private lateinit var _actor: Actor
-    private lateinit var screen: CustomScreen
+    private lateinit var screen: RenderableScreen
 
     private var wasAdded: Boolean = false
 
@@ -217,7 +217,7 @@ class InputActorImpl : InputActor {
 
     override val reusableInputActor: Boolean = false
 
-    override fun <T> initInput(actor: T, screen: CustomScreen) where T : Actor, T : InputActor {
+    override fun <T> initInput(actor: T, screen: RenderableScreen) where T : Actor, T : InputActor {
         this._actor = actor
         this.screen = screen
     }

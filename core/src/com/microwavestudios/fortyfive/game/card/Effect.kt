@@ -92,7 +92,7 @@ abstract class Effect(val data: EffectData) {
 
             is BulletSelector.RevolverCardByPopup -> later {
 
-                val selector = CardInRevolverSelector(
+                val selector = SelectorFactory.getCardInRevolverSelector(
                     controller,
                     bulletSelector.text,
                     predicate = { card ->
@@ -116,7 +116,7 @@ abstract class Effect(val data: EffectData) {
             }
             is BulletSelector.HandCardByPopup -> later {
 
-                val selector = CardInHandSelector(
+                val selector = SelectorFactory.getCardInHandSelector(
                     controller,
                     bulletSelector.text,
                     predicate = { card ->
@@ -162,7 +162,7 @@ abstract class Effect(val data: EffectData) {
         ): Timeline {
             val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
-                action { controller.gainReserves(amount, card.actor) }
+                action { controller.gainReserves(amount, card.presentation.animTarget()) }
             }
         }
 

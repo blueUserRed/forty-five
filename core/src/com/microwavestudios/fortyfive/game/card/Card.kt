@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
@@ -33,7 +34,8 @@ import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.IScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
@@ -112,12 +114,12 @@ class CardPrototype(
      * creates an actual instance of this card. [type] should match this prototype
      */
     fun create(
-        screen: CustomScreen,
+        screen: IScreen,
         type: CardType,
-        areHoverDetailsEnabled: Boolean = true
+        presentationProvider: PresentationProvider
     ): Card {
         require(type.name == name) { "CardType - Prototype mismatch $type != $this" }
-        return creator!!(screen, type.stamp, areHoverDetailsEnabled)
+        return creator!!(screen, type.stamp, presentationProvider)
     }
 
     fun modifyPrice(modifier: (Int) -> Int) {
@@ -142,9 +144,9 @@ class CardPrototype(
 }
 
 typealias CardCreator = (
-    screen: CustomScreen,
+    screen: IScreen,
     withStamp: String?,
-    areHoverDetailsEnabled: Boolean
+    presentationProvider: PresentationProvider
 ) -> Card
 
 /**
@@ -165,14 +167,12 @@ class Card(
     val variableTexture: VariableTextureSelector?,
     val parryNumber: Int?,
     val tags: List<String>,
-    isDark: Boolean,
+    val isDark: Boolean,
     val forbiddenSlots: List<Int>,
     val additionalHoverInfos: List<String>,
-    font: Promise<PixmapFont>,
-    fontScale: Float,
-    screen: CustomScreen,
+    screen: IScreen,
     val deckMaximum: Int,
-    val enableHoverDetails: Boolean
+    presentationProvider: PresentationProvider
 ) : Disposable {
 
     val name: String
@@ -183,10 +183,7 @@ class Card(
      */
     val logTag = "$type-${++instanceCounter}"
 
-    /**
-     * the actor for representing the card on the screen
-     */
-    val actor: CardActor
+    val presentation: CardPresentation
 
     val inGame: Boolean
         get() = game != null
@@ -257,9 +254,9 @@ class Card(
 
     var isMarked: Boolean
         set(value) {
-            actor.isMarked = value
+            presentation.isMarked = value
         }
-        get() = actor.isMarked
+        get() = presentation.isMarked
 
     var lastEffectAffectedCardsCache: List<Card> = listOf()
 
@@ -277,14 +274,7 @@ class Card(
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
         // card texture while the constructor is running and actor is not yet assigned
         synchronized(this) {
-            actor = CardActor(
-                this,
-                font,
-                fontScale,
-                isDark,
-                screen,
-                enableHoverDetails
-            )
+            presentation = presentationProvider(this, screen)
         }
     }
 
@@ -312,21 +302,21 @@ class Card(
     fun changeZone(newZone: Zone, controller: GameController) {
         val oldZone = zone
         zone = newZone
-        if (actor.inTriggerPosition) actor.skipAnimateBack()
+        if (presentation.inTriggerPosition) presentation.skipAnimateBack()
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
             enteredOnTurn = controller.turnCounter
             if (isRotten) addRottenModifier(controller)
         }
         if (newZone == Zone.HAND) {
-            actor.isDraggable = true
+            presentation.isDraggable = true
         } else {
-            actor.isDraggable = false
+            presentation.isDraggable = false
         }
         if (newZone == Zone.REVOLVER) {
-            actor.touchable = Touchable.disabled
+            presentation.touchable = Touchable.disabled
         } else {
-            actor.touchable = Touchable.enabled
+            presentation.touchable = Touchable.enabled
         }
         if (oldZone == Zone.REVOLVER) {
             rotationCounter = 0
@@ -647,14 +637,14 @@ class Card(
 
         checkModifierTransformers(situation, triggerInformation, controller)
 
-        val prevPosition = Vector2(actor.x, actor.y)
+        val prevPosition = presentation.position()
         val zoneAtStart = zone
         var isInTriggerPosition = false
         val triggeredEffects = effects.filter {
             it.checkTrigger(situation, triggerInformation, controller, this@Card)
         }
         if (situation is GameSituation.CardRightClicked && triggeredEffects.isNotEmpty()) {
-            val result = controller.tryPay(rightClickCost ?: 0, actor)
+            val result = controller.tryPay(rightClickCost ?: 0, presentation.animTarget())
             if (!result) FortyFive.logger.warn(logTag, "Right Click triggered but can't pay for it")
         }
         triggeredEffects.forEach { effect ->
@@ -674,7 +664,7 @@ class Card(
                         }
 
                         val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
-                        val anim = actor.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
+                        val anim = presentation.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
 
                         action { controller.dispatchAnimTimeline(screenShakeTimeline) }
                         include(anim)
@@ -685,11 +675,11 @@ class Card(
         }
 
         later {
-            if (!actor.inTriggerPosition) return@later
+            if (!presentation.inTriggerPosition) return@later
             if (zone == zoneAtStart) {
-                include(actor.animateBack(controller, prevPosition))
+                include(presentation.animateBack(controller, prevPosition))
             } else {
-                action { actor.skipAnimateBack() }
+                action { presentation.skipAnimateBack() }
             }
         }
     } }
@@ -766,9 +756,9 @@ class Card(
     }
 
     private fun updateTexture(controller: GameController) =
-        actor.redrawPixmap(curDamage(controller), curCost(controller))
+        presentation.redrawPixmap(curDamage(controller), curCost(controller))
 
-    override fun dispose() = actor.dispose()
+    override fun dispose() = presentation.dispose()
 
     override fun toString(): String {
         return logTag
@@ -839,9 +829,9 @@ class Card(
                         onj.get<Long?>("deckMaximum")?.toInt() ?: -1,
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, stamp, areHoverDetailsEnabled ->
+                    prototype.creator = { screen, stamp, presentationProvider ->
                         val type = CardType(from, name, stamp)
-                        getCardFrom(onj, screen, type, initializer, prototype, areHoverDetailsEnabled)
+                        getCardFrom(onj, screen, type, initializer, presentationProvider, prototype)
                     }
                     prototypes.add(prototype)
                 }
@@ -850,11 +840,11 @@ class Card(
 
         private fun getCardFrom(
             onj: OnjObject,
-            customScreen: CustomScreen,
+            customScreen: IScreen,
             type: CardType,
             initializer: (Card) -> Unit,
+            presentationProvider: PresentationProvider,
             prototype: CardPrototype,
-            enableHoverDetails: Boolean
         ): Card {
             val stamp = type.stamp?.let { StampFactory.createStamp(it) }
             val card = Card(
@@ -877,8 +867,6 @@ class Card(
                     ?.map { (it.value as Long).toInt() }
                     ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
-                font = GraphicsConfig.cardFont(customScreen, customScreen),
-                fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.getOr<Boolean>("dark", false),
                 additionalHoverInfos = onj
                     .getOr<OnjArray?>("additionalHoverInfos", null)
@@ -886,11 +874,11 @@ class Card(
                     ?.map { it.value as String }
                     ?: listOf(),
                 screen = customScreen,
-                enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
                 stamp = stamp,
                 deckMaximum = prototype.deckMaximum,
+                presentationProvider = presentationProvider
             )
             applyTraitEffects(card, onj, stamp)
             stamp?.behaviours()?.let { behaviours ->
@@ -999,6 +987,105 @@ data class CardModifierData(
 
 typealias CardModifierPredicate = (controller: GameController, card: Card, modifier: CardModifierData) -> Boolean
 
+typealias PresentationProvider = (card: Card, screen: IScreen) -> CardPresentation
+
+interface CardPresentation : Disposable {
+
+    val inTriggerPosition: Boolean
+    var isMarked: Boolean
+
+    var isDraggable: Boolean
+    var touchable: Touchable
+
+    fun setAlphaZero()
+    fun setAlphaOne()
+    fun position(): Vector2
+
+    fun destroyAnimation(): Timeline
+    fun spawnAnimation(reverse: Boolean = false): Timeline
+    fun descendAnimation(): Timeline
+    fun resetDescendAnimation()
+
+    fun forceGetActor(): CardActor
+
+    fun animTarget(): () -> Actor = { forceGetActor() }
+
+    fun redrawPixmap(damageValue: Int, costValue: Int)
+
+    fun animateToTriggerPosition(
+        controller: GameController,
+        isOnShot: Boolean,
+        afterlifeOpen: Boolean
+    ): Timeline
+    fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline
+    fun skipAnimateBack()
+
+    companion object {
+
+        val defaultProvider: PresentationProvider = { card, screen ->
+            requireRenderableScreen(screen)
+            val actor = CardActor(
+                card,
+                GraphicsConfig.cardFont(screen, screen),
+                GraphicsConfig.cardFontScale(),
+                card.isDark,
+                screen,
+                true
+            )
+            ActorCardPresentation(actor)
+        }
+    }
+}
+
+class ActorCardPresentation(private val actor: CardActor) : CardPresentation {
+
+    override val inTriggerPosition: Boolean by actor::inTriggerPosition
+    override var isMarked: Boolean by actor::isMarked
+
+    override var isDraggable: Boolean by actor::isDraggable
+
+    override var touchable: Touchable
+        get() = actor.touchable
+        set(value) { actor.touchable = value }
+
+    override fun setAlphaZero() {
+        actor.alpha = 0f
+    }
+
+    override fun setAlphaOne() {
+        actor.alpha = 1f
+    }
+
+    override fun destroyAnimation(): Timeline = actor.destroyAnimation()
+
+    override fun spawnAnimation(reverse: Boolean): Timeline = actor.spawnAnimation(reverse)
+
+    override fun descendAnimation(): Timeline = actor.descendAnimation()
+
+    override fun resetDescendAnimation() = actor.resetDescendAnimation()
+
+    override fun forceGetActor(): CardActor = actor
+
+    override fun position(): Vector2 = Vector2(actor.x, actor.y)
+
+    override fun redrawPixmap(damageValue: Int, costValue: Int) = actor.redrawPixmap(damageValue, costValue)
+
+    override fun animateToTriggerPosition(
+        controller: GameController,
+        isOnShot: Boolean,
+        afterlifeOpen: Boolean
+    ): Timeline = actor.animateToTriggerPosition(controller, isOnShot, afterlifeOpen)
+
+    override fun animateBack(
+        controller: GameController,
+        prevCoordinates: Vector2
+    ): Timeline = actor.animateBack(controller, prevCoordinates)
+
+    override fun skipAnimateBack() = actor.skipAnimateBack()
+
+    override fun dispose() = actor.dispose()
+}
+
 /**
  * the actor representing a card on the screen
  */
@@ -1007,7 +1094,7 @@ class CardActor(
     val font: Promise<PixmapFont>,
     val fontScale: Float,
     val isDark: Boolean,
-    override val screen: CustomScreen,
+    override val screen: RenderableScreen,
     val enableHoverDetails: Boolean // TODO: fix
 ) : Widget(), ZIndexActor, InputActor by InputActorImpl(), Selectable<CardActor>, ActorWithDragFeatures,
     OffSettable, Disposable, ResourceBorrower, KotlinStyledActor, DropShadowActor, AnimatedActor {

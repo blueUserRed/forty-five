@@ -24,7 +24,7 @@ import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.DropShadowActor
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
 import com.microwavestudios.fortyfive.screen.actors.OnLayoutActor
@@ -45,7 +45,7 @@ class Revolver(
     private val slotSize: Float,
     private val animationDuration: Float,
     private val events: EventPipeline,
-    private val screen: CustomScreen
+    private val screen: RenderableScreen
 ) : WidgetGroup(), ZIndexActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var fixedZIndex: Int = 0
@@ -111,13 +111,14 @@ class Revolver(
     fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         slots[slot - 1].card = card
-        card?.actor?.let {
+        val actor = card?.presentation?.forceGetActor()
+        actor?.let {
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
             it.rotation = 0f
         }
-        if (card != null && card.actor !in this) {
-            addActor(card.actor)
+        if (actor != null && actor !in this) {
+            addActor(actor)
         }
         slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
     }
@@ -125,15 +126,16 @@ class Revolver(
     fun preAddCard(slot: Int, card: Card) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val revolverSlot = slots[slot - 1]
-        if (card.actor !in this) addActor(card.actor)
-        card.actor.let {
+        val actor = card.presentation.forceGetActor()
+        if (actor !in this) addActor(actor)
+        actor.let {
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
             it.rotation = 0f
             it.toBack()
         }
         slots.forEach { it.toBack() }
-        card.actor.setPosition(revolverSlot.cardPosition())
+        actor.setPosition(revolverSlot.cardPosition())
     }
 
     /**
@@ -149,11 +151,13 @@ class Revolver(
      * removes a card from the revolver
      */
     fun removeCard(card: Card) {
-        for (slot in slots) if (slot.card === card) {
-            if (card.actor in screen.stage.root) screen.removeActorFromRoot(card.actor)
+        slots.forEach { slot ->
+            if (slot.card !== card) return@forEach
+            val actor = card.presentation.forceGetActor()
+            if (actor in screen.stage.root) screen.removeActorFromRoot(actor)
             setCard(slot.num, null)
-            card.actor.leaveInputStateManually(GameInputs.States.manuallyFocused)
-            removeActor(card.actor)
+            actor.leaveInputStateManually(GameInputs.States.manuallyFocused)
+            removeActor(actor)
             return
         }
     }
@@ -300,7 +304,7 @@ class RevolverSlot(
     val revolver: Revolver,
     drawableHandle: ResourceHandle,
     size: Float,
-    screen: CustomScreen,
+    screen: RenderableScreen,
     private val events: EventPipeline,
     private val animationDuration: Float
 ) : CustomImageActor(drawableHandle, screen), Selectable<RevolverSlot>, DropShadowActor {
@@ -338,20 +342,20 @@ class RevolverSlot(
         observeInputState(
             GameInputs.States.focused,
             {
-                card?.actor?.enterInputStateManually(GameInputs.States.manuallyFocused)
+                card?.presentation?.forceGetActor()?.enterInputStateManually(GameInputs.States.manuallyFocused)
                 selectableDropShadow.scale = 1.4f
             },
             {
-                card?.actor?.leaveInputStateManually(GameInputs.States.manuallyFocused)
+                card?.presentation?.forceGetActor()?.leaveInputStateManually(GameInputs.States.manuallyFocused)
                 selectableDropShadow.scale = 1.1f
             }
         )
         onInput(GameInputs.interact) {
             selectionPromise?.resolve(this)
-            card?.actor?.clickedViaSlot(false)
+            card?.presentation?.forceGetActor()?.clickedViaSlot(false)
         }
         onInput(GameInputs.triggerCard) {
-            card?.actor?.clickedViaSlot(true)
+            card?.presentation?.forceGetActor()?.clickedViaSlot(true)
         }
         isDropTarget = true
         onDrop { actor ->
@@ -393,16 +397,16 @@ class RevolverSlot(
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
-//        if (card?.actor?.inAnimation ?: true) return
-        val actor = card?.actor
+        val actor = card?.presentation?.forceGetActor()
         if (actor != null && !actor.inTriggerPosition) {
             actor.setPosition(cardPosition())
         }
     }
 
     fun cardPosition(): Vector2 {
-        val cardWidth = card?.actor?.width ?: 0f
-        val cardHeight = card?.actor?.height ?: 0f
+        val actor = card?.presentation?.forceGetActor()
+        val cardWidth = actor?.width ?: 0f
+        val cardHeight = actor?.height ?: 0f
         return Vector2(
             x + width / 2 - cardWidth / 2,
             y + height / 2 - cardHeight / 2,

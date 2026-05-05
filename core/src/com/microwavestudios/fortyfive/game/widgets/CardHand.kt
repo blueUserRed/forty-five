@@ -7,13 +7,13 @@ import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.contains
 import kotlin.math.pow
 
 class CardHand(
-    screen: CustomScreen,
+    screen: RenderableScreen,
     private val centerGap: Float,
     private val cardSize: Float,
     private val maxDistanceBetweenCards: Float,
@@ -35,7 +35,10 @@ class CardHand(
     init {
         focusShortcut(
             GameInputs.focusShortcutCardHand,
-            variableActor = { leftSide.lastOrNull()?.actor ?: rightSide.firstOrNull()?.actor }
+            variableActor = {
+                leftSide.lastOrNull()?.presentation?.forceGetActor() ?:
+                    rightSide.firstOrNull()?.presentation?.forceGetActor()
+            }
         )
     }
 
@@ -45,22 +48,22 @@ class CardHand(
         orderedChildrenDirty = true
         if (leftSide.size < rightSide.size) leftSide.add(card)
         else rightSide.add(card)
-        val actor = card.actor
+        val actor = card.presentation.forceGetActor()
         addActor(actor)
         actor.fixedZIndex = zIndexFor(card)
         resortZIndices()
         if (card !in addedListenersToCards) {
-            card.actor.observeInputState(
+            actor.observeInputState(
                 GameInputs.States.focused,
                 {
-                    if (card.actor !in this) return@observeInputState
+                    if (actor !in this) return@observeInputState
                     actor.width = cardSize * 1.2f
                     actor.height = cardSize * 1.2f
                     actor.fixedZIndex = 100
                     resortZIndices()
                 },
                 {
-                    if (card.actor !in this) return@observeInputState
+                    if (actor !in this) return@observeInputState
                     actor.width = cardSize
                     actor.height = cardSize
                     actor.fixedZIndex = zIndexFor(card)
@@ -77,10 +80,10 @@ class CardHand(
         val new = mutableListOf<Actor>()
         var i = leftSide.size - 1
         while (i >= 0) {
-            new.add(leftSide[i].actor)
+            new.add(leftSide[i].presentation.forceGetActor())
             i--
         }
-        new.addAll(rightSide.map { it.actor })
+        new.addAll(rightSide.map { it.presentation.forceGetActor() })
         childrenInCorrectOrderCache = new
         orderedChildrenDirty = false
         return new
@@ -99,8 +102,9 @@ class CardHand(
             in rightSide -> rightSide.remove(card)
             else -> throw RuntimeException("card $card can't be removed because it is not the cardHand")
         }
-        removeActor(card.actor)
-        card.actor.rotation = 0f
+        val actor = card.presentation.forceGetActor()
+        removeActor(actor)
+        actor.rotation = 0f
         evenOutCards()
         invalidate()
     }
@@ -138,20 +142,20 @@ class CardHand(
         val cardDistLeftSide = (widthPerSide / (leftSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
         x = width / 2 - centerGap / 2 - cardSize
         leftSide.forEach { card ->
-            val actor = card.actor
+            val actor = card.presentation.forceGetActor()
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
             actor.rotation = cardHeightFuncDerivative(x) * 50f
-            card.actor.fixedZIndex = zIndexFor(card)
+            actor.fixedZIndex = zIndexFor(card)
             x -= cardDistLeftSide
         }
 
         val cardDistRightSide = (widthPerSide / (rightSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
         x = width / 2 + centerGap / 2
         rightSide.forEach { card ->
-            val actor = card.actor
+            val actor = card.presentation.forceGetActor()
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
             actor.rotation = cardHeightFuncDerivative(x) * 50f
-            card.actor.fixedZIndex = zIndexFor(card)
+            actor.fixedZIndex = zIndexFor(card)
             x += cardDistRightSide
         }
     }

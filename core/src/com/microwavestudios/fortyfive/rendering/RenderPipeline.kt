@@ -25,10 +25,10 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 
-class RenderPipeline(screen: CustomScreen) : ResourceBorrower {
+class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
 
     private var screen = screen
 
@@ -309,7 +309,7 @@ class RenderPipeline(screen: CustomScreen) : ResourceBorrower {
         postprocessor.shader.setUniformf("u_shakeTime", TimeUtils.timeSinceMillis(shakeReferenceTime).toFloat() / 1000f)
     }
 
-    fun screenChanged(newScreen: CustomScreen) {
+    fun screenChanged(newScreen: RenderableScreen) {
         screen = newScreen
         additionalPostProcessingSteps.clear()
         frameBufferManager.pruneFrameBuffers()
@@ -510,7 +510,7 @@ interface RenderTask {
 
     fun start()
 
-    fun render(batch: Batch, screen: CustomScreen)
+    fun render(batch: Batch, screen: RenderableScreen)
 
     fun dispose()
 
@@ -535,7 +535,7 @@ class FadeToBlackRenderTask(
 
     override fun render(
         batch: Batch,
-        screen: CustomScreen
+        screen: RenderableScreen
     ) {
         val now = TimeUtils.millis()
         screen.viewport.apply()
@@ -579,7 +579,7 @@ class GeometricFadeRenderTask(
 
     override fun render(
         batch: Batch,
-        screen: CustomScreen
+        screen: RenderableScreen
     ) {
         val batch = polygonBatch
         batch.projectionMatrix = screen.viewport.camera.combined
@@ -647,7 +647,7 @@ class FrameBufferManager : Disposable {
 
     private val freeFrameBuffers: MutableList<BorrowableFrameBuffer> = mutableListOf()
 
-    fun borrowFrameBuffer(useViewportSize: Boolean, screen: CustomScreen, keepAlive: Boolean = false): FrameBuffer? {
+    fun borrowFrameBuffer(useViewportSize: Boolean, screen: RenderableScreen, keepAlive: Boolean = false): FrameBuffer? {
         val existing = freeFrameBuffers.find { !it.borrowed && it.viewportSize == useViewportSize }
         if (existing != null) {
             existing.borrowed = true
@@ -673,7 +673,7 @@ class FrameBufferManager : Disposable {
         singleBuffers[name] = Triple(sizeMultiplier, format,null)
     }
 
-    fun getNamedFrameBuffer(name: String, screen: CustomScreen): FrameBuffer? {
+    fun getNamedFrameBuffer(name: String, screen: RenderableScreen): FrameBuffer? {
         val (sizeMultiplier, format, buffer) = singleBuffers[name] ?: throw RuntimeException("no single FrameBuffer with name $name")
         if (buffer != null) return buffer
         val newBuffer = tryCreateFrameBuffer(format, sizeMultiplier, screen.viewport, false)
@@ -728,7 +728,7 @@ class FrameBufferManager : Disposable {
         )
     }
 
-    fun getPingPongFrameBuffers(name: String, screen: CustomScreen): Pair<FrameBuffer, FrameBuffer>? {
+    fun getPingPongFrameBuffers(name: String, screen: RenderableScreen): Pair<FrameBuffer, FrameBuffer>? {
         val buffers = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
         if (buffers.fbo1 != null) {
             val fbo1 = buffers.fbo1!!

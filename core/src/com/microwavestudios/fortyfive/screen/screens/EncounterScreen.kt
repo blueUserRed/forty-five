@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
@@ -15,11 +16,13 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
+import com.microwavestudios.fortyfive.game.BannerAnimation
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
@@ -37,6 +40,7 @@ import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScr
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
@@ -120,6 +124,23 @@ class EncounterScreen : ScreenCreator() {
     private var bgOffX: Float = 0f
     private var bgOffY: Float = 0f
 
+    private val shieldIconPromise: Promise<Drawable> by lazy {
+        FortyFive.resourceManager.request(this, this.screen.lifetime, "shield_icon_large")
+    }
+
+    private val shieldShaderPromise: Promise<BetterShader> by lazy {
+        FortyFive.resourceManager.request(this, screen.lifetime, "glow_shader_shield")
+    }
+
+    private val enemyBannerPromise: Promise<Drawable> by lazy {
+        FortyFive.resourceManager.request(this, screen.lifetime, "enemy_turn_banner")
+    }
+
+    private val playerBannerPromise: Promise<Drawable> by lazy {
+        FortyFive.resourceManager.request(this, screen.lifetime, "player_turn_banner")
+    }
+
+
     private lateinit var cardRevolverDragAndDrop: InputManager.DragAndDrop
     private lateinit var cardUnderDeckDragAndDrop: InputManager.DragAndDrop
 
@@ -128,6 +149,9 @@ class EncounterScreen : ScreenCreator() {
     }
 
     override fun getRoot(): Group = newGroup {
+        // call getters for each resource so that the lazy loaders execute and request the resources as early as
+        // possible. They have to be lazy because `screen` is not available when the constructor runs
+        shieldIconPromise; shieldShaderPromise; enemyBannerPromise; playerBannerPromise
 
         x = 0f
         y = 0f
@@ -1360,7 +1384,7 @@ class EncounterScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         bgScreenController,
-        GameControllerImpl(screen, gameEvents, warningParent, afterlife)
+        GameControllerImpl(screen, gameEvents, warningParent, afterlife, CardPresentation.defaultProvider)
     )
 
     override fun debugMenuPages(): List<String> = listOf("Encounter")
@@ -1484,7 +1508,7 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.PlayCardOrbAnimation> { event ->
             event.orbAnimationTimeline = cardAnimationTimeline(
                 deckAnimationTarget,
-                event.targetActor,
+                event.targetActor(),
                 event.reverse
             )
         }
@@ -1492,6 +1516,54 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.PlayerLivesChanged> { event ->
             if (event.newValue >= event.oldValue) return@watchFor
             screen.screenControllers.filterIsInstance<GameControllerImpl>().first().dispatchAnimTimeline(playerDamageTimeline())
+        }
+        gameEvents.watchFor<GameControllerImpl.Events.PlayPlayerDamagedEffects> { event ->
+            event.animationTimeline = Timeline.timeline { parallelActions(
+                FortyFive.currentRenderPipeline!!.getScreenShakeTimeline().asAction(),
+                GraphicsConfig.damageOverlay(screen, event.controller)
+            ) }
+        }
+        gameEvents.watchFor<GameControllerImpl.Events.PlayShieldAnimation> { event ->
+            event.shieldTimeline = getShieldAnim(event.controller)
+        }
+        gameEvents.watchFor<GameControllerImpl.Events.PlayBannerAnimation> { event ->
+            event.timeline = getBannerAnim(event)
+        }
+    }
+
+    private fun getBannerAnim(event: GameControllerImpl.Events.PlayBannerAnimation): Timeline =
+        (if (event.isPlayer) playerBannerPromise else enemyBannerPromise).getOrNull()?.let { banner ->
+            BannerAnimation(
+                banner,
+                this.screen,
+                1_500,
+                500,
+                1.4f,
+                1.1f
+            ).asTimeline(event.controller)
+        } ?: Timeline()
+
+    private fun getShieldAnim(controller: GameController): Timeline {
+        val shieldIcon = shieldIconPromise.getOrNull() ?: return Timeline()
+        val shieldShader = shieldShaderPromise.getOrNull() ?: return Timeline()
+        return Timeline.timeline {
+            val bannerAnim = BannerAnimation(
+                shieldIcon,
+                screen,
+                1_000,
+                150,
+                0.3f,
+                0.5f,
+                interpolation = Interpolation.pow2In,
+                customShader = shieldShader
+            ).asTimeline(controller).asAction()
+            val postProcessorAction = Timeline.timeline {
+                delay(100)
+                include(FortyFive.currentRenderPipeline!!.getScreenShakePopoutTimeline())
+                delay(50)
+                action { FortyFive.soundPlayer.situation("shield_anim", screen) }
+            }.asAction()
+            parallelActions(bannerAnim, postProcessorAction)
         }
     }
 
@@ -1510,8 +1582,8 @@ class EncounterScreen : ScreenCreator() {
         source ?: return
         val amount = new - old
         val anim = when {
-            amount > 0 -> reservesGainedAnim(amount, source)
-            amount < 0 -> reservesPaidAnim(amount, source)
+            amount > 0 -> reservesGainedAnim(amount, source())
+            amount < 0 -> reservesPaidAnim(amount, source())
             else -> null
         }
         anim?.let { controller.dispatchAnimTimeline(it) }

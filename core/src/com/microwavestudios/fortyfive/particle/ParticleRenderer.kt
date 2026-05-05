@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.degrees
@@ -15,7 +15,7 @@ import kotlin.math.sin
 
 abstract class ParticleRenderer(val emitter: ParticleSystem.Emitter) {
 
-    abstract fun render(batch: Batch, screen: CustomScreen)
+    abstract fun render(batch: Batch, screen: RenderableScreen)
 }
 
 class TextParticleRenderer(emitter: ParticleSystem.Emitter) : ParticleRenderer(emitter) {
@@ -24,7 +24,7 @@ class TextParticleRenderer(emitter: ParticleSystem.Emitter) : ParticleRenderer(e
 
     override fun render(
         batch: Batch,
-        screen: CustomScreen
+        screen: RenderableScreen
     ) {
         infos.removeIf { !it.particle.active }
         infos.forEach { renderRenderInfo(batch, it) }
@@ -68,7 +68,7 @@ class TextureParticleRenderer(
     val height: Float,
     val color: Color,
     val angleFromVelocity: Boolean,
-    private val screen: CustomScreen,
+    private val screen: RenderableScreen,
     emitter: ParticleSystem.Emitter
 ) : ParticleRenderer(emitter), ResourceBorrower {
 
@@ -76,7 +76,7 @@ class TextureParticleRenderer(
 
     override fun render(
         batch: Batch,
-        screen: CustomScreen
+        screen: RenderableScreen
     ) {
         val originalColor = batch.color.cpy()
         batch.flush()

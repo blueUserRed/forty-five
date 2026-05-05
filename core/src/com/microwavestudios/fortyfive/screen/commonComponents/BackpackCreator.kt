@@ -7,14 +7,16 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.CardPrototype
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.game.card.PresentationProvider
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.profile.Profile
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
@@ -617,7 +619,7 @@ object BackpackCreator {
         var card: Card? = null
         val actor: InputActor = if (cardType != null)  {
             card = state.getCardInstance(cardType, screen, state)
-            val actor = actor(card.actor) {
+            val actor = actor(card.presentation.forceGetActor()) {
                 height = cardSize
                 width = cardSize
                 isDraggable = true
@@ -731,7 +733,7 @@ object BackpackCreator {
         val functionsAsCollection: Boolean,
     ) {
 
-        fun getCardInstance(type: CardType, screen: CustomScreen, state: BackpackState): Card {
+        fun getCardInstance(type: CardType, screen: RenderableScreen, state: BackpackState): Card {
             val created = createdCards.find { it.name == type.name }
             if (created != null) {
                 createdCards.remove(created)
@@ -739,14 +741,15 @@ object BackpackCreator {
             }
             val proto = cardPrototypes[type.name]
                 ?: throw RuntimeException("unknown card $type in Backpack")
-            val card = proto.create(screen, type)
+            val card = proto.create(screen, type, CardPresentation.defaultProvider)
             screen.lifetime.tieDisposable(card)
 
-            card.actor.onDrop { actor ->
-                if (actor !is CardActor) return@onDrop
+            val actor = card.presentation.forceGetActor()
+            actor.onDrop { other ->
+                if (other !is CardActor) return@onDrop
 
-                val otherInfo = actor.infoObject
-                val thisInfo = card.actor.infoObject
+                val otherInfo = other.infoObject
+                val thisInfo = actor.infoObject
                 if (thisInfo !is CardInfoObject) return@onDrop
                 if (otherInfo !is CardInfoObject) return@onDrop
 
@@ -758,21 +761,21 @@ object BackpackCreator {
                 if (!otherInfo.isBackpack) {
                     swapCardsInDeck(thisInfo.slot, otherInfo.slot, state)
                 } else {
-                    swapBackpackWithDeckCard(actor.card, thisInfo.slot, state)
+                    swapBackpackWithDeckCard(other.card, thisInfo.slot, state)
                 }
             }
 
-            card.actor.observeInputState(
+            actor.observeInputState(
                 InputManager.BaseStates.keyboardDrag,
                 {},
-                { screen.inputManager.changeKeyboardFocusedActor(card.actor) }
+                { screen.inputManager.changeKeyboardFocusedActor(actor) }
             )
 
             state.events.watchFor<GiveCardBackEvent> { event ->
-                val info = card.actor.infoObject
+                val info = actor.infoObject
                 if (info !is CardInfoObject) return@watchFor
                 if (event.backpack != info.isBackpack || (info.slot != event.slot && info.slot != -1)) return@watchFor
-                card.actor.infoObject = null
+                actor.infoObject = null
                 state.giveCardInstanceBack(card)
             }
 

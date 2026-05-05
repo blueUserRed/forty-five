@@ -11,6 +11,7 @@ import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.CardPrototype
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -119,7 +120,7 @@ class ChooseCardScreen : ScreenCreator() {
                             FortyFive.screenManager.screenFinished()
                         }
                     }
-                    allActors(cards.map { it.actor }) {
+                    allActors(cards.map { it.presentation.forceGetActor() }) {
                         width = 160f
                         height = 160f
                         val (rotation, yPos) = data[i]
@@ -318,7 +319,11 @@ class ChooseCardScreen : ScreenCreator() {
 
     private fun initCards() {
         val cards = getCardProtos().map {
-            val card = it.create(screen, CardType(it.namespace, it.simpleName, null))
+            val card = it.create(
+                screen,
+                CardType(it.namespace, it.simpleName, null),
+                CardPresentation.defaultProvider
+            )
             screen.lifetime.tieDisposable(card)
             card
         }

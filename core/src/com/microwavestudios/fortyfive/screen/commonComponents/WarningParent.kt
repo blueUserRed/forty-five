@@ -3,7 +3,7 @@ package com.microwavestudios.fortyfive.screen.commonComponents
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
@@ -16,7 +16,7 @@ import kotlin.math.abs
 
 class WarningParent(
     val creator: ScreenCreator,
-    val screen: CustomScreen,
+    val screen: RenderableScreen,
     private val events: EventPipeline? = null
 ) {
 

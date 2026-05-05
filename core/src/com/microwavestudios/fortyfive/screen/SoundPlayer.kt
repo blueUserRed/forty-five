@@ -7,10 +7,31 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.screen.SoundPlayer.Companion.logTag
+import com.microwavestudios.fortyfive.screen.SoundPlayer.Theme
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
+import kotlin.ranges.random
+
+interface ISoundPlayer {
+
+    var masterVolume: Float
+    var musicVolume: Float
+    var soundEffectVolume: Float
+
+    fun init()
+    fun changeMusicTo(theme: Theme, transitionDuration: Int = 3_000)
+    fun situation(name: String, screen: IScreen)
+    fun playSoundFull(soundHandle: ResourceHandle, screen: IScreen)
+    fun update(screen: IScreen, playAmbientSounds: Boolean)
+    fun playMusicOnce(musicHandle: ResourceHandle, screen: IScreen)
+    fun end()
+}
 
 /**
  * handles music, volume control and playing sound
@@ -24,19 +45,19 @@ import onj.value.OnjValue
  *
  * Also handles ambient sounds.
  */
-class SoundPlayer : ResourceBorrower {
+class SoundPlayer : ISoundPlayer, ResourceBorrower {
 
     private lateinit var situations: List<Situation>
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
     private lateinit var biomeAmbience: Map<String, List<String>>
 
-    var masterVolume: Float = 1f
+    override var masterVolume: Float = 1f
         set(value) {
             field = value
             currentMusic?.volume = masterVolume * musicVolume
         }
 
-    var musicVolume: Float = 1f
+    override var musicVolume: Float = 1f
         set(value) {
             field = value
             currentMusic?.volume = masterVolume * musicVolume
@@ -44,7 +65,7 @@ class SoundPlayer : ResourceBorrower {
 
     private val musicTimeline = Timeline().also { it.startTimeline() }
 
-    var soundEffectVolume: Float = 1f
+    override var soundEffectVolume: Float = 1f
 
     private var currentMusic: Music? = null
     private var currentMusicLifetime: EndableLifetime? = null
@@ -54,7 +75,7 @@ class SoundPlayer : ResourceBorrower {
     private var transitionStartTime: Long = 0
     private var transitionDuration: Int = 0
 
-    fun init() {
+    override fun init() {
         val onj = ConfigFileManager.getConfigFile("soundConfig")
         situations = onj
             .get<OnjArray>("situations")
@@ -95,7 +116,7 @@ class SoundPlayer : ResourceBorrower {
             .associate { it.second to it.first }
     }
 
-    fun changeMusicTo(theme: Theme, transitionDuration: Int = 3_000) = Timeline.timeline {
+    override fun changeMusicTo(theme: Theme, transitionDuration: Int) = Timeline.timeline {
         if (theme == currentMusicTheme) return@timeline
 
         val nextMusicLifetime = EndableLifetime()
@@ -129,7 +150,7 @@ class SoundPlayer : ResourceBorrower {
 
     }.let { musicTimeline.appendAction(it.asAction()) }
 
-    fun situation(name: String, screen: CustomScreen) {
+    override fun situation(name: String, screen: IScreen) {
         val situation = situations.find { it.name == name } ?: run {
             FortyFive.logger.warn(logTag, "No sound config for situation $name")
             return
@@ -140,14 +161,14 @@ class SoundPlayer : ResourceBorrower {
         }
     }
 
-    fun playSoundFull(soundHandle: ResourceHandle, screen: CustomScreen) {
+    override fun playSoundFull(soundHandle: ResourceHandle, screen: IScreen) {
         val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, soundHandle)
         soundPromise.then { sound ->
             sound.play(soundEffectVolume * masterVolume)
         }
     }
 
-    fun update(screen: CustomScreen, playAmbientSounds: Boolean) {
+    override fun update(screen: IScreen, playAmbientSounds: Boolean) {
         if (playAmbientSounds) updateAmbientSounds(screen)
         musicTimeline.updateTimeline()
 
@@ -158,7 +179,7 @@ class SoundPlayer : ResourceBorrower {
         nextMusic?.volume = musicVolume * masterVolume * transitionProgress
     }
 
-    private fun updateAmbientSounds(screen: CustomScreen) {
+    private fun updateAmbientSounds(screen: IScreen) {
         val now = TimeUtils.millis()
         val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
             ?: return
@@ -175,7 +196,7 @@ class SoundPlayer : ResourceBorrower {
         }
     }
 
-    fun playMusicOnce(musicHandle: ResourceHandle, screen: CustomScreen) {
+    override fun playMusicOnce(musicHandle: ResourceHandle, screen: IScreen) {
         val musicPromise = FortyFive.resourceManager.request<Music>(this, screen.lifetime, musicHandle)
         musicPromise.then { music ->
             music.play()
@@ -183,7 +204,7 @@ class SoundPlayer : ResourceBorrower {
         }
     }
 
-    fun end() {
+    override fun end() {
         currentMusicLifetime?.die()
     }
 

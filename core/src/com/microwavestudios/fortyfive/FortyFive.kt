@@ -21,9 +21,10 @@ import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
+import com.microwavestudios.fortyfive.screen.ISoundPlayer
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
@@ -44,7 +45,7 @@ object FortyFive : Game() {
     val serviceThread = ServiceThread()
 
     /** see [SoundPlayer] */
-    val soundPlayer = SoundPlayer()
+    val soundPlayer: ISoundPlayer = SoundPlayer()
 
     /** see [FortyFiveLogger] */
     val logger = FortyFiveLogger()
@@ -72,7 +73,7 @@ object FortyFive : Game() {
     var currentRenderPipeline: RenderPipeline? = null
         private set
 
-    var currentScreen: CustomScreen? = null
+    var currentScreen: RenderableScreen? = null
 
     var cleanExit: Boolean = true
     lateinit var appArguments: AppArguments

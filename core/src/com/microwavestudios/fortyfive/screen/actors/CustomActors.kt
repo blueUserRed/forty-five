@@ -18,12 +18,12 @@ import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.*
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.max
 
 open class CustomLabel(
-    val screen: CustomScreen,
+    val screen: RenderableScreen,
     text: String,
     labelStyle: LabelStyle,
     private val isDistanceField: Boolean,
@@ -157,7 +157,7 @@ open class CustomLabel(
 }
 
 open class TemplateStringLabel(
-    screen: CustomScreen,
+    screen: RenderableScreen,
     var templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
@@ -186,7 +186,7 @@ open class TemplateStringLabel(
  */
 open class CustomImageActor(
     drawableHandle: ResourceHandle?,
-    override val screen: CustomScreen,
+    override val screen: RenderableScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor,
     OffSettable, InputActor by InputActorImpl(), DropShadowActor,
@@ -346,7 +346,7 @@ open class CustomImageActor(
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomHorizontalGroup(
-    val screen: CustomScreen,
+    val screen: RenderableScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : HorizontalGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor,
     KotlinStyledActor {
@@ -403,7 +403,7 @@ open class CustomHorizontalGroup(
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomVerticalGroup(
-    val screen: CustomScreen,
+    val screen: RenderableScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf()
 ) : VerticalGroup(), ZIndexGroup, ZIndexActor, OnLayoutActor {
 
@@ -450,7 +450,7 @@ open class CustomVerticalGroup(
  * children. Layout is fully the responsibility of the programmer
  */
 open class CustomGroup(
-    override val screen: CustomScreen,
+    override val screen: RenderableScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf()
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor, KotlinStyledActor,
     DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugActor by DebugActorImpl() {

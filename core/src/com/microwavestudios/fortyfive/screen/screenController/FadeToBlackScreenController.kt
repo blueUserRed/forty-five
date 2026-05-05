@@ -1,12 +1,12 @@
 package com.microwavestudios.fortyfive.screen.screenController
 
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.utils.Timeline
 import onj.value.OnjObject
 
-class FadeToBlackScreenController(private val screen: CustomScreen, onj: OnjObject) : ScreenController() {
+class FadeToBlackScreenController(private val screen: RenderableScreen, onj: OnjObject) : ScreenController() {
 
     private val duration: Int = onj.get<Long>("duration").toInt()
 
