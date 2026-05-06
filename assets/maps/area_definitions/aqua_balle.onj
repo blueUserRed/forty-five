@@ -27,20 +27,24 @@ nodes: [
         edgesTo: [
             1, 3
         ],
-        nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "tutorial_dialog",
             displayName: "Your Brother",
-            descriptionText: "Your Brother wants to talk to you before you go on your journey",
-            completedDescriptionText: "You completed the tutorial run",
-            canOnlyBeStartedOnce: false,
-            currentlyBlocks: true,
-            startable: true,
+            descriptionText: [
+                {
+                    predicate: $RunCompleted { runName: "tutorial_run" },
+                    text: "You completed the tutorial run, and can now progress beyond this point"
+                },
+                {
+                    predicate: $Always {},
+                    text: "Your Brother wants to talk to you before you go on your journey"
+                }
+            ],
             isCompleted: false,
             startConditions: [
                 $Not {
                     negate: $RunCompleted { runName: "tutorial_run" }
-                }
+                },
             ],
             blockConditions: [
                 $Not {
@@ -64,15 +68,15 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "aqua_balle_progress_dialog",
             displayName: "Stranger",
-            descriptionText: "A stranger has a mission for you",
-            completedDescriptionText: "",
-            canOnlyBeStartedOnce: false,
-            currentlyBlocks: false,
-            startable: true,
+            descriptionText: [
+                {
+                    predicate: $Always {},
+                    text: "A stranger has a mission for you"
+                }
+            ],
             isCompleted: false,
         }
     },
@@ -82,13 +86,19 @@ nodes: [
         edgesTo: [
             4, 6
         ],
-        nodeTexture: "map_node_default",
         event: $SimpleMapEvent {
             displayDescription: true,
             displayName: "Progress Run",
-            descriptionText: "To progress beyond this point, you must complete a mission. Talk to the person behind you",
-            currentlyBlocks: false,
-            startable: false,
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "To progress beyond this point, you must complete a mission. Talk to the person behind you"
+                },
+                {
+                    predicate: $Always {},
+                    text: "You can now progress beyond this point"
+                },
+            ],
             isCompleted: false,
             blockConditions: [
                 $Not {
@@ -103,7 +113,6 @@ nodes: [
         edgesTo: [
             5
         ],
-        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "tabu_letter_outpost",
             fromEnd: false,

@@ -6,6 +6,7 @@ import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -108,6 +109,8 @@ open class CustomScreen(
 
     var mouseDraggedActor: InputActor? = null
 
+    val keyboardFocusShapeRenderer: ShapeRenderer = ShapeRenderer()
+
     val inputManager = InputManager(this)
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
@@ -125,6 +128,7 @@ open class CustomScreen(
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
+        inputManager.init()
         inputMultiplexer.addProcessor(inputManager)
         inputMultiplexer.addProcessor(stage)
         inputManager.onInput(GameInputs.toggleDebugMenu) { debugMenu?.toggle() }
@@ -265,12 +269,14 @@ open class CustomScreen(
 
     override fun render(delta: Float) = try {
         if (makeLaggy) Thread.sleep(500)
+        inputManager.update()
         val batch = stage.batch
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         if (batch.isDrawing) batch.end()
         stage.viewport.apply()
         doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
         stage.draw()
+        drawFocusedActorBox()
         batch.begin()
         actorsWithActiveHoverDetails.forEach {
             it.detailWidget?.drawDetailActor(batch)
@@ -293,6 +299,41 @@ open class CustomScreen(
         FortyFive.logger.fatal(e)
     }
 
+    private fun drawFocusedActorBox() {
+        val actor = inputManager.keyboardFocused ?: return
+        val padding = 5f
+        val lineWidth = 6f
+        val coords = actor.actor.localToStageCoordinates(Vector2(0f, 0f))
+        val x = coords.x - padding / 2f
+        val y = coords.y - padding / 2f
+        val width = actor.actor.width + 2 * padding
+        val height = actor.actor.height + 2 * padding
+        val shapeRenderer = keyboardFocusShapeRenderer
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        shapeRenderer.color = Color.Blue
+        shapeRenderer.rectLine(
+            x - lineWidth / 2, y - lineWidth / 2,
+            x + width, y - lineWidth / 2,
+            lineWidth
+        )
+        shapeRenderer.rectLine(
+            x + width - lineWidth / 2, y,
+            x + width - lineWidth / 2, y + height,
+            lineWidth
+        )
+        shapeRenderer.rectLine(
+            x - lineWidth / 2, y - lineWidth,
+            x - lineWidth / 2, y + height,
+            lineWidth
+        )
+        shapeRenderer.rectLine(
+            x, y + height - lineWidth / 2,
+            x + width, y + height - lineWidth / 2,
+            lineWidth
+        )
+        shapeRenderer.end()
+    }
+
     private fun doRenderTasks(tasks: List<CustomScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
         stage.batch.begin()
         tasks.forEach { it(this) }
@@ -307,8 +348,10 @@ open class CustomScreen(
 
     override fun dispose() {
         hide()
+        inputManager.end()
         screenControllers.forEach(ScreenController::end)
         stage.dispose()
+        keyboardFocusShapeRenderer.dispose()
         additionalDisposables.forEach(Disposable::dispose)
         _lifetime.die()
     }

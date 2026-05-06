@@ -18,17 +18,24 @@ nodes: [
             3,
         ],
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                 ],
                 forceCards: null,
@@ -42,7 +49,6 @@ nodes: [
             isExtraction: false,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
     {
         x: 15.88763427734375,
@@ -57,13 +63,22 @@ nodes: [
             startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                     'moist',
                 ],
@@ -78,7 +93,6 @@ nodes: [
             isExtraction: false,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
     {
         x: 30.0533447265625,
@@ -104,13 +118,22 @@ nodes: [
             startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                     'rain',
                 ],
@@ -125,7 +148,6 @@ nodes: [
             isExtraction: false,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
     {
         x: 77.09080505371094,
@@ -140,13 +162,22 @@ nodes: [
             startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                 ],
                 forceCards: null,
@@ -160,7 +191,6 @@ nodes: [
             isExtraction: false,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
     {
         x: 45.39954376220703,
@@ -174,13 +204,22 @@ nodes: [
             startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                     'moist',
                 ],
@@ -195,7 +234,6 @@ nodes: [
             isExtraction: false,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
     {
         x: 20.609533309936523,
@@ -209,13 +247,22 @@ nodes: [
             startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                     'rain',
                 ],
@@ -230,7 +277,6 @@ nodes: [
             isExtraction: false,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
     {
         x: 88.25996398925781,
@@ -254,14 +300,23 @@ nodes: [
             startable: true,
             isCompleted: false,
             startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
             ],
             blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            descriptionText: [
+                {
+                    predicate: $CurrentNodeBlocks {},
+                    text: "Defeat enemies to progress"
+                }
             ],
             encounter: {
-                enemies: [
+                forceConcreteEnemies: [
                     'Outlaw-1',
                     'Pyro-1',
                 ],
+                enemies: [],
                 encounterModifier: [
                 ],
                 forceCards: null,
@@ -275,7 +330,6 @@ nodes: [
             isExtraction: true,
         },
         distance: -1,
-        nodeTexture: 'map_node_fight',
     },
 ],
 startNode: 0,

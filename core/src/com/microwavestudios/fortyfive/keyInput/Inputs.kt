@@ -1,20 +1,52 @@
 package com.microwavestudios.fortyfive.keyInput
 
-import com.badlogic.gdx.Input
+import com.badlogic.gdx.controllers.ControllerMapping
+import com.badlogic.gdx.Input.Keys
 
 class Input(val name: String, val causes: Array<Cause>) {
 
     override fun toString(): String = "Input($name)"
 
-    sealed class Cause {
+    override fun equals(other: Any?): Boolean = other is Input && other.name == name
+
+    override fun hashCode(): Int = name.hashCode()
+
+    abstract class Cause {
+
+        interface RequiresStates {
+            abstract val requireStates: Array<InputState>
+        }
 
         class Keyboard(
             val primaryKey: KeyCode,
             val modifierKeys: Array<ModifierKey> = arrayOf(),
-            val requireStates: Array<InputState> = arrayOf()
-        ) : Cause()
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
+
+        class KeyHeldDown(
+            val key: KeyCode,
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
 
         class Mouse(val button: MouseButton, val requireDirectHit: Boolean = true) : Cause()
+
+        class ControllerButtonBased(
+            val button: ControllerButton,
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
+
+        class ControllerAxisFlick(
+            val axis: ControllerAxis,
+            val threshold: Float,
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
+
+        class ControllerAxisHeld(
+            val axis: ControllerAxis,
+            val threshold: Float,
+            override val requireStates: Array<InputState> = arrayOf()
+        ) : Cause(), RequiresStates
+
     }
 
 }
@@ -33,9 +65,72 @@ enum class MouseButton(val code: Int) {
 }
 
 enum class ModifierKey(val codes: Array<KeyCode>) {
-    SHIFT(arrayOf(Input.Keys.SHIFT_LEFT, Input.Keys.SHIFT_RIGHT)),
-    CTRL(arrayOf(Input.Keys.CONTROL_LEFT, Input.Keys.CONTROL_RIGHT)),
-    ALT(arrayOf(Input.Keys.ALT_LEFT, Input.Keys.ALT_RIGHT))
+    SHIFT(arrayOf(Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT)),
+    CTRL(arrayOf(Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT)),
+    ALT(arrayOf(Keys.ALT_LEFT, Keys.ALT_RIGHT))
+}
+
+enum class ControllerAxis {
+
+    LEFT_X {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisLeftX
+    },
+    LEFT_Y {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisLeftY
+    },
+
+    RIGHT_X {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisRightX
+    },
+    RIGHT_Y {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.axisRightY
+    },
+
+    ;
+
+    abstract fun getCode(mapping: ControllerMapping): Int
+}
+
+enum class ControllerButton {
+
+    A {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonA
+    },
+    B {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonB
+    },
+    X {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonX
+    },
+    Y {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonY
+    },
+    DPAD_LEFT {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonDpadLeft
+    },
+    DPAD_RIGHT {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonDpadRight
+    },
+    DPAD_UP {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonDpadUp
+    },
+    DPAD_DOWN {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonDpadDown
+    },
+    SHOULDER_LEFT {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonL1
+    },
+    SHOULDER_RIGHT {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonR1
+    },
+    START {
+        override fun getCode(mapping: ControllerMapping): Int = mapping.buttonStart
+    },
+
+    ;
+
+    abstract fun getCode(mapping: ControllerMapping): Int
+
 }
 
 typealias KeyCode = Int

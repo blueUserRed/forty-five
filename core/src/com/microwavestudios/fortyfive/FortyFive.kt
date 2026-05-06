@@ -2,12 +2,16 @@ package com.microwavestudios.fortyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.controllers.ControllerAdapter
+import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
@@ -89,7 +93,6 @@ object FortyFive : Game() {
             Oven().bake(appArguments.bakeTasks)
             return
         }
-
         if (appArguments.mapEditor) {
             screenManager.appendScreen(MapEditorScreen, object : MapEditorContext {
                 override val map: DetailMap? = null
@@ -98,6 +101,7 @@ object FortyFive : Game() {
             screenManager.screenFinished()
             return
         }
+
         globalSave.setToCorrectWindowMode()
         if (!globalSave.skipIntroScreen) screenManager.appendScreen(IntroScreen)
         screenManager.appendScreen(TitleScreen)
@@ -162,6 +166,7 @@ object FortyFive : Game() {
             registerNamespace("Common", CommonNamespace)
             registerNamespace("Cards", CardsNamespace)
         }
+        initControllers()
         ConfigFileManager.init()
         TemplateString.init()
         logger.init()
@@ -180,12 +185,29 @@ object FortyFive : Game() {
         OnjConfig.dumpOnjEnv(File(".onj/forty-five.onjenv"))
     }
 
+    private fun initControllers() {
+        globalSave.currentControllerUid = Controllers.getControllers().firstOrNull()?.uniqueId
+        Controllers.addListener(object : ControllerAdapter() {
+
+            override fun connected(controller: Controller?) {
+                controller?.let {
+                    currentScreen?.inputManager?.controllerConnected(it)
+                }
+            }
+
+            override fun disconnected(controller: Controller?) {
+                controller?.let {
+                    currentScreen?.inputManager?.controllerDisconnected(it)
+                }
+            }
+        })
+    }
+
     override fun dispose() {
         logger.debug(logTag, "game closing")
         DebugActorImpl.dumpActorsWithDebugWarnings()
         pluginManager.onEnd()
         profileManager.currentProfile?.write()
-        profileManager.currentProfile?.writeMaps()
         globalSave.write()
         _lifetime.die()
         soundPlayer.end()

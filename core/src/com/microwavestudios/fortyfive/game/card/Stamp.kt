@@ -43,10 +43,9 @@ abstract class Stamp(
      */
     open fun behaviours(): List<BulletBehaviour>? = null
 
-    open fun traitEffects(): List<String>
-    {
-        return emptyList()
-    }
+    open fun traitEffects(): List<String> = emptyList()
+
+    open fun canBeAppliedTo(card: Card): Boolean = true
 
     object Bewitched : Stamp("bewitched", "Bewitched") {
 
@@ -73,7 +72,7 @@ abstract class Stamp(
     object Jammed : Stamp("jammed", "Jammed") {
 
         override val description: String = $$"""
-            This bullet has $keyword$Jammed$keyword$
+            This bullet has $trait$JAMMED$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -84,7 +83,7 @@ abstract class Stamp(
     object Undead : Stamp("undead", "Undead") {
 
         override val description: String = $$"""
-            This bullet has $keyword$Undead$keyword$
+            This bullet has $trait$UNDEAD$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -95,7 +94,7 @@ abstract class Stamp(
     object Gauge : Stamp("gauge", "Gauge") {
 
         override val description: String = $$"""
-            This bullet has $keyword$Spray$keyword$
+            This bullet has $trait$SPRAY$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -106,7 +105,7 @@ abstract class Stamp(
     object HighVelocity : Stamp("highVelocity", "High Velocity") {
 
         override val description: String = $$"""
-            This bullet has $keyword$High Velocity$keyword$
+            This bullet has $trait$HIGH VELOCITY$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -117,7 +116,7 @@ abstract class Stamp(
     object Phantom : Stamp("phantom", "Phantom") {
 
         override val description: String = $$"""
-            This bullet has $keyword$Phantom$keyword$
+            This bullet has $trait$PHANTOM$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -139,7 +138,7 @@ abstract class Stamp(
     object Spirit : Stamp("spirit", "Spirit") {
 
         override val description: String = $$"""
-            This bullet has $keyword$Spirit$keyword$
+            This bullet has $trait$SPIRIT$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -155,13 +154,15 @@ abstract class Stamp(
             return original
         }
 
+        override fun canBeAppliedTo(card: Card): Boolean = card.originalBaseCost >= 2
+
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spirit)
     }
 
     object FiftyCal : Stamp("fiftyCal", ".50 Cal") {
 
         override val description: String = $$"""
-            This bullet has $keyword$Piercing$keyword$
+            This bullet has $trait$PIERCING$trait$
         """.trimIndent().replace('\n', ' ')
 
         override val icon: ResourceHandle = "card_stamp_test"
@@ -169,9 +170,6 @@ abstract class Stamp(
         override fun traitEffects(): List<String> {
             return listOf("piercing")
         }
-
-        //This didnt end up being needed
-        //override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Piercing)
     }
 
 }

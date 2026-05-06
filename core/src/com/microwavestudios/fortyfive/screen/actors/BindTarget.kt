@@ -48,6 +48,12 @@ object BindTargetFactory {
             setter = { FortyFive.globalSave.fullscreen = it },
             mapOf(true to "on", false to "off")
         ),
+        "controllerVibration" to BindTarget(
+            Boolean::class,
+            getter = { FortyFive.globalSave.enableControllerVibration },
+            setter = { FortyFive.globalSave.enableControllerVibration = it },
+            mapOf(true to "on", false to "off")
+        ),
     )
 
     fun <T : Any> get(name: String, clazz: KClass<T>): BindTarget<T> {

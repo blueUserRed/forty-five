@@ -24,9 +24,17 @@ class RunSave private constructor(val profile: Profile) {
 
     var currentNodeIndex: Int by DataDelegate(RunSaveData::currentNode)
     var lastNodeIndex: Int? by DataDelegate(RunSaveData::lastNode)
+    var encountersStarted: Int by DataDelegate(RunSaveData::encountersStarted)
     var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
     var cardsTakenAlong: List<CardType> by DataDelegate(RunSaveData::cardsTakenAlong)
+
+    var usedSteps: Int by DataDelegate(
+        RunSaveData::usedSteps,
+        onSet = {
+            FortyFive.currentScreen?.events?.fire(UsedStepsChangedEvent(it))
+        }
+    )
 
     var playerHealth: Int by DataDelegate(
         RunSaveData::playerHealth,
@@ -66,6 +74,14 @@ class RunSave private constructor(val profile: Profile) {
         _backpack.add(card)
         backpackDecks.forEach { it.checkDeck(_backpack) }
         dirty()
+    }
+
+    fun swapCardInBackpack(old: CardType, new: CardType) {
+        val result = _backpack.remove(old)
+        require(result) { "card $old not in backpack" }
+        _backpack.add(new)
+        dirty()
+        checkDecks()
     }
 
     fun readFromDisc() {
@@ -137,9 +153,11 @@ class RunSave private constructor(val profile: Profile) {
         var currentNode: Int,
         var lastNode: Int?,
         var playerHealth: Int,
+        var usedSteps: Int,
         var backpack: MutableList<CardType>,
         var backpackDecks: MutableList<Deck>,
         var currentDeckId: Int,
+        var encountersStarted: Int,
         var cardsTakenAlong: List<CardType>,
         var run: Run
     ) {
@@ -148,6 +166,8 @@ class RunSave private constructor(val profile: Profile) {
             "currentNode" with currentNode
             "lastNode" with lastNode
             "playerHealth" with playerHealth
+            "usedSteps" with usedSteps
+            "encountersStarted" with encountersStarted
             "backpack" with backpack.map { it.asOnj() }
             "backpackDecks" with backpackDecks.map { it.asOnjObject() }
             "currentDeckId" with currentDeckId
@@ -161,6 +181,7 @@ class RunSave private constructor(val profile: Profile) {
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),
                 onj.get<Long>("playerHealth").toInt(),
+                onj.get<Long>("usedSteps").toInt(),
                 onj
                     .get<OnjArray>("backpack")
                     .value
@@ -172,6 +193,7 @@ class RunSave private constructor(val profile: Profile) {
                     .map { Deck.getFromOnj(it as OnjObject) }
                     .toMutableList(),
                 onj.get<Long>("currentDeckId").toInt(),
+                onj.get<Long>("encountersStarted").toInt(),
                 onj
                     .get<OnjArray>("cardsTakenAlong")
                     .value
@@ -223,9 +245,10 @@ class RunSave private constructor(val profile: Profile) {
             val map = mapGenerator.generate("run_map", TimeUtils.millis())
             val save = RunSave(profile)
             save.data = RunSaveData(
-                0,
+                map.startNode.index,
                 null,
                 run.initialPlayerHealth,
+                0,
                 cardsToTakeAlong.toMutableList(),
                 mutableListOf(
                     Deck("1", 0, mutableMapOf()),
@@ -234,6 +257,7 @@ class RunSave private constructor(val profile: Profile) {
                     Deck("4", 3, mutableMapOf()),
                     Deck("5", 4, mutableMapOf()),
                 ),
+                0,
                 0,
                 cardsToTakeAlong,
                 run
@@ -247,5 +271,7 @@ class RunSave private constructor(val profile: Profile) {
             return save
         }
     }
+
+    class UsedStepsChangedEvent(val newUsedSteps: Int)
 
 }

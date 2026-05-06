@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
 import com.microwavestudios.fortyfive.run.RunGenerator.Companion.logTag
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.fractionalPart
 import com.microwavestudios.fortyfive.utils.unreachable
 import com.microwavestudios.fortyfive.utils.zip
 import onj.builder.buildOnjObject
@@ -17,9 +18,10 @@ import onj.value.OnjObject
 import kotlin.random.Random
 
 data class Encounter(
-    val enemies: List<String>,
+    val enemiesGroups: List<String>,
     val encounterModifierNames: Set<String>,
     val forceCards: List<CardType>?,
+    val forceConcreteEnemies: List<String>?,
     val shuffleCards: Boolean,
     val unadjustedMajorDifficulty: Int,
     val majorDifficulty: Int,
@@ -34,18 +36,24 @@ data class Encounter(
     }
 
     fun createEnemies(): List<Enemy> {
+        val difficultyAdjustment = EncounterGenerator.justInTimeDifficultyAddition()
+        val majorDifficulty = (majorDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
+        val minorDifficulty = minorDifficulty + difficultyAdjustment.fractionalPart()
         val enemiesOnj = ConfigFileManager.getConfigFile("enemies")
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         val healthMultiplier = 1f + ((minorDifficulty - 1f) * RunGeneratorConfig.enemyHealthAdjustment)
+        val enemies = forceConcreteEnemies ?:
+            EncounterGenerator.generateConcreteEnemies(enemiesGroups, majorDifficulty)
         return enemies
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
             .map { it.create((it.baseHealth * healthMultiplier).toInt()) }
     }
 
     fun asOnj(): OnjObject = buildOnjObject {
-        "enemies" with enemies
+        "enemies" with enemiesGroups
         "encounterModifier" with encounterModifierNames
         "forceCards" with forceCards?.map { it.asOnj() }
+        forceConcreteEnemies?.let { "forceConcreteEnemies" with forceConcreteEnemies }
         "shuffleCards" with shuffleCards
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "majorDifficulty" with majorDifficulty
@@ -60,6 +68,7 @@ data class Encounter(
             onj.get<OnjArray>("enemies").value.map { it.value as String },
             onj.get<OnjArray>("encounterModifier").value.map { it.value as String }.toSet(),
             onj.getOr<OnjArray?>("forceCards", null)?.value?.map { CardType.fromOnj(it as OnjObject) },
+            onj.getOr<OnjArray?>("forceConcreteEnemies", null)?.value?.map { it.value as String },
             onj.getOr("shuffleCards", true),
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Long>("majorDifficulty").toInt(),
@@ -72,6 +81,133 @@ data class Encounter(
 }
 
 object EncounterGenerator {
+
+    fun justInTimeDifficultyAddition(): Float {
+        val profile = FortyFive.profileManager.currentProfile ?: return 0f
+        val run = profile.activeRun ?: return 0f
+        val scalingData = when (run.type) {
+            RunType.CONSTRUCTED -> RunGeneratorConfig.scalingConstructed
+            RunType.LIMITED -> RunGeneratorConfig.scalingLimited
+            else -> return 0f
+        }
+        val encountersStarted = profile.encountersStartedInRun ?: return 0f
+        return encountersStarted * scalingData.encounterStartedScale
+    }
+
+    fun generateConcreteEnemies(groupNames: List<String>, majorDifficulty: Int): List<String> {
+        val enemyAmount = groupNames.size
+        val random = Random
+        val enemyGroups = RunGeneratorConfig.enemyGroups
+        val enemies = when (enemyAmount) {
+            1 -> generateConcreteSingleEnemy(groupNames, majorDifficulty, enemyGroups, random)
+            2 -> generateConcreteTwoEnemies(groupNames, majorDifficulty, enemyGroups, random)
+            3 -> generateConcreteThreeEnemies(groupNames, majorDifficulty, enemyGroups, random)
+            else -> unreachable()
+        }
+        if (enemies != null) return enemies
+        FortyFive.logger.warn(
+            logTag,
+            "couldn't generate concrete enemies for configuration: $groupNames and difficulty: $majorDifficulty"
+        )
+        // generate enemies that don't match exactly
+        val config = mutableListOf<String>()
+        var diff = 0
+        repeat(enemyAmount) { i ->
+            val enemyGroupName = groupNames[i]
+            val group = enemyGroups[enemyGroupName]
+            requireNotNull(group) { "unknown enemy $enemyGroupName" }
+            val neededDiff = majorDifficulty - diff
+            val result = group.entries.find { it.key <= neededDiff }
+                ?: return@repeat
+            val (enemyDiff, enemyName) = result
+            config.add(enemyName)
+            diff += enemyDiff
+        }
+        if (config.isEmpty()) {
+            // all enemies are too difficult
+            return listOf(
+                enemyGroups[groupNames.first()]!!.minBy { it.key }.value
+            )
+        }
+        return config
+    }
+
+    private fun generateConcreteSingleEnemy(
+        groupNames: List<String>,
+        majorDifficulty: Int,
+        enemyGroups: Map<String, Map<Int, String>>,
+        random: Random
+    ): List<String>? {
+        val enemy = groupNames.first()
+        val group = enemyGroups[enemy]
+        requireNotNull(group) { "Unknown enemy $enemy" }
+        return group[majorDifficulty]?.let { listOf(it) }
+    }
+
+    private fun generateConcreteTwoEnemies(
+        groupNames: List<String>,
+        majorDifficulty: Int,
+        enemyGroups: Map<String, Map<Int, String>>,
+        random: Random
+    ): List<String>? {
+        val firstEnemy = groupNames.first()
+        val secondEnemy = groupNames[1]
+        val firstEnemyGroup = enemyGroups[firstEnemy]
+        val secondEnemyGroup = enemyGroups[secondEnemy]
+        requireNotNull(firstEnemyGroup) { "Unknown enemy $firstEnemy" }
+        requireNotNull(secondEnemyGroup) { "Unknown enemy $secondEnemy" }
+
+        val firstEnemyGroupList = firstEnemyGroup.toList()
+        val offset = (0..firstEnemyGroupList.size).random(random)
+        firstEnemyGroupList.indices.forEach { i ->
+            val offsetIndex = (i + offset) % firstEnemyGroupList.size
+            val (diff, name) = firstEnemyGroupList[offsetIndex]
+            val secondDiff = majorDifficulty - diff
+            if (secondDiff <= 0) return@forEach
+            val secondEnemy = secondEnemyGroup[secondDiff]
+                ?: return@forEach
+            return listOf(name, secondEnemy)
+        }
+        return null
+    }
+
+    private fun generateConcreteThreeEnemies(
+        groupNames: List<String>,
+        majorDifficulty: Int,
+        enemyGroups: Map<String, Map<Int, String>>,
+        random: Random
+    ): List<String>? {
+        val firstEnemy = groupNames.first()
+        val secondEnemy = groupNames[1]
+        val thirdEnemy = groupNames[2]
+        val firstEnemyGroup = enemyGroups[firstEnemy]
+        val secondEnemyGroup = enemyGroups[secondEnemy]
+        val thirdEnemyGroup = enemyGroups[thirdEnemy]
+        requireNotNull(firstEnemyGroup) { "Unknown enemy $firstEnemy" }
+        requireNotNull(secondEnemyGroup) { "Unknown enemy $secondEnemy" }
+        requireNotNull(thirdEnemyGroup) { "Unknown enemy $thirdEnemy" }
+
+        val firstEnemyGroupList = firstEnemyGroup.toList()
+        val secondEnemyGroupList = firstEnemyGroup.toList()
+        val offset = (0..firstEnemyGroupList.size).random(random)
+        val secondOffset = (0..secondEnemyGroupList.size).random(random)
+        firstEnemyGroupList.indices.forEach { i ->
+            val offsetI = (i + offset) % firstEnemyGroupList.size
+            val (firstDiff, firstName) = firstEnemyGroupList[offsetI]
+            if (firstDiff >= majorDifficulty) return@forEach
+
+            secondEnemyGroupList.indices.forEach { j ->
+                val offsetJ = (j + secondOffset) % secondEnemyGroupList.size
+                val (secondDiff, secondName) = secondEnemyGroupList[offsetJ]
+                val thirdDiff = majorDifficulty - (firstDiff + secondDiff)
+                if (thirdDiff <= 0) return@forEach
+                val thirdName = thirdEnemyGroup[thirdDiff]
+                    ?: return@forEach
+                return listOf(firstName, secondName, thirdName)
+            }
+        }
+        return null
+    }
 
     fun generate(
         placeholder: EncounterPlaceholderMapEvent,
@@ -100,16 +236,14 @@ object EncounterGenerator {
         difficultyAdjustment += difficultyScaling
 
         majorDifficulty = (majorDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
-        minorDifficulty = (minorDifficulty + (difficultyAdjustment % 1)).toFloat()
+        minorDifficulty = (minorDifficulty + difficultyAdjustment.fractionalPart()).toFloat()
 
-        val (enemies, enemyDifficulty) = generateEnemies(random, majorDifficulty, placeholder)
-        val difficultyDiff = majorDifficulty - enemyDifficulty
-        minorDifficulty += difficultyDiff
+        val enemies = generateEnemies(random, placeholder)
 
         return Encounter(
             enemies,
             modifiers.toSet(),
-            null,
+            null, null,
             true,
             placeholder.unadjustedMajorDifficulty,
             majorDifficulty,
@@ -140,9 +274,8 @@ object EncounterGenerator {
 
     private fun generateEnemies(
         random: Random,
-        majorDifficulty: Int, // adjusted
         placeholder: EncounterPlaceholderMapEvent
-    ): Pair<List<String>, Int> {
+    ): List<String> {
         val enemyConfig = RunGeneratorConfig.enemyConfig
         lateinit var config: EnemyConfig
         var difficultyToCheck = placeholder.unadjustedMajorDifficulty
@@ -158,70 +291,50 @@ object EncounterGenerator {
             difficultyToCheck--
         }
 
-        val availableEnemies = mutableListOf<Triple<Int, String, String>>() // maj. Diff., name, group name
-        config.allowedEnemies.forEach { group ->
-            val enemies = RunGeneratorConfig.enemyGroups[group]
-            requireNotNull(enemies) { "unknown enemy group: $group" }
-            enemies.forEach { (difficulty, name) -> availableEnemies.add(Triple(difficulty, name, group)) }
+        val allowedConfigurations = RunGeneratorConfig.enemyConfigurations.filter { configuration ->
+            configuration.all { it in config.allowedEnemies }
         }
-        availableEnemies.sortBy { it.first }
 
-        var candidates = when (placeholder.amountEnemies.random(random)) {
-            1 -> generateEnemySingle(majorDifficulty, availableEnemies)
-            2 -> generateEnemyPairs(majorDifficulty, availableEnemies)
-            3 -> generateEnemyTriples(majorDifficulty, availableEnemies)
+        if (allowedConfigurations.isEmpty()) {
+            FortyFive.logger.warn(
+                logTag,
+                "No allowable enemy configuration for difficulty ${placeholder.unadjustedMajorDifficulty}"
+            )
+            val allConfigurations = RunGeneratorConfig.enemyConfigurations
+            require(allConfigurations.isNotEmpty()) { "No enemy configurations are defined" }
+            return allConfigurations.first()
+        }
+
+        val enemyAmountGenerationOrder = when (placeholder.amountEnemies.random(random)) {
+            1 -> arrayOf(1, 2, 3)
+            2 -> arrayOf(2, 1, 3)
+            3 -> arrayOf(3, 2, 1)
             else -> unreachable()
         }
-        if (candidates.isEmpty()) {
-            FortyFive.logger.warn("EncounterGenerator", "Cant generate encounter with preferred number of enemies " +
-                    "number enemies: ${placeholder.amountEnemies}, " +
-                    "available enemies: $availableEnemies")
+
+        var configurations: List<List<String>>? = null
+        enemyAmountGenerationOrder.forEach { amount ->
+            if (configurations != null) return@forEach
+            val configurationsWithCorrectSize = allowedConfigurations.filter { it.size == amount }
+            if (configurationsWithCorrectSize.isEmpty()) return@forEach
+            configurations = configurationsWithCorrectSize
         }
-        if (candidates.isEmpty()) candidates = generateEnemySingle(majorDifficulty, availableEnemies)
-        if (candidates.isEmpty()) candidates = generateEnemyPairs(majorDifficulty, availableEnemies)
-        if (candidates.isEmpty()) candidates = generateEnemyTriples(majorDifficulty, availableEnemies)
+        requireNotNull(configurations) // should never happen as allowedConfigurations is never empty
 
-        if (candidates.isEmpty()) {
-            val maxDifficulty = availableEnemies.maxOf { it.first }
-            if (majorDifficulty > maxDifficulty * 3) {
-                // difficulty is too high
-                FortyFive.logger.debug("EncounterGenerator", "Difficulty $majorDifficulty has no hard enough enemies")
-                val difficultEnemies = availableEnemies.filter { it.first >= maxDifficulty }
-                val enemies = listOf(
-                    difficultEnemies.random(random),
-                    difficultEnemies.random(random),
-                    difficultEnemies.random(random),
-                )
-                return enemies.map { it.second } to enemies.sumOf { it.first }
-            }
-
-            FortyFive.logger.warn(
-                "EncounterGenerator",
-                "Couldn't generate enemies for encounter " +
-                        "difficulty: $majorDifficulty, " +
-                        "available enemies: $availableEnemies, " +
-                        "amountEnemies: ${placeholder.amountEnemies}"
-            )
-
-            // shouldn't really happen, always return expected difficulty to prevent weird scaling
-            return listOf(availableEnemies.first().second) to majorDifficulty
-        }
-
-        val winner = candidates
+        val winner = configurations
             .zip { scoreEnemyConfiguration(random, it, placeholder) }
             .maxBy { it.second }
             .first
 
-        return winner.map { it.second } to winner.sumOf { it.first }
+        return winner
     }
 
     private fun scoreEnemyConfiguration(
         random: Random,
-        enemies: Array<Triple<Int, String, String>>,
+        enemies: List<String>,
         placeholder: EncounterPlaceholderMapEvent
     ): Int {
-        val distinctEnemies = enemies.map { it.third }.distinct().size
-
+        val distinctEnemies = enemies.distinct().size
         val distinctEnemiesPoints = when (enemies.size) {
             1 -> 0
             2 -> if (distinctEnemies == 2) 100 else 0
@@ -232,92 +345,15 @@ object EncounterGenerator {
             }
             else -> unreachable()
         }
-
-        val distinctDifficulties = enemies.map { it.first }.distinct().size
-
-        val distinctDifficultiesPoints = when (enemies.size) {
-            1 -> 0
-            2 -> if (distinctDifficulties == 2) 40 else 0
-            3 -> when (distinctDifficulties) {
-                3 -> 40
-                2 -> 20
-                else -> 0
-            }
-            else -> unreachable()
-        }
-
         val probabilityIncreases = RunGeneratorConfig.enemyProbabilityIncrease
-        val enemyGroups = enemies.map { it.third }
         var bonusPoints = 0
         probabilityIncreases
             .forEach {
-                if (it.biome != placeholder.biome || it.enemy !in enemyGroups) return@forEach
+                if (it.biome != placeholder.biome || it.enemy !in enemies) return@forEach
                 bonusPoints += it.bonusPoints
             }
-
         val randomPoints = (0..RunGeneratorConfig.enemyProbabilityRandomPoints).random(random)
-
-        return distinctEnemiesPoints + distinctDifficultiesPoints + bonusPoints + randomPoints
-    }
-
-    private fun generateEnemySingle(
-        majorDifficulty: Int,
-        availableEnemies: List<Triple<Int, String, String>>
-    ): List<Array<Triple<Int, String, String>>> {
-        return availableEnemies.filter { it.first == majorDifficulty }.map { arrayOf(it) }
-    }
-
-    private fun generateEnemyPairs(
-        majorDifficulty: Int,
-        availableEnemies: List<Triple<Int, String, String>>
-    ): List<Array<Triple<Int, String, String>>> {
-        val candidates = mutableListOf<Array<Triple<Int, String, String>>>()
-        var i = 0
-        while (i < availableEnemies.size) {
-            val enemy = availableEnemies[i]
-            val difficulty = enemy.first
-            if (difficulty > majorDifficulty) break
-            var j = i
-            while (j < availableEnemies.size) {
-                val enemy2 = availableEnemies[j]
-                if (difficulty + enemy2.first == majorDifficulty) {
-                    candidates.add(arrayOf(enemy, enemy2))
-                }
-                j++
-            }
-            i++
-        }
-        return candidates
-    }
-
-    private fun generateEnemyTriples(
-        majorDifficulty: Int,
-        availableEnemies: List<Triple<Int, String, String>>
-    ): List<Array<Triple<Int, String, String>>> {
-        val candidates = mutableListOf<Array<Triple<Int, String, String>>>()
-        var i = 0
-        while (i < availableEnemies.size) {
-            val enemy = availableEnemies[i]
-            val difficulty = enemy.first
-            if (difficulty > majorDifficulty) break
-            var j = i
-            while (j < availableEnemies.size) {
-                val enemy2 = availableEnemies[j]
-                val difficulty2 = enemy2.first
-                if (difficulty + difficulty2 > majorDifficulty) break
-                var k = j
-                while (k < availableEnemies.size) {
-                    val enemy3 = availableEnemies[k]
-                    if (difficulty + difficulty2 + enemy3.first == majorDifficulty) {
-                        candidates.add(arrayOf(enemy, enemy2, enemy3))
-                    }
-                    k++
-                }
-                j++
-            }
-            i++
-        }
-        return candidates
+        return distinctEnemiesPoints + bonusPoints + randomPoints
     }
 
     private fun generateEncounterModifier(

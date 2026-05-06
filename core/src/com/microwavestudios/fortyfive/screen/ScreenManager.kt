@@ -142,7 +142,6 @@ class ScreenManager(
                 val profile = FortyFive.profileManager.currentProfile
                 profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
                 profile?.write()
-                profile?.writeMaps()
                 screen.active()
                 inScreenTransition = false
             }

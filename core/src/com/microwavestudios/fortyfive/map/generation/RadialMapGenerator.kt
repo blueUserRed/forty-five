@@ -16,13 +16,11 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
     override fun generate(name: String, seed: Long): DetailMap {
         setup(name, data, seed)
         val startNode = newNode(0f, 0f)
-        setupFirstNode(startNode)
 
         val nodes = generateNodes(data.circles)
         generateNodeConnections(startNode, nodes)
 
         rotateNodes()
-        calculateDistances(startNode)
 
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
@@ -30,19 +28,18 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             .decorations
             .splitInTwo { it.animated }
 
-        assignEvents(data.events, nodes)
-
         val genDecorations = decorations.map { generateDecoration(it) }
         val genAnimatedDecorations = animatedDecorations.map { generateDecoration(it) }
 
-        generateEncounters(startNode)
+        generateMapEvents()
+        generateEncounters()
 
         startNode.build()
 
         return DetailMap(
             name = name,
-            startNode = startNode.asNode!!,
-            endNode = allNodes.last().asNode!!,
+            startNode = this.startNode!!.asNode!!,
+            endNode = this.endNode!!.asNode!!,
             decorations = genDecorations,
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
@@ -51,55 +48,6 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             majorDifficulty = data.majorDifficulty,
             camPosOffset = Vector2(0f, 0f)
         )
-    }
-
-    private fun assignEvents(events: List<RadialMapGeneratorEventSpawner>, nodes: List<List<MapNodeBuilder>>) {
-        nodes.forEachIndexed { index, circle ->
-            val possibleEvents = events
-                .filter { it.circle == null || it.circle == index }
-                .filter { it.fixedAmount == null }
-            if (possibleEvents.isEmpty()) return@forEachIndexed
-            circle.forEach { node ->
-                val chosen = possibleEvents
-                    .map { it.weight to it }
-                    .weightedRandom(random)
-                node.event = chosen.eventCreator()
-                node.nodeTexture = chosen.nodeTexture
-            }
-        }
-        val allNodes = nodes.flatten()
-        val fixedEvents = events.filter { it.fixedAmount != null }.toMutableList()
-        val usedNodes = mutableListOf<MapNodeBuilder>()
-
-        val exitNode = nodes[data.exitNodeCircle].random(random)
-        setupLastNode(exitNode)
-        usedNodes.add(exitNode)
-
-        fixedEvents.forEach { eventSpawner ->
-            val possibleNodes = if (eventSpawner.circle == null) {
-                allNodes
-            } else {
-                nodes.getOrNull(eventSpawner.circle) ?: throw RuntimeException("no circle with index ${eventSpawner.circle}")
-            }
-            var spawned = 0
-            while (true) {
-                if (spawned >= eventSpawner.fixedAmount!!) break
-                val candidates = possibleNodes.filter { it !in usedNodes }
-                if (candidates.isEmpty()) {
-                    FortyFive.logger.warn(
-                        logTag,
-                        "Cant spawn event $eventSpawner ${eventSpawner.fixedAmount} times because no possible nodes are left"
-                    )
-                    break
-                }
-                val chosen = candidates.random(random)
-                val event = eventSpawner.eventCreator()
-                chosen.event = event
-                chosen.nodeTexture = eventSpawner.nodeTexture
-                usedNodes.add(chosen)
-                spawned++
-            }
-        }
     }
 
     private fun findIdealNodeImagePosition(node: MapNodeBuilder): MapNode.ImagePosition {
@@ -192,15 +140,14 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val horizontalExtension: Float,
         val verticalExtension: Float,
         val decorations: List<MapGeneratorDecoration>,
-        val events: List<RadialMapGeneratorEventSpawner>,
         override val locationSignProtectedAreaWidth: Float,
         override val locationSignProtectedAreaHeight: Float,
         override val firstNodeEvent: () -> MapEvent,
-        override val firstNodeTexture: String,
         override val lastNodeEvent: () -> MapEvent,
-        override val lastNodeTexture: String,
-        val exitNodeCircle: Int,
-        override val rotation: Float
+        override val randomStepsToLastNode: Int,
+        override val rotation: Float,
+        override val fillEvents: List<MapGeneratorFillEvent>,
+        override val fixedEvents: List<MapGeneratorFixedEvent>
     ) : BaseMapGeneratorData {
 
         override fun asOnj(): OnjObject = buildOnjObject {
@@ -209,7 +156,6 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             "horizontalExtension" with horizontalExtension
             "verticalExtension" with verticalExtension
             "decorations" with decorations.map { it.asOnj() }
-            "events" with events.map { it.asOnj() }
             includeBaseData()
         }
 
@@ -224,10 +170,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 locationSignProtectedAreaWidth = onj.get<Double>("locationSignProtectedAreaWidth").toFloat(),
                 locationSignProtectedAreaHeight = onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
                 firstNodeEvent = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("firstNodeEvent")) },
-                firstNodeTexture = onj.get<String>("firstNodeTexture"),
                 lastNodeEvent = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("lastNodeEvent")) },
-                lastNodeTexture = onj.get<String>("lastNodeTexture"),
-                exitNodeCircle = onj.get<Long>("exitNodeCircle").toInt(),
                 circles = onj
                     .get<OnjArray>("circles")
                     .value
@@ -236,41 +179,11 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                     .get<OnjArray>("decorations")
                     .value
                     .map { MapGeneratorDecoration.fromOnj(it as OnjObject) },
-                events = onj
-                    .get<OnjArray>("events")
-                    .value
-                    .map { RadialMapGeneratorEventSpawner.fromOnj(it as OnjObject) },
+                randomStepsToLastNode = onj.get<Long>("randomStepsToLastNode").toInt(),
+                fillEvents = onj.get<OnjArray>("fillEvents").value.map { MapGeneratorFillEvent.fromOnj(it as OnjObject) },
+                fixedEvents = onj.get<OnjArray>("fixedEvents").value.map { MapGeneratorFixedEvent.fromOnj(it as OnjObject) },
                 rotation = onj.get<Double>("rotation").toFloat()
             )
         }
     }
-
-    data class RadialMapGeneratorEventSpawner(
-        val eventCreator: () -> MapEvent,
-        val circle: Int?,
-        val weight: Int,
-        val nodeTexture: String,
-        val fixedAmount: Int?,
-    ) {
-
-        fun asOnj(): OnjObject = buildOnjObject {
-            "event" with eventCreator().asOnjObject()
-            "circle" with circle
-            "weight" with weight
-            "nodeTexture" with nodeTexture
-            "fixedAmount" with fixedAmount
-        }
-
-        companion object {
-
-            fun fromOnj(onj: OnjObject) = RadialMapGeneratorEventSpawner(
-                eventCreator = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("event")) },
-                nodeTexture = onj.get<String>("nodeTexture"),
-                circle = onj.getOr<Long?>("circle", null)?.toInt(),
-                weight = onj.get<Long>("weight").toInt(),
-                fixedAmount = onj.getOr<Long?>("fixedAmount", null)?.toInt(),
-            )
-        }
-    }
-
 }

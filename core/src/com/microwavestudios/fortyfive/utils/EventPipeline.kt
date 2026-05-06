@@ -39,6 +39,7 @@ class EventPipeline {
     }
 
     fun link(other: EventPipeline) {
+        if (other === this) return
         linkedTo.add(other)
         other.linkedTo.add(this)
     }

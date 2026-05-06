@@ -32,6 +32,20 @@ var decoration = {
     animated: boolean,
 };
 
+var fixedEvent = {
+    nodeEvent: $MapEvent,
+    minDistance: int?,
+    maxDistance: int?,
+    amount: int
+};
+
+var fillEvent = {
+    nodeEvent: $MapEvent,
+    minDistance: int?,
+    maxDistance: int?,
+    weight: int
+};
+
 var mapGeneratorSharedKeys = {
     majorDifficulty: int,
     biome: string,
@@ -41,10 +55,11 @@ var mapGeneratorSharedKeys = {
     locationSignProtectedAreaHeight: float,
     nodeProtectedArea: float,
     firstNodeEvent: $MapEvent,
-    firstNodeTexture: string,
     lastNodeEvent: $MapEvent,
-    lastNodeTexture: string,
+    randomStepsToLastNode: int,
     rotation: float,
+    fixedEvents: fixedEvent[],
+    fillEvents: fillEvent[],
 };
 
 $MapGenerator {
@@ -55,11 +70,6 @@ $MapGenerator {
         roadHeight: float,
         exclusionRadius: float,
         decorations: decoration[],
-        eventSpawner: {
-            texture: string,
-            weight: int,
-            event: $MapEvent,
-        }[],
         ...mapGeneratorSharedKeys
     }
 
@@ -70,34 +80,16 @@ $MapGenerator {
         altLinesOffset: float,
         varianceX: float,
         varianceY: float,
-        mainEvent: {
-            nodeTexture: string,
-            event: $MapEvent,
-        },
-        events: {
-            nodeTexture: string,
-            event: $MapEvent,
-            offset: int[2],
-            line: int,
-        }[],
         decorations: decoration[],
         ...mapGeneratorSharedKeys
     }
 
     $Radial {
         decorations: decoration[],
-        exitNodeCircle: int,
         circles: {
             radius: float,
             numNodes: int,
             angleVariance: float,
-        }[],
-        events: {
-            event: $MapEvent,
-            nodeTexture: string,
-            circle?: int?,
-            weight: int,
-            fixedAmount?: int?,
         }[],
         ...mapGeneratorSharedKeys
     }

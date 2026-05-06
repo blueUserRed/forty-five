@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.game.enemy
 
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.controller.GameController
@@ -10,7 +11,6 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
-import kotlin.math.log
 
 data class EnemyPrototype(
     val name: String,
@@ -32,14 +32,18 @@ class Enemy(
 
     val enemyEvents: EventPipeline = EventPipeline()
 
+    var actor: Actor? = null
+
     /**
      * the current lives of this enemy
      */
     var currentHealth: Int = health
         private set(value) {
             FortyFive.logger.debug(logTag, "enemy lives updated: new lives = $field ")
+            val defeated = field > 0 && value <= 0
             field = max(value, -300)
             enemyEvents.fire(HealthChangedEvent)
+            if (defeated) enemyEvents.fire(EnemyDefeated)
         }
 
     val isDefeated: Boolean
@@ -131,18 +135,11 @@ class Enemy(
         .mapNotNull { it.executeAfterShot() }
         .collectTimeline()
 
-    fun update() {
-        var change = false
-        _statusEffects.removeIf { effect ->
-            if (!effect.isStillValid()) {
-                change = true
-                true
-            } else {
-                false
-            }
-        }
-        if (!change) return
-        enemyEvents.fire(StatusEffectsChangedEvent)
+    fun checkStatusEffectValidity(): List<StatusEffect> {
+        val toRemove = _statusEffects.filter { !it.isStillValid() }
+        _statusEffects.removeAll(toRemove)
+        if (toRemove.isNotEmpty()) enemyEvents.fire(StatusEffectsChangedEvent)
+        return toRemove
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
@@ -161,44 +158,41 @@ class Enemy(
      */
     fun damage(damage: Int, triggeredByStatusEffect: Boolean = false, isPiercing: Boolean = false): Timeline = Timeline.timeline {
         var remaining = 0
+        var healthBefore = 0
+        action { healthBefore = currentHealth }
 
-        if(!isPiercing)
-        {
-            action {
+        if (!isPiercing) {
+            later {
                 remaining = max(damage - currentCover, 0)
+                if (currentCover == 0) return@later
+                currentCover -= damage
+                if (currentCover < 0) currentCover = 0
             }
-
-            includeLater(
-                { Timeline.timeline {
-                    action {
-                        currentCover -= damage
-                        if (currentCover < 0) currentCover = 0
-                    }
-                } },
-                { currentCover != 0 }
-            )
-        }
-        else
-        {
+        } else {
             action {
                 remaining = max(damage, 0)
             }
         }
 
+        var wasDefeated = false
 
-        includeLater(
-            { Timeline.timeline {
-                action {
-                    currentHealth -= remaining
-                }
-            } },
-            { remaining != 0 }
-        )
+        later {
+            if (remaining != 0) currentHealth -= remaining
+            wasDefeated = healthBefore > 0 && currentHealth <= 0
+        }
 
         includeLater(
             { executeStatusEffectsAfterDamage(damage) },
             { remaining != 0 && !triggeredByStatusEffect }
         )
+
+        later {
+            if (!wasDefeated) return@later
+            _statusEffects
+                .mapNotNull { it.onEnemyDeath(StatusEffectTarget.EnemyTarget(this@Enemy)) }
+                .collectTimeline()
+                .let { include(it) }
+        }
     }
 
     override fun toString(): String {
@@ -206,6 +200,7 @@ class Enemy(
     }
 
     data object HealthChangedEvent
+    data object EnemyDefeated
     data object StatusEffectsChangedEvent
     data class PlayChargeAnimationEvent(val timeline: Promise<Timeline> = Promise())
     data class EnemyActionChangedEvent(val nextAction: NextEnemyAction)

@@ -11,5 +11,7 @@ rewards: [
 biome: 'wasteland',
 fromArea: 'aqua_balle',
 maxPlayerLives: 100,
+minSteps: -1,
+maxSteps: -1,
 initialPlayerLives: 100,
 mapGenerator: $StaticMap { name: "tutorial_road" }

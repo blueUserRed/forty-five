@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
+import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.onjNamespaces.OnjZone
 import com.microwavestudios.fortyfive.rendering.BetterShader
@@ -97,6 +98,7 @@ class CardPrototype(
     val title: String,
     val baseCost: Int,
     val baseDamage: Int,
+    val deckMaximum: Int,
     val tags: List<String>,
 ) {
 
@@ -124,12 +126,12 @@ class CardPrototype(
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
 
-    fun copy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
+    fun copy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, deckMaximum, tags).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
         this.creator = this@CardPrototype.creator
     }
 
-    fun cleanCopy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, tags).apply {
+    fun cleanCopy(): CardPrototype = CardPrototype(namespace, name, title, baseCost, baseDamage, deckMaximum, tags).apply {
         this.creator = this@CardPrototype.creator
     }
 
@@ -169,6 +171,7 @@ class Card(
     font: Promise<PixmapFont>,
     fontScale: Float,
     screen: CustomScreen,
+    val deckMaximum: Int,
     val enableHoverDetails: Boolean
 ) : Disposable {
 
@@ -309,6 +312,7 @@ class Card(
     fun changeZone(newZone: Zone, controller: GameController) {
         val oldZone = zone
         zone = newZone
+        if (actor.inTriggerPosition) actor.skipAnimateBack()
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
             enteredOnTurn = controller.turnCounter
@@ -457,8 +461,9 @@ class Card(
         controller: GameController,
         wasParry: Boolean,
         parryDamage: Int,
-        putCardInTheHand: (Card) -> Timeline,
-        putCardInTheStack: (Card) -> Timeline
+        triggerInfo: TriggerInformation,
+        putCardInTheHand: (Card, TriggerInformation) -> Timeline,
+        putCardInTheStack: (Card, TriggerInformation) -> Timeline
     ): Timeline = Timeline.timeline {
         later {
             activeBehaviours
@@ -507,11 +512,27 @@ class Card(
             val putInHand =
                 activeBehaviours.any { it.putInHandInsteadOfStackAfterShot(this@Card, controller, wasParry, parryDamage) }
             if (putInHand) {
-                include(putCardInTheHand(this@Card))
+                include(putCardInTheHand(this@Card, triggerInfo))
             } else {
-                include(putCardInTheStack(this@Card))
+                include(putCardInTheStack(this@Card, triggerInfo))
             }
         }
+    }
+
+    fun afterDestroyed(
+        card: Card,
+        controller: GameController,
+        sourceCard: Card?,
+        putCardInAfterlife: (card: Card, sourceCard: Card?) -> Timeline,
+        putCardInHand: (card: Card, sourceCard: Card?) -> Timeline,
+    ): Timeline = Timeline.timeline {
+        includeLater({
+            if (activeBehaviours.any { it.putInHandAfterDestroy(card, controller) }) {
+                putCardInHand(card, sourceCard)
+            } else {
+                putCardInAfterlife(card, sourceCard)
+            }
+        })
     }
 
     fun changeStackPosition(stackPosition: StackPosition, controller: GameController) {
@@ -624,15 +645,20 @@ class Card(
         controller: GameController,
     ): Timeline = Timeline.timeline { later {
 
-        action { checkModifierTransformers(situation, triggerInformation, controller) }
+        checkModifierTransformers(situation, triggerInformation, controller)
 
         val prevPosition = Vector2(actor.x, actor.y)
         val zoneAtStart = zone
         var isInTriggerPosition = false
-        effects.forEach { effect ->
+        val triggeredEffects = effects.filter {
+            it.checkTrigger(situation, triggerInformation, controller, this@Card)
+        }
+        if (situation is GameSituation.CardRightClicked && triggeredEffects.isNotEmpty()) {
+            val result = controller.tryPay(rightClickCost ?: 0, actor)
+            if (!result) FortyFive.logger.warn(logTag, "Right Click triggered but can't pay for it")
+        }
+        triggeredEffects.forEach { effect ->
             later {
-                val shouldTrigger = effect.checkTrigger(situation, triggerInformation, controller, this@Card)
-                if (!shouldTrigger) return@later
                 if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) {
                     later {
                         isInTriggerPosition = true
@@ -655,17 +681,11 @@ class Card(
                     }
                 }
                 include(effect.trigger(this@Card, triggerInformation, controller, situation))
-                later {
-                    if (!isInTriggerPosition) return@later
-                    if (zone == zoneAtStart) return@later
-                    actor.skipAnimateBack()
-                    isInTriggerPosition = false
-                }
             }
         }
 
         later {
-            if (!isInTriggerPosition) return@later
+            if (!actor.inTriggerPosition) return@later
             if (zone == zoneAtStart) {
                 include(actor.animateBack(controller, prevPosition))
             } else {
@@ -754,10 +774,10 @@ class Card(
         return logTag
     }
 
-    fun getKeyWordsForDescriptions(): List<String> {
+    fun getAllHoverTexts(): List<String> {
         val res = mutableListOf<String>()
-        res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
-        res.addAll(currentHoverTexts.map { it.first })
+        res.add(shortDescription)
+        res.addAll(currentHoverTexts.map { it.second })
         return res
     }
 
@@ -816,6 +836,7 @@ class Card(
                         onj.get<String>("title"),
                         onj.get<Long>("cost").toInt(),
                         onj.get<Long>("baseDamage").toInt(),
+                        onj.get<Long?>("deckMaximum")?.toInt() ?: -1,
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     )
                     prototype.creator = { screen, stamp, areHoverDetailsEnabled ->
@@ -868,8 +889,8 @@ class Card(
                 enableHoverDetails = enableHoverDetails,
                 variableTexture = onj.getOr<VariableTextureSelector?>("variableTexture", null),
                 parryNumber = onj.getOr<Long?>("parryNumber", null)?.toInt(),
-                stamp = stamp
-
+                stamp = stamp,
+                deckMaximum = prototype.deckMaximum,
             )
             applyTraitEffects(card, onj, stamp)
             stamp?.behaviours()?.let { behaviours ->
@@ -929,6 +950,7 @@ class Card(
             "alwaysAtBottom" -> card.stackPosition = StackPosition.BOTTOM
             "alwaysAtTop" -> card.stackPosition = StackPosition.TOP
             "piercing" -> card.isPiercing = true
+            "putInHandAfterDestroy" -> card.addBehaviour(BulletBehaviour.PutInHandAfterDestroy)
 
             else -> throw RuntimeException("unknown trait effect $effect")
         }
@@ -992,11 +1014,12 @@ class CardActor(
 
     override var detailWidget: DetailWidget? = DetailWidget.ComplexBigDetailActor(
         screen,
-        effects = cardDetailEffects,
+        effects = DetailDescriptionHandler.allTextEffects,
         text = {
             val list = card.currentHoverTexts.map { it.second }.toMutableList()
             list.add(card.shortDescription)
-            list.add(card.flavourText)
+            if (card.flavourText.isNotBlank()) list.add("\$flavourText$${card.flavourText}\$flavourText$")
+            list.add("allowed in deck: ${if (card.deckMaximum == -1) "unlimited" else card.deckMaximum }")
             list
         },
         topText = {
@@ -1084,6 +1107,8 @@ class CardActor(
     var inTriggerPosition: Boolean = false
         private set
 
+    private var inKeyboardDrag: Boolean = false
+
     init {
         initInput(this, screen)
         bindDetailToInputState(GameInputs.States.focused)
@@ -1116,6 +1141,11 @@ class CardActor(
             { FortyFive.soundPlayer.situation("card_drag_started", screen) },
             { FortyFive.soundPlayer.situation("card_drag_finished", screen) }
         )
+        observeInputState(
+            InputManager.BaseStates.keyboardDrag,
+            { inKeyboardDrag = true },
+            { inKeyboardDrag = false }
+        )
     }
 
     private fun focusEnter() {
@@ -1123,7 +1153,10 @@ class CardActor(
             selectionAnimation.start()
             return
         }
-        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+        if (
+            (!card.inGame || card.inZone(Zone.REVOLVER)) &&
+            (dropShadow == null || dropShadow == defaultFocusDropShadow)
+        ) {
             dropShadow = defaultFocusDropShadow
             defaultFocusDropShadow.showDropShadow = true
         }
@@ -1136,7 +1169,10 @@ class CardActor(
             rotation = rotationOnSelectionEnter
             return
         }
-        if (card.inZone(Zone.REVOLVER) && (dropShadow == null || dropShadow == defaultFocusDropShadow)) {
+        if (
+            (!card.inGame || card.inZone(Zone.REVOLVER)) &&
+            (dropShadow == null || dropShadow == defaultFocusDropShadow)
+        ) {
             dropShadow = defaultFocusDropShadow
             defaultFocusDropShadow.showDropShadow = false
         }
@@ -1216,8 +1252,9 @@ class CardActor(
         val texture = texture ?: return
         val textureRegion = TextureRegion(texture)
         val isShaderSetup = setupShader(batch)
+        val dragAlpha = if (inKeyboardDrag) 0.66f else 1f
         val c = batch.color.cpy()
-        batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
+        batch.setColor(c.r, c.g, c.b, alpha * parentAlpha * dragAlpha)
         val textureSize = width
         dropShadow?.doDropShadow(batch, screen, TextureRegionDrawable(textureRegion), this, scaleX, scaleY, rotation)
         batch.draw(
@@ -1296,9 +1333,7 @@ class CardActor(
                     controller.revolver.getCardTriggerPosition()
                 }
             }
-            Zone.HAND -> Vector2(
-                x, y + 300f
-            )
+            Zone.HAND -> controller.cardHand.triggerPositionForCardActor(this@CardActor)
             Zone.AFTERLIFE -> Vector2(
                 x, y + 200f
             )
@@ -1338,6 +1373,7 @@ class CardActor(
     fun skipAnimateBack() {
         inTriggerPosition = false
         setScale(1f)
+        invalidateHierarchy()
     }
 
     fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {
@@ -1397,42 +1433,16 @@ class CardActor(
     }
 
     private fun getEffectTexts(): () -> List<String> = {
-        val allKeys = card.getKeyWordsForDescriptions() +
-                DetailDescriptionHandler.getKeyWordsFromDescription(card.stamp?.description ?: "")
+        val allHoverTexts = card.getAllHoverTexts().toMutableList()
+        card.stamp?.description?.let { allHoverTexts.add(it) }
+
         val texts: MutableList<String> = mutableListOf()
-
+        texts.addAll(DetailDescriptionHandler.extractAllExtraDescriptions(allHoverTexts))
         texts.addAll(card.getAdditionalHoverDescriptions().filter { it.isNotBlank() })
-
-        val addedDescriptions = mutableSetOf<String>()
-        allKeys.forEach { key ->
-            if (key in addedDescriptions) return@forEach
-            addedDescriptions.add(key)
-            DetailDescriptionHandler.descriptions[key]?.let { texts.add(it.second) }
-        }
-        while (true) {
-            val keywords = texts.flatMap { text ->
-                DetailDescriptionHandler.getKeyWordsFromDescription(text)
-            }
-            var addedText = false
-            keywords.forEach { keyword ->
-                if (keyword in addedDescriptions) return@forEach
-                addedDescriptions.add(keyword)
-                addedText = true
-                DetailDescriptionHandler.descriptions[keyword]?.let { texts.add(it.second) }
-            }
-            if (!addedText) break
-        }
         texts
     }
 
     companion object {
-
-        val cardDetailEffects by lazy {
-            DetailDescriptionHandler.allTextEffects.value.map {
-                AdvancedTextParser.AdvancedTextEffect.getFromOnj(it as OnjNamedObject)
-            }
-        }
-
         const val cardGroup: String = "card-group"
         const val selectableCardGroup: String = "selectable-card-group"
     }

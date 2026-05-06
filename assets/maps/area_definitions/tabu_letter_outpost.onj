@@ -9,7 +9,6 @@ nodes: [
         edgesTo: [
             1
         ],
-        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "aqua_balle",
             fromEnd: true,
@@ -21,7 +20,6 @@ nodes: [
         edgesTo: [
             0, 2, 3
         ],
-        nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
             currentCards: null,
             amountCards: [3, 5],
@@ -41,14 +39,17 @@ nodes: [
         edgesTo: [
             1, 4
         ],
-        nodeTexture: "map_node_dialog",
         image: "under_construction",
         imagePos: "LEFT",
         event: $DialogMapEvent {
             dialog: "not_yet_implemented_dialog",
             displayName: "Not yet implemented",
-            descriptionText: "",
-            completedDescriptionText: "",
+            descriptionText: [
+                {
+                    predicate: $Always {},
+                    text: ""
+                }
+            ],
             canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             startable: true,
@@ -61,7 +62,6 @@ nodes: [
         edgesTo: [
             1, 4
         ],
-        nodeTexture: "map_node_heal",
         event: $EmptyMapEvent {}
     },
     {
@@ -78,7 +78,6 @@ nodes: [
         edgesTo: [
             4
         ],
-        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "salem",
             fromEnd: false,

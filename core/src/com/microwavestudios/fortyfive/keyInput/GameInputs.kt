@@ -9,74 +9,188 @@ object GameInputs {
         Input.Cause.Keyboard(
             Keys.ENTER,
             requireStates = arrayOf(States.trueFocused)
+        ),
+        Input.Cause.ControllerButtonBased(
+            ControllerButton.A,
+            requireStates = arrayOf(States.trueFocused)
         )
     ))
 
     val focusNext = Input(
         "focusNext",
-        arrayOf(Input.Cause.Keyboard(Keys.TAB))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.TAB),
+            Input.Cause.ControllerButtonBased(ControllerButton.SHOULDER_RIGHT)
+        ),
     )
 
     val focusPrevious = Input(
         "focusPrevious",
-        arrayOf(Input.Cause.Keyboard(Keys.TAB, arrayOf(ModifierKey.SHIFT)))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.TAB, arrayOf(ModifierKey.SHIFT)),
+            Input.Cause.ControllerButtonBased(ControllerButton.SHOULDER_LEFT)
+        )
+    )
+
+    val scrollUp = Input(
+        "scrollUp",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.UP),
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_Y, -0.3f)
+        )
+    )
+
+    val scrollDown = Input(
+        "scrollDown",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.DOWN),
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_Y, 0.3f)
+        )
+    )
+
+    val scrollLeft = Input(
+        "scrollLeft",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.LEFT),
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_X, -0.3f)
+        )
+    )
+
+    val scrollRight = Input(
+        "scrollRight",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.RIGHT),
+            Input.Cause.ControllerAxisHeld(ControllerAxis.RIGHT_X, 0.3f)
+        )
     )
 
     val focusUp = Input(
         "focusUp",
         arrayOf(
-            Input.Cause.Keyboard(Keys.UP),
-            Input.Cause.Keyboard(Keys.W)
+            Input.Cause.Keyboard(Keys.W),
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_UP),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_Y, -0.6f)
         )
     )
 
     val focusDown = Input(
         "focusDown",
         arrayOf(
-            Input.Cause.Keyboard(Keys.DOWN),
-            Input.Cause.Keyboard(Keys.S)
+            Input.Cause.Keyboard(Keys.S),
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_DOWN),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_Y, 0.6f)
         )
     )
 
     val focusLeft = Input(
         "focusLeft",
         arrayOf(
-            Input.Cause.Keyboard(Keys.LEFT),
-            Input.Cause.Keyboard(Keys.A)
+            Input.Cause.Keyboard(Keys.A),
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_LEFT),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_X, -0.6f)
         )
     )
 
     val focusRight = Input(
         "focusRight",
         arrayOf(
-            Input.Cause.Keyboard(Keys.RIGHT),
-            Input.Cause.Keyboard(Keys.D)
+            Input.Cause.Keyboard(Keys.D),
+            Input.Cause.ControllerButtonBased(ControllerButton.DPAD_RIGHT),
+            Input.Cause.ControllerAxisFlick(ControllerAxis.LEFT_X, 0.6f)
         )
+    )
+
+    val focusShortcutShootButton = Input(
+        "focusShortcutShootButton",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.S, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+    val focusShortcutHolsterButton = Input(
+        "focusShortcutHolsterButton",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.H, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+   val focusShortcutCardHand = Input(
+        "focusShortcutCardHand",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.C, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+   val focusShortcutAfterlife = Input(
+        "focusShortcutAfterlife",
+        arrayOf(
+            Input.Cause.Keyboard(Keys.A, modifierKeys = arrayOf(ModifierKey.SHIFT))
+        )
+    )
+
+    val focusShortcutRevolverSlots = arrayOf(
+        Input(
+            "focusShortcutRevolverSlot-1",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_1)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-2",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_2)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-3",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_3)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-4",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_4)),
+        ),
+        Input(
+            "focusShortcutRevolverSlot-5",
+            arrayOf(Input.Cause.Keyboard(Keys.NUM_5)),
+        ),
     )
 
     val toggleFullScreen = Input(
         "toggleFullScreen",
-        arrayOf(Input.Cause.Keyboard(Keys.F))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.F),
+            Input.Cause.ControllerButtonBased(ControllerButton.START)
+        ),
     )
 
     val cancel = Input(
         "cancel",
-        arrayOf(Input.Cause.Keyboard(Keys.ESCAPE))
+        arrayOf(
+            Input.Cause.Keyboard(Keys.ESCAPE),
+            Input.Cause.ControllerButtonBased(ControllerButton.B)
+        )
     )
 
     val enemyAnimConfirmation = Input(
         "enemyAnimConfirmation",
         arrayOf(
             Input.Cause.Mouse(MouseButton.LEFT),
-            Input.Cause.Keyboard(Keys.ENTER)
+            Input.Cause.Keyboard(Keys.ENTER),
+            Input.Cause.ControllerButtonBased(ControllerButton.A)
         )
     )
+
 
     val switchSelectorToLeft = Input(
         "switchToLeft",
         arrayOf(
             Input.Cause.Keyboard(Keys.LEFT, requireStates = arrayOf(States.trueFocused)),
             Input.Cause.Keyboard(Keys.A, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerButtonBased(
+                ControllerButton.DPAD_LEFT,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisFlick(
+                ControllerAxis.LEFT_X,
+                -0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            )
         )
     )
 
@@ -85,6 +199,51 @@ object GameInputs {
         arrayOf(
             Input.Cause.Keyboard(Keys.RIGHT, requireStates = arrayOf(States.trueFocused)),
             Input.Cause.Keyboard(Keys.D, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerButtonBased(
+                ControllerButton.DPAD_RIGHT,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisFlick(
+                ControllerAxis.LEFT_X,
+                0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            )
+        )
+    )
+
+    val moveSliderToLeft = Input(
+        "moveSliderToLeft",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.LEFT, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.KeyHeldDown(Keys.A, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.LEFT_X,
+                -0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.RIGHT_X,
+                -0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            )
+        )
+    )
+
+    val moveSliderToRight = Input(
+        "moveSliderToRight",
+        arrayOf(
+            Input.Cause.KeyHeldDown(Keys.RIGHT, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.KeyHeldDown(Keys.D, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.LEFT_X,
+                0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerAxisHeld(
+                ControllerAxis.RIGHT_X,
+                0.6f,
+                requireStates = arrayOf(States.trueFocused)
+            )
         )
     )
 
@@ -110,11 +269,13 @@ object GameInputs {
     )
 
     val initDragAndDrop = Input("initDragAndDrop", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(InputManager.BaseStates.keyboardFocus))
+        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(InputManager.BaseStates.keyboardFocus)),
+        Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
     ))
 
     val confirmDragAndDrop = Input("confirmDragAndDrop", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused))
+        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused)),
+        Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
     ))
 
     val triggerCard = Input("triggerCard", arrayOf(
@@ -123,15 +284,18 @@ object GameInputs {
             Keys.ENTER,
             modifierKeys = arrayOf(ModifierKey.SHIFT),
             requireStates = arrayOf(States.trueFocused)
-        )
+        ),
+        Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
     ))
 
     val skipCredits = Input("skipCredits", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER)
+        Input.Cause.Keyboard(Keys.ENTER),
+        Input.Cause.ControllerButtonBased(ControllerButton.A)
     ))
 
     val dialogContinue = Input("dialogContinue", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER)
+        Input.Cause.Keyboard(Keys.ENTER),
+        Input.Cause.ControllerButtonBased(ControllerButton.A)
     ))
 
 

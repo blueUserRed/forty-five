@@ -1,6 +1,8 @@
 package com.microwavestudios.fortyfive.map
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.controllers.ControllerAdapter
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
@@ -25,6 +27,7 @@ import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.CustomScreen
 import com.microwavestudios.fortyfive.screen.actors.DisableActor
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
+import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.asin
 import kotlin.math.ceil
@@ -185,17 +188,43 @@ class DetailMapWidget(
         }
     }
 
+    private val controllerListener = object : ControllerAdapter() {
+
+        override fun axisMoved(
+            controller: Controller?,
+            axisIndex: Int,
+            value: Float
+        ): Boolean {
+            controller ?: return false
+            if (SettingsCreator.settingsOpenScreenState in screen.screenState) return false
+            val mapping = controller.mapping
+            if (axisIndex == mapping.axisLeftY || axisIndex == mapping.axisLeftX) {
+                leftStickChanged(controller)
+            }
+
+            return true
+        }
+    }
+
     private val debugMenuPage: MapDebugMenuPage =
         screen.findDebugMenuPage<MapDebugMenuPage>()!!
     private val encounterDebugMenuPage: EncounterPreviewDebugMenuPage =
         screen.findDebugMenuPage<EncounterPreviewDebugMenuPage>()!!
 
+    private var maxStepsReached: Boolean = false
+
     private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
+    private var countSteps: Boolean by debugMenuPage.countSteps
+
+    private var ignoreLeftStick: Boolean = false
 
     init {
         map.decorations.forEach { it.requestDrawable(screen, this) }
         addListener(dragListener)
         addListener(clickListener)
+        screen.inputManager.addControllerListener(controllerListener)
+        screen.inputManager.disableStick(true)
+        screen.inputManager.disableStick(false)
         invalidateHierarchy()
 
         encounterDebugMenuPage.encounter = (playerNode.event as? EncounterMapEvent)?.encounter
@@ -220,6 +249,35 @@ class DetailMapWidget(
         }
     }
 
+    private fun leftStickChanged(controller: Controller) {
+        val x = controller.getAxis(controller.mapping.axisLeftX)
+        val y = controller.getAxis(controller.mapping.axisLeftY)
+        val stickDir = Vector2(x, -y)
+        val mag = stickDir.len()
+        if (mag.epsilonEquals(0f, 0.1f)) {
+            ignoreLeftStick = false
+            return
+        }
+        if (ignoreLeftStick) return
+        if (mag < 0.7f) return
+
+        ignoreLeftStick = true
+
+        val dir = stickDir.unit
+        val playerNodePosition = scaledNodePos(playerNode)
+        var bestMatchValue = -1f
+        var bestMatch: MapNode? = null
+        playerNode.edgesTo.forEach { node ->
+            val nodeDirection = (scaledNodePos(node) - playerNodePosition).unit
+            val result = dir dot nodeDirection
+            if (result > bestMatchValue) {
+                bestMatch = node
+                bestMatchValue = result
+            }
+        }
+        if (bestMatch != null) goToNode(bestMatch)
+    }
+
     fun moveToNextNode(mapNode: MapNode) {
         if (movePlayerTo != null) {
             finishMovement()
@@ -236,23 +294,11 @@ class DetailMapWidget(
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
-        val btn = startButton ?: screen.namedActorOrError(startButtonName)
-        if (btn is DisableActor && btn.isDisabled) return
+        if (maxStepsReached) return
+        if (startButton is DisableActor && startButton.isDisabled) return
         if (playerNode.event?.canBeStarted(map)?.not() ?: true) return
         val event = playerNode.event
-        val additionalEvent = playerNode.additionalEvent
-        if (additionalEvent == null) {
-            event?.start()
-        } else {
-            requireNotNull(event) { "node cant have additional event without primary event" }
-            val firstScreen = event.chainScreen
-            val secondScreen = additionalEvent.chainScreen
-            requireNotNull(firstScreen) { "event: $event cant be chained" }
-            requireNotNull(secondScreen) { "event: $additionalEvent cant be chained" }
-            FortyFive.screenManager.appendScreen(firstScreen.first, firstScreen.second)
-            FortyFive.screenManager.appendScreen(secondScreen.first, secondScreen.second)
-            FortyFive.screenManager.screenFinished()
-        }
+        event?.start()
     }
 
     private fun updateDirectionIndicator(pointerPosition: Vector2) {
@@ -325,11 +371,14 @@ class DetailMapWidget(
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
         FortyFive.soundPlayer.situation("walk", screen)
+        if (countSteps) FortyFive.profileManager.currentProfile?.stepTaken()
+        checkMaxSteps()
         if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
     }
 
     private fun canGoTo(node: MapNode): Boolean {
+        if (maxStepsReached) return false
         val lastNode = mapSaver.lastNode
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // trap player ? idk
         if (!playerNode.isLinkedTo(node)) return false
@@ -338,16 +387,33 @@ class DetailMapWidget(
         return true
     }
 
+    private fun checkMaxSteps() {
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile) { "map screen can only be used with a profile" }
+        val run = profile.activeRun ?: return
+        if (run.minSteps == -1 || run.maxSteps == -1) return
+        val steps = profile.usedSteps ?: return
+        if (steps < run.maxSteps) return
+        maxStepsReached = true
+        events.fire(MaxStepsReachedEvent)
+    }
+
+    fun startLastEvent() {
+        map.endNode.event?.start()
+    }
+
     private var firstFrame: Boolean = true
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (firstFrame) {
             firstFrame = false
+            checkMaxSteps()
             map.uniqueNodes.forEach { it.event?.onMapLoad(map) }
             events.fire(PlayerChangedNodeEvent(playerNode))
         }
 
         validate()
+        updateControllerBasedScroll()
         updatePlayerMovement()
         updateScreenMovement()
         batch ?: return
@@ -375,6 +441,20 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun updateControllerBasedScroll() {
+        val speed = 20f
+
+        if (SettingsCreator.settingsOpenScreenState in screen.screenState) return
+        if (moveScreenToPoint != null) return
+        val controller = screen.inputManager.activeController ?: return
+        val mapping = controller.mapping
+        val x = controller.getAxis(mapping.axisRightX)
+        val y = controller.getAxis(mapping.axisRightY)
+        val direction = Vector2(-x, y)
+        if (direction.len() < 0.2f) return
+        mapOffset += direction * speed
     }
 
     private fun updateScreenMovement() {
@@ -641,6 +721,7 @@ class DetailMapWidget(
     data class PlayerChangedNodeEvent(
         val newNode: MapNode
     )
+    object MaxStepsReachedEvent
 
     companion object {
         const val logTag = "Map"

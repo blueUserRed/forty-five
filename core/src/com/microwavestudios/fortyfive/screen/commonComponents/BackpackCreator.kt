@@ -20,6 +20,7 @@ import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.pluralS
 
 object BackpackCreator {
 
@@ -212,6 +213,22 @@ object BackpackCreator {
             state.warningEvents.fire(warningEvent)
             return
         }
+        val deckMaximum = card.deckMaximum
+        if (deckMaximum != -1 && state.currentDeck.countCards(card.name) + 1 > deckMaximum) {
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${card.title} allowed in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
+        card.stamp?.let { stamp ->
+            if (!state.currentDeck.cards.any { it.stamp == stamp.name }) return@let
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.addToDeck(slot, card.type)
         updateCardsInCollection(state)
         with(state.events) {
@@ -243,6 +260,22 @@ object BackpackCreator {
     }
 
     private fun swapBackpackWithDeckCard(backpackCard: Card, deckSlot: Int, state: BackpackState) {
+        val deckMaximum = backpackCard.deckMaximum
+        if (deckMaximum != -1 && state.currentDeck.countCards(backpackCard.name) + 1 > deckMaximum) {
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${backpackCard.title} allowed in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
+        backpackCard.stamp?.let { stamp ->
+            if (!state.currentDeck.cards.any { it.stamp == stamp.name }) return@let
+            val warningEvent = WarningParent.ShowWarningEvent(
+                WarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
+            )
+            state.warningEvents.fire(warningEvent)
+            return
+        }
         state.currentDeck.removeFromDeck(deckSlot)
         state.currentDeck.addToDeck(deckSlot, backpackCard.type)
         updateCardsInCollection(state)
@@ -645,28 +678,6 @@ object BackpackCreator {
                 height = 40f
             }
 
-//            inputField("red_wing", Color.Black, backgroundHints = arrayOf("black_texture")) {
-//                maxLength = 20
-//                touchable = Touchable.enabled
-//                joinGroup(backpackElementsGroup)
-//                keyboardFocusable = KeyboardFocusable.LEAF
-//                setText("Hello World")
-//                width = 200f
-//                height = 40f
-//                isDisabled = true
-//                observeInputState(
-//                    GameInputs.States.focused,
-//                    {
-//                        isDisabled = false
-//                        backgroundHandle = "black_texture"
-//                    },
-//                    {
-//                        isDisabled = true
-//                        backgroundHandle = null
-//                    }
-//                )
-//            }
-
             box {
                 flexDirection = FlexDirection.ROW
                 height = 50f
@@ -750,6 +761,12 @@ object BackpackCreator {
                     swapBackpackWithDeckCard(actor.card, thisInfo.slot, state)
                 }
             }
+
+            card.actor.observeInputState(
+                InputManager.BaseStates.keyboardDrag,
+                {},
+                { screen.inputManager.changeKeyboardFocusedActor(card.actor) }
+            )
 
             state.events.watchFor<GiveCardBackEvent> { event ->
                 val info = card.actor.infoObject

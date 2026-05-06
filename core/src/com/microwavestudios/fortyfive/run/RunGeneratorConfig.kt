@@ -104,6 +104,17 @@ object RunGeneratorConfig {
             }
     }
 
+    val enemyConfigurations: List<List<String>> by lazy {
+        configFile
+            .get<OnjArray>("allowedEnemyConfigurations")
+            .value
+            .map { configuration ->
+                (configuration as OnjArray)
+                    .value
+                    .map { it.value as String }
+            }
+    }
+
     val enemyGroups: Map<String, Map<Int, String>> by lazy {
         enemiesFile
             .get<OnjArray>("enemyGroups")
@@ -148,29 +159,48 @@ object RunGeneratorConfig {
         configFile.get<Double>("enemyDamageAdjustment").toFloat()
     }
 
-    val scalingLimited: Triple<Float, Float, DifficultyScaling> by lazy {
+    val scalingLimited: DifficultyScalingData by lazy {
         val config = configFile
             .get<OnjObject>("difficultyScaling")
             .get<OnjObject>("limited")
-        Triple(
+        DifficultyScalingData(
             config.get<Double>("relativeMin").toFloat(),
             config.get<Double>("relativeMax").toFloat(),
-            DifficultyScaling.fromOnj(config.get<OnjNamedObject>("scaling"))
+            DifficultyScaling.fromOnj(config.get<OnjNamedObject>("scaling")),
+            config.get<Double>("encounterStartedScale").toFloat()
         )
     }
 
-    val scalingConstructed: Triple<Float, Float, DifficultyScaling> by lazy {
+    val scalingConstructed: DifficultyScalingData by lazy {
         val config = configFile
             .get<OnjObject>("difficultyScaling")
             .get<OnjObject>("constructed")
-        Triple(
+        DifficultyScalingData(
             config.get<Double>("relativeMin").toFloat(),
             config.get<Double>("relativeMax").toFloat(),
-            DifficultyScaling.fromOnj(config.get<OnjNamedObject>("scaling"))
+            DifficultyScaling.fromOnj(config.get<OnjNamedObject>("scaling")),
+            config.get<Double>("encounterStartedScale").toFloat()
         )
     }
 
+    val stepsLimited: Pair<IntRange, IntRange> by lazy {
+        configFile.access<OnjArray>(".stepConfig.limited.minSteps").toIntRange() to
+            configFile.access<OnjArray>(".stepConfig.limited.maxSteps").toIntRange()
+    }
+
+    val stepsConstructed: Pair<IntRange, IntRange> by lazy {
+        configFile.access<OnjArray>(".stepConfig.constructed.minSteps").toIntRange() to
+            configFile.access<OnjArray>(".stepConfig.constructed.maxSteps").toIntRange()
+    }
+
 }
+
+data class DifficultyScalingData(
+    val relativeMin: Float,
+    val relativeMax: Float,
+    val difficultyScaling: DifficultyScaling,
+    val encounterStartedScale: Float,
+)
 
 data class EnemyProbabilityIncrease(
     val enemy: String,

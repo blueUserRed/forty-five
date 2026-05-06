@@ -1,5 +1,7 @@
 package com.microwavestudios.fortyfive.screen.commonComponents
 
+import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
@@ -17,7 +19,7 @@ import com.microwavestudios.fortyfive.utils.Timeline
 
 object SettingsCreator {
 
-    private const val settingsOpenScreenState = "settingsAreOpen"
+    const val settingsOpenScreenState = "settingsAreOpen"
 
     fun ScreenCreator.getSharedSettingsMenu(
         worldWidth: Float,
@@ -113,41 +115,127 @@ object SettingsCreator {
 
         reloadBox(creator, events, parentWidth, settings)
 
-        header(creator, "Graphics")
+        header(creator, "Controllers")
+        controllers(creator, events, parentWidth)
+        singleSettingSelector("Controller Vibration:", "controllerVibration")
 
+        header(creator, "Audio")
+        singleSettingSlider(creator, parentWidth, "Master Volume", "masterVolume", 0f, 1f)
+        singleSettingSlider(creator, parentWidth, "Music", "musicVolume", 0f, 1f)
+        singleSettingSlider(creator, parentWidth, "Sound Effects", "soundEffectsVolume", 0f, 1f)
+
+        header(creator, "General")
         singleSettingSelector("Show Screenshake:", "enableScreenShake")
         singleSettingSelector("Skip intro Screen:", "skipIntroScreen")
         singleSettingSelector("Fullscreen:", "fullscreen")
         singleSettingSelector("Use borderless window when in fullscreen:", "useBorderlessWindowFullscreen")
 
-        header(creator, "Audio")
-
-        singleSettingSlider(creator, parentWidth, "Master Volume", "masterVolume", 0f, 1f)
-        singleSettingSlider(creator, parentWidth, "Music", "musicVolume", 0f, 1f)
-        singleSettingSlider(creator, parentWidth, "Sound Effects", "soundEffectsVolume", 0f, 1f)
-
         header(creator, "Plugins")
-        box {
-            flexDirection = FlexDirection.COLUMN
+        plugins(creator, parentWidth, events, settings)
+    }
+
+    private fun CustomBox.controllers(
+        creator: ScreenCreator,
+        events: EventPipeline,
+        parentWidth: Float
+    ) = with(creator) {
+        box(isScrollable = true) {
+            this as CustomScrollableBox
+            scrollDirectionStart = CustomDirection.LEFT
+            addScrollbarFromDefaults(
+                CustomDirection.BOTTOM,
+                "backpack_scrollbar",
+                "backpack_scrollbar_background",
+                barWidth = 10f
+            )
+            wrap = CustomWrap.NONE
+            onLayoutAndNow {
+                touchable = if (canBeScrolled) Touchable.enabled else Touchable.disabled
+            }
+            flexDirection = FlexDirection.ROW
+            verticalAlign = CustomAlign.CENTER
+            height = 230f
             width = parentWidth
-            syncHeight()
-            debug()
-            events.watchFor<ReloadPluginSettings> {
-                clearChildren()
-                val plugins = FortyFive.pluginManager.allPlugins
-                plugins.forEach { plugin ->
-                    pluginSettings(creator, plugin, events, settings, parentWidth)
+
+            fun controllersChanged() {
+                children.toList().forEach { if (it !is CustomImageActor) removeActor(it) } // avoid removing scrollbar
+                val controllers = Controllers.getControllers()
+                controllers.forEach { controller ->
+                    controller(creator, events, 200f, controller)
+                    horizontalSpacer(30f)
                 }
-                if (plugins.isEmpty()) {
-                    verticalSpacer(10f)
-                    label("red wing", "No plugins found", Color.FortyWhite, 25) {
-                        syncHeight()
-                        width = parentWidth
-                        setAlignment(Align.center)
-                    }
+                if (controllers.isEmpty) label("red wing", "No Controllers connected", Color.FortyWhite, 22) {
+                    width = parentWidth - 30f
+                    setAlignment(Align.center)
+                    syncHeight()
                 }
             }
-            events.fire(ReloadPluginSettings)
+
+            events.watchFor<InputManager.ControllersChangedEvent> {
+                controllersChanged()
+            }
+
+            controllersChanged()
+        }
+    }
+
+    private fun CustomBox.controller(
+        creator: ScreenCreator,
+        events: EventPipeline,
+        size: Float,
+        controller: Controller
+    ) = with(creator) {
+        var isSelected = FortyFive.globalSave.currentControllerUid == controller.uniqueId
+        box(backgroundHints = arrayOf("dark_brown_grey_texture", "lighter_brown_grey_texture")) {
+
+            backgroundHandle = if (isSelected) {
+                "lighter_brown_grey_texture"
+            } else {
+                "dark_brown_grey_texture"
+            }
+            width = size
+            height = size
+            flexDirection = FlexDirection.COLUMN
+            verticalAlign = CustomAlign.CENTER
+            horizontalAlign = CustomAlign.CENTER
+
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            joinGroup(settingsGroup)
+
+            onInput(GameInputs.interact) {
+                if (isSelected) {
+                    events.fire(InputManager.NewControllerSelectedEvent(null))
+                } else {
+                    events.fire(InputManager.NewControllerSelectedEvent(controller.uniqueId))
+                }
+            }
+
+            events.watchFor<InputManager.NewControllerSelectedEvent> { (uid) ->
+                isSelected = uid == controller.uniqueId
+                backgroundHandle = if (isSelected) {
+                    "lighter_brown_grey_texture"
+                } else {
+                    "dark_brown_grey_texture"
+                }
+            }
+
+            image {
+                backgroundHandle = "white_texture"
+                width = 50f
+                height = 50f
+                badTexture("controller icon")
+            }
+            verticalSpacer(10f)
+
+            label("red wing", controller.name, Color.FortyWhite, 22) {
+                touchable = Touchable.disabled
+                width = size * 0.9f
+                wrap = true
+                setAlignment(Align.center)
+                syncHeight()
+            }
+
         }
     }
 
@@ -183,11 +271,40 @@ object SettingsCreator {
 
     private fun CustomBox.header(creator: ScreenCreator, title: String) = with(creator) {
         label("red wing", title, fontSize = (32 * 1.4).toInt()) {
-            marginTop = 20f
+            marginTop = 50f
             marginBottom = 10f
             height = 50f
             syncWidth()
             fontColor = ScreenCreator.fortyWhite
+        }
+    }
+
+    private fun CustomBox.plugins(
+        creator: ScreenCreator,
+        parentWidth: Float,
+        events: EventPipeline,
+        settings: MutableList<BindTarget<*>>,
+    ) = with(creator) {
+        box {
+            flexDirection = FlexDirection.COLUMN
+            width = parentWidth
+            syncHeight()
+            events.watchFor<ReloadPluginSettings> {
+                clearChildren()
+                val plugins = FortyFive.pluginManager.allPlugins
+                plugins.forEach { plugin ->
+                    pluginSettings(creator, plugin, events, settings, parentWidth)
+                }
+                if (plugins.isEmpty()) {
+                    verticalSpacer(10f)
+                    label("red wing", "No plugins found", Color.FortyWhite, 25) {
+                        syncHeight()
+                        width = parentWidth
+                        setAlignment(Align.center)
+                    }
+                }
+            }
+            events.fire(ReloadPluginSettings)
         }
     }
 
@@ -221,6 +338,9 @@ object SettingsCreator {
                     relativeWidth(95f)
                     syncHeight()
                     wrap = true
+                    joinGroup(settingsGroup)
+                    keyboardFocusable = KeyboardFocusable.LEAF
+                    touchable = Touchable.enabled
                     setAlignment(Align.center)
                 }
                 label("roadgeek", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
@@ -257,6 +377,7 @@ object SettingsCreator {
                             touchable = Touchable.disabled
                             syncDimensions()
                         }
+                        joinGroup(settingsGroup)
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
                         onInput(GameInputs.interact) {
@@ -289,6 +410,11 @@ object SettingsCreator {
                     selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite, callback) {
                         height = 50f
                         width = 250f
+                        joinGroup(settingsGroup)
+                        touchable = Touchable.enabled
+                        keyboardFocusable = KeyboardFocusable.LEAF
+                        onInput(GameInputs.switchSelectorToLeft) { switch(-1) }
+                        onInput(GameInputs.switchSelectorToRight) { switch(1) }
                     }
                     restartLabel = label("red wing", "Restart required", Color.HemoglobinRed, 22) {
                         isVisible = false
@@ -378,6 +504,7 @@ object SettingsCreator {
             marginTop = 10f
 
             keyboardFocusable = KeyboardFocusable.LEAF
+            touchable = Touchable.enabled
             joinGroup(settingsGroup)
             backgroundHandle = "single_setting_background"
 
@@ -408,8 +535,8 @@ object SettingsCreator {
                 horizontalSpacer(10f)
             }
 
-            onInput(GameInputs.switchSelectorToLeft) { slider.move(-0.1f) } // TODO: veeeeryyy baad
-            onInput(GameInputs.switchSelectorToRight) { slider.move(0.1f) }
+            onInput(GameInputs.moveSliderToLeft) { slider.move(-0.04f) }
+            onInput(GameInputs.moveSliderToRight) { slider.move(0.04f) }
         }
     }
 

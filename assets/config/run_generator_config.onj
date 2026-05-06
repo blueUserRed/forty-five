@@ -125,6 +125,21 @@ encounterModifierBlacklist: [
 ],
 
 //////////////////////////////////////////////////////
+// Steps
+//////////////////////////////////////////////////////
+
+stepConfig: {
+    limited: {
+        minSteps: [5, 10],
+        maxSteps: [15, 25],
+    },
+    constructed: {
+        minSteps: [5, 10],
+        maxSteps: [15, 25],
+    }
+},
+
+//////////////////////////////////////////////////////
 // Enemies
 //////////////////////////////////////////////////////
 
@@ -150,6 +165,20 @@ enemies: [
         amount: [2, 3],
         allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
     },
+],
+
+allowedEnemyConfigurations: [
+    [ "Outlaw" ],
+    [ "Outlaw", "Outlaw" ],
+    [ "Outlaw", "Outlaw", "Outlaw" ],
+    [ "Outlaw", "Witch" ],
+    [ "Outlaw", "Witch", "Witch" ],
+    [ "Outlaw", "Outlaw", "Witch" ],
+    [ "Pyro" ],
+    [ "Outlaw", "Pyro" ],
+    [ "Outlaw", "Outlaw", "Pyro" ],
+    [ "Outlaw", "Pyro", "Pyro" ],
+    [ "Outlaw", "Pyro", "Witch" ],
 ],
 
 enemyProbabilityIncrease: [
@@ -187,6 +216,7 @@ enemyDamageAdjustment: 0.3,
 
 difficultyScaling: {
     limited: {
+        encounterStartedScale: 0.17,
         relativeMin: 0.0,
         relativeMax: 0.5,
         scaling: $PowerScaling {
@@ -194,6 +224,7 @@ difficultyScaling: {
         },
     },
     constructed: {
+        encounterStartedScale: 0.17,
         relativeMin: 0.3,
         relativeMax: 0.7,
         scaling: $LinearScaling {},

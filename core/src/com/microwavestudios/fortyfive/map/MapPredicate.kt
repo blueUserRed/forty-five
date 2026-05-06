@@ -11,13 +11,13 @@ import kotlin.math.min
 
 interface MapPredicate {
 
-    fun check(currentMap: DetailMap): Boolean
+    fun check(currentMap: DetailMap, thisEvent: MapEvent? = null): Boolean
 
     fun asOnj(): OnjObject
 
     class PlayerHasCard(val card: CardType) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean {
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
             val profile = FortyFive.profileManager.currentProfile ?: return false
             val cards = if (profile.isRunActive) profile.backpack!! else profile.cardCollection
             return card !in cards
@@ -31,7 +31,7 @@ interface MapPredicate {
 
     class RunCompleted(val runName: String) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean {
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
             val profile = FortyFive.profileManager.currentProfile ?: return false
             return profile.isSpecialRunCompleted(runName)
         }
@@ -45,7 +45,7 @@ interface MapPredicate {
 
     class RunInCurrentBoard(val runName: String) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean {
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
             val profile = FortyFive.profileManager.currentProfile ?: return false
             val runBoard = profile.runBoardForArea(profile.currentAreaMap)
             return runBoard.progressRun?.name == runName ||
@@ -61,7 +61,7 @@ interface MapPredicate {
 
     class MinimumRunsWon(val minimum: Int) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean {
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
             val profile = FortyFive.profileManager.currentProfile ?: return false
             return profile.wonRuns >= minimum
         }
@@ -72,9 +72,46 @@ interface MapPredicate {
         }
     }
 
+    object MinStepsReached : MapPredicate {
+
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
+            val profile = FortyFive.profileManager.currentProfile ?: return false
+            val run = profile.activeRun ?: return false
+            return (profile.usedSteps ?: 0) >= run.minSteps
+        }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("MinStepsReached")
+        }
+    }
+
+    object CurrentNodeBlocks : MapPredicate {
+
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
+            val profile = FortyFive.profileManager.currentProfile ?: return false
+            val mapSaver = profile.currentMapSaver
+            return thisEvent?.isBlocking(mapSaver.currentMap) ?: false
+        }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("CurrentNodeBlocks")
+        }
+    }
+
+    object CurrentNodeCompleted : MapPredicate {
+
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean {
+            return thisEvent?.isCompleted ?: false
+        }
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("CurrentNodeCompleted")
+        }
+    }
+
     class Not(val negate: MapPredicate) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean = !negate.check(currentMap)
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean = !negate.check(currentMap, thisEvent)
 
         override fun asOnj(): OnjObject = buildOnjObject {
             name("Not")
@@ -84,7 +121,7 @@ interface MapPredicate {
 
     class Or(val predicates: List<MapPredicate>) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean = predicates.any { it.check(currentMap) }
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean = predicates.any { it.check(currentMap, thisEvent) }
 
         override fun asOnj(): OnjObject = buildOnjObject {
             name("Or")
@@ -94,7 +131,7 @@ interface MapPredicate {
 
     class And(val predicates: List<MapPredicate>) : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean = predicates.all { it.check(currentMap) }
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean = predicates.all { it.check(currentMap, thisEvent) }
 
         override fun asOnj(): OnjObject = buildOnjObject {
             name("And")
@@ -104,10 +141,19 @@ interface MapPredicate {
 
     object Never : MapPredicate {
 
-        override fun check(currentMap: DetailMap): Boolean = false
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean = false
 
         override fun asOnj(): OnjObject = buildOnjObject {
             name("Never")
+        }
+    }
+
+    object Always : MapPredicate {
+
+        override fun check(currentMap: DetailMap, thisEvent: MapEvent?): Boolean = true
+
+        override fun asOnj(): OnjObject = buildOnjObject {
+            name("Always")
         }
     }
 
@@ -123,6 +169,12 @@ interface MapPredicate {
 
             "RunInCurrentBoard" -> RunInCurrentBoard(onj.get<String>("runName"))
 
+            "MinStepsReached" -> MinStepsReached
+
+            "CurrentNodeCompleted" -> CurrentNodeCompleted
+
+            "CurrentNodeBlocks" -> CurrentNodeBlocks
+
             "Not" -> Not(fromOnj(onj.get<OnjNamedObject>("negate")))
 
             "Or" -> Or(onj.get<OnjArray>("predicates").value.map { fromOnj(it as OnjNamedObject) })
@@ -130,6 +182,8 @@ interface MapPredicate {
             "And" -> And(onj.get<OnjArray>("predicates").value.map { fromOnj(it as OnjNamedObject) })
 
             "Never" -> Never
+
+            "Always" -> Always
 
             else -> throw RuntimeException("unknown MapPredicate: ${onj.name}")
         }

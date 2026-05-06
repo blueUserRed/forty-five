@@ -6,6 +6,7 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.onjNamespaces.OnjEffectValue
 import com.microwavestudios.fortyfive.utils.*
 
 /**
@@ -392,6 +393,31 @@ abstract class Effect(val data: EffectData) {
         override fun toString(): String {
             return "GiveStatus()"
         }
+
+    }
+
+    class GiveStatusToRandomEnemy(
+        val statusEffectCreator: StatusEffectCreator,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController,
+            situation: GameSituation
+        ): Timeline = Timeline.timeline {
+            later {
+                val enemies = controller.activeEnemies
+                if (enemies.isEmpty()) return@later
+                val statusEffect = statusEffectCreator(controller, card, triggerInformation.isOnShot)
+                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemies.random(), card))
+            }
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = GiveStatusToRandomEnemy(statusEffectCreator, data)
 
     }
 
@@ -1057,6 +1083,34 @@ abstract class Effect(val data: EffectData) {
 
     }
 
+    class RemovePoisonFromTargetedEnemy(
+        val amount: EffectValue,
+        data: EffectData
+    ) : Effect(data) {
+
+        override fun onTrigger(
+            card: Card,
+            triggerInformation: TriggerInformation,
+            controller: GameController,
+            situation: GameSituation
+        ): Timeline = Timeline.timeline {
+            includeLater({
+                val amount = amount(controller, card, triggerInformation, card) * triggerInformation.multiplierOr1
+                controller
+                    .targetedEnemy()
+                    .statusEffects
+                    .findInstance<Poison>()
+                    ?.removeValue(amount)
+                    ?: Timeline.emptyTimeline
+            })
+        }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(data: EffectData): Effect = RemovePoisonFromTargetedEnemy(amount, data)
+
+    }
+
 }
 
 /**
@@ -1197,6 +1251,12 @@ sealed class GameSituation(val relevantCards: List<Card>) {
     class CardRightClicked(val card: Card) : GameSituation(listOf(card))
 
     class CardCompletedFullRotation(val card: Card) : GameSituation(listOf(card))
+
+    class EnemyStatusEffectsChanged(
+        val enemy: Enemy,
+        val effect: StatusEffect,
+        val added: Boolean
+    ) : GameSituation(listOf())
 }
 
 data class TriggerInformation(

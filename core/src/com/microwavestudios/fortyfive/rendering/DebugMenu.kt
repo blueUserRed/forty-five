@@ -224,6 +224,8 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
 
     val walkEverywhere = debugSwitch("walk everywhere", Keys.R, false)
 
+    val countSteps = debugSwitch("count steps", Keys.M, true)
+
     val completeRun = debugButton("complete run", Keys.Q) {
         val profile = FortyFive.profileManager.currentProfile ?: return@debugButton
         if (profile.activeRun == null) return@debugButton
@@ -236,6 +238,7 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
         index: ${currentNode?.index}
         $completeRun
         $walkEverywhere
+        $countSteps
     """.trimIndent()
 }
 
@@ -245,7 +248,7 @@ class EncounterPreviewDebugMenuPage : DebugMenuPage("Encounter Preview") {
 
     override fun getText(screen: CustomScreen): String = encounter?.let { encounter ->
         """
-            enemies: ${encounter.enemies.joinToString(separator = ", ")}
+            enemies: ${encounter.enemiesGroups.joinToString(separator = ", ")}
             modifier: ${encounter.encounterModifierNames.joinToString(separator = ", ")}
             major difficulty: ${encounter.majorDifficulty}
             minor difficulty: ${encounter.minorDifficulty}

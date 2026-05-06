@@ -511,6 +511,22 @@ abstract class ScreenCreator : ResourceBorrower {
         onLayoutAndNow { y = parent.height / 2 - height / 2 }
     }
 
+    fun <T> T.heightByAspectRatio(ratio: Double) where T : Actor, T : Layout, T : OnLayoutActor {
+        val inverseRatio = 1.0 / ratio
+        onLayoutAndNow { height = (inverseRatio * width).toFloat() }
+    }
+
+    fun <T> T.widthByAspectRatio(ratio: Double) where T : Actor, T : Layout, T : OnLayoutActor {
+        onLayoutAndNow { width = (ratio * height).toFloat() }
+    }
+
+    fun <T> T.squareDim(size: Float) where T : Actor, T : Layout, T : OnLayoutActor {
+        onLayoutAndNow {
+            width = size
+            height = size
+        }
+    }
+
     /**
      * adds default button backgrounds and sound effects
      *
@@ -564,12 +580,12 @@ abstract class ScreenCreator : ResourceBorrower {
         hasCollection: Boolean = false,
         hasNavbar: Boolean = true,
         navbarIsLeft: Boolean = false,
-        warnings: WarningParent? = null,
+        warnings: WarningParent? = WarningParent(this@ScreenCreator, screen, events),
         hasTutorial: Boolean = true,
         hasTitleScreen: Boolean = true,
         canHaveRunBoard: Boolean = false,
     ) {
-
+        screen.events.link(events)
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
 
         val settings: CustomGroup? = if (hasSettings) {

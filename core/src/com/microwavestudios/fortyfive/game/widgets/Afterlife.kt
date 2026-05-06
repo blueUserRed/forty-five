@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
+import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
@@ -116,6 +117,7 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
         action.y = actor.y
         action.duration = 0.1f
         action.interpolation = Interpolation.pow2
+        include(scrollToBeginTimeline())
         later {
             if (!afterlifeIsVisible) afterlifeEvents.fire(Events.MakeVisible)
             if (isOpen) return@later
@@ -177,11 +179,7 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
                     marginBottom = 10f
                     joinGroup(afterlifeSlotGroup)
                     keyboardFocusable = KeyboardFocusable.LEAF
-                    observeInputState(
-                        GameInputs.States.focused,
-                        { debug = true },
-                        { debug = false }
-                    )
+                    focusShortcut(GameInputs.focusShortcutAfterlife)
                     afterlifeEvents.watchFor<Events.CardsChanged> {
                         clearChildren()
                         val card = _cards.getOrNull(0) ?: return@watchFor
@@ -198,7 +196,7 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
                 flexDirection = FlexDirection.ROW_REVERSE
                 height = 200f
                 width = 400f
-                horizontalAlign = CustomAlign.END
+                horizontalAlign = CustomAlign.START
                 verticalAlign = CustomAlign.CENTER
                 wrap = CustomWrap.NONE
                 scrollDirectionStart = CustomDirection.RIGHT
@@ -233,11 +231,6 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
             horizontalAlign = CustomAlign.CENTER
             joinGroup(afterlifeSlotGroup)
             keyboardFocusable = KeyboardFocusable.LEAF
-            observeInputState(
-                GameInputs.States.focused,
-                { debug = true },
-                { debug = false }
-            )
             afterlifeEvents.watchFor<Events.CardsChanged> {
                 clearChildren()
                 card = _cards.getOrNull(index + 1)
@@ -284,11 +277,6 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
             marginRight = 30f
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
-            observeInputState(
-                GameInputs.States.focused,
-                { debug = true },
-                { debug = false }
-            )
             onInput(GameInputs.interact) {
                 gameEvents.fire(GameControllerImpl.Events.AfterlifeOpenToggle)
             }
