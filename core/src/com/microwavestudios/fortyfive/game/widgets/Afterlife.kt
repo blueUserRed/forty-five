@@ -9,6 +9,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
+import com.microwavestudios.fortyfive.game.widgets.Afterlife.Events
 import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
@@ -27,23 +28,38 @@ import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 
-class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) {
+interface IAfterlife {
+
+    val cards: List<Card>
+    val isOpen: Boolean
+    val isClosed: Boolean
+    val afterlifeIsVisible: Boolean
+
+    fun pushCard(card: Card)
+    fun scrollToBeginTimeline(): Timeline
+    fun popCardTimeline(): Timeline
+    fun toggleTimeline(): Timeline
+    fun openTimeline(): Timeline
+    fun closeTimeline(): Timeline
+}
+
+class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) : IAfterlife {
 
     private var actor: CustomBox? = null
 
     private var _cards: MutableList<Card> = mutableListOf()
-    val cards: List<Card>
+    override val cards: List<Card>
         get() = _cards
 
     private val afterlifeEvents: EventPipeline = EventPipeline()
 
-    var isOpen: Boolean = false
+    override var isOpen: Boolean = false
         private set
 
-    val isClosed: Boolean
+    override val isClosed: Boolean
         get() = !isOpen
 
-    var afterlifeIsVisible: Boolean = false
+    override var afterlifeIsVisible: Boolean = false
         private set
 
     private val openFilter = InputManager.FocusFilter(listOf(afterlifeSlotGroup), screen)
@@ -63,14 +79,14 @@ class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) {
         }
     }
 
-    fun pushCard(card: Card) {
+    override fun pushCard(card: Card) {
         _cards.add(card)
         afterlifeEvents.fire(Events.CardsChanged)
     }
 
-    fun scrollToBeginTimeline(): Timeline = slotParent.scrollToBeginTimeline()
+    override fun scrollToBeginTimeline(): Timeline = slotParent.scrollToBeginTimeline()
 
-    fun popCardTimeline(): Timeline = Timeline.timeline {
+    override fun popCardTimeline(): Timeline = Timeline.timeline {
         later {
             val duration = 0.3f
             val toRemove = _cards.firstOrNull()
@@ -109,11 +125,11 @@ class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) {
         }
     }
 
-    fun toggleTimeline(): Timeline = Timeline.timeline { later {
+    override fun toggleTimeline(): Timeline = Timeline.timeline { later {
         include(if (isOpen) closeTimeline() else openTimeline())
     } }
 
-    fun openTimeline(): Timeline = Timeline.timeline {
+    override fun openTimeline(): Timeline = Timeline.timeline {
         val actor = actor ?: return@timeline
         val action = MoveToAction()
         action.x = -500f
@@ -135,7 +151,7 @@ class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) {
         }
     }
 
-    fun closeTimeline(): Timeline = Timeline.timeline {
+    override fun closeTimeline(): Timeline = Timeline.timeline {
         val actor = actor ?: return@timeline
         val action = MoveToAction()
         action.x = -1150f

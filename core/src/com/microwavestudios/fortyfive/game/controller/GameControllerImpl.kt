@@ -12,9 +12,11 @@ import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.IAfterlife
+import com.microwavestudios.fortyfive.game.widgets.ICardHand
+import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
@@ -37,7 +39,7 @@ class GameControllerImpl(
     override val screen: IScreen,
     override val gameEvents: EventPipeline,
     private val warningParent: WarningParent,
-    override val afterlife: Afterlife,
+    override val afterlife: IAfterlife,
     private val cardPresentationProvider: PresentationProvider
 ) : ScreenController(), GameController, ResourceBorrower {
 
@@ -87,16 +89,12 @@ class GameControllerImpl(
 
     private lateinit var targetedEnemy: Enemy
 
-    @Inject(name = "shoot_button")
-    override lateinit var shootButton: Actor
+    @Inject
+    override lateinit var revolver: IRevolver
         private set
 
     @Inject
-    override lateinit var revolver: Revolver
-        private set
-
-    @Inject
-    override lateinit var cardHand: CardHand
+    override lateinit var cardHand: ICardHand
         private set
 
     override lateinit var encounterContext: EncounterContext
@@ -1569,7 +1567,7 @@ class GameControllerImpl(
         action {
             chooseEnemyActions()
             FortyFive.soundPlayer.situation("turn_begin", screen)
-            updateReserves(currentTurnStartReserves(), { revolver })
+            updateReserves(currentTurnStartReserves(), { revolver.forceGetActor() })
         }
 
         includeLater({ drawCardsTimeline(Config.cardsToDraw) })

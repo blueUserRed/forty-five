@@ -10,6 +10,9 @@ import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.IAfterlife
+import com.microwavestudios.fortyfive.game.widgets.ICardHand
+import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -76,11 +79,10 @@ interface GameController {
     val activeEnemies: List<Enemy>
     val allEnemies: List<Enemy>
 
-    val shootButton: Actor
-    val revolver: Revolver
+    val revolver: IRevolver
     val cardStack: CardStack
-    val afterlife: Afterlife
-    val cardHand: CardHand
+    val afterlife: IAfterlife
+    val cardHand: ICardHand
 
     val gameEvents: EventPipeline
 

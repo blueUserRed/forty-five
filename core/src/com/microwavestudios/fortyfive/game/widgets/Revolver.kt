@@ -33,6 +33,36 @@ import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.cos
 import kotlin.math.sin
 
+interface IRevolver {
+
+    val slots: Array<out IRevolverSlot>
+
+    fun setCard(slot: Int, card: Card?)
+    fun preAddCard(slot: Int, card: Card)
+    fun removeCard(slot: Int)
+    fun removeCard(card: Card)
+    fun getCardInSlot(slot: Int): Card?
+
+    fun getCardTriggerPosition(): Vector2
+    fun getMirroredCardTriggerPosition(): Vector2
+    fun getCardOnShotTriggerPosition(): Vector2
+
+    fun rotate(rotation: RevolverRotation): Timeline
+
+    fun forceGetActor(): Revolver
+}
+
+interface IRevolverSlot : Selectable<IRevolverSlot> {
+
+    val num: Int
+    val card: Card?
+    val revolver: IRevolver
+
+    fun cardPosition(): Vector2
+
+    fun forceGetActor(): RevolverSlot
+}
+
 /**
  * actor representing the revolver
  * @param radiusExtension the width of [background] is set to radius + radiusExtension. necessary to create some space
@@ -46,7 +76,7 @@ class Revolver(
     private val animationDuration: Float,
     private val events: EventPipeline,
     private val screen: RenderableScreen
-) : WidgetGroup(), ZIndexActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
+) : WidgetGroup(), IRevolver, ZIndexActor, OnLayoutActor, ResourceBorrower, InputActor by InputActorImpl() {
 
     override var fixedZIndex: Int = 0
 
@@ -68,11 +98,8 @@ class Revolver(
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
 
-    /**
-     * the slots of the revolver
-     */
-    val slots: Array<RevolverSlot> = Array(5) {
-        val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize!!, screen, events, animationDuration)
+    override val slots: Array<out RevolverSlot> = Array(5) {
+        val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize, screen, events, animationDuration)
         slot.reportDimensionsWithScaling = true
         slot.ignoreScalingWhenDrawing = true
         addActor(slot)
@@ -100,15 +127,7 @@ class Revolver(
         touchable = Touchable.childrenOnly
     }
 
-    fun setGame(controller: GameController) {
-        game = controller
-    }
-
-    /**
-     * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
-     * remove a card
-     */
-    fun setCard(slot: Int, card: Card?) {
+    override fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         slots[slot - 1].card = card
         val actor = card?.presentation?.forceGetActor()
@@ -123,7 +142,7 @@ class Revolver(
         slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
     }
 
-    fun preAddCard(slot: Int, card: Card) {
+    override fun preAddCard(slot: Int, card: Card) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val revolverSlot = slots[slot - 1]
         val actor = card.presentation.forceGetActor()
@@ -138,19 +157,13 @@ class Revolver(
         actor.setPosition(revolverSlot.cardPosition())
     }
 
-    /**
-     * removes a card from the revolver
-     */
-    fun removeCard(slot: Int) {
+    override fun removeCard(slot: Int) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val card = getCardInSlot(slot) ?: return
         removeCard(card)
     }
 
-    /**
-     * removes a card from the revolver
-     */
-    fun removeCard(card: Card) {
+    override fun removeCard(card: Card) {
         slots.forEach { slot ->
             if (slot.card !== card) return@forEach
             val actor = card.presentation.forceGetActor()
@@ -162,10 +175,7 @@ class Revolver(
         }
     }
 
-    /**
-     * @return the card in [slot]
-     */
-    fun getCardInSlot(slot: Int): Card? {
+    override fun getCardInSlot(slot: Int): Card? {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         return slots[slot - 1].card
     }
@@ -187,11 +197,14 @@ class Revolver(
         }
     }
 
-    fun getCardTriggerPosition() = Vector2(slots[0].x - slots[0].width / 2f, slots[4].y + slots[0].width / 2f)
+    override fun getCardTriggerPosition() =
+        Vector2(slots[0].x - slots[0].width / 2f, slots[4].y + slots[0].width / 2f)
 
-    fun getMirroredCardTriggerPosition() = Vector2(slots[3].x + slots[3].width / 2f, slots[4].y + slots[0].width / 2f)
+    override fun getMirroredCardTriggerPosition() =
+        Vector2(slots[3].x + slots[3].width / 2f, slots[4].y + slots[0].width / 2f)
 
-    fun getCardOnShotTriggerPosition() = Vector2(slots[4].x, slots[4].y + slots[0].height * 2)
+    override fun getCardOnShotTriggerPosition() =
+        Vector2(slots[4].x, slots[4].y + slots[0].height * 2)
 
     override fun layout() {
         updateSlotsAndCards()
@@ -203,8 +216,6 @@ class Revolver(
         val size = 2 * radius + radiusExtension
         prefWidth = size
         prefHeight = size
-//        width = prefWidth
-//        height = prefHeight
         val basePos = Vector2(width / 2, height / 2)
         for (i in slots.indices) {
             val slot = slots[i]
@@ -215,7 +226,7 @@ class Revolver(
         }
     }
 
-    fun rotate(rotation: RevolverRotation): Timeline = Timeline.timeline {
+    override fun rotate(rotation: RevolverRotation): Timeline = Timeline.timeline {
         when (rotation) {
 
             is RevolverRotation.Right -> repeat(rotation.amount) {
@@ -287,6 +298,8 @@ class Revolver(
         onLayout.add(callback)
     }
 
+    override fun forceGetActor(): Revolver = this
+
     companion object {
         private const val slotAngleOff: Double = ((2 * Math.PI) / 5)
     }
@@ -300,14 +313,14 @@ class Revolver(
  * @param animationDuration the duration of the spin animation
  */
 class RevolverSlot(
-    val num: Int,
-    val revolver: Revolver,
+    override val num: Int,
+    override val revolver: Revolver,
     drawableHandle: ResourceHandle,
     size: Float,
     screen: RenderableScreen,
     private val events: EventPipeline,
     private val animationDuration: Float
-) : CustomImageActor(drawableHandle, screen), Selectable<RevolverSlot>, DropShadowActor {
+) : CustomImageActor(drawableHandle, screen), IRevolverSlot, DropShadowActor {
 
     override var dropShadow: DropShadow? = null
 
@@ -316,12 +329,12 @@ class RevolverSlot(
     /**
      * if set to a card, the card will be moved along with the spin animation
      */
-    var card: Card? = null
+    override var card: Card? = null
 
     private var action: RevolverSlotRotationAction? = null
     private var curAngle: Double = 0.0
 
-    private var selectionPromise: Promise<RevolverSlot>? = null
+    private var selectionPromise: Promise<IRevolverSlot>? = null
 
     private val selectableDropShadow = SquareDropShadow(
         Color.BrightYellow,
@@ -364,7 +377,7 @@ class RevolverSlot(
         }
     }
 
-    override fun enterSelectionMode(promise: Promise<RevolverSlot>) {
+    override fun enterSelectionMode(promise: Promise<IRevolverSlot>) {
         selectionPromise = promise
         dropShadow = selectableDropShadow
     }
@@ -403,7 +416,7 @@ class RevolverSlot(
         }
     }
 
-    fun cardPosition(): Vector2 {
+    override fun cardPosition(): Vector2 {
         val actor = card?.presentation?.forceGetActor()
         val cardWidth = actor?.width ?: 0f
         val cardHeight = actor?.height ?: 0f
@@ -447,6 +460,8 @@ class RevolverSlot(
         inAnimation = true
         this.action = action
     }
+
+    override fun forceGetActor(): RevolverSlot = this
 
     override fun toString(): String {
         return "revolverSlot: $num with card $card"

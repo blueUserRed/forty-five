@@ -4,6 +4,7 @@ import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
+import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.utils.Promise
@@ -28,8 +29,8 @@ object SelectorFactory {
     fun getRevolverSlotSelector(
         controller: GameController,
         popupText: String,
-        predicate: (RevolverSlot) -> Boolean = { true }
-    ): ISelector<RevolverSlot> = RevolverSlotSelector(controller, popupText, predicate)
+        predicate: (IRevolverSlot) -> Boolean = { true }
+    ): ISelector<IRevolverSlot> = RevolverSlotSelector(controller, popupText, predicate)
 
 }
 
@@ -104,7 +105,7 @@ class CardInRevolverSelector(
         selectables.forEach { actor ->
             val card = actor.card
             val slot = controller.revolver.slots.find { it.card == card }
-            slot?.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+            slot?.forceGetActor()?.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
         }
         controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(popupText))
     }
@@ -113,7 +114,7 @@ class CardInRevolverSelector(
         selectables.forEach { actor ->
             val card = actor.card
             val slot = controller.revolver.slots.find { it.card == card }
-            slot?.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+            slot?.forceGetActor()?.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
         }
         controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(null))
     }
@@ -133,14 +134,14 @@ class CardInRevolverSelector(
 class RevolverSlotSelector(
     val controller: GameController,
     val popupText: String,
-    val predicate: (RevolverSlot) -> Boolean
-) : BaseSelector<RevolverSlot, RevolverSlot>() {
+    val predicate: (IRevolverSlot) -> Boolean
+) : BaseSelector<IRevolverSlot, IRevolverSlot>() {
 
-    override fun begin(selectables: List<RevolverSlot>) {
+    override fun begin(selectables: List<IRevolverSlot>) {
         controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(popupText))
     }
 
-    override fun end(selectables: List<RevolverSlot>) {
+    override fun end(selectables: List<IRevolverSlot>) {
         controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(null))
     }
 
@@ -150,9 +151,9 @@ class RevolverSlotSelector(
         return InputManager.Modal(listOf(RevolverSlot.revolverSlotGroup), screen)
     }
 
-    override fun getSelectables(): List<RevolverSlot> = controller.revolver.slots.filter { predicate(it) }
+    override fun getSelectables(): List<IRevolverSlot> = controller.revolver.slots.filter { predicate(it) }
 
-    override fun mapSelectable(selectable: RevolverSlot): RevolverSlot = selectable
+    override fun mapSelectable(selectable: IRevolverSlot): IRevolverSlot = selectable
 }
 
 interface Selectable<T> {

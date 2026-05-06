@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.onjNamespaces.OnjEffectValue
 import com.microwavestudios.fortyfive.utils.*
@@ -1172,7 +1173,7 @@ typealias RevolverSlotGetter = (
     controller: GameController,
     card: Card,
     triggerInformation: TriggerInformation
-) -> Promise<out RevolverSlot?>
+) -> Promise<out IRevolverSlot?>
 
 fun interface Trigger {
 

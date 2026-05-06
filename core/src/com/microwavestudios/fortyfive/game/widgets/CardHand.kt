@@ -12,20 +12,31 @@ import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.contains
 import kotlin.math.pow
 
+interface ICardHand {
+
+    val amountOfCards: Int
+    val events: EventPipeline
+
+    fun allCards(): List<Card>
+    fun addCard(card: Card)
+    fun removeCard(card: Card)
+    fun triggerPositionForCardActor(card: CardActor): Vector2
+}
+
 class CardHand(
     screen: RenderableScreen,
     private val centerGap: Float,
     private val cardSize: Float,
     private val maxDistanceBetweenCards: Float,
-) : CustomGroup(screen) {
+) : CustomGroup(screen), ICardHand {
 
     private val leftSide: MutableList<Card> = mutableListOf()
     private val rightSide: MutableList<Card> = mutableListOf()
 
-    val amountOfCards: Int
+    override val amountOfCards: Int
         get() = leftSide.size + rightSide.size
 
-    val events: EventPipeline = EventPipeline()
+    override val events: EventPipeline = EventPipeline()
 
     private val addedListenersToCards: MutableList<Card> = mutableListOf()
 
@@ -42,9 +53,9 @@ class CardHand(
         )
     }
 
-    fun allCards(): List<Card> = leftSide + rightSide
+    override fun allCards(): List<Card> = leftSide + rightSide
 
-    fun addCard(card: Card) {
+    override fun addCard(card: Card) {
         orderedChildrenDirty = true
         if (leftSide.size < rightSide.size) leftSide.add(card)
         else rightSide.add(card)
@@ -95,7 +106,7 @@ class CardHand(
         return 50 - zIndex
     }
 
-    fun removeCard(card: Card) {
+    override fun removeCard(card: Card) {
         orderedChildrenDirty = true
         when (card) {
             in leftSide -> leftSide.remove(card)
@@ -109,7 +120,7 @@ class CardHand(
         invalidate()
     }
 
-    fun triggerPositionForCardActor(card: CardActor): Vector2 {
+    override fun triggerPositionForCardActor(card: CardActor): Vector2 {
         val handMiddle = x + width / 2
         val extendedGap = centerGap + 330
         val isLeft = card.x < handMiddle
@@ -164,15 +175,6 @@ class CardHand(
 
     private fun cardHeightFunc(x: Float): Float = -(0.008f * (x - 800f)).pow(2)
 
-    private inline fun forAllCards(block: (Card) -> Unit) {
-        leftSide.forEach { block(it) }
-        rightSide.forEach { block(it) }
-    }
-
     data class CardDraggedOntoSlotEvent(val card: Card, val slot: RevolverSlot)
-
-    companion object {
-        const val cardFocusGroupName = "cardInCardHand"
-    }
 
 }

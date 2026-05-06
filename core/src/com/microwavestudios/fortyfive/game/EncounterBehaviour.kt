@@ -151,7 +151,7 @@ abstract class EncounterBehaviour {
         }
 
         override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
-            controller.tryPay(cost, { controller.shootButton })
+            controller.tryPay(cost)
         }
     }
 
