@@ -17,7 +17,7 @@ import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.IAfterlife
 import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolver
-import com.microwavestudios.fortyfive.game.widgets.Revolver
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunGeneratorConfig
@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
+import com.microwavestudios.fortyfive.screen.commonComponents.IWarningParent
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
 import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
@@ -38,7 +39,7 @@ import kotlin.math.floor
 class GameControllerImpl(
     override val screen: IScreen,
     override val gameEvents: EventPipeline,
-    private val warningParent: WarningParent,
+    private val warningParent: IWarningParent,
     override val afterlife: IAfterlife,
     private val cardPresentationProvider: PresentationProvider
 ) : ScreenController(), GameController, ResourceBorrower {
@@ -122,14 +123,14 @@ class GameControllerImpl(
     override val hasWon: Boolean
         get() = allEnemies.all { it.isDefeated }
 
-    private val softMaxCardsWarning = warningParent.Warning(
+    private val softMaxCardsWarning = warningParent.warning(
         "Maximum Card Number Reached\nAfter this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
-        WarningParent.Level.MID
+        IWarningParent.Level.MID
     )
 
-    private val hardMaxCardsWarning = warningParent.Warning(
+    private val hardMaxCardsWarning = warningParent.warning(
         "Hard Maximum Card Number Reached\nYou cant draw any more cards this turn. After this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
-        WarningParent.Level.HIGH
+        IWarningParent.Level.HIGH
     )
 
     private val enemyDifficulty
@@ -137,7 +138,7 @@ class GameControllerImpl(
 
     private var inEnemyPhase: Boolean = false
 
-    private lateinit var profile: Profile
+    private lateinit var profile: IProfile
 
     private val controller: GameController = this
     

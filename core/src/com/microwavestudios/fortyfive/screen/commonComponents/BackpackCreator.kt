@@ -15,6 +15,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.*
@@ -211,22 +212,22 @@ object BackpackCreator {
 
     private fun putCardFromBackpackInDeck(card: Card, slot: Int, state: BackpackState) {
         if (!state.currentDeck.canAddCards()) {
-            val warningEvent = WarningParent.ShowWarningEvent(WarningParent.Level.MID, "Deck already is at maximum size!")
+            val warningEvent = IWarningParent.ShowWarningEvent(IWarningParent.Level.MID, "Deck already is at maximum size!")
             state.warningEvents.fire(warningEvent)
             return
         }
         val deckMaximum = card.deckMaximum
         if (deckMaximum != -1 && state.currentDeck.countCards(card.name) + 1 > deckMaximum) {
-            val warningEvent = WarningParent.ShowWarningEvent(
-                WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${card.title} allowed in deck"
+            val warningEvent = IWarningParent.ShowWarningEvent(
+                IWarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${card.title} allowed in deck"
             )
             state.warningEvents.fire(warningEvent)
             return
         }
         card.stamp?.let { stamp ->
             if (!state.currentDeck.cards.any { it.stamp == stamp.name }) return@let
-            val warningEvent = WarningParent.ShowWarningEvent(
-                WarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
+            val warningEvent = IWarningParent.ShowWarningEvent(
+                IWarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
             )
             state.warningEvents.fire(warningEvent)
             return
@@ -242,7 +243,7 @@ object BackpackCreator {
 
     private fun putCardFromDeckInBackpack(slot: Int, state: BackpackState) {
         if (!state.currentDeck.canRemoveCards()) {
-            val warningEvent = WarningParent.ShowWarningEvent(WarningParent.Level.MID, "Deck already is at minimum size!")
+            val warningEvent = IWarningParent.ShowWarningEvent(IWarningParent.Level.MID, "Deck already is at minimum size!")
             state.warningEvents.fire(warningEvent)
             return
         }
@@ -264,16 +265,16 @@ object BackpackCreator {
     private fun swapBackpackWithDeckCard(backpackCard: Card, deckSlot: Int, state: BackpackState) {
         val deckMaximum = backpackCard.deckMaximum
         if (deckMaximum != -1 && state.currentDeck.countCards(backpackCard.name) + 1 > deckMaximum) {
-            val warningEvent = WarningParent.ShowWarningEvent(
-                WarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${backpackCard.title} allowed in deck"
+            val warningEvent = IWarningParent.ShowWarningEvent(
+                IWarningParent.Level.MID, "Only ${deckMaximum.pluralS("card")} with name ${backpackCard.title} allowed in deck"
             )
             state.warningEvents.fire(warningEvent)
             return
         }
         backpackCard.stamp?.let { stamp ->
             if (!state.currentDeck.cards.any { it.stamp == stamp.name }) return@let
-            val warningEvent = WarningParent.ShowWarningEvent(
-                WarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
+            val warningEvent = IWarningParent.ShowWarningEvent(
+                IWarningParent.Level.MID, "Card with stamp ${stamp.title} already in deck"
             )
             state.warningEvents.fire(warningEvent)
             return
@@ -717,7 +718,7 @@ object BackpackCreator {
 
     private data class BackpackState(
         var currentDeck: Deck,
-        val profile: Profile,
+        val profile: IProfile,
         val cardPrototypes: Map<String, CardPrototype>,
         val createdCards: MutableList<Card>,
         var cardsInCollection: List<Pair<CardType, Int>>,

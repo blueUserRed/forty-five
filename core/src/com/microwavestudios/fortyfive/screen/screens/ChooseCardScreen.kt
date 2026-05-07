@@ -18,6 +18,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.SquareDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -64,7 +65,7 @@ class ChooseCardScreen : ScreenCreator() {
         InputManager.FocusFilter(listOf(dropTargetGroup), screen)
     }
 
-    private val profile: Profile = FortyFive.profileManager.currentProfile!!
+    private val profile: IProfile = FortyFive.profileManager.currentProfile!!
 
     private lateinit var currentDeck: Deck
 

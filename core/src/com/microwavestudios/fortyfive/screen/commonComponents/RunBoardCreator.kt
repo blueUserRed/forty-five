@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.animation.yPositionAbstractProperty
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunType
@@ -233,7 +234,7 @@ object RunBoardCreator {
 
     private fun CustomGroup.noRunActiveBoard(
         creator: ScreenCreator,
-        profile: Profile,
+        profile: IProfile,
         events: EventPipeline
     ) = with(creator) {
 

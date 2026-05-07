@@ -53,6 +53,27 @@ abstract class ScreenController {
             }
     }
 
+    fun injectManual(name: String, obj: Any) {
+        this::class
+            .java
+            .declaredFields
+            .filter { it.isAnnotationPresent(Inject::class.java) }
+            .forEach { field ->
+                val annotation = field.getAnnotation(Inject::class.java)
+                val fieldName = annotation.name.ifBlank { field.name }
+                if (fieldName != name) return@forEach
+                if (!field.type.isInstance(obj)) {
+                    throw RuntimeException(
+                        "tried to inject object with name $name into field of ${this::class.simpleName}" +
+                                "but type of field '${field.type.simpleName}' is not compatible with type of object" +
+                                " '${obj::class.simpleName}'"
+                    )
+                }
+                field.isAccessible = true
+                field.set(this, obj)
+            }
+    }
+
 }
 
 @Retention(AnnotationRetention.RUNTIME)

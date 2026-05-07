@@ -2,16 +2,36 @@ package com.microwavestudios.fortyfive.profile
 
 import com.microwavestudios.fortyfive.FortyFive
 
-class ProfileManager {
+interface IProfileManager {
 
-    var currentProfile: Profile? = null
+    val currentProfile: IProfile?
+    val availableProfiles: List<Profile.Preview>
+
+    fun init()
+
+    fun deselectProfile()
+
+    /**
+     * @return true when the profile was loaded successfully
+     */
+    fun selectProfile(preview: Profile.Preview): Boolean
+
+    fun rereadPreviews()
+
+    fun reloadPreviews()
+
+}
+
+class ProfileManager : IProfileManager {
+
+    override var currentProfile: IProfile? = null
         private set
 
-    lateinit var availableProfiles: List<Profile.Preview>
+    override lateinit var availableProfiles: List<Profile.Preview>
         private set
 
 
-    fun init() {
+    override fun init() {
         availableProfiles = listOf(
             Profile.loadPreview("A"),
             Profile.loadPreview("B"),
@@ -19,17 +39,14 @@ class ProfileManager {
         )
     }
 
-    fun deselectProfile() {
+    override fun deselectProfile() {
         FortyFive.logger.debug(logTag, "deselect profile ${currentProfile?.name}")
         currentProfile?.write()
         currentProfile = null
         rereadPreviews()
     }
 
-    /**
-     * @return true when the profile was loaded successfully
-     */
-    fun selectProfile(preview: Profile.Preview): Boolean {
+    override fun selectProfile(preview: Profile.Preview): Boolean {
         if (!preview.loadedSuccessfully) {
             FortyFive.logger.warn(logTag, "can't select profile ${preview.name}")
             return false
@@ -45,11 +62,11 @@ class ProfileManager {
         return loaded != null
     }
 
-    fun rereadPreviews() {
+    override fun rereadPreviews() {
         availableProfiles.filter { it.loadedSuccessfully }.forEach { it.read() }
     }
 
-    fun reloadPreviews() {
+    override fun reloadPreviews() {
         availableProfiles = listOf(
             Profile.loadPreview("A"),
             Profile.loadPreview("B"),

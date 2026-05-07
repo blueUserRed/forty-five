@@ -71,6 +71,34 @@ project(":onj") {
     }
 }
 
+project(":tests") {
+    apply(plugin = "kotlin")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+        sourceSets.all {
+            languageSettings.enableLanguageFeature("ExplicitBackingFields")
+        }
+    }
+
+    val gdxVersion = rootProject.extra["gdxVersion"]
+    val gdxControllersVersion = rootProject.extra["gdxControllersVersion"]
+    dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
+        dependencies {
+            implementation(project(":core"))
+
+            api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
+            api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+            implementation("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
+            implementation("com.badlogicgames.gdx:gdx-tools:$gdxVersion")
+            implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:${gdxControllersVersion}")
+        }
+    }
+}
+
 project(":core") {
     apply(plugin = "kotlin")
     kotlin {

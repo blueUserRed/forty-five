@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
+import com.microwavestudios.fortyfive.screen.commonComponents.IWarningParent
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.utils.Vector2
 import com.microwavestudios.fortyfive.utils.epsilonEquals
@@ -112,7 +113,7 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
     }
 
     fun controllerConnected(controller: Controller) {
-        val event = WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "New Controller connected!")
+        val event = IWarningParent.ShowWarningEvent(IWarningParent.Level.INFO, "New Controller connected!")
         screen.events.fire(event)
         screen.events.fire(ControllersChangedEvent)
         if (FortyFive.globalSave.currentControllerUid != null) return
@@ -122,9 +123,9 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
     fun controllerDisconnected(controller: Controller) {
         val isActiveController = controller == activeController
         val event = if (isActiveController) {
-            WarningParent.ShowWarningEvent(WarningParent.Level.HIGH, "Active controller disconnected!")
+            IWarningParent.ShowWarningEvent(IWarningParent.Level.HIGH, "Active controller disconnected!")
         } else {
-            WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "Controller disconnected!")
+            IWarningParent.ShowWarningEvent(IWarningParent.Level.INFO, "Controller disconnected!")
         }
         screen.events.fire(event)
         screen.events.fire(ControllersChangedEvent)
