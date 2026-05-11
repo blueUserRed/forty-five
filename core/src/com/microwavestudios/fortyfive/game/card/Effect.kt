@@ -409,10 +409,11 @@ abstract class Effect(val data: EffectData) {
             situation: GameSituation
         ): Timeline = Timeline.timeline {
             later {
+                val random = controller.random
                 val enemies = controller.activeEnemies
                 if (enemies.isEmpty()) return@later
                 val statusEffect = statusEffectCreator(controller, card, triggerInformation.isOnShot)
-                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemies.random(), card))
+                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemies.random(random), card))
             }
         }
 
@@ -940,7 +941,7 @@ abstract class Effect(val data: EffectData) {
                .revolver
                .slots
                .filter { it.card == null }
-               .randomOrNull()
+               .randomOrNull(controller.random)
             if (slot == null) {
                 include(controller.bounceBulletTimeline(card))
             } else {

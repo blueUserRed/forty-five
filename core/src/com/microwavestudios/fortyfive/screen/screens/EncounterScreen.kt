@@ -1384,7 +1384,14 @@ class EncounterScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         bgScreenController,
-        GameControllerImpl(screen, gameEvents, warningParent, afterlife, CardPresentation.defaultProvider)
+        GameControllerImpl(
+            screen,
+            gameEvents,
+            TimeUtils.millis(),
+            warningParent,
+            afterlife,
+            CardPresentation.defaultProvider
+        )
     )
 
     override fun debugMenuPages(): List<String> = listOf("Encounter")

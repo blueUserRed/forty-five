@@ -17,6 +17,7 @@ import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
+import kotlin.random.Random
 
 /**
  * keeps track of the encounter state and contains functions to construct timelines for e.g. effects
@@ -31,6 +32,7 @@ import com.microwavestudios.fortyfive.utils.Timeline
 interface GameController {
 
     val screen: IScreen
+    val random: Random
     val encounterContext: EncounterContext
 
     val playerLost: Boolean

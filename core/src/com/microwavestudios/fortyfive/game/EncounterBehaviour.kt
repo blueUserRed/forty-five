@@ -180,7 +180,7 @@ abstract class EncounterBehaviour {
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             later {
-                controller.cardsInRevolver().randomOrNull()?.let {
+                controller.cardsInRevolver().randomOrNull(controller.random)?.let {
                     include(controller.bounceBulletTimeline(it))
                 }
             }

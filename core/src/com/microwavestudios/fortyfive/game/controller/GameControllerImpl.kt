@@ -12,13 +12,11 @@ import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.IAfterlife
 import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.profile.IProfile
-import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.screen.Inject
@@ -35,14 +33,18 @@ import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjObject
 import kotlin.collections.map
 import kotlin.math.floor
+import kotlin.random.Random
 
 class GameControllerImpl(
     override val screen: IScreen,
     override val gameEvents: EventPipeline,
+    seed: Long,
     private val warningParent: IWarningParent,
     override val afterlife: IAfterlife,
     private val cardPresentationProvider: PresentationProvider
 ) : ScreenController(), GameController, ResourceBorrower {
+
+    override val random: Random = Random(seed)
 
     override val playerLost: Boolean = false
 
@@ -526,7 +528,7 @@ class GameControllerImpl(
                 if (onTop){
                     cardStack.addCardAtTop(card)
                 } else {
-                    cardStack.shuffleCardIntoStack(card)
+                    cardStack.shuffleCardIntoStack(card, random)
                 }
             }
             later {
@@ -552,7 +554,7 @@ class GameControllerImpl(
         include(card.presentation.spawnAnimation(true))
         action {
             cardHand.removeCard(card)
-            cardStack.shuffleCardIntoStack(card)
+            cardStack.shuffleCardIntoStack(card, random)
         }
         later {
             val animEvent = Events.PlayCardOrbAnimation(card.presentation.animTarget(), true)
@@ -1450,7 +1452,7 @@ class GameControllerImpl(
         val money = -allEnemies.sumOf { it.currentHealth }
         val playerGetsCard = !encounter.special &&
                 !encounterContext.isExtraction &&
-                Utils.coinFlip(Config.playerGetsRewardCardChance)
+                Utils.coinFlip(Config.playerGetsRewardCardChance, random)
         val event = Events.ShowPlayerWonPopup(
             gotCard = playerGetsCard,
             cashAmount = money

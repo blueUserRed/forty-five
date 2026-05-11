@@ -175,6 +175,6 @@ class CardHand(
 
     private fun cardHeightFunc(x: Float): Float = -(0.008f * (x - 800f)).pow(2)
 
-    data class CardDraggedOntoSlotEvent(val card: Card, val slot: RevolverSlot)
+    data class CardDraggedOntoSlotEvent(val card: Card, val slot: IRevolverSlot)
 
 }
