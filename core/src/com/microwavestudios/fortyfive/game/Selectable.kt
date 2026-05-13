@@ -14,23 +14,41 @@ import com.microwavestudios.fortyfive.utils.requireRenderableScreen
 
 object SelectorFactory {
 
+    var cardInHandSelectorCreator = SelectorCreator { controller, popupText, predicate ->
+        CardInHandSelector(controller, popupText, predicate)
+    }
+
+    var cardInRevolverSelectorCreator = SelectorCreator { controller, popupText, predicate ->
+        CardInRevolverSelector(controller, popupText, predicate)
+    }
+
+    var revolverSlotSelectorCreator = SelectorCreator { controller, popupText, predicate ->
+        RevolverSlotSelector(controller, popupText, predicate)
+    }
+
     fun getCardInHandSelector(
         controller: GameController,
         popupText: String,
         predicate: (Card) -> Boolean = { true }
-    ): ISelector<Card> = CardInHandSelector(controller, popupText, predicate)
+    ): ISelector<Card> = cardInHandSelectorCreator.create(controller, popupText, predicate)
 
     fun getCardInRevolverSelector(
         controller: GameController,
         popupText: String,
         predicate: (Card) -> Boolean = { true }
-    ): ISelector<Card> = CardInRevolverSelector(controller, popupText, predicate)
+    ): ISelector<Card> = cardInHandSelectorCreator.create(controller, popupText, predicate)
 
     fun getRevolverSlotSelector(
         controller: GameController,
         popupText: String,
         predicate: (IRevolverSlot) -> Boolean = { true }
-    ): ISelector<IRevolverSlot> = RevolverSlotSelector(controller, popupText, predicate)
+    ): ISelector<IRevolverSlot> = revolverSlotSelectorCreator.create(controller, popupText, predicate)
+
+
+    fun interface SelectorCreator<T> {
+
+        fun create(controller: GameController, popupText: String, predicate: (T) -> Boolean): ISelector<T>
+    }
 
 }
 

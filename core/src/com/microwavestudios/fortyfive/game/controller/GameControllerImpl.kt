@@ -1204,8 +1204,7 @@ class GameControllerImpl(
 
         action {
             FortyFive.soundPlayer.situation("revolver_shot", screen)
-            val postProcessor = FortyFive.currentRenderPipeline!!.getOnShotPostProcessingTimeline()
-            dispatchAnimTimeline(postProcessor)
+            FortyFive.currentRenderPipeline?.let { dispatchAnimTimeline(it.getOnShotPostProcessingTimeline()) }
         }
         cardToShoot?.let { card ->
             targetedEnemies

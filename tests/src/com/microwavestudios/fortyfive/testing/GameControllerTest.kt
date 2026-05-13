@@ -1,10 +1,12 @@
 package com.microwavestudios.fortyfive.testing
 
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Events
+import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.profile.Profile
@@ -18,12 +20,13 @@ import com.microwavestudios.fortyfive.testing.mockcomponents.MockWarningParent
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfile
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.utils.ANSI
+import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
 import java.util.Stack
 
 @Suppress("NOTHING_TO_INLINE")
-abstract class GameControllerTest(val profileManager: MockProfileManager) {
+abstract class GameControllerTest {
 
     abstract val name: String
 
@@ -40,14 +43,28 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
     private val eventListeners: MutableList<(event: Any) -> Unit> = mutableListOf()
     private val titleStack: Stack<String> = Stack()
 
-    fun run() {
+    fun run(): Boolean {
         setup()
         val timeline = testTimeline()
-        timeline.startTimeline()
-        while (!timeline.isFinished) {
-            timeline.updateTimeline()
-            controller.update()
+        try {
+            timeline.startTimeline()
+            while (!timeline.isFinished) {
+                timeline.updateTimeline()
+                controller.update()
+            }
+        } catch (e: TestException) {
+            FortyFive.logger.severe(name, "Test $name failed:")
+            FortyFive.logger.dump(
+                FortyFiveLogger.LogLevel.SEVERE,
+                e.message!!
+            )
+            return false
+        } catch (e: Exception) {
+            FortyFive.logger.severe(name, "Test $name threw Exception:")
+            FortyFive.logger.stackTrace(e)
+            return false
         }
+        return true
     }
 
     protected abstract fun testTimeline(): Timeline
@@ -89,7 +106,7 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
             currentRunDeck = null,
             talismans = listOf()
         )
-        profileManager.currentProfile = profile
+        (FortyFive.profileManager as MockProfileManager).currentProfile = profile
         val controller = GameControllerImpl(
             screen,
             screen.events,
@@ -105,6 +122,7 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
         screen.addScreenController(controller)
 
         bindDefaultEventHandler()
+        prepare()
     }
 
     private fun bindDefaultEventHandler() {
@@ -114,6 +132,8 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
         events.watchFor<Events.PlayBannerAnimation> { it.timeline = Timeline.emptyTimeline }
         events.watchFor<Events.PlayPlayerDamagedEffects> { it.animationTimeline = Timeline.emptyTimeline }
     }
+
+    protected open fun prepare() {}
 
     protected abstract fun seed(): Long
     protected abstract fun deck(): List<CardType>
@@ -125,11 +145,15 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
 
     protected fun cardInHand(name: String): Card = cardHand.allCards().find { it.name == name }!!
 
+    protected fun cardInAfterlife(slot: Int): Card? = afterlife.cards.getOrNull(slot)
+
     protected fun revolverSlot(num: Int): IRevolverSlot = revolver.slots[Utils.convertSlotRepresentation(num) - 1]
     
     protected fun curPlayerHealth(): Int = controller.curPlayerLives
         
     protected fun curReserves(): Int = controller.curReserves
+
+    protected fun enemy(index: Int): Enemy = controller.allEnemies[index]
 
     ///////////////////////////////
     // assertion helpers
@@ -147,19 +171,12 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
 
         override fun toString(): String = "${ANSI.cyan}aCurReservers${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
-    
-    protected fun aPlayerHealth(): AssertionValue<Int> = object : AssertionValue<Int>() {
-
-        override fun get(): Int = controller.curReserves
-
-        override fun toString(): String = "${ANSI.cyan}aCurReservers${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
-    }
 
     protected fun aCardInSlot(slot: Int): AssertionValue<Card?> = object : AssertionValue<Card?>() {
 
         override fun get(): Card? = revolverSlot(slot).card
 
-        override fun toString(): String = "${ANSI.cyan}aCardInSlot${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
+        override fun toString(): String = "${ANSI.cyan}aCardInSlot($slot)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
     
     protected fun aCurrentPlayerHealth(): AssertionValue<Int> = object : AssertionValue<Int>() {
@@ -169,13 +186,35 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
         override fun toString(): String = "${ANSI.cyan}aCurrentPlayerHealth${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
 
+    protected fun aEnemy(index: Int): AssertionValue<Enemy> = object : AssertionValue<Enemy>() {
+
+        override fun get(): Enemy = enemy(index)
+
+        override fun toString(): String = "${ANSI.cyan}aEnemy($index)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
+    protected fun aCardInAfterlife(slot: Int): AssertionValue<Card?> = object : AssertionValue<Card?>() {
+
+        override fun get(): Card? = cardInAfterlife(slot)
+
+        override fun toString(): String = "${ANSI.cyan}aCardInAfterlife($slot)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
     protected fun AssertionValue<Card?>.aName(): AssertionValue<String?> = object : AssertionValue<String?>() {
 
         override fun get(): String? = this@aName.get()?.name
 
         override fun toString(): String = "${ANSI.white}(${this@aName}${ANSI.white}).${ANSI.cyan}name ${ANSI.grey}(='${get()}')${ANSI.reset}"
-
     }
+
+    protected fun AssertionValue<Enemy>.aCurrentHealth(): AssertionValue<Int> = object : AssertionValue<Int>() {
+
+        override fun get(): Int = this@aCurrentHealth.get().currentHealth
+
+        override fun toString(): String = "${ANSI.white}(${this@aCurrentHealth}${ANSI.white}).${ANSI.cyan}currentHealth ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
+    protected fun <T> deferred(getter: () -> T): AssertionValue<T> = AssertionValue.deferred(getter)
 
     ///////////////////////////////
     // Timeline helpers
@@ -205,11 +244,15 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
         action { if (!condition()) throw AssertionTestException(curTestTitle(), message()) }
     }
     
-    internal inline fun Timeline.TimelineBuilderDSL.handleNextParry(parry: Boolean) {
+    internal inline fun Timeline.TimelineBuilderDSL.handleNextParry(
+        parry: Boolean,
+        crossinline callback: (event: Events.ParryStateChange) -> Unit = {}
+    ) {
         var handled = false
         val listener: (Any) -> Unit = listener@{ event -> 
             if (event !is Events.ParryStateChange || !event.inParryMenu) return@listener
             handled = true
+            callback(event)
             event.resolutionPromise.resolve(parry)
         }
         timelineActions.add(object : Timeline.TimelineAction() {
@@ -225,6 +268,11 @@ abstract class GameControllerTest(val profileManager: MockProfileManager) {
                 eventListeners.remove(listener)
             }
         })
+    }
+
+    internal inline fun Timeline.TimelineBuilderDSL.switchEnemy(enemy: Enemy) {
+        waitForFreeUi()
+        fire { Events.EnemySelected(enemy) }
     }
 
     internal inline fun Timeline.TimelineBuilderDSL.holster() {

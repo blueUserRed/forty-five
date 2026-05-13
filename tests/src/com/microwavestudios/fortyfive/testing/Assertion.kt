@@ -51,11 +51,6 @@ abstract class AssertionValue<out T> {
 
     abstract override fun toString(): String
 
-    fun <T> immediate(value: T): AssertionValue<T> = object : AssertionValue<T>() {
-        override fun get(): T = value
-        override fun toString(): String = "${ANSI.blue}'$value'${ANSI.reset}"
-    }
-
     override fun equals(other: Any?): Boolean = throw RuntimeException("comparing AssertionValues using == is forbidden")
 
     infix fun equal(other: AssertionValue<*>): Assertion = Assertion.Equal(this, other)
@@ -67,4 +62,17 @@ abstract class AssertionValue<out T> {
     infix fun notEqual(other: Any): Assertion = Assertion.NotEqual(this, immediate(other))
 
     fun isNull(): Assertion = Assertion.IsNull(this)
+
+    companion object {
+
+        fun <T> immediate(value: T): AssertionValue<T> = object : AssertionValue<T>() {
+            override fun get(): T = value
+            override fun toString(): String = "${ANSI.blue}'$value'${ANSI.reset}"
+        }
+
+        fun <T> deferred(getter: () -> T): AssertionValue<T> = object : AssertionValue<T>() {
+            override fun get(): T = getter()
+            override fun toString(): String = "${ANSI.cyan}deferred ${ANSI.white}{ ${ANSI.grey}(='${get()}')${ANSI.white} }${ANSI.reset}"
+        }
+    }
 }
