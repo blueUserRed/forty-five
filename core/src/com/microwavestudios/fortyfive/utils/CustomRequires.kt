@@ -2,6 +2,8 @@
 
 package com.microwavestudios.fortyfive.utils
 
+import com.microwavestudios.fortyfive.screen.IScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -40,5 +42,15 @@ inline fun requireNot(condition: Boolean, lazyMessage: () -> String) {
     if (condition) {
         val message = lazyMessage()
         throw IllegalArgumentException(message)
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun requireRenderableScreen(screen: IScreen) {
+    contract {
+        returns() implies (screen is RenderableScreen)
+    }
+    if (screen !is RenderableScreen) {
+        throw IllegalArgumentException("Requires renderable screen, but different implementation was passed instead")
     }
 }

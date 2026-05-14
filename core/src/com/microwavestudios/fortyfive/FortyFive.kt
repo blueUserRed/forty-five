@@ -19,12 +19,14 @@ import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
 import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.profile.GlobalSave
+import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
+import com.microwavestudios.fortyfive.screen.ISoundPlayer
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
 import com.microwavestudios.fortyfive.screen.screens.*
 import com.microwavestudios.fortyfive.steam.SteamHandler
@@ -45,7 +47,8 @@ object FortyFive : Game() {
     val serviceThread = ServiceThread()
 
     /** see [SoundPlayer] */
-    val soundPlayer = SoundPlayer()
+    var soundPlayer: ISoundPlayer = SoundPlayer()
+        private set
 
     /** see [FortyFiveLogger] */
     val logger = FortyFiveLogger()
@@ -53,7 +56,8 @@ object FortyFive : Game() {
     /** see [ResourceManager] */
     val resourceManager = ResourceManager()
 
-    val profileManager = ProfileManager()
+    var profileManager: IProfileManager = ProfileManager()
+        private set
 
     /** see [ScreenManager] */
     val screenManager = ScreenManager(TitleScreen, null)
@@ -73,7 +77,7 @@ object FortyFive : Game() {
     var currentRenderPipeline: RenderPipeline? = null
         private set
 
-    var currentScreen: CustomScreen? = null
+    var currentScreen: RenderableScreen? = null
 
     var cleanExit: Boolean = true
     lateinit var appArguments: AppArguments
@@ -158,6 +162,23 @@ object FortyFive : Game() {
     override fun resize(width: Int, height: Int) {
         super.resize(width, height)
         currentRenderPipeline?.sizeChanged()
+    }
+
+    fun initTest(mockSoundPlayer: ISoundPlayer, mockProfileManager: IProfileManager) {
+        soundPlayer = mockSoundPlayer
+        profileManager = mockProfileManager
+        with(OnjConfig) {
+            registerNamespace("Common", CommonNamespace)
+            registerNamespace("Cards", CardsNamespace)
+        }
+        ConfigFileManager.init()
+        logger.init()
+        profileManager.init()
+        globalSave.readFromDisk()
+        pluginManager.init()
+        pluginManager.earlyInit()
+        soundPlayer.init()
+        GraphicsConfig.init()
     }
 
     private fun init() {

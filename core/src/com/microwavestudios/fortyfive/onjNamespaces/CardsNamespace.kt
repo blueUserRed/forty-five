@@ -106,7 +106,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             5 -> arrayOf(1, 4)
             else -> unreachable()
         }
-        val selector = RevolverSlotSelector(controller, text.value) { slot ->
+        val selector = SelectorFactory.getRevolverSlotSelector(controller, text.value) { slot ->
             slot.card == null && slot.num in adjacentSlots
         }
         selector.startSelect()
@@ -120,7 +120,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         cardSlot ?: return@OnjRevolverSlotGetter Promise.nullPromise
         val thisSlotNum = Utils.convertSlotRepresentation(cardSlot.num)
 
-        val selector = RevolverSlotSelector(controller, text.value) { slot ->
+        val selector = SelectorFactory.getRevolverSlotSelector(controller, text.value) { slot ->
             slot.card == null && Utils.convertSlotRepresentation(slot.num) < thisSlotNum
         }
         selector.startSelect()
@@ -128,7 +128,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun slotGetter(text: OnjString): OnjRevolverSlotGetter = OnjRevolverSlotGetter { controller, card, triggerInformation ->
-        val selector = RevolverSlotSelector(controller, text.value) { slot ->
+        val selector = SelectorFactory.getRevolverSlotSelector(controller, text.value) { slot ->
             slot.card == null
         }
         selector.startSelect()

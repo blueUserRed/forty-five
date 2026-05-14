@@ -7,25 +7,36 @@ import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.contains
 import kotlin.math.pow
 
+interface ICardHand {
+
+    val amountOfCards: Int
+    val events: EventPipeline
+
+    fun allCards(): List<Card>
+    fun addCard(card: Card)
+    fun removeCard(card: Card)
+    fun triggerPositionForCardActor(card: CardActor): Vector2
+}
+
 class CardHand(
-    screen: CustomScreen,
+    screen: RenderableScreen,
     private val centerGap: Float,
     private val cardSize: Float,
     private val maxDistanceBetweenCards: Float,
-) : CustomGroup(screen) {
+) : CustomGroup(screen), ICardHand {
 
     private val leftSide: MutableList<Card> = mutableListOf()
     private val rightSide: MutableList<Card> = mutableListOf()
 
-    val amountOfCards: Int
+    override val amountOfCards: Int
         get() = leftSide.size + rightSide.size
 
-    val events: EventPipeline = EventPipeline()
+    override val events: EventPipeline = EventPipeline()
 
     private val addedListenersToCards: MutableList<Card> = mutableListOf()
 
@@ -35,32 +46,35 @@ class CardHand(
     init {
         focusShortcut(
             GameInputs.focusShortcutCardHand,
-            variableActor = { leftSide.lastOrNull()?.actor ?: rightSide.firstOrNull()?.actor }
+            variableActor = {
+                leftSide.lastOrNull()?.presentation?.forceGetActor() ?:
+                    rightSide.firstOrNull()?.presentation?.forceGetActor()
+            }
         )
     }
 
-    fun allCards(): List<Card> = leftSide + rightSide
+    override fun allCards(): List<Card> = leftSide + rightSide
 
-    fun addCard(card: Card) {
+    override fun addCard(card: Card) {
         orderedChildrenDirty = true
         if (leftSide.size < rightSide.size) leftSide.add(card)
         else rightSide.add(card)
-        val actor = card.actor
+        val actor = card.presentation.forceGetActor()
         addActor(actor)
         actor.fixedZIndex = zIndexFor(card)
         resortZIndices()
         if (card !in addedListenersToCards) {
-            card.actor.observeInputState(
+            actor.observeInputState(
                 GameInputs.States.focused,
                 {
-                    if (card.actor !in this) return@observeInputState
+                    if (actor !in this) return@observeInputState
                     actor.width = cardSize * 1.2f
                     actor.height = cardSize * 1.2f
                     actor.fixedZIndex = 100
                     resortZIndices()
                 },
                 {
-                    if (card.actor !in this) return@observeInputState
+                    if (actor !in this) return@observeInputState
                     actor.width = cardSize
                     actor.height = cardSize
                     actor.fixedZIndex = zIndexFor(card)
@@ -77,10 +91,10 @@ class CardHand(
         val new = mutableListOf<Actor>()
         var i = leftSide.size - 1
         while (i >= 0) {
-            new.add(leftSide[i].actor)
+            new.add(leftSide[i].presentation.forceGetActor())
             i--
         }
-        new.addAll(rightSide.map { it.actor })
+        new.addAll(rightSide.map { it.presentation.forceGetActor() })
         childrenInCorrectOrderCache = new
         orderedChildrenDirty = false
         return new
@@ -92,20 +106,21 @@ class CardHand(
         return 50 - zIndex
     }
 
-    fun removeCard(card: Card) {
+    override fun removeCard(card: Card) {
         orderedChildrenDirty = true
         when (card) {
             in leftSide -> leftSide.remove(card)
             in rightSide -> rightSide.remove(card)
             else -> throw RuntimeException("card $card can't be removed because it is not the cardHand")
         }
-        removeActor(card.actor)
-        card.actor.rotation = 0f
+        val actor = card.presentation.forceGetActor()
+        removeActor(actor)
+        actor.rotation = 0f
         evenOutCards()
         invalidate()
     }
 
-    fun triggerPositionForCardActor(card: CardActor): Vector2 {
+    override fun triggerPositionForCardActor(card: CardActor): Vector2 {
         val handMiddle = x + width / 2
         val extendedGap = centerGap + 330
         val isLeft = card.x < handMiddle
@@ -138,20 +153,20 @@ class CardHand(
         val cardDistLeftSide = (widthPerSide / (leftSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
         x = width / 2 - centerGap / 2 - cardSize
         leftSide.forEach { card ->
-            val actor = card.actor
+            val actor = card.presentation.forceGetActor()
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
             actor.rotation = cardHeightFuncDerivative(x) * 50f
-            card.actor.fixedZIndex = zIndexFor(card)
+            actor.fixedZIndex = zIndexFor(card)
             x -= cardDistLeftSide
         }
 
         val cardDistRightSide = (widthPerSide / (rightSide.size + 1)).coerceAtMost(maxDistanceBetweenCards)
         x = width / 2 + centerGap / 2
         rightSide.forEach { card ->
-            val actor = card.actor
+            val actor = card.presentation.forceGetActor()
             actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
             actor.rotation = cardHeightFuncDerivative(x) * 50f
-            card.actor.fixedZIndex = zIndexFor(card)
+            actor.fixedZIndex = zIndexFor(card)
             x += cardDistRightSide
         }
     }
@@ -160,15 +175,6 @@ class CardHand(
 
     private fun cardHeightFunc(x: Float): Float = -(0.008f * (x - 800f)).pow(2)
 
-    private inline fun forAllCards(block: (Card) -> Unit) {
-        leftSide.forEach { block(it) }
-        rightSide.forEach { block(it) }
-    }
-
-    data class CardDraggedOntoSlotEvent(val card: Card, val slot: RevolverSlot)
-
-    companion object {
-        const val cardFocusGroupName = "cardInCardHand"
-    }
+    data class CardDraggedOntoSlotEvent(val card: Card, val slot: IRevolverSlot)
 
 }

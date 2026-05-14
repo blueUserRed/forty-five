@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.game.GameAnimation
 import com.microwavestudios.fortyfive.game.controller.GameController
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import onj.value.OnjArray
 import onj.value.OnjString
 import java.io.BufferedInputStream

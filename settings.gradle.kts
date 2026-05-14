@@ -11,4 +11,4 @@ pluginManagement {
 
 rootProject.name = "forty-five"
 
-include("desktop", "core", "onj")
+include("desktop", "core", "onj", "tests")

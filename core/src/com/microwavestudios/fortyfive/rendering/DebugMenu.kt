@@ -7,7 +7,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.run.Encounter
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActor
 import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -114,7 +114,7 @@ abstract class DebugMenuPage(val name: String) {
         default: Boolean
     ): DebugSwitch = DebugSwitch(name, key, default).also { switches.add(it) }
 
-    abstract fun getText(screen: CustomScreen): String
+    abstract fun getText(screen: RenderableScreen): String
 
     data class DebugButton(
         val name: String,
@@ -142,7 +142,7 @@ abstract class DebugMenuPage(val name: String) {
 
 class BaseInfosDebugMenuPage : DebugMenuPage("Basic infos") {
 
-    override fun getText(screen: CustomScreen) = """
+    override fun getText(screen: RenderableScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
         version: ${FortyFive.logger.versionTag}
         15s render lagSpike: ${FortyFive.renderTimes.max()}ms
@@ -154,7 +154,7 @@ class ScreenDebugMenuPage : DebugMenuPage("Screen/Input") {
 
     val makeLaggy = debugSwitch("make laggy", Keys.L, false)
 
-    override fun getText(screen: CustomScreen): String = """
+    override fun getText(screen: RenderableScreen): String = """
         focused with keyboard: ${
             screen.inputManager.keyboardFocused?.actor?.let {
                 if (it is DebugActor) it.getDebugName() else it.toString()
@@ -177,7 +177,7 @@ class ScreenDebugMenuPage : DebugMenuPage("Screen/Input") {
 
 class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
 
-    override fun getText(screen: CustomScreen): String {
+    override fun getText(screen: RenderableScreen): String {
         val statistics = FortyFive.cardTextureManager.statistics
         return """
             loaded textures: ${statistics.loadedTextures}
@@ -194,7 +194,7 @@ class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
 
 class ResourceDebugMenuPage : DebugMenuPage("Resources") {
 
-    override fun getText(screen: CustomScreen): String {
+    override fun getText(screen: RenderableScreen): String {
         val unloaded = FortyFive
             .resourceManager
             .resources
@@ -233,7 +233,7 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
         FortyFive.screenManager.screenFinished()
     }
 
-    override fun getText(screen: CustomScreen): String = """
+    override fun getText(screen: RenderableScreen): String = """
         dist: ${currentNode?.distance}
         index: ${currentNode?.index}
         $completeRun
@@ -246,7 +246,7 @@ class EncounterPreviewDebugMenuPage : DebugMenuPage("Encounter Preview") {
 
     var encounter: Encounter? = null
 
-    override fun getText(screen: CustomScreen): String = encounter?.let { encounter ->
+    override fun getText(screen: RenderableScreen): String = encounter?.let { encounter ->
         """
             enemies: ${encounter.enemiesGroups.joinToString(separator = ", ")}
             modifier: ${encounter.encounterModifierNames.joinToString(separator = ", ")}
@@ -284,7 +284,7 @@ class EncounterDebugMenuPage : DebugMenuPage("Encounter") {
         controller.appendMainTimeline(controller.drawCardsTimeline(2))
     }
 
-    override fun getText(screen: CustomScreen): String = """
+    override fun getText(screen: RenderableScreen): String = """
         $giveReserves
         $drawCards
         $defeatEnemies

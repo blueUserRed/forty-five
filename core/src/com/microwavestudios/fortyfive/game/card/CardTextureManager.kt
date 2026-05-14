@@ -7,7 +7,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -56,7 +56,7 @@ class CardTextureManager : ResourceBorrower {
 
     fun cardTextureFor(
         card: Card,
-        screen: CustomScreen,
+        screen: RenderableScreen,
         cost: Int,
         damage: Int,
         variablePostfix: String? = null
@@ -73,7 +73,7 @@ class CardTextureManager : ResourceBorrower {
 
     private fun getCardPixmap(
         data: CardTextureData,
-        screen: CustomScreen,
+        screen: RenderableScreen,
         card: Card,
         variablePostfix: String?
     ): Promise<Pair<Pixmap, Pixmap?>> {
@@ -106,7 +106,7 @@ class CardTextureManager : ResourceBorrower {
 
     private fun createVariant(
         data: CardTextureData,
-        screen: CustomScreen,
+        screen: RenderableScreen,
         card: Card,
         cost: Int,
         damage: Int,
@@ -120,7 +120,8 @@ class CardTextureManager : ResourceBorrower {
                 cardPixmap.height + 2 * padding,
                 Pixmap.Format.RGBA8888
             )
-            if (!card.actor.font.isResolved) FortyFive.resourceManager.forceResolve(card.actor.font)
+            val actor = card.presentation.forceGetActor()
+            if (!actor.font.isResolved) FortyFive.resourceManager.forceResolve(actor.font)
             val message = ServiceThreadMessage.DrawCardPixmap(
                 pixmap,
                 cardPixmap,
@@ -128,7 +129,7 @@ class CardTextureManager : ResourceBorrower {
                 damage,
                 cost,
                 stampPixmap,
-                card.actor.font.getOrError()
+                actor.font.getOrError()
             )
             FortyFive.serviceThread.sendMessage(message)
             message.promise

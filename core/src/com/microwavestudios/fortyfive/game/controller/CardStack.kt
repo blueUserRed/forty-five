@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.game.controller
 
 import com.microwavestudios.fortyfive.game.card.Card
+import kotlin.random.Random
 
 class CardStack(
     private var cards: MutableList<Card>
@@ -18,8 +19,8 @@ class CardStack(
         dirty()
     }
 
-    fun shuffleCardIntoStack(card: Card) {
-        cards.add(cards.indices.randomOrNull() ?: 0, card)
+    fun shuffleCardIntoStack(card: Card, random: Random) {
+        cards.add(cards.indices.randomOrNull(random) ?: 0, card)
     }
 
     fun set(cards: MutableList<Card>) {
@@ -61,8 +62,8 @@ class CardStack(
 
     fun size(): Int = cards.size
 
-    fun shuffle() {
-        cards.shuffle()
+    fun shuffle(random: Random) {
+        cards.shuffle(random)
         dirty()
     }
 

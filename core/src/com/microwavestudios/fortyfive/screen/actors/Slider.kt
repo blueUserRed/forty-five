@@ -11,7 +11,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.between
 
@@ -23,7 +23,7 @@ class Slider(
     val min: Float,
     val max: Float,
     bind: String?,
-    val screen: CustomScreen
+    val screen: RenderableScreen
 ) : Widget(), ResourceBorrower {
 
     var cursorPos: Float = 0.5f

@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.alpha
 import java.lang.Float.min
 
@@ -54,7 +54,7 @@ abstract class GameAnimation {
  */
 class BannerAnimation(
     val banner: Drawable,
-    private val screen: CustomScreen,
+    private val screen: RenderableScreen,
     private val duration: Int,
     private val animationDuration: Int,
     private val beginScale: Float,
@@ -127,7 +127,7 @@ open class FadeInAndOutAnimation(
     protected val x: Float,
     protected val y: Float,
     val actor: Actor,
-    private val customScreen: CustomScreen,
+    private val customScreen: RenderableScreen,
     private val duration: Int,
     private val fadeIn : Int,
     private val fadeOut : Int,

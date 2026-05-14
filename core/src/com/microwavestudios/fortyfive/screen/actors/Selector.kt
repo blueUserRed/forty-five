@@ -13,7 +13,7 @@ import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.Promise
 
 class Selector(
@@ -24,7 +24,7 @@ class Selector(
     private val arrowWidth: Float = 20f,
     private val arrowHeight: Float = 20f,
     private val bindTarget: BindTarget<*>,
-    private val screen: CustomScreen,
+    private val screen: RenderableScreen,
     private val settingChangedCallback: (() -> Unit)? = null,
 ) : Widget(), InputActor by InputActorImpl(), ResourceBorrower {
 

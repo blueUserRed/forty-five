@@ -6,6 +6,10 @@ import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.Talisman
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.DetailMap
+import com.microwavestudios.fortyfive.profile.Profile.Companion.dataFileSchema
+import com.microwavestudios.fortyfive.profile.Profile.Companion.limitedTakeAlong
+import com.microwavestudios.fortyfive.profile.Profile.ProfileData
+import com.microwavestudios.fortyfive.profile.Profile.RunBoard
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
 import com.microwavestudios.fortyfive.run.RunType
@@ -17,11 +21,64 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.io.File
+import kotlin.collections.set
+import kotlin.getValue
 import kotlin.io.path.createDirectories
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
+import kotlin.setValue
 
-class Profile private constructor(val name: String, private var runSave: RunSave?) {
+interface IProfile {
+
+    val name: String
+    val playerMoney: Int
+    val cardCollection: List<CardType>
+    val collectionDecks: List<Deck>
+    val currentAreaMapName: String
+    val wonRuns: Int
+    var currentCollectionDeck: Deck
+    var currentRunDeck: Deck?
+    val backpack: List<CardType>?
+    val backpackDecks: List<Deck>?
+    val encountersStartedInRun: Int?
+    val talismans: List<Talisman>
+    var currentNodeIndex: Int
+    var lastNodeIndex: Int?
+    val currentMapSaver: MapSaver
+    val currentAreaMap: DetailMap
+    val activeRun: Run?
+    val isRunActive: Boolean
+    var healthInRun: Int?
+    val maxHealthInRun: Int?
+    val areaMapSaver: MapSaver
+
+    fun isSpecialRunCompleted(runName: String): Boolean
+    fun addCardToBackpack(card: CardType)
+    fun swapCardInBackpack(old: CardType, new: CardType)
+    fun addCardToCollection(card: CardType)
+    fun swapCardInCollection(old: CardType, new: CardType)
+    fun changeToMap(map: String, fromEnd: Boolean = false)
+    fun runBoardForArea(area: DetailMap): RunBoard
+    fun addRunToRunBoard(areaName: String, run: Run)
+    fun startRun(run: Run)
+    fun encounterStarted()
+    fun loseRun()
+    fun winRun()
+    fun earnMoney(amount: Int)
+    fun payMoney(amount: Int)
+    fun getCardForRun(card: CardType)
+    fun checkDecks()
+    fun extractableCards(): List<CardType>
+    fun readFromDisk()
+    fun dirty()
+    fun write()
+
+}
+
+class Profile private constructor(
+    override val name: String,
+    private var runSave: RunSave?
+) : IProfile {
 
     private var data: ProfileData = ProfileData(
         mutableListOf(
@@ -57,37 +114,37 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             FortyFive.currentScreen?.events?.fire(MoneyChangedEvent(value))
         }
     )
-    val playerMoney: Int
+    override val playerMoney: Int
         get() = _playerMoney
 
     private var _cardCollection: MutableList<CardType> by DataDelegate(ProfileData::cardCollection)
-    val cardCollection: List<CardType>
+    override val cardCollection: List<CardType>
         get() = _cardCollection
 
     private var _collectionDecks: MutableList<Deck> by DataDelegate(ProfileData::collectionDecks)
-    val collectionDecks: List<Deck>
+    override val collectionDecks: List<Deck>
         get() = _collectionDecks
 
     private var _currentMapName: String by DataDelegate(ProfileData::currentMap)
-    val currentAreaMapName: String
+    override val currentAreaMapName: String
         get() = _currentMapName
 
     private var _wonRuns: Int by DataDelegate(ProfileData::wonRuns)
-    val wonRuns: Int
+    override val wonRuns: Int
         get() = _wonRuns
 
     private var runBoards: MutableMap<String, RunBoard> by DataDelegate(ProfileData::runBoards)
 
     private var currentCollectionDeckId: Int by DataDelegate(ProfileData::currentDeckId)
 
-    var currentCollectionDeck: Deck
+    override var currentCollectionDeck: Deck
         get() =
             data.collectionDecks.find { it.id == currentCollectionDeckId }!!
         set(value) {
             currentCollectionDeckId = value.id
         }
 
-    var currentRunDeck: Deck?
+    override var currentRunDeck: Deck?
         get() = runSave?.let { run ->
             run.backpackDecks[run.currentDeckId]
         }
@@ -96,50 +153,50 @@ class Profile private constructor(val name: String, private var runSave: RunSave
             runSave.currentDeckId = value?.id ?: throw RuntimeException("can't set currentRunDeck to 'null'")
         }
 
-    val backpack: List<CardType>?
+    override val backpack: List<CardType>?
         get() = runSave?.backpack
 
-    val backpackDecks: List<Deck>?
+    override val backpackDecks: List<Deck>?
         get() = runSave?.backpackDecks
 
-    val encountersStartedInRun: Int?
+    override val encountersStartedInRun: Int?
         get() = runSave?.encountersStarted
 
-    val talismans: List<Talisman>
+    override val talismans: List<Talisman>
         get() = runSave?.talismans ?: listOf()
+
+    override var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
     val usedSteps: Int?
         get() = runSave?.usedSteps
 
-    var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
+    override var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
 
-    var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
-
-    val currentMapSaver: MapSaver
+    override val currentMapSaver: MapSaver
         get() = runSave?.mapSaver ?: areaMapSaver
 
-    lateinit var currentAreaMap: DetailMap
+    override lateinit var currentAreaMap: DetailMap
         private set
 
     private var currentMapFile: File? = null
 
-    val activeRun: Run?
+    override val activeRun: Run?
         get() = runSave?.run
 
-    val isRunActive: Boolean
+    override val isRunActive: Boolean
         get() = runSave != null
 
-    var healthInRun: Int?
+    override var healthInRun: Int?
         get() = runSave?.playerHealth
         set(value) {
             value ?: throw RuntimeException("cant set healthInRun to null")
             runSave?.playerHealth = value
         }
 
-    val maxHealthInRun: Int?
+    override val maxHealthInRun: Int?
         get() = runSave?.run?.maxPlayerHealth
 
-    val areaMapSaver: MapSaver = object : MapSaver {
+    override val areaMapSaver: MapSaver = object : MapSaver {
         override var currentNodeIndex: Int by this@Profile::currentNodeIndex
         override var lastNodeIndex: Int? by this@Profile::lastNodeIndex
         override val currentMapName: String by this@Profile::currentAreaMapName
@@ -150,26 +207,26 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         data.collectionDecks.forEach { it.checkDeck(data.cardCollection) }
     }
 
-    fun isSpecialRunCompleted(runName: String): Boolean = runName in data.completedSpecialRuns
+    override fun isSpecialRunCompleted(runName: String): Boolean = runName in data.completedSpecialRuns
 
-    fun addCardToBackpack(card: CardType) {
+    override fun addCardToBackpack(card: CardType) {
         require(isRunActive) { "not in run" }
         runSave!!.addCardToBackpack(card)
         checkDecks()
     }
 
-    fun swapCardInBackpack(old: CardType, new: CardType) {
+    override fun swapCardInBackpack(old: CardType, new: CardType) {
         require(isRunActive) { "not in run" }
         runSave!!.swapCardInBackpack(old, new)
     }
 
-    fun addCardToCollection(card: CardType) {
+    override fun addCardToCollection(card: CardType) {
         _cardCollection.add(card)
         checkDecks()
         dirty()
     }
 
-    fun swapCardInCollection(old: CardType, new: CardType) {
+    override fun swapCardInCollection(old: CardType, new: CardType) {
         val result = _cardCollection.remove(old)
         require(result) { "card $old not in collection" }
         _cardCollection.add(new)
@@ -182,7 +239,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         runSave.usedSteps++
     }
 
-    fun changeToMap(map: String, fromEnd: Boolean = false) {
+    override fun changeToMap(map: String, fromEnd: Boolean = false) {
         if (map == _currentMapName) return
         writeMaps()
         loadAreaMap(map)
@@ -194,7 +251,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         }
     }
 
-    fun runBoardForArea(area: DetailMap): RunBoard {
+    override fun runBoardForArea(area: DetailMap): RunBoard {
         var runBoard = runBoards[area.name] ?: RunBoard(
             areaName = area.name,
             null, null, null,
@@ -221,7 +278,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         return runBoard
     }
 
-    fun addRunToRunBoard(areaName: String, run: Run) {
+    override fun addRunToRunBoard(areaName: String, run: Run) {
         requireNot(run.type == RunType.LIMITED || run.type == RunType.CONSTRUCTED) {
             "limited or constructed runs cant be manually added to the run board"
         }
@@ -245,7 +302,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         dirty()
     }
 
-    fun startRun(run: Run) {
+    override fun startRun(run: Run) {
         requireNull(runSave) { "cant start new run when old run wasn't completed yet" }
         if (
             run.type == RunType.SPECIAL ||
@@ -263,17 +320,17 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         runSave = RunSave.newRun(this, run, cardsToTakeAlong)
     }
 
-    fun encounterStarted() {
+    override fun encounterStarted() {
         val runSave = runSave ?: return
         runSave.encountersStarted++
     }
 
-    fun loseRun() {
+    override fun loseRun() {
         val runSave = runSave ?: throw RuntimeException("cant lose run if no run is active")
         endRun(runSave)
     }
 
-    fun winRun() {
+    override fun winRun() {
         val runSave = runSave
         requireNotNull(runSave) { "cant win run if no run is active" }
         _wonRuns++
@@ -322,26 +379,26 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         dirty()
     }
 
-    fun earnMoney(amount: Int) {
+    override fun earnMoney(amount: Int) {
         _playerMoney += amount
     }
 
-    fun payMoney(amount: Int) {
+    override fun payMoney(amount: Int) {
         _playerMoney -= amount
     }
 
-    fun getCardForRun(card: CardType) {
+    override fun getCardForRun(card: CardType) {
         val runSave = runSave ?: throw RuntimeException("not in a run")
         runSave.addCardToBackpack(card)
         checkDecks()
     }
 
-    fun checkDecks() {
+    override fun checkDecks() {
         collectionDecks.forEach { it.checkDeck(cardCollection) }
         runSave?.checkDecks()
     }
 
-    fun extractableCards(): List<CardType> {
+    override fun extractableCards(): List<CardType> {
         val runSave = runSave
             ?: throw RuntimeException("Profile.extractableCards() can only be called when a run is active")
         val cardsToExtract = currentRunDeck!!.cards.toMutableList()
@@ -364,11 +421,11 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         return if (areaFile.exists()) areaFile else null
     }
 
-    fun dirty() {
+    override fun dirty() {
         dirty = true
     }
 
-    fun readFromDisk() {
+    override fun readFromDisk() {
         dirty = false
         runSave?.readFromDisc()
         if (!dataFile.exists()) {
@@ -383,7 +440,7 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         checkDecks()
     }
 
-    fun write() {
+    override fun write() {
         writeMaps()
         checkDecks()
         runSave?.write()

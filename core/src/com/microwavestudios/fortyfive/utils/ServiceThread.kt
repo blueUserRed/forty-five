@@ -88,8 +88,9 @@ class ServiceThread : Thread("ServiceThread") {
             val damageValue = message.damageValue
             val costValue = message.costValue
             val baseDamage = card.baseDamage
-            val isDark = card.actor.isDark
-            val fontScale = card.actor.fontScale
+            val actor = card.presentation.forceGetActor()
+            val isDark = actor.isDark
+            val fontScale = actor.fontScale
             val padding = (CardTextureManager.texturePaddingFraction * cardTexturePixmap.width).toInt()
             pixmap.drawPixmap(
                 cardTexturePixmap,

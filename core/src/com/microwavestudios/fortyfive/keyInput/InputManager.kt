@@ -9,9 +9,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.profile.GlobalSave
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
+import com.microwavestudios.fortyfive.screen.commonComponents.IWarningParent
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.utils.Vector2
 import com.microwavestudios.fortyfive.utils.epsilonEquals
@@ -24,7 +25,7 @@ import java.util.Stack
  *
  * To participate in the Input system actors must implement [InputActor]
  */
-class InputManager(val screen: CustomScreen) : InputProcessor {
+class InputManager(val screen: RenderableScreen) : InputProcessor {
 
     private val actorBuffer: MutableList<Pair<Boolean, InputActor>> = mutableListOf()
     private val actors: MutableSet<InputActor> = mutableSetOf()
@@ -112,7 +113,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     }
 
     fun controllerConnected(controller: Controller) {
-        val event = WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "New Controller connected!")
+        val event = IWarningParent.ShowWarningEvent(IWarningParent.Level.INFO, "New Controller connected!")
         screen.events.fire(event)
         screen.events.fire(ControllersChangedEvent)
         if (FortyFive.globalSave.currentControllerUid != null) return
@@ -122,9 +123,9 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     fun controllerDisconnected(controller: Controller) {
         val isActiveController = controller == activeController
         val event = if (isActiveController) {
-            WarningParent.ShowWarningEvent(WarningParent.Level.HIGH, "Active controller disconnected!")
+            IWarningParent.ShowWarningEvent(IWarningParent.Level.HIGH, "Active controller disconnected!")
         } else {
-            WarningParent.ShowWarningEvent(WarningParent.Level.INFO, "Controller disconnected!")
+            IWarningParent.ShowWarningEvent(IWarningParent.Level.INFO, "Controller disconnected!")
         }
         screen.events.fire(event)
         screen.events.fire(ControllersChangedEvent)
@@ -869,7 +870,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
      *
      * Note: Unlike [Modal], FocusFilters stack
      */
-    class FocusFilter(val groups: List<String>, private val screen: CustomScreen) {
+    class FocusFilter(val groups: List<String>, private val screen: RenderableScreen) {
 
         fun start() {
             screen.inputManager.addFilter(this)
@@ -888,7 +889,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
      *
      * Note: Unlike [FocusFilter], only the most recent modal is active and can block events
      */
-    class Modal(val allowGroups: List<String>, private val screen: CustomScreen) {
+    class Modal(val allowGroups: List<String>, private val screen: RenderableScreen) {
 
         var finished: Boolean = false
             private set
@@ -907,7 +908,7 @@ class InputManager(val screen: CustomScreen) : InputProcessor {
     /**
      * allows enabling and disabling drag and drops
      */
-    data class DragAndDrop(val source: String, val target: String, val screen: CustomScreen) {
+    data class DragAndDrop(val source: String, val target: String, val screen: RenderableScreen) {
 
         fun enable() {
             screen.inputManager.enableDragAndDrop(this)

@@ -532,7 +532,7 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
         require(target is StatusEffectTarget.EnemyTarget) { "Bounty can only be used on enemy" }
         action {
             enemyDied = true
-            controller.gainReserves(reserves, target.enemy.actor)
+            controller.gainReserves(reserves, target.enemy.actor?.let { { it } })
         }
     }
 

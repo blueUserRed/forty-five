@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.animation.yPositionAbstractProperty
+import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.widgets.TextEffectEmitter
@@ -107,7 +108,7 @@ class WinRunScreen : ScreenCreator() {
         val cards = cardsToExtract.map { type ->
             val proto = allCardProtos.find { it.name == type.name }
             requireNotNull(proto) { "no card with name $type" }
-            proto.create(screen, type)
+            proto.create(screen, type, CardPresentation.defaultProvider)
         }
         cards.forEach { screen.lifetime.tieDisposable(it) }
 
@@ -167,7 +168,7 @@ class WinRunScreen : ScreenCreator() {
                         height = widthPerCard
                         verticalAlign = CustomAlign.CENTER
                         horizontalAlign = CustomAlign.CENTER
-                        actor(card.actor) {
+                        actor(card.presentation.forceGetActor()) {
                             width = widthPerCard * 0.9f
                             height = widthPerCard * 0.9f
                         }

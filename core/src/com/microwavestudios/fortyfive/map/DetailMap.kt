@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
@@ -221,11 +221,11 @@ data class DetailMap(
 
         private var drawableCache: Promise<Drawable>? = null
 
-        fun requestDrawable(screen: CustomScreen, borrower: ResourceBorrower) {
+        fun requestDrawable(screen: RenderableScreen, borrower: ResourceBorrower) {
             drawableCache = FortyFive.resourceManager.request<Drawable>(borrower, screen.lifetime, drawableHandle)
         }
 
-        fun getDrawable(screen: CustomScreen, borrower: ResourceBorrower): Promise<Drawable> {
+        fun getDrawable(screen: RenderableScreen, borrower: ResourceBorrower): Promise<Drawable> {
             drawableCache?.let { return it }
             requestDrawable(screen, borrower)
             return drawableCache!!

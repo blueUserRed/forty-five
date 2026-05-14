@@ -8,14 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.InputActor
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 
 interface DebugActor {
 
     var debugColor: Color
 
-    fun initDebugBounds(actor: Actor, screen: CustomScreen)
+    fun initDebugBounds(actor: Actor, screen: RenderableScreen)
 
     fun badTexture(
         name: String,
@@ -41,7 +41,7 @@ class DebugActorImpl : DebugActor {
     override var debugColor: Color = Color(0f, 1f, 0f, 0.85f)
 
     private lateinit var actor: Actor
-    private lateinit var screen: CustomScreen
+    private lateinit var screen: RenderableScreen
 
     private var badTexture: Boolean = false
 
@@ -50,7 +50,7 @@ class DebugActorImpl : DebugActor {
     private var invalidateCalls: Int = 0
     private var lastInvalidateCheckTime: Long = TimeUtils.millis()
 
-    override fun initDebugBounds(actor: Actor, screen: CustomScreen) {
+    override fun initDebugBounds(actor: Actor, screen: RenderableScreen) {
         this.actor = actor
         this.screen = screen
     }

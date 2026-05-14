@@ -1,8 +1,6 @@
 package com.microwavestudios.fortyfive.game.controller
 
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
@@ -12,20 +10,20 @@ import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
-import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.game.widgets.Afterlife
-import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.game.widgets.CardHand
-import com.microwavestudios.fortyfive.game.widgets.Revolver
-import com.microwavestudios.fortyfive.profile.Profile
+import com.microwavestudios.fortyfive.game.widgets.IAfterlife
+import com.microwavestudios.fortyfive.game.widgets.ICardHand
+import com.microwavestudios.fortyfive.game.widgets.IRevolver
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.screen.Inject
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
+import com.microwavestudios.fortyfive.screen.commonComponents.IWarningParent
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
 import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
@@ -35,13 +33,18 @@ import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjObject
 import kotlin.collections.map
 import kotlin.math.floor
+import kotlin.random.Random
 
 class GameControllerImpl(
-    override val screen: CustomScreen,
+    override val screen: IScreen,
     override val gameEvents: EventPipeline,
-    private val warningParent: WarningParent,
-    override val afterlife: Afterlife,
+    seed: Long,
+    private val warningParent: IWarningParent,
+    override val afterlife: IAfterlife,
+    private val cardPresentationProvider: PresentationProvider
 ) : ScreenController(), GameController, ResourceBorrower {
+
+    override val random: Random = Random(seed)
 
     override val playerLost: Boolean = false
 
@@ -89,16 +92,12 @@ class GameControllerImpl(
 
     private lateinit var targetedEnemy: Enemy
 
-    @Inject(name = "shoot_button")
-    override lateinit var shootButton: Actor
+    @Inject
+    override lateinit var revolver: IRevolver
         private set
 
     @Inject
-    override lateinit var revolver: Revolver
-        private set
-
-    @Inject
-    override lateinit var cardHand: CardHand
+    override lateinit var cardHand: ICardHand
         private set
 
     override lateinit var encounterContext: EncounterContext
@@ -126,20 +125,14 @@ class GameControllerImpl(
     override val hasWon: Boolean
         get() = allEnemies.all { it.isDefeated }
 
-    private val enemyBannerPromise: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, this.screen.lifetime, "enemy_turn_banner")
-
-    private val playerBannerPromise: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, this.screen.lifetime, "player_turn_banner")
-
-    private val softMaxCardsWarning = warningParent.Warning(
+    private val softMaxCardsWarning = warningParent.warning(
         "Maximum Card Number Reached\nAfter this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
-        WarningParent.Level.MID
+        IWarningParent.Level.MID
     )
 
-    private val hardMaxCardsWarning = warningParent.Warning(
+    private val hardMaxCardsWarning = warningParent.warning(
         "Hard Maximum Card Number Reached\nYou cant draw any more cards this turn. After this turn, put all but ${Config.softMaxCards} cards at the bottom of your deck.",
-        WarningParent.Level.HIGH
+        IWarningParent.Level.HIGH
     )
 
     private val enemyDifficulty
@@ -147,7 +140,7 @@ class GameControllerImpl(
 
     private var inEnemyPhase: Boolean = false
 
-    private lateinit var profile: Profile
+    private lateinit var profile: IProfile
 
     private val controller: GameController = this
     
@@ -401,7 +394,7 @@ class GameControllerImpl(
         .map { it.checkEffects(situation, triggerInformation, this) }
         .collectTimeline()
 
-    private fun updateReserves(newReserves: Int, sourceActor: Actor? = null) {
+    private fun updateReserves(newReserves: Int, sourceActor: (() -> Actor)? = null) {
         if (curReserves == newReserves) return
         val prevReserves = curReserves
         curReserves = newReserves
@@ -471,12 +464,12 @@ class GameControllerImpl(
             gameEvents.fire(beforeEvent)
             beforeEvent.createTimeline()
         })
-        include(card.actor.destroyAnimation())
-        action { card.actor.alpha = 0f }
+        include(card.presentation.destroyAnimation())
+        action { card.presentation.setAlphaZero() }
         action {
             revolver.removeCard(card)
             tryPutCardInHand(card)
-            card.actor.alpha = 1f
+            card.presentation.setAlphaOne()
         }
         later {
             val afterEvent = beforeEvent.copy(before = false)
@@ -497,13 +490,13 @@ class GameControllerImpl(
             gameEvents.fire(beforeEvent)
             beforeEvent.createTimeline()
         })
-        include(card.actor.destroyAnimation())
-        action { card.actor.alpha = 0f }
+        include(card.presentation.destroyAnimation())
+        action { card.presentation.setAlphaZero() }
         if (afterlife.isClosed) include(afterlife.openTimeline())
         action {
             revolver.removeCard(card)
             afterlife.pushCard(card)
-            card.actor.alpha = 1f
+            card.presentation.setAlphaOne()
         }
         later {
             val afterEvent = beforeEvent.copy(before = false)
@@ -535,7 +528,7 @@ class GameControllerImpl(
                 if (onTop){
                     cardStack.addCardAtTop(card)
                 } else {
-                    cardStack.shuffleCardIntoStack(card)
+                    cardStack.shuffleCardIntoStack(card, random)
                 }
             }
             later {
@@ -558,13 +551,13 @@ class GameControllerImpl(
         val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.STACK, true, info)
         gameEvents.fire(event)
         include(event.createTimeline())
-        include(card.actor.spawnAnimation(true))
+        include(card.presentation.spawnAnimation(true))
         action {
             cardHand.removeCard(card)
-            cardStack.shuffleCardIntoStack(card)
+            cardStack.shuffleCardIntoStack(card, random)
         }
         later {
-            val animEvent = Events.PlayCardOrbAnimation(card.actor, true)
+            val animEvent = Events.PlayCardOrbAnimation(card.presentation.animTarget(), true)
             gameEvents.fire(animEvent)
             include(animEvent.orbAnimationTimeline!!)
             val afterEvent = event.copy(before = false)
@@ -594,7 +587,7 @@ class GameControllerImpl(
                 beforeEvent.createTimeline()
             })
             action { cardHand.addCard(card) }
-            include(card.actor.spawnAnimation())
+            include(card.presentation.spawnAnimation())
             action { checkCardMaximums() }
             later {
                 val afterEvent = beforeEvent.copy(before = false)
@@ -622,8 +615,8 @@ class GameControllerImpl(
                 include(beforeEvent.createTimeline())
             }
             if (!leaveInRevolver) later {
-                include(card.actor.spawnAnimation(reverse = true))
-                action { card.actor.alpha = 0f }
+                include(card.presentation.spawnAnimation(reverse = true))
+                action { card.presentation.setAlphaZero() }
             }
             if (!leaveInRevolver) later {
                 val success = maxSpaceInHand() > 0
@@ -632,11 +625,11 @@ class GameControllerImpl(
                 if (!success) leaveInRevolver = true
                 if (success) {
                     delay(200)
-                    include(card.actor.spawnAnimation())
-                    action { card.actor.alpha = 1f }
+                    include(card.presentation.spawnAnimation())
+                    action { card.presentation.setAlphaOne() }
                     delay(100)
                 } else {
-                    action { card.actor.alpha = 1f }
+                    action { card.presentation.setAlphaOne() }
                 }
             }
             later {
@@ -789,7 +782,7 @@ class GameControllerImpl(
         include(event.createTimeline())
         include(afterlife.scrollToBeginTimeline())
         delay(200)
-        include(card.actor.descendAnimation())
+        include(card.presentation.descendAnimation())
         delay(50)
         later {
             val damage = card.curOnShotDamage(controller)
@@ -801,7 +794,7 @@ class GameControllerImpl(
         }
         delay(400)
         include(afterlife.popCardTimeline())
-        action { card.actor.resetDescendAnimation() }
+        action { card.presentation.resetDescendAnimation() }
         delay(400)
         later {
             val afterEvent = event.copy(before = false)
@@ -824,18 +817,18 @@ class GameControllerImpl(
             include(event.createTimeline())
             include(afterlife.scrollToBeginTimeline())
             delay(200)
-            include(card.actor.spawnAnimation(reverse = true))
-            action { card.actor.alpha = 0f }
+            include(card.presentation.spawnAnimation(reverse = true))
+            action { card.presentation.setAlphaZero() }
             delay(200)
             later {
                 if (slot.card != null) { // may have changed due to bullet effects
-                    card.actor.alpha = 1f
+                    card.presentation.setAlphaOne()
                     return@later
                 }
                 include(afterlife.popCardTimeline())
                 action { revolver.setCard(slot.num, card) }
-                include(card.actor.spawnAnimation())
-                action { card.actor.alpha = 1f }
+                include(card.presentation.spawnAnimation())
+                action { card.presentation.setAlphaOne() }
             }
             later {
                 val afterEvent = event.copy(before = false)
@@ -878,16 +871,16 @@ class GameControllerImpl(
             if (canAdd) cardStack.remove(card)
             if (!canAdd) return@action
             require(tryPutCardInHand(card))
-            card.actor.alpha = 0f
-            val event = Events.PlayCardOrbAnimation(card.actor)
+            card.presentation.setAlphaZero()
+            val event = Events.PlayCardOrbAnimation(card.presentation.animTarget())
             gameEvents.fire(event)
             orbAnimationTimeline = event.orbAnimationTimeline
         }
         later {
             if (orbAnimationTimeline != null && canAdd) {
                 include(orbAnimationTimeline!!)
-                action { card.actor.alpha = 1f }
-                include(card.actor.spawnAnimation())
+                action { card.presentation.setAlphaOne() }
+                include(card.presentation.spawnAnimation())
             }
         }
         includeLater({
@@ -932,13 +925,18 @@ class GameControllerImpl(
         } else {
             _playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
         }
-        if (newDamage != damage) include(shieldAnimationTimeline())
+        if (newDamage != damage) {
+            val event = Events.PlayShieldAnimation(controller)
+            gameEvents.fire(event)
+            include(event.shieldTimeline!!)
+        }
         if (newDamage == 0) return@later
         include(updatePlayerLivesTimeline(curPlayerLives - newDamage))
         action {
             FortyFive.soundPlayer.situation("enemy_attack", controller.screen)
-            dispatchAnimTimeline(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
-            dispatchAnimTimeline(GraphicsConfig.damageOverlay(screen, controller).wrap())
+            val event = Events.PlayPlayerDamagedEffects(controller)
+            gameEvents.fire(event)
+            dispatchAnimTimeline(event.animationTimeline!!)
             FortyFive.logger.debug(
                 logTag,
                 "player got damaged; damage = $newDamage; curPlayerLives = $curPlayerLives"
@@ -968,36 +966,6 @@ class GameControllerImpl(
             event.createTimeline()
         })
     } }
-
-    private val shieldIconPromise: Promise<Drawable> =
-        FortyFive.resourceManager.request(this, this.screen.lifetime, "shield_icon_large")
-
-    private val shieldShaderPromise: Promise<BetterShader> =
-        FortyFive.resourceManager.request(this, this.screen.lifetime, "glow_shader_shield")
-
-    private fun shieldAnimationTimeline(): Timeline {
-        val shieldIcon = shieldIconPromise.getOrNull() ?: return Timeline()
-        val shieldShader = shieldShaderPromise.getOrNull() ?: return Timeline()
-        return Timeline.timeline {
-            val bannerAnim = BannerAnimation(
-                shieldIcon,
-                screen,
-                1_000,
-                150,
-                0.3f,
-                0.5f,
-                interpolation = Interpolation.pow2In,
-                customShader = shieldShader
-            ).asTimeline(controller).asAction()
-            val postProcessorAction = Timeline.timeline {
-                delay(100)
-                include(FortyFive.currentRenderPipeline!!.getScreenShakePopoutTimeline())
-                delay(50)
-                action { FortyFive.soundPlayer.situation("shield_anim", screen) }
-            }.asAction()
-            parallelActions(bannerAnim, postProcessorAction)
-        }
-    }
 
     override fun playerDeathTimeline(): Timeline = Timeline.timeline {
         action {
@@ -1056,13 +1024,13 @@ class GameControllerImpl(
         val event = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.AFTERLIFE, true, info)
         gameEvents.fire(event)
         include(event.createTimeline())
-        include(card.actor.destroyAnimation())
-        action { card.actor.alpha = 0f }
+        include(card.presentation.destroyAnimation())
+        action { card.presentation.setAlphaZero() }
         includeLater({ afterlife.openTimeline() }, { afterlife.isClosed })
         later {
             cardHand.removeCard(card)
             afterlife.pushCard(card)
-            card.actor.alpha = 1f
+            card.presentation.setAlphaOne()
             checkCardMaximums()
             val afterEvent = event.copy(before = false)
             gameEvents.fire(afterEvent)
@@ -1145,8 +1113,8 @@ class GameControllerImpl(
             gameEvents.fire(beforeEvent)
             include(beforeEvent.createTimeline())
             if (!putInStackInstead) later {
-                include(card.actor.spawnAnimation(reverse = true))
-                action { card.actor.alpha = 0f }
+                include(card.presentation.spawnAnimation(reverse = true))
+                action { card.presentation.setAlphaZero() }
             }
             action { revolver.removeCard(card) }
             if (!putInStackInstead) later {
@@ -1154,11 +1122,11 @@ class GameControllerImpl(
                 if (!success) putInStackInstead = true
                 if (success) {
                     delay(200)
-                    include(card.actor.spawnAnimation())
-                    action { card.actor.alpha = 1f }
+                    include(card.presentation.spawnAnimation())
+                    action { card.presentation.setAlphaOne() }
                     delay(100)
                 } else {
-                    action { card.actor.alpha = 1f }
+                    action { card.presentation.setAlphaOne() }
                 }
             }
             later {
@@ -1236,8 +1204,7 @@ class GameControllerImpl(
 
         action {
             FortyFive.soundPlayer.situation("revolver_shot", screen)
-            val postProcessor = FortyFive.currentRenderPipeline!!.getOnShotPostProcessingTimeline()
-            dispatchAnimTimeline(postProcessor)
+            FortyFive.currentRenderPipeline?.let { dispatchAnimTimeline(it.getOnShotPostProcessingTimeline()) }
         }
         cardToShoot?.let { card ->
             targetedEnemies
@@ -1285,11 +1252,11 @@ class GameControllerImpl(
         appendMainTimeline(shootTimeline())
     }
 
-    override fun gainReserves(amount: Int, source: Actor?) {
+    override fun gainReserves(amount: Int, source: (() -> Actor)?) {
         updateReserves(curReserves + amount, source)
     }
 
-    override fun tryPay(cost: Int, animTarget: Actor?): Boolean {
+    override fun tryPay(cost: Int, animTarget: (() -> Actor)?): Boolean {
         if (cost > curReserves) return false
         updateReserves(curReserves - cost, sourceActor = animTarget)
         return true
@@ -1373,7 +1340,7 @@ class GameControllerImpl(
                 val blockedByCard = cardInSlot != null && !cardInSlot!!.canBeReplaced(controller, card)
                 val shouldSkip = !card.allowsEnteringGame(controller, slot)
                         || blockedByCard
-                        || !tryPay(card.baseCost, card.actor)
+                        || !tryPay(card.baseCost, card.presentation.animTarget())
                 if (!shouldSkip) return@action
                 FortyFive.soundPlayer.situation("not_allowed", screen)
                 skip = true
@@ -1418,7 +1385,7 @@ class GameControllerImpl(
             val beforeEvent = Events.CardChangeZoneEvent(card, Zone.HAND, Zone.REVOLVER, before = true, info)
             action {
                 FortyFive.logger.debug(logTag, "loading punk bullet $card in revolver slot $slot")
-                tryPay(card.baseCost, card.actor) // ignore return value
+                tryPay(card.baseCost, card.presentation.animTarget()) // ignore return value
                 cardInSlot = revolver.getCardInSlot(slot)
             }
             includeLater({
@@ -1445,17 +1412,11 @@ class GameControllerImpl(
         }
     }
 
-    private fun bannerAnimationTimeline(isPlayer: Boolean): Timeline =
-        (if (isPlayer) playerBannerPromise else enemyBannerPromise).getOrNull()?.let { banner ->
-            BannerAnimation(
-                banner,
-                this.screen,
-                1_500,
-                500,
-                1.4f,
-                1.1f
-            ).asTimeline(this)
-        } ?: Timeline()
+    private fun bannerAnimationTimeline(isPlayer: Boolean): Timeline {
+        val event = Events.PlayBannerAnimation(controller, isPlayer)
+        gameEvents.fire(event)
+        return event.timeline!!
+    }
 
     private fun enemyActionTimeline(): Timeline = Timeline.timeline {
         activeEnemies.forEach { enemy -> later {
@@ -1490,7 +1451,7 @@ class GameControllerImpl(
         val money = -allEnemies.sumOf { it.currentHealth }
         val playerGetsCard = !encounter.special &&
                 !encounterContext.isExtraction &&
-                Utils.coinFlip(Config.playerGetsRewardCardChance)
+                Utils.coinFlip(Config.playerGetsRewardCardChance, random)
         val event = Events.ShowPlayerWonPopup(
             gotCard = playerGetsCard,
             cashAmount = money
@@ -1608,7 +1569,7 @@ class GameControllerImpl(
         action {
             chooseEnemyActions()
             FortyFive.soundPlayer.situation("turn_begin", screen)
-            updateReserves(currentTurnStartReserves(), revolver)
+            updateReserves(currentTurnStartReserves(), { revolver.forceGetActor() })
         }
 
         includeLater({ drawCardsTimeline(Config.cardsToDraw) })
@@ -1664,7 +1625,7 @@ class GameControllerImpl(
 
     override fun createCardFromType(cardType: CardType): Card = cardPrototypes
         .find { it.name == cardType.name }
-        ?.create(screen, cardType)
+        ?.create(screen, cardType, cardPresentationProvider)
         ?: throw RuntimeException("no card '$cardType'")
 
     private fun createTriggerInfo(
@@ -1710,11 +1671,11 @@ class GameControllerImpl(
             val old: Int,
             val new: Int,
             val base: Int,
-            val sourceActor: Actor? = null,
+            val sourceActor: (() -> Actor)? = null,
             val controller: GameController
         )
         data class PlayCardOrbAnimation(
-            val targetActor: Actor,
+            val targetActor: () -> Actor,
             val reverse: Boolean = false,
             var orbAnimationTimeline: Timeline? = null
         )
@@ -1745,6 +1706,13 @@ class GameControllerImpl(
         data object AfterlifeOpenToggle
         data class CardRightClickEvent(val card: Card)
 
+        data class PlayPlayerDamagedEffects(val controller: GameController, var animationTimeline: Timeline? = null)
+        data class PlayShieldAnimation(val controller: GameController, var shieldTimeline: Timeline? = null)
+        data class PlayBannerAnimation(
+            val controller: GameController,
+            val isPlayer: Boolean,
+            var timeline: Timeline? = null
+        )
         data class SteelNervesCountdown(val newNumber: Int)
 
         abstract class TimelineBuildingEvent {

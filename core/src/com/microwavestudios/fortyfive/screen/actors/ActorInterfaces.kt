@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.sin
 
@@ -95,7 +95,7 @@ interface BoundedActor {
     /**
      * returns the area of the actor on the screen in screenSpace coordinates
      */
-    fun getScreenSpaceBounds(screen: CustomScreen): Rectangle {
+    fun getScreenSpaceBounds(screen: RenderableScreen): Rectangle {
         val worldSpaceBounds = getBounds()
         val worldSpaceCoords = Vector2(worldSpaceBounds.x, worldSpaceBounds.y)
         val screenSpaceCoords = screen.viewport.project(worldSpaceCoords)
@@ -107,7 +107,7 @@ interface BoundedActor {
 
 interface AnimatedActor {
 
-    val screen: CustomScreen
+    val screen: RenderableScreen
 
     val animationsNeedingUpdate: MutableList<NeedsUpdate>
 

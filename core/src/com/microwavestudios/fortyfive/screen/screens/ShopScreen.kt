@@ -14,6 +14,7 @@ import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -216,7 +217,7 @@ class ShopScreen : ScreenCreator() {
         val guardedLifetime = newLifetime.shorter(screen.lifetime)
         val createdCards = cards.map { type ->
             val proto = protos.find { it.name == type.name } ?: throw RuntimeException("unknown card: $type")
-            val card = proto.create(screen, type)
+            val card = proto.create(screen, type, CardPresentation.defaultProvider)
             guardedLifetime.tieDisposable(card)
             card
         }
@@ -283,7 +284,7 @@ class ShopScreen : ScreenCreator() {
         width = 130f
         height = 190f
         flexDirection = FlexDirection.COLUMN
-        val actor = actor(card.actor) {
+        val actor = actor(card.presentation.forceGetActor()) {
             width = 130f
             height = 130f
             touchable = Touchable.enabled

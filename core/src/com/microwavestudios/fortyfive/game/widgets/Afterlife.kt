@@ -9,11 +9,12 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
+import com.microwavestudios.fortyfive.game.widgets.Afterlife.Events
 import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
@@ -27,23 +28,38 @@ import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 
-class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
+interface IAfterlife {
+
+    val cards: List<Card>
+    val isOpen: Boolean
+    val isClosed: Boolean
+    val afterlifeIsVisible: Boolean
+
+    fun pushCard(card: Card)
+    fun scrollToBeginTimeline(): Timeline
+    fun popCardTimeline(): Timeline
+    fun toggleTimeline(): Timeline
+    fun openTimeline(): Timeline
+    fun closeTimeline(): Timeline
+}
+
+class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) : IAfterlife {
 
     private var actor: CustomBox? = null
 
     private var _cards: MutableList<Card> = mutableListOf()
-    val cards: List<Card>
+    override val cards: List<Card>
         get() = _cards
 
     private val afterlifeEvents: EventPipeline = EventPipeline()
 
-    var isOpen: Boolean = false
+    override var isOpen: Boolean = false
         private set
 
-    val isClosed: Boolean
+    override val isClosed: Boolean
         get() = !isOpen
 
-    var afterlifeIsVisible: Boolean = false
+    override var afterlifeIsVisible: Boolean = false
         private set
 
     private val openFilter = InputManager.FocusFilter(listOf(afterlifeSlotGroup), screen)
@@ -63,54 +79,57 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
         }
     }
 
-    fun pushCard(card: Card) {
+    override fun pushCard(card: Card) {
         _cards.add(card)
         afterlifeEvents.fire(Events.CardsChanged)
     }
 
-    fun scrollToBeginTimeline(): Timeline = slotParent.scrollToBeginTimeline()
+    override fun scrollToBeginTimeline(): Timeline = slotParent.scrollToBeginTimeline()
 
-    fun popCardTimeline(): Timeline = Timeline.timeline {
+    override fun popCardTimeline(): Timeline = Timeline.timeline {
         later {
             val duration = 0.3f
             val toRemove = _cards.firstOrNull()
             requireNotNull(toRemove) { "can't pop card, afterlife is empty" }
 
-            _cards.getOrNull(1)?.let { slotParent.liftChild = it.actor.parent }
+            _cards.getOrNull(1)?.let { slotParent.liftChild = it.presentation.forceGetActor().parent }
             _cards.forEachIndexed { index, card ->
                 if (index == 0) return@forEachIndexed
+                val actor = card.presentation.forceGetActor()
                 val cardBefore = _cards[index - 1]
-                val xBefore = cardBefore.actor.localToStageCoordinates(Vector2(cardBefore.actor.x, cardBefore.actor.y)).x
-                val thisX = card.actor.localToStageCoordinates(Vector2(card.actor.x, card.actor.y)).x
+                val actorBefore = cardBefore.presentation.forceGetActor()
+                val xBefore = actorBefore.localToStageCoordinates(Vector2(actorBefore.x, actorBefore.y)).x
+                val thisX = actor.localToStageCoordinates(Vector2(actor.x, actor.y)).x
                 var diff = xBefore - thisX
                 if (index == 1) diff -= 15f
                 val action = PropertyAction(
-                    card.actor,
-                    card.actor::drawOffsetX,
+                    actor,
+                    actor::drawOffsetX,
                     diff,
                 )
                 action.duration = duration
                 action.interpolation = Interpolation.pow4
-                card.actor.addAction(action)
+                actor.addAction(action)
             }
             delay((duration * 1000).toInt())
         }
         action {
             slotParent.liftChild = null
             _cards.forEach { card ->
-                card.actor.drawOffsetX = 0f
-                card.actor.clearActions()
+                val actor = card.presentation.forceGetActor()
+                actor.drawOffsetX = 0f
+                actor.clearActions()
             }
             _cards.removeFirst()
             afterlifeEvents.fire(Events.CardsChanged)
         }
     }
 
-    fun toggleTimeline(): Timeline = Timeline.timeline { later {
+    override fun toggleTimeline(): Timeline = Timeline.timeline { later {
         include(if (isOpen) closeTimeline() else openTimeline())
     } }
 
-    fun openTimeline(): Timeline = Timeline.timeline {
+    override fun openTimeline(): Timeline = Timeline.timeline {
         val actor = actor ?: return@timeline
         val action = MoveToAction()
         action.x = -500f
@@ -132,7 +151,7 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
         }
     }
 
-    fun closeTimeline(): Timeline = Timeline.timeline {
+    override fun closeTimeline(): Timeline = Timeline.timeline {
         val actor = actor ?: return@timeline
         val action = MoveToAction()
         action.x = -1150f
@@ -183,7 +202,7 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
                     afterlifeEvents.watchFor<Events.CardsChanged> {
                         clearChildren()
                         val card = _cards.getOrNull(0) ?: return@watchFor
-                        actor(card.actor) {
+                        actor(card.presentation.forceGetActor()) {
                             width = 120f
                             height = 120f
                         }
@@ -235,13 +254,13 @@ class Afterlife(val screen: CustomScreen, val gameEvents: EventPipeline) {
                 clearChildren()
                 card = _cards.getOrNull(index + 1)
                 if (card == null) return@watchFor
-                actor(card!!.actor) {
+                actor(card!!.presentation.forceGetActor()) {
                     width = 120f
                     height = 120f
                 }
             }
             card = _cards.getOrNull(index + 1)
-            if (card != null) actor(card!!.actor) {
+            if (card != null) actor(card!!.presentation.forceGetActor()) {
                 width = 120f
                 height = 120f
             }

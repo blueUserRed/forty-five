@@ -9,7 +9,7 @@ import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
@@ -26,7 +26,7 @@ object GraphicsConfig {
         readConstants(config)
     }
 
-    fun damageOverlay(screen: CustomScreen, controller: GameController): Timeline.TimelineAction {
+    fun damageOverlay(screen: RenderableScreen, controller: GameController): Timeline.TimelineAction {
         val overlayActor = CustomImageActor(damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
@@ -91,7 +91,7 @@ object GraphicsConfig {
         return config.get<String>("description")
     }
 
-    fun cardFont(borrower: ResourceBorrower, screen: CustomScreen): Promise<PixmapFont> =
+    fun cardFont(borrower: ResourceBorrower, screen: RenderableScreen): Promise<PixmapFont> =
         FortyFive.resourceManager.request(borrower, screen.lifetime, cardFont)
 
     fun cardFontScale(): Float = cardFontScale

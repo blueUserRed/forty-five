@@ -10,10 +10,14 @@ import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.IAfterlife
+import com.microwavestudios.fortyfive.game.widgets.ICardHand
+import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
+import kotlin.random.Random
 
 /**
  * keeps track of the encounter state and contains functions to construct timelines for e.g. effects
@@ -27,7 +31,8 @@ import com.microwavestudios.fortyfive.utils.Timeline
  */
 interface GameController {
 
-    val screen: CustomScreen
+    val screen: IScreen
+    val random: Random
     val encounterContext: EncounterContext
 
     val playerLost: Boolean
@@ -76,11 +81,10 @@ interface GameController {
     val activeEnemies: List<Enemy>
     val allEnemies: List<Enemy>
 
-    val shootButton: Actor
-    val revolver: Revolver
+    val revolver: IRevolver
     val cardStack: CardStack
-    val afterlife: Afterlife
-    val cardHand: CardHand
+    val afterlife: IAfterlife
+    val cardHand: ICardHand
 
     val gameEvents: EventPipeline
 
@@ -189,13 +193,13 @@ interface GameController {
     /**
      * gives the player more reserves. [source] is used for animations
      */
-    fun gainReserves(amount: Int, source: Actor? = null)
+    fun gainReserves(amount: Int, source: (() -> Actor)? = null)
 
     /**
      * removes [cost] reserves, or returns false if the player didn't have enough reserves.
      * [animTarget] is used for animations
      */
-    fun tryPay(cost: Int, animTarget: Actor? = null): Boolean
+    fun tryPay(cost: Int, animTarget: (() -> Actor)? = null): Boolean
 
     /**
      * adds an encounter behaviour and removes it again one [validityChecker] is not true anymore

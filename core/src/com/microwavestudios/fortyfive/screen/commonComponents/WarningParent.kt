@@ -3,10 +3,11 @@ package com.microwavestudios.fortyfive.screen.commonComponents
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
+import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent.Warning
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
@@ -14,18 +15,49 @@ import com.microwavestudios.fortyfive.utils.epsilonEquals
 import com.microwavestudios.fortyfive.utils.minMagnitude
 import kotlin.math.abs
 
+interface IWarningParent {
+
+    fun showTemporaryWarning(text: String, level: Level, time: Int = defaultDisplayTime): IWarning
+    fun showTemporaryWarning(warning: IWarning, time: Int = defaultDisplayTime)
+    fun show(warning: IWarning)
+    fun hide(warning: IWarning)
+
+    fun warning(text: String, level: Level): IWarning
+
+    enum class Level(val symbol: String, val background: String, val fontColor: com.badlogic.gdx.graphics.Color) {
+        INFO("i", "warning_label_background_grey", Color.Black),
+        MID("!", "warning_label_background_red", Color.FortyWhite),
+        HIGH("!!!", "warning_label_background_red", Color.FortyWhite),
+    }
+
+    interface IWarning {
+
+        val isActive: Boolean
+
+        fun show()
+        fun hide()
+    }
+
+    companion object {
+        const val movementSpeed = 5_000f
+        const val defaultDisplayTime = 8_000
+    }
+
+    class ShowWarningEvent(val level: Level, val text: String, val displayTime: Int = defaultDisplayTime)
+}
+
 class WarningParent(
     val creator: ScreenCreator,
-    val screen: CustomScreen,
+    val screen: RenderableScreen,
     private val events: EventPipeline? = null
-) {
+) : IWarningParent {
 
     private var actor: CustomGroup? = null
 
     private val displayedWarnings: MutableList<Warning> = mutableListOf()
 
     init {
-        events?.watchFor<ShowWarningEvent> { event ->
+        events?.watchFor<IWarningParent.ShowWarningEvent> { event ->
             showTemporaryWarning(Warning(event.text, event.level), event.displayTime)
         }
     }
@@ -61,18 +93,19 @@ class WarningParent(
         width = 100f
     }
 
-    fun showTemporaryWarning(text: String, level: Level, time: Int = defaultDisplayTime): Warning {
+    override fun showTemporaryWarning(text: String, level: IWarningParent.Level, time: Int): IWarningParent.IWarning {
         val warning = Warning(text, level)
         showTemporaryWarning(warning, time)
         return warning
     }
 
-    fun showTemporaryWarning(warning: Warning, time: Int = defaultDisplayTime) {
+    override fun showTemporaryWarning(warning: IWarningParent.IWarning, time: Int) {
         warning.show()
         screen.afterMs(time) { warning.hide() }
     }
 
-    fun show(warning: Warning) {
+    override fun show(warning: IWarningParent.IWarning) {
+        require(warning is Warning) { "Mock Warnings cant be used with real WarningParent" }
         if (warning.isActive) return
         val actor = warning.getActor()
         val parent = this.actor ?: return
@@ -85,7 +118,8 @@ class WarningParent(
         updatePositionsOfWarnings()
     }
 
-    fun hide(warning: Warning) {
+    override fun hide(warning: IWarningParent.IWarning) {
+        require(warning is Warning) { "Mock Warnings cant be used with real WarningParent" }
         if (!warning.isActive) return
         warning.isActive = false
         warning.targetX = -500f
@@ -98,15 +132,17 @@ class WarningParent(
         }
     }
 
+    override fun warning(text: String, level: IWarningParent.Level): IWarningParent.IWarning = Warning(text, level)
+
     inner class Warning(
         val text: String,
-        val level: Level
-    ) {
+        val level: IWarningParent.Level
+    ) : IWarningParent.IWarning {
 
         var targetX = 0f
         var targetY = 0f
 
-        var isActive: Boolean = false
+        override var isActive: Boolean = false
 
         private var actor: CustomBox? = null
 
@@ -114,6 +150,7 @@ class WarningParent(
             this.targetX = targetX
             this.targetY = targetY
         }
+
         fun getActor(): CustomBox {
             actor?.let { return it }
             with(creator) {
@@ -125,6 +162,7 @@ class WarningParent(
 
         fun update() {
             val actor = actor ?: return
+            val movementSpeed = IWarningParent.movementSpeed
             val totalHeight = (this@WarningParent.actor?.height ?: return).coerceAtLeast(1f)
             val x = actor.x
             val y = actor.y
@@ -179,28 +217,13 @@ class WarningParent(
             }
         }
 
-        fun show() {
+        override fun show() {
             this@WarningParent.show(this)
         }
 
-        fun hide() {
+        override fun hide() {
             this@WarningParent.hide(this)
         }
 
     }
-
-    companion object {
-        const val movementSpeed = 5_000f
-        const val defaultDisplayTime = 8_000
-    }
-
-    class ShowWarningEvent(val level: Level, val text: String, val displayTime: Int = defaultDisplayTime)
-
-    enum class Level(val symbol: String, val background: String, val fontColor: com.badlogic.gdx.graphics.Color) {
-
-        INFO("i", "warning_label_background_grey", Color.Black),
-        MID("!", "warning_label_background_red", Color.FortyWhite),
-        HIGH("!!!", "warning_label_background_red", Color.FortyWhite),
-    }
-
 }

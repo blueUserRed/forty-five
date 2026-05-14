@@ -16,7 +16,7 @@ import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.game.widgets.TextEffectEmitter
 import com.microwavestudios.fortyfive.game.widgets.textEffectEmitter
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.Promise
@@ -26,7 +26,7 @@ import com.microwavestudios.fortyfive.utils.component2
 import com.microwavestudios.fortyfive.utils.epsilonEquals
 import kotlin.math.abs
 
-class StatusBar(screen: CustomScreen, private val enemy: Enemy) : CustomGroup(screen), ResourceBorrower, AnimatedActor {
+class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGroup(screen), ResourceBorrower, AnimatedActor {
 
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 

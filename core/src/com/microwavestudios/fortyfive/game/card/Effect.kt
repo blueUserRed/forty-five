@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.onjNamespaces.OnjEffectValue
 import com.microwavestudios.fortyfive.utils.*
@@ -92,7 +93,7 @@ abstract class Effect(val data: EffectData) {
 
             is BulletSelector.RevolverCardByPopup -> later {
 
-                val selector = CardInRevolverSelector(
+                val selector = SelectorFactory.getCardInRevolverSelector(
                     controller,
                     bulletSelector.text,
                     predicate = { card ->
@@ -116,7 +117,7 @@ abstract class Effect(val data: EffectData) {
             }
             is BulletSelector.HandCardByPopup -> later {
 
-                val selector = CardInHandSelector(
+                val selector = SelectorFactory.getCardInHandSelector(
                     controller,
                     bulletSelector.text,
                     predicate = { card ->
@@ -162,7 +163,7 @@ abstract class Effect(val data: EffectData) {
         ): Timeline {
             val amount = amount(controller, card, triggerInformation, card) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
-                action { controller.gainReserves(amount, card.actor) }
+                action { controller.gainReserves(amount, card.presentation.animTarget()) }
             }
         }
 
@@ -408,10 +409,11 @@ abstract class Effect(val data: EffectData) {
             situation: GameSituation
         ): Timeline = Timeline.timeline {
             later {
+                val random = controller.random
                 val enemies = controller.activeEnemies
                 if (enemies.isEmpty()) return@later
                 val statusEffect = statusEffectCreator(controller, card, triggerInformation.isOnShot)
-                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemies.random(), card))
+                include(controller.tryApplyStatusEffectToEnemyTimeline(statusEffect, enemies.random(random), card))
             }
         }
 
@@ -939,7 +941,7 @@ abstract class Effect(val data: EffectData) {
                .revolver
                .slots
                .filter { it.card == null }
-               .randomOrNull()
+               .randomOrNull(controller.random)
             if (slot == null) {
                 include(controller.bounceBulletTimeline(card))
             } else {
@@ -1172,7 +1174,7 @@ typealias RevolverSlotGetter = (
     controller: GameController,
     card: Card,
     triggerInformation: TriggerInformation
-) -> Promise<out RevolverSlot?>
+) -> Promise<out IRevolverSlot?>
 
 fun interface Trigger {
 

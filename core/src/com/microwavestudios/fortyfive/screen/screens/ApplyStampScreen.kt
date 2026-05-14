@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.card.Stamp
@@ -161,7 +162,7 @@ class ApplyStampScreen : ScreenCreator() {
         val cards = collection.map { type ->
             val proto = cardProtos.find { it.name == type.name }
             requireNotNull(proto) { "unknown card $type" }
-            proto.create(screen, type)
+            proto.create(screen, type, CardPresentation.defaultProvider)
         }
         cards.forEach { screen.lifetime.tieDisposable(it) }
 
@@ -197,11 +198,12 @@ class ApplyStampScreen : ScreenCreator() {
         val grid = InputManager.FocusGrid()
         cards.forEach { card ->
             val canBePicked = cardCanBePicked(card)
+            val actor = card.presentation.forceGetActor()
             box {
                 verticalAlign = CustomAlign.CENTER
                 horizontalAlign = CustomAlign.CENTER
                 squareDim(160f)
-                actor(card.actor) {
+                actor(actor) {
                     width = 140f
                     height = 140f
                     touchable = Touchable.enabled
@@ -209,14 +211,14 @@ class ApplyStampScreen : ScreenCreator() {
                     if (!canBePicked) alpha = 0.5f
                 }
             }
-            card.actor.onInput(GameInputs.interact) {
+            actor.onInput(GameInputs.interact) {
                 if (!canBePicked) {
                     FortyFive.soundPlayer.situation("not_allowed", screen)
                     return@onInput
                 }
                 cardSelected(card)
             }
-            grid.set(x, y, card.actor)
+            grid.set(x, y, actor)
             x++
             if (x > 3) {
                 x = 0

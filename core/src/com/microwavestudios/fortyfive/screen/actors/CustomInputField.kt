@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.UIUtils
 import com.badlogic.gdx.utils.Clipboard
 import com.badlogic.gdx.utils.Pools
 import com.badlogic.gdx.utils.Timer
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.substringTillEnd
 import kotlin.math.abs
 import kotlin.math.max
@@ -26,7 +26,7 @@ import kotlin.math.min
  * Represents a ONE LINE input from a user (not the best, but it's okay)
  */
 open class CustomInputField(
-    screen: CustomScreen,
+    screen: RenderableScreen,
     defText: String,
     val labelStyle: LabelStyle,
     val backgroundHints: Array<String> = arrayOf()

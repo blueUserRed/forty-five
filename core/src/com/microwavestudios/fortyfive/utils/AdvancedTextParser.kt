@@ -3,7 +3,7 @@ package com.microwavestudios.fortyfive.utils
 import com.badlogic.gdx.graphics.Color
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.onjNamespaces.OnjColor
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.commonComponents.*
 import onj.builder.buildOnjObject
 import onj.value.OnjNamedObject
@@ -13,7 +13,7 @@ import java.lang.Exception
 
 class AdvancedTextParser(
     val code: String,
-    private val screen: CustomScreen,
+    private val screen: RenderableScreen,
     private val defaultSettings: Triple<String, Color, Int>,
     private val changes: List<AdvancedTextEffect>
 ) {

@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 
 // TODO: come up with better name
@@ -35,16 +35,16 @@ class BetterShader(
         referenceTime = TimeUtils.millis()
     }
 
-    fun prepare(screen: CustomScreen) {
+    fun prepare(screen: RenderableScreen) {
         shader.setUniformMatrix("u_projTrans", screen.viewport.camera.combined)
         bindUniforms(screen)
     }
 
-    private fun bindUniforms(screen: CustomScreen) {
+    private fun bindUniforms(screen: RenderableScreen) {
         uniformsToBind.forEach { bindUniform(it, screen) }
     }
 
-    private fun bindUniform(uniform: String, screen: CustomScreen) = when (uniform) {
+    private fun bindUniform(uniform: String, screen: RenderableScreen) = when (uniform) {
 
         "u_time" -> {
             val uTime = TimeUtils.timeSinceMillis(referenceTime).toFloat() / 1000f

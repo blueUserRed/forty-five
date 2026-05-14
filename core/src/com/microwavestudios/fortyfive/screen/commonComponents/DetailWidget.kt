@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
@@ -14,7 +14,7 @@ import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.utils.*
 
-sealed class DetailWidget(protected val screen: CustomScreen) {
+sealed class DetailWidget(protected val screen: RenderableScreen) {
 
     var detailActor: Actor? = null
 
@@ -65,7 +65,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
     }
 
     class SimpleBigDetailActor(
-        screen: CustomScreen,
+        screen: RenderableScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> String
@@ -88,7 +88,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
     }
 
     class SimpleSmallDetailActor(
-        screen: CustomScreen,
+        screen: RenderableScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> String
@@ -125,7 +125,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
     }
 
     class ComplexBigDetailActor(
-        screen: CustomScreen,
+        screen: RenderableScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true,
         private val text: () -> List<String>,
@@ -325,7 +325,7 @@ sealed class DetailWidget(protected val screen: CustomScreen) {
     }
 
     abstract class AdvancedTextDetailWidget(
-        screen: CustomScreen,
+        screen: RenderableScreen,
         effects: List<AdvancedTextParser.AdvancedTextEffect> = listOf(),
         useDefaultEffects: Boolean = true
     ) : DetailWidget(screen) {

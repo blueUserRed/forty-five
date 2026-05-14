@@ -24,6 +24,39 @@ import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenBuilder
 import com.microwavestudios.fortyfive.utils.*
 
+interface IScreen : ResourceBorrower {
+
+    val screenEvents: EventPipeline
+    var defaultCursor: Either<Cursor, Cursor.SystemCursor>
+    val screenState: Set<String>
+    val screenControllers: List<ScreenController>
+    val lifetime: Lifetime
+    var debugMenu: DebugMenu?
+    val events: EventPipeline
+
+    fun addScreenController(controller: ScreenController)
+
+    /**
+     * runs [callback] after [ms] milliseconds have passed
+     */
+    fun afterMs(ms: Int, callback: () -> Unit)
+
+    @Deprecated("use lifetime.tieDisposable() instead")
+    fun addDisposable(disposable: Disposable)
+
+    @Deprecated("use events instead")
+    fun enterState(state: String)
+
+    @Deprecated("use events instead")
+    fun leaveState(state: String)
+
+    @Deprecated("use events instead")
+    fun addOnScreenStateChangedListener(listener: (entered: Boolean, state: String) -> Unit)
+
+
+    data class ScreenResizedEvent(val width: Int, val height: Int)
+}
+
 // TODO: this is one of the oldest classes in the game an contains a lot of features that have
 // been replaced by better ones. These features have been marked as Deprecated and need to be removed
 // eventually
@@ -39,18 +72,18 @@ import com.microwavestudios.fortyfive.utils.*
  * is used together with [ScreenCreator][com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator].
  * What screen is shown is managed by the [ScreenManager]
  */
-open class CustomScreen(
+open class RenderableScreen(
     val viewport: Viewport,
     batch: Batch,
     private val controllerContext: Any?,
-    private val earlyRenderTasks: List<CustomScreen.() -> Unit>,
-    private val lateRenderTasks: List<CustomScreen.() -> Unit>,
+    private val earlyRenderTasks: List<RenderableScreen.() -> Unit>,
+    private val lateRenderTasks: List<RenderableScreen.() -> Unit>,
     private val namedActors: MutableMap<String, Actor>,
     val transitions: Map<String, ScreenManager.ScreenTransition>,
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
-) : ScreenAdapter(), ResourceBorrower {
+) : ScreenAdapter(), IScreen, ResourceBorrower {
 
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
@@ -59,12 +92,12 @@ open class CustomScreen(
     private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
     private val additionalEarlyRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
 
-    val screenEvents: EventPipeline = EventPipeline()
+    override val screenEvents: EventPipeline = EventPipeline()
 
     var isVisible: Boolean = false
         private set
 
-    var defaultCursor: Either<Cursor, Cursor.SystemCursor> = Cursor.SystemCursor.Arrow.eitherRight()
+    override var defaultCursor: Either<Cursor, Cursor.SystemCursor> = Cursor.SystemCursor.Arrow.eitherRight()
         set(value) {
             field = value
             Utils.setCursor(value)
@@ -76,7 +109,7 @@ open class CustomScreen(
      * using events is typically more convenient
      */
     @Deprecated("Use events instead")
-    val screenState: Set<String>
+    override val screenState: Set<String>
         get() = _screenState
 
     private val screenStateChangeListeners: MutableList<(entered: Boolean, state: String) -> Unit> = mutableListOf()
@@ -85,7 +118,7 @@ open class CustomScreen(
 
     private val _screenControllers: MutableList<ScreenController> = mutableListOf()
 
-    val screenControllers: List<ScreenController>
+    override val screenControllers: List<ScreenController>
         get() = _screenControllers
 
     private val makeLaggy: Boolean
@@ -95,7 +128,7 @@ open class CustomScreen(
     /**
      * lives as long as the screen is shown
      */
-    val lifetime: Lifetime
+    override val lifetime: Lifetime
         get() = _lifetime
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
@@ -105,7 +138,7 @@ open class CustomScreen(
 
     private val actorsWithActiveHoverDetails: MutableList<InputActor> = mutableListOf()
 
-    var debugMenu: DebugMenu? = null
+    override var debugMenu: DebugMenu? = null
 
     var mouseDraggedActor: InputActor? = null
 
@@ -121,7 +154,7 @@ open class CustomScreen(
     /**
      * used to distribute events across the actor hierarchy, controllers, etc.
      */
-    val events: EventPipeline = EventPipeline()
+    override val events: EventPipeline = EventPipeline()
 
     init {
         addEarlyRenderTask {
@@ -136,7 +169,7 @@ open class CustomScreen(
         inputManager.onInput(GameInputs.previousDebugMenuPage) { debugMenu?.previousDebugPage() }
     }
 
-    fun addScreenController(controller: ScreenController) {
+    override fun addScreenController(controller: ScreenController) {
         _screenControllers.add(controller)
         controller.injectActors(this)
         controller.init(controllerContext)
@@ -150,12 +183,12 @@ open class CustomScreen(
     /**
      * runs [callback] after [ms] milliseconds have passed
      */
-    fun afterMs(ms: Int, callback: () -> Unit) {
+    override fun afterMs(ms: Int, callback: () -> Unit) {
         callbackAddBuffer.add((TimeUtils.millis() + ms) to callback)
     }
 
     @Deprecated("use lifetime.tieDisposable() instead")
-    fun addDisposable(disposable: Disposable) {
+    override fun addDisposable(disposable: Disposable) {
         additionalDisposables.add(disposable)
     }
 
@@ -169,21 +202,21 @@ open class CustomScreen(
     }
 
     @Deprecated("use events instead")
-    fun enterState(state: String) {
+    override fun enterState(state: String) {
         if (state in _screenState) return
         _screenState.add(state)
         screenStateChangeListeners.forEach { it(true, state) }
     }
 
     @Deprecated("use events instead")
-    fun leaveState(state: String) {
+    override fun leaveState(state: String) {
         if (state !in _screenState) return
         _screenState.remove(state)
         screenStateChangeListeners.forEach { it(false, state) }
     }
 
     @Deprecated("use events instead")
-    fun addOnScreenStateChangedListener(listener: (entered: Boolean, state: String) -> Unit) {
+    override fun addOnScreenStateChangedListener(listener: (entered: Boolean, state: String) -> Unit) {
         screenStateChangeListeners.add(listener)
     }
 
@@ -335,7 +368,7 @@ open class CustomScreen(
         shapeRenderer.end()
     }
 
-    private fun doRenderTasks(tasks: List<CustomScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
+    private fun doRenderTasks(tasks: List<RenderableScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
         stage.batch.begin()
         tasks.forEach { it(this) }
         additionalTasks.forEach { it(stage.batch) }
@@ -344,7 +377,7 @@ open class CustomScreen(
 
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
-        screenEvents.fire(ScreenResizedEvent(width, height))
+        screenEvents.fire(IScreen.ScreenResizedEvent(width, height))
     }
 
     override fun dispose() {
@@ -363,6 +396,4 @@ open class CustomScreen(
 
         const val transitionAwayScreenState = "transition away"
     }
-
-    data class ScreenResizedEvent(val width: Int, val height: Int)
 }

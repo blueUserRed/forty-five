@@ -10,7 +10,6 @@ import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import kotlin.random.Random
 
 class EnemyAction(
     val indicatorText: String?,
@@ -67,7 +66,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
-            val damage = damage.scale(scale * scaleFactor).random()
+            val damage = damage.scale(scale * scaleFactor).random(controller.random)
             return {
                 val additional = getAdditionalDamage(damage, controller)
                 val newDamage = damage + additional.sumOf { it.second }
@@ -86,14 +85,15 @@ sealed class EnemyActionPrototype(
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
             val cardAmount = controller.cardsInHand.size
-            val amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
+            val random = controller.random
+            val amountToDestroy = (1..maxCards).random(random).coerceAtMost(cardAmount - 1)
             return {
                 EnemyAction(amountToDestroy.toString(), mapOf("amount" to amountToDestroy),this) {
                     repeat(amountToDestroy) {
                         // might cause mismatches when this action is shown instead of hidden
                         later {
                             if (controller.cardsInHand.isEmpty()) return@later
-                            val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random()]
+                            val card = controller.cardsInHand[(0 until controller.cardsInHand.size).random(random)]
                             include(controller.destroyCardInHandTimeline(card))
                         }
                     }
@@ -111,9 +111,10 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
-            val amount = (1..maxTurnAmount).random()
+            val random = controller.random
+            val amount = (1..maxTurnAmount).random(random)
             val rotation = if (forceDirection == null) {
-                if (Random.nextBoolean()) {
+                if (random.nextBoolean()) {
                     RevolverRotation.Right(amount)
                 } else {
                     RevolverRotation.Left(amount)
@@ -147,7 +148,7 @@ sealed class EnemyActionPrototype(
                         .revolver
                         .slots
                         .mapNotNull { it.card }
-                        .randomOrNull()
+                        .randomOrNull(controller.random)
                         ?.let { include(controller.bounceBulletTimeline(it)) }
                 }
             }
@@ -161,7 +162,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
-            val cover = cover.scale(scale * scaleFactor).random()
+            val cover = cover.scale(scale * scaleFactor).random(controller.random)
             return {
                 EnemyAction(cover.toString(), mapOf("cover" to cover),this) {
                     include(enemy.addCoverTimeline(cover))
@@ -237,7 +238,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
-            val amount = amountToMark.random()
+            val amount = amountToMark.random(controller.random)
             return {
                 EnemyAction(null, mapOf("amount" to amount), this) {
                     action {
@@ -282,7 +283,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
-            val damage = damage.scale(scale * scaleFactor).random()
+            val damage = damage.scale(scale * scaleFactor).random(controller.random)
             return {
                 val additional = getAdditionalDamage(damage, controller)
                 val newDamage = damage + additional.sumOf { it.second }
@@ -300,7 +301,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun newCreator(controller: GameController, scale: Double): EnemyActionCreator {
-            val slot = possibleSlots.random()
+            val slot = possibleSlots.random(controller.random)
             return {
                 EnemyAction(
                     null,

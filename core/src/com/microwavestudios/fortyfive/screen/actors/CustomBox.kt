@@ -18,7 +18,7 @@ import com.microwavestudios.fortyfive.keyInput.FocusAlignment
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.CustomScreen
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
 import com.microwavestudios.fortyfive.utils.between
@@ -35,7 +35,7 @@ import kotlin.math.max
  * used in webdev, although CustomBox lacks a lot of its features.
  */
 open class CustomBox(
-    screen: CustomScreen,
+    screen: RenderableScreen,
     backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : CustomGroup(screen, backgroundHints), ResourceBorrower, KotlinStyledActor, DisableActor, HasPaddingActor
 {
@@ -452,7 +452,7 @@ enum class PositionType {
 }
 
 
-class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: CustomScreen) : CustomBox(screen, backgroundHints) {
+class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: RenderableScreen) : CustomBox(screen, backgroundHints) {
     /**
      * scrollDirection: LEFT_TO_RIGHT, RIGHT_TO_LEFT, UP_TO_DOWN, DOWN_TO_UP, this allows reverse directions as well
      */

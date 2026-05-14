@@ -78,7 +78,6 @@ tasks.register<JavaExec>("createDropShadowsIncremental") {
     args = mutableListOf("-bake", "dropShadows", "incremental")
 }
 
-
 tasks.register<JavaExec>("debug") {
     group = "development"
     dependsOn("classes")

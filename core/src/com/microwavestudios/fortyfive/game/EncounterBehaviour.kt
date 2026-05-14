@@ -151,7 +151,7 @@ abstract class EncounterBehaviour {
         }
 
         override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
-            controller.tryPay(cost, controller.shootButton)
+            controller.tryPay(cost)
         }
     }
 
@@ -165,7 +165,7 @@ abstract class EncounterBehaviour {
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             later {
-                val selector = CardInRevolverSelector(controller, "Select bullet to destroy")
+                val selector = SelectorFactory.getCardInRevolverSelector(controller, "Select bullet to destroy")
                 val promise = selector.startSelect()
                 waitForPromise(promise)
                 later {
@@ -180,7 +180,7 @@ abstract class EncounterBehaviour {
 
         override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             later {
-                controller.cardsInRevolver().randomOrNull()?.let {
+                controller.cardsInRevolver().randomOrNull(controller.random)?.let {
                     include(controller.bounceBulletTimeline(it))
                 }
             }
@@ -272,7 +272,7 @@ abstract class EncounterBehaviour {
             controller: GameController,
             event: GameControllerImpl.Events.CardChangeZoneEvent
         ) {
-            val targetSelector = CardInRevolverSelector(
+            val targetSelector = SelectorFactory.getCardInRevolverSelector(
                 controller,
                 "Choose bullet to return to your hand",
                 predicate = { it != event.card }

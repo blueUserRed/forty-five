@@ -115,9 +115,9 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
         } else {
             damageShieldWeight
         }
-        val doNormalAction = Utils.coinFlip(normalSpecialActionWeight)
+        val doNormalAction = Utils.coinFlip(normalSpecialActionWeight, controller.random)
         if (doNormalAction) {
-            val actionProto = if (Utils.coinFlip(damageShieldWeight)) {
+            val actionProto = if (Utils.coinFlip(damageShieldWeight, controller.random)) {
                 val damage = if (aggressive) {
                     baseDamage shift aggressionDamageIncrease
                 } else {
@@ -131,13 +131,13 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
         }
         val actionConfig = actions
             .zipToFirst { it.weight }
-            .weightedRandom()
+            .weightedRandom(controller.random)
         val (_, showProb, actionProto) = actionConfig
         actionConfig.executionCount++
         if (actionConfig.maxExecutions > 0 && actionConfig.executionCount >= actionConfig.maxExecutions) {
             actions.remove(actionConfig)
         }
-        return actionProto to Utils.coinFlip(showProb)
+        return actionProto to Utils.coinFlip(showProb, controller.random)
     }
 
     private data class EnemyActionConfig(
