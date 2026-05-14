@@ -187,33 +187,4 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             )
         }
     }
-
-    data class RadialMapGeneratorEventSpawner(
-        val eventCreator: () -> MapEvent,
-        val circle: Int?,
-        val weight: Int,
-        val nodeTexture: String,
-        val fixedAmount: Int?,
-    ) {
-
-        fun asOnj(): OnjObject = buildOnjObject {
-            "event" with eventCreator().asOnjObject()
-            "circle" with circle
-            "weight" with weight
-            "nodeTexture" with nodeTexture
-            "fixedAmount" with fixedAmount
-        }
-
-        companion object {
-
-            fun fromOnj(onj: OnjObject) = RadialMapGeneratorEventSpawner(
-                eventCreator = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("event")) },
-                nodeTexture = onj.get<String>("nodeTexture"),
-                circle = onj.getOr<Long?>("circle", null)?.toInt(),
-                weight = onj.get<Long>("weight").toInt(),
-                fixedAmount = onj.getOr<Long?>("fixedAmount", null)?.toInt(),
-            )
-        }
-    }
-
 }

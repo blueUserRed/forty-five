@@ -247,6 +247,8 @@ operator fun Float.plus(fl: Float?): Float {
     return this
 }
 
+fun Float.fractionalPart(): Float = this - toInt()
+fun Double.fractionalPart(): Double = this - toInt()
 
 val AtomicInteger.get: Int
     get() = this.get()

@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.map.generation.PointCloudMapGenerator
 import com.microwavestudios.fortyfive.map.generation.RadialMapGenerator
 import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.fractionalPart
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.unreachable
 import com.microwavestudios.fortyfive.utils.weightedRandom
@@ -38,7 +39,7 @@ class RunGenerator {
         var difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
         difficultyAdjustment += behaviours.sumOf { it.difficultyAddition().toDouble() }
         val majorDifficulty = (baseDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
-        val minorDifficulty = 1f + (difficultyAdjustment % 1).toFloat()
+        val minorDifficulty = 1f + difficultyAdjustment.fractionalPart().toFloat()
 
         val rewards = generateRunRewards(forDifficulty)
 
