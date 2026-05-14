@@ -108,6 +108,9 @@ class Profile private constructor(val name: String, private var runSave: RunSave
     val talismans: List<Talisman>
         get() = runSave?.talismans ?: listOf()
 
+    val usedSteps: Int?
+        get() = runSave?.usedSteps
+
     var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
     var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
@@ -172,6 +175,11 @@ class Profile private constructor(val name: String, private var runSave: RunSave
         _cardCollection.add(new)
         checkDecks()
         dirty()
+    }
+
+    fun stepTaken() {
+        val runSave = runSave ?: return
+        runSave.usedSteps++
     }
 
     fun changeToMap(map: String, fromEnd: Boolean = false) {

@@ -224,6 +224,8 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
 
     val walkEverywhere = debugSwitch("walk everywhere", Keys.R, false)
 
+    val countSteps = debugSwitch("count steps", Keys.M, true)
+
     val completeRun = debugButton("complete run", Keys.Q) {
         val profile = FortyFive.profileManager.currentProfile ?: return@debugButton
         if (profile.activeRun == null) return@debugButton
@@ -236,6 +238,7 @@ class MapDebugMenuPage : DebugMenuPage("Map") {
         index: ${currentNode?.index}
         $completeRun
         $walkEverywhere
+        $countSteps
     """.trimIndent()
 }
 

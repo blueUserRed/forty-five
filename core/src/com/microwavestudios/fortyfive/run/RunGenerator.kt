@@ -1,28 +1,21 @@
 package com.microwavestudios.fortyfive.run
 
-import com.badlogic.gdx.utils.compression.lzma.Base
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
 import com.microwavestudios.fortyfive.map.EmptyMapEvent
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
+import com.microwavestudios.fortyfive.map.MapEvent
+import com.microwavestudios.fortyfive.map.MapPredicate
 import com.microwavestudios.fortyfive.map.ShopMapEvent
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import com.microwavestudios.fortyfive.map.generation.PointCloudMapGenerator
+import com.microwavestudios.fortyfive.map.generation.RadialMapGenerator
 import com.microwavestudios.fortyfive.map.generation.ThreeLineMapGenerator
 import com.microwavestudios.fortyfive.utils.Utils
-import com.microwavestudios.fortyfive.utils.between
 import com.microwavestudios.fortyfive.utils.fractionalPart
 import com.microwavestudios.fortyfive.utils.random
-import com.microwavestudios.fortyfive.utils.requireNot
-import com.microwavestudios.fortyfive.utils.toIntRange
 import com.microwavestudios.fortyfive.utils.unreachable
 import com.microwavestudios.fortyfive.utils.weightedRandom
-import onj.value.OnjArray
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
-import kotlin.math.absoluteValue
-import kotlin.math.log
 import kotlin.random.Random
 
 class RunGenerator {
@@ -34,10 +27,18 @@ class RunGenerator {
             "generateRun only works for Limited and Constructed Runs"
         }
 
-        val modifiers = generateRunModifiers(forBiome, forDifficulty)
+        val modifiers = generateRunModifiers(forBiome, forDifficulty, type)
+        val challenges = generateChallenges(type, forDifficulty)
+        val behaviours = Run.accumulateBehaviours(modifiers, challenges)
 
-        val difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
-        val majorDifficulty = (forDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
+        val baseDifficulty = if (type == RunType.CONSTRUCTED) {
+            forDifficulty
+        } else {
+            1
+        }
+        var difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
+        difficultyAdjustment += behaviours.sumOf { it.difficultyAddition().toDouble() }
+        val majorDifficulty = (baseDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         val minorDifficulty = 1f + difficultyAdjustment.fractionalPart().toFloat()
 
         val rewards = generateRunRewards(forDifficulty)
@@ -55,19 +56,29 @@ class RunGenerator {
             forDifficulty,
             minorDifficulty,
             enemyAmountRange(forDifficulty),
-            modifiers,
             minDiff,
             maxDiff,
             scaling,
             forBiome
         )
 
+        val (minStepRange, maxStepRange) = if (type == RunType.CONSTRUCTED) {
+            RunGeneratorConfig.stepsConstructed
+        } else {
+            RunGeneratorConfig.stepsLimited
+        }
+
+        val minSteps = behaviours.fold(minStepRange.random(random)) { acc, cur -> cur.modifyMinSteps(acc) }
+        val maxSteps = behaviours.fold(maxStepRange.random(random)) { acc, cur -> cur.modifyMaxSteps(acc) }
+
         return Run(
             "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,
+            minSteps, maxSteps,
             modifiers,
+            challenges,
             rewards,
             forBiome,
             forArea,
@@ -75,6 +86,17 @@ class RunGenerator {
             100,
             mapGenerator
         )
+    }
+
+    private fun generateChallenges(type: RunType, difficulty: Int): List<RunChallenge> {
+        val result = mutableListOf<RunChallenge>()
+        if (type != RunType.LIMITED) return result
+        val challenges = RunGeneratorConfig.limitedChallenges
+        challenges.forEach { (addAtDiff, challenges) ->
+            if (addAtDiff > difficulty) return@forEach
+            result.addAll(challenges)
+        }
+        return result
     }
 
     private fun enemyAmountRange(majorDifficulty: Int): IntRange {
@@ -125,29 +147,35 @@ class RunGenerator {
         return rewards
     }
 
-    private fun generateRunModifiers(biome: String, majorDifficulty: Int): List<RunModifier> {
+    private fun generateRunModifiers(biome: String, majorDifficulty: Int, type: RunType): List<RunModifier> {
         var checkDifficulty = majorDifficulty
-        lateinit var pool: Pair<Float, List<String>>
+        lateinit var pool: RunModifierPool
         while (true) {
             if (checkDifficulty < 0) {
                 throw RuntimeException("no run modifier pool for major difficulty $majorDifficulty")
             }
-            val checkPool = RunGeneratorConfig.runModifierPools[checkDifficulty]
+            val checkPool = RunGeneratorConfig
+                .runModifierPools
+                .find { it.majorDifficulty == checkDifficulty }
             checkDifficulty--
             checkPool ?: continue
+            when {
+                checkPool.onlyConstructed && type != RunType.CONSTRUCTED -> continue
+                checkPool.onlyLimited && type != RunType.LIMITED -> continue
+            }
             pool = checkPool
             break
         }
         val probabilityIncrease = RunGeneratorConfig.runModifierProbabilityChanges[biome]
         val modifiers = if (probabilityIncrease == null) {
-            pool.second
+            pool.modifiers
         } else {
-            pool.second + probabilityIncrease.filter { it in pool.second }
+            pool.modifiers + probabilityIncrease.filter { it in pool.modifiers }
         }.map { RunModifier.get(it) }
 
         val selectedModifiers = mutableListOf<RunModifier>()
-        repeat(RunGeneratorConfig.runModifiersMax) {
-            if (!Utils.coinFlip(pool.first, random)) return@repeat
+        repeat(pool.maxModifiers) {
+            if (!Utils.coinFlip(pool.modifierProbability, random)) return@repeat
 
             val start = modifiers.indices.random(random)
             var current = start
@@ -185,7 +213,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -193,12 +220,14 @@ class RunGenerator {
         ): BaseMapGenerator {
             val options = when (type) {
                 RunType.LIMITED -> listOf(
-                    20 to MapGenType.ThreeLine,
-                    10 to MapGenType.PointCloud
+                    10 to MapGenType.ThreeLine,
+                    20 to MapGenType.PointCloud,
+                    20 to MapGenType.Radial
                 )
                 RunType.CONSTRUCTED -> listOf(
                     10 to MapGenType.ThreeLine,
-                    20 to MapGenType.PointCloud
+                    20 to MapGenType.PointCloud,
+                    20 to MapGenType.Radial
                 )
                 else -> unreachable()
             }
@@ -210,7 +239,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -222,7 +250,17 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
+                    minDiff,
+                    maxDiff,
+                    difficultyScaling,
+                    biome,
+                )
+                MapGenType.Radial -> radialMapGen(
+                    random,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    enemyAmountRange,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -231,7 +269,7 @@ class RunGenerator {
             }
         }
 
-        enum class MapGenType { ThreeLine, PointCloud }
+        enum class MapGenType { ThreeLine, PointCloud, Radial }
 
         fun decorationsFor(biome: String, random: Random): List<BaseMapGenerator.MapGeneratorDecoration> = when (biome) {
             "wasteland" -> {
@@ -247,13 +285,131 @@ class RunGenerator {
             else -> unreachable()
         }
 
+        fun fillEvents(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): List<BaseMapGenerator.MapGeneratorFillEvent> = listOf(
+            BaseMapGenerator.MapGeneratorFillEvent(
+                {
+                    EncounterPlaceholderMapEvent(
+                        false,
+                        majorDifficulty,
+                        unadjustedMajorDifficulty,
+                        minorDifficulty,
+                        enemyAmountRange,
+                        biome,
+                        difficultyScaling,
+                        minDiff,
+                        maxDiff,
+                        random.nextLong()
+                    ).also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.setDescriptionText(listOf(
+                            MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
+                        ))
+                    }
+                },
+                null, null,
+                100
+            ),
+            BaseMapGenerator.MapGeneratorFillEvent(
+                {
+                    ChooseCardMapEvent(
+                        listOf(),
+                        true,
+                        0,
+                        20, 10,
+                        random.nextLong(),
+                        3
+                    )
+                },
+                2, null,
+                20
+            ),
+            BaseMapGenerator.MapGeneratorFillEvent(
+                { EmptyMapEvent() },
+                2, 4,
+                20
+            ),
+        )
+
+        // parameters for symmetry with fillEvents() and in case encounters will be added, in which case
+        // the parameters will be needed
+        @Suppress("unused")
+        fun fixedEvents(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): List<BaseMapGenerator.MapGeneratorFixedEvent> = listOf(
+            BaseMapGenerator.MapGeneratorFixedEvent(
+                {
+                    ShopMapEvent(
+                        setOf(),
+                        "npc.traveling_merchant",
+                        mutableSetOf(),
+                        3..5,
+                        mutableListOf(),
+                        0,
+                        20,
+                        20,
+                    )
+                },
+                4, null,
+                1
+            )
+        )
+
+        fun lastEncounter(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): MapEvent = EncounterPlaceholderMapEvent(
+            true,
+            majorDifficulty,
+            unadjustedMajorDifficulty,
+            minorDifficulty,
+            enemyAmountRange,
+            biome,
+            difficultyScaling,
+            minDiff,
+            maxDiff,
+            random.nextLong()
+        ).also {
+            // extraction encounters don't block
+            it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+            it.addStartCondition(MapPredicate.MinStepsReached)
+            it.setDescriptionText(listOf(
+                MapPredicate.Not(MapPredicate.MinStepsReached) to "Walk the minimum number of steps to start the final encounter",
+                MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
+            ))
+        }
+
         fun pointCloudMapGen(
             random: Random,
             majorDifficulty: Int,
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -266,89 +422,49 @@ class RunGenerator {
             exclusionRadius = 10f,
             locationSignProtectedAreaWidth = 25f,
             locationSignProtectedAreaHeight = 30f,
-            firstNodeTexture = "map_node_default",
             firstNodeEvent = { EmptyMapEvent() },
-            lastNodeTexture = "map_node_fight",
             lastNodeEvent = {
-                EncounterPlaceholderMapEvent(
-                    true,
+                lastEncounter(
+                    random,
                     majorDifficulty,
                     unadjustedMajorDifficulty,
                     minorDifficulty,
-                    runModifier,
                     enemyAmountRange,
-                    biome,
-                    difficultyScaling,
                     minDiff,
                     maxDiff,
-                    random.nextLong()
+                    difficultyScaling,
+                    biome
                 )
             },
-            eventSpawner = listOf(
-                PointCloudMapGenerator.EventSpawner(
-                    {
-                        EncounterPlaceholderMapEvent(
-                            false,
-                            majorDifficulty,
-                            unadjustedMajorDifficulty,
-                            minorDifficulty,
-                            runModifier,
-                            enemyAmountRange,
-                            biome,
-                            difficultyScaling,
-                            minDiff,
-                            maxDiff,
-                            random.nextLong()
-                        )
-                    },
-                    "map_node_fight",
-                    100
-                ),
-                PointCloudMapGenerator.EventSpawner(
-                    {
-                        ChooseCardMapEvent(
-                            listOf(),
-                            true,
-                            0,
-                            20,
-                            10,
-                            random.nextLong(),
-                            3
-                        )
-                    },
-                    "map_node_choose_card",
-                    20
-                ),
-                PointCloudMapGenerator.EventSpawner(
-                    {
-                        EmptyMapEvent()
-                    },
-                    "map_node_default",
-                    20
-                ),
-                PointCloudMapGenerator.EventSpawner(
-                    {
-                        ShopMapEvent(
-                            setOf(),
-                            "npc.traveling_merchant",
-                            mutableSetOf(),
-                            3..5,
-                            mutableListOf(),
-                            0,
-                            20,
-                            20,
-                        )
-                    },
-                    "map_node_shop",
-                    10
-                )
-            ),
+            randomStepsToLastNode = 4,
             majorDifficulty = unadjustedMajorDifficulty,
             horizontalExtension = 80f,
             verticalExtension = 50f,
             decorations = decorationsFor(biome, random),
             biome = biome,
-            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random)
+            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random),
+            fillEvents = fillEvents(
+                random,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                enemyAmountRange,
+                minDiff,
+                maxDiff,
+                difficultyScaling,
+                biome
+            ),
+            fixedEvents = fixedEvents(
+                random,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                enemyAmountRange,
+                minDiff,
+                maxDiff,
+                difficultyScaling,
+                biome
+            ),
         ).let { PointCloudMapGenerator(it) }
 
         fun threeLineMapGen(
@@ -357,7 +473,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -376,83 +491,112 @@ class RunGenerator {
             verticalExtension = 50f,
             locationSignProtectedAreaWidth = 25f,
             locationSignProtectedAreaHeight = 30f,
-            firstNodeTexture = "map_node_default",
             firstNodeEvent = { EmptyMapEvent() },
-            lastNodeTexture = "map_node_fight",
             lastNodeEvent = {
-                EncounterPlaceholderMapEvent(
-                    true,
+                lastEncounter(
+                    random,
                     majorDifficulty,
                     unadjustedMajorDifficulty,
                     minorDifficulty,
-                    runModifier,
                     enemyAmountRange,
-                    biome,
-                    difficultyScaling,
                     minDiff,
                     maxDiff,
-                    random.nextLong()
+                    difficultyScaling,
+                    biome
                 )
             },
-            mainEvent = ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-                {
-                    EncounterPlaceholderMapEvent(
-                        false,
-                        majorDifficulty,
-                        unadjustedMajorDifficulty,
-                        minorDifficulty,
-                        runModifier,
-                        enemyAmountRange,
-                        biome,
-                        difficultyScaling,
-                        minDiff,
-                        maxDiff,
-                        random.nextLong()
-                    )
-                },
-                offset = 0..1,
-                nodeTexture = "map_node_fight",
-                line = -1,
-            ),
-            events = listOf(
-                ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-                    {
-                        ChooseCardMapEvent(
-                            listOf(),
-                            true,
-                            0,
-                            20,
-                            10,
-                            random.nextLong(),
-                            3
-                        )
-                    },
-                    offset = 2..2,
-                    line = 2,
-                    nodeTexture = "map_node_choose_card"
-                ),
-                ThreeLineMapGenerator.ThreeLineMapGeneratorEventSpawner(
-                    {
-                        ShopMapEvent(
-                            setOf(),
-                            "npc.traveling_merchant",
-                            mutableSetOf(),
-                            3..5,
-                            mutableListOf(),
-                            0,
-                            20,
-                            20,
-                        )
-                    },
-                    offset = 2..2,
-                    line = 2,
-                    nodeTexture = "map_node_shop"
-                ),
-            ),
+            randomStepsToLastNode = 4,
             decorations = decorationsFor(biome, random),
-            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random)
+            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random),
+            fillEvents = fillEvents(
+                random,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                enemyAmountRange,
+                minDiff,
+                maxDiff,
+                difficultyScaling,
+                biome
+            ),
+            fixedEvents = fixedEvents(
+                random,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                enemyAmountRange,
+                minDiff,
+                maxDiff,
+                difficultyScaling,
+                biome
+            ),
         ).let { ThreeLineMapGenerator(it) }
 
+        fun radialMapGen(
+            random: Random,
+            majorDifficulty: Int,
+            unadjustedMajorDifficulty: Int,
+            minorDifficulty: Float,
+            enemyAmountRange: IntRange,
+            minDiff: Float,
+            maxDiff: Float,
+            difficultyScaling: DifficultyScaling,
+            biome: String
+        ): RadialMapGenerator = RadialMapGenerator.RadialMapGeneratorData(
+            majorDifficulty = unadjustedMajorDifficulty,
+            biome = biome,
+            nodeProtectedArea = 20f,
+            horizontalExtension = 80f,
+            verticalExtension = 50f,
+            locationSignProtectedAreaWidth = 25f,
+            locationSignProtectedAreaHeight = 30f,
+            firstNodeEvent = { EmptyMapEvent() },
+            lastNodeEvent = {
+                lastEncounter(
+                    random,
+                    majorDifficulty,
+                    unadjustedMajorDifficulty,
+                    minorDifficulty,
+                    enemyAmountRange,
+                    minDiff,
+                    maxDiff,
+                    difficultyScaling,
+                    biome
+                )
+            },
+            circles = listOf(
+                RadialMapGenerator.Circle(20f, 3, 0.005f),
+                RadialMapGenerator.Circle(50f, 6, 0.005f),
+                RadialMapGenerator.Circle(70f, 12, 0.005f),
+                RadialMapGenerator.Circle(90f, 15, 0.005f),
+                RadialMapGenerator.Circle(110f, 18, 0.005f),
+            ),
+            randomStepsToLastNode = 4,
+            decorations = decorationsFor(biome, random),
+            rotation = (-(Math.PI / 4).toFloat()..(Math.PI / 2).toFloat()).random(random),
+            fillEvents = fillEvents(
+                random,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                enemyAmountRange,
+                minDiff,
+                maxDiff,
+                difficultyScaling,
+                biome
+            ),
+            fixedEvents = fixedEvents(
+                random,
+                majorDifficulty,
+                unadjustedMajorDifficulty,
+                minorDifficulty,
+                enemyAmountRange,
+                minDiff,
+                maxDiff,
+                difficultyScaling,
+                biome
+            ),
+        ).let { RadialMapGenerator(it) }
 
         private fun bewitchedForestDecorations(moreSheep: Boolean): List<BaseMapGenerator.MapGeneratorDecoration> = listOf(
             BaseMapGenerator.MapGeneratorDecoration(

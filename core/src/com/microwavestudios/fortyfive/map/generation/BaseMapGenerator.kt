@@ -7,6 +7,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.onjNamespaces.OnjInterpolation
 import com.microwavestudios.fortyfive.run.EncounterGenerator
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -24,6 +25,8 @@ abstract class BaseMapGenerator {
 
     protected lateinit var random: Random
         private set
+    protected lateinit var run: Run
+        private set
     private lateinit var data: BaseMapGeneratorData
     private lateinit var name: String
 
@@ -36,12 +39,18 @@ abstract class BaseMapGenerator {
     private val decorationColliders: MutableList<Rectangle> = mutableListOf()
     private val lineColliders: MutableList<Line2D> = mutableListOf()
 
-    abstract fun generate(name: String, seed: Long): DetailMap
+    protected var startNode: MapNodeBuilder? = null
+        private set
+    protected var endNode: MapNodeBuilder? = null
+        private set
 
-    protected fun setup(name: String, data: BaseMapGeneratorData, seed: Long) {
+    abstract fun generate(name: String, run: Run, seed: Long): DetailMap
+
+    protected fun setup(name: String, data: BaseMapGeneratorData, run: Run, seed: Long) {
         this.random = Random(seed)
         this.data = data
         this.name = name
+        this.run = run
         nodeColliders.clear()
         decorationColliders.clear()
         lineColliders.clear()
@@ -165,17 +174,17 @@ abstract class BaseMapGenerator {
         nodeColliders.add(Rectangle(x - halfWidth, y - halfWidth, width, width))
     }
 
-    protected fun setupLastNode(node: MapNodeBuilder) {
+    private fun setupLastNode(node: MapNodeBuilder) {
         node.event = data.lastNodeEvent()
-        node.nodeTexture = data.lastNodeTexture
+        endNode = node
     }
 
-    protected fun setupFirstNode(node: MapNodeBuilder) {
+    private fun setupFirstNode(node: MapNodeBuilder) {
         node.event = data.firstNodeEvent()
-        node.nodeTexture = data.firstNodeTexture
+        startNode = node
     }
 
-    protected fun calculateDistances(startNode: MapNodeBuilder) {
+    private fun calculateDistances(startNode: MapNodeBuilder) {
         var currentNodes = listOf(startNode)
         var dist = 0
         while (currentNodes.isNotEmpty()) {
@@ -194,13 +203,81 @@ abstract class BaseMapGenerator {
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
     }
 
-    fun generateEncounters(startNode: MapNodeBuilder) {
+    fun generateMapEvents() {
+        val startNode = _allNodes.random(random)
+        setupFirstNode(startNode)
+        val endNode = chooseEndNode(startNode)
+        setupLastNode(endNode)
+        calculateDistances(startNode)
+
+        _allNodes.forEach { node ->
+            if (node === startNode || node === endNode) return@forEach
+            val distance = node.distance
+            val allowedFillEvents = data
+                .fillEvents
+                .filter {
+                    (it.minDistance == null || it.minDistance <= distance) &&
+                            (it.maxDistance == null || it.maxDistance >= distance)
+                }
+            if (allowedFillEvents.isEmpty()) {
+                FortyFive.logger.warn(logTag, "No allowed events for distance $distance in map $name")
+                return@forEach
+            }
+            val chosen = allowedFillEvents
+                .zipToFirst { it.weight }
+                .weightedRandom(random)
+            node.event = chosen.nodeEvent()
+        }
+
+        val availableNodes = _allNodes.toMutableList()
+        availableNodes.remove(startNode)
+        availableNodes.remove(endNode)
+        data.fixedEvents.forEach { event ->
+            repeat(event.amount) {
+                val possibleNodes = availableNodes.filter {
+                    (event.minDistance == null || event.minDistance <= it.distance) &&
+                            (event.maxDistance == null || event.maxDistance >= it.distance)
+                }
+                if (possibleNodes.isEmpty()) {
+                    FortyFive.logger.warn(
+                        logTag,
+                        "Can't spawn event ${event.nodeEvent()} because there are no free nodes in the distance range"
+                    )
+                    return@forEach
+                }
+                val node = possibleNodes.random(random)
+                node.event = event.nodeEvent()
+                availableNodes.remove(node)
+            }
+        }
+    }
+
+    private fun chooseEndNode(startNode: MapNodeBuilder): MapNodeBuilder {
+        var cur = startNode
+        var steps = data.randomStepsToLastNode
+        // This random walk seems to always just return back to where it started,
+        // maybe replace with a different system at some point, but it isn't too
+        // much of an issue, the exit node is supposed to be close to the start node
+        // anyway
+        while (steps > 0 || cur === startNode) {
+            cur = cur.edgesTo.random(random)
+            steps--
+        }
+        return cur
+    }
+
+    fun generateEncounters() {
+        val startNode = startNode
+        requireNotNull(startNode) { "call generateMapEvents() before generateEncounters()" }
         _allNodes.forEach { node ->
             val event = node.event
             if (event !is EncounterPlaceholderMapEvent) return@forEach
-            val encounter = EncounterGenerator.generate(event, node, startNode)
-            val mapEvent = EncounterMapEvent(encounter, event.genExtraction)
-            node.event = mapEvent
+            val encounter = EncounterGenerator.generate(event, node, startNode, run)
+            val encounterEvent = EncounterMapEvent(encounter, event.genExtraction)
+            event.startConditions.forEach { encounterEvent.addStartCondition(it) }
+            event.blockConditions.forEach { encounterEvent.addBlockCondition(it) }
+            encounterEvent.setDescriptionText(event.descriptionText)
+            node.event = encounterEvent
         }
     }
 
@@ -211,11 +288,12 @@ abstract class BaseMapGenerator {
         val locationSignProtectedAreaWidth: Float
         val locationSignProtectedAreaHeight: Float
         val firstNodeEvent: () -> MapEvent
-        val firstNodeTexture: String
         val lastNodeEvent: () -> MapEvent
-        val lastNodeTexture: String
+        val randomStepsToLastNode: Int
         val majorDifficulty: Int
         val rotation: Float
+        val fillEvents: List<MapGeneratorFillEvent>
+        val fixedEvents: List<MapGeneratorFixedEvent>
 
         fun asOnj(): OnjObject
 
@@ -224,11 +302,58 @@ abstract class BaseMapGenerator {
             "locationSignProtectedAreaWidth" with locationSignProtectedAreaWidth
             "locationSignProtectedAreaHeight" with locationSignProtectedAreaHeight
             "firstNodeEvent" with firstNodeEvent().asOnjObject()
-            "firstNodeTexture" with firstNodeTexture
             "lastNodeEvent" with lastNodeEvent().asOnjObject()
-            "lastNodeTexture" with lastNodeTexture
+            "randomStepsToLastNode" with randomStepsToLastNode
             "majorDifficulty" with majorDifficulty
             "rotation" with rotation
+            "fillEvents" with fillEvents.map { it.asOnj() }
+            "fixedEvents" with fixedEvents.map { it.asOnj() }
+        }
+    }
+
+    data class MapGeneratorFixedEvent(
+        val nodeEvent: () -> MapEvent,
+        val minDistance: Int?,
+        val maxDistance: Int?,
+        val amount: Int
+    ) {
+        fun asOnj(): OnjObject = buildOnjObject {
+            "nodeEvent" with nodeEvent().asOnjObject()
+            "minDistance" with minDistance
+            "maxDistance" with maxDistance
+            "amount" with amount
+        }
+
+        companion object {
+            fun fromOnj(onj: OnjObject): MapGeneratorFixedEvent = MapGeneratorFixedEvent(
+                { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("nodeEvent")) },
+                onj.get<Long?>("minDistance")?.toInt(),
+                onj.get<Long?>("maxDistance")?.toInt(),
+                onj.get<Long>("amount").toInt(),
+            )
+        }
+    }
+
+    data class MapGeneratorFillEvent(
+        val nodeEvent: () -> MapEvent,
+        val minDistance: Int?,
+        val maxDistance: Int?,
+        val weight: Int
+    ) {
+        fun asOnj(): OnjObject = buildOnjObject {
+            "nodeEvent" with nodeEvent().asOnjObject()
+            "minDistance" with minDistance
+            "maxDistance" with maxDistance
+            "weight" with weight
+        }
+
+        companion object {
+            fun fromOnj(onj: OnjObject): MapGeneratorFillEvent = MapGeneratorFillEvent(
+                { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("nodeEvent")) },
+                onj.get<Long?>("minDistance")?.toInt(),
+                onj.get<Long?>("maxDistance")?.toInt(),
+                onj.get<Long>("weight").toInt(),
+            )
         }
     }
 

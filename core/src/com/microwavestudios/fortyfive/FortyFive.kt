@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
+import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace

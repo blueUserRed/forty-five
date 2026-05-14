@@ -3,6 +3,9 @@ import "imports/run.onjschema" as _;
 runModifierPools: {
     majorDifficulty: int,
     modifierProbability: float,
+    maxModifiers: int,
+    onlyLimited?: boolean,
+    onlyConstructed?: boolean,
     modifiers: string[]
 }[],
 
@@ -13,9 +16,6 @@ runModifierProbabilityIncreases: {
 
 runModifierBlacklist: string[][],
 encounterModifierBlacklist: string[][],
-
-runModifiersMax: int,
-
 
 runRewardPools: {
     majorDifficulty: Int,
@@ -50,6 +50,16 @@ enemyProbabilityRandomPoints: int,
 enemyHealthAdjustment: float,
 enemyDamageAdjustment: float,
 
+var stepConfig = {
+    minSteps: int[2],
+    maxSteps: int[2],
+};
+
+stepConfig: {
+    limited: stepConfig,
+    constructed: stepConfig
+},
+
 difficultyScaling: {
     limited: {
         encounterStartedScale: float,
@@ -64,3 +74,8 @@ difficultyScaling: {
         scaling: $DifficultyScaling,
     },
 },
+
+limitedChallenges: {
+    addAtDifficulty: int,
+    challenges: $RunChallenge[]
+}[],

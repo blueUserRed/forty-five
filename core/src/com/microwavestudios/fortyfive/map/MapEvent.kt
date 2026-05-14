@@ -5,8 +5,10 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.RunBehaviour
 import com.microwavestudios.fortyfive.run.RunModifier
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -45,7 +47,6 @@ object MapEventFactory {
         },
         "EncounterPlaceholderMapEvent" to { EncounterPlaceholderMapEvent.fromOnj(it) },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
-        "LockNodeMapEvent" to { LockNodeMapEvent.fromOnj(it) },
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
         "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() }
     )
@@ -64,16 +65,6 @@ interface Completable {
 abstract class MapEvent {
 
     /**
-     * when this is true, the player can't progress past the node
-     */
-    abstract var currentlyBlocks: Boolean
-
-    /**
-     * when this is true, a start button for this event is displayed and the start function can be called
-     */
-    abstract var startable: Boolean
-
-    /**
      * when this is true, the event was already completed
      */
     abstract var isCompleted: Boolean
@@ -85,17 +76,10 @@ abstract class MapEvent {
 
     open val buttonText: String = "Start"
 
-    /**
-     * Short text describing the event
-     */
-    open val descriptionText: String = ""
+    var descriptionText: List<Pair<MapPredicate, String>> = listOf()
+        private set
 
     open val warningText: String? = null
-
-    /**
-     * Short text that is displayed instead of [descriptionText] when the event was completed
-     */
-    open val completedDescriptionText: String = ""
 
     /**
      * the name of the event that is displayed to the user
@@ -110,7 +94,8 @@ abstract class MapEvent {
     val blockConditions: List<MapPredicate>
         get() = _blockConditions
 
-    abstract val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>?
+    abstract val nodeTexture: ResourceHandle
+    open val secondaryNodeTexture: ResourceHandle? = null
 
     /**
      * called when the start button was clicked
@@ -125,15 +110,26 @@ abstract class MapEvent {
     open fun onMapLoad(map: DetailMap) {}
     open fun onPlayerMovedToNode(map: DetailMap) {}
 
-    fun canBeStarted(map: DetailMap): Boolean =
-        startable && _startConditions.all { it.check(map) }
+    fun canBeStarted(map: DetailMap): Boolean = _startConditions.all { it.check(map, this) }
 
-    fun isBlocking(map: DetailMap): Boolean =
-        currentlyBlocks || _blockConditions.any { it.check(map) }
+    fun isBlocking(map: DetailMap): Boolean = _blockConditions.any { it.check(map, this) }
+
+    fun setDescriptionText(texts: List<Pair<MapPredicate, String>>) {
+        descriptionText = texts
+    }
+
+    fun currentDescription(map: DetailMap): String =
+        descriptionText.firstOrNull { it.first.check(map, this) }?.second ?: ""
+
+    fun addStartCondition(predicate: MapPredicate) {
+        _startConditions.add(predicate)
+    }
+
+    fun addBlockCondition(predicate: MapPredicate) {
+        _blockConditions.add(predicate)
+    }
 
     fun setStandardValuesFromConfig(config: OnjObject) {
-        currentlyBlocks = config.get<Boolean>("currentlyBlocks")
-        startable = config.get<Boolean>("startable")
         isCompleted = config.get<Boolean>("isCompleted")
         val startConditions = config
             .getOr<OnjArray?>("startConditions", null)
@@ -147,18 +143,28 @@ abstract class MapEvent {
             ?.map { MapPredicate.fromOnj(it as OnjNamedObject) }
         _blockConditions.clear()
         blockConditions?.let { _blockConditions.addAll(it) }
+        descriptionText = config
+            .get<OnjArray>("descriptionText")
+            .value
+            .map { obj ->
+                obj as OnjObject
+                MapPredicate.fromOnj(obj.get<OnjNamedObject>("predicate")) to obj.get<String>("text")
+            }
     }
 
     /**
-     * utility function that can be called from the [asOnjObject] function and includes the [currentlyBlocks],
-     * [startable], [isCompleted] fields in the onjObject.
+     * utility function that can be called from the [asOnjObject] function and includes standard config
      */
     protected fun OnjObjectBuilderDSL.includeStandardConfig() {
-        "currentlyBlocks" with currentlyBlocks
-        "startable" with startable
         "isCompleted" with isCompleted
         "startConditions" with _startConditions.map { it.asOnj() }
         "blockConditions" with _blockConditions.map { it.asOnj() }
+        "descriptionText" with descriptionText.map {
+            buildOnjObject {
+                "predicate" with it.first.asOnj()
+                "text" with it.second
+            }
+        }
     }
 
 }
@@ -168,15 +174,13 @@ abstract class MapEvent {
  */
 class EmptyMapEvent : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = false
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = false
 
     override fun start() {}
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EmptyMapEvent")
@@ -185,17 +189,14 @@ class EmptyMapEvent : MapEvent() {
 
 class SimpleMapEvent(
     override val displayDescription: Boolean,
-    override val descriptionText: String,
     override val displayName: String
 ) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = false
     override var isCompleted: Boolean = false
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
-    constructor() : this(false, "", "")
+    constructor() : this(false, "")
 
     override fun start() {
     }
@@ -203,7 +204,6 @@ class SimpleMapEvent(
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("SimpleMapEvent")
         "displayDescription" with displayDescription
-        "descriptionText" with descriptionText
         "displayName" with displayName
         includeStandardConfig()
     }
@@ -212,7 +212,6 @@ class SimpleMapEvent(
 
         fun fromOnj(onj: OnjObject): SimpleMapEvent = SimpleMapEvent(
             onj.getOr<Boolean>("displayDescription", false),
-            onj.getOr<String>("descriptionText", ""),
             onj.getOr<String>("displayName", ""),
         ).apply { setStandardValuesFromConfig(onj) }
     }
@@ -227,14 +226,10 @@ class EncounterMapEvent(
     override val isExtraction: Boolean
 ) : MapEvent(), EncounterContext, Completable {
 
-    override var currentlyBlocks: Boolean = true
-    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = "Take on enemies and come out on top!"
-    override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
     override val buttonText: String = "Fight!"
@@ -246,7 +241,12 @@ class EncounterMapEvent(
         null
     }
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = EncounterScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_fight"
+    override val secondaryNodeTexture: ResourceHandle? = if (isExtraction) {
+        "map_node_exit"
+    } else {
+        null
+    }
 
     override fun start() {
         FortyFive.profileManager.currentProfile?.encounterStarted()
@@ -255,8 +255,6 @@ class EncounterMapEvent(
     }
 
     override fun completed() {
-        currentlyBlocks = false
-        startable = false
         isCompleted = true
     }
 
@@ -281,7 +279,6 @@ class EncounterPlaceholderMapEvent(
     val majorDifficulty: Int,
     val unadjustedMajorDifficulty: Int,
     val minorDifficulty: Float,
-    val runModifier: List<RunModifier>,
     val amountEnemies: IntRange,
     val biome: String,
     val difficultyScaling: DifficultyScaling,
@@ -290,12 +287,10 @@ class EncounterPlaceholderMapEvent(
     val seed: Long,
 ) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = false
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = false
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_default"
 
     override fun start() {
         FortyFive.logger.warn("MapEvent", "EncounterPlaceholderMapEvent started")
@@ -307,7 +302,6 @@ class EncounterPlaceholderMapEvent(
         "majorDifficulty" with majorDifficulty
         "unadjustedMajorDifficulty" with unadjustedMajorDifficulty
         "minorDifficulty" with minorDifficulty
-        "runModifier" with runModifier.map { it.name() }
         "amountEnemies" with arrayOf(amountEnemies.first, amountEnemies.last)
         "biome" with biome
         "seed" with seed
@@ -323,7 +317,6 @@ class EncounterPlaceholderMapEvent(
             onj.get<Long>("majorDifficulty").toInt(),
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Double>("minorDifficulty").toFloat(),
-            onj.get<OnjArray>("runModifier").value.map { RunModifier.get(it.value as String) },
             onj.get<OnjArray>("amountEnemies").toIntRange(),
             onj.get<String>("biome"),
             DifficultyScaling.fromOnj(onj.get<OnjNamedObject>("difficultyScaling")),
@@ -337,8 +330,6 @@ class EncounterPlaceholderMapEvent(
 
 class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = true
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
 
@@ -347,9 +338,7 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
     private val targetMapDisplayName: String = displayName(targetMap)
 
     override val displayName: String = "Enter $targetMapDisplayName"
-    override val descriptionText: String = ""
-
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_exit"
 
     override fun start() {
         FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)
@@ -368,23 +357,17 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
  * event that opens a dialog box and allows talking to an NPC
  */
 class DialogMapEvent(
-    private val canOnlyBeStartedOnce: Boolean,
     override val dialog: String,
     override val displayName: String,
-    override val descriptionText: String,
-    override val completedDescriptionText: String
 ) : MapEvent(), DialogScreenContext {
 
-    override var currentlyBlocks: Boolean = true
-    override var startable: Boolean = true
-
-    override var isCompleted: Boolean = !startable
+    override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
     override val buttonText: String = "Talk"
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = DialogScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_dialog"
 
     override fun start() {
         FortyFive.screenManager.appendScreen(DialogScreen, this)
@@ -392,8 +375,6 @@ class DialogMapEvent(
     }
 
     override fun completed() {
-        currentlyBlocks = false
-        if (canOnlyBeStartedOnce) startable = false
         isCompleted = true
     }
 
@@ -402,26 +383,19 @@ class DialogMapEvent(
         includeStandardConfig()
         "dialog" with dialog
         "displayName" with displayName
-        "descriptionText" with descriptionText
-        "completedDescriptionText" with completedDescriptionText
-        "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
     }
 
     companion object {
 
         fun fromOnj(onj: OnjObject): DialogMapEvent = DialogMapEvent(
-            onj.get<Boolean>("canOnlyBeStartedOnce"),
             onj.get<String>("dialog"),
             onj.get<String>("displayName"),
-            onj.get<String>("descriptionText"),
-            onj.get<String>("completedDescriptionText"),
         ).apply { setStandardValuesFromConfig(onj) }
     }
 }
 
 /**
- * event that opens a shop where the player can buy up to 8 cards
- * @param type which type the restrictions are
+ * event that opens a shop where the player can buy cards
  */
 class ShopMapEvent(
     val types: Set<String>,
@@ -434,20 +408,17 @@ class ShopMapEvent(
     val rerollBasePrice: Int,
 ) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = ""
     override val displayName: String = "Shop"
     override val buttonText: String = "Enter"
 
     val currentRerollPrice: Int
         get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = ShopScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_shop"
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ShopScreen, this)
@@ -481,17 +452,13 @@ class ChooseCardMapEvent(
     override val nbrOfCards: Int,
 ) : MapEvent(), ChooseCardScreenContext, Completable {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String =
-        if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
     override val displayName: String = "Ominous person"
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any> = ChooseCardScreen to this
+    override val nodeTexture: ResourceHandle = "map_node_choose_card"
 
     override fun start() {
         FortyFive.screenManager.appendScreen(ChooseCardScreen, this)
@@ -500,8 +467,6 @@ class ChooseCardMapEvent(
 
     override fun completed() {
         isCompleted = true
-        currentlyBlocks = false
-        startable = false
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
@@ -530,80 +495,16 @@ class ChooseCardMapEvent(
     }
 }
 
-class LockNodeMapEvent(
-    val conditions: List<MapPredicate>,
-    initialLocked: Boolean,
-    val lockedDescription: String,
-    val openDescription: String,
-) : MapEvent() {
-
-    override var currentlyBlocks: Boolean
-        get() = locked
-        set(_) {}
-
-    override var startable: Boolean = false
-    override var isCompleted: Boolean = false
-
-    override val displayDescription: Boolean = true
-
-    override val descriptionText: String
-        get() = if (locked) lockedDescription else openDescription
-
-    var locked: Boolean = initialLocked
-        private set
-
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
-
-    override fun start() {
-    }
-
-    override fun onMapLoad(map: DetailMap) {
-        checkLocked(map)
-    }
-
-    override fun onPlayerMovedToNode(map: DetailMap) {
-        checkLocked(map)
-    }
-
-    private fun checkLocked(map: DetailMap) {
-        if (!locked) return
-        if (conditions.all { it.check(map) }) locked = false
-    }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("LockNodeMapEvent")
-        "conditions" with conditions.map { it.asOnj() }
-        "locked" with locked
-        "lockedDescription" with lockedDescription
-        "openDescription" with openDescription
-    }
-
-    companion object {
-
-        fun fromOnj(onj: OnjObject): LockNodeMapEvent = LockNodeMapEvent(
-            onj.get<OnjArray>("conditions").value.map { MapPredicate.fromOnj(it as OnjNamedObject) },
-            onj.get<Boolean>("locked"),
-            onj.get<String>("lockedDescription"),
-            onj.get<String>("openDescription"),
-        )
-    }
-
-}
-
 class CompleteRunMapEvent(
     val runName: String,
     override val displayName: String,
-    override val descriptionText: String,
-    override val completedDescriptionText: String,
 ) : MapEvent(), Completable {
 
-    override var currentlyBlocks: Boolean = true
-    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_exit"
 
     override fun start() {
         val map = FortyFive.profileManager.currentProfile!!.currentMapSaver.currentMap
@@ -621,8 +522,6 @@ class CompleteRunMapEvent(
     }
 
     override fun completed() {
-        currentlyBlocks = false
-        startable = false
         isCompleted = true
     }
 
@@ -630,8 +529,6 @@ class CompleteRunMapEvent(
         name("CompleteRunMapEvent")
         "runName" with runName
         "displayName" with displayName
-        "descriptionText" with descriptionText
-        "completedDescriptionText" with completedDescriptionText
         includeStandardConfig()
     }
 
@@ -640,8 +537,6 @@ class CompleteRunMapEvent(
         fun fromOnj(onj: OnjObject): CompleteRunMapEvent = CompleteRunMapEvent(
             onj.get<String>("runName"),
             onj.get<String>("displayName"),
-            onj.get<String>("descriptionText"),
-            onj.get<String>("completedDescriptionText"),
         ).also { it.setStandardValuesFromConfig(onj) }
     }
 
@@ -649,16 +544,13 @@ class CompleteRunMapEvent(
 
 class FinishTutorialRunMapEvent : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
-    override var startable: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
     override val displayName: String = "Finish"
-    override val descriptionText: String = "You completed the Tutorial!"
 
-    override val chainScreen: Pair<ScreenManager.ScreenCreatorCompanion, Any>? = null
+    override val nodeTexture: ResourceHandle = "map_node_exit"
 
     override fun start() {
         val profile = FortyFive.profileManager.currentProfile!!

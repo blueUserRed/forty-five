@@ -116,12 +116,10 @@ class SeededMapGenerator(
             if ((isDeadEnd && deadEndsWithoutEvents.isNotEmpty()) || nodesWithoutEvents.isEmpty()) {
                 val curNode = deadEndsWithoutEvents.random(rnd)
                 curNode.event = event
-                curNode.nodeTexture = nodeTexture
                 deadEndsWithoutEvents.remove(curNode)
             } else {
                 val curNode = nodesWithoutEvents.random(rnd)
                 curNode.event = event
-                curNode.nodeTexture = nodeTexture
                 nodesWithoutEvents.remove(curNode)
             }
         }
@@ -142,7 +140,6 @@ class SeededMapGenerator(
                 val (_, eventCreator, nodeTexture) = restrictions.optionalEvents[choice]
                 curNode.event = eventCreator()
                 val event = curNode.event
-                curNode.nodeTexture = nodeTexture
             }
             nodesWithoutEvents.remove(curNode)
         }
@@ -162,9 +159,7 @@ class SeededMapGenerator(
         lastMainNode.connect(newEndNode, Direction.RIGHT)
 
         newEndNode.event = lastMainNode.event
-        newEndNode.nodeTexture = lastMainNode.nodeTexture
         lastMainNode.event = endEvent.first
-        lastMainNode.nodeTexture = endEvent.second
         nodes.add(newEndNode)
         setDistanceFromEnd(newEndNode)
         return newEndNode
@@ -179,8 +174,6 @@ class SeededMapGenerator(
         areaNodes.add(mainLine.lineNodes.last())
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
         mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
-        mainLine.lineNodes.first().nodeTexture = restrictions.exitNodeTexture
-        mainLine.lineNodes.last().nodeTexture = restrictions.exitNodeTexture
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
