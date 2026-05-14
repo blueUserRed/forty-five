@@ -43,6 +43,18 @@ abstract class Assertion {
             "${ANSI.white}($value${ANSI.white}).${ANSI.purple}isNull${ANSI.reset}"
     }
 
+    class IsNotNull(val value: AssertionValue<*>) : Assertion() {
+
+        override fun check(): String? {
+            val value = value.get()
+            if (value != null) return null
+            return "'$value == null'"
+        }
+
+        override fun toString(): String =
+            "${ANSI.white}($value${ANSI.white}).${ANSI.purple}isNotNull${ANSI.reset}"
+    }
+
 }
 
 abstract class AssertionValue<out T> {
@@ -62,6 +74,8 @@ abstract class AssertionValue<out T> {
     infix fun notEqual(other: Any): Assertion = Assertion.NotEqual(this, immediate(other))
 
     fun isNull(): Assertion = Assertion.IsNull(this)
+
+    fun isNotNull(): Assertion = Assertion.IsNotNull(this)
 
     companion object {
 

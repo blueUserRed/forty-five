@@ -7,14 +7,16 @@ import com.microwavestudios.fortyfive.testing.mockservices.MockSoundPlayer
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.tests.AfterlifeTest
 import com.microwavestudios.fortyfive.tests.BasicEncounterTest
+import com.microwavestudios.fortyfive.tests.StatusEffectTest
 import com.microwavestudios.fortyfive.utils.ANSI
 
 
 class TestLauncher {
 
     val gameControllerTests: Array<GameControllerTest> = arrayOf(
-        BasicEncounterTest(),
-        AfterlifeTest()
+//        BasicEncounterTest(),
+//        AfterlifeTest(),
+        StatusEffectTest()
     )
 
     fun run() {

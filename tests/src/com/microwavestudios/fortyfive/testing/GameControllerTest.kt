@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.testing
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
@@ -23,6 +24,7 @@ import com.microwavestudios.fortyfive.utils.ANSI
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.findInstance
 import java.util.Stack
 
 @Suppress("NOTHING_TO_INLINE")
@@ -155,6 +157,9 @@ abstract class GameControllerTest {
 
     protected fun enemy(index: Int): Enemy = controller.allEnemies[index]
 
+    protected inline fun <reified T : StatusEffect> findPlayerStatusEffect(): T? =
+        controller.playerStatusEffects.findInstance<T>()
+
     ///////////////////////////////
     // assertion helpers
     ///////////////////////////////
@@ -200,6 +205,26 @@ abstract class GameControllerTest {
         override fun toString(): String = "${ANSI.cyan}aCardInAfterlife($slot)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
 
+    protected fun aHasWon(): Assertion = object : Assertion() {
+
+        override fun check(): String? {
+            val hasWon = controller.hasWon
+            if (!hasWon) return "controller.hasWon is false"
+            return null
+        }
+
+        override fun toString(): String = "${ANSI.purple}hasWon${ANSI.reset}"
+
+    }
+
+    protected inline fun <reified T : StatusEffect> aFindPlayerStatusEffect() = object : AssertionValue<T?>() {
+
+        override fun get(): T? = findPlayerStatusEffect<T>()
+
+        override fun toString(): String =
+            "${ANSI.cyan}findPlayerStatusEffect<${T::class.simpleName}> ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
     protected fun AssertionValue<Card?>.aName(): AssertionValue<String?> = object : AssertionValue<String?>() {
 
         override fun get(): String? = this@aName.get()?.name
@@ -214,6 +239,15 @@ abstract class GameControllerTest {
         override fun toString(): String = "${ANSI.white}(${this@aCurrentHealth}${ANSI.white}).${ANSI.cyan}currentHealth ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
 
+    protected inline fun <reified T : StatusEffect> AssertionValue<Enemy>.aFindStatusEffect(): AssertionValue<T?> = object : AssertionValue<T?>() {
+
+        override fun get(): T? = this@aFindStatusEffect.get().statusEffects.findInstance<T>()
+
+        override fun toString(): String =
+            "${ANSI.white}(${this@aFindStatusEffect}${ANSI.white})." +
+                    "${ANSI.cyan}findStatusEffect<${T::class.simpleName}> ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+    
     protected fun <T> deferred(getter: () -> T): AssertionValue<T> = AssertionValue.deferred(getter)
 
     ///////////////////////////////
