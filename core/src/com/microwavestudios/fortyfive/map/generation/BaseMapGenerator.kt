@@ -7,6 +7,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
 import com.microwavestudios.fortyfive.onjNamespaces.OnjInterpolation
 import com.microwavestudios.fortyfive.run.EncounterGenerator
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -23,6 +24,8 @@ abstract class BaseMapGenerator {
         get() = _allNodes
 
     protected lateinit var random: Random
+        private set
+    protected lateinit var run: Run
         private set
     private lateinit var data: BaseMapGeneratorData
     private lateinit var name: String
@@ -41,12 +44,13 @@ abstract class BaseMapGenerator {
     protected var endNode: MapNodeBuilder? = null
         private set
 
-    abstract fun generate(name: String, seed: Long): DetailMap
+    abstract fun generate(name: String, run: Run, seed: Long): DetailMap
 
-    protected fun setup(name: String, data: BaseMapGeneratorData, seed: Long) {
+    protected fun setup(name: String, data: BaseMapGeneratorData, run: Run, seed: Long) {
         this.random = Random(seed)
         this.data = data
         this.name = name
+        this.run = run
         nodeColliders.clear()
         decorationColliders.clear()
         lineColliders.clear()
@@ -268,7 +272,7 @@ abstract class BaseMapGenerator {
         _allNodes.forEach { node ->
             val event = node.event
             if (event !is EncounterPlaceholderMapEvent) return@forEach
-            val encounter = EncounterGenerator.generate(event, node, startNode)
+            val encounter = EncounterGenerator.generate(event, node, startNode, run)
             val encounterEvent = EncounterMapEvent(encounter, event.genExtraction)
             event.startConditions.forEach { encounterEvent.addStartCondition(it) }
             event.blockConditions.forEach { encounterEvent.addBlockCondition(it) }

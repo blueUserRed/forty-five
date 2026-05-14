@@ -3,6 +3,7 @@ package com.microwavestudios.fortyfive.map.generation
 import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.map.*
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.utils.*
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
@@ -13,8 +14,8 @@ import kotlin.math.sin
 
 class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String, seed: Long): DetailMap {
-        setup(name, data, seed)
+    override fun generate(name: String, run: Run, seed: Long): DetailMap {
+        setup(name, data, run, seed)
         val startNode = newNode(0f, 0f)
 
         val nodes = generateNodes(data.circles)

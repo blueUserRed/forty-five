@@ -5,6 +5,7 @@ import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.map.MapEvent
 import com.microwavestudios.fortyfive.map.MapEventFactory
 import com.microwavestudios.fortyfive.map.MapNodeBuilder
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.utils.minus
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.splitInTwo
@@ -19,8 +20,8 @@ import kotlin.collections.map
 
 class PointCloudMapGenerator(val data: PointCloudMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String, seed: Long): DetailMap {
-        setup(name, data, seed)
+    override fun generate(name: String, run: Run, seed: Long): DetailMap {
+        setup(name, data, run, seed)
 
         val startNode = newNode(x = -40f, y = 0f)
         val endNode = newNode(x = data.roadLength + 40f, y = 0f)

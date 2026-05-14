@@ -8,22 +8,42 @@ runModifierPools: [
     {
         majorDifficulty: 0,
         modifierProbability: 0.0,
+        maxModifiers: 0,
         modifiers: []
     },
     {
-        majorDifficulty: 3,
-        modifierProbability: 0.3,
+        majorDifficulty: 2,
+        modifierProbability: 0.4,
+        maxModifiers: 1,
         modifiers: [ "AllRain", "AllMoist" ]
     },
     {
         majorDifficulty: 4,
-        modifierProbability: 0.4,
+        modifierProbability: 0.3,
+        maxModifiers: 1,
+        onlyConstructed: true,
         modifiers: [ "AllRain", "AllMoist", "AllBewitchedMist" ]
     },
     {
         majorDifficulty: 5,
         modifierProbability: 0.4,
-        modifiers: [ "AllBewitchedMist", "AllFrozen" ]
+        maxModifiers: 2,
+        onlyConstructed: true,
+        modifiers: [ "AllBewitchedMist", "AllFrozen", "AllMoist" ]
+    },
+    {
+        majorDifficulty: 3,
+        modifierProbability: 0.5,
+        maxModifiers: 1,
+        onlyLimited: true,
+        modifiers: [ "AllRain", "AllMoist", "AllBewitchedMist" ]
+    },
+    {
+        majorDifficulty: 4,
+        modifierProbability: 0.5,
+        maxModifiers: 2,
+        onlyLimited: true,
+        modifiers: [ "AllBewitchedMist", "AllFrozen", "AllMoist" ]
     },
 ],
 
@@ -38,9 +58,6 @@ runModifierBlacklist: [
     [ "allMoist", "allFrozen" ],
     [ "allFrozen", "allBewitchedMist" ],
 ],
-
-runModifiersMax: 2,
-
 
 //////////////////////////////////////////////////////
 // Run rewards
@@ -143,7 +160,6 @@ stepConfig: {
 // Enemies
 //////////////////////////////////////////////////////
 
-
 enemies: [
     {
         majorDifficulty: 0,
@@ -230,3 +246,38 @@ difficultyScaling: {
         scaling: $LinearScaling {},
     },
 },
+
+//////////////////////////////////////////////////////
+// Limited Challenges
+//////////////////////////////////////////////////////
+
+limitedChallenges: [
+    {
+        addAtDifficulty: 0,
+        challenges: []
+    },
+    {
+        addAtDifficulty: 2,
+        challenges: [
+            $PriceIncrease {
+                multitplier: 1.25
+            }
+        ]
+    },
+    {
+        addAtDifficulty: 3,
+        challenges: [
+            $DifficultyIncrease {
+                increase: 1.0
+            }
+        ]
+    },
+    {
+        addAtDifficulty: 4,
+        challenges: [
+            $ReduceStepAmount {
+                reduceBy: 3
+            }
+        ]
+    },
+]

@@ -27,10 +27,18 @@ class RunGenerator {
             "generateRun only works for Limited and Constructed Runs"
         }
 
-        val modifiers = generateRunModifiers(forBiome, forDifficulty)
+        val modifiers = generateRunModifiers(forBiome, forDifficulty, type)
+        val challenges = generateChallenges(type, forDifficulty)
+        val behaviours = Run.accumulateBehaviours(modifiers, challenges)
 
-        val difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
-        val majorDifficulty = (forDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
+        val baseDifficulty = if (type == RunType.CONSTRUCTED) {
+            forDifficulty
+        } else {
+            1
+        }
+        var difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
+        difficultyAdjustment += behaviours.sumOf { it.difficultyAddition().toDouble() }
+        val majorDifficulty = (baseDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         val minorDifficulty = 1f + difficultyAdjustment.fractionalPart().toFloat()
 
         val rewards = generateRunRewards(forDifficulty)
@@ -48,7 +56,6 @@ class RunGenerator {
             forDifficulty,
             minorDifficulty,
             enemyAmountRange(forDifficulty),
-            modifiers,
             minDiff,
             maxDiff,
             scaling,
@@ -61,14 +68,17 @@ class RunGenerator {
             RunGeneratorConfig.stepsLimited
         }
 
+        val minSteps = behaviours.fold(minStepRange.random(random)) { acc, cur -> cur.modifyMinSteps(acc) }
+        val maxSteps = behaviours.fold(maxStepRange.random(random)) { acc, cur -> cur.modifyMaxSteps(acc) }
+
         return Run(
             "-generated-",
             RunLength.MEDIUM,
             type,
             forDifficulty,
-            minStepRange.random(random),
-            maxStepRange.random(random),
+            minSteps, maxSteps,
             modifiers,
+            challenges,
             rewards,
             forBiome,
             forArea,
@@ -76,6 +86,17 @@ class RunGenerator {
             100,
             mapGenerator
         )
+    }
+
+    private fun generateChallenges(type: RunType, difficulty: Int): List<RunChallenge> {
+        val result = mutableListOf<RunChallenge>()
+        if (type != RunType.LIMITED) return result
+        val challenges = RunGeneratorConfig.limitedChallenges
+        challenges.forEach { (addAtDiff, challenges) ->
+            if (addAtDiff > difficulty) return@forEach
+            result.addAll(challenges)
+        }
+        return result
     }
 
     private fun enemyAmountRange(majorDifficulty: Int): IntRange {
@@ -126,29 +147,35 @@ class RunGenerator {
         return rewards
     }
 
-    private fun generateRunModifiers(biome: String, majorDifficulty: Int): List<RunModifier> {
+    private fun generateRunModifiers(biome: String, majorDifficulty: Int, type: RunType): List<RunModifier> {
         var checkDifficulty = majorDifficulty
-        lateinit var pool: Pair<Float, List<String>>
+        lateinit var pool: RunModifierPool
         while (true) {
             if (checkDifficulty < 0) {
                 throw RuntimeException("no run modifier pool for major difficulty $majorDifficulty")
             }
-            val checkPool = RunGeneratorConfig.runModifierPools[checkDifficulty]
+            val checkPool = RunGeneratorConfig
+                .runModifierPools
+                .find { it.majorDifficulty == checkDifficulty }
             checkDifficulty--
             checkPool ?: continue
+            when {
+                checkPool.onlyConstructed && type != RunType.CONSTRUCTED -> continue
+                checkPool.onlyLimited && type != RunType.LIMITED -> continue
+            }
             pool = checkPool
             break
         }
         val probabilityIncrease = RunGeneratorConfig.runModifierProbabilityChanges[biome]
         val modifiers = if (probabilityIncrease == null) {
-            pool.second
+            pool.modifiers
         } else {
-            pool.second + probabilityIncrease.filter { it in pool.second }
+            pool.modifiers + probabilityIncrease.filter { it in pool.modifiers }
         }.map { RunModifier.get(it) }
 
         val selectedModifiers = mutableListOf<RunModifier>()
-        repeat(RunGeneratorConfig.runModifiersMax) {
-            if (!Utils.coinFlip(pool.first, random)) return@repeat
+        repeat(pool.maxModifiers) {
+            if (!Utils.coinFlip(pool.modifierProbability, random)) return@repeat
 
             val start = modifiers.indices.random(random)
             var current = start
@@ -186,7 +213,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -213,7 +239,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -225,7 +250,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -237,7 +261,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -268,7 +291,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -281,7 +303,6 @@ class RunGenerator {
                         majorDifficulty,
                         unadjustedMajorDifficulty,
                         minorDifficulty,
-                        runModifier,
                         enemyAmountRange,
                         biome,
                         difficultyScaling,
@@ -329,7 +350,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -359,7 +379,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -369,7 +388,6 @@ class RunGenerator {
             majorDifficulty,
             unadjustedMajorDifficulty,
             minorDifficulty,
-            runModifier,
             enemyAmountRange,
             biome,
             difficultyScaling,
@@ -392,7 +410,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -413,7 +430,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -433,7 +449,6 @@ class RunGenerator {
                 unadjustedMajorDifficulty,
                 minorDifficulty,
                 enemyAmountRange,
-                runModifier,
                 minDiff,
                 maxDiff,
                 difficultyScaling,
@@ -445,7 +460,6 @@ class RunGenerator {
                 unadjustedMajorDifficulty,
                 minorDifficulty,
                 enemyAmountRange,
-                runModifier,
                 minDiff,
                 maxDiff,
                 difficultyScaling,
@@ -459,7 +473,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -486,7 +499,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -502,7 +514,6 @@ class RunGenerator {
                 unadjustedMajorDifficulty,
                 minorDifficulty,
                 enemyAmountRange,
-                runModifier,
                 minDiff,
                 maxDiff,
                 difficultyScaling,
@@ -514,7 +525,6 @@ class RunGenerator {
                 unadjustedMajorDifficulty,
                 minorDifficulty,
                 enemyAmountRange,
-                runModifier,
                 minDiff,
                 maxDiff,
                 difficultyScaling,
@@ -528,7 +538,6 @@ class RunGenerator {
             unadjustedMajorDifficulty: Int,
             minorDifficulty: Float,
             enemyAmountRange: IntRange,
-            runModifier: List<RunModifier>,
             minDiff: Float,
             maxDiff: Float,
             difficultyScaling: DifficultyScaling,
@@ -549,7 +558,6 @@ class RunGenerator {
                     unadjustedMajorDifficulty,
                     minorDifficulty,
                     enemyAmountRange,
-                    runModifier,
                     minDiff,
                     maxDiff,
                     difficultyScaling,
@@ -572,7 +580,6 @@ class RunGenerator {
                 unadjustedMajorDifficulty,
                 minorDifficulty,
                 enemyAmountRange,
-                runModifier,
                 minDiff,
                 maxDiff,
                 difficultyScaling,
@@ -584,7 +591,6 @@ class RunGenerator {
                 unadjustedMajorDifficulty,
                 minorDifficulty,
                 enemyAmountRange,
-                runModifier,
                 minDiff,
                 maxDiff,
                 difficultyScaling,
