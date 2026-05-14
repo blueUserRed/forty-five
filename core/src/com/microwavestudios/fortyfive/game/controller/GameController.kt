@@ -1,13 +1,13 @@
 package com.microwavestudios.fortyfive.game.controller
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.microwavestudios.fortyfive.game.EncounterBehaviour
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GameAnimation
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
-import com.microwavestudios.fortyfive.rendering.GameRenderPipeline
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.Revolver
@@ -29,7 +29,6 @@ interface GameController {
 
     val screen: CustomScreen
     val encounterContext: EncounterContext
-    val gameRenderPipeline: GameRenderPipeline
 
     val playerLost: Boolean
 
@@ -64,6 +63,8 @@ interface GameController {
     val isEverlastingDisabled: Boolean
     val cardsInHand: List<Card>
     val encounterModifiers: List<EncounterModifier>
+
+    val encounterBehaviours: List<EncounterBehaviour>
 
     val curPlayerLives: Int
 
@@ -197,10 +198,14 @@ interface GameController {
     fun tryPay(cost: Int, animTarget: Actor? = null): Boolean
 
     /**
-     * adds an encounter modifier and removes it again one [validityChecker] is not true anymore. Encounter
-     * Modifier added like this are not displayed in the UI
+     * adds an encounter behaviour and removes it again one [validityChecker] is not true anymore
      */
-    fun addTemporaryEncounterModifier(modifier: EncounterModifier, validityChecker: (GameController) -> Boolean)
+    fun addTemporaryEncounterBehaviour(behaviour: EncounterBehaviour, validityChecker: (GameController) -> Boolean)
+
+    /**
+     * add an encounter behaviour that stays active for the duration of the encounter
+     */
+    fun addEncounterBehaviour(behaviour: EncounterBehaviour)
 
     fun addEncounterModifier(modifier: EncounterModifier)
 

@@ -1274,43 +1274,6 @@ cursors: [
 
 shaders: [
     {
-        name: "shoot_shader",
-        file: "shaders/shoot.glsl",
-        constantArgs: {
-            timeOffset: 1_500,
-            speed: 14.0,
-            mag: 0.3,
-        }
-    },
-    {
-        name: "screen_shake_shader",
-        file: "shaders/screen_shake.glsl",
-        constantArgs: {
-            timeOffset: 1_500,
-            speed: 25.0,
-            mag: 0.0028,
-        }
-    },
-    {
-        name: "screen_shake_popout_shader",
-        file: "shaders/screen_shake_popout.glsl",
-        constantArgs: {
-            timeOffset: 0,
-            speed: 30.0,
-            mag: 0.1,
-        }
-    },
-    {
-        name: "vignette_shader", // TODO: fix
-        file: "shaders/vignette.glsl",
-        constantArgs: {
-            color: color.red,
-            speed: 0.0,
-            movement: 1.0,
-            minMovement: 0.3
-        }
-    },
-    {
         name: "parry_shader",
         file: "shaders/parry.glsl",
         constantArgs: {
@@ -1337,12 +1300,6 @@ shaders: [
         }
     },
     {
-        name: "bewitched_fog_dynamic_noise_shader",
-        file: "shaders/bewitched_fog_dynamic_noise.glsl",
-        constantArgs: {
-        }
-    },
-    {
         name: "map_edge_shader",
         file: "shaders/map_edge.glsl",
         constantArgs: {
@@ -1355,12 +1312,6 @@ shaders: [
             timeOffset: 200.0,
             texSize: [636.0, 758.0],
             cardSize: [636.0, 758.0]
-        }
-    },
-    {
-        name: "fog_shader",
-        file: "shaders/fog.glsl",
-        constantArgs: {
         }
     },
     {

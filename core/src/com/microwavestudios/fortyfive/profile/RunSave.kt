@@ -3,6 +3,8 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
+import com.microwavestudios.fortyfive.game.Talisman
+import com.microwavestudios.fortyfive.game.TalismanFactory
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.run.Run
@@ -59,6 +61,10 @@ class RunSave private constructor(val profile: Profile) {
     private var _backpack: MutableList<CardType> by DataDelegate(RunSaveData::backpack)
     val backpack: List<CardType>
         get() = _backpack
+
+    private var _talismans: MutableList<Talisman> by DataDelegate(RunSaveData::talismans)
+    val talismans: List<Talisman>
+        get() = _talismans
 
     private lateinit var map: DetailMap
 
@@ -156,6 +162,7 @@ class RunSave private constructor(val profile: Profile) {
         var usedSteps: Int,
         var backpack: MutableList<CardType>,
         var backpackDecks: MutableList<Deck>,
+        var talismans: MutableList<Talisman>,
         var currentDeckId: Int,
         var encountersStarted: Int,
         var cardsTakenAlong: List<CardType>,
@@ -171,6 +178,7 @@ class RunSave private constructor(val profile: Profile) {
             "backpack" with backpack.map { it.asOnj() }
             "backpackDecks" with backpackDecks.map { it.asOnjObject() }
             "currentDeckId" with currentDeckId
+            "talismans" with talismans.map { it.name }
             "cardsTakenAlong" with cardsTakenAlong.map { it.asOnj() }
             "run" with run.asOnj()
         }
@@ -191,6 +199,11 @@ class RunSave private constructor(val profile: Profile) {
                     .get<OnjArray>("backpackDecks")
                     .value
                     .map { Deck.getFromOnj(it as OnjObject) }
+                    .toMutableList(),
+                onj
+                    .get<OnjArray>("talismans")
+                    .value
+                    .map { TalismanFactory.getTalisman(it.value as String) }
                     .toMutableList(),
                 onj.get<Long>("currentDeckId").toInt(),
                 onj.get<Long>("encountersStarted").toInt(),
@@ -257,6 +270,7 @@ class RunSave private constructor(val profile: Profile) {
                     Deck("4", 3, mutableMapOf()),
                     Deck("5", 4, mutableMapOf()),
                 ),
+                mutableListOf(),
                 0,
                 0,
                 cardsToTakeAlong,

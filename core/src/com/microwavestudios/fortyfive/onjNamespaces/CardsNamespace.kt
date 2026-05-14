@@ -495,12 +495,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun discharge(turns: OnjEffectValue): OnjEffect = OnjEffect(Effect.DischargePoison(turns.value, EffectData()))
 
-    @RegisterOnjFunction(schema = "params: [string]")
-    fun addEncounterModifierWhileBulletIsInRevolver(encounterModifierName: OnjString): OnjEffect =
-        OnjEffect(Effect.AddEncounterModifierWhileBulletIsInRevolver(
-            encounterModifierName.value,
-            EffectData()
-        ))
+    @RegisterOnjFunction(schema = "params: []")
+    fun drawOneMoreCardWhileBulletIsInRevolver(): OnjEffect =
+        OnjEffect(Effect.DrawOneMoreCardWhileBulletIsInRevolver(EffectData()))
 
     @RegisterOnjFunction(schema = "params: []")
     fun toTopCard(): OnjEffect = OnjEffect(Effect.ToTopCard(EffectData()))

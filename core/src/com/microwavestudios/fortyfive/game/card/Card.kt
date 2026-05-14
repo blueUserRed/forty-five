@@ -670,7 +670,7 @@ class Card(
 
                         val screenShakeTimeline = Timeline.timeline {
                             delay(210)
-                            include(controller.gameRenderPipeline.getScreenShakeTimeline())
+                            include(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
                         }
 
                         val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
