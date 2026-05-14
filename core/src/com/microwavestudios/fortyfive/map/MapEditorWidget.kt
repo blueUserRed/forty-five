@@ -242,16 +242,6 @@ class MapEditorWidget(
             if (mapBuilder.startNode == node) return@watchFor
             mapBuilder.endNode = node
         }
-        events.watchFor<MapEditorScreen.CycleNodeTextureEvent> {
-            val node = selectedNode ?: return@watchFor
-            var index = nodeTextures.indexOf(node.nodeTexture)
-            if (index < 0) return@watchFor
-            index++
-            if (index >= nodeTextures.size) index = 0
-            node.nodeTexture = nodeTextures[index]
-            node.invalidateCaches()
-            events.fire(DisplayNodePageEvent(selectedNode))
-        }
     }
 
     private fun handleClick(x: Float, y: Float, button: Int) {

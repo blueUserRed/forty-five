@@ -117,6 +117,43 @@ var encounter = [
     },
 ];
 
+var encounterKeys = {
+    startConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    blockConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    descriptionText: [
+        {
+            predicate: $CurrentNodeBlocks {},
+            text: "Defeat enemies to progress"
+        }
+    ],
+};
+
+var chooseCardKeys = {
+    seed: 0,
+    nbrOfCards: 1,
+    startConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    blockConditions: [
+        $Not { negate: $CurrentNodeCompleted {} }
+    ],
+    descriptionText: [
+        {
+            predicate: $Always {},
+            text: "You get a card!"
+        }
+    ],
+    amountOfRerolls: 0,
+    rerollPriceIncrease: 30,
+    rerollBasePrice: 30,
+    enableRerolls: false,
+    isCompleted: false
+};
+
 majorDifficulty: 1,
 tutorialText: [
     {
@@ -180,14 +217,11 @@ nodes: [
         edgesTo: [
             1, 2, 4
         ],
-        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
-//            currentlyBlocks: false,
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             encounter: encounter.1,
             isExtraction: false,
+            ...encounterKeys
         }
     },
     {
@@ -196,18 +230,9 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        nodeTexture: "map_node_choose_card",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_silver_bullet"],
-            seed: 0,
-            nbrOfCards: 1,
-            currentlyBlocks: true,
-            startable: true,
-            amountOfRerolls: 0,
-            rerollPriceIncrease: 30,
-            rerollBasePrice: 30,
-            enableRerolls: false,
-            isCompleted: false
+            ...chooseCardKeys
         },
     },
     {
@@ -216,13 +241,11 @@ nodes: [
         edgesTo: [
             4, 6
         ],
-        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             encounter: encounter.2,
             isExtraction: false,
+            ...encounterKeys
         }
     },
     {
@@ -231,18 +254,9 @@ nodes: [
         edgesTo: [
             5, 7,
         ],
-        nodeTexture: "map_node_choose_card",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_worker_bullet"],
-            seed: 0,
-            nbrOfCards: 1,
-            currentlyBlocks: true,
-            startable: true,
-            amountOfRerolls: 0,
-            rerollPriceIncrease: 30,
-            rerollBasePrice: 30,
-            enableRerolls: false,
-            isCompleted: false
+            ...chooseCardKeys
         },
     },
     {
@@ -251,13 +265,11 @@ nodes: [
         edgesTo: [
             6, 8
         ],
-        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            startable: true,
             isCompleted: false,
             encounter: encounter.3,
             isExtraction: false,
+            ...encounterKeys
         }
     },
     {
@@ -266,15 +278,21 @@ nodes: [
         edgesTo: [
             7, 9
         ],
-        nodeTexture: "map_node_dialog",
         event: $DialogMapEvent {
             dialog: "talk_with_brother",
             displayName: "Your Brother",
-            descriptionText: "Your Brother wants to talk to you",
-            completedDescriptionText: "",
-            canOnlyBeStartedOnce: true,
-            currentlyBlocks: true,
-            startable: true,
+            descriptionText: [
+                {
+                    predicate: $Always {},
+                    text: "Your Brother wants to talk to you"
+                }
+            ],
+            startConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
+            blockConditions: [
+                $Not { negate: $CurrentNodeCompleted {} }
+            ],
             isCompleted: false
         }
     },
@@ -286,7 +304,6 @@ nodes: [
         ],
         image: "aqua_balle",
         imagePos: "RIGHT",
-        nodeTexture: "map_node_exit",
         event: $FinishTutorialRunMapEvent {
         },
     },

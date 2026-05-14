@@ -2,9 +2,9 @@ package com.microwavestudios.fortyfive.map.generation
 
 import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.map.*
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.splitInTwo
-import com.microwavestudios.fortyfive.utils.toFloatRange
 import com.microwavestudios.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
 import onj.value.OnjArray
@@ -13,40 +13,26 @@ import onj.value.OnjObject
 
 class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseMapGenerator() {
 
-    override fun generate(name: String, seed: Long): DetailMap {
-        setup(name, data, seed)
+    override fun generate(name: String, run: Run, seed: Long): DetailMap {
+        setup(name, data, run, seed)
 
-        val startNode = newNode(x = 0f, y = 0f)
-        setupFirstNode(startNode)
+        val firstNode = newNode(x = 0f, y = 0f)
+        val lastNode = newNode(x = data.roadLength, y = 0f)
 
-        val endNode = newNode(x = data.roadLength, y = 0f)
-        setupLastNode(endNode)
-
-        val mainLine = Line(startNode, endNode, data.mainLineNodes, 0f)
+        val mainLine = Line(firstNode, lastNode, data.mainLineNodes, 0f)
         mainLine.generate()
 
-        val addLine1 = addAdditionalLine(mainLine, data.altLinesOffset)
-        val addLine2 = addAdditionalLine(mainLine, -data.altLinesOffset)
+        addAdditionalLine(mainLine, data.altLinesOffset)
+        addAdditionalLine(mainLine, -data.altLinesOffset)
 
         rotateNodes()
-        calculateDistances(startNode)
 
         setupBounds(data.horizontalExtension, data.verticalExtension)
 
-        val sharedEvents = data.events.filter { it.line == -1 }
-        assignEvents(mainLine, sharedEvents)
-        assignEvents(addLine1, sharedEvents)
-        assignEvents(addLine2, sharedEvents)
-        val eventsMainLine = data.events.filter { it.line == 0 }
-        assignEvents(mainLine, eventsMainLine)
-        val eventsLine1 = data.events.filter { it.line == 1 }
-        assignEvents(addLine1, eventsLine1)
-        val eventsLine2 = data.events.filter { it.line == 2 }
-        assignEvents(addLine2, eventsLine2)
+        generateMapEvents()
+        generateEncounters()
 
-        generateEncounters(startNode)
-
-        startNode.build()
+        firstNode.build()
 
         val (animatedDecorations, decorations) = data
             .decorations
@@ -57,8 +43,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
 
         return DetailMap(
             name = name,
-            startNode = startNode.asNode!!,
-            endNode = endNode.asNode!!,
+            startNode = this.startNode!!.asNode!!,
+            endNode = this.endNode!!.asNode!!,
             decorations = genDecorations,
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
@@ -84,24 +70,6 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         )
         line.generate()
         return line
-    }
-
-    private fun assignEvents(line: Line, eventsToAssign: List<ThreeLineMapGeneratorEventSpawner>) {
-        val mainEvent = data.mainEvent
-        val events = MutableList(line.nodes.size) { mainEvent.nodeTexture to mainEvent.eventCreator }
-        eventsToAssign.forEach { (eventCreator, offset, nodeTexture) ->
-            var cur = 0
-            while (true) {
-                cur += offset.random(random)
-                if (cur >= events.size) break
-                events[cur] = nodeTexture to eventCreator
-            }
-        }
-        events.forEachIndexed { index, (texture, eventCreator) ->
-            val node = line.nodes[index]
-            node.event = eventCreator()
-            node.nodeTexture = texture
-        }
     }
 
     private inner class Line(
@@ -149,9 +117,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         override val majorDifficulty: Int,
         val biome: String,
         override val firstNodeEvent: () -> MapEvent,
-        override val firstNodeTexture: String,
         override val lastNodeEvent: () -> MapEvent,
-        override val lastNodeTexture: String,
+        override val randomStepsToLastNode: Int,
         val roadLength: Float,
         val mainLineNodes: Int,
         val altLinesPadding: IntRange,
@@ -163,10 +130,10 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         override val nodeProtectedArea: Float,
         override val locationSignProtectedAreaWidth: Float,
         override val locationSignProtectedAreaHeight: Float,
-        val mainEvent: ThreeLineMapGeneratorEventSpawner,
-        val events: List<ThreeLineMapGeneratorEventSpawner>,
         val decorations: List<MapGeneratorDecoration>,
-        override val rotation: Float
+        override val rotation: Float,
+        override val fillEvents: List<MapGeneratorFillEvent>,
+        override val fixedEvents: List<MapGeneratorFixedEvent>
     ) : BaseMapGeneratorData {
 
         override fun asOnj(): OnjObject = buildOnjObject {
@@ -179,11 +146,6 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
             "varianceY" with varianceY
             "horizontalExtension" with horizontalExtension
             "verticalExtension" with verticalExtension
-            "mainEvent" with buildOnjObject {
-                "event" with mainEvent.eventCreator().asOnjObject()
-                "nodeTexture" with mainEvent.nodeTexture
-            }
-            "events" with events.map { it.asOnj() }
             "decorations" with decorations.map { it.asOnj() }
             includeBaseData()
         }
@@ -194,9 +156,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
                 onj.get<Long>("majorDifficulty").toInt(),
                 onj.get<String>("biome"),
                 { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("firstNodeEvent")) },
-                onj.get<String>("firstNodeTexture"),
                 { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("lastNodeEvent")) },
-                onj.get<String>("lastNodeTexture"),
+                onj.get<Long>("randomStepsToLastNode").toInt(),
                 onj.get<Double>("roadLength").toFloat(),
                 onj.get<Long>("mainLineNodes").toInt(),
                 onj.get<OnjArray>("altLinesPadding").toIntRange(),
@@ -208,46 +169,13 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
                 onj.get<Double>("nodeProtectedArea").toFloat(),
                 onj.get<Double>("locationSignProtectedAreaWidth").toFloat(),
                 onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
-                ThreeLineMapGeneratorEventSpawner(
-                    { MapEventFactory.getMapEvent(onj.access(".mainEvent.event")) },
-                    (0..1),
-                    onj.access<String>(".mainEvent.nodeTexture"),
-                    0
-                ),
-                onj
-                    .get<OnjArray>("events")
-                    .value
-                    .map { ThreeLineMapGeneratorEventSpawner.fromOnj(it as OnjObject) },
                 onj
                     .get<OnjArray>("decorations")
                     .value
                     .map { MapGeneratorDecoration.fromOnj(it as OnjObject) },
-                onj.get<Double>("rotation").toFloat()
-            )
-        }
-    }
-
-    data class ThreeLineMapGeneratorEventSpawner(
-        val eventCreator: () -> MapEvent,
-        val offset: IntRange,
-        val nodeTexture: String,
-        val line: Int,
-    ) {
-
-        fun asOnj(): OnjObject = buildOnjObject {
-            "event" with eventCreator().asOnjObject()
-            "offset" with arrayOf(offset.first, offset.last)
-            "nodeTexture" with nodeTexture
-            "line" with line
-        }
-
-        companion object {
-
-            fun fromOnj(onj: OnjObject): ThreeLineMapGeneratorEventSpawner = ThreeLineMapGeneratorEventSpawner(
-                eventCreator = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("event")) },
-                offset = onj.get<OnjArray>("offset").toIntRange(),
-                nodeTexture = onj.get<String>("nodeTexture"),
-                line = onj.get<Long>("line").toInt()
+                onj.get<Double>("rotation").toFloat(),
+                onj.get<OnjArray>("fillEvents").value.map { MapGeneratorFillEvent.fromOnj(it as OnjObject) },
+                onj.get<OnjArray>("fixedEvents").value.map { MapGeneratorFixedEvent.fromOnj(it as OnjObject) },
             )
         }
     }

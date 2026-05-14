@@ -110,12 +110,6 @@ class MapEditorScreen : ScreenCreator() {
         val index = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val nodeTexture = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
-            syncDimensions()
-            keyboardFocusable = KeyboardFocusable.LEAF
-            touchable = Touchable.enabled
-            onInput(GameInputs.interact) { events.fire(CycleNodeTextureEvent) }
-        }
         val makeStart = label("roadgeek", "make start node", Color.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
             keyboardFocusable = KeyboardFocusable.LEAF
@@ -134,7 +128,6 @@ class MapEditorScreen : ScreenCreator() {
             isVisible = node != null
             node ?: return@watchFor
             index.setText("index: ${node.index}")
-            nodeTexture.setText("texture: ${node.nodeTexture ?: "null"}")
             val startEndNodeVisible = map.startNode != node && map.endNode != node
             makeStart.isVisible = startEndNodeVisible
             makeEnd.isVisible = startEndNodeVisible

@@ -31,6 +31,13 @@ class RunSave private constructor(val profile: Profile) {
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
     var cardsTakenAlong: List<CardType> by DataDelegate(RunSaveData::cardsTakenAlong)
 
+    var usedSteps: Int by DataDelegate(
+        RunSaveData::usedSteps,
+        onSet = {
+            FortyFive.currentScreen?.events?.fire(UsedStepsChangedEvent(it))
+        }
+    )
+
     var playerHealth: Int by DataDelegate(
         RunSaveData::playerHealth,
         onSet = { value ->
@@ -152,6 +159,7 @@ class RunSave private constructor(val profile: Profile) {
         var currentNode: Int,
         var lastNode: Int?,
         var playerHealth: Int,
+        var usedSteps: Int,
         var backpack: MutableList<CardType>,
         var backpackDecks: MutableList<Deck>,
         var talismans: MutableList<Talisman>,
@@ -165,6 +173,7 @@ class RunSave private constructor(val profile: Profile) {
             "currentNode" with currentNode
             "lastNode" with lastNode
             "playerHealth" with playerHealth
+            "usedSteps" with usedSteps
             "encountersStarted" with encountersStarted
             "backpack" with backpack.map { it.asOnj() }
             "backpackDecks" with backpackDecks.map { it.asOnjObject() }
@@ -180,6 +189,7 @@ class RunSave private constructor(val profile: Profile) {
                 onj.get<Long>("currentNode").toInt(),
                 onj.get<Long?>("lastNode")?.toInt(),
                 onj.get<Long>("playerHealth").toInt(),
+                onj.get<Long>("usedSteps").toInt(),
                 onj
                     .get<OnjArray>("backpack")
                     .value
@@ -245,12 +255,13 @@ class RunSave private constructor(val profile: Profile) {
 
         fun newRun(profile: Profile, run: Run, cardsToTakeAlong: List<CardType>): RunSave {
             val mapGenerator = run.mapGenerator
-            val map = mapGenerator.generate("run_map", TimeUtils.millis())
+            val map = mapGenerator.generate("run_map", run, TimeUtils.millis())
             val save = RunSave(profile)
             save.data = RunSaveData(
-                0,
+                map.startNode.index,
                 null,
                 run.initialPlayerHealth,
+                0,
                 cardsToTakeAlong.toMutableList(),
                 mutableListOf(
                     Deck("1", 0, mutableMapOf()),
@@ -274,5 +285,7 @@ class RunSave private constructor(val profile: Profile) {
             return save
         }
     }
+
+    class UsedStepsChangedEvent(val newUsedSteps: Int)
 
 }

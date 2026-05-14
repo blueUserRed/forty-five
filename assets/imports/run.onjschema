@@ -8,11 +8,30 @@ $RunReward {
 
 }
 
+$RunChallenge {
+
+    $ReduceStepAmount {
+        reduceBy: int
+    }
+
+    $PriceIncrease {
+        multitplier: float
+    }
+
+    $DifficultyIncrease {
+        increase: float
+    }
+
+}
+
 name: string,
 length: string,
 type: string,
 difficulty: int,
+minSteps: int,
+maxSteps: int,
 modifiers: string[],
+challenges: $RunChallenge[],
 rewards: $RunReward[],
 biome: string,
 fromArea: string,

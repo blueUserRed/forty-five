@@ -167,6 +167,9 @@ class Profile private constructor(
 
     override var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
+    val usedSteps: Int?
+        get() = runSave?.usedSteps
+
     override var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
 
     override val currentMapSaver: MapSaver
@@ -231,7 +234,12 @@ class Profile private constructor(
         dirty()
     }
 
-    override fun changeToMap(map: String, fromEnd: Boolean) {
+    fun stepTaken() {
+        val runSave = runSave ?: return
+        runSave.usedSteps++
+    }
+
+    override fun changeToMap(map: String, fromEnd: Boolean = false) {
         if (map == _currentMapName) return
         writeMaps()
         loadAreaMap(map)

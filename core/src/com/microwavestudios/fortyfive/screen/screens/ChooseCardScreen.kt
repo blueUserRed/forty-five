@@ -67,9 +67,12 @@ class ChooseCardScreen : ScreenCreator() {
 
     private val profile: IProfile = FortyFive.profileManager.currentProfile!!
 
+    private var rerollPrice: Int = 0
+
     private lateinit var currentDeck: Deck
 
     override fun getRoot(): Group = newGroup {
+        setRerollPrice()
         width = worldWidth
         height = worldHeight
         x = 0f
@@ -159,13 +162,13 @@ class ChooseCardScreen : ScreenCreator() {
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 val label = label("roadgeek", "", Color.FortyWhite, 24) {
-                    setText("reroll: ${context.currentRerollPrice}\$")
+                    setText("reroll: \$$rerollPrice")
                     touchable = Touchable.disabled
                     syncDimensions()
                 }
                 onInput(GameInputs.interact) {
                     reroll()
-                    label.setText("reroll: ${context.currentRerollPrice}\$")
+                    label.setText("reroll: \$$rerollPrice")
                 }
             }
         }
@@ -175,14 +178,21 @@ class ChooseCardScreen : ScreenCreator() {
         initCards()
     }
 
+    private fun setRerollPrice() {
+        val profile = FortyFive.profileManager.currentProfile!!
+        rerollPrice = profile.activeRun?.let {
+            it.behaviours.fold(context.currentRerollPrice) { acc, cur -> cur.modifyPrice(acc) }
+        } ?: context.currentRerollPrice
+    }
+
     private fun reroll() {
-        val price = context.currentRerollPrice
-        if (profile.playerMoney < price) {
+        if (profile.playerMoney < rerollPrice) {
             FortyFive.soundPlayer.situation("not_allowed", screen)
             return
         }
-        profile.payMoney(price)
+        profile.payMoney(rerollPrice)
         context.amountOfRerolls++
+        setRerollPrice()
         context.seed = Random(context.seed).nextLong()
         initCards()
     }

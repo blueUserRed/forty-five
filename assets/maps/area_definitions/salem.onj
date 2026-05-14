@@ -9,7 +9,6 @@ nodes: [
         edgesTo: [
             2
         ],
-        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "tabu_letter_outpost",
             fromEnd: true,
@@ -37,7 +36,6 @@ nodes: [
         edgesTo: [
             2, 4
         ],
-        nodeTexture: "map_node_heal",
         event: $EmptyMapEvent {}
     },
     {
@@ -46,7 +44,6 @@ nodes: [
         edgesTo: [
             3
         ],
-//        nodeTexture: "map_node_exit",
         event: $EmptyMapEvent {},
 //        event: $EnterMapMapEvent {
 //            targetMap: "spire_outpost",

@@ -7,7 +7,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.collections.associate
 import kotlin.collections.map
-import kotlin.math.pow
 
 object RunGeneratorConfig {
 
@@ -44,20 +43,20 @@ object RunGeneratorConfig {
             }
     }
 
-    val runModifiersMax: Int by lazy { configFile.get<Long>("runModifiersMax").toInt() }
-
-    val runModifierPools: Map<Int, Pair<Float, List<String>>> by lazy {
+    val runModifierPools: List<RunModifierPool> by lazy {
         configFile
             .get<OnjArray>("runModifierPools")
             .value
-            .associate { pool ->
-                pool as OnjObject
-                val modifiers = pool
-                    .get<OnjArray>("modifiers")
-                    .value
-                    .map { it.value as String }
-                val majDifficulty = pool.get<Long>("majorDifficulty").toInt()
-                majDifficulty to (pool.get<Double>("modifierProbability").toFloat() to modifiers)
+            .map { obj ->
+                obj as OnjObject
+                RunModifierPool(
+                    obj.get<Long>("majorDifficulty").toInt(),
+                    obj.get<Double>("modifierProbability").toFloat(),
+                    obj.get<Long>("maxModifiers").toInt(),
+                    obj.getOr<Boolean>("onlyLimited", false),
+                    obj.getOr<Boolean>("onlyConstructed", false),
+                    obj.get<OnjArray>("modifiers").value.map { it.value as String }
+                )
             }
     }
 
@@ -183,6 +182,30 @@ object RunGeneratorConfig {
         )
     }
 
+    val stepsLimited: Pair<IntRange, IntRange> by lazy {
+        configFile.access<OnjArray>(".stepConfig.limited.minSteps").toIntRange() to
+            configFile.access<OnjArray>(".stepConfig.limited.maxSteps").toIntRange()
+    }
+
+    val stepsConstructed: Pair<IntRange, IntRange> by lazy {
+        configFile.access<OnjArray>(".stepConfig.constructed.minSteps").toIntRange() to
+            configFile.access<OnjArray>(".stepConfig.constructed.maxSteps").toIntRange()
+    }
+
+    val limitedChallenges: List<Pair<Int, List<RunChallenge>>> by lazy {
+        val config = configFile.get<OnjArray>("limitedChallenges")
+        config
+            .value
+            .map { obj ->
+                obj as OnjObject
+                val difficulty = obj.get<Long>("addAtDifficulty").toInt()
+                val challenges = obj.get<OnjArray>("challenges").value.map {
+                    RunChallengeFactory.get(it as OnjNamedObject)
+                }
+                difficulty to challenges
+            }
+    }
+
 }
 
 data class DifficultyScalingData(
@@ -208,6 +231,15 @@ data class EncounterModifierPool(
     val majorDifficulty: Int,
     val modifierProbability: Float,
     val maxModifiers: Int,
+    val modifiers: List<String>
+)
+
+data class RunModifierPool(
+    val majorDifficulty: Int,
+    val modifierProbability: Float,
+    val maxModifiers: Int,
+    val onlyLimited: Boolean,
+    val onlyConstructed: Boolean,
     val modifiers: List<String>
 )
 

@@ -17,6 +17,12 @@ $MapPredicate {
         minimum: int
     }
 
+    $MinStepsReached {}
+
+    $CurrentNodeCompleted {}
+
+    $CurrentNodeBlocks {}
+
     $Not {
         negate: $MapPredicate
     }
@@ -30,5 +36,7 @@ $MapPredicate {
     }
 
     $Never {}
+
+    $Always {}
 
 }

@@ -29,8 +29,6 @@ import com.microwavestudios.fortyfive.screen.actors.DisableActor
 import com.microwavestudios.fortyfive.screen.actors.ZIndexActor
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator
 import com.microwavestudios.fortyfive.utils.*
-import kotlin.math.abs
-import kotlin.math.absoluteValue
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -213,7 +211,10 @@ class DetailMapWidget(
     private val encounterDebugMenuPage: EncounterPreviewDebugMenuPage =
         screen.findDebugMenuPage<EncounterPreviewDebugMenuPage>()!!
 
+    private var maxStepsReached: Boolean = false
+
     private var walkEverywhere: Boolean by debugMenuPage.walkEverywhere
+    private var countSteps: Boolean by debugMenuPage.countSteps
 
     private var ignoreLeftStick: Boolean = false
 
@@ -293,23 +294,11 @@ class DetailMapWidget(
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
-        val btn = startButton ?: screen.namedActorOrError(startButtonName)
-        if (btn is DisableActor && btn.isDisabled) return
+        if (maxStepsReached) return
+        if (startButton is DisableActor && startButton.isDisabled) return
         if (playerNode.event?.canBeStarted(map)?.not() ?: true) return
         val event = playerNode.event
-        val additionalEvent = playerNode.additionalEvent
-        if (additionalEvent == null) {
-            event?.start()
-        } else {
-            requireNotNull(event) { "node cant have additional event without primary event" }
-            val firstScreen = event.chainScreen
-            val secondScreen = additionalEvent.chainScreen
-            requireNotNull(firstScreen) { "event: $event cant be chained" }
-            requireNotNull(secondScreen) { "event: $additionalEvent cant be chained" }
-            FortyFive.screenManager.appendScreen(firstScreen.first, firstScreen.second)
-            FortyFive.screenManager.appendScreen(secondScreen.first, secondScreen.second)
-            FortyFive.screenManager.screenFinished()
-        }
+        event?.start()
     }
 
     private fun updateDirectionIndicator(pointerPosition: Vector2) {
@@ -382,11 +371,14 @@ class DetailMapWidget(
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
         FortyFive.soundPlayer.situation("walk", screen)
+        if (countSteps) FortyFive.profileManager.currentProfile?.stepTaken()
+        checkMaxSteps()
         if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
     }
 
     private fun canGoTo(node: MapNode): Boolean {
+        if (maxStepsReached) return false
         val lastNode = mapSaver.lastNode
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // trap player ? idk
         if (!playerNode.isLinkedTo(node)) return false
@@ -395,11 +387,27 @@ class DetailMapWidget(
         return true
     }
 
+    private fun checkMaxSteps() {
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile) { "map screen can only be used with a profile" }
+        val run = profile.activeRun ?: return
+        if (run.minSteps == -1 || run.maxSteps == -1) return
+        val steps = profile.usedSteps ?: return
+        if (steps < run.maxSteps) return
+        maxStepsReached = true
+        events.fire(MaxStepsReachedEvent)
+    }
+
+    fun startLastEvent() {
+        map.endNode.event?.start()
+    }
+
     private var firstFrame: Boolean = true
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (firstFrame) {
             firstFrame = false
+            checkMaxSteps()
             map.uniqueNodes.forEach { it.event?.onMapLoad(map) }
             events.fire(PlayerChangedNodeEvent(playerNode))
         }
@@ -713,6 +721,7 @@ class DetailMapWidget(
     data class PlayerChangedNodeEvent(
         val newNode: MapNode
     )
+    object MaxStepsReachedEvent
 
     companion object {
         const val logTag = "Map"
