@@ -541,12 +541,15 @@ class FadeToBlackRenderTask(
         screen.viewport.apply()
         shapeRenderer.projectionMatrix = screen.viewport.camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val remaining = (fadeFinishesAt - now).toFloat()
-        val alpha = if (reverse) {
+        var alpha = if (reverse) {
             remaining / duration.toFloat()
         } else {
             1f - remaining / duration.toFloat()
         }
+        alpha = Interpolation.pow2.apply(alpha)
         shapeRenderer.color = Color(0f, 0f, 0f, alpha)
         shapeRenderer.rect(0f, 0f, screen.viewport.worldWidth, screen.viewport.worldHeight)
         shapeRenderer.end()

@@ -91,6 +91,7 @@ $MapEvent {
 
     $EncounterPlaceholderMapEvent {
         genExtraction: boolean,
+        genHard: boolean,
         majorDifficulty: int,
         unadjustedMajorDifficulty: int,
         minorDifficulty: float,

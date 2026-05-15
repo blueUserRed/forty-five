@@ -47,6 +47,7 @@ interface IProfile {
     val currentMapSaver: MapSaver
     val currentAreaMap: DetailMap
     val activeRun: Run?
+    val usedSteps: Int?
     val isRunActive: Boolean
     var healthInRun: Int?
     val maxHealthInRun: Int?
@@ -64,6 +65,7 @@ interface IProfile {
     fun encounterStarted()
     fun loseRun()
     fun winRun()
+    fun stepTaken()
     fun earnMoney(amount: Int)
     fun payMoney(amount: Int)
     fun getCardForRun(card: CardType)
@@ -167,7 +169,7 @@ class Profile private constructor(
 
     override var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
-    val usedSteps: Int?
+    override val usedSteps: Int?
         get() = runSave?.usedSteps
 
     override var lastNodeIndex: Int? by DataDelegate(ProfileData::lastNode)
@@ -234,12 +236,12 @@ class Profile private constructor(
         dirty()
     }
 
-    fun stepTaken() {
+    override fun stepTaken() {
         val runSave = runSave ?: return
         runSave.usedSteps++
     }
 
-    override fun changeToMap(map: String, fromEnd: Boolean = false) {
+    override fun changeToMap(map: String, fromEnd: Boolean) {
         if (map == _currentMapName) return
         writeMaps()
         loadAreaMap(map)

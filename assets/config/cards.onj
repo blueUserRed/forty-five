@@ -870,7 +870,7 @@ cards: [
         name: "shieldBullet",
         title: "Shield Bullet",
         flavourText: "",
-        description: "$trigger$On-Turn-Begin:$trigger$\n$trigger$While in revolver$trigger$:\n$You get $status$SHIELD$status$ (4)",
+        description: "$trigger$On-Turn-Begin:$trigger$\n$trigger$While in revolver$trigger$:\nYou get $status$SHIELD$status$ (4)",
         baseDamage: 0,
         deckMaximum: 3,
         effects: [
@@ -2082,7 +2082,7 @@ cards: [
         name: "amplifyingBullet",
         title: "Amplifying Bullet",
         flavourText: "",
-        description: "$trigger$While in Revolver:$trigger$\nWhenever a bullet gets a buff that is caused by another Bulleteffect:\nit additionally gets +4 dmg",
+        description: "$trigger$While in Revolver:$trigger$\nWhenever a bullet gets a buff that is caused by another Bulleteffect:\n it additionally gets +4 dmg",
         baseDamage: 6,
         deckMaximum: 1,
         effects: [

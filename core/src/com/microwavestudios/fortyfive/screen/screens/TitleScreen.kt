@@ -107,7 +107,7 @@ class TitleScreen : ScreenCreator() {
             FortyFive.globalSave.lastUsedProfile = event.newProfile?.name
         }
 
-        label("red wing", "rework stage 2", Color.Black, 32) {
+        label("red wing", "rework stage 3", Color.Black, 32) {
             onLayoutAndNow {
                 x = worldWidth - width - 10
                 y = worldHeight - height - 10
