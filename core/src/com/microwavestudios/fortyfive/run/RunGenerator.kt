@@ -299,7 +299,7 @@ class RunGenerator {
             BaseMapGenerator.MapGeneratorFillEvent(
                 {
                     EncounterPlaceholderMapEvent(
-                        false,
+                        false, false,
                         majorDifficulty,
                         unadjustedMajorDifficulty,
                         minorDifficulty,
@@ -319,6 +319,30 @@ class RunGenerator {
                 },
                 null, null,
                 100
+            ),
+            BaseMapGenerator.MapGeneratorFillEvent(
+                { // hard encounter
+                    EncounterPlaceholderMapEvent(
+                        false, true,
+                        majorDifficulty,
+                        unadjustedMajorDifficulty,
+                        minorDifficulty,
+                        enemyAmountRange,
+                        biome,
+                        difficultyScaling,
+                        minDiff,
+                        maxDiff,
+                        random.nextLong()
+                    ).also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.setDescriptionText(listOf(
+                            MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
+                        ))
+                    }
+                },
+                null, null,
+                20
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 {
@@ -384,7 +408,7 @@ class RunGenerator {
             difficultyScaling: DifficultyScaling,
             biome: String
         ): MapEvent = EncounterPlaceholderMapEvent(
-            true,
+            true, true,
             majorDifficulty,
             unadjustedMajorDifficulty,
             minorDifficulty,

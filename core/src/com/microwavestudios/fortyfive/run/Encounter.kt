@@ -26,6 +26,7 @@ data class Encounter(
     val unadjustedMajorDifficulty: Int,
     val majorDifficulty: Int,
     val minorDifficulty: Float,
+    val isHard: Boolean,
     val difficultyScalingInfo: Float, // additional info for debugging/balancing
     val special: Boolean,
 ) {
@@ -59,6 +60,7 @@ data class Encounter(
         "majorDifficulty" with majorDifficulty
         "minorDifficulty" with minorDifficulty
         "difficultyScalingInfo" with difficultyScalingInfo
+        if (isHard) "isHard" with true
         "special" with special
     }
 
@@ -73,6 +75,7 @@ data class Encounter(
             onj.get<Long>("unadjustedMajorDifficulty").toInt(),
             onj.get<Long>("majorDifficulty").toInt(),
             onj.get<Double>("minorDifficulty").toFloat(),
+            onj.getOr<Boolean>("isHard", false),
             onj.getOr<Double>("difficultyScalingInfo", -1.0).toFloat(),
             onj.getOr("special", false),
         )
@@ -236,6 +239,11 @@ object EncounterGenerator {
         val difficultyScaling = difficultyScale(node, placeholder, startNode)
         difficultyAdjustment += difficultyScaling
 
+        if (placeholder.genHard) {
+            val multiplier = RunGeneratorConfig.hardEncounterDifficultyMultiplier
+            difficultyAdjustment += (multiplier * placeholder.minorDifficulty) - placeholder.minorDifficulty
+        }
+
         majorDifficulty = (majorDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         minorDifficulty = (minorDifficulty + difficultyAdjustment.fractionalPart()).toFloat()
 
@@ -249,6 +257,7 @@ object EncounterGenerator {
             placeholder.unadjustedMajorDifficulty,
             majorDifficulty,
             minorDifficulty,
+            placeholder.genHard,
             difficultyScaling,
             placeholder.genExtraction
         )
