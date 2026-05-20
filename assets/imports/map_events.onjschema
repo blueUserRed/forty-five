@@ -103,4 +103,8 @@ $MapEvent {
         seed: int
     }
 
+    $ApplyStampMapEvent {
+        stampName: string?
+    }
+
 }

@@ -282,4 +282,27 @@ limitedChallenges: [
             }
         ]
     },
-]
+],
+
+//////////////////////////////////////////////////////
+// Stamps
+//////////////////////////////////////////////////////
+
+stampPools: [
+    {
+        majorDifficulty: 0,
+        stamps: []
+    },
+    {
+        majorDifficulty: 1,
+        stamps: [ "bewitched", "poisonTip", "fiftyCal" ]
+    },
+    {
+        majorDifficulty: 3,
+        stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity" ]
+    },
+    {
+        majorDifficulty: 4,
+        stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity", "phantom", "catalyst", "spirit" ]
+    },
+],

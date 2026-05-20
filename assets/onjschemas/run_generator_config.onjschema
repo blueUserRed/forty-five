@@ -81,3 +81,8 @@ limitedChallenges: {
     addAtDifficulty: int,
     challenges: $RunChallenge[]
 }[],
+
+stampPools: {
+    majorDifficulty: int,
+    stamps: string[]
+}[],

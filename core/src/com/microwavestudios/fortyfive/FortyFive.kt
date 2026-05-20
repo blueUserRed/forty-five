@@ -184,8 +184,8 @@ object FortyFive : Game() {
     private fun init() {
         ShaderProgram.pedantic = false
         with(OnjConfig) {
-            registerNamespace("Common", CommonNamespace)
-            registerNamespace("Cards", CardsNamespace)
+            if (getNamespace("Common") == null) registerNamespace("Common", CommonNamespace)
+            if (getNamespace("Cards") == null) registerNamespace("Cards", CardsNamespace)
         }
         initControllers()
         ConfigFileManager.init()
@@ -199,7 +199,7 @@ object FortyFive : Game() {
         soundPlayer.init()
         GraphicsConfig.init()
         resourceManager.init()
-        serviceThread.start()
+        if (serviceThread.state == Thread.State.NEW) serviceThread.start()
         cardTextureManager.init()
         if (logger.versionTag != "--dev--") return
         File(".onj").mkdirs()

@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.run
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.map.ApplyStampMapEvent
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
 import com.microwavestudios.fortyfive.map.EmptyMapEvent
 import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
@@ -353,10 +354,19 @@ class RunGenerator {
                         20, 10,
                         random.nextLong(),
                         3
-                    )
+                    ).also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                    }
                 },
                 2, null,
                 20
+            ),
+            BaseMapGenerator.MapGeneratorFillEvent(
+                {
+                    ApplyStampMapEvent(null)
+                },
+                4, null,
+                5
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 { EmptyMapEvent() },

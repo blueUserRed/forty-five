@@ -4,6 +4,8 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.game.card.Stamp
+import com.microwavestudios.fortyfive.game.card.StampFactory
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
@@ -48,7 +50,10 @@ object MapEventFactory {
         "EncounterPlaceholderMapEvent" to { EncounterPlaceholderMapEvent.fromOnj(it) },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
-        "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() }
+        "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() },
+        "ApplyStampMapEvent" to {
+            ApplyStampMapEvent(it.get<String?>("stampName"))
+        }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -439,6 +444,31 @@ class ShopMapEvent(
         "amountOfRerolls" with amountOfRerolls
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice
+    }
+}
+
+class ApplyStampMapEvent(
+    override var stampName: String?,
+) : MapEvent(), ApplyStampScreenContext, Completable {
+
+    override var isCompleted: Boolean = false
+    override val displayDescription: Boolean = true
+    override val nodeTexture: ResourceHandle = "map_node_choose_card"
+
+    override val displayName: String = "You get a stamp"
+
+    override fun start() {
+        FortyFive.screenManager.appendScreen(ApplyStampScreen, this)
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("ApplyStampMapEvent")
+        "stampName" with stampName
+    }
+
+    override fun completed() {
+        isCompleted = true
     }
 }
 
