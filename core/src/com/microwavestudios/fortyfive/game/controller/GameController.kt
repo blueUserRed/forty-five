@@ -16,6 +16,7 @@ import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.random.Random
 
@@ -189,6 +190,12 @@ interface GameController {
     fun resurrectTimeline(intoSlot: Int): Timeline
 
     fun shoot()
+
+    fun askParryTimeline(
+        value: Int,
+        resultValue: Promise<Int>,
+        texts: (remainingDamage: Int) -> Pair<String, String>
+    ): Timeline
 
     /**
      * gives the player more reserves. [source] is used for animations

@@ -57,7 +57,7 @@ Also, the script requires 7zip and launch4j to be installed and available in the
 
 Use this command in the root directory of the project to run the script:
 ````shell
-kontlinc scripts/build.main.kts
+kontlinc -script scripts/build.main.kts
 ````
 
 ### Project Build (to .jar)
@@ -88,7 +88,6 @@ kontlinc scripts/build.main.kts
 ### Project Build (to .exe)
 - follow the previous instructions to create a jar file.
 - Download launch4j
-- Create a stripped down jre for the game using the following command:
 - Copy the jre from the ``assets/blobs`` directory in the temporary directory
 - If you want/need to create your own jre (f.e. because you upgraded the java version) see the section below
 - open the launch4j GUI
@@ -106,7 +105,7 @@ jlink `
   --strip-debug `
   --no-man-pages `
   --no-header-files `
-  --output /jre `
+  --output ./jre `
   --add-modules java.base,java.datatransfer,java.desktop,java.instrument,java.logging,java.prefs,java.xml,jdk.unsupported
 ````
 - The needed modules might change when new functionality is added. The ``jdeps`` utility that is packed with the jdk

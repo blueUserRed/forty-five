@@ -27,7 +27,6 @@ import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
-import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
 import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.game.enemy.StatusBar
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -243,149 +242,153 @@ class EncounterScreen : ScreenCreator() {
         y = 200f
         touchable = Touchable.disabled
 
-        val borrower = object : ResourceBorrower {}
-
-        fun commonPanelHandle(i: Int, proto: EnemyActionPrototype) = when (i) {
-            0 -> proto.commonPanel1
-            1 -> proto.commonPanel2
-            2 -> proto.commonPanel3
-            else -> unreachable()
+        gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+            event.finishedPromise.resolve(Unit)
         }
 
-        fun commonPanel(i: Int, panel: String) = group {
-            width = 170f
-            onLayoutAndNow { y = parent.height / 2 + 100 }
-            val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-                borrower,
-                screen.lifetime,
-                panel
-            )
-            promise.then { texture ->
-                height = width * (texture.minHeight / texture.minWidth)
-                manualBackground = texture
-            }
-            val xAnim = propertyAnimation(
-                xPositionAbstractProperty(),
-                AnimState("open", parentWidth - (width - 8f) * (i + 1)),
-                AnimState("closed", parentWidth + 100),
-                initialState = "closed",
-                defaultTime = 300,
-                defaultInterpolation = Interpolation.pow2,
-            )
-            xAnim.transition("open", "closed", 0, Interpolation.linear)
-            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-                    borrower,
-                    screen.lifetime,
-                    commonPanelHandle(i, event.enemyAction.prototype)
-                )
-                promise.then { texture ->
-                    height = width * (texture.minHeight / texture.minWidth)
-                    manualBackground = texture
-                }
-                event.finishedPromise.then {
-                    xAnim.state("closed")
-                    manualBackground = null
-                }
-                event.append { includeAction(xAnim.stateAction("open")) }
-            }
+//        val borrower = object : ResourceBorrower {}
+//
+//        fun commonPanelHandle(i: Int, proto: EnemyActionPrototype) = when (i) {
+//            0 -> proto.commonPanel1
+//            1 -> proto.commonPanel2
+//            2 -> proto.commonPanel3
+//            else -> unreachable()
+//        }
+//
+//        fun commonPanel(i: Int, panel: String) = group {
+//            width = 170f
+//            onLayoutAndNow { y = parent.height / 2 + 100 }
+//            val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
+//                borrower,
+//                screen.lifetime,
+//                panel
+//            )
+//            promise.then { texture ->
+//                height = width * (texture.minHeight / texture.minWidth)
+//                manualBackground = texture
+//            }
+//            val xAnim = propertyAnimation(
+//                xPositionAbstractProperty(),
+//                AnimState("open", parentWidth - (width - 8f) * (i + 1)),
+//                AnimState("closed", parentWidth + 100),
+//                initialState = "closed",
+//                defaultTime = 300,
+//                defaultInterpolation = Interpolation.pow2,
+//            )
+//            xAnim.transition("open", "closed", 0, Interpolation.linear)
+//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+//                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
+//                    borrower,
+//                    screen.lifetime,
+//                    commonPanelHandle(i, event.enemyAction.prototype)
+//                )
+//                promise.then { texture ->
+//                    height = width * (texture.minHeight / texture.minWidth)
+//                    manualBackground = texture
+//                }
+//                event.finishedPromise.then {
+//                    xAnim.state("closed")
+//                    manualBackground = null
+//                }
+//                event.append { includeAction(xAnim.stateAction("open")) }
+//            }
         }
 
-        fun actionPanel() = group {
-            height = 220f
-            onLayoutAndNow { y = parent.height / 2 + 100 - height + 20f }
-            x = parentWidth + 100f
-            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-                    borrower,
-                    screen.lifetime,
-                    event.enemyAction.prototype.specialPanel
-                )
-                promise.then { texture ->
-                    width = height * (texture.minWidth / texture.minHeight)
-                    manualBackground = texture
-                }
-                event.finishedPromise.then {
-                    x = parentWidth + 100f
-                    manualBackground = null
-                }
-                val action = MoveToAction()
-                action.duration = 0.3f
-                action.interpolation = Interpolation.Pow(10)
-                event.append {
-                    delayUntil { manualBackground != null }
-                    delay(100)
-                    action {
-                        action.x = parentWidth - width - 5f
-                        action.y = y
-                        addAction(action)
-                        event.controller.dispatchAnimTimeline(Timeline.timeline {
-                            delay(200)
-                            include(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
-                        })
-                    }
-                    delayUntil { action.isComplete }
-                }
-            }
-        }
-
-        fun descriptionBox() = box {
-            width = 500f
-            height = 300f
-
-            onLayoutAndNow { y = parent.height / 2 - 120f - height + 100 }
-
-            backgroundHandle = "common_popup_background_black_large"
-            dropShadow = BakedDropShadow(
-                "common_popup_background_black_large",
-                screen,
-                0f, 0f,
-                1.3f, 1.3f
-            )
-            flexDirection = FlexDirection.COLUMN
-            verticalAlign = CustomAlign.CENTER
-            horizontalAlign = CustomAlign.CENTER
-
-            val title = label("red wing", "Hot Potato", Color.Red, 35) {
-                syncDimensions()
-            }
-            verticalSpacer(10f)
-            val body = label("roadgeek", "A scorching Bullet will be put in your hand!", Color.FortyWhite, 22) {
-                wrap = true
-                setAlignment(Align.center)
-                relativeWidth(60f)
-                syncHeight()
-            }
-            val xAnim = propertyAnimation(
-                xPositionAbstractProperty(),
-                AnimState("open", parentWidth - width + 60f),
-                AnimState("closed", parentWidth + 100),
-                initialState = "closed",
-                defaultTime = 300,
-                defaultInterpolation = Interpolation.pow5,
-            )
-            xAnim.transition("open", "closed", 0, Interpolation.linear)
-            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-                val enemyAction = event.enemyAction
-                val prototype = enemyAction.prototype
-                title.setText(prototype.title)
-                val bodyTemplate = TemplateString(prototype.descriptionTemplate, enemyAction.descriptionParams)
-                body.setText(bodyTemplate.string)
-                event.finishedPromise.then {
-                    xAnim.state("closed")
-                }
-                event.append {
-                    includeAction(xAnim.stateAction("open"))
-                }
-            }
-        }
-
-        commonPanel(0, "enemy_pyro_action_comic_common_panel_1")
-        commonPanel(1, "enemy_pyro_action_comic_common_panel_2")
-        commonPanel(2, "enemy_pyro_action_comic_common_panel_3")
-        descriptionBox()
-        actionPanel()
-    }
+//        fun actionPanel() = group {
+//            height = 220f
+//            onLayoutAndNow { y = parent.height / 2 + 100 - height + 20f }
+//            x = parentWidth + 100f
+//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+//                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
+//                    borrower,
+//                    screen.lifetime,
+//                    event.enemyAction.prototype.specialPanel
+//                )
+//                promise.then { texture ->
+//                    width = height * (texture.minWidth / texture.minHeight)
+//                    manualBackground = texture
+//                }
+//                event.finishedPromise.then {
+//                    x = parentWidth + 100f
+//                    manualBackground = null
+//                }
+//                val action = MoveToAction()
+//                action.duration = 0.3f
+//                action.interpolation = Interpolation.Pow(10)
+//                event.append {
+//                    delayUntil { manualBackground != null }
+//                    delay(100)
+//                    action {
+//                        action.x = parentWidth - width - 5f
+//                        action.y = y
+//                        addAction(action)
+//                        event.controller.dispatchAnimTimeline(Timeline.timeline {
+//                            delay(200)
+//                            include(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
+//                        })
+//                    }
+//                    delayUntil { action.isComplete }
+//                }
+//            }
+//        }
+//
+//        fun descriptionBox() = box {
+//            width = 500f
+//            height = 300f
+//
+//            onLayoutAndNow { y = parent.height / 2 - 120f - height + 100 }
+//
+//            backgroundHandle = "common_popup_background_black_large"
+//            dropShadow = BakedDropShadow(
+//                "common_popup_background_black_large",
+//                screen,
+//                0f, 0f,
+//                1.3f, 1.3f
+//            )
+//            flexDirection = FlexDirection.COLUMN
+//            verticalAlign = CustomAlign.CENTER
+//            horizontalAlign = CustomAlign.CENTER
+//
+//            val title = label("red wing", "Hot Potato", Color.Red, 35) {
+//                syncDimensions()
+//            }
+//            verticalSpacer(10f)
+//            val body = label("roadgeek", "A scorching Bullet will be put in your hand!", Color.FortyWhite, 22) {
+//                wrap = true
+//                setAlignment(Align.center)
+//                relativeWidth(60f)
+//                syncHeight()
+//            }
+//            val xAnim = propertyAnimation(
+//                xPositionAbstractProperty(),
+//                AnimState("open", parentWidth - width + 60f),
+//                AnimState("closed", parentWidth + 100),
+//                initialState = "closed",
+//                defaultTime = 300,
+//                defaultInterpolation = Interpolation.pow5,
+//            )
+//            xAnim.transition("open", "closed", 0, Interpolation.linear)
+//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
+//                val enemyAction = event.enemyAction
+//                val prototype = enemyAction.prototype
+//                title.setText(prototype.title)
+//                val bodyTemplate = TemplateString(prototype.descriptionTemplate, enemyAction.descriptionParams)
+//                body.setText(bodyTemplate.string)
+//                event.finishedPromise.then {
+//                    xAnim.state("closed")
+//                }
+//                event.append {
+//                    includeAction(xAnim.stateAction("open"))
+//                }
+//            }
+//        }
+//
+//        commonPanel(0, "enemy_pyro_action_comic_common_panel_1")
+//        commonPanel(1, "enemy_pyro_action_comic_common_panel_2")
+//        commonPanel(2, "enemy_pyro_action_comic_common_panel_3")
+//        descriptionBox()
+//        actionPanel()
+//    }
 
     private fun CustomGroup.playerStatusEffectDisplay() = box {
         badTexture("status effect background", comment = "??????")
@@ -665,44 +668,57 @@ class EncounterScreen : ScreenCreator() {
                 fun showAction(
                     text: String?,
                     iconHandle: String,
-                    damageChanges: List<Pair<String, Int>>
                 ) {
                     image {
                         backgroundHandle = iconHandle
                         width = 60f
                         height = 60f
                     }
-
-                    val effects = listOf(
-                        AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red),
-                        AdvancedTextEffect.AdvancedColorTextEffect("?G", Color.LIGHT_GRAY),
-                    )
-
-                    val texts = mutableListOf<String>()
-                    if (text != null) texts.add(text)
-                    damageChanges.forEach { (icon, damage) ->
-                        val text = when {
-                            damage > 0 -> "?R+$damage§§$icon§§?R"
-                            damage < 0 -> "?G$damage§§$icon§§?G"
-                            else -> ""
-                        }
-                        texts.add(text)
+                    if (text != null) advancedText("roadgeek", Color.FortyWhite, 23) {
+                        relativeHeight(58f)
+                        setRawText(text, DetailDescriptionHandler.allTextEffects)
+                        centerX()
+                        centerY()
+                        wrap = false
+                        syncWidth()
                     }
 
-                    texts.forEach { text -> group {
-                        height = 40f
-                        backgroundHandle = "wood_box"
-                        touchable = Touchable.disabled
-                        val text = advancedText("roadgeek", Color.FortyWhite, 23) {
-                            relativeHeight(58f)
-                            setRawText(text, effects)
-                            centerX()
-                            centerY()
-                            wrap = false
-                            syncWidth()
-                        }
-                        onLayoutAndNow { width = (text.width + 25).coerceAtLeast(40f) }
-                    } }
+//                    image {
+//                        backgroundHandle = iconHandle
+//                        width = 60f
+//                        height = 60f
+//                    }
+//
+//                    val effects = listOf(
+//                        AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red),
+//                        AdvancedTextEffect.AdvancedColorTextEffect("?G", Color.LIGHT_GRAY),
+//                    )
+//
+//                    val texts = mutableListOf<String>()
+//                    if (text != null) texts.add(text)
+//                    damageChanges.forEach { (icon, damage) ->
+//                        val text = when {
+//                            damage > 0 -> "?R+$damage§§$icon§§?R"
+//                            damage < 0 -> "?G$damage§§$icon§§?G"
+//                            else -> ""
+//                        }
+//                        texts.add(text)
+//                    }
+//
+//                    texts.forEach { text -> group {
+//                        height = 40f
+//                        backgroundHandle = "wood_box"
+//                        touchable = Touchable.disabled
+//                        val text = advancedText("roadgeek", Color.FortyWhite, 23) {
+//                            relativeHeight(58f)
+//                            setRawText(text, effects)
+//                            centerX()
+//                            centerY()
+//                            wrap = false
+//                            syncWidth()
+//                        }
+//                        onLayoutAndNow { width = (text.width + 25).coerceAtLeast(40f) }
+//                    } }
 
                 }
 
@@ -721,11 +737,7 @@ class EncounterScreen : ScreenCreator() {
                 enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->
                     this.clear()
                     val hoverText = when (val nextAction = event.nextAction) {
-                        is NextEnemyAction.ShownEnemyAction -> {
-                            val template = nextAction.action.prototype.descriptionTemplate
-                            val templateString = TemplateString(template, nextAction.action.descriptionParams)
-                            templateString.string
-                        }
+                        is NextEnemyAction.ShownEnemyAction -> nextAction.action.description
                         is NextEnemyAction.HiddenEnemyAction -> "You cant see the action of the enemy yet!"
                         is NextEnemyAction.None -> null
                     }
@@ -737,11 +749,10 @@ class EncounterScreen : ScreenCreator() {
                     when (val nextAction = event.nextAction) {
                         is NextEnemyAction.ShownEnemyAction -> showAction(
                             nextAction.action.indicatorText,
-                            nextAction.action.prototype.iconHandle,
-                            nextAction.action.damageChanges
+                            nextAction.action.icon
                         )
                         is NextEnemyAction.None -> {}
-                        is NextEnemyAction.HiddenEnemyAction -> showAction("?",  "enemy_action_unknown", listOf())
+                        is NextEnemyAction.HiddenEnemyAction -> showAction("?",  "enemy_action_unknown")
                     }
                 }
             }
@@ -836,8 +847,8 @@ class EncounterScreen : ScreenCreator() {
         }
         verticalSpacer(20f)
         label("roadgeek", "", Color.GRAY, 24) {
-            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, blockable) ->
-                setText("Parrying will let ${(damage - blockable).coerceAtLeast(0)} damage through")
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+                setText(event.texts.first)
             }
             setAlignment(Align.center)
             relativeWidth(100f)
@@ -845,8 +856,8 @@ class EncounterScreen : ScreenCreator() {
         }
         verticalSpacer(20f)
         label("roadgeek", "", Color.GRAY, 24) {
-            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (_, damage, _) ->
-                setText("Passing will let $damage damage through")
+            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+                setText(event.texts.second)
             }
             setAlignment(Align.center)
             relativeWidth(100f)

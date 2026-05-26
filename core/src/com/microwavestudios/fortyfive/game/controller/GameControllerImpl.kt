@@ -8,8 +8,6 @@ import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.*
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
-import com.microwavestudios.fortyfive.game.enemy.EnemyActionPrototype
-import com.microwavestudios.fortyfive.game.enemy.NextEnemyAction
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.game.widgets.CardHand
@@ -904,9 +902,6 @@ class GameControllerImpl(
             return@later
         }
         enemy.applyEffect(statusEffect, controller)
-        if (!inEnemyPhase && statusEffect.reevaluateEnemyAttack()) {
-            enemy.reevaluateAction(controller)
-        }
         val info = createTriggerInfo(null, sourceCard = source)
         val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
         gameEvents.fire(event)
@@ -1048,15 +1043,17 @@ class GameControllerImpl(
     }
 
     private fun parryTimeline(
-        damage: Int,
-        isPiercing: Boolean,
-        card: Card
+        value: Int,
+        card: Card,
+        texts: (remainingDamage: Int) -> Pair<String, String>,
+        resultValue: Promise<Int>
     ): Timeline = Timeline.timeline { later {
         FortyFive.soundPlayer.situation("enter_parry", controller.screen)
         val damageToParry = card.curParryValue(controller)
-        val remainingDamage = if (card.isReinforced) 0 else (damage - damageToParry).coerceAtLeast(0)
-        val parryEnterEvent = Events.ParryStateChange(true, damage, damageToParry)
-        val parryLeaveEvent = Events.ParryStateChange(false, 0, 0)
+        val remainingDamage = if (card.isReinforced) 0 else (value - damageToParry).coerceAtLeast(0)
+        val texts = texts(remainingDamage)
+        val parryEnterEvent = Events.ParryStateChange(true, value, damageToParry, texts)
+        val parryLeaveEvent = Events.ParryStateChange(false, 0, 0, texts)
         parryEnterEvent.resolutionPromise.then { gameEvents.fire(parryLeaveEvent) }
         include(afterlife.closeTimeline())
         action { gameEvents.fire(parryEnterEvent) }
@@ -1064,18 +1061,16 @@ class GameControllerImpl(
         later {
             val parried = parryEnterEvent.resolutionPromise.getOrError()
             if (parried) {
-                if (remainingDamage > 0) {
-                    include(damagePlayerTimeline(remainingDamage, false, isPiercing))
-                }
                 val triggerInfo = createTriggerInfo(card, isOnShot = true)
                 include(card.afterShot(
-                    controller, true, damage,
+                    controller, true, value,
                     triggerInfo,
                     ::putCardBackInHandAfterShot, ::putCardInTheStackAfterShot
                 ))
                 include(rotateRevolverTimeline(card.getRotationDirection(controller)))
+                action { resultValue.resolve(remainingDamage) }
             } else {
-                include(damagePlayerTimeline(damage, false, isPiercing))
+                action { resultValue.resolve(remainingDamage) }
             }
         }
     } }
@@ -1085,13 +1080,26 @@ class GameControllerImpl(
         enemy: Enemy,
         isPiercing: Boolean
     ): Timeline = Timeline.timeline { later {
+        include(damagePlayerTimeline(damage, isPiercing))
+//        val card = revolver.getCardInSlot(5)
+//        if (card == null) {
+//            include(damagePlayerTimeline(damage, false, isPiercing))
+//        } else {
+//            include(parryTimeline(damage, isPiercing, card))
+//        }
+    } }
+
+    override fun askParryTimeline(
+        value: Int,
+        resultValue: Promise<Int>,
+        texts: (remainingDamage: Int) -> Pair<String, String>
+    ): Timeline = Timeline.timeline { later {
         val card = revolver.getCardInSlot(5)
-        if (card == null) {
-            include(damagePlayerTimeline(damage, false, isPiercing))
+        if (card != null) {
+            include(parryTimeline(value, card, texts, resultValue))
         } else {
-            include(parryTimeline(damage, isPiercing, card))
+            resultValue.resolve(value)
         }
-        later { enemy.statusEffects.forEach { it.onEnemyAttack() } }
     } }
 
     override fun putBulletFromRevolverUnderTheStackTimeline(card: Card): Timeline {
@@ -1419,32 +1427,47 @@ class GameControllerImpl(
     }
 
     private fun enemyActionTimeline(): Timeline = Timeline.timeline {
-        activeEnemies.forEach { enemy -> later {
-            val action = enemy.resolveAction(controller, 1.0) ?: return@later
-            if (action.prototype.hasSpecialAnimation) {
-                val event = Events.PlayEnemySpecialAttackAnim(controller, action)
-                gameEvents.fire(event)
-                delay(300)
-                include(event.createTimeline())
-                delayUntil { event.finishedPromise.isResolved }
-                delay(100)
-                include(action.getTimeline())
-                delay(400)
-            } else {
-                val event = Enemy.PlayChargeAnimationEvent()
-                enemy.enemyEvents.fire(event)
-                action {
-                    event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
-                }
-                delay(200)
-                include(action.getTimeline())
-                delay(400)
-            }
-            action {
-                val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None)
-                enemy.enemyEvents.fire(event)
-            }
+        allEnemies.forEach { enemy -> later {
+            if (enemy.isDefeated) return@later
+            enemy.resolveAction(controller, enemyDifficulty.toDouble())
         } }
+        allEnemies.forEach { enemy -> later {
+            if (enemy.isDefeated) return@later
+            val event = Enemy.PlayChargeAnimationEvent()
+            enemy.enemyEvents.fire(event)
+            action {
+                event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
+            }
+            delay(200)
+            include(enemy.executeAction(controller))
+            delay(400)
+        } }
+//        activeEnemies.forEach { enemy -> later {
+//            val action = enemy.resolveAction(controller, 1.0) ?: return@later
+//            if (action.prototype.hasSpecialAnimation) {
+//                val event = Events.PlayEnemySpecialAttackAnim(controller, action)
+//                gameEvents.fire(event)
+//                delay(300)
+//                include(event.createTimeline())
+//                delayUntil { event.finishedPromise.isResolved }
+//                delay(100)
+//                include(action.getTimeline())
+//                delay(400)
+//            } else {
+//                val event = Enemy.PlayChargeAnimationEvent()
+//                enemy.enemyEvents.fire(event)
+//                action {
+//                    event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
+//                }
+//                delay(200)
+//                include(action.getTimeline())
+//                delay(400)
+//            }
+//            action {
+//                val event = Enemy.EnemyActionChangedEvent(NextEnemyAction.None)
+//                enemy.enemyEvents.fire(event)
+//            }
+//        } }
     }
 
     private fun winTimeline(): Timeline = Timeline.timeline { later {
@@ -1591,11 +1614,7 @@ class GameControllerImpl(
     }
 
     private fun chooseEnemyActions() {
-        val otherActions = mutableListOf<Pair<EnemyActionPrototype, Boolean>>()
-        activeEnemies.forEach { enemy ->
-            val action = enemy.chooseNewAction(this, enemyDifficulty.toDouble(), otherActions)
-            action?.let { otherActions.add(it) }
-        }
+        activeEnemies.forEach { it.chooseNewAction(controller, enemyDifficulty.toDouble()) }
     }
 
     override fun appendMainTimeline(timeline: Timeline) {
@@ -1683,6 +1702,7 @@ class GameControllerImpl(
             val inParryMenu: Boolean,
             val damage: Int,
             val ableToBlock: Int,
+            val texts: Pair<String, String>,
             val resolutionPromise: Promise<Boolean /*= parried*/> = Promise()
         )
         data class SelectionChangedEvent(val text: String?)

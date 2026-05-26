@@ -1,7 +1,7 @@
 ///schema=onjschemas/enemies.onjschema
 import "imports/colors.onj" as color;
 
-use Cards;
+use Game;
 
 enemyGroups: [
     {

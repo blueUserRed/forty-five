@@ -1,5 +1,5 @@
 ///schema=onjschemas/mainGame/cards.onjschema
-use Cards;
+use Game;
 use Common;
 
 import "config/graphics_config.onj" as graphicsConfig;

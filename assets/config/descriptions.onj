@@ -225,4 +225,14 @@ defaultTextEffects: [
         indicator:"$costDecrease$",
         color: color.green,
     },
+
+    $Color {
+        indicator:"$enemyDamageDecrease$",
+        color: color.light_grey,
+    },
+
+    $Color {
+        indicator:"$enemyDamageIncrease$",
+        color: color.red,
+    },
 ]

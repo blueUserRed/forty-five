@@ -10,10 +10,8 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
-import com.microwavestudios.fortyfive.game.card.RandomCardSelection
-import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
+import com.microwavestudios.fortyfive.onjNamespaces.GameNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
@@ -169,7 +167,7 @@ object FortyFive : Game() {
         profileManager = mockProfileManager
         with(OnjConfig) {
             registerNamespace("Common", CommonNamespace)
-            registerNamespace("Cards", CardsNamespace)
+            registerNamespace("Game", GameNamespace)
         }
         ConfigFileManager.init()
         logger.init()
@@ -185,7 +183,7 @@ object FortyFive : Game() {
         ShaderProgram.pedantic = false
         with(OnjConfig) {
             if (getNamespace("Common") == null) registerNamespace("Common", CommonNamespace)
-            if (getNamespace("Cards") == null) registerNamespace("Cards", CardsNamespace)
+            if (getNamespace("Game") == null) registerNamespace("Game", GameNamespace)
         }
         initControllers()
         ConfigFileManager.init()

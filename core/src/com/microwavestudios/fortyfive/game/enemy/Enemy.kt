@@ -24,11 +24,10 @@ class Enemy(
     val name: String,
     val drawableHandle: ResourceHandle,
     val health: Int,
+    private val brain: EnemyBrain
 ) {
 
     val logTag = "$name-${++instanceCounter}"
-
-    private var brain: EnemyBrain = NoOpEnemyBrain
 
     val enemyEvents: EventPipeline = EventPipeline()
 
@@ -60,58 +59,37 @@ class Enemy(
     val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
-    private var nextActionCreator: EnemyActionCreator? = null
-    private var nextActionShown: Boolean = true
-    private var createdNextAction: EnemyAction? = null
-    private var createdWithDifficulty: Double = 1.0
+    private var nextEnemyAction: NextEnemyAction = NextEnemyAction.None
 
     fun chooseNewAction(
         controller: GameController,
         difficulty: Double,
-        otherActions: List<Pair<EnemyActionPrototype, Boolean>>
-    ): Pair<EnemyActionPrototype, Boolean>? {
-        createdWithDifficulty = difficulty
-        val (actionProto, shown) = brain.chooseNewAction(controller, this, difficulty, otherActions) ?: run {
-            nextActionCreator = null
-            createdNextAction = null
-            enemyEvents.fire(EnemyActionChangedEvent(NextEnemyAction.None))
-            return null
-        }
-        val creator = actionProto.newCreator(controller, difficulty)
-        val created = creator()
-        nextActionCreator = creator
-        createdNextAction = created
-        nextActionShown = shown
-
-        val nextAction = if (shown) NextEnemyAction.ShownEnemyAction(created) else NextEnemyAction.HiddenEnemyAction
-        val event = EnemyActionChangedEvent(nextAction)
-        enemyEvents.fire(event)
-        return actionProto to shown
+    ) {
+        nextEnemyAction = brain.selectAction(this, controller, difficulty)
+        enemyEvents.fire(EnemyActionChangedEvent(nextEnemyAction))
     }
 
-    fun reevaluateAction(controller: GameController) {
-        val newAction = nextActionCreator?.invoke()
-        createdNextAction = newAction
-        val nextAction = when {
-            newAction == null -> NextEnemyAction.None
-            nextActionShown -> NextEnemyAction.ShownEnemyAction(newAction)
-            else -> NextEnemyAction.HiddenEnemyAction
-        }
-        val event = EnemyActionChangedEvent(nextAction)
-        enemyEvents.fire(event)
+    fun resolveAction(controller: GameController, difficulty: Double) {
+        val nextEnemyAction = nextEnemyAction
+        if (nextEnemyAction !is NextEnemyAction.HiddenEnemyAction) return
+        val shownAction = NextEnemyAction.ShownEnemyAction(nextEnemyAction.action)
+        this.nextEnemyAction = shownAction
+        enemyEvents.fire(EnemyActionChangedEvent(shownAction))
     }
 
-    fun resolveAction(controller: GameController, difficulty: Double): EnemyAction? {
-        brain.onNewTurn(controller, this)
-        return createdNextAction
+    fun executeAction(controller: GameController): Timeline = when (val action = nextEnemyAction) {
+        is NextEnemyAction.HiddenEnemyAction -> action.action.getTimeline(this, controller)
+        is NextEnemyAction.ShownEnemyAction -> action.action.getTimeline(this, controller)
+        is NextEnemyAction.None -> Timeline.emptyTimeline
     }
 
     fun applyEffect(effect: StatusEffect, controller: GameController) {
         if (isDefeated) return
         FortyFive.logger.debug(logTag, "status effect $effect applied to enemy")
-        for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
-            FortyFive.logger.debug(logTag, "stacked with $effectToTest")
-            effectToTest.stack(effect)
+        val effectToStack = _statusEffects.find { it.canStackWith(effect) }
+        if (effectToStack != null) {
+            FortyFive.logger.debug(logTag, "stacked with $effectToStack")
+            effectToStack.stack(effect)
             return
         }
         effect.start(controller)
@@ -147,11 +125,6 @@ class Enemy(
             currentCover += amount
         }
     }
-
-    fun brainTransplant(newBrain: EnemyBrain) {
-        brain = newBrain
-    }
-
 
     /**
      * reduces the enemies lives by [damage]
@@ -224,10 +197,9 @@ class Enemy(
             val enemy = Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
-                health
+                health,
+                EnemyBrain.fromOnj(onj)
             )
-            val brain = EnemyBrain.fromOnj(onj.get<OnjNamedObject>("brain"), enemy)
-            enemy.brainTransplant(brain)
             return enemy
         }
 
