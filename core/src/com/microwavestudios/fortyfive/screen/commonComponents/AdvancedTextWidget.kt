@@ -102,7 +102,7 @@ open class AdvancedTextWidget(
         curX = paddingLeft
         lines
             .reversed()
-            .zip { line -> line.maxOf { it.height } }
+            .zip { line -> line.maxOfOrNull { it.height } ?: defaults.third.toFloat() }
             .forEach { (line, height) ->
                 line.forEach { actor ->
                     actor.setPosition(curX, curY)
@@ -132,7 +132,10 @@ open class AdvancedTextWidget(
             layoutPrefWidth = advancedText.parts.sumOf { it.actor.width.toDouble() }.toFloat()
         }
         if (lines.isNotEmpty()) {
-            if (width == 0F) width = lines.maxOf { it.last().x + it.last().width } + paddingRight
+            if (width == 0F) {
+                val lineMax = lines.getMaxWidth()
+                width = lineMax + paddingRight
+            }
         } else {
             paddingRight
         }
@@ -140,24 +143,28 @@ open class AdvancedTextWidget(
     }
 
     private fun alignHorizontalTextAfterLayout(lines: List<List<Actor>>) {
-        lines.forEach {
-            val diff = width - it.maxOf { it.x + it.width }
+        lines.forEach { line ->
+            val diff = width - (line.maxOfOrNull { it.x + it.width } ?: 0f)
             when (horizontalTextAlign) {
                 CustomAlign.START -> {} //this is default, so no changes
-                CustomAlign.CENTER -> it.forEach { it.setPosition(it.x + diff / 2, it.y) }
-                CustomAlign.END -> it.forEach { it.setPosition(it.x + diff, it.y) }
+                CustomAlign.CENTER -> line.forEach { it.setPosition(it.x + diff / 2, it.y) }
+                CustomAlign.END -> line.forEach { it.setPosition(it.x + diff, it.y) }
                 CustomAlign.SPACE_AROUND -> TODO()
                 CustomAlign.SPACE_BETWEEN -> TODO()
             }
         }
     }
 
+    private fun List<List<Actor>>.getMaxWidth(): Float = maxOf {
+        it.lastOrNull()?.let { last -> last.x + last.width } ?: 0f
+    }
+
     private fun alignVerticalTextAfterLayout(lines: List<List<Actor>>, totalHeight: Float) {
         if (fitContentHeight) return
         val diff = height - totalHeight
         when (verticalTextAlign) {
-            CustomAlign.START -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff) } }
-            CustomAlign.CENTER -> lines.forEach { it2 -> it2.forEach { it.setPosition(it.x, it.y + diff / 2) } }
+            CustomAlign.START -> lines.forEach { line -> line.forEach { it.setPosition(it.x, it.y + diff) } }
+            CustomAlign.CENTER -> lines.forEach { line -> line.forEach { it.setPosition(it.x, it.y + diff / 2) } }
             CustomAlign.END -> {} //this is default, so no changes
             CustomAlign.SPACE_AROUND -> TODO()
             CustomAlign.SPACE_BETWEEN -> TODO()

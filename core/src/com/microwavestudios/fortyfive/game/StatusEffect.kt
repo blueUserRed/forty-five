@@ -59,6 +59,8 @@ abstract class StatusEffect(
     }
 
     abstract fun increment(amount: Int)
+
+    abstract fun parameterSum(): Int
 }
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
@@ -106,6 +108,12 @@ abstract class RotationBasedStatusEffect(
 
     override fun increment(amount: Int) {
         extendDuration(amount)
+    }
+
+    override fun parameterSum(): Int = if (!continueForever) {
+        min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)
+    } else {
+        0
     }
 }
 
@@ -158,6 +166,12 @@ abstract class TurnBasedStatusEffect(
 
     override fun increment(amount: Int) {
         extendDuration(amount)
+    }
+
+    override fun parameterSum(): Int = if (!continueForever) {
+        turnOnEffectStart + duration - controller.turnCounter
+    } else {
+        0
     }
 }
 
@@ -281,6 +295,8 @@ class Poison(
         damage += amount
     }
 
+    override fun parameterSum(): Int = damage
+
     override fun isStillValid(): Boolean = damage > 0
 
     override fun getDisplayText(): String = damage.toString()
@@ -368,6 +384,15 @@ class Bewitched(
         rotationDuration += amount
     }
 
+    override fun parameterSum(): Int {
+        val rotations = min(
+            rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter,
+            rotationDuration
+        )
+        val turns = turnOnEffectStart + turnsDuration - controller.turnCounter
+        return rotations + turns
+    }
+
     override fun equals(other: Any?): Boolean = other is Bewitched
 
 }
@@ -407,6 +432,8 @@ class Shield(
     override fun increment(amount: Int) {
         shield += amount
     }
+
+    override fun parameterSum(): Int = shield
 
     override fun equals(other: Any?): Boolean = other is Shield
 
@@ -454,6 +481,8 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
     override fun increment(amount: Int) {
         shots += amount
     }
+
+    override fun parameterSum(): Int = shots
 
     override fun equals(other: Any?): Boolean = other is Frozen
 
@@ -524,6 +553,7 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
         reserves += amount
     }
 
+    override fun parameterSum(): Int = turns + reserves
 }
 
 typealias StatusEffectCreator = (GameController?, Card?, skipFirstRotation: Boolean) -> StatusEffect

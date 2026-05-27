@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package com.microwavestudios.fortyfive.onjNamespaces
 
 import com.microwavestudios.fortyfive.game.*
@@ -7,6 +9,9 @@ import com.microwavestudios.fortyfive.game.card.Trigger.Companion.triggerForSitu
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.game.enemy.EnemyAction
+import com.microwavestudios.fortyfive.game.enemy.EnemyActionValue
+import com.microwavestudios.fortyfive.game.enemy.EnemyPredicate
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.findInstance
@@ -37,7 +42,10 @@ object GameNamespace {
         "VariableTextureSelector" to OnjVariableTextureSelector::class,
         "RevolverSlotGetter" to OnjRevolverSlotGetter::class,
         "CardType" to OnjCardType::class,
-        "Behaviour" to OnjBulletBehaviour::class
+        "Behaviour" to OnjBulletBehaviour::class,
+        "EnemyAction" to OnjEnemyAction::class,
+        "EnemyActionValue" to OnjEnemyActionValue::class,
+        "EnemyPredicate" to OnjEnemyPredicate::class,
     )
 
     @OnjNamespaceVariables
@@ -84,6 +92,9 @@ object GameNamespace {
                     }
                     ?: 0
             }
+            "countPlayerStatusEffectParams" with OnjEffectValue { controller, _, _, _ ->
+                controller.playerStatusEffects.sumOf { it.parameterSum() }
+            }
         },
         "zone" to buildOnjObject {
             Zone.entries.forEach {
@@ -91,6 +102,10 @@ object GameNamespace {
             }
         }
     )
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Slot Getters
+    //////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun slotGetterAdjacentSlots(
@@ -134,6 +149,10 @@ object GameNamespace {
         selector.startSelect()
     }
 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Modifier Predicates
+    //////////////////////////////////////////////////////////////////////////////////
+
     @RegisterOnjFunction(schema = "use Game; params: [Zone]")
     fun sourceCardInZoneModifierPredicate(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, _, modifier ->
         modifier.sourceCard?.inZone(zone.value) ?: false
@@ -143,6 +162,21 @@ object GameNamespace {
     fun cardInZoneModifierPredicate(zone: OnjZone): OnjCardModifierPredicate = OnjCardModifierPredicate { _, card, _ ->
         card.inZone(zone.value)
     }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun alwaysTrueModifierPredicate(): OnjCardModifierPredicate {
+        return OnjCardModifierPredicate { _, _, _ -> true }
+    }
+
+    @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
+    fun modifierPredicate(value: OnjNamedObject): OnjCardModifierPredicate {
+        val predicate = GamePredicate.fromOnj(value)
+        return OnjCardModifierPredicate { controller, _, _ -> predicate.check(controller) }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Bullet Effects
+    //////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue]")
     fun reserveGain(amount: OnjEffectValue): OnjEffect = OnjEffect(Effect.ReserveGain(amount.value, EffectData()))
@@ -534,6 +568,10 @@ object GameNamespace {
         EffectData()
     ))
 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Trigger
+    //////////////////////////////////////////////////////////////////////////////////
+
     @RegisterOnjFunction(schema = "params: []")
     fun triggerNever(): OnjTrigger = OnjTrigger(Trigger.Never)
 
@@ -753,6 +791,11 @@ object GameNamespace {
                     rhs.value.check(situation, card, triggerInfo, controller)
         }
 
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Card Predicates
+    //////////////////////////////////////////////////////////////////////////////////
+
     @RegisterOnjFunction(schema = "use Game; params: [Zone]")
     fun inZone(zone: OnjZone): OnjCardPredicate = OnjCardPredicate(CardPredicate.inZone(zone.value))
 
@@ -784,6 +827,12 @@ object GameNamespace {
 
     @RegisterOnjFunction(schema = "params: []")
     fun inHomeSlot() = OnjCardPredicate(CardPredicate.inHomeSlot())
+
+    @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
+    fun cardPredicate(value: OnjNamedObject): OnjCardPredicate {
+        val predicate = GamePredicate.fromOnj(value)
+        return OnjCardPredicate { _, controller, _ -> predicate.check(controller) }
+    }
 
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue, EffectValue]", type = OnjFunctionType.INFIX)
     fun equals(lhs: OnjEffectValue, rhs: OnjEffectValue): OnjCardPredicate = OnjCardPredicate { card, controller, self ->
@@ -826,6 +875,9 @@ object GameNamespace {
     fun or(first: OnjCardPredicate, second: OnjCardPredicate): OnjCardPredicate =
         OnjCardPredicate(CardPredicate.or(first.value, second.value))
 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Bullet Selectors
+    //////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "use Game; params: [CardPredicate]", type = OnjFunctionType.CONVERSION)
     fun bSelect(predicate: OnjCardPredicate): OnjBulletSelector = OnjBulletSelector(
@@ -885,7 +937,9 @@ object GameNamespace {
         BulletSelector.ByLambda { info, card, situation -> situation.relevantCards }
     )
 
-
+    //////////////////////////////////////////////////////////////////////////////////
+    // Status Effects
+    //////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue]")
     fun poison(damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
@@ -967,6 +1021,60 @@ object GameNamespace {
         )
     }
 
+    //////////////////////////////////////////////////////////////////////////////////
+    // Enemy Action Values
+    //////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
+    fun actionVal(value: OnjInt): OnjEnemyActionValue = OnjEnemyActionValue { _, _ -> value.value.toInt() }
+
+    @RegisterOnjFunction(schema = "use Game; params: [EffectValue]", type = OnjFunctionType.CONVERSION)
+    fun actionVal(value: OnjEffectValue): OnjEnemyActionValue = OnjEnemyActionValue { _, controller ->
+        value.value(controller, null, null, null)
+    }
+
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun enemyBaseHealthPercent(percent: OnjFloat) = OnjEnemyActionValue { enemy, _ ->
+        (enemy.health * (percent.value / 100f)).toInt()
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun curEnemyHealth() = OnjEnemyActionValue { enemy, _ ->
+        enemy.currentHealth
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Enemy Predicates
+    //////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "use Game; params: [EnemyActionValue, EnemyActionValue]", type = OnjFunctionType.INFIX)
+    fun lessThan(lhs: OnjEnemyActionValue, rhs: OnjEnemyActionValue) = OnjEnemyPredicate { enemy, controller ->
+        lhs.value(enemy, controller) < rhs.value(enemy, controller)
+    }
+
+    @RegisterOnjFunction(schema = "use Game; params: [EnemyActionValue, EnemyActionValue]", type = OnjFunctionType.INFIX)
+    fun greaterThan(lhs: OnjEnemyActionValue, rhs: OnjEnemyActionValue) = OnjEnemyPredicate { enemy, controller ->
+        lhs.value(enemy, controller) > rhs.value(enemy, controller)
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Enemy Actions
+    //////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "params: [int, int, boolean]")
+    fun action_damage(min: OnjInt, max: OnjInt, isPiercing: OnjBoolean): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.DamagePlayer(min.value.toInt(), max.value.toInt(), isPiercing.value, null)
+    )
+
+    @RegisterOnjFunction(schema = "params: [int, int]")
+    fun action_shield(min: OnjInt, max: OnjInt): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.ApplyShield(min.value.toInt(), max.value.toInt(), null)
+    )
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Bullet Behaviours
+    //////////////////////////////////////////////////////////////////////////////////
+
     @RegisterOnjFunction(schema = "params: [int]")
     fun amplifyBehaviour(damage: OnjInt): OnjBulletBehaviour = OnjBulletBehaviour(
         BulletBehaviour.Amplify(damage.value.toInt())
@@ -975,11 +1083,9 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "params: []")
     fun everlastingBehaviour(): OnjBulletBehaviour = OnjBulletBehaviour(BulletBehaviour.Everlasting)
 
-    @RegisterOnjFunction(schema = "params: [{...*}]")
-    fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
-        name("NegatePredicate")
-        "value" with predicate
-    }
+    //////////////////////////////////////////////////////////////////////////////////
+    // Effect Values
+    //////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
     fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _, _, _ -> value.value.toInt() }
@@ -1085,21 +1191,14 @@ object GameNamespace {
         controller.afterlife.cards.indexOf(card)
     }
 
-    @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
-    fun modifierPredicate(value: OnjNamedObject): OnjCardModifierPredicate {
-        val predicate = GamePredicate.fromOnj(value)
-        return OnjCardModifierPredicate { controller, _, _ -> predicate.check(controller) }
-    }
+    //////////////////////////////////////////////////////////////////////////////////
+    // General
+    //////////////////////////////////////////////////////////////////////////////////
 
-    @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
-    fun cardPredicate(value: OnjNamedObject): OnjCardPredicate {
-        val predicate = GamePredicate.fromOnj(value)
-        return OnjCardPredicate { _, controller, _ -> predicate.check(controller) }
-    }
-
-    @RegisterOnjFunction(schema = "params: []")
-    fun alwaysTrueModifierPredicate(): OnjCardModifierPredicate {
-        return OnjCardModifierPredicate { _, _, _ -> true }
+    @RegisterOnjFunction(schema = "params: [{...*}]")
+    fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
+        name("NegatePredicate")
+        "value" with predicate
     }
 
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue, int]")
@@ -1247,5 +1346,29 @@ class OnjBulletBehaviour(
 ) : OnjValue() {
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--bulletBehaviour--'")
+    }
+}
+
+class OnjEnemyAction(
+    override val value: EnemyAction
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--enemyAction--'")
+    }
+}
+
+class OnjEnemyActionValue(
+    override val value: EnemyActionValue
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--enemyActionValue--'")
+    }
+}
+
+class OnjEnemyPredicate(
+    override val value: EnemyPredicate
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--enemyPredicate--'")
     }
 }

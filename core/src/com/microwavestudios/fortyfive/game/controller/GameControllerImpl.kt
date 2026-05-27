@@ -1094,6 +1094,10 @@ class GameControllerImpl(
         resultValue: Promise<Int>,
         texts: (remainingDamage: Int) -> Pair<String, String>
     ): Timeline = Timeline.timeline { later {
+        if (value <= 0) {
+            resultValue.resolve(0)
+            return@later
+        }
         val card = revolver.getCardInSlot(5)
         if (card != null) {
             include(parryTimeline(value, card, texts, resultValue))

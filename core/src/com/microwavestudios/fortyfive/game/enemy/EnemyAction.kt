@@ -11,14 +11,22 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
-abstract class EnemyAction(val data: EnemyActionData) {
+abstract class EnemyAction(protected val data: EnemyActionData?) {
 
-    abstract val title: String
-    abstract val description: String
-
-    abstract val icon: ResourceHandle
+    abstract val defaultTitle: String
+    abstract val defaultDescription: String
+    abstract val defaultIcon: ResourceHandle
 
     abstract val indicatorText: String
+
+    val title: String
+        get() = data?.overrideTitle ?: defaultTitle
+
+    val description: String
+        get() = data?.overrideDescription ?: defaultDescription
+
+    val icon: String
+        get() = data?.overrideIcon ?: defaultIcon
 
     open fun onSelected(
         enemy: Enemy,
@@ -35,13 +43,14 @@ abstract class EnemyAction(val data: EnemyActionData) {
         controller: GameController
     ): Timeline
 
-    abstract fun copy(data: EnemyActionData): EnemyAction
+    abstract fun copy(data: EnemyActionData?): EnemyAction
 
     protected fun getAdditionalDamage(
-        enemy: Enemy,
         originalDamage: Int,
-        controller: GameController,
+        data: EnemyActionData
     ): List<Pair<String, Int>> {
+        val controller = data.controller
+        val enemy = data.enemy
         val playerModifiers = controller
             .playerStatusEffects
             .zip { it.additionalEnemyDamage(originalDamage, StatusEffectTarget.PlayerTarget) }
@@ -55,47 +64,72 @@ abstract class EnemyAction(val data: EnemyActionData) {
         return playerModifiers + enemyModifiers
     }
 
+    private interface DamageAction {
 
-    class DamagePlayer(val min: Int, val max: Int, data: EnemyActionData) : EnemyAction(data) {
+        fun buildDefaultDescription(
+            damage: Int?,
+            data: EnemyActionData?,
+            isPiercing: Boolean,
+            additionalFn: (Int, EnemyActionData) -> List<Pair<String, Int>>
+        ): String {
+            data ?: return ""
+            val baseDmg = damage ?: return ""
+            val additional = additionalFn(baseDmg, data)
+            val damage = baseDmg + additional.sumOf { it.second }
+            val builder = StringBuilder("The enemy deals $damage damage\n\n")
+            if (isPiercing) {
+                builder.append("Shield will have no effect, but the damage can still be parried\n")
+            }
+            if (additional.isEmpty()) return builder.toString()
+            builder.append("base: $baseDmg\n")
+            additional.forEach { (icon, dmg) ->
+                builder.append(if (dmg < 0) "-" else "+")
+                builder.append(dmg)
+                builder.append("§§$icon§§\n")
+            }
+            return builder.toString()
+        }
+
+        fun buildIndicatorText(
+            damage: Int?,
+            data: EnemyActionData?,
+            isPiercing: Boolean,
+            additionalFn: (Int, EnemyActionData) -> List<Pair<String, Int>>
+        ): String {
+            damage ?: return ""
+            data ?: return ""
+            val additional = additionalFn(damage, data).sumOf { it.second }
+            return when {
+                additional > 0 -> "$damage+\$enemyDamageIncrease\$$additional\$enemyDamageIncrease\$"
+                additional < 0 -> "$damage-\$enemyDamageDecrease\$$additional\$enemyDamageDecrease\$"
+                else -> damage.toString()
+            }
+        }
+    }
+
+    class DamagePlayer(
+        val min: Int, val max: Int,
+        val isPiercing: Boolean,
+        data: EnemyActionData?
+    ) : EnemyAction(data), DamageAction {
 
         private var damage: Int? = null
 
-        override val title: String = "Attack"
-        override val icon: ResourceHandle = "enemy_action_damage"
+        override val defaultTitle: String = "Attack"
+        override val defaultIcon: ResourceHandle = "enemy_action_damage"
 
-        override val description: String
-            get() {
-                val baseDmg = damage ?: return ""
-                val additional = getAdditionalDamage(data.enemy, baseDmg, data.controller)
-                val damage = baseDmg + additional.sumOf { it.second }
-                val builder = StringBuilder("The enemy deals $damage damage")
-                if (additional.isEmpty()) return builder.toString()
-                builder.append("base: $baseDmg")
-                additional.forEach { (icon, dmg) ->
-                    builder.append(if (dmg < 0) "-" else "+")
-                    builder.append(dmg)
-                    builder.append("§§$icon§§\n")
-                }
-                return builder.toString()
-            }
+        override val defaultDescription: String
+            get() = buildDefaultDescription(damage, data, isPiercing, ::getAdditionalDamage)
 
         override val indicatorText: String
-            get() {
-                val baseDmg = damage ?: return ""
-                val additional = getAdditionalDamage(data.enemy, baseDmg, data.controller)
-                    .sumOf { it.second }
-                return when {
-                    additional > 0 -> "$baseDmg+\$enemyDamageIncrease\$$additional\$enemyDamageIncrease\$"
-                    additional < 0 -> "$baseDmg-\$enemyDamageDecrease\$$additional\$enemyDamageDecrease\$"
-                    else -> baseDmg.toString()
-                }
-            }
+            get() = buildIndicatorText(damage, data, isPiercing, ::getAdditionalDamage)
 
         override fun onSelected(
             enemy: Enemy,
             controller: GameController
         ) {
             requireNull(damage) { "Cant reuse EnemyActions" }
+            requireNotNull(data) { "EnemyAction must be copied with appropriate data before it can be used" }
             val baseDamage = (min..max).random(controller.random)
             damage = (baseDamage * data.difficulty).toInt()
         }
@@ -113,21 +147,103 @@ abstract class EnemyAction(val data: EnemyActionData) {
             include(controller.askParryTimeline(damage, parryResult, texts))
             later {
                 val result = parryResult.getOrError()
-                if (result != 0) include(controller.enemyAttackTimeline(result, enemy, false))
+                if (result != 0) include(controller.enemyAttackTimeline(result, enemy, isPiercing))
             }
         } }
 
-        override fun copy(data: EnemyActionData) = DamagePlayer(min, max, data)
+        override fun copy(data: EnemyActionData?) = DamagePlayer(min, max, isPiercing, data)
     }
+
+    class DamagePlayerVariable(
+        val damage: EnemyActionValue,
+        val isPiercing: Boolean,
+        data: EnemyActionData?
+    ) : EnemyAction(data), DamageAction {
+
+        override val defaultTitle: String = "Attack"
+        override val defaultIcon: ResourceHandle = "enemy_action_damage"
+
+        override val defaultDescription: String
+            get() = data?.let { data ->
+                buildDefaultDescription(damage(data.enemy, data.controller), data, isPiercing, ::getAdditionalDamage)
+            } ?: ""
+
+        override val indicatorText: String
+            get() = data?.let { data ->
+                buildIndicatorText(damage(data.enemy, data.controller), data, isPiercing, ::getAdditionalDamage)
+            } ?: ""
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            requireNotNull(data)
+            val damage = damage(data.enemy, data.controller)
+            val parryResult = Promise<Int>()
+            val texts: (remainingDamage: Int) -> Pair<String, String> = { remainingDamage ->
+                "Parrying will let $remainingDamage damage through" to
+                "Passing will let $damage damage through"
+            }
+            include(controller.askParryTimeline(damage, parryResult, texts))
+            later {
+                val result = parryResult.getOrError()
+                if (result != 0) include(controller.enemyAttackTimeline(result, enemy, isPiercing))
+            }
+        } }
+
+        override fun copy(data: EnemyActionData?) = DamagePlayerVariable(damage, isPiercing, data)
+    }
+
+    class ApplyShield(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
+
+        private var shield: Int? = null
+
+        override val defaultTitle: String = "Shield"
+
+        override val defaultDescription: String
+            get() = shield?.let { "The Enemy gives itself $shield shield" } ?: ""
+
+        override val defaultIcon: ResourceHandle = "enemy_action_cover"
+
+        override val indicatorText: String
+            get() = shield?.toString() ?: ""
+
+        override fun onSelected(
+            enemy: Enemy,
+            controller: GameController
+        ) {
+            requireNull(shield) { "Cant reuse EnemyActions" }
+            requireNotNull(data)
+            shield = (min..max).random(data.controller.random)
+        }
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            val shield = shield
+            requireNotNull(shield)
+            requireNotNull(data)
+            include(data.enemy.addCoverTimeline(shield))
+        } }
+
+        override fun copy(data: EnemyActionData?): EnemyAction = ApplyShield(min, max, data)
+    }
+
 
     data class EnemyActionData(
         val isHidden: Boolean,
         val difficulty: Double,
         val enemy: Enemy,
-        val controller: GameController
+        val controller: GameController,
+        val overrideTitle: String? = null,
+        val overrideDescription: String? = null,
+        val overrideIcon: ResourceHandle? = null,
     )
 }
 
+typealias EnemyActionValue = (enemy: Enemy, controller: GameController) -> Int
+typealias EnemyPredicate = (enemy: Enemy, controller: GameController) -> Boolean
 
 
 //class EnemyAction(

@@ -8,7 +8,6 @@ import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
-import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
 
@@ -65,7 +64,16 @@ class Enemy(
         controller: GameController,
         difficulty: Double,
     ) {
-        nextEnemyAction = brain.selectAction(this, controller, difficulty)
+        val action = brain.selectAction(this, controller, difficulty)
+        nextEnemyAction = action
+        when (action) {
+            is NextEnemyAction.ShownEnemyAction -> {
+                action.action.onSelected(this, controller)
+                action.action.onShow(this, controller)
+            }
+            is NextEnemyAction.HiddenEnemyAction -> action.action.onSelected(this, controller)
+            else -> {}
+        }
         enemyEvents.fire(EnemyActionChangedEvent(nextEnemyAction))
     }
 
@@ -73,6 +81,7 @@ class Enemy(
         val nextEnemyAction = nextEnemyAction
         if (nextEnemyAction !is NextEnemyAction.HiddenEnemyAction) return
         val shownAction = NextEnemyAction.ShownEnemyAction(nextEnemyAction.action)
+        nextEnemyAction.action.onShow(this, controller)
         this.nextEnemyAction = shownAction
         enemyEvents.fire(EnemyActionChangedEvent(shownAction))
     }

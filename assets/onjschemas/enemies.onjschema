@@ -3,141 +3,25 @@ import "imports/game_predicates.onjschema" as _;
 import "imports/textEffectEmitterConfig.onjschema" as textEmitterConfig;
 
 use Common;
-use Cards; // include Card namespace for status effects
+use Game;
 
-var enemyActionSharedKeys = {
-    icon: string,
-    scaleFactor?: float,
-    predicates?: $GamePredicate[],
-    hasSpecialAnimation: boolean,
-    commonPanel1?: string,
-    commonPanel2?: string,
-    commonPanel3?: string,
-    specialPanel?: string,
-    title: string,
-    descriptionTemplate: string,
+var action = {
+    weight: EnemyActionValue,
+    action: EnemyAction?,
+    maxExecutions?: int,
+    selectionConditions?: EnemyPredicate[],
+    variants?: {
+        weight: int,
+        hidden?: boolean,
+    }[]
 };
-
-$EnemyAction {
-
-    $DamagePlayer {
-        damage: int[2],
-        ...enemyActionSharedKeys
-    }
-
-    $DestroyCardsInHand {
-        maxCards: int,
-        ...enemyActionSharedKeys
-    }
-
-    $RotateRevolver {
-        maxTurns: int,
-        forceDirection?: string,
-        ...enemyActionSharedKeys
-    }
-
-    $ReturnCardToHand {
-        ...enemyActionSharedKeys
-    }
-
-    $TakeCover {
-        cover: int[2],
-        ...enemyActionSharedKeys
-    }
-
-    $GivePlayerStatusEffect {
-        statusEffect: StatusEffect,
-        ...enemyActionSharedKeys
-    }
-
-    $GiveSelfStatusEffect {
-        statusEffect: StatusEffect,
-        ...enemyActionSharedKeys
-    }
-
-    $GivePlayerCard {
-        card: CardType,
-        ...enemyActionSharedKeys
-    }
-
-    $PiercingDamage {
-        damage: int[2],
-        ...enemyActionSharedKeys
-    }
-
-    $MarkCards {
-        amountToMark: int[2],
-       ...enemyActionSharedKeys
-    }
-
-    $PutMarkedCardsUnderDeck {
-       ...enemyActionSharedKeys
-    }
-
-    $PutBulletFromRevolverUnderDeck {
-        possibleSlots: int[],
-       ...enemyActionSharedKeys
-    }
-}
-
-$EnemyBrain {
-
-    $NewEnemyBrain {
-        damageShieldWeight: float,
-        normalSpecialActionWeight: float,
-        baseDamage: int[2],
-        baseShield: int[2],
-        scaleIncreasePerTurn: float,
-        aggressionBoostConfig: {
-            healthPercent: float,
-            normalSpecialWeightChange: float,
-            damageShieldWeightChange: float,
-            damageIncrease: int,
-        },
-        actions: {
-            weight: int,
-            showProbability: float,
-            maxExecutions?: int,
-            action: $EnemyAction
-        }[]
-    }
-
-    $SniperEnemyBrain {
-        damageShieldWeight: float,
-        normalSpecialActionWeight: float,
-        baseDamage: int[2],
-        baseShield: int[2],
-        scaleIncreasePerTurn: float,
-        goodbyesAction: $EnemyAction,
-        actions: {
-            weight: int,
-            showProbability: float,
-            maxExecutions?: int,
-            action: $EnemyAction
-        }[]
-    }
-
-    $RandomEnemyBrain {
-        actions: $EnemyAction[],
-        actionProbability: float,
-    }
-
-    $ScriptedEnemyBrain {
-        actions: {
-            turn: int,
-            action: $EnemyAction,
-            show: boolean
-        }[]
-    }
-
-}
 
 var enemy = {
     name: string,
     title: string,
     baseHealth: int,
     texture: string,
-    brain: $EnemyBrain,
+    actions: action[],
 };
 
 enemies: enemy[],

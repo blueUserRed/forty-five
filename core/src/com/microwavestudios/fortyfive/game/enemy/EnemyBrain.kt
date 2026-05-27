@@ -1,7 +1,8 @@
 package com.microwavestudios.fortyfive.game.enemy
 
-import com.microwavestudios.fortyfive.game.card.EffectValue
 import com.microwavestudios.fortyfive.game.controller.GameController
+import com.microwavestudios.fortyfive.onjNamespaces.OnjEnemyPredicate
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -13,11 +14,26 @@ class EnemyBrain(
     fun selectAction(enemy: Enemy, controller: GameController, difficulty: Double): NextEnemyAction {
         if (enemyActions.isEmpty()) return NextEnemyAction.None
         val winner = enemyActions
-            .zipToFirst { it.weight(controller, null, null, null) }
-            .weightedRandom(controller.random)
+            .filter { it.maxExecutions == -1 || it.executions < it.maxExecutions }
+            .filter { option -> option.selectionConditions.all { it(enemy, controller) } }
+            .zipToFirst { it.weight(enemy, controller) }
+            .weightedRandomOrNull(controller.random)
+            ?: return NextEnemyAction.None
         if (winner.action == null) return NextEnemyAction.None
-        val variant = winner.variants.random(controller.random)
-        val data = EnemyAction.EnemyActionData(variant.hidden, difficulty, enemy, controller)
+        winner.executions++
+        val variant = winner
+            .variants
+            .zipToFirst { it.weight }
+            .weightedRandom(controller.random)
+        val data = EnemyAction.EnemyActionData(
+            variant.hidden,
+            difficulty,
+            enemy,
+            controller,
+            winner.overrideTitle,
+            winner.overrideDescription,
+            winner.overrideIcon
+        )
         val action = winner.action.copy(data)
         return if (variant.hidden) {
             NextEnemyAction.HiddenEnemyAction(action)
@@ -28,9 +44,14 @@ class EnemyBrain(
 
     data class EnemyActionOption(
         val action: EnemyAction?,
-        val weight: EffectValue,
+        val weight: EnemyActionValue,
         val maxExecutions: Int,
-        val variants: List<EnemyActionVariant>
+        val selectionConditions: List<EnemyPredicate>,
+        val variants: List<EnemyActionVariant>,
+        var executions: Int,
+        val overrideTitle: String?,
+        val overrideDescription: String?,
+        val overrideIcon: ResourceHandle?,
     )
 
     data class EnemyActionVariant(
@@ -45,9 +66,14 @@ class EnemyBrain(
             .value
             .map { obj ->
                 obj as OnjObject
-                val weight = obj.get<EffectValue>("weight")
+                val weight = obj.get<EnemyActionValue>("weight")
                 val action = obj.get<EnemyAction?>("action")
                 val maxExecutions = obj.getOr("maxExecutions", -1L).toInt()
+
+                val selectionConditions = obj.getOr<OnjArray?>("selectionConditions", null)
+                    ?.value
+                    ?.map { (it as OnjEnemyPredicate).value }
+                    ?: listOf()
 
                 val variants = obj.getOr<OnjArray?>("variants", null)?.value?.map {
                     it as OnjObject
@@ -58,7 +84,12 @@ class EnemyBrain(
                     action,
                     weight,
                     maxExecutions,
-                    variants
+                    selectionConditions,
+                    variants,
+                    0,
+                    obj.getOr<String?>("overrideTitle", null),
+                    obj.getOr<String?>("overrideDescription", null),
+                    obj.getOr<String?>("overrideIcon", null),
                 )
             }.let { EnemyBrain(it) }
 

@@ -271,7 +271,12 @@ fun Vector2.toArray(): Array<Float> = arrayOf(x, y)
 
 fun OnjArray.toVector2(): Vector2 = Vector2(get<Double>(0).toFloat(), get<Double>(1).toFloat())
 
-fun <T> Collection<Pair<Int, T>>.weightedRandom(random: Random = Random): T {
+fun <T> Collection<Pair<Int, T>>.weightedRandom(random: Random = Random): T =
+    weightedRandomOrNull(random) ?:
+        throw NoSuchElementException("weightedRandom called on an empty collection")
+
+fun <T> Collection<Pair<Int, T>>.weightedRandomOrNull(random: Random = Random): T? {
+    if (isEmpty()) return null
     val total = this.sumOf { abs(it.first) }
     val choice = (0..total).random(random)
     var acc = 0
@@ -279,7 +284,7 @@ fun <T> Collection<Pair<Int, T>>.weightedRandom(random: Random = Random): T {
         acc += abs(weight)
         if (choice <= acc) return value
     }
-    throw NoSuchElementException("weightedRandom called on an empty collection")
+    unreachable()
 }
 
 fun Collection<Timeline>.collectTimeline(): Timeline {
