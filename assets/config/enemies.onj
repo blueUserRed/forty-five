@@ -27,13 +27,13 @@ enemyGroups: [
 //            },
         ]
     },
-//    {
-//        groupName: "Pyro",
-//        variants: [
-//            {
-//                name: "Pyro-1",
-//                majorDifficulty: 1
-//            },
+    {
+        groupName: "Pyro",
+        variants: [
+            {
+                name: "Pyro-1",
+                majorDifficulty: 1
+            },
 //            {
 //                name: "Pyro-2",
 //                majorDifficulty: 2
@@ -46,8 +46,8 @@ enemyGroups: [
 //                name: "Pyro-4",
 //                majorDifficulty: 4
 //            },
-//        ]
-//    },
+        ]
+    },
 //    {
 //        groupName: "Witch",
 //        variants: [
@@ -104,7 +104,7 @@ var outlaws = [
 
 var pyros = [
     {
-        name: "Pyro-4",
+        name: "Pyro-1",
         title: "Pyro",
         baseHealth: 160,
         texture: "enemy_pyro",
@@ -112,6 +112,22 @@ var pyros = [
             {
                 weight: 10#actionVal,
                 action: action_damage(5, 10, false)
+            },
+            {
+                weight: 4#actionVal,
+                selectionConditions: [
+                    value.countPlayerStatusEffectParams#actionVal moreThan 3#actionVal
+                ],
+                action: action_variableDamage(
+                    value.countPlayerStatusEffectParams#actionVal,
+                    false,
+                    "The damage of this attack is equal to the sum of all the parameters of the Status Effects you have"
+                )
+            },
+            {
+                weight: 4#actionVal,
+                action: action_parryableBurning(3, 7),
+                overrideTitle: "Pyro-dmg"
             },
         ]
     }

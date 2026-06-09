@@ -102,7 +102,9 @@ open class AdvancedTextWidget(
         curX = paddingLeft
         lines
             .reversed()
-            .zip { line -> line.maxOfOrNull { it.height } ?: defaults.third.toFloat() }
+            .zip { line ->
+                (line.maxOfOrNull { it.height } ?: 0f).coerceAtLeast(defaults.third.toFloat())
+            }
             .forEach { (line, height) ->
                 line.forEach { actor ->
                     actor.setPosition(curX, curY)

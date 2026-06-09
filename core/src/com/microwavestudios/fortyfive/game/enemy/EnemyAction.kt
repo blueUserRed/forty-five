@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.game.enemy
 
+import com.microwavestudios.fortyfive.game.BurningPlayer
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.StatusEffectCreator
 import com.microwavestudios.fortyfive.game.StatusEffectTarget
@@ -70,6 +71,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             damage: Int?,
             data: EnemyActionData?,
             isPiercing: Boolean,
+            additionalExplanation: String?,
             additionalFn: (Int, EnemyActionData) -> List<Pair<String, Int>>
         ): String {
             data ?: return ""
@@ -78,10 +80,11 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             val damage = baseDmg + additional.sumOf { it.second }
             val builder = StringBuilder("The enemy deals $damage damage\n\n")
             if (isPiercing) {
-                builder.append("Shield will have no effect, but the damage can still be parried\n")
+                builder.append("Piercing: Shield will have no effect, but the damage can still be parried\n")
             }
+            additionalExplanation?.let { builder.append("$it\n") }
             if (additional.isEmpty()) return builder.toString()
-            builder.append("base: $baseDmg\n")
+            builder.append("\nbase: $baseDmg\n")
             additional.forEach { (icon, dmg) ->
                 builder.append(if (dmg < 0) "-" else "+")
                 builder.append(dmg)
@@ -100,8 +103,8 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             data ?: return ""
             val additional = additionalFn(damage, data).sumOf { it.second }
             return when {
-                additional > 0 -> "$damage+\$enemyDamageIncrease\$$additional\$enemyDamageIncrease\$"
-                additional < 0 -> "$damage-\$enemyDamageDecrease\$$additional\$enemyDamageDecrease\$"
+                additional > 0 -> "$damage\$enemyDamageIncrease\$+$additional\$enemyDamageIncrease\$"
+                additional < 0 -> "$damage\$enemyDamageDecrease\$-$additional\$enemyDamageDecrease\$"
                 else -> damage.toString()
             }
         }
@@ -119,7 +122,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         override val defaultIcon: ResourceHandle = "enemy_action_damage"
 
         override val defaultDescription: String
-            get() = buildDefaultDescription(damage, data, isPiercing, ::getAdditionalDamage)
+            get() = buildDefaultDescription(damage, data, isPiercing, null, ::getAdditionalDamage)
 
         override val indicatorText: String
             get() = buildIndicatorText(damage, data, isPiercing, ::getAdditionalDamage)
@@ -138,7 +141,9 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             enemy: Enemy,
             controller: GameController
         ): Timeline = Timeline.timeline { later {
-            val damage = damage!!
+            val originalDamage = damage!!
+            val additional = getAdditionalDamage(originalDamage, data!!).sumOf { it.second }
+            val damage = originalDamage + additional
             val parryResult = Promise<Int>()
             val texts: (remainingDamage: Int) -> Pair<String, String> = { remainingDamage ->
                 "Parrying will let $remainingDamage damage through" to
@@ -157,6 +162,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
     class DamagePlayerVariable(
         val damage: EnemyActionValue,
         val isPiercing: Boolean,
+        val additionalExplanation: String?,
         data: EnemyActionData?
     ) : EnemyAction(data), DamageAction {
 
@@ -165,12 +171,23 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
 
         override val defaultDescription: String
             get() = data?.let { data ->
-                buildDefaultDescription(damage(data.enemy, data.controller), data, isPiercing, ::getAdditionalDamage)
+                buildDefaultDescription(
+                    damage(data.enemy, data.controller),
+                    data,
+                    isPiercing,
+                    additionalExplanation,
+                    ::getAdditionalDamage
+                )
             } ?: ""
 
         override val indicatorText: String
             get() = data?.let { data ->
-                buildIndicatorText(damage(data.enemy, data.controller), data, isPiercing, ::getAdditionalDamage)
+                buildIndicatorText(
+                    damage(data.enemy, data.controller),
+                    data,
+                    isPiercing,
+                    ::getAdditionalDamage
+                )
             } ?: ""
 
         override fun getTimeline(
@@ -178,7 +195,9 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             controller: GameController
         ): Timeline = Timeline.timeline { later {
             requireNotNull(data)
-            val damage = damage(data.enemy, data.controller)
+            val originalDamage = damage(data.enemy, data.controller)
+            val additional = getAdditionalDamage(originalDamage, data).sumOf { it.second }
+            val damage = originalDamage + additional
             val parryResult = Promise<Int>()
             val texts: (remainingDamage: Int) -> Pair<String, String> = { remainingDamage ->
                 "Parrying will let $remainingDamage damage through" to
@@ -191,7 +210,8 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             }
         } }
 
-        override fun copy(data: EnemyActionData?) = DamagePlayerVariable(damage, isPiercing, data)
+        override fun copy(data: EnemyActionData?) =
+            DamagePlayerVariable(damage, isPiercing, additionalExplanation, data)
     }
 
     class ApplyShield(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
@@ -228,6 +248,60 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         } }
 
         override fun copy(data: EnemyActionData?): EnemyAction = ApplyShield(min, max, data)
+    }
+
+    class ParryableBurning(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
+
+        private var burningValue: Int? = null
+
+        override val defaultTitle: String = "Burning"
+
+        override val defaultDescription: String
+            get() = burningValue?.let { value ->
+                $$"""
+                The Enemy will give you $status$BURNING$status$ ($$value).
+                
+                However, you will be given the chance to parry, reducing the parameter value of the Status Effect.
+                """.trimIndent()
+            } ?: ""
+
+        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+
+        override val indicatorText: String
+            get() = burningValue?.toString() ?: ""
+
+        override fun onSelected(
+            enemy: Enemy,
+            controller: GameController
+        ) {
+            requireNull(burningValue) { "Cant reuse EnemyActions" }
+            requireNotNull(data)
+            burningValue = ((min..max).random(controller.random) * data.difficulty).toInt()
+        }
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            requireNotNull(data)
+            val burningValue = burningValue
+            requireNotNull(burningValue)
+            val result = Promise<Int>()
+            val texts: (remaining: Int) -> Pair<String, String> = { remaining ->
+                "Parrying will result in Burning($remaining)" to
+                "Passing will result in Burning($burningValue)"
+            }
+            include(controller.askParryTimeline(burningValue, result, texts))
+            later {
+                val newValue = result.getOrError()
+                if (newValue <= 0) return@later
+                val effect = BurningPlayer(newValue, 0.5f, continueForever = false, skipFirstRotation = false)
+                include(controller.tryApplyStatusEffectToPlayerTimeline(effect))
+            }
+        } }
+
+        override fun copy(data: EnemyActionData?): EnemyAction = ParryableBurning(min, max, data)
+
     }
 
 

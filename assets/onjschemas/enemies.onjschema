@@ -13,7 +13,10 @@ var action = {
     variants?: {
         weight: int,
         hidden?: boolean,
-    }[]
+    }[],
+    overrideTitle?: string,
+    overrideDescription?: string,
+    overrideIcon?: string,
 };
 
 var enemy = {

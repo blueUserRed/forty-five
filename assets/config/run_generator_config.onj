@@ -166,23 +166,28 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Outlaw" ],
+        allowedEnemies: [ "Pyro" ],
     },
-    {
-        majorDifficulty: 2,
-        amount: [1, 2],
-        allowedEnemies: [ "Outlaw", "Pyro" ],
-    },
-    {
-        majorDifficulty: 3,
-        amount: [1, 2],
-        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
-    },
-    {
-        majorDifficulty: 4,
-        amount: [2, 3],
-        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
-    },
+//    {
+//        majorDifficulty: 0,
+//        amount: [1, 1],
+//        allowedEnemies: [ "Outlaw" ],
+//    },
+//    {
+//        majorDifficulty: 2,
+//        amount: [1, 2],
+//        allowedEnemies: [ "Outlaw", "Pyro" ],
+//    },
+//    {
+//        majorDifficulty: 3,
+//        amount: [1, 2],
+//        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
+//    },
+//    {
+//        majorDifficulty: 4,
+//        amount: [2, 3],
+//        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
+//    },
 ],
 
 allowedEnemyConfigurations: [

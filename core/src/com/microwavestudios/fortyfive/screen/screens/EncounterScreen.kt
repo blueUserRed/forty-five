@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -41,7 +40,6 @@ import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
-import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -52,7 +50,6 @@ import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
-import com.microwavestudios.fortyfive.utils.AdvancedTextParser.*
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -663,99 +660,7 @@ class EncounterScreen : ScreenCreator() {
                 event.timeline.resolve(chargeTimeline())
             }
 
-            box {
-
-                fun showAction(
-                    text: String?,
-                    iconHandle: String,
-                ) {
-                    image {
-                        backgroundHandle = iconHandle
-                        width = 60f
-                        height = 60f
-                    }
-                    if (text != null) advancedText("roadgeek", Color.FortyWhite, 23) {
-                        relativeHeight(58f)
-                        setRawText(text, DetailDescriptionHandler.allTextEffects)
-                        centerX()
-                        centerY()
-                        wrap = false
-                        syncWidth()
-                    }
-
-//                    image {
-//                        backgroundHandle = iconHandle
-//                        width = 60f
-//                        height = 60f
-//                    }
-//
-//                    val effects = listOf(
-//                        AdvancedTextEffect.AdvancedColorTextEffect("?R", Color.Red),
-//                        AdvancedTextEffect.AdvancedColorTextEffect("?G", Color.LIGHT_GRAY),
-//                    )
-//
-//                    val texts = mutableListOf<String>()
-//                    if (text != null) texts.add(text)
-//                    damageChanges.forEach { (icon, damage) ->
-//                        val text = when {
-//                            damage > 0 -> "?R+$damage§§$icon§§?R"
-//                            damage < 0 -> "?G$damage§§$icon§§?G"
-//                            else -> ""
-//                        }
-//                        texts.add(text)
-//                    }
-//
-//                    texts.forEach { text -> group {
-//                        height = 40f
-//                        backgroundHandle = "wood_box"
-//                        touchable = Touchable.disabled
-//                        val text = advancedText("roadgeek", Color.FortyWhite, 23) {
-//                            relativeHeight(58f)
-//                            setRawText(text, effects)
-//                            centerX()
-//                            centerY()
-//                            wrap = false
-//                            syncWidth()
-//                        }
-//                        onLayoutAndNow { width = (text.width + 25).coerceAtLeast(40f) }
-//                    } }
-
-                }
-
-                relativeWidth(100f)
-                animateUpAndDownSinus(
-                    method = AnimatedActor.AnimationMethod.DRAW_OFFSET,
-                    frequency = 0.3f,
-                    amplitude = 6f
-                )
-                flexDirection = FlexDirection.ROW
-                horizontalAlign = CustomAlign.CENTER
-                verticalAlign = CustomAlign.CENTER
-                height = enemyHeight * 0.15f
-                touchable = Touchable.enabled
-                bindDetailToInputState(GameInputs.States.focused)
-                enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->
-                    this.clear()
-                    val hoverText = when (val nextAction = event.nextAction) {
-                        is NextEnemyAction.ShownEnemyAction -> nextAction.action.description
-                        is NextEnemyAction.HiddenEnemyAction -> "You cant see the action of the enemy yet!"
-                        is NextEnemyAction.None -> null
-                    }
-                    detailWidget = if (hoverText != null) {
-                        DetailWidget.SimpleSmallDetailActor(screen) { hoverText }
-                    } else {
-                        null
-                    }
-                    when (val nextAction = event.nextAction) {
-                        is NextEnemyAction.ShownEnemyAction -> showAction(
-                            nextAction.action.indicatorText,
-                            nextAction.action.icon
-                        )
-                        is NextEnemyAction.None -> {}
-                        is NextEnemyAction.HiddenEnemyAction -> showAction("?",  "enemy_action_unknown")
-                    }
-                }
-            }
+            actionIndicator(enemy, enemyHeight)
 
             group {
                 relativeWidth(100f)
@@ -815,6 +720,79 @@ class EncounterScreen : ScreenCreator() {
 
         }
         return enemyWidth
+    }
+
+    private fun CustomGroup.actionIndicator(enemy: Enemy, enemyHeight: Float) = box {
+
+        fun showAction(
+            text: () -> String?,
+            iconHandle: String,
+        ) {
+            image {
+                backgroundHandle = iconHandle
+                width = 60f
+                height = 60f
+            }
+
+            group {
+                height = 40f
+                backgroundHandle = "wood_box"
+                touchable = Touchable.disabled
+                var curText: String? = text()
+                val label = advancedText("roadgeek", Color.FortyWhite, 23) {
+                    relativeHeight(58f)
+                    setRawText(curText ?: "", DetailDescriptionHandler.allTextEffects)
+                    centerX()
+                    centerY()
+                    wrap = false
+                    touchable = Touchable.disabled
+                    syncWidth()
+                }
+                onLayoutAndNow { width = (label.width + 25).coerceAtLeast(40f) }
+                onUpdate {
+                    val newText = text()
+                    if (newText == curText) return@onUpdate
+                    curText = newText
+                    label.setRawText(curText ?: "", DetailDescriptionHandler.allTextEffects)
+                }
+            }
+        }
+
+        relativeWidth(100f)
+        animateUpAndDownSinus(
+            method = AnimatedActor.AnimationMethod.DRAW_OFFSET,
+            frequency = 0.3f,
+            amplitude = 6f
+        )
+        flexDirection = FlexDirection.ROW
+        horizontalAlign = CustomAlign.CENTER
+        verticalAlign = CustomAlign.CENTER
+        height = enemyHeight * 0.15f
+        touchable = Touchable.enabled
+        bindDetailToInputState(GameInputs.States.focused)
+        enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->
+            this.clear()
+            val text: () -> List<String> = {
+                when (val nextAction = event.nextAction) {
+                    is NextEnemyAction.ShownEnemyAction -> nextAction.action.description
+                    is NextEnemyAction.HiddenEnemyAction -> "You cant see the action of the enemy yet!"
+                    is NextEnemyAction.None -> ""
+                }.let { listOf(it) }
+            }
+            detailWidget = DetailWidget.ComplexBigDetailActor(
+                screen,
+                text = text,
+                effects = DetailDescriptionHandler.allTextEffects
+            )
+            when (val nextAction = event.nextAction) {
+                is NextEnemyAction.ShownEnemyAction -> showAction(
+                    { nextAction.action.indicatorText },
+                    nextAction.action.icon
+                )
+                is NextEnemyAction.None -> {}
+                is NextEnemyAction.HiddenEnemyAction -> showAction({ "?" },  "enemy_action_unknown")
+            }
+        }
     }
 
     private fun CustomGroup.parryPopup() = box {

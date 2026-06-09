@@ -1053,7 +1053,7 @@ object GameNamespace {
     }
 
     @RegisterOnjFunction(schema = "use Game; params: [EnemyActionValue, EnemyActionValue]", type = OnjFunctionType.INFIX)
-    fun greaterThan(lhs: OnjEnemyActionValue, rhs: OnjEnemyActionValue) = OnjEnemyPredicate { enemy, controller ->
+    fun moreThan(lhs: OnjEnemyActionValue, rhs: OnjEnemyActionValue) = OnjEnemyPredicate { enemy, controller ->
         lhs.value(enemy, controller) > rhs.value(enemy, controller)
     }
 
@@ -1064,6 +1064,20 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "params: [int, int, boolean]")
     fun action_damage(min: OnjInt, max: OnjInt, isPiercing: OnjBoolean): OnjEnemyAction = OnjEnemyAction(
         EnemyAction.DamagePlayer(min.value.toInt(), max.value.toInt(), isPiercing.value, null)
+    )
+
+    @RegisterOnjFunction(schema = "use Game; params: [EnemyActionValue, boolean, string]")
+    fun action_variableDamage(
+        damage: OnjEnemyActionValue,
+        isPiercing: OnjBoolean,
+        explanation: OnjString
+    ): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.DamagePlayerVariable(damage.value, isPiercing.value, explanation.value, null)
+    )
+
+    @RegisterOnjFunction(schema = "params: [int, int]")
+    fun action_parryableBurning(min: OnjInt, max: OnjInt) = OnjEnemyAction(
+        EnemyAction.ParryableBurning(min.value.toInt(), max.value.toInt(), null)
     )
 
     @RegisterOnjFunction(schema = "params: [int, int]")
