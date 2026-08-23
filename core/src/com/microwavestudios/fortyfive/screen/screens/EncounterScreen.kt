@@ -410,10 +410,11 @@ class EncounterScreen : ScreenCreator() {
             flexDirection = FlexDirection.ROW
             touchable = Touchable.enabled
             val text = DetailDescriptionHandler.descriptions[effect.name.lowercase()]?.second
-            detailWidget = DetailWidget.SimpleSmallDetailActor(
+            detailWidget = DetailWidget.ComplexBigDetailActor(
                 screen,
-                effects = DetailDescriptionHandler.allTextEffects
-            ) { text ?: "" }
+                DetailDescriptionHandler.allTextEffects,
+                text = { listOf(text ?: "") }
+            )
             bindDetailToInputState(GameInputs.States.focused)
             image {
                 backgroundHandle = effect.iconHandle
@@ -748,10 +749,12 @@ class EncounterScreen : ScreenCreator() {
                     touchable = Touchable.disabled
                     syncWidth()
                 }
+                isVisible = curText != null && curText != ""
                 onLayoutAndNow { width = (label.width + 25).coerceAtLeast(40f) }
                 onUpdate {
                     val newText = text()
                     if (newText == curText) return@onUpdate
+                    isVisible = curText != null && curText != ""
                     curText = newText
                     label.setRawText(curText ?: "", DetailDescriptionHandler.allTextEffects)
                 }
@@ -782,7 +785,8 @@ class EncounterScreen : ScreenCreator() {
             detailWidget = DetailWidget.ComplexBigDetailActor(
                 screen,
                 text = text,
-                effects = DetailDescriptionHandler.allTextEffects
+                effects = DetailDescriptionHandler.allTextEffects,
+                subtexts = { DetailDescriptionHandler.extractAllExtraDescriptions(text()) }
             )
             when (val nextAction = event.nextAction) {
                 is NextEnemyAction.ShownEnemyAction -> showAction(

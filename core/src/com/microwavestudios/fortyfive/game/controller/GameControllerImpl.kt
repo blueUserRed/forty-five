@@ -901,13 +901,25 @@ class GameControllerImpl(
             FortyFive.logger.debug(logTag, "cant apply status effect because they are disabled")
             return@later
         }
-        enemy.applyEffect(statusEffect, controller)
-        val info = createTriggerInfo(null, sourceCard = source)
-        val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
-        gameEvents.fire(event)
-        include(event.createTimeline())
-        val situation = GameSituation.EnemyStatusEffectsChanged(enemy, statusEffect, true)
-        include(checkTrigger(situation, info))
+        val dontApplyEffectPromise = Promise<Unit>()
+        val timelines = mutableListOf<Timeline>()
+        for (effect in enemy.statusEffects) {
+            effect
+                .executeBeforeStatusEffectApplied(statusEffect, dontApplyEffectPromise)
+                ?.let { timelines.add(it) }
+            if (dontApplyEffectPromise.isResolved) break
+        }
+        include(timelines.collectTimeline())
+        later {
+            if (dontApplyEffectPromise.isResolved) return@later
+            enemy.applyEffect(statusEffect, controller)
+            val info = createTriggerInfo(null, sourceCard = source)
+            val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
+            gameEvents.fire(event)
+            include(event.createTimeline())
+            val situation = GameSituation.EnemyStatusEffectsChanged(enemy, statusEffect, true)
+            include(checkTrigger(situation, info))
+        }
     } }
 
     override fun damagePlayerTimeline(
@@ -980,7 +992,17 @@ class GameControllerImpl(
     }
 
     override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect, source: Card?): Timeline = Timeline.timeline {
+        val dontApplyEffectPromise = Promise<Unit>()
+        val timelines = mutableListOf<Timeline>()
+        for (toCheck in playerStatusEffects) {
+            toCheck
+                .executeBeforeStatusEffectApplied(effect, dontApplyEffectPromise)
+                ?.let { timelines.add(it) }
+            if (dontApplyEffectPromise.isResolved) break
+        }
+        include(timelines.collectTimeline())
         later {
+            if (dontApplyEffectPromise.isResolved) return@later
             FortyFive.logger.debug(logTag, "status effect $effect applied to player")
             var stacked = false
             _playerStatusEffects
@@ -1081,12 +1103,6 @@ class GameControllerImpl(
         isPiercing: Boolean
     ): Timeline = Timeline.timeline { later {
         include(damagePlayerTimeline(damage, isPiercing))
-//        val card = revolver.getCardInSlot(5)
-//        if (card == null) {
-//            include(damagePlayerTimeline(damage, false, isPiercing))
-//        } else {
-//            include(parryTimeline(damage, isPiercing, card))
-//        }
     } }
 
     override fun askParryTimeline(
@@ -1437,13 +1453,14 @@ class GameControllerImpl(
         } }
         allEnemies.forEach { enemy -> later {
             if (enemy.isDefeated) return@later
+            val actionTimeline = enemy.executeAction(controller) ?: return@later
             val event = Enemy.PlayChargeAnimationEvent()
             enemy.enemyEvents.fire(event)
             action {
                 event.timeline.getOrNull()?.let { dispatchAnimTimeline(it) }
             }
             delay(200)
-            include(enemy.executeAction(controller))
+            include(actionTimeline)
             delay(400)
         } }
 //        activeEnemies.forEach { enemy -> later {
@@ -1541,7 +1558,7 @@ class GameControllerImpl(
 
         later {
             playerStatusEffects
-                .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.PlayerTarget) }
+                .mapNotNull { it.executeOnEndTurn(StatusEffectTarget.PlayerTarget) }
                 .collectTimeline()
                 .let { include(it) }
         }

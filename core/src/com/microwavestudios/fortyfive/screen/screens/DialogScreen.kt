@@ -261,6 +261,17 @@ class DialogScreen : ScreenCreator() {
                 nameLabels()
             }
 
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            onInput(GameInputs.interact) {
+                if (!advTextWidget.isFinished) return@onInput
+                events.fire(DialogScreenController.NextClicked)
+            }
+            onInput(GameInputs.dialogContinue) {
+                if (!advTextWidget.isFinished) return@onInput
+                events.fire(DialogScreenController.NextClicked)
+            }
+
             val continueButton = image {
                 positionType = PositionType.ABSOLUTE
                 backgroundHandle = "common_symbol_arrow_right"
@@ -268,16 +279,6 @@ class DialogScreen : ScreenCreator() {
                 height = 40F
                 y = (parent.height - height) / 2
                 x = parent.width - 100F
-                touchable = Touchable.enabled
-                keyboardFocusable = KeyboardFocusable.LEAF
-                onInput(GameInputs.interact) {
-                    if (!advTextWidget.isFinished) return@onInput
-                    events.fire(DialogScreenController.NextClicked)
-                }
-                onInput(GameInputs.dialogContinue) {
-                    if (!advTextWidget.isFinished) return@onInput
-                    events.fire(DialogScreenController.NextClicked)
-                }
             }
 
             events.watchFor<DialogScreenController.ChangeToNewDialogPart> { (part) ->

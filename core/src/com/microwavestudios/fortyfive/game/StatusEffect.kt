@@ -6,6 +6,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.math.floor
 import kotlin.math.min
@@ -30,11 +31,19 @@ abstract class StatusEffect(
 
     open fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
-    open fun executeOnNewTurn(target: StatusEffectTarget): Timeline? = null
+    open fun executeOnEndTurn(target: StatusEffectTarget): Timeline? = null
 
     open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
 
     open fun executeAfterShot(): Timeline? = null
+
+    /**
+     * @param dontApplyStatusEffect resolve to stop the status effect from being applied
+     */
+    open fun executeBeforeStatusEffectApplied(
+        statusEffect: StatusEffect,
+        dontApplyStatusEffect: Promise<Unit>
+    ): Timeline? = null
 
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
@@ -43,6 +52,8 @@ abstract class StatusEffect(
     open fun disableEverlasting(): Boolean = false
 
     open fun onEnemyDeath(target: StatusEffectTarget): Timeline? = null
+
+    open fun canBeBlocked(): Boolean = true
 
     abstract fun canStackWith(other: StatusEffect): Boolean
 
@@ -61,40 +72,78 @@ abstract class StatusEffect(
     abstract fun increment(amount: Int)
 
     abstract fun parameterSum(): Int
+
+    abstract fun toDisplayString(): String
+
+
+    protected fun statusTemplate(name: String): String = $$"$status$$$name$status$"
 }
+
+abstract class PassiveEnemyAction(iconHandle: ResourceHandle) : StatusEffect(iconHandle) {
+
+    private var valid: Boolean = true
+
+    override fun isStillValid(): Boolean = valid
+
+    override fun getDisplayText(): String = ""
+
+    override fun increment(amount: Int) {
+    }
+
+    override fun parameterSum(): Int = 0
+
+    override fun stack(other: StatusEffect) {
+        throw RuntimeException("cant stack passive enemy actions")
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = false
+
+    override fun canBeBlocked(): Boolean = false
+
+    override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        action { valid = false }
+    }
+}
+
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
     duration: Int,
     private val skipFirstRotation: Boolean
 ) : StatusEffect(iconHandle) {
 
-    var duration: Int = duration
-        private set
-
     var continueForever: Boolean = false
         private set
 
-    var rotationOnEffectStart = -1
+    private var hadFirstRotation = false
+
+    var currentDuration: Int = duration
         private set
 
-    override fun start(controller: GameController) {
-        super.start(controller)
-        rotationOnEffectStart = controller.revolverRotationCounter
-        if (skipFirstRotation) rotationOnEffectStart++
+    override fun isStillValid(): Boolean =
+        continueForever || currentDuration > 0
+
+    override fun executeAfterRotation(
+        rotation: RevolverRotation,
+        target: StatusEffectTarget
+    ): Timeline = Timeline.timeline {
+        action {
+            if (skipFirstRotation && !hadFirstRotation) {
+                hadFirstRotation = true
+                return@action
+            }
+            currentDuration -= rotation.amount
+            currentDuration = currentDuration.coerceAtLeast(0)
+        }
     }
 
-    override fun isStillValid(): Boolean =
-        continueForever || controller.revolverRotationCounter < rotationOnEffectStart + duration
-
     override fun getDisplayText(): String = if (!continueForever) {
-        val rotations = min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)
-        rotations.toString()
+        currentDuration.toString()
     } else {
         "inf"
     }
 
     protected fun extendDuration(extension: Int) {
-        duration += extension
+        currentDuration += extension
     }
 
     protected fun continueForever() {
@@ -102,7 +151,7 @@ abstract class RotationBasedStatusEffect(
     }
 
     protected fun stackRotationEffect(other: RotationBasedStatusEffect) {
-        duration += other.duration
+        currentDuration += other.currentDuration
         if (other.continueForever) continueForever = true
     }
 
@@ -111,48 +160,43 @@ abstract class RotationBasedStatusEffect(
     }
 
     override fun parameterSum(): Int = if (!continueForever) {
-        min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)
+        currentDuration
     } else {
         0
     }
 }
-
 
 abstract class TurnBasedStatusEffect(
     iconHandle: ResourceHandle,
     duration: Int
 ) : StatusEffect(iconHandle) {
 
-    var turnOnEffectStart = -1
-        private set
-
-    var duration: Int = duration
-        private set
+    private var currentDuration: Int = duration
 
     var continueForever: Boolean = false
         private set
 
-    override fun start(controller: GameController) {
-        super.start(controller)
-        turnOnEffectStart = controller.turnCounter
+    override fun isStillValid(): Boolean =
+        continueForever || currentDuration > 0
+
+    override fun executeOnEndTurn(target: StatusEffectTarget): Timeline? = Timeline.timeline {
+        action {
+            currentDuration = (currentDuration - 1).coerceAtLeast(0)
+        }
     }
 
-    override fun isStillValid(): Boolean =
-        continueForever || controller.turnCounter < turnOnEffectStart + duration
-
     override fun getDisplayText(): String = if (!continueForever) {
-        val turns = turnOnEffectStart + duration - controller.turnCounter
-        turns.toString()
+        currentDuration.toString()
     } else {
         "inf"
     }
 
     protected fun extendDuration(extension: Int) {
-        duration += extension
+        currentDuration += extension
     }
 
     protected fun reduceDuration(extension: Int) {
-        duration -= extension
+        currentDuration -= extension
     }
 
     protected fun continueForever() {
@@ -160,7 +204,7 @@ abstract class TurnBasedStatusEffect(
     }
 
     protected fun stackTurnEffect(other: TurnBasedStatusEffect) {
-        duration += other.duration
+        currentDuration += other.currentDuration
         if (other.continueForever) continueForever = true
     }
 
@@ -169,7 +213,7 @@ abstract class TurnBasedStatusEffect(
     }
 
     override fun parameterSum(): Int = if (!continueForever) {
-        turnOnEffectStart + duration - controller.turnCounter
+        currentDuration
     } else {
         0
     }
@@ -177,9 +221,9 @@ abstract class TurnBasedStatusEffect(
 
 class Burning(
     rotations: Int,
-    private val percent: Float,
+    val percent: Float,
     continueForever: Boolean,
-    skipFirstRotation: Boolean,
+    val skipFirstRotation: Boolean,
 ) : RotationBasedStatusEffect(
     GraphicsConfig.iconName("burning"),
     rotations,
@@ -209,6 +253,8 @@ class Burning(
         other as Burning
         stackRotationEffect(other)
     }
+
+    override fun toDisplayString(): String = "${statusTemplate("BURNING")} (${getDisplayText()})"
 
     override fun equals(other: Any?): Boolean = other is Burning
 }
@@ -241,6 +287,8 @@ class BurningPlayer(
         stackRotationEffect(other)
     }
 
+    override fun toDisplayString(): String = "${statusTemplate("BURNING")} (${getDisplayText()})"
+
     override fun equals(other: Any?): Boolean = other is BurningPlayer
 }
 
@@ -257,7 +305,7 @@ class Poison(
     var damage: Int = damage
         private set
 
-    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+    override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         later {
             if (target.isBlocked(this@Poison, controller)) return@later
             delay(200)
@@ -301,30 +349,9 @@ class Poison(
 
     override fun getDisplayText(): String = damage.toString()
 
+    override fun toDisplayString(): String = "${statusTemplate("POISON")} (${getDisplayText()})"
+
     override fun equals(other: Any?): Boolean = other is Poison
-}
-
-class FireResistance(
-    turns: Int
-) : TurnBasedStatusEffect(
-    GraphicsConfig.iconName("fireResistance"),
-    turns
-) {
-
-    override val name: String = "fireresistance"
-
-    override val effectType: StatusEffectType = StatusEffectType.BLOCKING
-    override val blocksStatusEffects: List<StatusEffectType> = listOf(StatusEffectType.FIRE)
-
-    override fun canStackWith(other: StatusEffect): Boolean = other is FireResistance
-
-    override fun stack(other: StatusEffect) {
-        other as FireResistance
-        stackTurnEffect(other)
-    }
-
-    override fun equals(other: Any?): Boolean = other is FireResistance
-
 }
 
 class Bewitched(
@@ -372,6 +399,8 @@ class Bewitched(
         val turns = turnOnEffectStart + turnsDuration - controller.turnCounter
         return "$turns, $rotations"
     }
+
+    override fun toDisplayString(): String = "${statusTemplate("BEWITCHED")} (${getDisplayText()})"
 
     override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
         is RevolverRotation.Right -> RevolverRotation.Left(rotation.amount)
@@ -421,13 +450,15 @@ class Shield(
         return 0
     }
 
-    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+    override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         action { shield /= 2 }
     }
 
     override fun isStillValid(): Boolean = shield > 0
 
     override fun getDisplayText(): String = shield.toString()
+
+    override fun toDisplayString(): String = "${statusTemplate("SHIELD")} (${getDisplayText()})"
 
     override fun increment(amount: Int) {
         shield += amount
@@ -478,6 +509,8 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
     override fun getDisplayText(): String = shots.toString()
 
+    override fun toDisplayString(): String = "${statusTemplate("FROZEN")} (${getDisplayText()})"
+
     override fun increment(amount: Int) {
         shots += amount
     }
@@ -505,6 +538,8 @@ class Weak(turns: Int) : TurnBasedStatusEffect(GraphicsConfig.iconName("weak"), 
         target: StatusEffectTarget
     ): Int = -((damage.toDouble() / 2) + 0.5).toInt()
 
+    override fun toDisplayString(): String = "${statusTemplate("WEAK")} (${getDisplayText()})"
+
     override fun equals(other: Any?): Boolean = other is Weak
 
 }
@@ -530,7 +565,7 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
         reserves = other.reserves
     }
 
-    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+    override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         action { turns-- }
     }
 
@@ -546,6 +581,8 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
 
     override fun getDisplayText(): String = "$turns, $reserves"
 
+    override fun toDisplayString(): String = "${statusTemplate("BOUNTY")} (${getDisplayText()})"
+
     override fun equals(other: Any?): Boolean = other is Bounty
 
     override fun increment(amount: Int) {
@@ -554,6 +591,36 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
     }
 
     override fun parameterSum(): Int = turns + reserves
+}
+
+class HeatRepellent : PassiveEnemyAction("encounter_modifier_frost") {
+
+    override val name: String = "heatrepellent"
+
+    override val effectType: StatusEffectType = StatusEffectType.FIRE
+
+    override fun executeBeforeStatusEffectApplied(
+        statusEffect: StatusEffect,
+        dontApplyStatusEffect: Promise<Unit>
+    ): Timeline = Timeline.timeline {
+        if (statusEffect !is Burning) return@timeline
+        val newEffect = BurningPlayer(
+            statusEffect.currentDuration,
+            statusEffect.percent,
+            statusEffect.continueForever,
+            statusEffect.skipFirstRotation
+        )
+        include(controller.tryApplyStatusEffectToPlayerTimeline(newEffect, null))
+    }
+
+    override fun getDisplayText(): String = "inf"
+
+    override fun toDisplayString(): String = statusTemplate("HEAT REPELLENT")
+
+    override fun isStillValid(): Boolean = true
+
+    override fun equals(other: Any?): Boolean = other is HeatRepellent
+
 }
 
 typealias StatusEffectCreator = (GameController?, Card?, skipFirstRotation: Boolean) -> StatusEffect
@@ -570,7 +637,7 @@ sealed class StatusEffectTarget {
             enemy.damage(damage, triggeredByStatusEffect = true)
 
         override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean =
-            enemy.statusEffects.any { effect.effectType in it.blocksStatusEffects }
+            effect.canBeBlocked() && enemy.statusEffects.any { effect.effectType in it.blocksStatusEffects }
     }
 
     object PlayerTarget : StatusEffectTarget() {
@@ -578,7 +645,8 @@ sealed class StatusEffectTarget {
         override fun damage(damage: Int, controller: GameController): Timeline =
             controller.damagePlayerTimeline(damage, triggeredByStatusEffect = true)
 
-        override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean = controller
+        override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean = effect.canBeBlocked() &&
+            controller
             .playerStatusEffects
             .any { effect.effectType in it.blocksStatusEffects }
 

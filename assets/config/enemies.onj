@@ -3,7 +3,7 @@ import "imports/colors.onj" as color;
 
 use Game;
 
-var largeNumber = 1000000000;
+var largeNumber = 1_000_000_000;
 
 enemyGroups: [
     {
@@ -110,7 +110,7 @@ var pyros = [
         texture: "enemy_pyro",
         actions: [
             {
-                weight: 10#actionVal,
+                weight: 22#actionVal,
                 action: action_damage(5, 10, false)
             },
             {
@@ -129,6 +129,24 @@ var pyros = [
                 action: action_parryableBurning(3, 7),
                 overrideTitle: "Pyro-dmg"
             },
+            {
+                weight: 4#actionVal,
+                action: action_givePlayerCard("scorchingBullet"#card),
+                overrideTitle: "Hot Potato",
+                maxExecutions: 2
+            },
+            {
+                weight: 4#actionVal,
+                action: action_passiveEffect(heatRepellent()),
+                overrideTitle: "Heat Repellent",
+                overrideDescription: "The enemy gives itself $status$HEAT REPELLENT$status$ for the remainder of the encounter",
+                maxExecutions: 1
+            },
+            {
+                weight: 8#actionVal,
+                action: action_givePlayerStatus(burningPlayer(3#val, 0.5, false)),
+                overrideTitle: "You get Burning!",
+            }
         ]
     }
 ];
@@ -144,154 +162,93 @@ enemies: [
     },
 
     ...outlaws,
-    ...pyros
+    ...pyros,
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-//    {
-//        name: "tutorial_enemy_1",
-//        title: "Scarecrow",
-//        baseHealth: 30,
-//        texture: "enemy_outlaw",
-//        brain: $ScriptedEnemyBrain {
-//            actions: [],
-//        },
-//    },
-//    {
-//        name: "tutorial_enemy_2",
-//        title: "Outlaw",
-//        baseHealth: 25,
-//        texture: "enemy_outlaw",
-//        brain: $ScriptedEnemyBrain {
-//            actions: [
-//                {
-//                    turn: 1,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 6, 6 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                }
-//            ],
-//        },
-//    },
-//    {
-//        name: "tutorial_enemy_3",
-//        title: "Outlaw",
-//        baseHealth: 45,
-//        texture: "enemy_outlaw",
-//        brain: $ScriptedEnemyBrain {
-//            actions: [
-//                {
-//                    turn: 3,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 25, 25 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                }
-//            ],
-//        },
-//    },
-//    {
-//        name: "tutorial_enemy_4",
-//        title: "Outlaw",
-//        baseHealth: 42,
-//        texture: "enemy_outlaw",
-//        brain: $ScriptedEnemyBrain {
-//            actions: [
-//                {
-//                    turn: 2,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 25, 25 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                }
-//            ],
-//        },
-//    },
-//    {
-//        name: "tutorial_enemy_5",
-//        title: "Outlaw",
-//        baseHealth: 55,
-//        texture: "enemy_outlaw",
-//        brain: $ScriptedEnemyBrain {
-//            actions: [
-//                {
-//                    turn: 2,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 25, 25 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                }
-//            ],
-//        },
-//    },
-//    {
-//        name: "tutorial_enemy_6",
-//        title: "Outlaw",
-//        baseHealth: 75,
-//        texture: "enemy_outlaw",
-//        brain: $ScriptedEnemyBrain {
-//            actions: [
-//                {
-//                    turn: 2,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 7, 7 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                },
-//                {
-//                    turn: 3,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 5, 5 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                },
-//                {
-//                    turn: 4,
-//                    show: true,
-//                    action: $DamagePlayer {
-//                        damage: [ 16, 16 ],
-//                        scaleFactor: 1.0,
-//                        icon: "enemy_action_damage",
-//                        hasSpecialAnimation: false,
-//                        title: "Damage",
-//                        descriptionTemplate: "This attack does {damage} damage",
-//                    }
-//                },
-//            ],
-//        },
-//    },
+    {
+        name: "tutorial_enemy_1",
+        title: "Scarecrow",
+        baseHealth: 30,
+        texture: "enemy_outlaw",
+        actions: []
+    },
+    {
+        name: "tutorial_enemy_2",
+        title: "Outlaw",
+        baseHealth: 25,
+        texture: "enemy_outlaw",
+        actions: [
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(1#actionVal) ],
+                action: action_damage(6, 6, false)
+            }
+        ],
+    },
+    {
+        name: "tutorial_enemy_3",
+        title: "Outlaw",
+        baseHealth: 45,
+        texture: "enemy_outlaw",
+        actions: [
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(3#actionVal) ],
+                action: action_damage(25, 25, false),
+            }
+        ],
+    },
+    {
+        name: "tutorial_enemy_4",
+        title: "Outlaw",
+        baseHealth: 42,
+        texture: "enemy_outlaw",
+        actions: [
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(2#actionVal) ],
+                action: action_damage(25, 25, false)
+            }
+        ],
+    },
+    {
+        name: "tutorial_enemy_5",
+        title: "Outlaw",
+        baseHealth: 55,
+        texture: "enemy_outlaw",
+        actions: [
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(2#actionVal) ],
+                action: action_damage(25, 25, false)
+            }
+        ],
+    },
+    {
+        name: "tutorial_enemy_6",
+        title: "Outlaw",
+        baseHealth: 75,
+        texture: "enemy_outlaw",
+        actions: [
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(2#actionVal) ],
+                action: action_damage(7, 7, false)
+            },
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(3#actionVal) ],
+                action: action_damage(5, 5, false)
+            },
+            {
+                weight: 1#actionVal,
+                selectionConditions: [ isTurn(4#actionVal) ],
+                action: action_damage(16, 16, false)
+            }
+        ],
+    },
 
 ]

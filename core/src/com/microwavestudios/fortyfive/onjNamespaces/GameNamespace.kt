@@ -996,11 +996,6 @@ object GameNamespace {
         )
     }
 
-    @RegisterOnjFunction(schema = "use Game; params: [EffectValue]")
-    fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
-        FireResistance(getStatusEffectValue(turns, controller, card, 1))
-    }
-
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue, EffectValue]")
     fun bewitched(
         turns: OnjEffectValue,
@@ -1019,6 +1014,11 @@ object GameNamespace {
             getStatusEffectValue(shots, controller, card, 1),
             skipFirstRotation
         )
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun heatRepellent(): OnjStatusEffect = OnjStatusEffect { _, _, _ ->
+        HeatRepellent()
     }
 
     //////////////////////////////////////////////////////////////////////////////////
@@ -1046,6 +1046,11 @@ object GameNamespace {
     //////////////////////////////////////////////////////////////////////////////////
     // Enemy Predicates
     //////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "use Game; params: [EnemyActionValue]")
+    fun isTurn(turnNumber: OnjEnemyActionValue) = OnjEnemyPredicate { enemy, controller ->
+        turnNumber.value(enemy, controller) == controller.turnCounter
+    }
 
     @RegisterOnjFunction(schema = "use Game; params: [EnemyActionValue, EnemyActionValue]", type = OnjFunctionType.INFIX)
     fun lessThan(lhs: OnjEnemyActionValue, rhs: OnjEnemyActionValue) = OnjEnemyPredicate { enemy, controller ->
@@ -1083,6 +1088,21 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "params: [int, int]")
     fun action_shield(min: OnjInt, max: OnjInt): OnjEnemyAction = OnjEnemyAction(
         EnemyAction.ApplyShield(min.value.toInt(), max.value.toInt(), null)
+    )
+
+    @RegisterOnjFunction(schema = "use Game; params: [CardType]")
+    fun action_givePlayerCard(card: OnjCardType): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.GivePlayerCard(card.value, null)
+    )
+
+    @RegisterOnjFunction(schema = "use Game; params: [StatusEffect]")
+    fun action_passiveEffect(statusEffect: OnjStatusEffect): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.PassiveAction(statusEffect.value, null)
+    )
+
+    @RegisterOnjFunction(schema = "use Game; params: [StatusEffect]")
+    fun action_givePlayerStatus(statusEffect: OnjStatusEffect): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.GivePlayerStatus(statusEffect.value, null)
     )
 
     //////////////////////////////////////////////////////////////////////////////////

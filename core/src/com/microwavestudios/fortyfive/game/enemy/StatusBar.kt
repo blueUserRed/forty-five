@@ -63,7 +63,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
     fun statusEffectsChanged() {
         enemy.statusEffects.forEach { effect ->
             if (statusEffectIcons.containsKey(effect.name)) return@forEach
-            val iconHandle = GraphicsConfig.iconName(effect.name)
+            val iconHandle = effect.iconHandle
             val promise = resourceManager.request<Drawable>(this, screen.lifetime, iconHandle)
             statusEffectIcons[effect.name] = promise
         }

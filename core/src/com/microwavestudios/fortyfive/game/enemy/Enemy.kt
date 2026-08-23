@@ -86,10 +86,10 @@ class Enemy(
         enemyEvents.fire(EnemyActionChangedEvent(shownAction))
     }
 
-    fun executeAction(controller: GameController): Timeline = when (val action = nextEnemyAction) {
+    fun executeAction(controller: GameController): Timeline? = when (val action = nextEnemyAction) {
         is NextEnemyAction.HiddenEnemyAction -> action.action.getTimeline(this, controller)
         is NextEnemyAction.ShownEnemyAction -> action.action.getTimeline(this, controller)
-        is NextEnemyAction.None -> Timeline.emptyTimeline
+        is NextEnemyAction.None -> null
     }
 
     fun applyEffect(effect: StatusEffect, controller: GameController) {
@@ -107,7 +107,7 @@ class Enemy(
     }
 
     fun executeStatusEffectsAfterTurn(): Timeline = _statusEffects
-        .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.EnemyTarget(this)) }
+        .mapNotNull { it.executeOnEndTurn(StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
     fun executeStatusEffectsAfterDamage(damage: Int): Timeline = _statusEffects
