@@ -100,7 +100,8 @@ $MapEvent {
         scaleMin: float,
         scaleMax: float,
         biome: string,
-        seed: int
+        seed: int,
+        ...mapEventStandardConfig
     }
 
     $ApplyStampMapEvent {

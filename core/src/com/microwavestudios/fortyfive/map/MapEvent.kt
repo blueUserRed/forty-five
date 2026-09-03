@@ -316,6 +316,7 @@ class EncounterPlaceholderMapEvent(
         "difficultyScaling" with difficultyScaling.toOnj()
         "scaleMin" with scaleMin
         "scaleMax" with scaleMax
+        includeStandardConfig()
     }
 
     companion object {
@@ -332,7 +333,7 @@ class EncounterPlaceholderMapEvent(
             onj.get<Double>("scaleMin").toFloat(),
             onj.get<Double>("scaleMax").toFloat(),
             onj.get<Long>("seed"),
-        )
+        ).apply { setStandardValuesFromConfig(onj) }
     }
 
 }
