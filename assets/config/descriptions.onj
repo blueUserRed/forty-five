@@ -44,6 +44,11 @@ hoverDetailDescriptions: [
         description: "$status$HEAT REPELLENT$status$\nWhenever you apply $status$BURNING$status$ to an enemy with heat repellent, you get $status$BURNING$status$ (x), where x is the paramter of the inflicted burning",
     },
     {
+        keyword: "WARD OF THE WITCH",
+        groupName: "status",
+        description: "$status$WARD OF THE WITCH$status$\nWhenever the revolver rotates, this enemy gets SHIELD(1).",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",

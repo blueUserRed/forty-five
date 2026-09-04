@@ -58,6 +58,11 @@ interface GameController {
     val revolverRotationCounter: Int
 
     /**
+     * like [revolverRotationCounter] but resets every turn
+     */
+    val revolverRotationCountInTurn: Int
+
+    /**
      * total amount of turns the game has lasted for. A turn ends when the "holster" button is pressed
      */
     val turnCounter: Int

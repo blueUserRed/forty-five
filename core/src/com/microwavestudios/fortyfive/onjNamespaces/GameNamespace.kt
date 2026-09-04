@@ -95,6 +95,9 @@ object GameNamespace {
             "countPlayerStatusEffectParams" with OnjEffectValue { controller, _, _, _ ->
                 controller.playerStatusEffects.sumOf { it.parameterSum() }
             }
+            "revolverRotationCountInTurn" with OnjEffectValue { controller, _, _, _ ->
+                controller.revolverRotationCountInTurn
+            }
         },
         "zone" to buildOnjObject {
             Zone.entries.forEach {
@@ -1021,6 +1024,11 @@ object GameNamespace {
         HeatRepellent()
     }
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun wardOfTheWitch(): OnjStatusEffect = OnjStatusEffect { _, _, _ ->
+        WardOfTheWitch()
+    }
+
     //////////////////////////////////////////////////////////////////////////////////
     // Enemy Action Values
     //////////////////////////////////////////////////////////////////////////////////
@@ -1103,6 +1111,11 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "use Game; params: [StatusEffect]")
     fun action_givePlayerStatus(statusEffect: OnjStatusEffect): OnjEnemyAction = OnjEnemyAction(
         EnemyAction.GivePlayerStatus(statusEffect.value, null)
+    )
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun action_bewitchedLeftRight(): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.BewitchedLeftRight(null)
     )
 
     //////////////////////////////////////////////////////////////////////////////////

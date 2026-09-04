@@ -620,6 +620,25 @@ class HeatRepellent : PassiveEnemyAction("encounter_modifier_frost") {
     override fun isStillValid(): Boolean = true
 
     override fun equals(other: Any?): Boolean = other is HeatRepellent
+}
+
+class WardOfTheWitch : PassiveEnemyAction("encounter_modifier_frost") {
+
+    override val name: String = "wardofthewitch"
+
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
+
+    override fun executeAfterRotation(
+        rotation: RevolverRotation,
+        target: StatusEffectTarget
+    ): Timeline = Timeline.timeline {
+        require(target is StatusEffectTarget.EnemyTarget)
+        if (rotation.amount != 0) include(target.enemy.addCoverTimeline(rotation.amount))
+    }
+
+    override fun toDisplayString(): String = statusTemplate("WARD OF THE WITCH")
+
+    override fun equals(other: Any?): Boolean = other is WardOfTheWitch
 
 }
 

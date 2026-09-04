@@ -54,6 +54,9 @@ class GameControllerImpl(
     override var revolverRotationCounter: Int = 0
         private set
 
+    override var revolverRotationCountInTurn: Int = 0
+        private set
+
     override var turnCounter: Int = 0
         private set
 
@@ -661,6 +664,7 @@ class GameControllerImpl(
         include(revolver.rotate(newRotation))
         action {
             revolverRotationCounter += newRotation.amount
+            revolverRotationCountInTurn += newRotation.amount
         }
         val fullRotationTimelineCreator = { card: Card -> Timeline.timeline {
             later {
@@ -1608,6 +1612,7 @@ class GameControllerImpl(
 
         action {
             turnCounter++
+            revolverRotationCountInTurn = 0
         }
 
         action {

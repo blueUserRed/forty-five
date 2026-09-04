@@ -13,18 +13,10 @@ enemyGroups: [
                 name: "Outlaw-1",
                 majorDifficulty: 1
             },
-//            {
-//                name: "Outlaw-2",
-//                majorDifficulty: 2
-//            },
-//            {
-//                name: "Outlaw-3",
-//                majorDifficulty: 3
-//            },
-//            {
-//                name: "Outlaw-4",
-//                majorDifficulty: 4
-//            },
+            {
+                name: "Outlaw-2",
+                majorDifficulty: 2
+            },
         ]
     },
     {
@@ -34,41 +26,25 @@ enemyGroups: [
                 name: "Pyro-1",
                 majorDifficulty: 1
             },
-//            {
-//                name: "Pyro-2",
-//                majorDifficulty: 2
-//            },
-//            {
-//                name: "Pyro-3",
-//                majorDifficulty: 3
-//            },
-//            {
-//                name: "Pyro-4",
-//                majorDifficulty: 4
-//            },
+            {
+                name: "Pyro-2",
+                majorDifficulty: 2
+            },
         ]
     },
-//    {
-//        groupName: "Witch",
-//        variants: [
-//            {
-//                name: "Witch-1",
-//                majorDifficulty: 1
-//            },
-//            {
-//                name: "Witch-2",
-//                majorDifficulty: 2
-//            },
-//            {
-//                name: "Witch-3",
-//                majorDifficulty: 3
-//            },
-//            {
-//                name: "Witch-4",
-//                majorDifficulty: 4
-//            },
-//        ]
-//    }
+    {
+        groupName: "Witch",
+        variants: [
+            {
+                name: "Witch-1",
+                majorDifficulty: 1
+            },
+            {
+                name: "Witch-2",
+                majorDifficulty: 2
+            },
+        ]
+    }
 ],
 
 var outlaws = [
@@ -83,10 +59,6 @@ var outlaws = [
                 action: action_damage(6, 10, false)
             },
             {
-                weight: 5#actionVal,
-                action: action_damage(6, 10, true)
-            },
-            {
                 weight: 7#actionVal,
                 action: action_shield(8, 11)
             },
@@ -99,7 +71,35 @@ var outlaws = [
                 action: action_damage(15, 20, false)
             },
         ]
-    }
+    },
+    {
+        name: "Outlaw-2",
+        title: "Outlaw",
+        texture: "enemy_outlaw",
+        baseHealth: 130,
+        actions: [
+            {
+                weight: 10#actionVal,
+                action: action_damage(8, 13, false)
+            },
+            {
+                weight: 5#actionVal,
+                action: action_damage(8, 13, true)
+            },
+            {
+                weight: 7#actionVal,
+                action: action_shield(11, 15)
+            },
+            {
+                weight: largeNumber#actionVal,
+                selectionConditions: [
+                    curEnemyHealth() lessThan enemyBaseHealthPercent(35.0)
+                ],
+                maxExecutions: 1,
+                action: action_damage(20, 25, false)
+            },
+        ]
+    },
 ];
 
 var pyros = [
@@ -115,6 +115,35 @@ var pyros = [
             },
             {
                 weight: 4#actionVal,
+                action: action_parryableBurning(3, 7),
+                overrideTitle: "Pyro-dmg"
+            },
+            {
+                weight: 4#actionVal,
+                action: action_passiveEffect(heatRepellent()),
+                overrideTitle: "Heat Repellent",
+                overrideDescription: "The enemy gives itself $status$HEAT REPELLENT$status$ for the remainder of the encounter",
+                maxExecutions: 1
+            },
+            {
+                weight: 8#actionVal,
+                action: action_givePlayerStatus(burningPlayer(3#val, 0.5, false)),
+                overrideTitle: "You get Burning!",
+            }
+        ]
+    },
+    {
+        name: "Pyro-2",
+        title: "Pyro",
+        baseHealth: 180,
+        texture: "enemy_pyro",
+        actions: [
+            {
+                weight: 22#actionVal,
+                action: action_damage(8, 12, false)
+            },
+            {
+                weight: 4#actionVal,
                 selectionConditions: [
                     value.countPlayerStatusEffectParams#actionVal moreThan 3#actionVal
                 ],
@@ -126,7 +155,7 @@ var pyros = [
             },
             {
                 weight: 4#actionVal,
-                action: action_parryableBurning(3, 7),
+                action: action_parryableBurning(5, 8),
                 overrideTitle: "Pyro-dmg"
             },
             {
@@ -144,11 +173,86 @@ var pyros = [
             },
             {
                 weight: 8#actionVal,
-                action: action_givePlayerStatus(burningPlayer(3#val, 0.5, false)),
+                action: action_givePlayerStatus(burningPlayer(4#val, 0.5, false)),
                 overrideTitle: "You get Burning!",
             }
         ]
     }
+];
+
+var witches = [
+    {
+        name: "Witch-1",
+        title: "Witch",
+        texture: "enemy_witch",
+        baseHealth: 120,
+        actions: [
+            {
+                weight: 8#actionVal,
+                action: action_damage(6, 10, false)
+            },
+            {
+                weight: 4#actionVal,
+                action: action_bewitchedLeftRight(),
+                variants: [
+                    {
+                        weight: 1,
+                        hidden: true
+                    }
+                ],
+            },
+            {
+                weight: 4#actionVal,
+                action: action_variableDamage(
+                    (value.revolverRotationCountInTurn * 3)#actionVal,
+                    false,
+                    "The damage of this attack is equal to the amount of times the revolver rotated this turn times three"
+                )
+            },
+            {
+                weight: 4#actionVal,
+                action: action_passiveEffect(wardOfTheWitch()),
+                overrideTitle: "Ward of the Witch",
+                overrideDescription: "The enemy gives itself $status$WARD OF THE WITCH$status$ for the next turn",
+            },
+        ]
+    },
+    {
+        name: "Witch-2",
+        title: "Witch",
+        texture: "enemy_witch",
+        baseHealth: 140,
+        actions: [
+            {
+                weight: 8#actionVal,
+                action: action_damage(8, 12, false)
+            },
+            {
+                weight: 5#actionVal,
+                action: action_bewitchedLeftRight(),
+                variants: [
+                    {
+                        weight: 1,
+                        hidden: true
+                    }
+                ],
+            },
+            {
+                weight: 4#actionVal,
+                action: action_variableDamage(
+                    (value.revolverRotationCountInTurn * 3)#actionVal,
+                    false,
+                    "The damage of this attack is equal to the amount of times the revolver rotated this turn times three"
+                )
+            },
+            {
+                weight: 4#actionVal,
+                action: action_passiveEffect(wardOfTheWitch()),
+                overrideTitle: "Ward of the Witch",
+                overrideDescription: "The enemy gives itself $status$WARD OF THE WITCH$status$ for the next turn",
+            },
+        ]
+    },
 ];
 
 enemies: [
@@ -163,6 +267,7 @@ enemies: [
 
     ...outlaws,
     ...pyros,
+    ...witches,
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

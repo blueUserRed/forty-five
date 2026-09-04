@@ -374,6 +374,31 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         override fun copy(data: EnemyActionData?): EnemyAction = GivePlayerStatus(statusEffect, data)
     }
 
+    class BewitchedLeftRight(data: EnemyActionData?) : EnemyAction(data) {
+
+        override val defaultTitle: String = ""
+        override val defaultDescription: String = ""
+        override val indicatorText: String = ""
+
+        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            val rotations = controller.revolverRotationCountInTurn
+            val rotation = if (rotations % 2 == 0) {
+                RevolverRotation.Right(1)
+            } else {
+                RevolverRotation.Left(1)
+            }
+            include(controller.rotateRevolverTimeline(rotation))
+        } }
+
+        override fun copy(data: EnemyActionData?): EnemyAction = BewitchedLeftRight(data)
+
+    }
+
     data class EnemyActionData(
         val isHidden: Boolean,
         val difficulty: Double,

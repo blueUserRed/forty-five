@@ -166,7 +166,7 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Pyro" ],
+        allowedEnemies: [ "Witch" ],
     },
 //    {
 //        majorDifficulty: 0,
@@ -191,6 +191,9 @@ enemies: [
 ],
 
 allowedEnemyConfigurations: [
+    [ "Witch" ],
+    [ "Witch", "Witch" ],
+
     [ "Outlaw" ],
     [ "Outlaw", "Outlaw" ],
     [ "Outlaw", "Outlaw", "Outlaw" ],
