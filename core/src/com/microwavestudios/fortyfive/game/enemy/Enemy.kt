@@ -92,6 +92,9 @@ class Enemy(
         is NextEnemyAction.None -> null
     }
 
+    /**
+     * don't use directly; use [GameController.tryApplyStatusEffectToEnemyTimeline]
+     */
     fun applyEffect(effect: StatusEffect, controller: GameController) {
         if (isDefeated) return
         FortyFive.logger.debug(logTag, "status effect $effect applied to enemy")
@@ -127,6 +130,15 @@ class Enemy(
         _statusEffects.removeAll(toRemove)
         if (toRemove.isNotEmpty()) enemyEvents.fire(StatusEffectsChangedEvent)
         return toRemove
+    }
+
+    /**
+     * dont use directly; use [GameController.removeEnemyStatusEffect]
+     */
+    fun removeStatusEffect(effect: StatusEffect) {
+        val removed = _statusEffects.remove(effect)
+        if (!removed) return
+        enemyEvents.fire(StatusEffectsChangedEvent)
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {

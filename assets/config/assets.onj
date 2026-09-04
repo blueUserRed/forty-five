@@ -839,60 +839,8 @@ textures: [
         file: "blobs/enemies/action_symbols/unknown.png",
     },
     {
-        name: "enemy_pyro_action_comic_common_panel_1",
-        file: "blobs/enemies/pyro/action_comic_common_panel_1.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_common_panel_2",
-        file: "blobs/enemies/pyro/action_comic_common_panel_2.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_common_panel_3",
-        file: "blobs/enemies/pyro/action_comic_common_panel_3.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_burning",
-        file: "blobs/enemies/pyro/action_comic_panel_burning.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_fire_resistance",
-        file: "blobs/enemies/pyro/action_comic_panel_fire_resistance.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_hot_potato",
-        file: "blobs/enemies/pyro/action_comic_panel_hot_potato.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_inferno",
-        file: "blobs/enemies/pyro/action_comic_panel_inferno.png"
-    },
-    {
         name: "enemy_pyro",
         file: "blobs/enemies/pyro/pyro.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_common_panel_1",
-        file: "blobs/enemies/sniper/action_comic_common_panel_1.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_common_panel_2",
-        file: "blobs/enemies/sniper/action_comic_common_panel_2.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_common_panel_3",
-        file: "blobs/enemies/sniper/action_comic_common_panel_3.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_panel_and_its_gone",
-        file: "blobs/enemies/sniper/action_comic_panel_and_its_gone.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_panel_goodbyes",
-        file: "blobs/enemies/sniper/action_comic_panel_goodbyes.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_panel_heads_up",
-        file: "blobs/enemies/sniper/action_comic_panel_heads_up.png"
     },
     {
         name: "enemy_sniper",
@@ -903,36 +851,12 @@ textures: [
         file: "blobs/enemies/witch/witch.png"
     },
     {
-        name: "enemy_witch_action_comic_common_panel_1",
-        file: "blobs/enemies/witch/action_comic_common_panel_1.png"
-    },
-    {
-        name: "enemy_witch_action_comic_common_panel_2",
-        file: "blobs/enemies/witch/action_comic_common_panel_2.png"
-    },
-    {
-        name: "enemy_witch_action_comic_common_panel_3",
-        file: "blobs/enemies/witch/action_comic_common_panel_3.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_bewitched",
-        file: "blobs/enemies/witch/action_comic_panel_bewitched.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_left_turn",
-        file: "blobs/enemies/witch/action_comic_panel_left_turn.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_ward_of_the_witch",
-        file: "blobs/enemies/witch/action_comic_panel_ward_of_the_witch.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_wrath_of_the_witch",
-        file: "blobs/enemies/witch/action_comic_panel_wrath_of_the_witch.png"
-    },
-    {
         name: "enemy_outlaw",
         file: "blobs/enemies/outlaw/outlaw.png"
+    },
+    {
+        name: "enemy_the_fangs",
+        file: "blobs/enemies/the_fangs/the_fangs.png"
     },
     {
         name: "encounter_modifier_frost",

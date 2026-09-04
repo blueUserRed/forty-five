@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.collectTimeline
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -19,16 +20,13 @@ abstract class StatusEffect(
 
     protected lateinit var controller: GameController
 
-    abstract val effectType: StatusEffectType
-
-    open val blocksStatusEffects: List<StatusEffectType> = listOf()
-
     open fun start(controller: GameController) {
         this.controller = controller
     }
 
     open fun modifyDamage(damage: Int): Int = damage
 
+    // TODO: not called for player effects
     open fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
     open fun executeOnEndTurn(target: StatusEffectTarget): Timeline? = null
@@ -53,7 +51,7 @@ abstract class StatusEffect(
 
     open fun onEnemyDeath(target: StatusEffectTarget): Timeline? = null
 
-    open fun canBeBlocked(): Boolean = true
+    open fun onEffectStart(target: StatusEffectTarget): Timeline? = null
 
     abstract fun canStackWith(other: StatusEffect): Boolean
 
@@ -97,8 +95,6 @@ abstract class PassiveEnemyAction(iconHandle: ResourceHandle) : StatusEffect(ico
     }
 
     override fun canStackWith(other: StatusEffect): Boolean = false
-
-    override fun canBeBlocked(): Boolean = false
 
     override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         action { valid = false }
@@ -236,13 +232,10 @@ class Burning(
 
     override val name: String = "burning"
 
-    override val effectType: StatusEffectType = StatusEffectType.FIRE
-
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
         if (target is StatusEffectTarget.PlayerTarget) {
             FortyFive.logger.warn("BurningStatus", "Burning should only be used on the enemy, consider using BurningPlayer instead")
         }
-        if (target.isBlocked(this@Burning, controller)) return Timeline()
         val additionalDamage = floor(damage * percent).toInt()
         include(target.damage(additionalDamage, controller))
     }
@@ -276,8 +269,6 @@ class BurningPlayer(
 
     override val name: String = "burning"
 
-    override val effectType: StatusEffectType = StatusEffectType.FIRE
-
     override fun canStackWith(other: StatusEffect): Boolean = other is BurningPlayer && other.percent == percent
 
     override fun additionalEnemyDamage(damage: Int, target: StatusEffectTarget): Int = floor(damage * percent).toInt()
@@ -300,14 +291,11 @@ class Poison(
 
     override val name: String = "poison"
 
-    override val effectType: StatusEffectType = StatusEffectType.POISON
-
     var damage: Int = damage
         private set
 
     override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
         later {
-            if (target.isBlocked(this@Poison, controller)) return@later
             delay(200)
             include(target.damage(damage, controller))
             action { damage /= 2 }
@@ -363,8 +351,6 @@ class Bewitched(
 ) {
 
     override val name: String = "bewitched"
-
-    override val effectType: StatusEffectType = StatusEffectType.WITCH
 
     private var turnOnEffectStart: Int = -1
     private var rotationOnEffectStart: Int = -1
@@ -434,8 +420,6 @@ class Shield(
 
     override val name: String = "shield"
 
-    override val effectType: StatusEffectType = StatusEffectType.OTHER
-
     override fun canStackWith(other: StatusEffect): Boolean = other is Shield
 
     override fun stack(other: StatusEffect) {
@@ -482,8 +466,6 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
     override val name: String = "Frost"
 
-    override val effectType: StatusEffectType = StatusEffectType.OTHER
-
     override fun canStackWith(other: StatusEffect): Boolean = other is Frozen
 
     override fun stack(other: StatusEffect) {
@@ -521,10 +503,47 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 
 }
 
+class PoisonImmunity(
+    turns: Int,
+    continueForever: Boolean
+) : TurnBasedStatusEffect(GraphicsConfig.iconName("burning"), turns) {
+
+    override val name: String = "poisonimmunity"
+
+    init {
+        if (continueForever) continueForever()
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is PoisonImmunity
+
+    override fun stack(other: StatusEffect) {
+        require(other is PoisonImmunity)
+        stackTurnEffect(other)
+    }
+
+    override fun executeBeforeStatusEffectApplied(
+        statusEffect: StatusEffect,
+        dontApplyStatusEffect: Promise<Unit>
+    ): Timeline = Timeline.timeline {
+        action {
+            if (shouldBeBlocked(statusEffect)) dontApplyStatusEffect.resolve(Unit)
+        }
+    }
+
+    override fun onEffectStart(target: StatusEffectTarget): Timeline = Timeline.timeline {
+        include(target.filterStatusEffectsTimeline(this@PoisonImmunity, controller, ::shouldBeBlocked))
+    }
+
+    private fun shouldBeBlocked(effect: StatusEffect): Boolean = effect is Poison
+
+    override fun equals(other: Any?): Boolean = other is PoisonImmunity
+
+    override fun toDisplayString(): String = "${statusTemplate("POISON IMMUNITY")} (${getDisplayText()})"
+}
+
 class Weak(turns: Int) : TurnBasedStatusEffect(GraphicsConfig.iconName("weak"), turns) {
 
     override val name: String = "weak"
-    override val effectType: StatusEffectType = StatusEffectType.OTHER
 
     override fun canStackWith(other: StatusEffect): Boolean = other is Weak
 
@@ -555,7 +574,6 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
     private var enemyDied: Boolean = false
 
     override val name: String = "bounty"
-    override val effectType: StatusEffectType = StatusEffectType.OTHER
 
     override fun canStackWith(other: StatusEffect): Boolean = other is Bounty
 
@@ -597,8 +615,6 @@ class HeatRepellent : PassiveEnemyAction("encounter_modifier_frost") {
 
     override val name: String = "heatrepellent"
 
-    override val effectType: StatusEffectType = StatusEffectType.FIRE
-
     override fun executeBeforeStatusEffectApplied(
         statusEffect: StatusEffect,
         dontApplyStatusEffect: Promise<Unit>
@@ -626,8 +642,6 @@ class WardOfTheWitch : PassiveEnemyAction("encounter_modifier_frost") {
 
     override val name: String = "wardofthewitch"
 
-    override val effectType: StatusEffectType = StatusEffectType.WITCH
-
     override fun executeAfterRotation(
         rotation: RevolverRotation,
         target: StatusEffectTarget
@@ -644,9 +658,6 @@ class WardOfTheWitch : PassiveEnemyAction("encounter_modifier_frost") {
 
 typealias StatusEffectCreator = (GameController?, Card?, skipFirstRotation: Boolean) -> StatusEffect
 
-enum class StatusEffectType {
-    FIRE, POISON, OTHER, BLOCKING, WITCH
-}
 
 sealed class StatusEffectTarget {
 
@@ -655,8 +666,12 @@ sealed class StatusEffectTarget {
         override fun damage(damage: Int, controller: GameController) =
             enemy.damage(damage, triggeredByStatusEffect = true)
 
-        override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean =
-            effect.canBeBlocked() && enemy.statusEffects.any { effect.effectType in it.blocksStatusEffects }
+        override fun getAllStatusEffects(controller: GameController): List<StatusEffect> = enemy.statusEffects
+
+        override fun removeStatusEffectTimeline(
+            effect: StatusEffect,
+            controller: GameController
+        ): Timeline = controller.removeEnemyStatusEffect(enemy, effect)
     }
 
     object PlayerTarget : StatusEffectTarget() {
@@ -664,15 +679,32 @@ sealed class StatusEffectTarget {
         override fun damage(damage: Int, controller: GameController): Timeline =
             controller.damagePlayerTimeline(damage, triggeredByStatusEffect = true)
 
-        override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean = effect.canBeBlocked() &&
-            controller
-            .playerStatusEffects
-            .any { effect.effectType in it.blocksStatusEffects }
+        override fun getAllStatusEffects(
+            controller: GameController
+        ): List<StatusEffect> = controller.playerStatusEffects
 
+        override fun removeStatusEffectTimeline(
+            effect: StatusEffect,
+            controller: GameController
+        ): Timeline = controller.removePlayerStatusEffect(effect)
     }
 
     abstract fun damage(damage: Int, controller: GameController): Timeline
 
-    abstract fun isBlocked(effect: StatusEffect, controller: GameController): Boolean
+    abstract fun getAllStatusEffects(controller: GameController): List<StatusEffect>
 
+    abstract fun removeStatusEffectTimeline(effect: StatusEffect, controller: GameController): Timeline
+
+    fun filterStatusEffectsTimeline(
+        thisEffect: StatusEffect,
+        controller: GameController,
+        remove: (StatusEffect) -> Boolean
+    ): Timeline = Timeline.timeline { later {
+        val statusEffects = getAllStatusEffects(controller)
+        val toRemove = statusEffects.filter { it != thisEffect && remove(it) }
+        toRemove
+            .map { removeStatusEffectTimeline(it, controller) }
+            .collectTimeline()
+            .let { include(it) }
+    } }
 }

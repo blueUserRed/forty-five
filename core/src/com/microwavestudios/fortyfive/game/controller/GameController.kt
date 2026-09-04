@@ -157,6 +157,10 @@ interface GameController {
 
     fun removeAllPlayerStatusEffectsTimeline(): Timeline
 
+    fun removePlayerStatusEffect(effect: StatusEffect): Timeline
+
+    fun removeEnemyStatusEffect(enemy: Enemy, effect: StatusEffect): Timeline
+
     /**
      * puts a specific [card] from the stack into the hand
      */

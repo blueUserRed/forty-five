@@ -607,7 +607,11 @@ class EncounterScreen : ScreenCreator() {
         }
     }
 
-    private fun createEnemy(x: Float, y: Float, enemy: Enemy): Float = with(enemyParent) {
+    private fun createEnemy(
+        x: Float, y: Float,
+        enemy: Enemy,
+        controller: GameController
+    ): Float = with(enemyParent) {
 
         val enemyHeight = 400f
         val enemyWidth = enemyHeight * 0.6f
@@ -632,7 +636,7 @@ class EncounterScreen : ScreenCreator() {
 
             onInput(GameInputs.interact) {
                 if (enemySelected || enemy.isDefeated) return@onInput
-                gameEvents.fire(GameControllerImpl.Events.EnemySelected(enemy))
+                gameEvents.fire(GameControllerImpl.Events.EnemySelected(enemy, controller))
             }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
@@ -702,9 +706,10 @@ class EncounterScreen : ScreenCreator() {
                         amplitude = 14f,
                         frequency = 0.4f
                     )
-                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelected> { (e) ->
+                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelected> { (e, controller) ->
+                        val onlyOne = controller.allEnemies.size == 1
                         enemySelected = e === enemy
-                        isVisible = enemySelected
+                        isVisible = !onlyOne && enemySelected
                     }
                 }
             }
@@ -1571,7 +1576,7 @@ class EncounterScreen : ScreenCreator() {
         var x = 10f
         var y = 160f
         event.enemies.forEach { enemy ->
-            val neededWidth = createEnemy(x, y, enemy)
+            val neededWidth = createEnemy(x, y, enemy, event.controller)
             x += neededWidth
             y -= 30f
         }

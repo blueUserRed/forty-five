@@ -49,6 +49,11 @@ hoverDetailDescriptions: [
         description: "$status$WARD OF THE WITCH$status$\nWhenever the revolver rotates, this enemy gets SHIELD(1).",
     },
     {
+        keyword: "POISON IMMUNITY",
+        groupName: "status",
+        description: "$status$POISON IMMUNITY (t)$status$\nThe $status$POISON$status$ Statuseffect can't be applied to this enemy for t turns",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",

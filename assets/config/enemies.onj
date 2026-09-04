@@ -44,6 +44,19 @@ enemyGroups: [
                 majorDifficulty: 2
             },
         ]
+    },
+    {
+        groupName: "The-Fangs",
+        variants: [
+            {
+                name: "The-Fangs-1",
+                majorDifficulty: 1
+            },
+            {
+                name: "The-Fangs-2",
+                majorDifficulty: 2
+            },
+        ]
     }
 ],
 
@@ -106,7 +119,7 @@ var pyros = [
     {
         name: "Pyro-1",
         title: "Pyro",
-        baseHealth: 160,
+        baseHealth: 130,
         texture: "enemy_pyro",
         actions: [
             {
@@ -135,7 +148,7 @@ var pyros = [
     {
         name: "Pyro-2",
         title: "Pyro",
-        baseHealth: 180,
+        baseHealth: 160,
         texture: "enemy_pyro",
         actions: [
             {
@@ -185,7 +198,7 @@ var witches = [
         name: "Witch-1",
         title: "Witch",
         texture: "enemy_witch",
-        baseHealth: 120,
+        baseHealth: 140,
         actions: [
             {
                 weight: 8#actionVal,
@@ -221,7 +234,7 @@ var witches = [
         name: "Witch-2",
         title: "Witch",
         texture: "enemy_witch",
-        baseHealth: 140,
+        baseHealth: 170,
         actions: [
             {
                 weight: 8#actionVal,
@@ -255,6 +268,71 @@ var witches = [
     },
 ];
 
+var fangs = [
+    {
+        name: "The-Fangs-1",
+        title: "The Fangs",
+        texture: "enemy_the_fangs",
+        baseHealth: 120,
+        actions: [
+            {
+                weight: 8#actionVal,
+                action: action_damage(6, 10, false)
+            },
+            {
+                weight: 6#actionVal,
+                action: action_shield(7, 10)
+            },
+            {
+                weight: 6#actionVal,
+                action: action_passiveEffect(poisonImmunity(1#val, true)),
+                overrideTitle: "Poison Immunity",
+                overrideDescription: "The enemy gives itself $status$POISON IMMUNITY$status$ for the remainder of the encounter",
+                maxExecutions: 1
+            },
+            {
+                weight: 4#actionVal,
+                action: action_poisonFangs(2)
+            },
+            {
+                weight: 4#actionVal,
+                action: action_parryablePoison(5, 10)
+            },
+        ]
+    },
+    {
+        name: "The-Fangs-2",
+        title: "The Fangs",
+        texture: "enemy_the_fangs",
+        baseHealth: 140,
+        actions: [
+            {
+                weight: 8#actionVal,
+                action: action_damage(8, 12, false)
+            },
+            {
+                weight: 6#actionVal,
+                action: action_shield(9, 13)
+            },
+            {
+                weight: 6#actionVal,
+                action: action_passiveEffect(poisonImmunity(1#val, true)),
+                overrideTitle: "Poison Immunity",
+                overrideDescription: "The enemy gives itself $status$POISON IMMUNITY$status$ for the remainder of the encounter",
+                maxExecutions: 1
+            },
+            {
+                weight: 4#actionVal,
+                action: action_poisonFangs(2)
+            },
+            {
+                weight: 4#actionVal,
+                action: action_parryablePoison(8, 12)
+            },
+        ]
+    },
+];
+
 enemies: [
 
     {
@@ -268,6 +346,7 @@ enemies: [
     ...outlaws,
     ...pyros,
     ...witches,
+    ...fangs,
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

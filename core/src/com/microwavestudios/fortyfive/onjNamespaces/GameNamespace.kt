@@ -951,6 +951,17 @@ object GameNamespace {
         )
     }
 
+    @RegisterOnjFunction(schema = "use Game; params: [EffectValue, boolean]")
+    fun poisonImmunity(
+        turns: OnjEffectValue,
+        continueForever: OnjBoolean
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
+        PoisonImmunity(
+            getStatusEffectValue(turns, controller, card, 1),
+            continueForever.value
+        )
+    }
+
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue]")
     fun shield(shield: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Shield(getStatusEffectValue(shield, controller, card, 1))
@@ -1094,6 +1105,11 @@ object GameNamespace {
     )
 
     @RegisterOnjFunction(schema = "params: [int, int]")
+    fun action_parryablePoison(min: OnjInt, max: OnjInt) = OnjEnemyAction(
+        EnemyAction.ParryablePoison(min.value.toInt(), max.value.toInt(), null)
+    )
+
+    @RegisterOnjFunction(schema = "params: [int, int]")
     fun action_shield(min: OnjInt, max: OnjInt): OnjEnemyAction = OnjEnemyAction(
         EnemyAction.ApplyShield(min.value.toInt(), max.value.toInt(), null)
     )
@@ -1116,6 +1132,11 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "params: []")
     fun action_bewitchedLeftRight(): OnjEnemyAction = OnjEnemyAction(
         EnemyAction.BewitchedLeftRight(null)
+    )
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun action_poisonFangs(factor: OnjInt): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.PoisonFangs(factor.value.toInt(), null)
     )
 
     //////////////////////////////////////////////////////////////////////////////////

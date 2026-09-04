@@ -166,7 +166,7 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Witch" ],
+        allowedEnemies: [ "The-Fangs" ],
     },
 //    {
 //        majorDifficulty: 0,
@@ -191,9 +191,6 @@ enemies: [
 ],
 
 allowedEnemyConfigurations: [
-    [ "Witch" ],
-    [ "Witch", "Witch" ],
-
     [ "Outlaw" ],
     [ "Outlaw", "Outlaw" ],
     [ "Outlaw", "Outlaw", "Outlaw" ],
@@ -205,6 +202,14 @@ allowedEnemyConfigurations: [
     [ "Outlaw", "Outlaw", "Pyro" ],
     [ "Outlaw", "Pyro", "Pyro" ],
     [ "Outlaw", "Pyro", "Witch" ],
+    [ "The-Fangs" ],
+    [ "The-Fangs", "Pyro" ],
+    [ "The-Fangs", "Pyro", "Pyro" ],
+    [ "The-Fangs", "Witch" ],
+    [ "The-Fangs", "The-Fangs" ],
+    [ "The-Fangs", "The-Fangs", "Pyro" ],
+    [ "The-Fangs", "The-Fangs", "Witch" ],
+    [ "The-Fangs", "Pyro", "Witch" ],
 ],
 
 enemyProbabilityIncrease: [

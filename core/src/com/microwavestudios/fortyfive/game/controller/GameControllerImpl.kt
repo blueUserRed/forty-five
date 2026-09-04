@@ -203,10 +203,10 @@ class GameControllerImpl(
 
     private fun setupEnemies() {
         allEnemies = encounter.createEnemies()
-        gameEvents.fire(Events.SetupEnemies(allEnemies))
+        gameEvents.fire(Events.SetupEnemies(allEnemies, controller))
 
         var selectedEnemy: Enemy = allEnemies.first()
-        gameEvents.fire(Events.EnemySelected(selectedEnemy))
+        gameEvents.fire(Events.EnemySelected(selectedEnemy, controller))
 
         gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
             selectedEnemy = enemy
@@ -216,7 +216,7 @@ class GameControllerImpl(
             enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
                 if (selectedEnemy != enemy) return@watchFor
                 val newEnemy = allEnemies.firstOrNull { !it.isDefeated } ?: allEnemies.first()
-                gameEvents.fire(Events.EnemySelected(newEnemy))
+                gameEvents.fire(Events.EnemySelected(newEnemy, controller))
             }
         }
     }
@@ -388,6 +388,12 @@ class GameControllerImpl(
                     include(card.checkEffects(situation, triggerInformation, controller))
                 }
             } })
+        }
+        gameEvents.watchFor<Events.StatusEffectAppliedEvent> { event ->
+            event.append {
+                val target = event.getStatusEffectTarget()
+                event.statusEffect.onEffectStart(target)?.let { include(it) }
+            }
         }
     }
 
@@ -918,7 +924,7 @@ class GameControllerImpl(
             if (dontApplyEffectPromise.isResolved) return@later
             enemy.applyEffect(statusEffect, controller)
             val info = createTriggerInfo(null, sourceCard = source)
-            val event = Events.StatusEffectAppliedEvent(statusEffect, false, info)
+            val event = Events.StatusEffectAppliedEvent(statusEffect, enemy, info)
             gameEvents.fire(event)
             include(event.createTimeline())
             val situation = GameSituation.EnemyStatusEffectsChanged(enemy, statusEffect, true)
@@ -995,7 +1001,10 @@ class GameControllerImpl(
         }
     }
 
-    override fun tryApplyStatusEffectToPlayerTimeline(effect: StatusEffect, source: Card?): Timeline = Timeline.timeline {
+    override fun tryApplyStatusEffectToPlayerTimeline(
+        effect: StatusEffect,
+        source: Card?
+    ): Timeline = Timeline.timeline { later {
         val dontApplyEffectPromise = Promise<Unit>()
         val timelines = mutableListOf<Timeline>()
         for (toCheck in playerStatusEffects) {
@@ -1022,11 +1031,11 @@ class GameControllerImpl(
                 gameEvents.fire(Events.AddedPlayerStatusEffect(effect)) // separate event for UI purposes
             }
             val info = createTriggerInfo(null, sourceCard = source)
-            val event = Events.StatusEffectAppliedEvent(effect, true, info)
+            val event = Events.StatusEffectAppliedEvent(effect, null, info)
             gameEvents.fire(event)
             include(event.createTimeline())
         }
-    }
+    } }
 
     private fun updateStatusEffects() {
         _playerStatusEffects.iterateRemoving { effect, remover ->
@@ -1066,6 +1075,21 @@ class GameControllerImpl(
                 gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
             }
         }
+    }
+
+    override fun removePlayerStatusEffect(effect: StatusEffect): Timeline = Timeline.timeline {
+        action {
+            val removed = _playerStatusEffects.remove(effect)
+            if (!removed) return@action
+            gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
+        }
+    }
+
+    override fun removeEnemyStatusEffect(
+        enemy: Enemy,
+        effect: StatusEffect
+    ): Timeline = Timeline.timeline {
+        action { enemy.removeStatusEffect(effect) }
     }
 
     private fun parryTimeline(
@@ -1732,9 +1756,9 @@ class GameControllerImpl(
             val resolutionPromise: Promise<Boolean /*= parried*/> = Promise()
         )
         data class SelectionChangedEvent(val text: String?)
-        data class SetupEnemies(val enemies: List<Enemy>)
+        data class SetupEnemies(val enemies: List<Enemy>, val controller: GameController)
         data class EncounterModifierAdded(val modifier: EncounterModifier)
-        data class EnemySelected(val selected: Enemy)
+        data class EnemySelected(val selected: Enemy, val controller: GameController)
         data class PutCardsUnderStack(
             val amount: Int,
             val cardAddedCallback: (card: Card) -> Unit,
@@ -1796,9 +1820,20 @@ class GameControllerImpl(
 
         data class StatusEffectAppliedEvent(
             val statusEffect: StatusEffect,
-            val toPlayer: Boolean,
+            val enemy: Enemy?,
             val triggerInformation: TriggerInformation,
-        ) : TimelineBuildingEvent()
+        ) : TimelineBuildingEvent() {
+
+            val toPlayer: Boolean
+                get() = enemy == null
+
+            fun getStatusEffectTarget(): StatusEffectTarget = if (toPlayer) {
+                StatusEffectTarget.PlayerTarget
+            } else {
+                requireNotNull(enemy)
+                StatusEffectTarget.EnemyTarget(enemy)
+            }
+        }
 
         data class AfterShotEvent(
             val card: Card,

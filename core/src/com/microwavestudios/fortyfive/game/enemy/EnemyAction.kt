@@ -1,7 +1,7 @@
 package com.microwavestudios.fortyfive.game.enemy
 
 import com.microwavestudios.fortyfive.game.BurningPlayer
-import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.StatusEffectCreator
@@ -10,9 +10,6 @@ import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.*
-import onj.value.OnjArray
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
 
 abstract class EnemyAction(protected val data: EnemyActionData?) {
 
@@ -263,7 +260,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 $$"""
                 The Enemy will give you $status$BURNING$status$ ($$value).
                 
-                However, you will be given the chance to parry, reducing the parameter value of the Status Effect.
+                However, you will be given the chance to parry, reducing the parameter value of the Statuseffect.
                 """.trimIndent()
             } ?: ""
 
@@ -396,6 +393,82 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         } }
 
         override fun copy(data: EnemyActionData?): EnemyAction = BewitchedLeftRight(data)
+
+    }
+
+    class PoisonFangs(val factor: Int, data: EnemyActionData?) : EnemyAction(data) {
+
+        override val defaultTitle: String = "Poison Fangs"
+        override val defaultDescription: String =
+            $$"You get $status$POISON$status$ (2) for every bullet in the revolver"
+
+        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+        override val indicatorText: String = ""
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            val poisonAmount = controller.cardsInRevolver().size * factor
+            if (poisonAmount <= 0) return@later
+            val poison = Poison(poisonAmount)
+            include(controller.tryApplyStatusEffectToPlayerTimeline(poison))
+        } }
+
+        override fun copy(data: EnemyActionData?): EnemyAction = PoisonFangs(factor, data)
+    }
+
+    class ParryablePoison(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
+
+        private var poisonValue: Int? = null
+
+        override val defaultTitle: String = "Poison"
+
+        override val defaultDescription: String
+            get() = poisonValue?.let { value ->
+                $$"""
+                The Enemy will give you $status$Poison$status$ ($$value).
+                
+                However, you will be given the chance to parry, reducing the parameter value of the Statuseffect.
+                """.trimIndent()
+            } ?: ""
+
+        override val defaultIcon: ResourceHandle = "poison_icon"
+
+        override val indicatorText: String
+            get() = poisonValue?.toString() ?: ""
+
+        override fun onSelected(
+            enemy: Enemy,
+            controller: GameController
+        ) {
+            requireNull(poisonValue) { "Cant reuse EnemyActions" }
+            requireNotNull(data)
+            poisonValue = ((min..max).random(controller.random) * data.difficulty).toInt()
+        }
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.timeline { later {
+            requireNotNull(data)
+            val poisonValue = poisonValue
+            requireNotNull(poisonValue)
+            val result = Promise<Int>()
+            val texts: (remaining: Int) -> Pair<String, String> = { remaining ->
+                "Parrying will result in Poison($remaining)" to
+                        "Passing will result in Poison($poisonValue)"
+            }
+            include(controller.askParryTimeline(poisonValue, result, texts))
+            later {
+                val newValue = result.getOrError()
+                if (newValue <= 0) return@later
+                val effect = Poison(newValue)
+                include(controller.tryApplyStatusEffectToPlayerTimeline(effect))
+            }
+        } }
+
+        override fun copy(data: EnemyActionData?): EnemyAction = ParryablePoison(min, max, data)
 
     }
 
