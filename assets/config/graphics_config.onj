@@ -75,24 +75,41 @@ encounterModifiers: {
     },
 },
 
-encounterBackgrounds: [
+biomeBackgrounds: [
     {
         biome: "wasteland",
-        isDark: false,
-        background: "background_wasteland",
-        secondaryBackground: "secondary_background_wasteland",
+        backgrounds: [
+            {
+                background: "background_wasteland1",
+                isDark: false,
+            },
+            {
+                background: "background_wasteland2",
+                isDark: false,
+            },
+            {
+                background: "background_wasteland3",
+                isDark: true,
+            },
+        ]
     },
     {
         biome: "bewitched_forest",
-        isDark: true,
-        background: "background_bewitched_forest",
-        secondaryBackground: "background_bewitched_forest",
+        backgrounds: [
+            {
+                background: "background_bewitched_forest",
+                isDark: true
+            }
+        ],
     },
     {
-        biome: "magenta_mountains",
-        isDark: false,
-        background: "background_magenta_mountains",
-        secondaryBackground: "background_bewitched_forest",
+        biome: "magenta_forest",
+        backgrounds: [
+            {
+                background: "background_magenta_mountains",
+                isDark: false
+            }
+        ],
     },
 ],
 

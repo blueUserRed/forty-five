@@ -77,7 +77,7 @@ class ShopScreen : ScreenCreator() {
     private var rerollPrice: Int = 0
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, true)
+        BiomeBackgroundScreenController(screen)
     )
 
     override fun getRoot(): Group = newGroup {

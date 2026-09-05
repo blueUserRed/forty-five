@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.controller.GameController
-import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -103,21 +102,18 @@ object GraphicsConfig {
         return if (isDark) cardFontColors["dark-$situation"]!! else cardFontColors["light-$situation"]!!
     }
 
-    fun encounterBackgroundFor(biome: String): ResourceHandle = config
-        .get<OnjArray>("encounterBackgrounds")
+    fun encounterBackgroundsFor(biome: String): List<Pair<ResourceHandle, Boolean>> = config
+        .get<OnjArray>("biomeBackgrounds")
         .value
         .map { it as OnjObject }
         .find { it.get<String>("biome") == biome }
-        ?.get<String>("background")
-        ?: throw RuntimeException("no background for biome $biome")
-
-    fun secondaryBackgroundFor(biome: String): ResourceHandle = config
-        .get<OnjArray>("encounterBackgrounds")
-        .value
-        .map { it as OnjObject }
-        .find { it.get<String>("biome") == biome }
-        ?.get<String>("secondaryBackground")
-        ?: throw RuntimeException("no secondary background for biome $biome")
+        ?.get<OnjArray>("backgrounds")
+        ?.value
+        ?.map {
+            it as OnjObject
+            it.get<String>("background") to it.get<Boolean>("isDark")
+        }
+        ?: throw RuntimeException("no background for biome: '$biome'")
 
     fun revolverSlotIcon(slot: Int): ResourceHandle = slotIcons[slot - 1]
 

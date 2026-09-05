@@ -114,7 +114,7 @@ class EncounterScreen : ScreenCreator() {
 
     private val bgZoom: Float = 1.07f
     private val bgScreenController by lazy {
-        BiomeBackgroundScreenController(screen, false, bgZoom)
+        BiomeBackgroundScreenController(screen, bgZoom)
     }
 
     private var bgOffX: Float = 0f

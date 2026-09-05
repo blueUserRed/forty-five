@@ -296,7 +296,7 @@ class DialogScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         dialogController,
-        BiomeBackgroundScreenController(screen, true),
+        BiomeBackgroundScreenController(screen),
         timelines
     )
 

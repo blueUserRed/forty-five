@@ -391,7 +391,7 @@ class ChooseCardScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, true)
+        BiomeBackgroundScreenController(screen)
     )
 
     private data object RecheckAddToDeck

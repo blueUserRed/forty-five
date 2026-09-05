@@ -300,20 +300,24 @@ textures: [
         file: "blobs/game_screen/status_effect_background.png"
     },
     {
-        name: "background_wasteland",
-        file: "blobs/backgrounds/wasteland.png"
+        name: "background_wasteland1",
+        file: "blobs/backgrounds/wasteland/wasteland1.png"
     },
     {
-        name: "secondary_background_wasteland",
-        file: "blobs/backgrounds/wasteland_secondary.png"
+        name: "background_wasteland2",
+        file: "blobs/backgrounds/wasteland/wasteland2.png"
+    },
+    {
+        name: "background_wasteland3",
+        file: "blobs/backgrounds/wasteland/wasteland3.png"
     },
     {
         name: "background_bewitched_forest",
-        file: "blobs/backgrounds/bewitched_forest.png"
+        file: "blobs/backgrounds/bewitched_forest/bewitched_forest.png"
     },
     {
         name: "background_magenta_mountains",
-        file: "blobs/backgrounds/magenta_mountains.png"
+        file: "blobs/backgrounds/magenta_mountains/magenta_mountains.png"
     },
     {
         name: "location_sign_aqua_dulche",

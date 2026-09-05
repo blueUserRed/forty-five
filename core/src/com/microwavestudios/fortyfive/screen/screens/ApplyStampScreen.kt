@@ -256,7 +256,7 @@ class ApplyStampScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, true)
+        BiomeBackgroundScreenController(screen)
     )
 
     companion object : ScreenManager.ScreenCreatorCompanion {

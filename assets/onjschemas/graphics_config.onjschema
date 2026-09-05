@@ -33,11 +33,12 @@ encounterModifiers: {
     confused: encounterModifierConfig,
 },
 
-encounterBackgrounds: {
+biomeBackgrounds: {
     biome: string,
-    isDark: boolean,
-    background: string,
-    secondaryBackground: string,
+    backgrounds: {
+        isDark: boolean,
+        background: string,
+    }[],
 }[],
 
 damageOverlay: {
