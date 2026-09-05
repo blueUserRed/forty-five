@@ -38,6 +38,9 @@ object FortyFive : Game() {
 
     private const val logTag = "forty-five"
 
+    const val DEMO_MODE: Boolean = true
+
+
     /** see [CardTextureManager] */
     val cardTextureManager = CardTextureManager()
 

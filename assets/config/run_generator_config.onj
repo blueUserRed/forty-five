@@ -166,28 +166,17 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Scarecrow" ],
+        allowedEnemies: [ "Outlaw", "Pyro" ],
     },
-//    {
-//        majorDifficulty: 0,
-//        amount: [1, 1],
-//        allowedEnemies: [ "Outlaw" ],
-//    },
-//    {
-//        majorDifficulty: 2,
-//        amount: [1, 2],
-//        allowedEnemies: [ "Outlaw", "Pyro" ],
-//    },
-//    {
-//        majorDifficulty: 3,
-//        amount: [1, 2],
-//        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
-//    },
-//    {
-//        majorDifficulty: 4,
-//        amount: [2, 3],
-//        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
-//    },
+    {
+        majorDifficulty: 2,
+        amount: [1, 2],
+        allowedEnemies: [
+            "Outlaw", "Pyro",
+            "Witch", "The-Fangs",
+            "Scarecrow"
+        ],
+    },
 ],
 
 allowedEnemyConfigurations: [
@@ -229,31 +218,31 @@ allowedEnemyConfigurations: [
 ],
 
 enemyProbabilityIncrease: [
-    {
-        enemy: "Outlaw",
-        biome: "wasteland",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Outlaw",
-        biome: "bewitched_forest",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Outlaw",
-        biome: "magenta_mountains",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Pyro",
-        biome: "wasteland",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Witch",
-        biome: "bewitched_forest",
-        bonusPoints: 20,
-    },
+//    {
+//        enemy: "Outlaw",
+//        biome: "wasteland",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Outlaw",
+//        biome: "bewitched_forest",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Outlaw",
+//        biome: "magenta_mountains",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Pyro",
+//        biome: "wasteland",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Witch",
+//        biome: "bewitched_forest",
+//        bonusPoints: 20,
+//    },
 ],
 
 enemyProbabilityRandomPoints: 120,

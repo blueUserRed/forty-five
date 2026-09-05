@@ -28,21 +28,23 @@ class RunGenerator {
             "generateRun only works for Limited and Constructed Runs"
         }
 
-        val modifiers = generateRunModifiers(forBiome, forDifficulty, type)
-        val challenges = generateChallenges(type, forDifficulty)
+        val unadjustedDifficulty = if (FortyFive.DEMO_MODE) 2 else forDifficulty
+
+        val modifiers = generateRunModifiers(forBiome, unadjustedDifficulty, type)
+        val challenges = generateChallenges(type, unadjustedDifficulty)
         val behaviours = Run.accumulateBehaviours(modifiers, challenges)
 
         val baseDifficulty = if (type == RunType.CONSTRUCTED) {
-            forDifficulty
+            unadjustedDifficulty
         } else {
-            1
+            if (FortyFive.DEMO_MODE) 2 else 1
         }
         var difficultyAdjustment = -modifiers.sumOf { it.difficultyAdjustment.toDouble() }
         difficultyAdjustment += behaviours.sumOf { it.difficultyAddition().toDouble() }
         val majorDifficulty = (baseDifficulty + difficultyAdjustment.toInt()).coerceAtLeast(0)
         val minorDifficulty = 1f + difficultyAdjustment.fractionalPart().toFloat()
 
-        val rewards = generateRunRewards(forDifficulty)
+        val rewards = generateRunRewards(unadjustedDifficulty)
 
         val (minDiff, maxDiff, scaling) = when (type) {
             RunType.CONSTRUCTED -> RunGeneratorConfig.scalingConstructed
@@ -54,9 +56,9 @@ class RunGenerator {
             type,
             random,
             majorDifficulty,
-            forDifficulty,
+            unadjustedDifficulty,
             minorDifficulty,
-            enemyAmountRange(forDifficulty),
+            enemyAmountRange(unadjustedDifficulty),
             minDiff,
             maxDiff,
             scaling,
@@ -76,7 +78,7 @@ class RunGenerator {
             "-generated-",
             RunLength.MEDIUM,
             type,
-            forDifficulty,
+            unadjustedDifficulty,
             minSteps, maxSteps,
             modifiers,
             challenges,

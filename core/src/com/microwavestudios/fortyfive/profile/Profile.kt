@@ -6,9 +6,6 @@ import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.Talisman
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.profile.Profile.Companion.dataFileSchema
-import com.microwavestudios.fortyfive.profile.Profile.Companion.limitedTakeAlong
-import com.microwavestudios.fortyfive.profile.Profile.ProfileData
 import com.microwavestudios.fortyfive.profile.Profile.RunBoard
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.run.RunGenerator
@@ -341,8 +338,8 @@ class Profile private constructor(
 
         if (run.type == RunType.SPECIAL_NOT_IN_BOARD) {
             data.completedSpecialRuns.add(run.name)
-            val cardsToExtraxt = extractableCards()
-            _cardCollection.addAll(cardsToExtraxt)
+            val cardsToExtract = extractableCards()
+            _cardCollection.addAll(cardsToExtract)
             endRun(runSave)
             return
         }
@@ -369,9 +366,14 @@ class Profile private constructor(
         }
         runBoards[area] = newRunBoard
 
-        val cardsToExtraxt = extractableCards()
-        _cardCollection.addAll(cardsToExtraxt)
+        val cardsToExtract = extractableCards()
+        _cardCollection.addAll(cardsToExtract)
         endRun(runSave)
+
+        if (FortyFive.DEMO_MODE) {
+            val runBoard = runBoardForArea(currentAreaMap)
+            runBoard.limitedRun?.let { startRun(it) }
+        }
     }
 
     private fun endRun(runSave: RunSave) {
@@ -659,6 +661,12 @@ class Profile private constructor(
             val versionFile = File(profile.profilePath.absolutePath + "/version.txt")
             versionFile.createNewFile()
             versionFile.writeText(profileVersion.toString())
+
+            if (FortyFive.DEMO_MODE) {
+                val runBoard = profile.runBoardForArea(profile.currentAreaMap)
+                runBoard.limitedRun?.let { profile.startRun(it) }
+            }
+
             return profile
         }
 
