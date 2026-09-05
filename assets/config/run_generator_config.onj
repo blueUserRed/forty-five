@@ -166,7 +166,7 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "The-Fangs" ],
+        allowedEnemies: [ "Scarecrow" ],
     },
 //    {
 //        majorDifficulty: 0,
@@ -210,6 +210,22 @@ allowedEnemyConfigurations: [
     [ "The-Fangs", "The-Fangs", "Pyro" ],
     [ "The-Fangs", "The-Fangs", "Witch" ],
     [ "The-Fangs", "Pyro", "Witch" ],
+    [ "Scarecrow" ],
+    [ "Scarecrow", "Scarecrow" ],
+    [ "Scarecrow", "Witch" ],
+    [ "Scarecrow", "Pyro" ],
+    [ "Scarecrow", "Outlaw" ],
+    [ "Scarecrow", "The-Fangs" ],
+    [ "Scarecrow", "Scarecrow", "Scarecrow" ],
+    [ "Scarecrow", "Scarecrow", "Witch" ],
+    [ "Scarecrow", "Scarecrow", "Pyro" ],
+    [ "Scarecrow", "Witch", "Witch" ],
+    [ "Scarecrow", "The-Fangs", "Witch" ],
+    [ "Scarecrow", "Witch", "Outlaw" ],
+    [ "Scarecrow", "Pyro", "Witch" ],
+    [ "Scarecrow", "Pyro", "The-Fangs" ],
+    [ "Scarecrow", "The-Fangs", "Witch" ],
+    [ "Scarecrow", "The-Fangs", "Pyro" ],
 ],
 
 enemyProbabilityIncrease: [

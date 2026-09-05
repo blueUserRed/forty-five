@@ -2,12 +2,15 @@ package com.microwavestudios.fortyfive.game
 
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardDamageModifier
+import com.microwavestudios.fortyfive.game.card.CardModifierData
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
+import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.collectTimeline
 import kotlin.math.floor
 import kotlin.math.min
@@ -35,6 +38,11 @@ abstract class StatusEffect(
 
     open fun executeAfterShot(): Timeline? = null
 
+    open fun executeAfterCardWasPlacedInRevolver(
+        card: Card,
+        controller: GameController
+    ): Timeline? = null
+
     /**
      * @param dontApplyStatusEffect resolve to stop the status effect from being applied
      */
@@ -42,6 +50,8 @@ abstract class StatusEffect(
         statusEffect: StatusEffect,
         dontApplyStatusEffect: Promise<Unit>
     ): Timeline? = null
+
+    open fun allowCardForParrying(card: Card, controller: GameController): Boolean = true
 
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
@@ -167,7 +177,8 @@ abstract class TurnBasedStatusEffect(
     duration: Int
 ) : StatusEffect(iconHandle) {
 
-    private var currentDuration: Int = duration
+    protected var currentDuration: Int = duration
+        private set
 
     var continueForever: Boolean = false
         private set
@@ -653,6 +664,82 @@ class WardOfTheWitch : PassiveEnemyAction("encounter_modifier_frost") {
     override fun toDisplayString(): String = statusTemplate("WARD OF THE WITCH")
 
     override fun equals(other: Any?): Boolean = other is WardOfTheWitch
+}
+
+class Ominous(
+    damage: Int,
+    turns: Int,
+    continueForever: Boolean
+) : TurnBasedStatusEffect("encounter_modifier_frost", turns) {
+
+    override val name: String = "ominous"
+
+    private var damage: Int = damage
+
+    init {
+        if (continueForever) continueForever()
+    }
+
+    override fun executeAfterCardWasPlacedInRevolver(
+        card: Card,
+        controller: GameController
+    ): Timeline = Timeline.timeline { later {
+        var slot = controller.slotOfCard(card)
+        requireNotNull(slot) { "card not actually in revolver in executeAfterCardWasPlacedInRevolver" }
+        slot = Utils.convertSlotRepresentation(slot)
+        if (slot % 2 == 0) return@later
+        val selector = SelectorFactory.getCardInRevolverSelector(controller, "Select bullet that gets -$damage dmg")
+        val promise = selector.startSelect()
+        waitForPromise(promise)
+        later {
+            val result = promise.getOrNull() ?: return@later
+            val modifier = CardDamageModifier(
+                damage = -damage,
+                data = CardModifierData("Ominous Statuseffect")
+            )
+            result.addDamageModifier(modifier, controller)
+        }
+    } }
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Ominous && other.damage == damage
+
+    override fun stack(other: StatusEffect) {
+        require(other is Ominous)
+        require(other.damage == damage) { "Can't stack Ominous effects with different damage values" }
+        stackTurnEffect(other)
+    }
+
+    override fun getDisplayText(): String = "($damage, $currentDuration)"
+
+    override fun equals(other: Any?): Boolean = other is Ominous
+
+    override fun increment(amount: Int) {
+        super.increment(amount)
+        damage += amount
+    }
+
+    override fun parameterSum(): Int = if (continueForever) {
+        damage
+    } else {
+        currentDuration + damage
+    }
+
+    override fun toDisplayString(): String = "${statusTemplate("OMINOUS")} (${getDisplayText()})"
+
+}
+
+class DeterringAura : PassiveEnemyAction("encounter_modifier_frost") {
+
+    override val name: String = "deterringaura"
+
+    override fun allowCardForParrying(
+        card: Card,
+        controller: GameController
+    ): Boolean = card.curDamage(controller) >= card.baseDamage
+
+    override fun equals(other: Any?): Boolean = other is DeterringAura
+
+    override fun toDisplayString(): String = statusTemplate("DETERRING AURA")
 
 }
 

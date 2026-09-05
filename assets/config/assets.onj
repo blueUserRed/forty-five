@@ -859,6 +859,10 @@ textures: [
         file: "blobs/enemies/the_fangs/the_fangs.png"
     },
     {
+        name: "enemy_scarecrow",
+        file: "blobs/enemies/scarecrow/scarecrow.png"
+    },
+    {
         name: "encounter_modifier_frost",
         file: "blobs/encounter_modifier/frost.png"
     },

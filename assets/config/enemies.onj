@@ -57,6 +57,19 @@ enemyGroups: [
                 majorDifficulty: 2
             },
         ]
+    },
+    {
+        groupName: "Scarecrow",
+        variants: [
+            {
+                name: "Scarecrow-1",
+                majorDifficulty: 1
+            },
+            {
+                name: "Scarecrow-2",
+                majorDifficulty: 2
+            },
+        ]
     }
 ],
 
@@ -333,6 +346,67 @@ var fangs = [
     },
 ];
 
+var scarecrows = [
+    {
+        name: "Scarecrow-1",
+        title: "Scarecrow",
+        texture: "enemy_scarecrow",
+        baseHealth: 110,
+        actions: [
+            {
+                weight: 9#actionVal,
+                action: action_damage(6, 10, false)
+            },
+            {
+                weight: 3#actionVal,
+                action: action_passiveEffect(ominous(2#val, 1#val, true)),
+                overrideTitle: "Ominous",
+                overrideDescription: "The enemy gives itself $status$OMINOUS$status$ for the remainder of the encounter",
+                maxExecutions: 1,
+            },
+            {
+                weight: 4#actionVal,
+                action: action_passiveEffect(deterringAura()),
+                overrideTitle: "Deterring Aura",
+                overrideDescription: "The enemy gives itself $status$DETERRING AURA$status$ for the next turn",
+            },
+            {
+                weight: 6#actionVal,
+                action: action_withoutAHeart(),
+            }
+        ]
+    },
+    {
+        name: "Scarecrow-2",
+        title: "Scarecrow",
+        texture: "enemy_scarecrow",
+        baseHealth: 130,
+        actions: [
+            {
+                weight: 10#actionVal,
+                action: action_damage(9, 15, false)
+            },
+            {
+                weight: 3#actionVal,
+                action: action_passiveEffect(ominous(2#val, 1#val, true)),
+                overrideTitle: "Ominous",
+                overrideDescription: "The enemy gives itself $status$OMINOUS$status$ for the remainder of the encounter",
+                maxExecutions: 1,
+            },
+            {
+                weight: 4#actionVal,
+                action: action_passiveEffect(deterringAura()),
+                overrideTitle: "Deterring Aura",
+                overrideDescription: "The enemy gives itself $status$DETERRING AURA$status$ for the next turn",
+            },
+            {
+                weight: 6#actionVal,
+                action: action_withoutAHeart(),
+            }
+        ]
+    },
+];
+
 enemies: [
 
     {
@@ -347,6 +421,7 @@ enemies: [
     ...pyros,
     ...witches,
     ...fangs,
+    ...scarecrows,
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

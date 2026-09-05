@@ -1022,6 +1022,19 @@ object GameNamespace {
         )
     }
 
+    @RegisterOnjFunction(schema = "use Game; params: [EffectValue, EffectValue, boolean]")
+    fun ominous(
+        damage: OnjEffectValue,
+        turns: OnjEffectValue,
+        continueForever: OnjBoolean
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
+        Ominous(
+            getStatusEffectValue(damage, controller, card, 1),
+            getStatusEffectValue(turns, controller, card, 1),
+            continueForever.value
+        )
+    }
+
     @RegisterOnjFunction(schema = "use Game; params: [EffectValue]")
     fun frozen(shots: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
         Frozen(
@@ -1038,6 +1051,11 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "params: []")
     fun wardOfTheWitch(): OnjStatusEffect = OnjStatusEffect { _, _, _ ->
         WardOfTheWitch()
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun deterringAura(): OnjStatusEffect = OnjStatusEffect { _, _, _ ->
+        DeterringAura()
     }
 
     //////////////////////////////////////////////////////////////////////////////////
@@ -1137,6 +1155,11 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "params: [int]")
     fun action_poisonFangs(factor: OnjInt): OnjEnemyAction = OnjEnemyAction(
         EnemyAction.PoisonFangs(factor.value.toInt(), null)
+    )
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun action_withoutAHeart(): OnjEnemyAction = OnjEnemyAction(
+        EnemyAction.WithoutAHeart(null)
     )
 
     //////////////////////////////////////////////////////////////////////////////////

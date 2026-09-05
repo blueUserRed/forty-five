@@ -6,6 +6,9 @@ import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.StatusEffectCreator
 import com.microwavestudios.fortyfive.game.StatusEffectTarget
+import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.game.card.CardDamageModifier
+import com.microwavestudios.fortyfive.game.card.CardModifierData
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -148,7 +151,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 "Parrying will let $remainingDamage damage through" to
                 "Passing will let $damage damage through"
             }
-            include(controller.askParryTimeline(damage, parryResult, texts))
+            include(controller.askParryTimeline(enemy, damage, parryResult, texts))
             later {
                 val result = parryResult.getOrError()
                 if (result != 0) include(controller.enemyAttackTimeline(result, enemy, isPiercing))
@@ -202,7 +205,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 "Parrying will let $remainingDamage damage through" to
                 "Passing will let $damage damage through"
             }
-            include(controller.askParryTimeline(damage, parryResult, texts))
+            include(controller.askParryTimeline(enemy, damage, parryResult, texts))
             later {
                 val result = parryResult.getOrError()
                 if (result != 0) include(controller.enemyAttackTimeline(result, enemy, isPiercing))
@@ -290,7 +293,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 "Parrying will result in Burning($remaining)" to
                 "Passing will result in Burning($burningValue)"
             }
-            include(controller.askParryTimeline(burningValue, result, texts))
+            include(controller.askParryTimeline(enemy, burningValue, result, texts))
             later {
                 val newValue = result.getOrError()
                 if (newValue <= 0) return@later
@@ -459,7 +462,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 "Parrying will result in Poison($remaining)" to
                         "Passing will result in Poison($poisonValue)"
             }
-            include(controller.askParryTimeline(poisonValue, result, texts))
+            include(controller.askParryTimeline(enemy, poisonValue, result, texts))
             later {
                 val newValue = result.getOrError()
                 if (newValue <= 0) return@later
@@ -469,6 +472,48 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         } }
 
         override fun copy(data: EnemyActionData?): EnemyAction = ParryablePoison(min, max, data)
+
+    }
+
+    class WithoutAHeart(data: EnemyActionData?) : EnemyAction(data) {
+
+        override val defaultTitle: String = "Without a heart"
+        override val defaultDescription: String = "two random bullets in the players hand get their dmg values halved"
+        override val defaultIcon: ResourceHandle = "poison_icon"
+        override val indicatorText: String = ""
+
+        override fun getTimeline(
+            enemy: Enemy,
+            controller: GameController
+        ): Timeline = Timeline.later {
+            val allCards = controller.cardsInHand.toMutableList()
+            allCards.shuffle(controller.random)
+            val selectedCards = mutableListOf<Card>()
+            if (allCards.isNotEmpty()) selectedCards.add(allCards.removeLast())
+            if (allCards.isNotEmpty()) selectedCards.add(allCards.removeLast())
+            if (selectedCards.isEmpty()) return@later
+            selectedCards
+                .map { halfDamageTimeline(it, controller) }
+                .collectTimeline()
+                .let { include(it) }
+        }
+
+        private fun halfDamageTimeline(card: Card, controller: GameController): Timeline = Timeline.later {
+            val prevCoords = card.presentation.position()
+            include(card.presentation.animateToTriggerPosition(controller, false, controller.afterlife.isOpen))
+            delay(300)
+            action {
+                val modifier = CardDamageModifier(
+                    damageMultiplier = 0.5f,
+                    data = CardModifierData("Without a heart")
+                )
+                card.addDamageModifier(modifier, controller)
+            }
+            delay(300)
+            include(card.presentation.animateBack(controller, prevCoords))
+        }
+
+        override fun copy(data: EnemyActionData?): EnemyAction = WithoutAHeart(data)
 
     }
 

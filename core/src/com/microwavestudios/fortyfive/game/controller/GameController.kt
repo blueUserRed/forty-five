@@ -201,6 +201,7 @@ interface GameController {
     fun shoot()
 
     fun askParryTimeline(
+        enemy: Enemy,
         value: Int,
         resultValue: Promise<Int>,
         texts: (remainingDamage: Int) -> Pair<String, String>

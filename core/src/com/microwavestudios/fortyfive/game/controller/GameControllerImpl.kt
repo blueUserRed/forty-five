@@ -272,6 +272,15 @@ class GameControllerImpl(
                         val timeline = behaviour.executeAfterBulletWasPlacedInRevolver(event.card, controller)
                         if (timeline != null) include(timeline)
                     }
+                    playerStatusEffects
+                        .mapNotNull { it.executeAfterCardWasPlacedInRevolver(event.card, controller) }
+                        .collectTimeline()
+                        .let { include(it) }
+                    activeEnemies
+                        .flatMap { it.statusEffects }
+                        .mapNotNull { it.executeAfterCardWasPlacedInRevolver(event.card, controller) }
+                        .collectTimeline()
+                        .let { include(it) }
                 }
             }
             val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before, event.afterShot)
@@ -1134,6 +1143,7 @@ class GameControllerImpl(
     } }
 
     override fun askParryTimeline(
+        enemy: Enemy,
         value: Int,
         resultValue: Promise<Int>,
         texts: (remainingDamage: Int) -> Pair<String, String>
@@ -1143,11 +1153,16 @@ class GameControllerImpl(
             return@later
         }
         val card = revolver.getCardInSlot(5)
-        if (card != null) {
-            include(parryTimeline(value, card, texts, resultValue))
-        } else {
+        if (card == null) {
             resultValue.resolve(value)
+            return@later
         }
+        val allowed = enemy.statusEffects.all { it.allowCardForParrying(card, controller) }
+        if (!allowed) {
+            resultValue.resolve(value)
+            return@later
+        }
+        include(parryTimeline(value, card, texts, resultValue))
     } }
 
     override fun putBulletFromRevolverUnderTheStackTimeline(card: Card): Timeline {
@@ -1297,7 +1312,7 @@ class GameControllerImpl(
                 .mapNotNull { it.executeAfterShot() }
                 .collectTimeline()
                 .let { include(it) }
-            allEnemies
+            activeEnemies
                 .map { it.executeStatusEffectsAfterShot() }
                 .collectTimeline()
                 .let { include(it) }

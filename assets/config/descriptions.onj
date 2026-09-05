@@ -54,6 +54,16 @@ hoverDetailDescriptions: [
         description: "$status$POISON IMMUNITY (t)$status$\nThe $status$POISON$status$ Statuseffect can't be applied to this enemy for t turns",
     },
     {
+        keyword: "OMINOUS",
+        groupName: "status",
+        description: "$status$OMINOUS (d, t)$status$\nWhenever a bullet enters the revolver in an uneven slot while an enemy has $status$OMINOUS$status$: target bullet in the revolver gets -d dmg. $status$OMINOUS$status$ is active for t turns.",
+    },
+    {
+        keyword: "DETERRING AURA",
+        groupName: "status",
+        description: "$status$DETERRING AURA$status$\nBullets with less dmg than their starting dmg can't be used to parry this enemy",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",
