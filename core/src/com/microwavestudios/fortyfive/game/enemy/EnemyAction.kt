@@ -499,7 +499,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         }
 
         private fun halfDamageTimeline(card: Card, controller: GameController): Timeline = Timeline.later {
-            val prevCoords = card.presentation.position()
+            val prevCoords = card.presentation.position().cpy()
             include(card.presentation.animateToTriggerPosition(controller, false, controller.afterlife.isOpen))
             delay(300)
             action {

@@ -171,6 +171,8 @@ enemies: [
     {
         majorDifficulty: 2,
         amount: [1, 2],
+//        amount: [1, 1],
+//        allowedEnemies: [ "Scarecrow" ],
         allowedEnemies: [
             "Outlaw", "Pyro",
             "Witch", "The-Fangs",

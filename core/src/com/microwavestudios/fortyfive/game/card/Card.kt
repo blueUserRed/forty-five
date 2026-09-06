@@ -1408,7 +1408,7 @@ class CardActor(
         controller: GameController,
         isOnShot: Boolean,
         afterlifeOpen: Boolean
-    ): Timeline = Timeline.timeline { later {
+    ): Timeline = Timeline.later {
         prevPosition = Vector2(x, y)
         val target = when (card.zone) {
             Zone.REVOLVER -> if (isOnShot) {
@@ -1450,7 +1450,7 @@ class CardActor(
             (parent as? Layout)?.invalidate()
         }
         delay(100)
-    } }
+    }
 
     override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
         // baaaaaaaaaad
@@ -1463,7 +1463,7 @@ class CardActor(
         invalidateHierarchy()
     }
 
-    fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {
+    fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.later {
         val target = controller
             .revolver
             .slots
