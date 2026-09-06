@@ -643,39 +643,37 @@ class Card(
         val triggeredEffects = effects.filter {
             it.checkTrigger(situation, triggerInformation, controller, this@Card)
         }
-        if (situation is GameSituation.CardRightClicked && triggeredEffects.isNotEmpty()) {
+        if (triggeredEffects.isEmpty()) return@later
+        if (situation is GameSituation.CardRightClicked) {
             val result = controller.tryPay(rightClickCost ?: 0, presentation.animTarget())
             if (!result) FortyFive.logger.warn(logTag, "Right Click triggered but can't pay for it")
         }
-        triggeredEffects.forEach { effect ->
-            later {
-                if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) {
-                    later {
-                        isInTriggerPosition = true
+        triggeredEffects.forEach { effect -> later {
+            if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) later {
+                isInTriggerPosition = true
 
-                        val afterlifeShouldBeOpen = inZone(Zone.AFTERLIFE) || effect.animatesInAfterlife()
-                        val afterlife = controller.afterlife
-                        if (afterlife.isClosed && afterlifeShouldBeOpen) include(afterlife.openTimeline())
-                        if (afterlife.isOpen && !afterlifeShouldBeOpen) include(afterlife.closeTimeline())
+                val afterlifeShouldBeOpen = inZone(Zone.AFTERLIFE) || effect.animatesInAfterlife()
+                val afterlife = controller.afterlife
+                if (afterlife.isClosed && afterlifeShouldBeOpen) include(afterlife.openTimeline())
+                if (afterlife.isOpen && !afterlifeShouldBeOpen) include(afterlife.closeTimeline())
 
-                        val screenShakeTimeline = Timeline.timeline {
-                            delay(210)
-                            FortyFive.currentRenderPipeline?.getScreenShakeTimeline()?.let { include(it) }
-                        }
-
-                        val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
-                        val anim = presentation.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
-
-                        action { controller.dispatchAnimTimeline(screenShakeTimeline) }
-                        include(anim)
-                    }
+                val screenShakeTimeline = Timeline.timeline {
+                    delay(210)
+                    FortyFive.currentRenderPipeline?.getScreenShakeTimeline()?.let { include(it) }
                 }
-                include(effect.trigger(this@Card, triggerInformation, controller, situation))
+
+                val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
+                val anim = presentation.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
+
+                action { controller.dispatchAnimTimeline(screenShakeTimeline) }
+                include(anim)
             }
-        }
+            include(effect.trigger(this@Card, triggerInformation, controller, situation))
+        } }
 
         later {
             if (!presentation.inTriggerPosition) return@later
+            println("anim back for: $situation")
             if (zone == zoneAtStart) {
                 include(presentation.animateBack(controller, prevPosition))
             } else {

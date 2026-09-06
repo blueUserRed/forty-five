@@ -501,7 +501,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         private fun halfDamageTimeline(card: Card, controller: GameController): Timeline = Timeline.later {
             val prevCoords = card.presentation.position().cpy()
             include(card.presentation.animateToTriggerPosition(controller, false, controller.afterlife.isOpen))
-            delay(300)
+            delay(200)
             action {
                 val modifier = CardDamageModifier(
                     damageMultiplier = 0.5f,
@@ -509,7 +509,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 )
                 card.addDamageModifier(modifier, controller)
             }
-            delay(300)
+            delay(200)
             include(card.presentation.animateBack(controller, prevCoords))
         }
 
