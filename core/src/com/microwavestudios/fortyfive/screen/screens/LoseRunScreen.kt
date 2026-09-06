@@ -3,9 +3,12 @@ package com.microwavestudios.fortyfive.screen.screens
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.keyInput.GameInputs
+import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
@@ -43,17 +46,21 @@ class LoseRunScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.CENTER
 
         label("red wing", "You lost!", Color.Red, 128) {
+            touchable = Touchable.disabled
             syncDimensions()
         }
         label("roadgeek", "Press any key to continue", Color.FortyWhite, 24) {
+            touchable = Touchable.disabled
             syncDimensions()
         }
 
-        val listener = object : InputListener() {
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        onInput(GameInputs.anyMouseClick) {
+            FortyFive.screenManager.screenFinished()
+        }
 
-            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
-                FortyFive.screenManager.screenFinished()
-            }
+        val listener = object : InputListener() {
 
             override fun keyUp(event: InputEvent?, keycode: Int): Boolean {
                 FortyFive.screenManager.screenFinished()

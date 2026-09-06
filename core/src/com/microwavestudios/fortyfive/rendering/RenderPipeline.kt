@@ -316,6 +316,10 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         earlyRenderTasks.clear()
         lateRenderTasks.forEach { it.dispose() }
         lateRenderTasks.clear()
+
+        shakeReferenceTime = -1
+        shootReferenceTime = -1
+        popoutReferenceTime = -1
     }
 
     fun sizeChanged() {

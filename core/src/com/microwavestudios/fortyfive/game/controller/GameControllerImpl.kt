@@ -996,7 +996,6 @@ class GameControllerImpl(
     override fun playerDeathTimeline(): Timeline = Timeline.timeline {
         action {
             FortyFive.logger.debug(logTag, "player lost")
-            animTimelines.forEach(Timeline::stopTimeline)
         }
         include(FortyFive.currentRenderPipeline!!.getFadeToBlackTimeline(2000, stayBlack = true))
         delay(500)
@@ -1005,6 +1004,7 @@ class GameControllerImpl(
                 profile.loseRun()
                 FortyFive.screenManager.ensureNextScreen(LoseRunScreen)
             }
+            animTimelines.forEach(Timeline::stopTimeline)
             FortyFive.screenManager.overrideNextTransition(ScreenManager.ScreenTransition(null, null))
             FortyFive.screenManager.screenFinished()
         }

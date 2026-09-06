@@ -494,14 +494,18 @@ class EncounterScreen : ScreenCreator() {
                 flexDirection = FlexDirection.COLUMN
 
                 label("roadgeek", encounterModifier.displayName, fontSize = (24 * 0.9).toInt()) {
+                    touchable = Touchable.disabled
                     syncDimensions()
                 }
+                verticalSpacer(3f)
                 box {
                     backgroundHandle = "black_texture"
-                    height = 1f
+                    height = 1.5f
                     relativeWidth(100f)
                 }
+                verticalSpacer(3f)
                 label("roadgeek", encounterModifier.description, fontSize = (24 * 0.6).toInt()) {
+                    touchable = Touchable.disabled
                     wrap = true
                     relativeWidth(100f)
                     syncHeight()
@@ -694,8 +698,8 @@ class EncounterScreen : ScreenCreator() {
                 image {
                     backgroundHandle = "card_symbol_marked"
                     centerX()
-                    centerY()
-                    relativeWidth(60f)
+                    onLayoutAndNow { this.y = parent.height / 2 - height / 2 + 30f }
+                    relativeWidth(40f)
                     touchable = Touchable.disabled
                     onLayoutAndNow { height = width }
                     animateRotationSinus(

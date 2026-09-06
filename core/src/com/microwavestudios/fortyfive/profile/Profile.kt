@@ -327,6 +327,12 @@ class Profile private constructor(
     override fun loseRun() {
         val runSave = runSave ?: throw RuntimeException("cant lose run if no run is active")
         endRun(runSave)
+
+        if (FortyFive.DEMO_MODE) {
+            runBoards[currentAreaMapName] = runBoards[currentAreaMapName]!!.copy(limitedRun = null)
+            val runBoard = runBoardForArea(currentAreaMap)
+            runBoard.limitedRun?.let { startRun(it) }
+        }
     }
 
     override fun winRun() {

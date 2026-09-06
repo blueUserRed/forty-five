@@ -270,6 +270,14 @@ class EncounterDebugMenuPage : DebugMenuPage("Encounter") {
         } })
     }
 
+    val die = debugButton("die", Keys.X) {
+        val screen = FortyFive.currentScreen ?: return@debugButton
+        val controller = screen.screenControllers.findInstance<GameController>() ?: return@debugButton
+        controller.appendMainTimeline(Timeline.timeline {
+            include(controller.damagePlayerTimeline(controller.curPlayerLives))
+        })
+    }
+
     val giveReserves = debugButton("give reserves", Keys.I) {
         val screen = FortyFive.currentScreen ?: return@debugButton
         val controller = screen.screenControllers.findInstance<GameController>() ?: return@debugButton
@@ -288,6 +296,7 @@ class EncounterDebugMenuPage : DebugMenuPage("Encounter") {
         $giveReserves
         $drawCards
         $defeatEnemies
+        $die
     """.trimIndent()
 
 }
