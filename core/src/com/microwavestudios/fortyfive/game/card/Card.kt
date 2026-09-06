@@ -673,7 +673,6 @@ class Card(
 
         later {
             if (!presentation.inTriggerPosition) return@later
-            println("anim back for: $situation")
             if (zone == zoneAtStart) {
                 include(presentation.animateBack(controller, prevPosition))
             } else {

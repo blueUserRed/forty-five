@@ -197,7 +197,6 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         ScreenUtils.clear(0f, 0f, 0f, 0f)
 
         batch.begin()
-        viewport.update(active.width, active.height)
         batch.projectionMatrix = viewport.camera.combined
 
         batch.shader = alphaReductionShader.shader
@@ -260,7 +259,6 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         ScreenUtils.clear(0f, 0f, 0f, 0f)
 
         batch.begin()
-        viewport.update(active.width, active.height)
         batch.projectionMatrix = viewport.camera.combined
         batch.shader = shader.shader
         shader.prepare(screen)
@@ -275,6 +273,7 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         )
         batch.flush()
         active.end()
+
         viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         batch.projectionMatrix = viewport.camera.combined
         shader.shader.setUniformf("u_dir", 0f, 1f)
@@ -416,8 +415,8 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         val viewport = screen.viewport
         menu.update()
         val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, lifetime, "redwing100")
-                font.data.setScale(0.2f)
-            val page = menu.currentPage()
+        font.data.setScale(0.2f)
+        val page = menu.currentPage()
         val pageText = page.getText(screen)
         var text = ""
         text += "* ---${page.name}---\n"
@@ -433,6 +432,7 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
             Align.topLeft,
             false
         )
+        shapeRenderer.projectionMatrix = viewport.camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         Gdx.gl.glEnable(GL20.GL_BLEND);
         shapeRenderer.setColor(0f, 0f, 0f, 0.8f)
