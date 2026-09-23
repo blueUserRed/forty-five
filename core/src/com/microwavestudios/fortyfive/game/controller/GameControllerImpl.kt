@@ -435,9 +435,10 @@ class GameControllerImpl(
     }
 
     private fun initCards() {
+        val deck = if (profile.isRunActive) profile.currentRunDeck!! else profile.currentCollectionDeck
         val cards = encounter.forceCards
             ?: encounterContext.forceCards
-            ?: profile.currentRunDeck!!.cards
+            ?: deck.cards
 
         val stack = mutableListOf<Card>()
 

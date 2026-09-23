@@ -1220,12 +1220,6 @@ shaders: [
         }
     },
     {
-        name: "film_shader",
-        file: "shaders/film.glsl",
-        constantArgs: {
-        }
-    },
-    {
         name: "postprocessor_shader",
         file: "shaders/postprocessor.glsl",
         constantArgs: {

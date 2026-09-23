@@ -1,7 +1,7 @@
 package com.microwavestudios.fortyfive.game
 
 import com.badlogic.gdx.utils.TimeUtils
-import com.microwavestudios.fortyfive.game.EncounterBehaviour.Lasso.selectAndBounceBullet
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardCostModifier
 import com.microwavestudios.fortyfive.game.card.CardDamageModifier
@@ -300,6 +300,20 @@ abstract class EncounterBehaviour {
                     addFrozen = !addFrozen
                 } }
             }
+        }
+    }
+
+    // veryyyyy specific
+    object BonusReserveIfDeckHasAtLeast25Cards : EncounterBehaviour() {
+
+        override fun modifyReserves(
+            controller: GameController,
+            reserves: Int
+        ): Int {
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile) { "EncounterBehaviour used without active profile" }
+            val deck = if (profile.isRunActive) profile.currentRunDeck!! else profile.currentCollectionDeck
+            return if (deck.cards.size >= 25) reserves + 1 else reserves
         }
     }
 
