@@ -498,17 +498,17 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     /**
-     * centers the actor on the x axies (Do not use in a box; the box handels layout itself)
+     * centers the actor on the x axes (Do not use in a box; the box handles layout itself)
      */
-    fun <T> T.centerX() where T : Actor, T : Layout, T : OnLayoutActor {
-        onLayoutAndNow { x = parent.width / 2 - width / 2 }
+    fun <T> T.centerX(offset: Float = 0f) where T : Actor, T : Layout, T : OnLayoutActor {
+        onLayoutAndNow { x = parent.width / 2 - width / 2 + offset }
     }
 
     /**
-     * centers the actor on the y axies (Do not use in a box; the box handels layout itself)
+     * centers the actor on the y axes (Do not use in a box; the box handles layout itself)
      */
-    fun <T> T.centerY() where T : Actor, T : Layout, T : OnLayoutActor {
-        onLayoutAndNow { y = parent.height / 2 - height / 2 }
+    fun <T> T.centerY(offset: Float = 0f) where T : Actor, T : Layout, T : OnLayoutActor {
+        onLayoutAndNow { y = parent.height / 2 - height / 2 + offset }
     }
 
     fun <T> T.heightByAspectRatio(ratio: Double) where T : Actor, T : Layout, T : OnLayoutActor {
@@ -527,18 +527,22 @@ abstract class ScreenCreator : ResourceBorrower {
         }
     }
 
+    fun CustomGroup.focusBackgrounds(normal: ResourceHandle, focus: ResourceHandle) {
+        backgroundHandle = normal
+        observeInputState(
+            GameInputs.States.focused,
+            { backgroundHandle = focus },
+            { backgroundHandle = normal }
+        )
+    }
+
     /**
      * adds default button backgrounds and sound effects
      *
      * Use together with [buttonBackgroundHints]
      */
     fun CustomBox.defaultButtonConfig() {
-        backgroundHandle = "common_button_default"
-        observeInputState(
-            GameInputs.States.focused,
-            { backgroundHandle = "common_button_hover" },
-            { backgroundHandle = "common_button_default" }
-        )
+        focusBackgrounds("common_button_default", "common_button_hover")
         onInput(GameInputs.interact) {
             FortyFive.soundPlayer.situation("general_button_click", screen)
         }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
@@ -45,13 +46,17 @@ class LoseRunScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.CENTER
 
-        label("red wing", "You lost!", Color.Red, 128) {
+        label("red wing", "You lost!", Color.Red, 140) {
             touchable = Touchable.disabled
-            syncDimensions()
+            relativeWidth(100f)
+            height = 180f
+            setAlignment(Align.center)
         }
-        label("roadgeek", "Press any key to continue", Color.FortyWhite, 24) {
+        label("roadgeek", "Press any key to continue", Color.FortyWhite, 30) {
             touchable = Touchable.disabled
-            syncDimensions()
+            relativeWidth(100f)
+            height = 40f
+            setAlignment(Align.center)
         }
 
         touchable = Touchable.enabled

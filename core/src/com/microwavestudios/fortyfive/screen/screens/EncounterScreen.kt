@@ -1524,12 +1524,12 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.SetupEnemies>(::setupEnemies)
         gameEvents.watchFor<GameControllerImpl.Events.PlayerLivesChanged> { event ->
             if (event.newValue >= event.oldValue) return@watchFor
-            screen.screenControllers.filterIsInstance<GameControllerImpl>().first().dispatchAnimTimeline(playerDamageTimeline())
+            screen.screenControllers.findInstance<GameControllerImpl>()!!.dispatchAnimTimeline(playerDamageTimeline())
         }
         gameEvents.watchFor<GameControllerImpl.Events.PlayPlayerDamagedEffects> { event ->
             event.animationTimeline = Timeline.timeline { parallelActions(
                 FortyFive.currentRenderPipeline!!.getScreenShakeTimeline().asAction(),
-                GraphicsConfig.damageOverlay(screen, event.controller)
+                GraphicsConfig.damageOverlay(screen).asTimeline(event.controller).asAction()
             ) }
         }
         gameEvents.watchFor<GameControllerImpl.Events.PlayShieldAnimation> { event ->

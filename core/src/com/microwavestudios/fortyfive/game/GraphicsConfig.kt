@@ -25,10 +25,10 @@ object GraphicsConfig {
         readConstants(config)
     }
 
-    fun damageOverlay(screen: RenderableScreen, controller: GameController): Timeline.TimelineAction {
+    fun damageOverlay(screen: RenderableScreen): GameAnimation {
         val overlayActor = CustomImageActor(damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
-        val anim = FadeInAndOutAnimation(
+        return FadeInAndOutAnimation(
             0f, 0f,
             overlayActor,
             screen,
@@ -37,15 +37,6 @@ object GraphicsConfig {
             damageOverlayFadeOut,
             Vector2(viewport.worldWidth, viewport.worldHeight)
         )
-        return object : Timeline.TimelineAction() {
-
-            override fun start(timeline: Timeline) {
-                super.start(timeline)
-                controller.playGameAnimation(anim)
-            }
-
-            override fun isFinished(timeline: Timeline): Boolean = anim.isFinished()
-        }
     }
 
     fun cashOrbAnimation(

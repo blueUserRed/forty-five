@@ -540,6 +540,10 @@ textures: [
         file: "blobs/events/shop/shop_items_background.png"
     },
     {
+        name: "special_event_text_background",
+        file: "blobs/events/special_event/special_event_background.png"
+    },
+    {
         name: "heal_or_max_accept",
         file: "blobs/events/heal_or_maxhp/accept.png"
     },

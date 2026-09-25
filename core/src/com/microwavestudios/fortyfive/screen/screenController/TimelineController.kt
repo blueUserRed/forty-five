@@ -16,6 +16,10 @@ class TimelineController : ScreenController() {
         mainTimeline.appendAction(timeline.asAction())
     }
 
+    fun appendMainTimeline(builder: Timeline.TimelineBuilderDSL.() -> Unit) {
+        appendMainTimeline(Timeline.timeline { builder() })
+    }
+
     fun dispatchTimeline(timeline: Timeline) {
         timeline.startTimeline()
         sideTimelines.add(timeline)

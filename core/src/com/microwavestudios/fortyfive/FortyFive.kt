@@ -11,6 +11,8 @@ import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.map.DetailMap
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventActions
 import com.microwavestudios.fortyfive.onjNamespaces.GameNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
@@ -115,6 +117,24 @@ object FortyFive : Game() {
 
     fun toMap() {
         screenManager.newBaseScreen(MapScreen)
+
+        val context = object : SpecialEventScreenContext {
+            override val specialEvent: SpecialEvent = SpecialEvent(
+                "bushOfThorns",
+                "Bush of Thorns",
+                "You find a bush of thorns with slight glow coming from inside",
+                listOf(
+                    "Reach Inside (Take 5 damage, get 1 card reward)" to listOf(
+                        SpecialEventActions.damagePlayer(5),
+                        SpecialEventActions.getRandomCard(),
+                    ),
+                    "Leave it be" to listOf(),
+                )
+            )
+        }
+
+        screenManager.appendScreen(SpecialEventScreen, context)
+
         screenManager.screenFinished()
     }
 
