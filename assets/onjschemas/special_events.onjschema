@@ -1,0 +1,13 @@
+use SpecialEvent;
+
+specialEvents: {
+    name: string,
+    title: string,
+    description: string,
+    allowedInBiomes: string[],
+    weight: int,
+    options: {
+        text: string,
+        actions: SpecialEventAction[]
+    }[]
+}[]

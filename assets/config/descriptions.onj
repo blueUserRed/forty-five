@@ -260,4 +260,9 @@ defaultTextEffects: [
         indicator:"$enemyDamageIncrease$",
         color: color.red,
     },
+
+    $Color {
+        indicator:"$specialEventAction$",
+        color: color.bright_red,
+    },
 ]

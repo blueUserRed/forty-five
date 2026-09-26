@@ -1,0 +1,73 @@
+///schema=onjschemas/special_events.onjschema
+use SpecialEvent;
+
+specialEvents: [
+    {
+        name: "bushOfThorns",
+        title: "Bush of Thorns",
+        description: "In the middle of the dessert, you find a bush growing from the sand. Long, spiky thorns completely cover the severely dehydrated plant. You think you see something inside, you think there might even be a subtle golden glow, but there is no way of reaching whatever is hiding in there while avoiding the thorns.",
+        allowedInBiomes: [ "wasteland" ],
+        weight: 10,
+        options: [
+            {
+                text: "Reach Inside $specialEventAction$[Take 5 damage, get 1 card]$specialEventAction$",
+                actions: [ damagePlayer(5), getRandomCard() ]
+            },
+            {
+                text: "Leave it be",
+                actions: []
+            }
+        ]
+    },
+    {
+        name: "bushOfThorns",
+        title: "Bush of Thorns",
+        description: "In a particularly dense portion of the forest, you find a bush growing between some trees. Long, spiky thorns completely cover the plant, which clings to one of the trees as if to choke it. You think you see something inside, you think there might even be a subtle golden glow, but there is no way of reaching whatever is hiding in there while avoiding the thorns.",
+        allowedInBiomes: [ "bewitched_forest" ],
+        weight: 10,
+        options: [
+            {
+                text: "Reach Inside $specialEventAction$[Take 5 damage, get 1 card]$specialEventAction$",
+                actions: [ damagePlayer(5), getRandomCard() ]
+            },
+            {
+                text: "Leave it be",
+                actions: []
+            }
+        ]
+    },
+    {
+        name: "mysterySpring",
+        title: "Mystery Spring",
+        description: "Between some rocks, a steady flow of water emerges. You watch as it makes its way across to stone to the ground, where it collects in a large puddle. It is so clear, you can see the ground underneath with no problem.",
+        allowedInBiomes: [ "wasteland", "bewitched_forest" ],
+        weight: 10,
+        options: [
+            {
+                text: "Drink from it $specialEventAction$[Heal 10 health]$specialEventAction$",
+                actions: [ healPlayer(10) ]
+            },
+            {
+                text: "Leave it be",
+                actions: []
+            }
+        ]
+    },
+    {
+        name: "abandonedWell",
+        title: "Abandoned Well",
+        description: "Your water reserves had already run dry a few days before, so as you spot the well, you feel some hope rising up in you. However, as you lean over it, you notice a strong chemical smell. With your tongue feeling like sandpaper in your mouth, you think about whether the risk is worth it.",
+        allowedInBiomes: [ "wasteland", "bewitched_forest" ],
+        weight: 10,
+        options: [
+            {
+                text: "Drink from it $specialEventAction$[50% chance you heal 10, 50% chance you take 10 damage]$specialEventAction$",
+                actions: [ healOrDamagePlayer(10) ]
+            },
+            {
+                text: "Throw a coin in it",
+                actions: []
+            }
+        ]
+    },
+],

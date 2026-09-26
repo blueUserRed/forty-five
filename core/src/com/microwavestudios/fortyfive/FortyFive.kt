@@ -13,8 +13,10 @@ import com.microwavestudios.fortyfive.game.card.CardTextureManager
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventActions
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventFactory
 import com.microwavestudios.fortyfive.onjNamespaces.GameNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
+import com.microwavestudios.fortyfive.onjNamespaces.SpecialEventNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
 import com.microwavestudios.fortyfive.plugin.PluginManager
@@ -117,24 +119,6 @@ object FortyFive : Game() {
 
     fun toMap() {
         screenManager.newBaseScreen(MapScreen)
-
-        val context = object : SpecialEventScreenContext {
-            override val specialEvent: SpecialEvent = SpecialEvent(
-                "bushOfThorns",
-                "Bush of Thorns",
-                "You find a bush of thorns with slight glow coming from inside",
-                listOf(
-                    "Reach Inside (Take 5 damage, get 1 card reward)" to listOf(
-                        SpecialEventActions.damagePlayer(5),
-                        SpecialEventActions.getRandomCard(),
-                    ),
-                    "Leave it be" to listOf(),
-                )
-            )
-        }
-
-        screenManager.appendScreen(SpecialEventScreen, context)
-
         screenManager.screenFinished()
     }
 
@@ -199,6 +183,7 @@ object FortyFive : Game() {
         pluginManager.init()
         pluginManager.earlyInit()
         soundPlayer.init()
+        SpecialEventFactory.init()
         GraphicsConfig.init()
     }
 
@@ -207,6 +192,7 @@ object FortyFive : Game() {
         with(OnjConfig) {
             if (getNamespace("Common") == null) registerNamespace("Common", CommonNamespace)
             if (getNamespace("Game") == null) registerNamespace("Game", GameNamespace)
+            if (getNamespace("SpecialEvent") == null) registerNamespace("SpecialEvent", SpecialEventNamespace)
         }
         initControllers()
         ConfigFileManager.init()
@@ -219,6 +205,7 @@ object FortyFive : Game() {
         pluginManager.earlyInit()
         soundPlayer.init()
         GraphicsConfig.init()
+        SpecialEventFactory.init()
         resourceManager.init()
         if (serviceThread.state == Thread.State.NEW) serviceThread.start()
         cardTextureManager.init()

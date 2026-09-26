@@ -12,6 +12,7 @@ import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventAction
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
@@ -57,6 +58,12 @@ class SpecialEventScreen : ScreenCreator() {
 
         box {
             backgroundHandle = "special_event_text_background"
+            dropShadow = BakedDropShadow(
+                "special_event_text_background",
+                screen,
+                0f, 0f,
+                1.34f, 1.34f
+            )
 
             relativeWidth(60f)
             heightByAspectRatio(1.4164)
@@ -127,6 +134,7 @@ class SpecialEventScreen : ScreenCreator() {
             actions.forEach { timelines.appendMainTimeline(it(screen, rewardScreens)) }
             timelines.appendMainTimeline {
                 action {
+                    context.onComplete()
                     FortyFive.screenManager.ensureNextScreens(rewardScreens)
                     FortyFive.screenManager.screenFinished()
                 }
@@ -145,5 +153,8 @@ class SpecialEventScreen : ScreenCreator() {
 }
 
 interface SpecialEventScreenContext {
+
     val specialEvent: SpecialEvent
+
+    fun onComplete()
 }

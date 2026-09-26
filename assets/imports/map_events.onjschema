@@ -59,6 +59,10 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
+    $SpecialEventMapEvent {
+        ...mapEventStandardConfig
+    }
+
     $ShopMapEvent {
         types: string[],
         person: string,

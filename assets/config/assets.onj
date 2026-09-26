@@ -429,6 +429,10 @@ textures: [
         file: "blobs/map/nodes/dialog.png"
     },
     {
+        name: "map_node_special_event",
+        file: "blobs/map/nodes/special_event.png"
+    },
+    {
         name: "map_player",
         file: "blobs/map/player.png"
     },
@@ -541,7 +545,8 @@ textures: [
     },
     {
         name: "special_event_text_background",
-        file: "blobs/events/special_event/special_event_background.png"
+        file: "blobs/events/special_event/special_event_background.png",
+        dropShadow: defaultDropShadowConfig,
     },
     {
         name: "heal_or_max_accept",
@@ -1312,6 +1317,12 @@ shaders: [
     {
         name: "card_spawn_shader",
         file: "shaders/card_spawn.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "heal_shader",
+        file: "shaders/heal.glsl",
         constantArgs: {
         }
     },

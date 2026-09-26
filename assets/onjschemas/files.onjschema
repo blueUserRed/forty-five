@@ -20,4 +20,5 @@ configFiles: {
     mapConfig: fileConfig,
     npcs: fileConfig,
     runGeneratorConfig: fileConfig,
+    specialEvents: fileConfig,
 },

@@ -75,13 +75,21 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
     private var popoutReferenceTime: Long = -1
     private var shakeReferenceTime: Long = -1
 
-    private val parryPostProcessingStep: (source: FrameBuffer) -> Unit = { source ->
+    private val parryPostProcessingStep: (source: FrameBuffer) -> Unit by lazy {
+        if (parryShader.isNotResolved) FortyFive.resourceManager.forceResolve(parryShader)
+        shaderPostProcessingStep(parryShader.getOrError())
+    }
+
+    init {
+//        val testShader = FortyFive.resourceManager.forceGet<BetterShader>(this, lifetime, "heal_shader")
+//        additionalPostProcessingSteps.add(shaderPostProcessingStep(testShader))
+    }
+
+    private fun shaderPostProcessingStep(shader: BetterShader): (source: FrameBuffer) -> Unit = { source ->
         val viewport = screen.viewport
-        if (this@RenderPipeline.parryShader.isNotResolved) FortyFive.resourceManager.forceResolve(this@RenderPipeline.parryShader)
-        val parryShader = this@RenderPipeline.parryShader.getOrError()
-        batch.shader = parryShader.shader
-        parryShader.prepare(screen)
-        setPostprocessorUniforms(parryShader)
+        batch.shader = shader.shader
+        shader.prepare(screen)
+        setPostprocessorUniforms(shader)
         batch.draw(
             source.colorBufferTexture,
             0f, 0f,

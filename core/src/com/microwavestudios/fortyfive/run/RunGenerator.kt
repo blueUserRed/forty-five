@@ -8,6 +8,7 @@ import com.microwavestudios.fortyfive.map.EncounterPlaceholderMapEvent
 import com.microwavestudios.fortyfive.map.MapEvent
 import com.microwavestudios.fortyfive.map.MapPredicate
 import com.microwavestudios.fortyfive.map.ShopMapEvent
+import com.microwavestudios.fortyfive.map.SpecialEventMapEvent
 import com.microwavestudios.fortyfive.map.generation.BaseMapGenerator
 import com.microwavestudios.fortyfive.map.generation.PointCloudMapGenerator
 import com.microwavestudios.fortyfive.map.generation.RadialMapGenerator
@@ -363,12 +364,22 @@ class RunGenerator {
                 2, null,
                 20
             ),
+//            BaseMapGenerator.MapGeneratorFillEvent(
+//                {
+//                    ApplyStampMapEvent(null)
+//                },
+//                4, null,
+//                5
+//            ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 {
-                    ApplyStampMapEvent(null)
+                    SpecialEventMapEvent().also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                        it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                    }
                 },
-                4, null,
-                5
+                null, null,
+                20
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 { EmptyMapEvent() },

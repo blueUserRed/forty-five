@@ -7,6 +7,8 @@ import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.game.card.StampFactory
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventFactory
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
@@ -51,6 +53,7 @@ object MapEventFactory {
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
         "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() },
+        "SpecialEventMapEvent" to { SpecialEventMapEvent.fromOnj(it) },
         "ApplyStampMapEvent" to {
             ApplyStampMapEvent(it.get<String?>("stampName"))
         }
@@ -527,6 +530,45 @@ class ChooseCardMapEvent(
             onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             onj.get<Long>("nbrOfCards").toInt(),
         ).apply { setStandardValuesFromConfig(onj) }
+    }
+}
+
+class SpecialEventMapEvent() : MapEvent() {
+
+    override var isCompleted: Boolean = false
+    override val displayName: String = "!Event"
+
+    override val displayDescription: Boolean = true
+    override val nodeTexture: ResourceHandle = "map_node_special_event"
+
+    init {
+        setDescriptionText(listOf(
+            MapPredicate.Always to "Something good, something bad, maybe a bit of both?"
+        ))
+    }
+
+    override fun start() {
+        val context = object : SpecialEventScreenContext {
+
+            override val specialEvent: SpecialEvent = SpecialEventFactory.getRandomSpecialEvent()
+
+            override fun onComplete() {
+                isCompleted = true
+            }
+        }
+        FortyFive.screenManager.appendScreen(SpecialEventScreen, context)
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("SpecialEventMapEvent")
+        includeStandardConfig()
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): SpecialEventMapEvent =
+            SpecialEventMapEvent().apply { setStandardValuesFromConfig(onj) }
     }
 }
 
