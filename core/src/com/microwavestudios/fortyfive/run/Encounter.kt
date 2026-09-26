@@ -120,7 +120,7 @@ object EncounterGenerator {
             val group = enemyGroups[enemyGroupName]
             requireNotNull(group) { "unknown enemy $enemyGroupName" }
             val neededDiff = majorDifficulty - diff
-            val result = group.entries.find { it.key <= neededDiff }
+            val result = group.variants.entries.find { it.key <= neededDiff }
                 ?: return@repeat
             val (enemyDiff, enemyName) = result
             config.add(enemyName)
@@ -129,7 +129,7 @@ object EncounterGenerator {
         if (config.isEmpty()) {
             // all enemies are too difficult
             return listOf(
-                enemyGroups[groupNames.first()]!!.minBy { it.key }.value
+                enemyGroups[groupNames.first()]!!.variants.minBy { it.key }.value
             )
         }
         return config
@@ -138,19 +138,19 @@ object EncounterGenerator {
     private fun generateConcreteSingleEnemy(
         groupNames: List<String>,
         majorDifficulty: Int,
-        enemyGroups: Map<String, Map<Int, String>>,
+        enemyGroups: Map<String, EnemyGroup>,
         random: Random
     ): List<String>? {
         val enemy = groupNames.first()
         val group = enemyGroups[enemy]
         requireNotNull(group) { "Unknown enemy $enemy" }
-        return group[majorDifficulty]?.let { listOf(it) }
+        return group.variants[majorDifficulty]?.let { listOf(it) }
     }
 
     private fun generateConcreteTwoEnemies(
         groupNames: List<String>,
         majorDifficulty: Int,
-        enemyGroups: Map<String, Map<Int, String>>,
+        enemyGroups: Map<String, EnemyGroup>,
         random: Random
     ): List<String>? {
         val firstEnemy = groupNames.first()
@@ -160,14 +160,14 @@ object EncounterGenerator {
         requireNotNull(firstEnemyGroup) { "Unknown enemy $firstEnemy" }
         requireNotNull(secondEnemyGroup) { "Unknown enemy $secondEnemy" }
 
-        val firstEnemyGroupList = firstEnemyGroup.toList()
+        val firstEnemyGroupList = firstEnemyGroup.variants.toList()
         val offset = (0..firstEnemyGroupList.size).random(random)
         firstEnemyGroupList.indices.forEach { i ->
             val offsetIndex = (i + offset) % firstEnemyGroupList.size
             val (diff, name) = firstEnemyGroupList[offsetIndex]
             val secondDiff = majorDifficulty - diff
             if (secondDiff <= 0) return@forEach
-            val secondEnemy = secondEnemyGroup[secondDiff]
+            val secondEnemy = secondEnemyGroup.variants[secondDiff]
                 ?: return@forEach
             return listOf(name, secondEnemy)
         }
@@ -177,7 +177,7 @@ object EncounterGenerator {
     private fun generateConcreteThreeEnemies(
         groupNames: List<String>,
         majorDifficulty: Int,
-        enemyGroups: Map<String, Map<Int, String>>,
+        enemyGroups: Map<String, EnemyGroup>,
         random: Random
     ): List<String>? {
         val firstEnemy = groupNames.first()
@@ -190,8 +190,8 @@ object EncounterGenerator {
         requireNotNull(secondEnemyGroup) { "Unknown enemy $secondEnemy" }
         requireNotNull(thirdEnemyGroup) { "Unknown enemy $thirdEnemy" }
 
-        val firstEnemyGroupList = firstEnemyGroup.toList()
-        val secondEnemyGroupList = firstEnemyGroup.toList()
+        val firstEnemyGroupList = firstEnemyGroup.variants.toList()
+        val secondEnemyGroupList = firstEnemyGroup.variants.toList()
         val offset = (0..firstEnemyGroupList.size).random(random)
         val secondOffset = (0..secondEnemyGroupList.size).random(random)
         firstEnemyGroupList.indices.forEach { i ->
@@ -204,7 +204,7 @@ object EncounterGenerator {
                 val (secondDiff, secondName) = secondEnemyGroupList[offsetJ]
                 val thirdDiff = majorDifficulty - (firstDiff + secondDiff)
                 if (thirdDiff <= 0) return@forEach
-                val thirdName = thirdEnemyGroup[thirdDiff]
+                val thirdName = thirdEnemyGroup.variants[thirdDiff]
                     ?: return@forEach
                 return listOf(firstName, secondName, thirdName)
             }

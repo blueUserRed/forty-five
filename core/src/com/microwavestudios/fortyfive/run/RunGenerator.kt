@@ -316,9 +316,6 @@ class RunGenerator {
                     ).also {
                         it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
                         it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
-                        it.setDescriptionText(listOf(
-                            MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
-                        ))
                     }
                 },
                 null, null,
@@ -340,9 +337,6 @@ class RunGenerator {
                     ).also {
                         it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
                         it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
-                        it.setDescriptionText(listOf(
-                            MapPredicate.CurrentNodeBlocks to "Defeat enemies to progress",
-                        ))
                     }
                 },
                 null, null,

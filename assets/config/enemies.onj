@@ -8,6 +8,7 @@ var largeNumber = 1_000_000_000;
 enemyGroups: [
     {
         groupName: "Outlaw",
+        title: "Outlaw",
         variants: [
             {
                 name: "Outlaw-1",
@@ -21,6 +22,7 @@ enemyGroups: [
     },
     {
         groupName: "Pyro",
+        title: "Pyro",
         variants: [
             {
                 name: "Pyro-1",
@@ -34,6 +36,7 @@ enemyGroups: [
     },
     {
         groupName: "Witch",
+        title: "Witch",
         variants: [
             {
                 name: "Witch-1",
@@ -47,6 +50,7 @@ enemyGroups: [
     },
     {
         groupName: "The-Fangs",
+        title: "The Fangs",
         variants: [
             {
                 name: "The-Fangs-1",
@@ -60,6 +64,7 @@ enemyGroups: [
     },
     {
         groupName: "Scarecrow",
+        title: "Scarecrow",
         variants: [
             {
                 name: "Scarecrow-1",

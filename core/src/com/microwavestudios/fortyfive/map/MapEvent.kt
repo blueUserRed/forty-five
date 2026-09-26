@@ -7,12 +7,14 @@ import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.game.card.StampFactory
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventFactory
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunBehaviour
+import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.run.RunModifier
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -255,6 +257,18 @@ class EncounterMapEvent(
         "map_node_exit"
     } else {
         null
+    }
+
+    init {
+        val enemyGroups = RunGeneratorConfig.enemyGroups
+        val enemiesString = encounter
+            .enemiesGroups
+            .mapNotNull { enemyGroups[it]?.title }
+            .joinToString(separator = ", ")
+        setDescriptionText(listOf(
+            MapPredicate.Not(MapPredicate.CurrentNodeCompleted) to "Fight enemies to progress: $enemiesString",
+            MapPredicate.CurrentNodeCompleted to "All enemies defeated"
+        ))
     }
 
     override fun start() {
