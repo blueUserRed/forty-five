@@ -38,6 +38,16 @@ object SpecialEventNamespace {
         SpecialEventActions.healOrDamagePlayer(amount.value.toInt())
     )
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun putPlayerOnRandomNode(): OnjSpecialEventAction = OnjSpecialEventAction(
+        SpecialEventActions.putPlayerOnRandomNode()
+    )
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun putPlayerOnNodeWithDistance(distance: OnjInt): OnjSpecialEventAction = OnjSpecialEventAction(
+        SpecialEventActions.putPlayerOnNodeWithDistance(distance.value.toInt())
+    )
+
 }
 
 

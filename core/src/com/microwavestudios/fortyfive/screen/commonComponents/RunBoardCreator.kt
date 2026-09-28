@@ -18,6 +18,7 @@ import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.commonComponents.RunCardCreator.getSharedRunCard
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screens.MapScreen
+import com.microwavestudios.fortyfive.screen.screens.MapScreenContext
 import com.microwavestudios.fortyfive.utils.Color
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Promise
@@ -246,7 +247,7 @@ object RunBoardCreator {
             event.result.then { startRun ->
                 if (!startRun) return@then
                 profile.startRun(run)
-                FortyFive.screenManager.appendScreen(MapScreen)
+                FortyFive.screenManager.appendScreen(MapScreen, MapScreenContext.default)
                 FortyFive.screenManager.screenFinished()
             }
         }

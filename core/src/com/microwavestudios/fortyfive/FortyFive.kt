@@ -118,7 +118,7 @@ object FortyFive : Game() {
     }
 
     fun toMap() {
-        screenManager.newBaseScreen(MapScreen)
+        screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
         screenManager.screenFinished()
     }
 

@@ -369,7 +369,7 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 
     override fun start() {
         FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)
-        FortyFive.screenManager.appendScreen(MapScreen, this)
+        FortyFive.screenManager.appendScreen(MapScreen, MapScreenContext.default)
         FortyFive.screenManager.screenFinished()
     }
 

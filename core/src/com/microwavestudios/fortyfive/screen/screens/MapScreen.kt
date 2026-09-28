@@ -55,6 +55,8 @@ class MapScreen : ScreenCreator() {
         "*" to geometricFadeTransition()
     )
 
+    private val context: MapScreenContext by lazy { context() }
+
     private val mapSaver: MapSaver by lazy {
         FortyFive.profileManager.currentProfile!!.currentMapSaver
     }
@@ -81,16 +83,15 @@ class MapScreen : ScreenCreator() {
         )
     }
 
-    private val tutorialInfoActor by lazy {
-        TutorialInfoActor(
-            "tutorial_info_actor_background",
-            2f,
-            200f,
-            screen
-        )
+    private val mapScreenController = object : ScreenController() {
+
+        override fun onActive() {
+            val teleportPlayerTo = context.teleportPlayerTo ?: return
+            mapWidget.teleportPlayer(teleportPlayerTo)
+        }
     }
 
-    override fun getScreenControllers(): List<ScreenController> = listOf()
+    override fun getScreenControllers(): List<ScreenController> = listOf(mapScreenController)
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -401,5 +402,17 @@ class MapScreen : ScreenCreator() {
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = MapScreen::class
+    }
+}
+
+interface MapScreenContext {
+
+    val teleportPlayerTo: MapNode?
+
+    companion object {
+
+        val default = object : MapScreenContext {
+            override val teleportPlayerTo: MapNode? = null
+        }
     }
 }

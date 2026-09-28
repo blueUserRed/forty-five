@@ -5,6 +5,7 @@ import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.controllers.ControllerAdapter
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -16,7 +17,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.animation.AbstractProperty
+import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.AnimationDrawable
+import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.animation.createAnimation
 import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.rendering.BetterShader
@@ -118,6 +122,8 @@ class DetailMapWidget(
 
     private var moveScreenToPoint: Vector2? = null
 
+    private var disableManualInput: Boolean = false
+
     private var pointToNode: MapNode? = null
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
@@ -138,6 +144,7 @@ class DetailMapWidget(
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (!map.scrollable) return
+            if (disableManualInput) return
             super.dragStart(event, x, y, pointer)
             dragStartPosition = Vector2(x, y)
             mapOffsetOnDragStart = mapOffset
@@ -146,6 +153,7 @@ class DetailMapWidget(
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (!map.scrollable) return
+            if (disableManualInput) return
             super.drag(event, x, y, pointer)
             val dragStartPosition = dragStartPosition ?: return
             val mapOffsetOnDragStart = mapOffsetOnDragStart ?: return
@@ -156,6 +164,7 @@ class DetailMapWidget(
 
         override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (!map.scrollable) return
+            if (disableManualInput) return
             super.dragStop(event, x, y, pointer)
             dragStartPosition = null
             mapOffsetOnDragStart = null
@@ -180,6 +189,7 @@ class DetailMapWidget(
         }
 
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
+            if (disableManualInput) return
             val screenDragged = screenDragged
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
@@ -217,6 +227,16 @@ class DetailMapWidget(
     private var countSteps: Boolean by debugMenuPage.countSteps
 
     private var ignoreLeftStick: Boolean = false
+
+    var playerIconAlpha: Float = 1f // needs to be public for the anim to access it
+    private val playerIconAlphaAnimation = PropertyAnimation(
+        this@DetailMapWidget, AbstractProperty.fromKotlin(this@DetailMapWidget::playerIconAlpha),
+        Float::class,
+        1000, Interpolation.linear, "visible",
+        states = arrayOf(AnimState("visible", 1f), AnimState("invisible", 0f)),
+    )
+
+    private val mainTimeline: Timeline = Timeline().also { it.startTimeline() }
 
     init {
         map.decorations.forEach { it.requestDrawable(screen, this) }
@@ -294,6 +314,7 @@ class DetailMapWidget(
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
+        if (!mainTimeline.isFinished) return
         if (maxStepsReached) return
         if (startButton is DisableActor && startButton.isDisabled) return
         if (playerNode.event?.canBeStarted(map)?.not() ?: true) return
@@ -356,6 +377,25 @@ class DetailMapWidget(
         else -> throw RuntimeException("unknown animated decoration: $name")
     }
 
+    fun teleportPlayer(to: MapNode) {
+        val timeline = Timeline.timeline {
+            action { disableManualInput = true }
+            includeAction(playerIconAlphaAnimation.stateAction("invisible"))
+            action {
+                movePlayerTo = to
+                finishMovement()
+            }
+            val idealPos = -scaledNodePos(to) + Vector2(width, height) / 2f
+            if (map.scrollable) {
+                action { moveScreenToPoint = idealPos }
+                delayUntil { moveScreenToPoint == null }
+            }
+            includeAction(playerIconAlphaAnimation.stateAction("visible"))
+            action { disableManualInput = false }
+        }
+        mainTimeline.appendAction(timeline.asAction())
+    }
+
     private fun goToNode(node: MapNode) {
         if (movePlayerTo != null) {
             finishMovement()
@@ -413,6 +453,7 @@ class DetailMapWidget(
         }
 
         validate()
+        mainTimeline.updateTimeline()
         updateControllerBasedScroll()
         updatePlayerMovement()
         updateScreenMovement()
@@ -434,13 +475,23 @@ class DetailMapWidget(
         drawAnimatedDecorations(batch)
         drawDirectionIndicator(batch)
         drawNodeImages(batch)
-        val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
-        val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
-        playerDrawable.getOrNull()?.draw(batch, playerX, playerY + playerHeightOffset, playerWidth, playerHeight)
+        drawPlayerIcon(batch)
         super.draw(batch, parentAlpha)
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawPlayerIcon(batch: Batch) {
+        val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
+        val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
+        batch.flush()
+        batch.enableBlending()
+        val old = batch.color.cpy()
+        batch.setColor(1f, 1f, 1f, playerIconAlpha)
+        playerDrawable.getOrNull()?.draw(batch, playerX, playerY + playerHeightOffset, playerWidth, playerHeight)
+        batch.flush()
+        batch.color = old
     }
 
     private fun updateControllerBasedScroll() {

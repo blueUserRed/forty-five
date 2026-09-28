@@ -3,12 +3,15 @@ package com.microwavestudios.fortyfive.map.events.specialevent
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.onjNamespaces.OnjSpecialEventAction
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
+import com.microwavestudios.fortyfive.screen.screens.MapScreenContext
+import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.weightedRandom
 import com.microwavestudios.fortyfive.utils.zipToFirst
@@ -26,12 +29,18 @@ data class SpecialEvent(
 )
 
 
-typealias SpecialEventAction = (screen: RenderableScreen, rewardScreens: ScreenManager.ScreenChain) -> Timeline
+typealias SpecialEventAction = (SpecialEventActionData) -> Timeline
+
+data class SpecialEventActionData(
+    val screen: RenderableScreen,
+    val nextScreens: ScreenManager.ScreenChain,
+    val mapScreenContextTransformers: MutableList<(MapScreenContext) -> MapScreenContext>
+)
 
 
 object SpecialEventActions {
 
-    fun damagePlayer(damage: Int): SpecialEventAction = { screen, _ ->
+    fun damagePlayer(damage: Int): SpecialEventAction = { (screen, _) ->
         Timeline.later {
             val pipeline = FortyFive.currentRenderPipeline
             requireNotNull(pipeline)
@@ -69,7 +78,7 @@ object SpecialEventActions {
         }
     }
 
-    fun getRandomCard(): SpecialEventAction = { _, rewardScreens ->
+    fun getRandomCard(): SpecialEventAction = { (_, nextScreens) ->
         val context = object : ChooseCardScreenContext {
             override var seed: Long = Random.nextLong() // TODO: get seed from somewhere
             override val nbrOfCards: Int = 1
@@ -85,12 +94,12 @@ object SpecialEventActions {
 
         Timeline.later {
             action {
-                rewardScreens.append(ChooseCardScreen, context)
+                nextScreens.append(ChooseCardScreen, context)
             }
         }
     }
 
-    fun healPlayer(amount: Int): SpecialEventAction = { _, _ ->
+    fun healPlayer(amount: Int): SpecialEventAction = {
         Timeline.later { // TODO: animation
             val profile = FortyFive.profileManager.currentProfile
             requireNotNull(profile)
@@ -100,15 +109,69 @@ object SpecialEventActions {
         }
     }
 
-    fun healOrDamagePlayer(amount: Int): SpecialEventAction = { screen, rewardScreens ->
+    fun healOrDamagePlayer(amount: Int): SpecialEventAction = { data ->
         Timeline.timeline {
             val action = if (Random.nextBoolean()) {
-                damagePlayer(amount)(screen, rewardScreens)
+                damagePlayer(amount)(data)
             } else {
-                healPlayer(amount)(screen, rewardScreens)
+                healPlayer(amount)(data)
             }
             include(action)
         }
+    }
+
+    fun putPlayerOnNode(node: MapNode): SpecialEventAction = { (_, _, contextTransformers) ->
+        Timeline.later {
+            contextTransformers.add { _ -> object : MapScreenContext {
+
+                override val teleportPlayerTo: MapNode = node
+            } }
+        }
+    }
+
+    fun putPlayerOnRandomNode(): SpecialEventAction = { data ->
+        Timeline.later {
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile)
+            require(profile.isRunActive)
+            val map = profile.currentMapSaver.currentMap
+            val node = map
+                .uniqueNodes
+                .filter { profile.currentMapSaver.currentNode != it }
+                .random()
+            include(putPlayerOnNode(node)(data))
+        }
+    }
+
+    fun putPlayerOnNodeWithDistance(targetDistance: Int): SpecialEventAction = { data ->
+        Timeline.later {
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile)
+            require(profile.isRunActive)
+            val currentNode = profile.currentMapSaver.currentNode
+            val node = nodeWithDistance(currentNode, targetDistance, Random)
+            include(putPlayerOnNode(node)(data))
+        }
+    }
+
+    private fun nodeWithDistance(currentNode: MapNode, targetDistance: Int, random: Random): MapNode {
+        var distance = targetDistance
+        var nextNodes = listOf(currentNode)
+        val visitedNodes = mutableSetOf<Int>()
+        visitedNodes.add(currentNode.index)
+        while (distance > 0) {
+            distance--
+            val newNodes = nextNodes
+                .flatMap { it.edgesTo }
+                .filter { it.index !in visitedNodes }
+            if (newNodes.isEmpty()) {
+                FortyFive.logger.warn("SpecialEventAction", "couldn't find node $targetDistance nodes away")
+                return nextNodes.random(random)
+            }
+            newNodes.forEach { visitedNodes.add(it.index) }
+            nextNodes = newNodes
+        }
+        return nextNodes.random(random)
     }
 
 }

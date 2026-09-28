@@ -70,4 +70,25 @@ specialEvents: [
             }
         ]
     },
+    {
+        name: "toWherever",
+        title: "3:10 to wherever",
+        description: "You come across a lonely train station in the desert. Wind chimes move in the wind, but otherwise, there is dead silence. In the distance, however, a train can be seen slowly approaching.",
+        allowedInBiomes: [ "wasteland", "bewitched_forest" ],
+        weight: 10,
+        options: [
+            {
+                text: "Board the train to the final station. $specialEventAction$[You get put onto a random node on the map]$specialEventAction$",
+                actions: [ putPlayerOnRandomNode() ]
+            },
+            {
+                text: "Board the train until the next stop. $specialEventAction$[You get put onto a random node adjacent to this node]$specialEventAction$",
+                actions: [ putPlayerOnNodeWithDistance(1) ]
+            },
+            {
+                text: "Board the train for two stops. $specialEventAction$[You get put onto a random node two spaces away from this node]$specialEventAction$",
+                actions: [ putPlayerOnNodeWithDistance(2) ]
+            }
+        ]
+    },
 ],

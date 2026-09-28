@@ -11,6 +11,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventAction
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventActionData
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -130,12 +131,19 @@ class SpecialEventScreen : ScreenCreator() {
         onInput(GameInputs.interact) {
             if (optionChosen) return@onInput
             optionChosen = true
-            val rewardScreens = ScreenManager.ScreenChain(listOf())
-            actions.forEach { timelines.appendMainTimeline(it(screen, rewardScreens)) }
+            val nextScreens = ScreenManager.ScreenChain(listOf())
+            val specialEventActionData = SpecialEventActionData(
+                screen, nextScreens, mutableListOf()
+            )
+            actions.forEach { timelines.appendMainTimeline(it(specialEventActionData)) }
             timelines.appendMainTimeline {
                 action {
+                    val mapScreenContext = specialEventActionData
+                        .mapScreenContextTransformers
+                        .fold(MapScreenContext.default) { acc, cur -> cur(acc) }
+                    nextScreens.append(MapScreen, mapScreenContext)
                     context.onComplete()
-                    FortyFive.screenManager.ensureNextScreens(rewardScreens)
+                    FortyFive.screenManager.ensureNextScreens(nextScreens)
                     FortyFive.screenManager.screenFinished()
                 }
             }
