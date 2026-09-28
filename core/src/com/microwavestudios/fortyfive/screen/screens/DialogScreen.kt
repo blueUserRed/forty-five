@@ -109,7 +109,7 @@ class DialogScreen : ScreenCreator() {
                         { backgroundHandle = "dialog_answer_option" },
                     )
                     onInput(GameInputs.interact) { currentPromise?.resolve(choice) }
-                    label("roadgeek", choice, Color.FortyWhite, (24 * 1.1).toInt()) {
+                    label("roadgeek", choice, Colors.FortyWhite, (24 * 1.1).toInt()) {
                         wrap = true
                         relativeWidth(90f)
                         syncHeight()
@@ -229,7 +229,7 @@ class DialogScreen : ScreenCreator() {
 
     private fun CustomGroup.textWidget() {
         val advTextWidget = AnimatedAdvancedTextWidget(
-            Triple("red wing", Color.FortyWhite, 16),
+            Triple("red wing", Colors.FortyWhite, 16),
             screen,
         )
         actor(advTextWidget) {

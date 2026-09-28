@@ -22,7 +22,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.ge
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.ParticleSystemScreenController
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
@@ -107,7 +107,7 @@ class TitleScreen : ScreenCreator() {
             FortyFive.globalSave.lastUsedProfile = event.newProfile?.name
         }
 
-        label("red wing", "rework stage 3", Color.Black, 32) {
+        label("red wing", "rework stage 3", Colors.Black, 32) {
             onLayoutAndNow {
                 x = worldWidth - width - 10
                 y = worldHeight - height - 10
@@ -286,7 +286,7 @@ class TitleScreen : ScreenCreator() {
         keyboardFocusable = KeyboardFocusable.LEAF
 
         if (onlyAvailableWhenProfileIsSelected) events.watchFor<SelectedProfileChanged> { event ->
-            fontColor = if (event.newProfile == null) Color.Grey else Color.Black
+            fontColor = if (event.newProfile == null) Colors.Grey else Colors.Black
         }
 
         onInput(GameInputs.interact) {

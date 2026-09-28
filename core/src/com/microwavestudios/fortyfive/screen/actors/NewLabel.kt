@@ -19,7 +19,7 @@ import com.microwavestudios.fortyfive.screen.DropShadow
 import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.screen.RenderableScreen
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.SubscribeableObserver
 import com.microwavestudios.fortyfive.utils.TemplateString
@@ -105,7 +105,7 @@ open class NewLabel(
 
     var underline: Boolean = false
 
-    var fontColor: com.badlogic.gdx.graphics.Color = Color.Black
+    var fontColor: com.badlogic.gdx.graphics.Color = Colors.Black
 
     private var reuseLayout: Boolean = false
     private var fontWasAlreadyLoaded: Boolean = false

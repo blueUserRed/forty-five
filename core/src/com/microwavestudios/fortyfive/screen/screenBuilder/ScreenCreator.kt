@@ -660,7 +660,7 @@ abstract class ScreenCreator : ResourceBorrower {
                 height = worldHeight
                 isVisible = false
             }
-            advancedText("red wing", com.microwavestudios.fortyfive.utils.Color.FortyWhite, 32) {
+            advancedText("red wing", com.microwavestudios.fortyfive.utils.Colors.FortyWhite, 32) {
                 name("tutorial_info_text")
                 horizontalTextAlign = CustomAlign.CENTER
                 centerX()

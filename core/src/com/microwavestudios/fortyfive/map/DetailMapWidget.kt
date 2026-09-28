@@ -45,7 +45,6 @@ class DetailMapWidget(
     private val screen: RenderableScreen,
     private val mapSaver: MapSaver,
     private val defaultNodeDrawableHandle: ResourceHandle,
-    private val edgeTextureHandle: ResourceHandle,
     private val playerDrawableHandle: ResourceHandle,
     private val playerWidth: Float,
     private val playerHeight: Float,
@@ -117,7 +116,7 @@ class DetailMapWidget(
             }
         }
 
-    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, edgeTextureHandle)
+    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, "white_texture")
     private val directionIndicator: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, directionIndicatorHandle)
 
     private var moveScreenToPoint: Vector2? = null

@@ -232,7 +232,7 @@ class Burning(
     continueForever: Boolean,
     val skipFirstRotation: Boolean,
 ) : RotationBasedStatusEffect(
-    GraphicsConfig.iconName("burning"),
+    "burning_icon",
     rotations,
     skipFirstRotation,
 ) {
@@ -269,7 +269,7 @@ class BurningPlayer(
     continueForever: Boolean,
     skipFirstRotation: Boolean,
 ) : RotationBasedStatusEffect(
-    GraphicsConfig.iconName("burning"),
+    "burning_icon",
     rotations,
     skipFirstRotation,
 ) {
@@ -294,11 +294,7 @@ class BurningPlayer(
     override fun equals(other: Any?): Boolean = other is BurningPlayer
 }
 
-class Poison(
-    damage: Int,
-) : StatusEffect(
-    GraphicsConfig.iconName("poison"),
-) {
+class Poison(damage: Int) : StatusEffect("poison_icon") {
 
     override val name: String = "poison"
 
@@ -357,9 +353,7 @@ class Bewitched(
     private val turns: Int,
     private val rotations: Int,
     private val skipFirstRotation: Boolean,
-) : StatusEffect(
-    GraphicsConfig.iconName("bewitched"),
-) {
+) : StatusEffect("bewitched_icon") {
 
     override val name: String = "bewitched"
 
@@ -423,11 +417,7 @@ class Bewitched(
 
 }
 
-class Shield(
-    private var shield: Int
-) : StatusEffect(
-    GraphicsConfig.iconName("shield"),
-) {
+class Shield(private var shield: Int) : StatusEffect("shield_icon") {
 
     override val name: String = "shield"
 
@@ -465,7 +455,7 @@ class Shield(
 
 }
 
-class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect("encounter_modifier_frost") {
+class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect("frozen_icon") {
 
     var shots: Int = shots
         private set
@@ -517,7 +507,7 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
 class PoisonImmunity(
     turns: Int,
     continueForever: Boolean
-) : TurnBasedStatusEffect(GraphicsConfig.iconName("burning"), turns) {
+) : TurnBasedStatusEffect("poison_immunity_icon", turns) {
 
     override val name: String = "poisonimmunity"
 
@@ -552,7 +542,7 @@ class PoisonImmunity(
     override fun toDisplayString(): String = "${statusTemplate("POISON IMMUNITY")} (${getDisplayText()})"
 }
 
-class Weak(turns: Int) : TurnBasedStatusEffect(GraphicsConfig.iconName("weak"), turns) {
+class Weak(turns: Int) : TurnBasedStatusEffect("weak_icon", turns) {
 
     override val name: String = "weak"
 
@@ -574,7 +564,7 @@ class Weak(turns: Int) : TurnBasedStatusEffect(GraphicsConfig.iconName("weak"), 
 
 }
 
-class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("bounty")) {
+class Bounty(turns: Int, reserves: Int) : StatusEffect("bounty_icon") {
 
     var turns: Int = turns
         private set
@@ -622,7 +612,7 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect(GraphicsConfig.iconName("
     override fun parameterSum(): Int = turns + reserves
 }
 
-class HeatRepellent : PassiveEnemyAction("encounter_modifier_frost") {
+class HeatRepellent : PassiveEnemyAction("heat_repellent_icon") {
 
     override val name: String = "heatrepellent"
 
@@ -649,7 +639,7 @@ class HeatRepellent : PassiveEnemyAction("encounter_modifier_frost") {
     override fun equals(other: Any?): Boolean = other is HeatRepellent
 }
 
-class WardOfTheWitch : PassiveEnemyAction("encounter_modifier_frost") {
+class WardOfTheWitch : PassiveEnemyAction("ward_of_the_witch_icon") {
 
     override val name: String = "wardofthewitch"
 
@@ -670,7 +660,7 @@ class Ominous(
     damage: Int,
     turns: Int,
     continueForever: Boolean
-) : TurnBasedStatusEffect("encounter_modifier_frost", turns) {
+) : TurnBasedStatusEffect("ominous_icon", turns) {
 
     override val name: String = "ominous"
 
@@ -728,7 +718,7 @@ class Ominous(
 
 }
 
-class DeterringAura : PassiveEnemyAction("encounter_modifier_frost") {
+class DeterringAura : PassiveEnemyAction("deterring_aura_icon") {
 
     override val name: String = "deterringaura"
 

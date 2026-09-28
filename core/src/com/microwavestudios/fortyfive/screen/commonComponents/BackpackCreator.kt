@@ -20,7 +20,7 @@ import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.pluralS
@@ -313,7 +313,7 @@ object BackpackCreator {
                 relativeWidth(100f)
                 syncHeight()
 
-                label("red wing", "Backpack", Color.White, 32) {
+                label("red wing", "Backpack", Colors.White, 32) {
                     width = 200f
                     syncHeight()
                 }
@@ -328,12 +328,12 @@ object BackpackCreator {
                     paddingLeft = 10f
                     paddingRight = 10f
 
-                    label("red wing", "Sort by: ", Color.FortyWhite, 28) {
+                    label("red wing", "Sort by: ", Colors.FortyWhite, 28) {
                         syncHeight()
                         syncWidth()
                     }
 
-                    label("red wing", state.sortingMode.displayName, Color.Red, 28) {
+                    label("red wing", state.sortingMode.displayName, Colors.Red, 28) {
                         syncHeight()
                         syncWidth()
                         val modes = SortingMode.entries
@@ -590,7 +590,7 @@ object BackpackCreator {
             val (_, actor) = with(parent) {
                 val stacked = amount != 1
                 val result = cardActorOrEmptySlot(cardName, cardSize, isBackpack, num, stacked, state, creator)
-                if (stacked) label("roadgeek", amount.toString(), Color.Black, 20) {
+                if (stacked) label("roadgeek", amount.toString(), Colors.Black, 20) {
                     badTexture("backpack number label", comment = "The designers can figure out how to make it look good")
                     syncDimensions()
                     positionType = PositionType.ABSOLUTE
@@ -674,7 +674,7 @@ object BackpackCreator {
             label(
                 "red wing",
                 if (state.functionsAsCollection) "Collection" else "Backpack",
-                Color.White,
+                Colors.White,
                 fontSize = 32
             ) {
                 width = 200f

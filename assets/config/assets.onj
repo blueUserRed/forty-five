@@ -10,20 +10,20 @@ fonts: [
             {
                 size: 200,
                 resourceHandle: "redwing200",
-                fontFile: "blobs/fonts2/redwing200.fnt",
-                imageFile: "blobs/fonts2/redwing200.png",
+                fontFile: "blobs/fonts/redwing200.fnt",
+                imageFile: "blobs/fonts/redwing200.png",
             },
             {
                 size: 100,
                 resourceHandle: "redwing100",
-                fontFile: "blobs/fonts2/redwing100.fnt",
-                imageFile: "blobs/fonts2/redwing100.png",
+                fontFile: "blobs/fonts/redwing100.fnt",
+                imageFile: "blobs/fonts/redwing100.png",
             },
             {
                 size: 60,
                 resourceHandle: "redwing60",
-                fontFile: "blobs/fonts2/redwing60.fnt",
-                imageFile: "blobs/fonts2/redwing60.png",
+                fontFile: "blobs/fonts/redwing60.fnt",
+                imageFile: "blobs/fonts/redwing60.png",
             }
         ]
     },
@@ -33,73 +33,24 @@ fonts: [
             {
                 size: 200,
                 resourceHandle: "roadgeek200",
-                fontFile: "blobs/fonts2/roadgeek200.fnt",
-                imageFile: "blobs/fonts2/roadgeek200.png"
+                fontFile: "blobs/fonts/roadgeek200.fnt",
+                imageFile: "blobs/fonts/roadgeek200.png"
             },
             {
                 size: 100,
                 resourceHandle: "roadgeek100",
-                fontFile: "blobs/fonts2/roadgeek100.fnt",
-                imageFile: "blobs/fonts2/roadgeek100.png"
+                fontFile: "blobs/fonts/roadgeek100.fnt",
+                imageFile: "blobs/fonts/roadgeek100.png"
             },
             {
                 size: 60,
                 resourceHandle: "roadgeek60",
-                fontFile: "blobs/fonts2/roadgeek60.fnt",
-                imageFile: "blobs/fonts2/roadgeek60.png"
+                fontFile: "blobs/fonts/roadgeek60.fnt",
+                imageFile: "blobs/fonts/roadgeek60.png"
             }
         ]
     },
 ],
-
-/*
-fonts: [
-
-    {
-        name: "red_wing",
-        fontFile: "blobs/fonts/red_wing_df.fnt",
-        imageFile: "blobs/fonts/red_wing_df.png",
-        stayLoaded: true,
-    },
-    {
-        name: "red_wing_cm",
-        fontFile: "blobs/fonts/red_wing_df.fnt",
-        imageFile: "blobs/fonts/red_wing_df.png",
-        markupEnabled: true
-    },
-    {
-        name: "red_wing_bmp",
-        fontFile: "blobs/fonts/red_wing_bmp.fnt",
-        imageFile: "blobs/fonts/red_wing_bmp.png",
-        stayLoaded: true,
-    },
-    {
-        name: "red_wing_bmp_cm",
-        fontFile: "blobs/fonts/red_wing_bmp.fnt",
-        imageFile: "blobs/fonts/red_wing_bmp.png",
-        markupEnabled: true
-    },
-    {
-        name: "roadgeek",
-        fontFile: "blobs/fonts/roadgeek_df.fnt",
-        imageFile: "blobs/fonts/roadgeek_df.png",
-        stayLoaded: true,
-    },
-    {
-        name: "roadgeek_cm",
-        fontFile: "blobs/fonts/roadgeek_df.fnt",
-        imageFile: "blobs/fonts/roadgeek_df.png",
-        markupEnabled: true
-    },
-    {
-        name: "roadgeek_bmp",
-        fontFile: "blobs/fonts/roadgeek_bmp.fnt",
-        imageFile: "blobs/fonts/roadgeek_bmp.png",
-        stayLoaded: true,
-    },
-
-],
-*/
 
 pixmapFonts: [
     {
@@ -244,24 +195,52 @@ textures: [
         file: "blobs/game_screen/afterlife/afterlife_icon.png"
     },
     {
-        name: "burning_icon",
-        file: "blobs/status_effects/burning_icon.png",
-    },
-    {
         name: "shield_icon",
-        file: "blobs/status_effects/shield_icon.png",
+        file: "blobs/icons/shield.png",
     },
     {
         name: "poison_icon",
-        file: "blobs/status_effects/poison_icon.png",
+        file: "blobs/icons/poison.png",
+    },
+    {
+        name: "poison_immunity_icon",
+        file: "blobs/icons/poison_immunity.png",
+    },
+    {
+        name: "burning_icon",
+        file: "blobs/icons/burning.png",
     },
     {
         name: "bewitched_icon",
-        file: "blobs/status_effects/bewitched_icon.png",
+        file: "blobs/icons/bewitched.png",
     },
     {
-        name: "draw_bullet",
-        file: "blobs/game_screen/draw_bullet.png"
+        name: "frozen_icon",
+        file: "blobs/icons/frozen.png",
+    },
+    {
+        name: "weak_icon",
+        file: "blobs/icons/weak.png",
+    },
+    {
+        name: "bounty_icon",
+        file: "blobs/icons/bounty.png",
+    },
+    {
+        name: "heat_repellent_icon",
+        file: "blobs/icons/heat_repellent.png",
+    },
+    {
+        name: "ward_of_the_witch_icon",
+        file: "blobs/icons/ward_of_the_witch.png",
+    },
+    {
+        name: "ominous_icon",
+        file: "blobs/icons/ominous.png",
+    },
+    {
+        name: "deterring_aura_icon",
+        file: "blobs/icons/ominous.png",
     },
     {
         name: "player_bar",
@@ -391,10 +370,6 @@ textures: [
     {
         name: "map_background_magenta_mountains_tileable",
         file: "blobs/map/backgrounds/magenta_mountains.png",
-    },
-    {
-        name: "map_path",
-        file: "blobs/map/path.png"
     },
     {
         name: "map_node_default",
@@ -922,10 +897,6 @@ textures: [
         file: "blobs/cards/detail_widget/detailwidget_small.png"
     },
     {
-        name: "detail_widget_more_info",
-        file: "blobs/cards/detail_widget/detailwidget_more_info.png"
-    },
-    {
         name: "loose_screen_background",
         file: "blobs/loose_screen/background.png"
     },
@@ -944,14 +915,6 @@ textures: [
     {
         name: "stats_screen_lost_cards_background",
         file: "blobs/stats_screen/lost_cards_background.png"
-    },
-    {
-        name: "card_symbol_saved",
-        file: "blobs/cards/symbols/saved.png"
-    },
-    {
-        name: "card_symbol_not_saved",
-        file: "blobs/cards/symbols/not_saved.png"
     },
     {
         name: "card_symbol_marked",
@@ -976,10 +939,6 @@ textures: [
     {
         name: "map_extraction_background",
         file: "blobs/map/extraction/background.png"
-    },
-    {
-        name: "map_extraction_symbol",
-        file: "blobs/map/extraction/symbol.png"
     },
     {
         name: "map_extraction_card_background_blue",
@@ -1392,24 +1351,6 @@ ninepatches: [
         left: 3,
         right: 3,
         scale: 2.0
-    },
-    {
-        name: "forty_white_rounded",
-        file: "blobs/ninepatches/forty_white_rounded.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.0025
-    },
-    {
-        name: "taupe_gray_rounded",
-        file: "blobs/ninepatches/taupe_gray_rounded.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.0025
     },
     {
         name: "backpack_scrollbar_background",

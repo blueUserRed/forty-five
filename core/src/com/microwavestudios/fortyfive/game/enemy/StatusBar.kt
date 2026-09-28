@@ -18,7 +18,7 @@ import com.microwavestudios.fortyfive.game.widgets.textEffectEmitter
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Vector2
 import com.microwavestudios.fortyfive.utils.component1
@@ -41,7 +41,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
 
     private val roadgeek: BitmapFont = resourceManager.forceGet(this, screen.lifetime, "roadgeek60")
 
-    private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Color.FortyWhite, 100f, Align.center, false)
+    private val hpGlyphLayout: GlyphLayout = GlyphLayout(roadgeek, "", Colors.FortyWhite, 100f, Align.center, false)
 
     private val polygonBatch: PolygonSpriteBatch = PolygonSpriteBatch()
 
@@ -142,7 +142,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
             val layout = hpGlyphLayout
             roadgeek.data.setScale(0.2f)
             val text = effect.getDisplayText()
-            layout.setText(roadgeek, text, Color.White, 0f, Align.left, false)
+            layout.setText(roadgeek, text, Colors.White, 0f, Align.left, false)
             roadgeek.draw(batch, layout, x + iconWidth + 6f, y + 6f + layout.height)
             x += boxWidth + 3f
             if (i % 3 == 0) {
@@ -161,7 +161,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         val layout = hpGlyphLayout
         roadgeek.data.setScale(0.35f)
         val text = enemy.currentCover.toString()
-        layout.setText(roadgeek, text, Color.Black, 100f, Align.center, false)
+        layout.setText(roadgeek, text, Colors.Black, 100f, Align.center, false)
         val labelX = barX - shieldWidthDiff / 2 - 50f + 5f
         val labelY = barY + barHeight / 2 - layout.height / 2 + 13f
         // TODO: fix alignment
@@ -175,7 +175,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         val layout = hpGlyphLayout
         roadgeek.data.setScale(0.24f)
         val text = "${enemy.currentHealth}/${enemy.health}"
-        layout.setText(roadgeek, text, Color.FortyWhite, labelWidth, Align.center, false)
+        layout.setText(roadgeek, text, Colors.FortyWhite, labelWidth, Align.center, false)
         val labelX = barX + barWidth - labelWidth + 15f
         val labelY = barY - 5f
         background.draw(batch, labelX, labelY, labelWidth, labelHeight)

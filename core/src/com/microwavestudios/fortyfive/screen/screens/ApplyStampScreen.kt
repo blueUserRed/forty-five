@@ -29,7 +29,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator.ba
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.alpha
@@ -131,13 +131,13 @@ class ApplyStampScreen : ScreenCreator() {
                     backgroundHandle = stamp.icon
                 }
                 horizontalSpacer(40f)
-                label("red wing", stamp.title, Color.Magenta, 60) {
+                label("red wing", stamp.title, Colors.Magenta, 60) {
                     touchable = Touchable.disabled
                     syncDimensions()
                 }
             }
 
-            label("red wing", "Choose card to apply stamp to", Color.FortyWhite, 35) {
+            label("red wing", "Choose card to apply stamp to", Colors.FortyWhite, 35) {
                 syncDimensions()
             }
 

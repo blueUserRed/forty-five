@@ -19,7 +19,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.RunCardCreator.get
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screens.MapScreen
 import com.microwavestudios.fortyfive.screen.screens.MapScreenContext
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -117,10 +117,10 @@ object RunBoardCreator {
 
             backgroundHandle = "map_extraction_background"
 
-            label("red wing", "Start run?", Color.FortyWhite, (32 * 1.3).toInt()) {
+            label("red wing", "Start run?", Colors.FortyWhite, (32 * 1.3).toInt()) {
                 setAlignment(Align.center)
             }
-            bodyLabel = label("roadgeek", "", Color.FortyWhite, (28 * 0.8).toInt()) {
+            bodyLabel = label("roadgeek", "", Colors.FortyWhite, (28 * 0.8).toInt()) {
                 setAlignment(Align.center)
             }
 
@@ -141,7 +141,7 @@ object RunBoardCreator {
                     joinGroup(buttonGroup)
                     defaultButtonConfig()
 
-                    label("red wing", "Cancel", Color.FortyWhite, 32) {
+                    label("red wing", "Cancel", Colors.FortyWhite, 32) {
                         touchable = Touchable.disabled
                         syncDimensions()
                     }
@@ -160,7 +160,7 @@ object RunBoardCreator {
                     joinGroup(buttonGroup)
                     defaultButtonConfig()
 
-                    label("red wing", "Start", Color.FortyWhite, 32) {
+                    label("red wing", "Start", Colors.FortyWhite, 32) {
                         touchable = Touchable.disabled
                         syncDimensions()
                     }

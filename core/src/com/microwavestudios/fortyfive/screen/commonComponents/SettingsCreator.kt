@@ -13,7 +13,7 @@ import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.plugin.ManagedPlugin
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 
@@ -164,7 +164,7 @@ object SettingsCreator {
                     controller(creator, events, 200f, controller)
                     horizontalSpacer(30f)
                 }
-                if (controllers.isEmpty) label("red wing", "No Controllers connected", Color.FortyWhite, 22) {
+                if (controllers.isEmpty) label("red wing", "No Controllers connected", Colors.FortyWhite, 22) {
                     width = parentWidth - 30f
                     setAlignment(Align.center)
                     syncHeight()
@@ -228,7 +228,7 @@ object SettingsCreator {
             }
             verticalSpacer(10f)
 
-            label("red wing", controller.name, Color.FortyWhite, 22) {
+            label("red wing", controller.name, Colors.FortyWhite, 22) {
                 touchable = Touchable.disabled
                 width = size * 0.9f
                 wrap = true
@@ -257,7 +257,7 @@ object SettingsCreator {
                 clearChildren()
                 if (needsRestart) {
                     showsNeedRestart = true
-                    label("red wing", "Restart required", Color.HemoglobinRed, 23) {
+                    label("red wing", "Restart required", Colors.HemoglobinRed, 23) {
                         syncDimensions()
                         setAlignment(Align.center)
                     }
@@ -297,7 +297,7 @@ object SettingsCreator {
                 }
                 if (plugins.isEmpty()) {
                     verticalSpacer(10f)
-                    label("red wing", "No plugins found", Color.FortyWhite, 25) {
+                    label("red wing", "No plugins found", Colors.FortyWhite, 25) {
                         syncHeight()
                         width = parentWidth
                         setAlignment(Align.center)
@@ -359,7 +359,7 @@ object SettingsCreator {
                 horizontalAlign = CustomAlign.SPACE_AROUND
                 verticalAlign = CustomAlign.CENTER
                 if (plugin.isRisky) {
-                    label("red wing", "Contains executable\ncode!", color = Color.Red, fontSize = 24) {
+                    label("red wing", "Contains executable\ncode!", color = Colors.Red, fontSize = 24) {
                         relativeWidth(100f)
                         syncHeight()
                         setAlignment(Align.center)
@@ -373,7 +373,7 @@ object SettingsCreator {
                         height = 50f
                         horizontalAlign = CustomAlign.CENTER
                         verticalAlign = CustomAlign.CENTER
-                        label("red wing", "View Risk", Color.FortyWhite, 22) {
+                        label("red wing", "View Risk", Colors.FortyWhite, 22) {
                             touchable = Touchable.disabled
                             syncDimensions()
                         }
@@ -407,7 +407,7 @@ object SettingsCreator {
                         events.fire(SettingChanged)
                         restartLabel.isVisible = !bindTarget.inSync
                     }
-                    selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite, callback) {
+                    selector("redwing100", bindTarget, 0.32f * 0.8f, Colors.FortyWhite, callback) {
                         height = 50f
                         width = 250f
                         joinGroup(settingsGroup)
@@ -416,7 +416,7 @@ object SettingsCreator {
                         onInput(GameInputs.switchSelectorToLeft) { switch(-1) }
                         onInput(GameInputs.switchSelectorToRight) { switch(1) }
                     }
-                    restartLabel = label("red wing", "Restart required", Color.HemoglobinRed, 22) {
+                    restartLabel = label("red wing", "Restart required", Colors.HemoglobinRed, 22) {
                         isVisible = false
                         syncDimensions()
                     }
@@ -476,7 +476,7 @@ object SettingsCreator {
                 width = 250f
                 height = parent.height
                 val callback = { events.fire(SettingChanged) }
-                selector = selector("redwing100", bindTarget, 0.32f * 0.8f, Color.FortyWhite, callback) {
+                selector = selector("redwing100", bindTarget, 0.32f * 0.8f, Colors.FortyWhite, callback) {
                     height = parent.height
                     width = 240f
                 }

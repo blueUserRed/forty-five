@@ -22,7 +22,7 @@ import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import kotlin.reflect.KClass
 
@@ -77,7 +77,7 @@ class SpecialEventScreen : ScreenCreator() {
 
             verticalSpacer(40f)
 
-            label("red wing", event.title, Color.FortyWhite, 60) {
+            label("red wing", event.title, Colors.FortyWhite, 60) {
                 relativeWidth(100f)
                 height = 60f
                 setAlignment(Align.center)
@@ -85,7 +85,7 @@ class SpecialEventScreen : ScreenCreator() {
 
             verticalSpacer(50f)
 
-            advancedText("roadgeek", Color.Black, 30) {
+            advancedText("roadgeek", Colors.Black, 30) {
                 relativeWidth(80f)
                 syncHeight()
                 setRawText(event.description, DetailDescriptionHandler.allTextEffects)
@@ -93,7 +93,7 @@ class SpecialEventScreen : ScreenCreator() {
 
             verticalSpacer(60f)
 
-            label("roadgeek", "What do you want to do:", Color.Black, 30) {
+            label("roadgeek", "What do you want to do:", Colors.Black, 30) {
                 relativeWidth(80f)
                 syncHeight()
             }
@@ -118,7 +118,7 @@ class SpecialEventScreen : ScreenCreator() {
         paddingBottom = 10f
         paddingLeft = 10f
 
-        advancedText("roadgeek", Color.Black, 24) {
+        advancedText("roadgeek", Colors.Black, 24) {
             relativeWidth(100f)
             setRawText(text, DetailDescriptionHandler.allTextEffects)
             syncHeight()

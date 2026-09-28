@@ -1,17 +1,6 @@
 ///schema=onjschemas/graphics_config.onjschema
 import "imports/colors.onj" as color;
 
-icons: {
-    burning: "burning_icon",
-    poison: "poison_icon",
-    fireResistance: "burning_icon",
-    bewitched: "bewitched_icon",
-    shield: "shield_icon",
-    frozen: "encounter_modifier_frost",
-    weak: "burning_icon",
-    bounty: "burning_icon"
-},
-
 encounterModifiers: {
     rain: {
         icon: "encounter_modifier_rain",

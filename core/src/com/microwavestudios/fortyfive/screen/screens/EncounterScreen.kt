@@ -604,7 +604,7 @@ class EncounterScreen : ScreenCreator() {
             }
         }
 
-        label("red wing", "Select cards to put under the deck", Color.White, 32) {
+        label("red wing", "Select cards to put under the deck", Colors.White, 32) {
             syncDimensions()
             onLayoutAndNow { y = underDeck.y + underDeck.height - height - 40f }
             centerX()
@@ -749,7 +749,7 @@ class EncounterScreen : ScreenCreator() {
                 backgroundHandle = "wood_box"
                 touchable = Touchable.disabled
                 var curText: String? = text()
-                val label = advancedText("roadgeek", Color.FortyWhite, 23) {
+                val label = advancedText("roadgeek", Colors.FortyWhite, 23) {
                     relativeHeight(58f)
                     setRawText(curText ?: "", DetailDescriptionHandler.allTextEffects)
                     centerX()
@@ -831,13 +831,13 @@ class EncounterScreen : ScreenCreator() {
             action.alpha = if (event.inParryMenu) 1f else 0f
             addAction(action)
         }
-        label("red wing", "Parry?", Color.BrightYellow, (32 * 1.4).toInt()) {
+        label("red wing", "Parry?", Colors.BrightYellow, (32 * 1.4).toInt()) {
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
         }
         verticalSpacer(20f)
-        label("roadgeek", "", Color.GRAY, 24) {
+        label("roadgeek", "", Colors.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
                 setText(event.texts.first)
             }
@@ -846,7 +846,7 @@ class EncounterScreen : ScreenCreator() {
             syncHeight()
         }
         verticalSpacer(20f)
-        label("roadgeek", "", Color.GRAY, 24) {
+        label("roadgeek", "", Colors.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
                 setText(event.texts.second)
             }
@@ -889,7 +889,7 @@ class EncounterScreen : ScreenCreator() {
                 animateInOut(true)
             }
         }
-        label("red wing", "", Color.BrightYellow, 32) {
+        label("red wing", "", Colors.BrightYellow, 32) {
             setAlignment(Align.center)
             relativeWidth(100f)
             syncHeight()
@@ -924,7 +924,7 @@ class EncounterScreen : ScreenCreator() {
             syncDimensions()
         }
 
-        label("red wing", "10", Color.Red, 90) {
+        label("red wing", "10", Colors.Red, 90) {
             centerX()
             y = 210f
             width = 50f
@@ -963,7 +963,7 @@ class EncounterScreen : ScreenCreator() {
                 y = 90f
             }
 
-            label("red wing", "0/0", Color.White, (32 * 1.1).toInt()) {
+            label("red wing", "0/0", Colors.White, (32 * 1.1).toInt()) {
                 centerX()
                 centerY()
                 gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
@@ -993,7 +993,7 @@ class EncounterScreen : ScreenCreator() {
                 y = 90f
             }
 
-            label("red wing", "", Color.White, (32 * 1.1).toInt()) {
+            label("red wing", "", Colors.White, (32 * 1.1).toInt()) {
                 gameEvents.watchFor<UpdateUiEvent> { (controller) ->
                     setText(controller.cardStack.size().toString())
                 }
@@ -1280,7 +1280,7 @@ class EncounterScreen : ScreenCreator() {
                 horizontalAlign = CustomAlign.CENTER
                 relativeWidth(100f)
                 // TODO: randomize text
-                label("red wing", "You survived", Color.FortyWhite, (128 * 0.5).toInt()) {
+                label("red wing", "You survived", Colors.FortyWhite, (128 * 0.5).toInt()) {
                     setAlignment(Align.center)
                     marginTop = 150f
                     syncDimensions()
@@ -1307,7 +1307,7 @@ class EncounterScreen : ScreenCreator() {
                         gotCash = money > 0
                     }
 
-                    label("red wing", "", Color.FortyWhite, 32) {
+                    label("red wing", "", Colors.FortyWhite, 32) {
                         syncDimensions()
                         gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, money, _) ->
                             setText("You get \$$money overkill cash")
@@ -1335,7 +1335,7 @@ class EncounterScreen : ScreenCreator() {
                         isVisible = gotCard
                     }
 
-                    label("red wing", "You get a card", Color.FortyWhite, 32)
+                    label("red wing", "You get a card", Colors.FortyWhite, 32)
                 }
             }
 
@@ -1353,7 +1353,7 @@ class EncounterScreen : ScreenCreator() {
                     { backgroundHandle = "common_button_hover" },
                     { backgroundHandle = "common_button_default" }
                 )
-                label("red wing", "Claim & Continue", Color.FortyWhite, (32 * 0.7).toInt()) {
+                label("red wing", "Claim & Continue", Colors.FortyWhite, (32 * 0.7).toInt()) {
                     setAlignment(Align.center)
                 }
                 marginBottom = 120f

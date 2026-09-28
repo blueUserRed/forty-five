@@ -1,6 +1,6 @@
 package com.microwavestudios.fortyfive.screen.screens
 
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.utils.Align
@@ -106,7 +106,7 @@ class CreditsScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.END
 
-            backToTitleScreen = label("roadgeek", "Press enter to end credits", Color.Red, (28 * 1.2).toInt()) {
+            backToTitleScreen = label("roadgeek", "Press enter to end credits", Colors.Red, (28 * 1.2).toInt()) {
                 backgroundHandle = "transparent_black_texture"
                 setAlignment(Align.center)
                 alpha = 0f
@@ -191,7 +191,7 @@ class CreditsScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.SPACE_AROUND
 
-        label("red wing", name, Color.Red, (128 * 0.7).toInt()) {
+        label("red wing", name, Colors.Red, (128 * 0.7).toInt()) {
             relativeWidth(45f)
             setAlignment(Align.right)
         }
@@ -199,7 +199,7 @@ class CreditsScreen : ScreenCreator() {
         box {
             relativeWidth(45f)
             flexDirection = FlexDirection.COLUMN
-            titles.forEach { title -> label("roadgeek", title, Color.FortyWhite, (28 * 1.3).toInt()) {
+            titles.forEach { title -> label("roadgeek", title, Colors.FortyWhite, (28 * 1.3).toInt()) {
                 syncHeight()
             } }
             syncHeight()
@@ -211,14 +211,14 @@ class CreditsScreen : ScreenCreator() {
         syncHeight()
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.CENTER
-        label("red wing", header, Color.Red, (128 * 0.45).toInt()) {
+        label("red wing", header, Colors.Red, (128 * 0.45).toInt()) {
             relativeWidth(100f)
             setAlignment(Align.center)
             syncHeight()
         }
         verticalSpacer(30f)
         subHeader?.let { subHeader ->
-            label("roadgeek", subHeader, Color.Red, (28 * 1.3).toInt()) {
+            label("roadgeek", subHeader, Colors.Red, (28 * 1.3).toInt()) {
                 relativeWidth(100f)
                 wrap = true
                 setAlignment(Align.center)
@@ -226,7 +226,7 @@ class CreditsScreen : ScreenCreator() {
             }
             verticalSpacer(30f)
         }
-        label("roadgeek", text, Color.FortyWhite, (28 * 1.3).toInt()) {
+        label("roadgeek", text, Colors.FortyWhite, (28 * 1.3).toInt()) {
             relativeWidth(100f)
             wrap = true
             setAlignment(Align.center)
@@ -239,7 +239,7 @@ class CreditsScreen : ScreenCreator() {
         syncHeight()
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.CENTER
-        label("red wing", "developed by", Color.FortyWhite, (128 * 0.4).toInt()) {
+        label("red wing", "developed by", Colors.FortyWhite, (128 * 0.4).toInt()) {
             relativeWidth(100f)
             setAlignment(Align.center)
             syncHeight()
@@ -251,7 +251,7 @@ class CreditsScreen : ScreenCreator() {
             onLayoutAndNow { height = width * (528f / 2030f) }
         }
         verticalSpacer(90f)
-        label("red wing", "Thank you for playing!", Color.FortyWhite, (128 * 0.5).toInt()) {
+        label("red wing", "Thank you for playing!", Colors.FortyWhite, (128 * 0.5).toInt()) {
             relativeWidth(100f)
             setAlignment(Align.center)
             syncHeight()

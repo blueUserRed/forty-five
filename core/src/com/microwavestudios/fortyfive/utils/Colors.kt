@@ -3,7 +3,7 @@ package com.microwavestudios.fortyfive.utils
 import com.badlogic.gdx.graphics.Color
 import kotlin.reflect.KProperty
 
-object Color : Color() {
+object Colors : Color() {
     // regex to replace from colors.onj
     // (\w+): color\(\"(.{6})\"\),
     // val $1 = Color(0x$2ff)

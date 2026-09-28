@@ -9,7 +9,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent.Warning
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.epsilonEquals
 import com.microwavestudios.fortyfive.utils.minMagnitude
@@ -25,9 +25,9 @@ interface IWarningParent {
     fun warning(text: String, level: Level): IWarning
 
     enum class Level(val symbol: String, val background: String, val fontColor: com.badlogic.gdx.graphics.Color) {
-        INFO("i", "warning_label_background_grey", Color.Black),
-        MID("!", "warning_label_background_red", Color.FortyWhite),
-        HIGH("!!!", "warning_label_background_red", Color.FortyWhite),
+        INFO("i", "warning_label_background_grey", Colors.Black),
+        MID("!", "warning_label_background_red", Colors.FortyWhite),
+        HIGH("!!!", "warning_label_background_red", Colors.FortyWhite),
     }
 
     interface IWarning {

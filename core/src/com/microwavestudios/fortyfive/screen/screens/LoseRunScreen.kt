@@ -15,7 +15,7 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import kotlin.reflect.KClass
 
 class LoseRunScreen : ScreenCreator() {
@@ -46,13 +46,13 @@ class LoseRunScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.CENTER
 
-        label("red wing", "You lost!", Color.Red, 140) {
+        label("red wing", "You lost!", Colors.Red, 140) {
             touchable = Touchable.disabled
             relativeWidth(100f)
             height = 180f
             setAlignment(Align.center)
         }
-        label("roadgeek", "Press any key to continue", Color.FortyWhite, 30) {
+        label("roadgeek", "Press any key to continue", Colors.FortyWhite, 30) {
             touchable = Touchable.disabled
             relativeWidth(100f)
             height = 40f

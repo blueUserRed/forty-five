@@ -58,8 +58,6 @@ object GraphicsConfig {
         velocityRamp = 1.2f
     )
 
-    fun iconName(name: String): String = iconConfig[name]!!
-
     fun encounterModifierDisplayName(modifier: EncounterModifier): String {
         val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
         val config = encounterModifierConfig.getOr<OnjObject?>(name, null)
@@ -114,11 +112,6 @@ object GraphicsConfig {
 
     private fun readConstants(config: OnjObject) {
 
-        iconConfig = config
-            .get<OnjObject>("icons")
-            .value
-            .mapValues { it.value.value as String }
-
         val damageOverlay = config.get<OnjObject>("damageOverlay")
 
         damageOverlayTexture = damageOverlay.get<String>("overlay")
@@ -149,8 +142,6 @@ object GraphicsConfig {
     private var cardFont by Delegates.notNull<String>()
     private var cardFontScale by Delegates.notNull<Float>()
     private lateinit var cardFontColors: Map<String, Color>
-
-    private lateinit var iconConfig: Map<String, String>
 
     private lateinit var damageOverlayTexture: String
     private var damageOverlayDuration by Delegates.notNull<Int>()

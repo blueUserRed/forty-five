@@ -337,7 +337,7 @@ class RevolverSlot(
     private var selectionPromise: Promise<IRevolverSlot>? = null
 
     private val selectableDropShadow = SquareDropShadow(
-        Color.BrightYellow,
+        Colors.BrightYellow,
         0f, 0f,
         1.1f
     )

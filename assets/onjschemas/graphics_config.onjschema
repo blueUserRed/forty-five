@@ -1,17 +1,6 @@
 
 use Common;
 
-icons: {
-    burning: string,
-    poison: string,
-    fireResistance: string,
-    bewitched: string,
-    shield: string,
-    frozen: string,
-    weak: string,
-    bounty: string,
-},
-
 var encounterModifierConfig = {
     icon: string,
     displayName: string,

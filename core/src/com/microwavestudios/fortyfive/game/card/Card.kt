@@ -1166,14 +1166,14 @@ class CardActor(
             .also { it.stop() }
 
     private val selectionDropShadow = SquareDropShadow(
-        color = Color.GOLDENROD,
+        color = Colors.GOLDENROD,
         scale = 1.2f,
         offX = 0f,
         offY = 0f
     )
 
     private val defaultFocusDropShadow = SquareDropShadow(
-        color = Color.Black,
+        color = Colors.Black,
         scale = 1.1f,
         offX = 3f,
         offY = -3f

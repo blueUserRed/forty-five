@@ -17,7 +17,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import java.io.File
 import java.nio.file.Paths
@@ -107,16 +107,16 @@ class MapEditorScreen : ScreenCreator() {
         centerX()
         y = -20f
 
-        val index = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
+        val index = label("roadgeek", "", Colors.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val makeStart = label("roadgeek", "make start node", Color.FortyWhite, (24 * 0.7).toInt()) {
+        val makeStart = label("roadgeek", "make start node", Colors.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
             onInput(GameInputs.interact) { events.fire(MakeStartNodeEvent) }
         }
-        val makeEnd = label("roadgeek", "make end node", Color.FortyWhite, (24 * 0.7).toInt()) {
+        val makeEnd = label("roadgeek", "make end node", Colors.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
             keyboardFocusable = KeyboardFocusable.LEAF
             touchable = Touchable.enabled
@@ -144,13 +144,13 @@ class MapEditorScreen : ScreenCreator() {
         centerX()
         y = -20f
 
-        val handle = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
+        val handle = label("roadgeek", "", Colors.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val isAnimated = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
+        val isAnimated = label("roadgeek", "", Colors.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
-        val isBackground = label("roadgeek", "", Color.FortyWhite, (24 * 0.7).toInt()) {
+        val isBackground = label("roadgeek", "", Colors.FortyWhite, (24 * 0.7).toInt()) {
             syncDimensions()
         }
 
@@ -175,7 +175,7 @@ class MapEditorScreen : ScreenCreator() {
         horizontalAlign = CustomAlign.START
 
         horizontalSpacer(20f)
-        label("roadgeek", "Load", Color.FortyWhite, 24) {
+        label("roadgeek", "Load", Colors.FortyWhite, 24) {
             backgroundHandle = "transparent_black_texture"
             height = 50f
             syncWidth()
@@ -185,7 +185,7 @@ class MapEditorScreen : ScreenCreator() {
             onInput(GameInputs.interact) { loadMap() }
         }
         horizontalSpacer(20f)
-        label("roadgeek", "Save", Color.FortyWhite, 24) {
+        label("roadgeek", "Save", Colors.FortyWhite, 24) {
             backgroundHandle = "transparent_black_texture"
             height = 50f
             syncWidth()
@@ -195,7 +195,7 @@ class MapEditorScreen : ScreenCreator() {
             onInput(GameInputs.interact) { save() }
         }
         horizontalSpacer(20f)
-        label("roadgeek", "Save To", Color.FortyWhite, 24) {
+        label("roadgeek", "Save To", Colors.FortyWhite, 24) {
             backgroundHandle = "transparent_black_texture"
             height = 50f
             syncWidth()

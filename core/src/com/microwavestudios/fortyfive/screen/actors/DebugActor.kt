@@ -129,7 +129,7 @@ class DebugActorImpl : DebugActor {
 
     override fun drawCustomDebugBounds(shapes: ShapeRenderer?) {
         val color = when {
-            badTexture -> com.microwavestudios.fortyfive.utils.Color.Red
+            badTexture -> com.microwavestudios.fortyfive.utils.Colors.Red
             actor.debug -> debugColor
             else -> return
         }
