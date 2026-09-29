@@ -279,6 +279,26 @@ textures: [
         file: "blobs/game_screen/status_effect_background.png"
     },
     {
+        name: "encounter_player",
+        file: "blobs/encounter_screen/player.png"
+    },
+    {
+        name: "encounter_bottom_bar",
+        file: "blobs/encounter_screen/bottom_bar.png"
+    },
+    {
+        name: "encounter_revolver_handle",
+        file: "blobs/encounter_screen/revolver_handle.png"
+    },
+    {
+        name: "encounter_revolver_drum_bottom",
+        file: "blobs/encounter_screen/revolver_drum_bottom.png"
+    },
+    {
+        name: "encounter_revolver_drum_top",
+        file: "blobs/encounter_screen/revolver_drum_top.png"
+    },
+    {
         name: "background_wasteland1",
         file: "blobs/backgrounds/wasteland/wasteland1.png"
     },

@@ -493,6 +493,8 @@ open class CustomGroup(
 
     var manualBackground: Drawable? = null
 
+    var childrenInCorrectOrderGetter: (() -> List<Actor>)? = null
+
     private val onUpdateCallbacks: MutableList<() -> Unit> = mutableListOf()
 
     init {
@@ -543,6 +545,8 @@ open class CustomGroup(
         onUpdateCallbacks.forEach { it() }
         super.act(delta)
     }
+
+    override fun childrenInCorrectOrder(): List<Actor>? = childrenInCorrectOrderGetter?.invoke()
 
     fun onUpdate(callback: () -> Unit) {
         onUpdateCallbacks.add(callback)

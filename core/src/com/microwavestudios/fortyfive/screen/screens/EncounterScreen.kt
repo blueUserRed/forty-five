@@ -36,6 +36,7 @@ import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.rendering.BetterShader
@@ -88,19 +89,20 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private val revolver by lazy {
-        Revolver(
-            "revolver_drum",
-            "revolver_slot_texture",
-            200f,
-            110f,
-            0.2f,
-            gameEvents,
-            screen
-        ).apply {
-            cardScale = 0.9f
-            radius = 140f
-            rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
-        }
+        NewRevolver(screen)
+//        Revolver(
+//            "revolver_drum",
+//            "revolver_slot_texture",
+//            200f,
+//            110f,
+//            0.2f,
+//            gameEvents,
+//            screen
+//        ).apply {
+//            cardScale = 0.9f
+//            radius = 140f
+//            rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
+//        }
     }
 
     private val cardHand by lazy {
@@ -160,11 +162,11 @@ class EncounterScreen : ScreenCreator() {
             screen.inputManager.addDragAndDrop(CardActor.cardGroup, underDeckGroup)
 
         image {
-            backgroundHandle = "game_screen_player"
-            x = 20f
+            backgroundHandle = "encounter_player"
+            x = 40f
             y = 0f
-            height = worldHeight
-            width = (1305f / 1512f) * worldHeight
+            relativeHeight(100f)
+            widthByAspectRatio(662.0 / 1080.0)
 
             gameEvents.watchFor<UpdateUiEvent> {
                 drawOffsetX = bgOffX
@@ -242,150 +244,7 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
             event.finishedPromise.resolve(Unit)
         }
-
-//        val borrower = object : ResourceBorrower {}
-//
-//        fun commonPanelHandle(i: Int, proto: EnemyActionPrototype) = when (i) {
-//            0 -> proto.commonPanel1
-//            1 -> proto.commonPanel2
-//            2 -> proto.commonPanel3
-//            else -> unreachable()
-//        }
-//
-//        fun commonPanel(i: Int, panel: String) = group {
-//            width = 170f
-//            onLayoutAndNow { y = parent.height / 2 + 100 }
-//            val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-//                borrower,
-//                screen.lifetime,
-//                panel
-//            )
-//            promise.then { texture ->
-//                height = width * (texture.minHeight / texture.minWidth)
-//                manualBackground = texture
-//            }
-//            val xAnim = propertyAnimation(
-//                xPositionAbstractProperty(),
-//                AnimState("open", parentWidth - (width - 8f) * (i + 1)),
-//                AnimState("closed", parentWidth + 100),
-//                initialState = "closed",
-//                defaultTime = 300,
-//                defaultInterpolation = Interpolation.pow2,
-//            )
-//            xAnim.transition("open", "closed", 0, Interpolation.linear)
-//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-//                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-//                    borrower,
-//                    screen.lifetime,
-//                    commonPanelHandle(i, event.enemyAction.prototype)
-//                )
-//                promise.then { texture ->
-//                    height = width * (texture.minHeight / texture.minWidth)
-//                    manualBackground = texture
-//                }
-//                event.finishedPromise.then {
-//                    xAnim.state("closed")
-//                    manualBackground = null
-//                }
-//                event.append { includeAction(xAnim.stateAction("open")) }
-//            }
-        }
-
-//        fun actionPanel() = group {
-//            height = 220f
-//            onLayoutAndNow { y = parent.height / 2 + 100 - height + 20f }
-//            x = parentWidth + 100f
-//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-//                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-//                    borrower,
-//                    screen.lifetime,
-//                    event.enemyAction.prototype.specialPanel
-//                )
-//                promise.then { texture ->
-//                    width = height * (texture.minWidth / texture.minHeight)
-//                    manualBackground = texture
-//                }
-//                event.finishedPromise.then {
-//                    x = parentWidth + 100f
-//                    manualBackground = null
-//                }
-//                val action = MoveToAction()
-//                action.duration = 0.3f
-//                action.interpolation = Interpolation.Pow(10)
-//                event.append {
-//                    delayUntil { manualBackground != null }
-//                    delay(100)
-//                    action {
-//                        action.x = parentWidth - width - 5f
-//                        action.y = y
-//                        addAction(action)
-//                        event.controller.dispatchAnimTimeline(Timeline.timeline {
-//                            delay(200)
-//                            include(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
-//                        })
-//                    }
-//                    delayUntil { action.isComplete }
-//                }
-//            }
-//        }
-//
-//        fun descriptionBox() = box {
-//            width = 500f
-//            height = 300f
-//
-//            onLayoutAndNow { y = parent.height / 2 - 120f - height + 100 }
-//
-//            backgroundHandle = "common_popup_background_black_large"
-//            dropShadow = BakedDropShadow(
-//                "common_popup_background_black_large",
-//                screen,
-//                0f, 0f,
-//                1.3f, 1.3f
-//            )
-//            flexDirection = FlexDirection.COLUMN
-//            verticalAlign = CustomAlign.CENTER
-//            horizontalAlign = CustomAlign.CENTER
-//
-//            val title = label("red wing", "Hot Potato", Color.Red, 35) {
-//                syncDimensions()
-//            }
-//            verticalSpacer(10f)
-//            val body = label("roadgeek", "A scorching Bullet will be put in your hand!", Color.FortyWhite, 22) {
-//                wrap = true
-//                setAlignment(Align.center)
-//                relativeWidth(60f)
-//                syncHeight()
-//            }
-//            val xAnim = propertyAnimation(
-//                xPositionAbstractProperty(),
-//                AnimState("open", parentWidth - width + 60f),
-//                AnimState("closed", parentWidth + 100),
-//                initialState = "closed",
-//                defaultTime = 300,
-//                defaultInterpolation = Interpolation.pow5,
-//            )
-//            xAnim.transition("open", "closed", 0, Interpolation.linear)
-//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-//                val enemyAction = event.enemyAction
-//                val prototype = enemyAction.prototype
-//                title.setText(prototype.title)
-//                val bodyTemplate = TemplateString(prototype.descriptionTemplate, enemyAction.descriptionParams)
-//                body.setText(bodyTemplate.string)
-//                event.finishedPromise.then {
-//                    xAnim.state("closed")
-//                }
-//                event.append {
-//                    includeAction(xAnim.stateAction("open"))
-//                }
-//            }
-//        }
-//
-//        commonPanel(0, "enemy_pyro_action_comic_common_panel_1")
-//        commonPanel(1, "enemy_pyro_action_comic_common_panel_2")
-//        commonPanel(2, "enemy_pyro_action_comic_common_panel_3")
-//        descriptionBox()
-//        actionPanel()
-//    }
+    }
 
     private fun CustomGroup.playerStatusEffectDisplay() = box {
         badTexture("status effect background", comment = "??????")
@@ -904,104 +763,116 @@ class EncounterScreen : ScreenCreator() {
         x = 0f
         y = 0f
         width = worldWidth
-        height = worldWidth * (505f / 1920f)
-        backgroundHandle = "player_bar"
+        height = worldHeight / 2
 
-        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
-
-        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-            if (event.inParryMenu) buttonModal.push() else buttonModal.finished()
+        actor(revolver.getActor(this@EncounterScreen)) {
+            x = 350f
+            y = 20f
         }
 
-        shootButton()
-        holsterButton()
-
-        actor(revolver) {
-            touchable = Touchable.enabled
-            name("revolver")
-            centerX()
-            y = -30f
-            syncDimensions()
+        image {
+            x = 0f
+            y = 00f
+            backgroundHandle = "encounter_bottom_bar"
+            relativeWidth(100f)
+            heightByAspectRatio(1920.0 / 183.0)
         }
 
-        label("red wing", "10", Colors.Red, 90) {
-            centerX()
-            y = 210f
-            width = 50f
-            setAlignment(Align.center)
-            isVisible = false
-            gameEvents.watchFor<GameControllerImpl.Events.SteelNervesCountdown> { (newNumber) ->
-                setText(newNumber.toString())
-                isVisible = true
-            }
-        }
-
-        actor(cardHand) {
-            name("cardHand")
-            centerX()
-            y = 0f
-            width = worldWidth
-            gameEvents.link(events)
-        }
-
-        group {
-            backgroundHandle = "wood_box"
-            x = 70f
-            y = 180f
-            width = 120f
-            height = 120f
-            reservesAnimationTarget = this
-            animateRotationSinus(
-                frequency = 0.15f
-            )
-
-            image {
-                backgroundHandle = "reserves_texture"
-                width = 60f
-                height = 60f
-                x = 30f
-                y = 90f
-            }
-
-            label("red wing", "0/0", Colors.White, (32 * 1.1).toInt()) {
-                centerX()
-                centerY()
-                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
-                    setText("${new}/$base")
-                }
-                syncDimensions()
-            }
-        }
-
-        group {
-            backgroundHandle = "wood_box"
-            x = worldWidth - 70f - 120f
-            y = 180f
-            width = 120f
-            height = 120f
-            deckAnimationTarget = this
-
-            animateRotationSinus(
-                frequency = 0.15f
-            )
-
-            image {
-                backgroundHandle = "deck_icon"
-                width = 60f
-                height = 60f
-                x = 30f
-                y = 90f
-            }
-
-            label("red wing", "", Colors.White, (32 * 1.1).toInt()) {
-                gameEvents.watchFor<UpdateUiEvent> { (controller) ->
-                    setText(controller.cardStack.size().toString())
-                }
-                centerX()
-                centerY()
-                syncDimensions()
-            }
-        }
+//        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
+//
+//        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+//            if (event.inParryMenu) buttonModal.push() else buttonModal.finished()
+//        }
+//
+//        shootButton()
+//        holsterButton()
+//
+//        actor(revolver) {
+//            touchable = Touchable.enabled
+//            name("revolver")
+//            centerX()
+//            y = -30f
+//            syncDimensions()
+//        }
+//
+//        label("red wing", "10", Colors.Red, 90) {
+//            centerX()
+//            y = 210f
+//            width = 50f
+//            setAlignment(Align.center)
+//            isVisible = false
+//            gameEvents.watchFor<GameControllerImpl.Events.SteelNervesCountdown> { (newNumber) ->
+//                setText(newNumber.toString())
+//                isVisible = true
+//            }
+//        }
+//
+//        actor(cardHand) {
+//            name("cardHand")
+//            centerX()
+//            y = 0f
+//            width = worldWidth
+//            gameEvents.link(events)
+//        }
+//
+//        group {
+//            backgroundHandle = "wood_box"
+//            x = 70f
+//            y = 180f
+//            width = 120f
+//            height = 120f
+//            reservesAnimationTarget = this
+//            animateRotationSinus(
+//                frequency = 0.15f
+//            )
+//
+//            image {
+//                backgroundHandle = "reserves_texture"
+//                width = 60f
+//                height = 60f
+//                x = 30f
+//                y = 90f
+//            }
+//
+//            label("red wing", "0/0", Colors.White, (32 * 1.1).toInt()) {
+//                centerX()
+//                centerY()
+//                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
+//                    setText("${new}/$base")
+//                }
+//                syncDimensions()
+//            }
+//        }
+//
+//        group {
+//            backgroundHandle = "wood_box"
+//            x = worldWidth - 70f - 120f
+//            y = 180f
+//            width = 120f
+//            height = 120f
+//            deckAnimationTarget = this
+//
+//            animateRotationSinus(
+//                frequency = 0.15f
+//            )
+//
+//            image {
+//                backgroundHandle = "deck_icon"
+//                width = 60f
+//                height = 60f
+//                x = 30f
+//                y = 90f
+//            }
+//
+//            label("red wing", "", Colors.White, (32 * 1.1).toInt()) {
+//                gameEvents.watchFor<UpdateUiEvent> { (controller) ->
+//                    setText(controller.cardStack.size().toString())
+//                }
+//                centerX()
+//                centerY()
+//                syncDimensions()
+//            }
+//        }
 
     }
 
@@ -1386,14 +1257,14 @@ class EncounterScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         bgScreenController,
-        GameControllerImpl(
-            screen,
-            gameEvents,
-            TimeUtils.millis(),
-            warningParent,
-            afterlife,
-            CardPresentation.defaultProvider
-        )
+//        GameControllerImpl(
+//            screen,
+//            gameEvents,
+//            TimeUtils.millis(),
+//            warningParent,
+//            afterlife,
+//            CardPresentation.defaultProvider
+//        )
     )
 
     override fun debugMenuPages(): List<String> = listOf("Encounter")

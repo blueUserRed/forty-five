@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
+import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.map.DetailMap
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventActions
@@ -25,6 +26,7 @@ import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.ISoundPlayer
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
@@ -36,6 +38,7 @@ import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.min
 import kotlin.system.measureTimeMillis
 
 object FortyFive : Game() {
@@ -118,7 +121,31 @@ object FortyFive : Game() {
     }
 
     fun toMap() {
-        screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
+//        screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
+
+        val context = object : EncounterContext {
+
+            override val encounter: Encounter = Encounter(
+                enemiesGroups = listOf("The-Fangs", "Witch", "Pyro"),
+                encounterModifierNames = setOf(),
+                forceCards = null,
+                forceConcreteEnemies = null,
+                shuffleCards = true,
+                unadjustedMajorDifficulty = 2,
+                majorDifficulty = 2,
+                minorDifficulty = 1f,
+                isHard = false,
+                difficultyScalingInfo = 0f,
+                special = false
+            )
+
+            override val isExtraction: Boolean = false
+
+            override fun completed() {
+            }
+        }
+        screenManager.appendScreen(EncounterScreen, context)
+
         screenManager.screenFinished()
     }
 
