@@ -1,5 +1,8 @@
 package com.microwavestudios.fortyfive.screen.screens
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -21,7 +24,6 @@ import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
-import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
@@ -39,8 +41,10 @@ import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
+import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -51,6 +55,7 @@ import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
+import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -766,17 +771,36 @@ class EncounterScreen : ScreenCreator() {
         height = worldHeight / 2
 
         actor(revolver.getActor(this@EncounterScreen)) {
-            x = 350f
+            x = 380f
             y = 20f
         }
 
         image {
             x = 0f
-            y = 00f
+            y = 0f
             backgroundHandle = "encounter_bottom_bar"
             relativeWidth(100f)
             heightByAspectRatio(1920.0 / 183.0)
         }
+
+        group {
+            x = -10f
+            y = 200f
+            focusBackgrounds(
+                normal = "encounter_holster",
+                focus = "encounter_holster_hover"
+            )
+            rotation = -5f
+            width = 320f
+            heightByAspectRatio(1513.0 / 335.0)
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            onInput(GameInputs.interact) {
+                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
+            }
+        }
+
+        playerHealthBar()
 
 //        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
 //
@@ -874,6 +898,88 @@ class EncounterScreen : ScreenCreator() {
 //            }
 //        }
 
+    }
+
+    private fun CustomGroup.playerHealthBar() {
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile)
+
+        val hpBarAnimationSpeed = 5.0
+        val baseHealth = profile.maxHealthInRun!!
+
+        var currentHealth = profile.healthInRun!!
+        var targetPercent = currentHealth.toFloat() / baseHealth.toFloat()
+        var displayedPercent = targetPercent
+
+        gameEvents.watchFor<UpdateUiEvent> {
+            val diff = abs(targetPercent - displayedPercent)
+            val moveDist = hpBarAnimationSpeed * Gdx.graphics.deltaTime * diff
+            when {
+                targetPercent.epsilonEquals(displayedPercent, epsilon = 0.001f) -> displayedPercent = targetPercent
+                targetPercent < displayedPercent -> displayedPercent -= moveDist.toFloat()
+                targetPercent > displayedPercent -> displayedPercent += moveDist.toFloat()
+            }
+        }
+
+        screen.events.watchFor<Profile.HealthChangedEvent> { event ->
+            currentHealth = event.newHealth
+            targetPercent = event.newHealth.toFloat() / baseHealth.toFloat()
+        }
+
+        val bar = object : CustomGroup(screen), ResourceBorrower {
+
+            val whiteTexture =
+                FortyFive.resourceManager.request<Texture>(this, screen.lifetime, "white_texture")
+            private val sliderShader: Promise<BetterShader> =
+                FortyFive.resourceManager.request(this, screen.lifetime, "enemy_status_bar_shader")
+
+            override fun draw(batch: Batch?, parentAlpha: Float) {
+                batch ?: return
+                val whiteTexture = whiteTexture.getOrNull() ?: return
+                val sliderShader = sliderShader.getOrNull() ?: return
+                batch.flush()
+                batch.shader = sliderShader.shader
+                sliderShader.prepare(screen)
+                sliderShader.shader.setUniformf("u_pos", displayedPercent)
+                batch.projectionMatrix = viewport.camera.combined
+                batch.draw(whiteTexture, x, y, width, height)
+                batch.flush()
+                batch.shader = null
+            }
+        }
+
+        group {
+            x = -5f
+            y = 110f
+            width = 350f
+            heightByAspectRatio(1781.0 / 355.0)
+            rotation = -5f
+
+            actor(bar) {
+                relativeWidth(88f)
+                relativeHeight(84f)
+                centerY()
+            }
+
+            group {
+                relativeWidth(100f)
+                relativeHeight(100f)
+                backgroundHandle = "encounter_player_health_bar"
+            }
+
+            label(
+                "red wing",
+                "${profile.healthInRun}/$baseHealth",
+                Colors.White, 35
+            ) {
+                syncDimensions()
+                centerY()
+                onLayoutAndNow { x = parent.width - width - 75f }
+                screen.events.watchFor<Profile.HealthChangedEvent> { event ->
+                    text = "${event.newHealth}/$baseHealth"
+                }
+            }
+        }
     }
 
     private fun CustomGroup.shootButton() {

@@ -299,6 +299,18 @@ textures: [
         file: "blobs/encounter_screen/revolver_drum_top.png"
     },
     {
+        name: "encounter_holster",
+        file: "blobs/encounter_screen/holster.png"
+    },
+    {
+        name: "encounter_holster_hover",
+        file: "blobs/encounter_screen/holster_hover.png"
+    },
+    {
+        name: "encounter_player_health_bar",
+        file: "blobs/encounter_screen/player_health_bar.png"
+    },
+    {
         name: "background_wasteland1",
         file: "blobs/backgrounds/wasteland/wasteland1.png"
     },

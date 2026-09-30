@@ -8,7 +8,8 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.*
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
@@ -17,10 +18,13 @@ import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.*
+import com.microwavestudios.fortyfive.screen.DropShadow
+import com.microwavestudios.fortyfive.screen.DropShadowActor
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.sin
 
 open class CustomLabel(
     val screen: RenderableScreen,
@@ -493,6 +497,8 @@ open class CustomGroup(
 
     var manualBackground: Drawable? = null
 
+    var rotateAroundMiddle: Boolean = true
+
     var childrenInCorrectOrderGetter: (() -> List<Actor>)? = null
 
     private val onUpdateCallbacks: MutableList<() -> Unit> = mutableListOf()
@@ -557,7 +563,7 @@ open class CustomGroup(
         background?.let {
             dropShadow?.doDropShadow(batch, screen, it, this)
             if (it is TransformDrawable) {
-                it.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
+                it.draw(batch, x, y, originX, originY, width, height, 1f, 1f, rotation)
             } else {
                 it.draw(batch, x, y, width, height)
             }
