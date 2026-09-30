@@ -174,7 +174,7 @@ var pyros = [
                 action: action_damage(8, 12, false)
             },
             {
-                weight: 4#actionVal,
+                weight: 4000#actionVal,
                 selectionConditions: [
                     value.countPlayerStatusEffectParams#actionVal moreThan 3#actionVal
                 ],
@@ -182,7 +182,8 @@ var pyros = [
                     value.countPlayerStatusEffectParams#actionVal,
                     false,
                     "The damage of this attack is equal to the sum of all the parameters of the Status Effects you have"
-                )
+                ),
+                overrideSecondaryIcon: "scaling_damage_pyro_icon",
             },
             {
                 weight: 4#actionVal,
@@ -193,6 +194,7 @@ var pyros = [
                 weight: 4#actionVal,
                 action: action_givePlayerCard("scorchingBullet"#card),
                 overrideTitle: "Hot Potato",
+                overrideIcon: "hot_potato_icon",
                 maxExecutions: 2
             },
             {
@@ -238,7 +240,8 @@ var witches = [
                     (value.revolverRotationCountInTurn * 3)#actionVal,
                     false,
                     "The damage of this attack is equal to the amount of times the revolver rotated this turn times three"
-                )
+                ),
+                overrideSecondaryIcon: "scaling_damage_witch_icon"
             },
             {
                 weight: 4#actionVal,
@@ -274,7 +277,8 @@ var witches = [
                     (value.revolverRotationCountInTurn * 3)#actionVal,
                     false,
                     "The damage of this attack is equal to the amount of times the revolver rotated this turn times three"
-                )
+                ),
+                overrideSecondaryIcon: "scaling_damage_witch_icon"
             },
             {
                 weight: 4#actionVal,

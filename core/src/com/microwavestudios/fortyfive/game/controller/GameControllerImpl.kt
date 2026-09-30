@@ -361,6 +361,12 @@ class GameControllerImpl(
                         .collectTimeline()
                         .let { include(it) }
                 }
+                later {
+                    playerStatusEffects
+                        .mapNotNull { it.executeAfterRotation(event.rotation, StatusEffectTarget.PlayerTarget) }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.CardDestroyedEvent> { event ->

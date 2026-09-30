@@ -737,11 +737,18 @@ class EncounterScreen : ScreenCreator() {
         fun showAction(
             text: () -> String?,
             iconHandle: String,
+            secondaryIconHandle: String?
         ) {
             image {
                 backgroundHandle = iconHandle
-                width = 60f
-                height = 60f
+                width = 45f
+                height = 45f
+            }
+
+            if (secondaryIconHandle != null) image {
+                backgroundHandle = secondaryIconHandle
+                width = 30f
+                height = 30f
             }
 
             group {
@@ -800,10 +807,11 @@ class EncounterScreen : ScreenCreator() {
             when (val nextAction = event.nextAction) {
                 is NextEnemyAction.ShownEnemyAction -> showAction(
                     { nextAction.action.indicatorText },
-                    nextAction.action.icon
+                    nextAction.action.icon,
+                    nextAction.action.secondaryIcon
                 )
                 is NextEnemyAction.None -> {}
-                is NextEnemyAction.HiddenEnemyAction -> showAction({ "?" },  "enemy_action_unknown")
+                is NextEnemyAction.HiddenEnemyAction -> showAction({ "?" },  "enemy_action_unknown", null)
             }
         }
     }

@@ -1129,7 +1129,7 @@ object GameNamespace {
 
     @RegisterOnjFunction(schema = "params: [int, int]")
     fun action_shield(min: OnjInt, max: OnjInt): OnjEnemyAction = OnjEnemyAction(
-        EnemyAction.ApplyShield(min.value.toInt(), max.value.toInt(), null)
+        EnemyAction.ApplyCover(min.value.toInt(), max.value.toInt(), null)
     )
 
     @RegisterOnjFunction(schema = "use Game; params: [CardType]")

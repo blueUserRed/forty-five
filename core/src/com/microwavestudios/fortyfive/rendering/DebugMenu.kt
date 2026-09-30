@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.controller.GameController
+import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.run.Encounter
@@ -292,11 +293,21 @@ class EncounterDebugMenuPage : DebugMenuPage("Encounter") {
         controller.appendMainTimeline(controller.drawCardsTimeline(2))
     }
 
-    override fun getText(screen: RenderableScreen): String = """
-        $giveReserves
-        $drawCards
-        $defeatEnemies
-        $die
-    """.trimIndent()
+    override fun getText(screen: RenderableScreen): String {
+        val controller = screen.findController<GameControllerImpl>()!!
+        val encounter = controller.encounterContext.encounter
+        return """
+            enemies: ${controller.allEnemies.joinToString(transform = { it.name }, separator = ", ")}
+            majorDiff: ${encounter.majorDifficulty}
+            minorDiff: ${encounter.minorDifficulty}
+            unadj. majorDiff: ${encounter.unadjustedMajorDifficulty}
+            diff scaling: ${encounter.difficultyScalingInfo}
+            
+            $giveReserves
+            $drawCards
+            $defeatEnemies
+            $die
+        """.trimIndent()
+    }
 
 }

@@ -32,7 +32,8 @@ class EnemyBrain(
             controller,
             winner.overrideTitle,
             winner.overrideDescription,
-            winner.overrideIcon
+            winner.overrideIcon,
+            winner.overrideSecondaryIcon
         )
         val action = winner.action.copy(data)
         return if (variant.hidden) {
@@ -52,6 +53,7 @@ class EnemyBrain(
         val overrideTitle: String?,
         val overrideDescription: String?,
         val overrideIcon: ResourceHandle?,
+        val overrideSecondaryIcon: ResourceHandle?
     )
 
     data class EnemyActionVariant(
@@ -90,6 +92,7 @@ class EnemyBrain(
                     obj.getOr<String?>("overrideTitle", null),
                     obj.getOr<String?>("overrideDescription", null),
                     obj.getOr<String?>("overrideIcon", null),
+                    obj.getOr<String?>("overrideSecondaryIcon", null),
                 )
             }.let { EnemyBrain(it) }
 

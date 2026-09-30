@@ -29,7 +29,6 @@ abstract class StatusEffect(
 
     open fun modifyDamage(damage: Int): Int = damage
 
-    // TODO: not called for player effects
     open fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
     open fun executeOnEndTurn(target: StatusEffectTarget): Timeline? = null
