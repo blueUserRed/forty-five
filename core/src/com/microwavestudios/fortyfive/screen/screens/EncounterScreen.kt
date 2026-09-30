@@ -23,9 +23,14 @@ import com.microwavestudios.fortyfive.game.BannerAnimation
 import com.microwavestudios.fortyfive.game.EncounterModifier
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.game.StatusEffect
+import com.microwavestudios.fortyfive.game.card.ActorCardPresentation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
+import com.microwavestudios.fortyfive.game.card.CardPresentation
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
+import com.microwavestudios.fortyfive.game.card.PresentationProvider
+import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -39,6 +44,7 @@ import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.NewCardHand
 import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
@@ -112,12 +118,13 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private val cardHand by lazy {
-        CardHand(
-            screen,
-            300f,
-            596f * 0.22f,
-            100f
-        )
+        NewCardHand()
+//        CardHand(
+//            screen,
+//            300f,
+//            596f * 0.22f,
+//            100f
+//        )
     }
 
     private val bgZoom: Float = 1.07f
@@ -776,6 +783,22 @@ class EncounterScreen : ScreenCreator() {
             y = 20f
         }
 
+        actor(cardHand.getActor(this@EncounterScreen)) {
+            width = worldWidth / 2 + 20f
+            height = 300f
+            y = 79f
+            onLayoutAndNow { x = worldWidth - width }
+
+//            val proto = RandomCardSelection
+//                .allCardPrototypes
+//                .find { it.name == "incendiaryBullet" }!!
+//            val max = GameControllerImpl.Config.hardMaxCards
+//            repeat(12) {
+//                val card = proto.create(screen, CardType.fromString("incendiaryBullet"), CardPresentation.defaultProvider)
+//                cardHand.addCard(card)
+//            }
+        }
+
         image {
             x = 0f
             y = 0f
@@ -812,7 +835,7 @@ class EncounterScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.CENTER
 
-            group {
+            deckAnimationTarget = group {
                 width = 60f
                 height = 60f
                 backgroundHandle = "deck_icon"
@@ -1390,14 +1413,16 @@ class EncounterScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         bgScreenController,
-//        GameControllerImpl(
-//            screen,
-//            gameEvents,
-//            TimeUtils.millis(),
-//            warningParent,
-//            afterlife,
-//            CardPresentation.defaultProvider
-//        )
+        GameControllerImpl(
+            screen,
+            gameEvents,
+            TimeUtils.millis(),
+            warningParent,
+            afterlife,
+            CardPresentation.defaultProvider,
+            revolver,
+            cardHand
+        )
     )
 
     override fun debugMenuPages(): List<String> = listOf("Encounter")

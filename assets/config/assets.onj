@@ -200,51 +200,99 @@ textures: [
     },
     {
         name: "poison_icon",
-        file: "blobs/icons/poison.png",
+        file: "blobs/icons/status_effects/poison.png",
     },
     {
         name: "poison_immunity_icon",
-        file: "blobs/icons/poison_immunity.png",
+        file: "blobs/icons/status_effects/poison_immunity.png",
     },
     {
         name: "burning_icon",
-        file: "blobs/icons/burning.png",
+        file: "blobs/icons/status_effects/burning.png",
     },
     {
         name: "bewitched_icon",
-        file: "blobs/icons/bewitched.png",
+        file: "blobs/icons/status_effects/bewitched.png",
     },
     {
         name: "frozen_icon",
-        file: "blobs/icons/frozen.png",
+        file: "blobs/icons/status_effects/frozen.png",
     },
     {
         name: "weak_icon",
-        file: "blobs/icons/weak.png",
+        file: "blobs/icons/status_effects/weak.png",
     },
     {
         name: "bounty_icon",
-        file: "blobs/icons/bounty.png",
+        file: "blobs/icons/status_effects/bounty.png",
     },
     {
         name: "heat_repellent_icon",
-        file: "blobs/icons/heat_repellent.png",
+        file: "blobs/icons/status_effects/heat_repellent.png",
     },
     {
         name: "ward_of_the_witch_icon",
-        file: "blobs/icons/ward_of_the_witch.png",
+        file: "blobs/icons/status_effects/ward_of_the_witch.png",
     },
     {
         name: "ominous_icon",
-        file: "blobs/icons/ominous.png",
+        file: "blobs/icons/status_effects/ominous.png",
     },
     {
         name: "deterring_aura_icon",
-        file: "blobs/icons/ominous.png",
+        file: "blobs/icons/status_effects/ominous.png",
+    },
+    {
+        name: "damage_icon",
+        file: "blobs/icons/damage.png",
+    },
+    {
+        name: "cover_icon",
+        file: "blobs/icons/cover.png",
+    },
+    {
+        name: "unknown_icon",
+        file: "blobs/icons/unknown.png",
+    },
+    {
+        name: "hot_potato_icon",
+        file: "blobs/icons/enemy_actions/hot_potato.png",
+    },
+    {
+        name: "parryable_burning_icon",
+        file: "blobs/icons/enemy_actions/parryable_burning.png",
+    },
+    {
+        name: "parryable_poison_icon",
+        file: "blobs/icons/enemy_actions/parryable_poison.png",
+    },
+    {
+        name: "bewitched_left_icon",
+        file: "blobs/icons/enemy_actions/bewitched_left.png",
+    },
+    {
+        name: "bewitched_right_icon",
+        file: "blobs/icons/enemy_actions/bewitched_right.png",
     },
     {
         name: "deck_icon",
         file: "blobs/icons/deck.png",
+    },
+    {
+        name: "poison_fangs_icon",
+        file: "blobs/icons/enemy_actions/poison_fangs.png",
+    },
+    {
+        name: "without_a_heart_icon",
+        file: "blobs/icons/enemy_actions/without_a_heart.png",
+    },
+    {
+        name: "scaling_damage_pyro_icon",
+        file: "blobs/icons/enemy_actions/scaling_damage_pyro.png",
+    },
+    {
+        name: "scaling_damage_witch_icon",
+        file: "blobs/icons/enemy_actions/scaling_damage_witch.png",
     },
     {
         name: "player_bar",

@@ -39,7 +39,9 @@ class GameControllerImpl(
     seed: Long,
     private val warningParent: IWarningParent,
     override val afterlife: IAfterlife,
-    private val cardPresentationProvider: PresentationProvider
+    private val cardPresentationProvider: PresentationProvider,
+    override val revolver: IRevolver,
+    override val cardHand: ICardHand
 ) : ScreenController(), GameController, ResourceBorrower {
 
     override val random: Random = Random(seed)
@@ -92,14 +94,6 @@ class GameControllerImpl(
         private set
 
     private lateinit var targetedEnemy: Enemy
-
-    @Inject
-    override lateinit var revolver: IRevolver
-        private set
-
-    @Inject
-    override lateinit var cardHand: ICardHand
-        private set
 
     override lateinit var encounterContext: EncounterContext
         private set
