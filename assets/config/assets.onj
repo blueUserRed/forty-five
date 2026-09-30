@@ -243,6 +243,10 @@ textures: [
         file: "blobs/icons/ominous.png",
     },
     {
+        name: "deck_icon",
+        file: "blobs/icons/deck.png",
+    },
+    {
         name: "player_bar",
         file: "blobs/game_screen/player_bar.png"
     },
@@ -1164,10 +1168,6 @@ textures: [
     {
         name: "wood_box",
         file: "blobs/game_screen/wood_box.png",
-    },
-    {
-        name: "deck_icon",
-        file: "blobs/game_screen/deck_icon.png",
     },
     {
         name: "reserves_texture",

@@ -453,6 +453,13 @@ abstract class ScreenCreator : ResourceBorrower {
         return actors
     }
 
+    fun <T> T.originCenter() where T : Actor, T : OnLayoutActor {
+        onLayoutAndNow {
+            originX = width / 2
+            originY = height / 2
+        }
+    }
+
     /**
      * sets the width to [percent] of the parent width
      */

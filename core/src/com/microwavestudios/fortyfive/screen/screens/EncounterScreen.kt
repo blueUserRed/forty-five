@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.screen.screens
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
@@ -801,6 +802,32 @@ class EncounterScreen : ScreenCreator() {
         }
 
         playerHealthBar()
+
+        box {
+            width = 130f
+            height = 120f
+            y = 0f
+            x = worldWidth - width
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.CENTER
+
+            group {
+                width = 60f
+                height = 60f
+                backgroundHandle = "deck_icon"
+                originCenter()
+                animateRotationSinus(amplitude = 8f, frequency = 0.6f)
+            }
+
+            label("roadgeek", "", Colors.White, 30) {
+                gameEvents.watchFor<UpdateUiEvent> { (controller) ->
+                    text = controller.cardStack.size().toString()
+                }
+                syncDimensions()
+            }
+
+        }
 
 //        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
 //
