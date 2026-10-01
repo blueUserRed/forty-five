@@ -592,7 +592,7 @@ class EncounterScreen : ScreenCreator() {
 
             group {
                 relativeWidth(100f)
-                height = enemyHeight * 0.2f
+                height = enemyHeight * 0.1f
                 val statusBar = StatusBar(screen, enemy)
                 actor(statusBar) {
                     relativeWidth(110f)

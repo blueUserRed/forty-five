@@ -121,8 +121,8 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         batch.begin()
         mainBar.draw(batch, barX, barY, barWidth, barHeight)
         if (enemy.currentCover > 0) drawShieldOverlay(batch, barX, barY, barWidth, barHeight)
-        drawStatusEffects(batch, barX, barY, barWidth, barHeight)
-        drawHpLabel(batch, barX, barY, barWidth)
+//        drawStatusEffects(batch, barX, barY, barWidth, barHeight)
+        drawHpLabel(batch, barX, barY, barWidth, barHeight)
     }
 
     private fun drawStatusEffects(batch: Batch, barX: Float, barY: Float, barWidth: Float, barHeight: Float) {
@@ -168,7 +168,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         roadgeek.draw(batch, layout, labelX, labelY)
     }
 
-    private fun drawHpLabel(batch: Batch, barX: Float, barY: Float, barWidth: Float) {
+    private fun drawHpLabel(batch: Batch, barX: Float, barY: Float, barWidth: Float, barHeight: Float) {
         val background = hpLabel.getOrNull() ?: return
         val labelWidth = barWidth * 0.37f
         val labelHeight = labelWidth * (background.minHeight / background.minWidth)
@@ -176,8 +176,8 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         roadgeek.data.setScale(0.24f)
         val text = "${enemy.currentHealth}/${enemy.health}"
         layout.setText(roadgeek, text, Colors.FortyWhite, labelWidth, Align.center, false)
-        val labelX = barX + barWidth - labelWidth + 15f
-        val labelY = barY - 5f
+        val labelX = barX + barWidth - labelWidth + 16f
+        val labelY = barY + barHeight / 2 - labelHeight / 2
         background.draw(batch, labelX, labelY, labelWidth, labelHeight)
         roadgeek.draw(batch, layout, labelX, labelY + layout.height + 7.5f)
     }
