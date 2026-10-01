@@ -59,6 +59,10 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
+    $SpecialEventMapEvent {
+        ...mapEventStandardConfig
+    }
+
     $ShopMapEvent {
         types: string[],
         person: string,
@@ -91,6 +95,7 @@ $MapEvent {
 
     $EncounterPlaceholderMapEvent {
         genExtraction: boolean,
+        genHard: boolean,
         majorDifficulty: int,
         unadjustedMajorDifficulty: int,
         minorDifficulty: float,
@@ -99,7 +104,12 @@ $MapEvent {
         scaleMin: float,
         scaleMax: float,
         biome: string,
-        seed: int
+        seed: int,
+        ...mapEventStandardConfig
+    }
+
+    $ApplyStampMapEvent {
+        stampName: string?
     }
 
 }

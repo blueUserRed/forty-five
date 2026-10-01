@@ -159,6 +159,14 @@ object GameInputs {
         ),
     )
 
+   val anyMouseClick = Input("anyMouseClick", arrayOf(
+       Input.Cause.Mouse(MouseButton.LEFT),
+       Input.Cause.Mouse(MouseButton.RIGHT),
+       Input.Cause.Mouse(MouseButton.BACK),
+       Input.Cause.Mouse(MouseButton.FORWARD),
+       Input.Cause.Mouse(MouseButton.MIDDLE),
+   ))
+
     val cancel = Input(
         "cancel",
         arrayOf(

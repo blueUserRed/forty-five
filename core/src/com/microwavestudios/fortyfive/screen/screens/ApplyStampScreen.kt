@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.game.card.CardPresentation
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.card.Stamp
+import com.microwavestudios.fortyfive.game.card.StampFactory
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
@@ -28,10 +29,11 @@ import com.microwavestudios.fortyfive.screen.commonComponents.BackpackCreator.ba
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.alpha
+import kotlin.random.Random
 import kotlin.reflect.KClass
 
 class ApplyStampScreen : ScreenCreator() {
@@ -54,6 +56,16 @@ class ApplyStampScreen : ScreenCreator() {
     )
 
     override fun getRoot(): Group = newGroup {
+        val stamp = if (context.stampName == null) {
+            val profile = FortyFive.profileManager.currentProfile!!
+            val difficulty = profile.currentMapSaver.currentMap.majorDifficulty
+            val s = StampFactory.getRandomStamp(difficulty, Random)
+            context.stampName = s.name
+            s
+        } else {
+            StampFactory.createStamp(context.stampName!!)
+        }
+
         x = 0f
         y = 0f
         width = worldWidth
@@ -65,13 +77,13 @@ class ApplyStampScreen : ScreenCreator() {
             width = worldWidth
             height = worldHeight
 
-            stampSide()
-            collectionSide()
+            stampSide(stamp)
+            collectionSide(stamp)
         }
         addDefaultOverlays(worldWidth, worldHeight, EventPipeline())
     }
 
-    private fun CustomBox.stampSide() = box {
+    private fun CustomBox.stampSide(stamp: Stamp) = box {
         height = worldHeight
         width = worldWidth * 0.4f
 
@@ -105,10 +117,10 @@ class ApplyStampScreen : ScreenCreator() {
                 detailWidget = DetailWidget.ComplexBigDetailActor(
                     screen,
                     effects = DetailDescriptionHandler.allTextEffects,
-                    text = { listOf(context.stamp.description) },
+                    text = { listOf(stamp.description) },
                     subtexts = {
                         DetailDescriptionHandler
-                            .extractAllExtraDescriptions(listOf(context.stamp.description))
+                            .extractAllExtraDescriptions(listOf(stamp.description))
                     }
                 )
 
@@ -116,16 +128,16 @@ class ApplyStampScreen : ScreenCreator() {
 
                 image {
                     squareDim(65f)
-                    backgroundHandle = context.stamp.icon
+                    backgroundHandle = stamp.icon
                 }
                 horizontalSpacer(40f)
-                label("red wing", context.stamp.title, Color.Magenta, 60) {
+                label("red wing", stamp.title, Colors.Magenta, 60) {
                     touchable = Touchable.disabled
                     syncDimensions()
                 }
             }
 
-            label("red wing", "Choose card to apply stamp to", Color.FortyWhite, 35) {
+            label("red wing", "Choose card to apply stamp to", Colors.FortyWhite, 35) {
                 syncDimensions()
             }
 
@@ -149,7 +161,7 @@ class ApplyStampScreen : ScreenCreator() {
 
     }
 
-    private fun CustomBox.collectionSide() = box {
+    private fun CustomBox.collectionSide(stamp: Stamp) = box {
         height = worldHeight
         width = worldWidth * 0.5f
         verticalAlign = CustomAlign.END
@@ -174,11 +186,11 @@ class ApplyStampScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
 
             verticalSpacer(25f)
-            cardScrollBox(cards)
+            cardScrollBox(cards, stamp)
         }
     }
 
-    private fun CustomBox.cardScrollBox(cards: List<Card>) = box(isScrollable = true) {
+    private fun CustomBox.cardScrollBox(cards: List<Card>, stamp: Stamp) = box(isScrollable = true) {
         this as CustomScrollableBox
         relativeWidth(95f)
         height = 680f
@@ -197,7 +209,7 @@ class ApplyStampScreen : ScreenCreator() {
         var y = 0
         val grid = InputManager.FocusGrid()
         cards.forEach { card ->
-            val canBePicked = cardCanBePicked(card)
+            val canBePicked = cardCanBePicked(card, stamp)
             val actor = card.presentation.forceGetActor()
             box {
                 verticalAlign = CustomAlign.CENTER
@@ -216,7 +228,7 @@ class ApplyStampScreen : ScreenCreator() {
                     FortyFive.soundPlayer.situation("not_allowed", screen)
                     return@onInput
                 }
-                cardSelected(card)
+                cardSelected(card, stamp)
             }
             grid.set(x, y, actor)
             x++
@@ -227,13 +239,14 @@ class ApplyStampScreen : ScreenCreator() {
         }
     }
 
-    private fun cardCanBePicked(card: Card): Boolean = card.stamp == null && context.stamp.canBeAppliedTo(card)
+    private fun cardCanBePicked(card: Card, stamp: Stamp): Boolean =
+        card.stamp == null && stamp.canBeAppliedTo(card)
 
-    private fun cardSelected(card: Card) {
+    private fun cardSelected(card: Card, stamp: Stamp) {
         val profile = FortyFive.profileManager.currentProfile
         requireNotNull(profile) { "ApplyStampScreen requires profile" }
         val old = card.type
-        val new = old.copy(stamp = context.stamp.name)
+        val new = old.copy(stamp = stamp.name)
         if (profile.isRunActive) {
             profile.swapCardInBackpack(old, new)
         } else {
@@ -243,7 +256,7 @@ class ApplyStampScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, true)
+        BiomeBackgroundScreenController(screen)
     )
 
     companion object : ScreenManager.ScreenCreatorCompanion {
@@ -252,5 +265,5 @@ class ApplyStampScreen : ScreenCreator() {
 }
 
 interface ApplyStampScreenContext {
-    val stamp: Stamp
+    var stampName: String?
 }

@@ -3,15 +3,19 @@ package com.microwavestudios.fortyfive.screen.screens
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
+import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.keyInput.GameInputs
+import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import kotlin.reflect.KClass
 
 class LoseRunScreen : ScreenCreator() {
@@ -42,18 +46,26 @@ class LoseRunScreen : ScreenCreator() {
         verticalAlign = CustomAlign.CENTER
         horizontalAlign = CustomAlign.CENTER
 
-        label("red wing", "You lost!", Color.Red, 128) {
-            syncDimensions()
+        label("red wing", "You lost!", Colors.Red, 140) {
+            touchable = Touchable.disabled
+            relativeWidth(100f)
+            height = 180f
+            setAlignment(Align.center)
         }
-        label("roadgeek", "Press any key to continue", Color.FortyWhite, 24) {
-            syncDimensions()
+        label("roadgeek", "Press any key to continue", Colors.FortyWhite, 30) {
+            touchable = Touchable.disabled
+            relativeWidth(100f)
+            height = 40f
+            setAlignment(Align.center)
+        }
+
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        onInput(GameInputs.anyMouseClick) {
+            FortyFive.screenManager.screenFinished()
         }
 
         val listener = object : InputListener() {
-
-            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
-                FortyFive.screenManager.screenFinished()
-            }
 
             override fun keyUp(event: InputEvent?, keycode: Int): Boolean {
                 FortyFive.screenManager.screenFinished()

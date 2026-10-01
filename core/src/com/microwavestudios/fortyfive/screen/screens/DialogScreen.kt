@@ -109,7 +109,7 @@ class DialogScreen : ScreenCreator() {
                         { backgroundHandle = "dialog_answer_option" },
                     )
                     onInput(GameInputs.interact) { currentPromise?.resolve(choice) }
-                    label("roadgeek", choice, Color.FortyWhite, (24 * 1.1).toInt()) {
+                    label("roadgeek", choice, Colors.FortyWhite, (24 * 1.1).toInt()) {
                         wrap = true
                         relativeWidth(90f)
                         syncHeight()
@@ -229,7 +229,7 @@ class DialogScreen : ScreenCreator() {
 
     private fun CustomGroup.textWidget() {
         val advTextWidget = AnimatedAdvancedTextWidget(
-            Triple("red wing", Color.FortyWhite, 16),
+            Triple("red wing", Colors.FortyWhite, 16),
             screen,
         )
         actor(advTextWidget) {
@@ -261,6 +261,17 @@ class DialogScreen : ScreenCreator() {
                 nameLabels()
             }
 
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            onInput(GameInputs.interact) {
+                if (!advTextWidget.isFinished) return@onInput
+                events.fire(DialogScreenController.NextClicked)
+            }
+            onInput(GameInputs.dialogContinue) {
+                if (!advTextWidget.isFinished) return@onInput
+                events.fire(DialogScreenController.NextClicked)
+            }
+
             val continueButton = image {
                 positionType = PositionType.ABSOLUTE
                 backgroundHandle = "common_symbol_arrow_right"
@@ -268,16 +279,6 @@ class DialogScreen : ScreenCreator() {
                 height = 40F
                 y = (parent.height - height) / 2
                 x = parent.width - 100F
-                touchable = Touchable.enabled
-                keyboardFocusable = KeyboardFocusable.LEAF
-                onInput(GameInputs.interact) {
-                    if (!advTextWidget.isFinished) return@onInput
-                    events.fire(DialogScreenController.NextClicked)
-                }
-                onInput(GameInputs.dialogContinue) {
-                    if (!advTextWidget.isFinished) return@onInput
-                    events.fire(DialogScreenController.NextClicked)
-                }
             }
 
             events.watchFor<DialogScreenController.ChangeToNewDialogPart> { (part) ->
@@ -295,7 +296,7 @@ class DialogScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         dialogController,
-        BiomeBackgroundScreenController(screen, true),
+        BiomeBackgroundScreenController(screen),
         timelines
     )
 

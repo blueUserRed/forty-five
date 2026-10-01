@@ -30,7 +30,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.alpha
 import kotlin.math.abs
@@ -52,7 +52,7 @@ class ChooseCardScreen : ScreenCreator() {
 
     override val transitions: Map<String, ScreenManager.ScreenTransition> = mapOf(
         name to noTransition(),
-        "*" to fadeToBlackTransition(700)
+        "*" to fadeToBlackTransition(300)
     )
 
     private val context: ChooseCardScreenContext by lazy { context() }
@@ -98,7 +98,7 @@ class ChooseCardScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.SPACE_AROUND
 
-            label("red wing", "", Color.FortyWhite, (32 * 1.3).toInt()) {
+            label("red wing", "", Colors.FortyWhite, (32 * 1.3).toInt()) {
                 syncDimensions()
                 events.watchFor<CardsChangedEvent> { (cards) ->
                     setText(if (cards.size == 1) "You get a card!" else "Choose a card!")
@@ -133,7 +133,7 @@ class ChooseCardScreen : ScreenCreator() {
                         logicalOffsetY = yPos * 10f
                         touchable = Touchable.enabled
                         keyboardFocusable = KeyboardFocusable.LEAF
-                        val dropShadow = SquareDropShadow(Color.GOLD, scale = 1.2f, blurFactor = 0.8f, showDropShadow = false)
+                        val dropShadow = SquareDropShadow(Colors.GOLD, scale = 1.2f, blurFactor = 0.8f, showDropShadow = false)
                         this.dropShadow = dropShadow
                         observeInputState(
                             GameInputs.States.inDrag,
@@ -149,7 +149,7 @@ class ChooseCardScreen : ScreenCreator() {
                     }
                 }
             }
-            label("red wing", "Drag to add to your deck or backpack", Color.FortyWhite, (32 * 0.7).toInt()) {
+            label("red wing", "Drag to add to your deck or backpack", Colors.FortyWhite, (32 * 0.7).toInt()) {
                 syncDimensions()
             }
             if (context.enableRerolls) box(backgroundHints = buttonBackgroundHints()) {
@@ -161,7 +161,7 @@ class ChooseCardScreen : ScreenCreator() {
                 defaultButtonConfig()
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
-                val label = label("roadgeek", "", Color.FortyWhite, 24) {
+                val label = label("roadgeek", "", Colors.FortyWhite, 24) {
                     setText("reroll: \$$rerollPrice")
                     touchable = Touchable.disabled
                     syncDimensions()
@@ -391,7 +391,7 @@ class ChooseCardScreen : ScreenCreator() {
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, true)
+        BiomeBackgroundScreenController(screen)
     )
 
     private data object RecheckAddToDeck

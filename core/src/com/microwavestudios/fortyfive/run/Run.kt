@@ -61,7 +61,7 @@ data class Run(
             onj.get<OnjArray>("modifiers").value.map { RunModifier.get(it.value as String) },
             onj.get<OnjArray>("challenges")
                 .value
-                .map { RunChallengeFactory.get(it.value as OnjNamedObject) },
+                .map { RunChallengeFactory.get(it as OnjNamedObject) },
             onj.get<OnjArray>("rewards").value.map {
                 it as OnjNamedObject
                 RunReward.fromOnj(it)

@@ -1,6 +1,5 @@
 package com.microwavestudios.fortyfive.game.card
 
-import com.badlogic.gdx.utils.Predicate
 import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
@@ -8,10 +7,6 @@ import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.collectTimeline
-import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
-import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace.damage
-import com.microwavestudios.fortyfive.onjNamespaces.OnjCardPredicate
-import com.microwavestudios.fortyfive.onjNamespaces.OnjZone
 
 abstract class BulletBehaviour(val supportsBeingAddedLater: Boolean) {
 

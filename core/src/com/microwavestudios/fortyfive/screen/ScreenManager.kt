@@ -15,10 +15,11 @@ import kotlin.reflect.KVisibility
  *
  * The ScreenManager maintains a list of screens that should be shown after the
  * current screen finishes. Screens can be added to the list via the [appendScreen]
- * and [ensureNextScreen] functions. If [screenFinished] is then called, the
- * ScreenManager will transition to the next screen in the list. If the list
- * is empty, the current base screen will be chosen instead. The base screen
- * is typically either the title or the map screen.
+ * and [ensureNextScreen] functions. There are also functions available that allow
+ * adding an entire [ScreenChain], which itself is a list of screens. If
+ * [screenFinished] is then called, the ScreenManager will transition to the next
+ * screen in the list. If the list is empty, the current base screen will be chosen
+ * instead. The base screen is typically either the title or the map screen.
  */
 class ScreenManager(
     private var baseScreen: Pair<() -> ScreenBuilder, Any?>
@@ -79,6 +80,14 @@ class ScreenManager(
     }
 
     /**
+     * appends multiple screens to the end of the list of screens (see [ScreenManager])
+     */
+    fun appendScreens(screenChain: ScreenChain) {
+        FortyFive.logger.debug(logTag, "screens appended: $screenChain")
+        chain.append(screenChain)
+    }
+
+    /**
      * add a screen to the start of the list of screens (see [ScreenManager])
      */
     fun ensureNextScreen(screenBuilder: ScreenBuilder, context: Any? = null) {
@@ -93,6 +102,14 @@ class ScreenManager(
         FortyFive.logger.debug(logTag, "ensure next screen: ${creatorCompanion.creatorClass.simpleName}")
         val creator = creatorFromClass(creatorCompanion.creatorClass)
         chain.pushScreenToFront(FromKotlinScreenBuilder(creator), context)
+    }
+
+    /**
+     * add multiple screens to the start of the list of screens (see [ScreenManager])
+     */
+    fun ensureNextScreens(screenChain: ScreenChain) {
+        FortyFive.logger.debug(logTag, "ensure next screens: $screenChain")
+        chain.pushScreensToFront(screenChain)
     }
 
     fun update() {
@@ -153,7 +170,10 @@ class ScreenManager(
         this.timeline.appendAction(timeline.asAction())
     }
 
-    private class ScreenChain(screens: List<Pair<ScreenBuilder, Any?>>) {
+    /**
+     * see [com.microwavestudios.fortyfive.screen.ScreenManager]
+     */
+    class ScreenChain(screens: List<Pair<ScreenBuilder, Any?>>) {
 
         private val screens: MutableList<Pair<ScreenBuilder, Any?>> = screens.toMutableList()
 
@@ -163,10 +183,36 @@ class ScreenManager(
             screens.add(builder to context)
         }
 
+        fun append(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+            val creator = creatorFromClass(creatorCompanion.creatorClass)
+            screens.add(FromKotlinScreenBuilder(creator) to context)
+        }
+
         fun pushScreenToFront(builder: ScreenBuilder, context: Any? = null) {
             screens.add(0, builder to context)
         }
 
+        fun pushScreenToFront(creatorCompanion: ScreenCreatorCompanion, context: Any? = null) {
+            val creator = creatorFromClass(creatorCompanion.creatorClass)
+            screens.add(0, FromKotlinScreenBuilder(creator) to context)
+        }
+
+        fun append(screenChain: ScreenChain) {
+            screens.addAll(screenChain.screens)
+            screenChain.screens.clear()
+        }
+
+        fun pushScreensToFront(screenChain: ScreenChain) {
+            screens.addAll(0, screenChain.screens)
+            screenChain.screens.clear()
+        }
+
+        override fun toString(): String = screens.joinToString(
+            prefix = "[",
+            postfix = "]",
+            transform = { it.first.name },
+            separator = ", "
+        )
     }
 
     interface ScreenCreatorCompanion {

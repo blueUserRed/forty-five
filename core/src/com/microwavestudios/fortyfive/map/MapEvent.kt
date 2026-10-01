@@ -4,11 +4,17 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.game.card.Stamp
+import com.microwavestudios.fortyfive.game.card.StampFactory
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
+import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventFactory
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.DifficultyScaling
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunBehaviour
+import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.run.RunModifier
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screenController.DialogScreenContext
@@ -48,7 +54,11 @@ object MapEventFactory {
         "EncounterPlaceholderMapEvent" to { EncounterPlaceholderMapEvent.fromOnj(it) },
         "ChooseCardMapEvent" to { ChooseCardMapEvent.fromOnj(it) },
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
-        "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() }
+        "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() },
+        "SpecialEventMapEvent" to { SpecialEventMapEvent.fromOnj(it) },
+        "ApplyStampMapEvent" to {
+            ApplyStampMapEvent(it.get<String?>("stampName"))
+        }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -249,6 +259,18 @@ class EncounterMapEvent(
         null
     }
 
+    init {
+        val enemyGroups = RunGeneratorConfig.enemyGroups
+        val enemiesString = encounter
+            .enemiesGroups
+            .mapNotNull { enemyGroups[it]?.title }
+            .joinToString(separator = ", ")
+        setDescriptionText(listOf(
+            MapPredicate.Not(MapPredicate.CurrentNodeCompleted) to "Fight enemies to progress: $enemiesString",
+            MapPredicate.CurrentNodeCompleted to "All enemies defeated"
+        ))
+    }
+
     override fun start() {
         FortyFive.profileManager.currentProfile?.encounterStarted()
         FortyFive.screenManager.appendScreen(EncounterScreen, this)
@@ -311,6 +333,7 @@ class EncounterPlaceholderMapEvent(
         "difficultyScaling" with difficultyScaling.toOnj()
         "scaleMin" with scaleMin
         "scaleMax" with scaleMax
+        includeStandardConfig()
     }
 
     companion object {
@@ -327,7 +350,7 @@ class EncounterPlaceholderMapEvent(
             onj.get<Double>("scaleMin").toFloat(),
             onj.get<Double>("scaleMax").toFloat(),
             onj.get<Long>("seed"),
-        )
+        ).apply { setStandardValuesFromConfig(onj) }
     }
 
 }
@@ -346,7 +369,7 @@ class EnterMapMapEvent(val targetMap: String, val fromEnd: Boolean) : MapEvent()
 
     override fun start() {
         FortyFive.profileManager.currentProfile!!.changeToMap(targetMap, fromEnd)
-        FortyFive.screenManager.appendScreen(MapScreen, this)
+        FortyFive.screenManager.appendScreen(MapScreen, MapScreenContext.default)
         FortyFive.screenManager.screenFinished()
     }
 
@@ -442,6 +465,31 @@ class ShopMapEvent(
     }
 }
 
+class ApplyStampMapEvent(
+    override var stampName: String?,
+) : MapEvent(), ApplyStampScreenContext, Completable {
+
+    override var isCompleted: Boolean = false
+    override val displayDescription: Boolean = true
+    override val nodeTexture: ResourceHandle = "map_node_choose_card"
+
+    override val displayName: String = "You get a stamp"
+
+    override fun start() {
+        FortyFive.screenManager.appendScreen(ApplyStampScreen, this)
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("ApplyStampMapEvent")
+        "stampName" with stampName
+    }
+
+    override fun completed() {
+        isCompleted = true
+    }
+}
+
 /**
  * event that opens a shop where the player can buy up to 8 cards
  * @param types which type the restrictions are
@@ -496,6 +544,45 @@ class ChooseCardMapEvent(
             onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             onj.get<Long>("nbrOfCards").toInt(),
         ).apply { setStandardValuesFromConfig(onj) }
+    }
+}
+
+class SpecialEventMapEvent() : MapEvent() {
+
+    override var isCompleted: Boolean = false
+    override val displayName: String = "!Event"
+
+    override val displayDescription: Boolean = true
+    override val nodeTexture: ResourceHandle = "map_node_special_event"
+
+    init {
+        setDescriptionText(listOf(
+            MapPredicate.Always to "Something good, something bad, maybe a bit of both?"
+        ))
+    }
+
+    override fun start() {
+        val context = object : SpecialEventScreenContext {
+
+            override val specialEvent: SpecialEvent = SpecialEventFactory.getRandomSpecialEvent()
+
+            override fun onComplete() {
+                isCompleted = true
+            }
+        }
+        FortyFive.screenManager.appendScreen(SpecialEventScreen, context)
+        FortyFive.screenManager.screenFinished()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("SpecialEventMapEvent")
+        includeStandardConfig()
+    }
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): SpecialEventMapEvent =
+            SpecialEventMapEvent().apply { setStandardValuesFromConfig(onj) }
     }
 }
 

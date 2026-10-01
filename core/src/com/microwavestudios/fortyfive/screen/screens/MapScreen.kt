@@ -30,7 +30,7 @@ import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.requireNot
 import kotlin.reflect.KClass
@@ -55,6 +55,8 @@ class MapScreen : ScreenCreator() {
         "*" to geometricFadeTransition()
     )
 
+    private val context: MapScreenContext by lazy { context() }
+
     private val mapSaver: MapSaver by lazy {
         FortyFive.profileManager.currentProfile!!.currentMapSaver
     }
@@ -63,7 +65,6 @@ class MapScreen : ScreenCreator() {
         DetailMapWidget(
             screen = screen,
             defaultNodeDrawableHandle = "map_node_default",
-            edgeTextureHandle = "map_path",
             playerDrawableHandle = "map_player",
             playerWidth = 170f,
             playerHeight = 170f,
@@ -81,16 +82,15 @@ class MapScreen : ScreenCreator() {
         )
     }
 
-    private val tutorialInfoActor by lazy {
-        TutorialInfoActor(
-            "tutorial_info_actor_background",
-            2f,
-            200f,
-            screen
-        )
+    private val mapScreenController = object : ScreenController() {
+
+        override fun onActive() {
+            val teleportPlayerTo = context.teleportPlayerTo ?: return
+            mapWidget.teleportPlayer(teleportPlayerTo)
+        }
     }
 
-    override fun getScreenControllers(): List<ScreenController> = listOf()
+    override fun getScreenControllers(): List<ScreenController> = listOf(mapScreenController)
 
     override fun getRoot(): Group = newGroup {
         x = 0f
@@ -124,13 +124,13 @@ class MapScreen : ScreenCreator() {
                 verticalAlign = CustomAlign.SPACE_AROUND
                 horizontalAlign = CustomAlign.CENTER
 
-                label("red wing", "used steps: ${profile.usedSteps}", Color.Black, 24) {
+                label("red wing", "used steps: ${profile.usedSteps}", Colors.Black, 24) {
                     syncDimensions()
                     screen.events.watchFor<RunSave.UsedStepsChangedEvent> { event ->
                         setText("used steps: ${event.newUsedSteps}")
                     }
                 }
-                label("red wing", "min/max: ${run.minSteps}/${run.maxSteps}", Color.Black, 24) {
+                label("red wing", "min/max: ${run.minSteps}/${run.maxSteps}", Colors.Black, 24) {
                     syncDimensions()
                 }
             }
@@ -219,7 +219,7 @@ class MapScreen : ScreenCreator() {
 
             eventName = label("red wing", "", fontSize = (32 * 1.3).toInt()) {
                 wrap = true
-                fontColor = Color.White
+                fontColor = Colors.White
                 setAlignment(Align.center)
                 relativeWidth(90f)
                 syncHeight()
@@ -228,7 +228,7 @@ class MapScreen : ScreenCreator() {
             eventDescription = label("red wing", "", fontSize = (32 * 0.7).toInt()) {
                 wrap = true
                 setAlignment(Align.center)
-                fontColor = Color.White
+                fontColor = Colors.White
                 relativeWidth(90f)
                 syncHeight()
             }
@@ -242,7 +242,7 @@ class MapScreen : ScreenCreator() {
             setAlignment(Align.center)
             width = 200f * 0.8f
             height = 60f
-            fontColor = Color.Red
+            fontColor = Colors.Red
             backgroundHandle = "map_detail_encounter_button"
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
@@ -276,12 +276,12 @@ class MapScreen : ScreenCreator() {
                 GameInputs.States.focused,
                 {
                     backgroundHandle = "map_detail_encounter_button_hover"
-                    fontColor = Color.White
+                    fontColor = Colors.White
                     dropShadow.showDropShadow = true
                 },
                 {
                     backgroundHandle = "map_detail_encounter_button"
-                    fontColor = Color.Red
+                    fontColor = Colors.Red
                     dropShadow.showDropShadow = false
                 },
             )
@@ -318,7 +318,7 @@ class MapScreen : ScreenCreator() {
 
         isVisible = false
 
-        val label = label("roadgeek", "", Color.FortyWhite, fontSize = (32 * 0.6).toInt()) {
+        val label = label("roadgeek", "", Colors.FortyWhite, fontSize = (32 * 0.6).toInt()) {
             setAlignment(Align.center)
             badTexture("map info popup warning label")
             wrap = true
@@ -365,14 +365,14 @@ class MapScreen : ScreenCreator() {
                 syncHeight()
 
                 label("red wing", name, fontSize = (32 * 0.6).toInt()) {
-                    fontColor = Color.Red
+                    fontColor = Colors.Red
                     setAlignment(Align.left)
                     relativeWidth(100f)
                     syncHeight()
                 }
 
                 label("red wing", description, fontSize = 16) {
-                    fontColor = Color.Black
+                    fontColor = Colors.Black
                     wrap = true
                     setAlignment(Align.left)
                     relativeWidth(100f)
@@ -401,5 +401,17 @@ class MapScreen : ScreenCreator() {
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = MapScreen::class
+    }
+}
+
+interface MapScreenContext {
+
+    val teleportPlayerTo: MapNode?
+
+    companion object {
+
+        val default = object : MapScreenContext {
+            override val teleportPlayerTo: MapNode? = null
+        }
     }
 }

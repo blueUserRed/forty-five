@@ -16,6 +16,7 @@ import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.random.Random
 
@@ -55,6 +56,11 @@ interface GameController {
      * times
      */
     val revolverRotationCounter: Int
+
+    /**
+     * like [revolverRotationCounter] but resets every turn
+     */
+    val revolverRotationCountInTurn: Int
 
     /**
      * total amount of turns the game has lasted for. A turn ends when the "holster" button is pressed
@@ -151,6 +157,10 @@ interface GameController {
 
     fun removeAllPlayerStatusEffectsTimeline(): Timeline
 
+    fun removePlayerStatusEffect(effect: StatusEffect): Timeline
+
+    fun removeEnemyStatusEffect(enemy: Enemy, effect: StatusEffect): Timeline
+
     /**
      * puts a specific [card] from the stack into the hand
      */
@@ -189,6 +199,13 @@ interface GameController {
     fun resurrectTimeline(intoSlot: Int): Timeline
 
     fun shoot()
+
+    fun askParryTimeline(
+        enemy: Enemy,
+        value: Int,
+        resultValue: Promise<Int>,
+        texts: (remainingDamage: Int) -> Pair<String, String>
+    ): Timeline
 
     /**
      * gives the player more reserves. [source] is used for animations

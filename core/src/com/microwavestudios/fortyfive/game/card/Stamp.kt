@@ -1,6 +1,8 @@
 package com.microwavestudios.fortyfive.game.card
 
 import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.run.RunGeneratorConfig
+import kotlin.random.Random
 
 /**
  * a stamp can be put on a card to modify its behaviour
@@ -182,19 +184,40 @@ object StampFactory {
     private val stampCreators: MutableMap<String, () -> Stamp> = mutableMapOf()
 
     init {
-        addStampCreator(Stamp.Bewitched.name) { Stamp.Bewitched }
-        addStampCreator(Stamp.PoisonTip.name) { Stamp.PoisonTip }
-        addStampCreator(Stamp.Jammed.name) { Stamp.Jammed }
-        addStampCreator(Stamp.Undead.name) { Stamp.Undead }
-        addStampCreator(Stamp.Gauge.name) { Stamp.Gauge }
-        addStampCreator(Stamp.HighVelocity.name) { Stamp.HighVelocity }
-        addStampCreator(Stamp.Phantom.name) { Stamp.Phantom }
-        addStampCreator(Stamp.Catalyst.name) { Stamp.Catalyst }
-        addStampCreator(Stamp.Spirit.name) { Stamp.Spirit }
-        addStampCreator(Stamp.FiftyCal.name) { Stamp.FiftyCal }
+        addStampCreator(Stamp.Bewitched)
+        addStampCreator(Stamp.PoisonTip)
+        addStampCreator(Stamp.Jammed)
+        addStampCreator(Stamp.Undead)
+        addStampCreator(Stamp.Gauge)
+        addStampCreator(Stamp.HighVelocity)
+        addStampCreator(Stamp.Phantom)
+        addStampCreator(Stamp.Catalyst)
+        addStampCreator(Stamp.Spirit)
+        addStampCreator(Stamp.FiftyCal)
     }
 
-    fun addStampCreator(name: String, creator: () -> Stamp) {
+    fun getRandomStamp(majorDifficulty: Int, random: Random): Stamp {
+        val stampPools = RunGeneratorConfig.stampPools
+        var allowedStamps: List<String>? = null
+        var difficultyToCheck = majorDifficulty
+        while (difficultyToCheck >= 0) {
+            val curPool = stampPools[difficultyToCheck]
+            if (curPool != null) {
+                allowedStamps = curPool
+                break
+            }
+            difficultyToCheck--
+        }
+        requireNotNull(allowedStamps) { "no allowed stamps configured for difficulty $majorDifficulty" }
+        val stampName = allowedStamps.random(random)
+        return createStamp(stampName)
+    }
+
+    fun addStampCreator(stamp: Stamp) {
+        addStampCreator(stamp.name) { stamp }
+    }
+
+    private fun addStampCreator(name: String, creator: () -> Stamp) {
         require(!stampCreators.containsKey(name)) { "Stamp with name '$name' already exists" }
         stampCreators[name] = creator
     }

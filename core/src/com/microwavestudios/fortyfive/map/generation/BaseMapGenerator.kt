@@ -276,7 +276,6 @@ abstract class BaseMapGenerator {
             val encounterEvent = EncounterMapEvent(encounter, event.genExtraction)
             event.startConditions.forEach { encounterEvent.addStartCondition(it) }
             event.blockConditions.forEach { encounterEvent.addBlockCondition(it) }
-            encounterEvent.setDescriptionText(event.descriptionText)
             node.event = encounterEvent
         }
     }

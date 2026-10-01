@@ -1,16 +1,13 @@
 package com.microwavestudios.fortyfive.screen.screenController
 
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.GraphicsConfig
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
-import kotlin.math.sin
 
 class BiomeBackgroundScreenController(
     private val screen: RenderableScreen,
-    private val useSecondary: Boolean,
     private val zoom: Float = 1f
 ) : ScreenController() {
 
@@ -19,11 +16,8 @@ class BiomeBackgroundScreenController(
 
     override fun init(context: Any?) {
         val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome ?: return
-        val background = if (useSecondary) {
-            GraphicsConfig.secondaryBackgroundFor(biome)
-        } else {
-            GraphicsConfig.encounterBackgroundFor(biome)
-        }
+        val backgrounds = GraphicsConfig.encounterBackgroundsFor(biome)
+        val background = backgrounds.random().first
         val bg = FortyFive.resourceManager.request<Drawable>(screen, screen.lifetime, background)
         screen.addEarlyRenderTask { batch ->
             val bg = bg.getOrNull() ?: return@addEarlyRenderTask

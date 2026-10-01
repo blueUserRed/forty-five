@@ -156,6 +156,14 @@ class FortyFiveLogger {
         writeln("-------------$message-------------")
     }
 
+    fun rawPrint(s: String) {
+        outputs.forEach { it.first.print(s) }
+    }
+
+    fun rawPrintln(s: String) {
+        outputs.forEach { it.first.println(s) }
+    }
+
     private fun outputOrError(config: OnjNamedObject): Pair<PrintStream, Boolean> = when (val name = config.name) {
 
         "Console" -> System.out to true

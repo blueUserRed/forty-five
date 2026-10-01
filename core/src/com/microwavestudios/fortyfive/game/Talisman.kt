@@ -7,6 +7,7 @@ abstract class Talisman {
     abstract val name: String
     abstract val title: String
     abstract val description: String
+    open val flavourText: String? = null
 
     open fun behaviours(): List<EncounterBehaviour> = listOf()
 
@@ -89,6 +90,25 @@ abstract class Talisman {
         )
     }
 
+    object Overstock : Talisman() {
+
+        override val name: String = "overstock"
+        override val title: String = "Overstock"
+
+        override val description: String = """
+            As long as your deck has at least 25 cards:
+            You start the turn with +1 reserve
+        """.trimIndent().replace('\n', ' ')
+
+        override val flavourText: String = """
+            Maybe 3 extra pairs of underwear and the 10 bottles whisky were a little bit overkill, I admit.
+        """.trimIndent().replace('\n', ' ')
+
+        override fun behaviours(): List<EncounterBehaviour> = listOf(
+            EncounterBehaviour.BonusReserveIfDeckHasAtLeast25Cards
+        )
+    }
+
 }
 
 object TalismanFactory {
@@ -102,6 +122,7 @@ object TalismanFactory {
         addTalisman(Talisman.SleepingBag)
         addTalisman(Talisman.Lasso)
         addTalisman(Talisman.WintersGrace)
+        addTalisman(Talisman.Overstock)
     }
 
     fun addTalisman(talisman: Talisman) {

@@ -30,6 +30,8 @@ class MockProfile(
     override val wonRuns: Int
         get() = data.wonRuns
 
+    override var usedSteps: Int = 0
+
     private var currentCollectionDeckId: Int
         get() = data.currentDeckId
         set(value) {
@@ -91,6 +93,10 @@ class MockProfile(
 
     override fun addCardToCollection(card: CardType) {
         data.cardCollection.add(card)
+    }
+
+    override fun stepTaken() {
+        usedSteps++
     }
 
     override fun swapCardInCollection(

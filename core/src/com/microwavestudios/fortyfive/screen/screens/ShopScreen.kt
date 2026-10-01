@@ -77,7 +77,7 @@ class ShopScreen : ScreenCreator() {
     private var rerollPrice: Int = 0
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
-        BiomeBackgroundScreenController(screen, true)
+        BiomeBackgroundScreenController(screen)
     )
 
     override fun getRoot(): Group = newGroup {
@@ -141,7 +141,7 @@ class ShopScreen : ScreenCreator() {
                 touchable = Touchable.enabled
                 keyboardFocusable = KeyboardFocusable.LEAF
                 logicalOffsetY = 55f
-                val label = label("roadgeek", "", Color.FortyWhite, 24) {
+                val label = label("roadgeek", "", Colors.FortyWhite, 24) {
                     setText("reroll: $rerollPrice\$")
                     syncDimensions()
                     touchable = Touchable.disabled
@@ -155,7 +155,7 @@ class ShopScreen : ScreenCreator() {
             label(
                 "red wing",
                 "drag to the merchant to confirm your purchase and add it to your backpack",
-                Color.FortyWhite,
+                Colors.FortyWhite,
                 (32 * 0.7).toInt()
             ) {
                 logicalOffsetY = 55f
@@ -352,7 +352,7 @@ class ShopScreen : ScreenCreator() {
                 label(
                     "red wing",
                     npc.displayName,
-                    Color.FortyWhite,
+                    Colors.FortyWhite,
                     64,
                     isTemplate = true
                 ) {
@@ -390,7 +390,7 @@ class ShopScreen : ScreenCreator() {
 
         advancedText(
             "roadgeek",
-            defaultColor = Color.FortyWhite,
+            defaultColor = Colors.FortyWhite,
             defaultFontSize = 19,
         ) {//subtext
             relativeWidth(100f)

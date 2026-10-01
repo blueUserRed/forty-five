@@ -10,20 +10,20 @@ fonts: [
             {
                 size: 200,
                 resourceHandle: "redwing200",
-                fontFile: "blobs/fonts2/redwing200.fnt",
-                imageFile: "blobs/fonts2/redwing200.png",
+                fontFile: "blobs/fonts/redwing200.fnt",
+                imageFile: "blobs/fonts/redwing200.png",
             },
             {
                 size: 100,
                 resourceHandle: "redwing100",
-                fontFile: "blobs/fonts2/redwing100.fnt",
-                imageFile: "blobs/fonts2/redwing100.png",
+                fontFile: "blobs/fonts/redwing100.fnt",
+                imageFile: "blobs/fonts/redwing100.png",
             },
             {
                 size: 60,
                 resourceHandle: "redwing60",
-                fontFile: "blobs/fonts2/redwing60.fnt",
-                imageFile: "blobs/fonts2/redwing60.png",
+                fontFile: "blobs/fonts/redwing60.fnt",
+                imageFile: "blobs/fonts/redwing60.png",
             }
         ]
     },
@@ -33,73 +33,24 @@ fonts: [
             {
                 size: 200,
                 resourceHandle: "roadgeek200",
-                fontFile: "blobs/fonts2/roadgeek200.fnt",
-                imageFile: "blobs/fonts2/roadgeek200.png"
+                fontFile: "blobs/fonts/roadgeek200.fnt",
+                imageFile: "blobs/fonts/roadgeek200.png"
             },
             {
                 size: 100,
                 resourceHandle: "roadgeek100",
-                fontFile: "blobs/fonts2/roadgeek100.fnt",
-                imageFile: "blobs/fonts2/roadgeek100.png"
+                fontFile: "blobs/fonts/roadgeek100.fnt",
+                imageFile: "blobs/fonts/roadgeek100.png"
             },
             {
                 size: 60,
                 resourceHandle: "roadgeek60",
-                fontFile: "blobs/fonts2/roadgeek60.fnt",
-                imageFile: "blobs/fonts2/roadgeek60.png"
+                fontFile: "blobs/fonts/roadgeek60.fnt",
+                imageFile: "blobs/fonts/roadgeek60.png"
             }
         ]
     },
 ],
-
-/*
-fonts: [
-
-    {
-        name: "red_wing",
-        fontFile: "blobs/fonts/red_wing_df.fnt",
-        imageFile: "blobs/fonts/red_wing_df.png",
-        stayLoaded: true,
-    },
-    {
-        name: "red_wing_cm",
-        fontFile: "blobs/fonts/red_wing_df.fnt",
-        imageFile: "blobs/fonts/red_wing_df.png",
-        markupEnabled: true
-    },
-    {
-        name: "red_wing_bmp",
-        fontFile: "blobs/fonts/red_wing_bmp.fnt",
-        imageFile: "blobs/fonts/red_wing_bmp.png",
-        stayLoaded: true,
-    },
-    {
-        name: "red_wing_bmp_cm",
-        fontFile: "blobs/fonts/red_wing_bmp.fnt",
-        imageFile: "blobs/fonts/red_wing_bmp.png",
-        markupEnabled: true
-    },
-    {
-        name: "roadgeek",
-        fontFile: "blobs/fonts/roadgeek_df.fnt",
-        imageFile: "blobs/fonts/roadgeek_df.png",
-        stayLoaded: true,
-    },
-    {
-        name: "roadgeek_cm",
-        fontFile: "blobs/fonts/roadgeek_df.fnt",
-        imageFile: "blobs/fonts/roadgeek_df.png",
-        markupEnabled: true
-    },
-    {
-        name: "roadgeek_bmp",
-        fontFile: "blobs/fonts/roadgeek_bmp.fnt",
-        imageFile: "blobs/fonts/roadgeek_bmp.png",
-        stayLoaded: true,
-    },
-
-],
-*/
 
 pixmapFonts: [
     {
@@ -244,24 +195,100 @@ textures: [
         file: "blobs/game_screen/afterlife/afterlife_icon.png"
     },
     {
-        name: "burning_icon",
-        file: "blobs/status_effects/burning_icon.png",
-    },
-    {
         name: "shield_icon",
-        file: "blobs/status_effects/shield_icon.png",
+        file: "blobs/icons/shield.png",
     },
     {
         name: "poison_icon",
-        file: "blobs/status_effects/poison_icon.png",
+        file: "blobs/icons/status_effects/poison.png",
+    },
+    {
+        name: "poison_immunity_icon",
+        file: "blobs/icons/status_effects/poison_immunity.png",
+    },
+    {
+        name: "burning_icon",
+        file: "blobs/icons/status_effects/burning.png",
     },
     {
         name: "bewitched_icon",
-        file: "blobs/status_effects/bewitched_icon.png",
+        file: "blobs/icons/status_effects/bewitched.png",
     },
     {
-        name: "draw_bullet",
-        file: "blobs/game_screen/draw_bullet.png"
+        name: "frozen_icon",
+        file: "blobs/icons/status_effects/frozen.png",
+    },
+    {
+        name: "weak_icon",
+        file: "blobs/icons/status_effects/weak.png",
+    },
+    {
+        name: "bounty_icon",
+        file: "blobs/icons/status_effects/bounty.png",
+    },
+    {
+        name: "heat_repellent_icon",
+        file: "blobs/icons/status_effects/heat_repellent.png",
+    },
+    {
+        name: "ward_of_the_witch_icon",
+        file: "blobs/icons/status_effects/ward_of_the_witch.png",
+    },
+    {
+        name: "ominous_icon",
+        file: "blobs/icons/status_effects/ominous.png",
+    },
+    {
+        name: "deterring_aura_icon",
+        file: "blobs/icons/status_effects/ominous.png",
+    },
+    {
+        name: "damage_icon",
+        file: "blobs/icons/damage.png",
+    },
+    {
+        name: "cover_icon",
+        file: "blobs/icons/cover.png",
+    },
+    {
+        name: "unknown_icon",
+        file: "blobs/icons/unknown.png",
+    },
+    {
+        name: "hot_potato_icon",
+        file: "blobs/icons/enemy_actions/hot_potato.png",
+    },
+    {
+        name: "parryable_burning_icon",
+        file: "blobs/icons/enemy_actions/parryable_burning.png",
+    },
+    {
+        name: "parryable_poison_icon",
+        file: "blobs/icons/enemy_actions/parryable_poison.png",
+    },
+    {
+        name: "bewitched_left_icon",
+        file: "blobs/icons/enemy_actions/bewitched_left.png",
+    },
+    {
+        name: "bewitched_right_icon",
+        file: "blobs/icons/enemy_actions/bewitched_right.png",
+    },
+    {
+        name: "poison_fangs_icon",
+        file: "blobs/icons/enemy_actions/poison_fangs.png",
+    },
+    {
+        name: "without_a_heart_icon",
+        file: "blobs/icons/enemy_actions/without_a_heart.png",
+    },
+    {
+        name: "scaling_damage_pyro_icon",
+        file: "blobs/icons/enemy_actions/scaling_damage_pyro.png",
+    },
+    {
+        name: "scaling_damage_witch_icon",
+        file: "blobs/icons/enemy_actions/scaling_damage_witch.png",
     },
     {
         name: "player_bar",
@@ -300,20 +327,24 @@ textures: [
         file: "blobs/game_screen/status_effect_background.png"
     },
     {
-        name: "background_wasteland",
-        file: "blobs/backgrounds/wasteland.png"
+        name: "background_wasteland1",
+        file: "blobs/backgrounds/wasteland/wasteland1.png"
     },
     {
-        name: "secondary_background_wasteland",
-        file: "blobs/backgrounds/wasteland_secondary.png"
+        name: "background_wasteland2",
+        file: "blobs/backgrounds/wasteland/wasteland2.png"
+    },
+    {
+        name: "background_wasteland3",
+        file: "blobs/backgrounds/wasteland/wasteland3.png"
     },
     {
         name: "background_bewitched_forest",
-        file: "blobs/backgrounds/bewitched_forest.png"
+        file: "blobs/backgrounds/bewitched_forest/bewitched_forest.png"
     },
     {
         name: "background_magenta_mountains",
-        file: "blobs/backgrounds/magenta_mountains.png"
+        file: "blobs/backgrounds/magenta_mountains/magenta_mountains.png"
     },
     {
         name: "location_sign_aqua_dulche",
@@ -389,10 +420,6 @@ textures: [
         file: "blobs/map/backgrounds/magenta_mountains.png",
     },
     {
-        name: "map_path",
-        file: "blobs/map/path.png"
-    },
-    {
         name: "map_node_default",
         file: "blobs/map/nodes/default_node.png"
     },
@@ -423,6 +450,10 @@ textures: [
     {
         name: "map_node_dialog",
         file: "blobs/map/nodes/dialog.png"
+    },
+    {
+        name: "map_node_special_event",
+        file: "blobs/map/nodes/special_event.png"
     },
     {
         name: "map_player",
@@ -534,6 +565,11 @@ textures: [
     {
         name: "shop_items_background",
         file: "blobs/events/shop/shop_items_background.png"
+    },
+    {
+        name: "special_event_text_background",
+        file: "blobs/events/special_event/special_event_background.png",
+        dropShadow: defaultDropShadowConfig,
     },
     {
         name: "heal_or_max_accept",
@@ -787,112 +823,8 @@ textures: [
         file: "blobs/game_screen/status_bar/effect_box.png",
     },
     {
-        name: "enemy_action_burning",
-        file: "blobs/enemies/action_symbols/burning.png",
-    },
-    {
-        name: "enemy_action_cover",
-        file: "blobs/enemies/action_symbols/cover.png",
-    },
-    {
-        name: "enemy_action_damage",
-        file: "blobs/enemies/action_symbols/damage.png",
-    },
-    {
-        name: "enemy_action_fire_resistance",
-        file: "blobs/enemies/action_symbols/fire_resistance.png",
-    },
-    {
-        name: "enemy_action_hot_potato",
-        file: "blobs/enemies/action_symbols/hot_potato.png",
-    },
-    {
-        name: "enemy_action_inferno",
-        file: "blobs/enemies/action_symbols/inferno.png",
-    },
-    {
-        name: "enemy_action_bewitched",
-        file: "blobs/enemies/action_symbols/bewitched.png",
-    },
-    {
-        name: "enemy_action_left_turn",
-        file: "blobs/enemies/action_symbols/left_turn.png",
-    },
-    {
-        name: "enemy_action_and_its_gone",
-        file: "blobs/enemies/action_symbols/and_its_gone.png",
-    },
-    {
-        name: "enemy_action_goodbyes",
-        file: "blobs/enemies/action_symbols/goodbyes.png",
-    },
-    {
-        name: "enemy_action_heads_up",
-        file: "blobs/enemies/action_symbols/heads_up.png",
-    },
-    {
-        name: "enemy_action_piercing",
-        file: "blobs/enemies/action_symbols/piercing.png",
-    },
-    {
-        name: "enemy_action_unknown",
-        file: "blobs/enemies/action_symbols/unknown.png",
-    },
-    {
-        name: "enemy_pyro_action_comic_common_panel_1",
-        file: "blobs/enemies/pyro/action_comic_common_panel_1.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_common_panel_2",
-        file: "blobs/enemies/pyro/action_comic_common_panel_2.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_common_panel_3",
-        file: "blobs/enemies/pyro/action_comic_common_panel_3.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_burning",
-        file: "blobs/enemies/pyro/action_comic_panel_burning.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_fire_resistance",
-        file: "blobs/enemies/pyro/action_comic_panel_fire_resistance.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_hot_potato",
-        file: "blobs/enemies/pyro/action_comic_panel_hot_potato.png"
-    },
-    {
-        name: "enemy_pyro_action_comic_panel_inferno",
-        file: "blobs/enemies/pyro/action_comic_panel_inferno.png"
-    },
-    {
         name: "enemy_pyro",
         file: "blobs/enemies/pyro/pyro.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_common_panel_1",
-        file: "blobs/enemies/sniper/action_comic_common_panel_1.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_common_panel_2",
-        file: "blobs/enemies/sniper/action_comic_common_panel_2.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_common_panel_3",
-        file: "blobs/enemies/sniper/action_comic_common_panel_3.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_panel_and_its_gone",
-        file: "blobs/enemies/sniper/action_comic_panel_and_its_gone.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_panel_goodbyes",
-        file: "blobs/enemies/sniper/action_comic_panel_goodbyes.png"
-    },
-    {
-        name: "enemy_sniper_action_comic_panel_heads_up",
-        file: "blobs/enemies/sniper/action_comic_panel_heads_up.png"
     },
     {
         name: "enemy_sniper",
@@ -903,36 +835,16 @@ textures: [
         file: "blobs/enemies/witch/witch.png"
     },
     {
-        name: "enemy_witch_action_comic_common_panel_1",
-        file: "blobs/enemies/witch/action_comic_common_panel_1.png"
-    },
-    {
-        name: "enemy_witch_action_comic_common_panel_2",
-        file: "blobs/enemies/witch/action_comic_common_panel_2.png"
-    },
-    {
-        name: "enemy_witch_action_comic_common_panel_3",
-        file: "blobs/enemies/witch/action_comic_common_panel_3.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_bewitched",
-        file: "blobs/enemies/witch/action_comic_panel_bewitched.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_left_turn",
-        file: "blobs/enemies/witch/action_comic_panel_left_turn.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_ward_of_the_witch",
-        file: "blobs/enemies/witch/action_comic_panel_ward_of_the_witch.png"
-    },
-    {
-        name: "enemy_witch_action_comic_panel_wrath_of_the_witch",
-        file: "blobs/enemies/witch/action_comic_panel_wrath_of_the_witch.png"
-    },
-    {
         name: "enemy_outlaw",
         file: "blobs/enemies/outlaw/outlaw.png"
+    },
+    {
+        name: "enemy_the_fangs",
+        file: "blobs/enemies/the_fangs/the_fangs.png"
+    },
+    {
+        name: "enemy_scarecrow",
+        file: "blobs/enemies/scarecrow/scarecrow.png"
     },
     {
         name: "encounter_modifier_frost",
@@ -981,10 +893,6 @@ textures: [
         file: "blobs/cards/detail_widget/detailwidget_small.png"
     },
     {
-        name: "detail_widget_more_info",
-        file: "blobs/cards/detail_widget/detailwidget_more_info.png"
-    },
-    {
         name: "loose_screen_background",
         file: "blobs/loose_screen/background.png"
     },
@@ -1003,14 +911,6 @@ textures: [
     {
         name: "stats_screen_lost_cards_background",
         file: "blobs/stats_screen/lost_cards_background.png"
-    },
-    {
-        name: "card_symbol_saved",
-        file: "blobs/cards/symbols/saved.png"
-    },
-    {
-        name: "card_symbol_not_saved",
-        file: "blobs/cards/symbols/not_saved.png"
     },
     {
         name: "card_symbol_marked",
@@ -1035,10 +935,6 @@ textures: [
     {
         name: "map_extraction_background",
         file: "blobs/map/extraction/background.png"
-    },
-    {
-        name: "map_extraction_symbol",
-        file: "blobs/map/extraction/symbol.png"
     },
     {
         name: "map_extraction_card_background_blue",
@@ -1288,12 +1184,6 @@ shaders: [
         }
     },
     {
-        name: "film_shader",
-        file: "shaders/film.glsl",
-        constantArgs: {
-        }
-    },
-    {
         name: "postprocessor_shader",
         file: "shaders/postprocessor.glsl",
         constantArgs: {
@@ -1386,6 +1276,12 @@ shaders: [
         }
     },
     {
+        name: "heal_shader",
+        file: "shaders/heal.glsl",
+        constantArgs: {
+        }
+    },
+    {
         name: "text_shader",
         file: "shaders/text.glsl",
         constantArgs: {}
@@ -1451,24 +1347,6 @@ ninepatches: [
         left: 3,
         right: 3,
         scale: 2.0
-    },
-    {
-        name: "forty_white_rounded",
-        file: "blobs/ninepatches/forty_white_rounded.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.0025
-    },
-    {
-        name: "taupe_gray_rounded",
-        file: "blobs/ninepatches/taupe_gray_rounded.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.0025
     },
     {
         name: "backpack_scrollbar_background",

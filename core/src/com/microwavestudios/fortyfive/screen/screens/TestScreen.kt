@@ -14,7 +14,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.NewLabel
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import kotlin.reflect.KClass
 
 class TestScreen : ScreenCreator() {
@@ -67,7 +67,7 @@ class TestScreen : ScreenCreator() {
 
         backgroundHandle = "statusbar_option"
 
-        label("red wing", "Backpack", Color.FortyWhite, fontSize = (32 * 0.7).toInt()) {
+        label("red wing", "Backpack", Colors.FortyWhite, fontSize = (32 * 0.7).toInt()) {
             wrap = false
             setAlignment(Align.center)
             relativeWidth(100f)
@@ -77,7 +77,7 @@ class TestScreen : ScreenCreator() {
 
     private fun CustomBox.newLabels() {
 
-        label("red wing", "Backpack", Color.FortyWhite, fontSize = 100) {
+        label("red wing", "Backpack", Colors.FortyWhite, fontSize = 100) {
             wrap = false
             debug()
             relativeWidth(100f)

@@ -82,7 +82,8 @@ abstract class GameControllerTest {
             majorDifficulty = 1,
             minorDifficulty = 1f,
             difficultyScalingInfo = 0f,
-            special = false
+            special = false,
+            isHard = false
         )
         val context = object : EncounterContext {
             override val encounter: Encounter = encounter

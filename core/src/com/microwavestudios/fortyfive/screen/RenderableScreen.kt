@@ -343,8 +343,9 @@ open class RenderableScreen(
         val width = actor.actor.width + 2 * padding
         val height = actor.actor.height + 2 * padding
         val shapeRenderer = keyboardFocusShapeRenderer
+        shapeRenderer.projectionMatrix = viewport.camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color.Blue
+        shapeRenderer.color = Colors.Blue
         shapeRenderer.rectLine(
             x - lineWidth / 2, y - lineWidth / 2,
             x + width, y - lineWidth / 2,

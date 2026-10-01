@@ -454,10 +454,10 @@ class MapEditorWidget(
         val end = scaledNodePos(mapBuilder.endNode) + mapOffset
         shapeRenderer.flush()
         Gdx.gl.glLineWidth(4f)
-        shapeRenderer.color = Color.Green
+        shapeRenderer.color = Colors.Green
         shapeRenderer.rect(start.x, start.y, nodeSize, nodeSize)
         shapeRenderer.flush()
-        shapeRenderer.color = Color.Red
+        shapeRenderer.color = Colors.Red
         shapeRenderer.rect(end.x, end.y, nodeSize, nodeSize)
     }
 
@@ -467,7 +467,7 @@ class MapEditorWidget(
         val height = decoration.baseHeight * instance.scale * mapScale
         val (x, y) = instance.position * mapScale + mapOffset
         shapeRenderer.flush()
-        shapeRenderer.color = Color.Blue
+        shapeRenderer.color = Colors.Blue
         Gdx.gl.glLineWidth(10f)
         shapeRenderer.rect(x, y, width, height)
     }
@@ -475,7 +475,7 @@ class MapEditorWidget(
     private fun drawSelectedNodeIndicator() {
         val node = selectedNode ?: return
         val coords = scaledNodePos(node) + mapOffset
-        shapeRenderer.color = Color.Blue
+        shapeRenderer.color = Colors.Blue
         shapeRenderer.flush()
         Gdx.gl.glLineWidth(10f)
         shapeRenderer.circle(x + coords.x + nodeSize / 2, y + coords.y + nodeSize / 2, nodeSize / 2)

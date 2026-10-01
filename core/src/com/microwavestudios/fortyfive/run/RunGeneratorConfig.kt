@@ -86,6 +86,18 @@ object RunGeneratorConfig {
             }
     }
 
+    val stampPools: Map<Int, List<String>> by lazy {
+        configFile
+            .get<OnjArray>("stampPools")
+            .value
+            .associate { obj ->
+                obj as OnjObject
+                val difficulty = obj.get<Long>("majorDifficulty").toInt()
+                val stamps = obj.get<OnjArray>("stamps").value.map { it.value as String }
+                difficulty to stamps
+            }
+    }
+
     val enemyConfig: List<EnemyConfig> by lazy {
         configFile
             .get<OnjArray>("enemies")
@@ -114,13 +126,14 @@ object RunGeneratorConfig {
             }
     }
 
-    val enemyGroups: Map<String, Map<Int, String>> by lazy {
+    val enemyGroups: Map<String, EnemyGroup> by lazy {
         enemiesFile
             .get<OnjArray>("enemyGroups")
             .value
             .associate { obj ->
                 obj as OnjObject
                 val groupName = obj.get<String>("groupName")
+                val title = obj.get<String>("title")
                 val variants = obj
                     .get<OnjArray>("variants")
                     .value
@@ -128,7 +141,7 @@ object RunGeneratorConfig {
                         it as OnjObject
                         it.get<Long>("majorDifficulty").toInt() to it.get<String>("name")
                     }
-                groupName to variants
+                groupName to EnemyGroup(groupName, title, variants)
             }
     }
 
@@ -229,6 +242,12 @@ data class EnemyConfig(
     val majorDifficulty: Int,
     val amount: IntRange,
     val allowedEnemies: List<String>
+)
+
+data class EnemyGroup(
+    val name: String,
+    val title: String,
+    val variants: Map<Int, String>
 )
 
 data class EncounterModifierPool(

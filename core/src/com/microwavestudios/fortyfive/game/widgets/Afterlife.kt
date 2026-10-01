@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.game.widgets
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Touchable
@@ -23,7 +24,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomWrap
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -306,7 +307,7 @@ class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) : I
             relativeHeight(100f)
             flexDirection = FlexDirection.COLUMN
             horizontalAlign = CustomAlign.END
-            label("red wing", "Afterlife", Color.FortyWhite, 32) {
+            label("red wing", "Afterlife", Color.valueOf("E4F8F0"), 32) {
                 width = 250f
                 relativeHeight(20f)
                 logicalOffsetX = -300f

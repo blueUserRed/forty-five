@@ -6,7 +6,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 
 object ProfileCardCreator {
 
@@ -35,7 +35,7 @@ object ProfileCardCreator {
             Profile.LoadFailure.VERSION_TOO_NEW -> "Profile was created by a newer version of the game; try upgrading the game"
             Profile.LoadFailure.VERSION_TOO_OLD -> "Profile was created by an older version of the game; try downgrading the game"
         }
-        label("red wing", message, Color.Red, (32 * 0.8).toInt()) {
+        label("red wing", message, Colors.Red, (32 * 0.8).toInt()) {
             syncHeight()
             wrap = true
             relativeWidth(100f)

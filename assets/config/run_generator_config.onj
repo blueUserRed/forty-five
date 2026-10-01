@@ -166,22 +166,18 @@ enemies: [
     {
         majorDifficulty: 0,
         amount: [1, 1],
-        allowedEnemies: [ "Outlaw" ],
+        allowedEnemies: [ "Outlaw", "Pyro" ],
     },
     {
         majorDifficulty: 2,
         amount: [1, 2],
-        allowedEnemies: [ "Outlaw", "Pyro" ],
-    },
-    {
-        majorDifficulty: 3,
-        amount: [1, 2],
-        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
-    },
-    {
-        majorDifficulty: 4,
-        amount: [2, 3],
-        allowedEnemies: [ "Outlaw", "Pyro", "Witch" ],
+//        amount: [1, 1],
+//        allowedEnemies: [ "Scarecrow" ],
+        allowedEnemies: [
+            "Outlaw", "Pyro",
+            "Witch", "The-Fangs",
+            "Scarecrow"
+        ],
     },
 ],
 
@@ -197,34 +193,58 @@ allowedEnemyConfigurations: [
     [ "Outlaw", "Outlaw", "Pyro" ],
     [ "Outlaw", "Pyro", "Pyro" ],
     [ "Outlaw", "Pyro", "Witch" ],
+    [ "The-Fangs" ],
+    [ "The-Fangs", "Pyro" ],
+    [ "The-Fangs", "Pyro", "Pyro" ],
+    [ "The-Fangs", "Witch" ],
+    [ "The-Fangs", "The-Fangs" ],
+    [ "The-Fangs", "The-Fangs", "Pyro" ],
+    [ "The-Fangs", "The-Fangs", "Witch" ],
+    [ "The-Fangs", "Pyro", "Witch" ],
+    [ "Scarecrow" ],
+    [ "Scarecrow", "Scarecrow" ],
+    [ "Scarecrow", "Witch" ],
+    [ "Scarecrow", "Pyro" ],
+    [ "Scarecrow", "Outlaw" ],
+    [ "Scarecrow", "The-Fangs" ],
+    [ "Scarecrow", "Scarecrow", "Scarecrow" ],
+    [ "Scarecrow", "Scarecrow", "Witch" ],
+    [ "Scarecrow", "Scarecrow", "Pyro" ],
+    [ "Scarecrow", "Witch", "Witch" ],
+    [ "Scarecrow", "The-Fangs", "Witch" ],
+    [ "Scarecrow", "Witch", "Outlaw" ],
+    [ "Scarecrow", "Pyro", "Witch" ],
+    [ "Scarecrow", "Pyro", "The-Fangs" ],
+    [ "Scarecrow", "The-Fangs", "Witch" ],
+    [ "Scarecrow", "The-Fangs", "Pyro" ],
 ],
 
 enemyProbabilityIncrease: [
-    {
-        enemy: "Outlaw",
-        biome: "wasteland",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Outlaw",
-        biome: "bewitched_forest",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Outlaw",
-        biome: "magenta_mountains",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Pyro",
-        biome: "wasteland",
-        bonusPoints: 20,
-    },
-    {
-        enemy: "Witch",
-        biome: "bewitched_forest",
-        bonusPoints: 20,
-    },
+//    {
+//        enemy: "Outlaw",
+//        biome: "wasteland",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Outlaw",
+//        biome: "bewitched_forest",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Outlaw",
+//        biome: "magenta_mountains",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Pyro",
+//        biome: "wasteland",
+//        bonusPoints: 20,
+//    },
+//    {
+//        enemy: "Witch",
+//        biome: "bewitched_forest",
+//        bonusPoints: 20,
+//    },
 ],
 
 enemyProbabilityRandomPoints: 120,
@@ -282,4 +302,27 @@ limitedChallenges: [
             }
         ]
     },
-]
+],
+
+//////////////////////////////////////////////////////
+// Stamps
+//////////////////////////////////////////////////////
+
+stampPools: [
+    {
+        majorDifficulty: 0,
+        stamps: []
+    },
+    {
+        majorDifficulty: 1,
+        stamps: [ "bewitched", "poisonTip", "fiftyCal" ]
+    },
+    {
+        majorDifficulty: 3,
+        stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity" ]
+    },
+    {
+        majorDifficulty: 4,
+        stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity", "phantom", "catalyst", "spirit" ]
+    },
+],

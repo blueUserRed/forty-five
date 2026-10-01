@@ -671,7 +671,7 @@ class Spacer(
     override fun drawDebug(renderer: ShapeRenderer?) {
         renderer ?: return
         renderer.flush()
-        renderer.color = Color.Red
+        renderer.color = Colors.Red
         val width = max(definedWidth, 10f)
         val height = max(definedHeight, 10f)
         renderer.rect(x, y, width, height)

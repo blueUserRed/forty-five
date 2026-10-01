@@ -75,13 +75,21 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
     private var popoutReferenceTime: Long = -1
     private var shakeReferenceTime: Long = -1
 
-    private val parryPostProcessingStep: (source: FrameBuffer) -> Unit = { source ->
+    private val parryPostProcessingStep: (source: FrameBuffer) -> Unit by lazy {
+        if (parryShader.isNotResolved) FortyFive.resourceManager.forceResolve(parryShader)
+        shaderPostProcessingStep(parryShader.getOrError())
+    }
+
+    init {
+//        val testShader = FortyFive.resourceManager.forceGet<BetterShader>(this, lifetime, "heal_shader")
+//        additionalPostProcessingSteps.add(shaderPostProcessingStep(testShader))
+    }
+
+    private fun shaderPostProcessingStep(shader: BetterShader): (source: FrameBuffer) -> Unit = { source ->
         val viewport = screen.viewport
-        if (this@RenderPipeline.parryShader.isNotResolved) FortyFive.resourceManager.forceResolve(this@RenderPipeline.parryShader)
-        val parryShader = this@RenderPipeline.parryShader.getOrError()
-        batch.shader = parryShader.shader
-        parryShader.prepare(screen)
-        setPostprocessorUniforms(parryShader)
+        batch.shader = shader.shader
+        shader.prepare(screen)
+        setPostprocessorUniforms(shader)
         batch.draw(
             source.colorBufferTexture,
             0f, 0f,
@@ -197,7 +205,6 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         ScreenUtils.clear(0f, 0f, 0f, 0f)
 
         batch.begin()
-        viewport.update(active.width, active.height)
         batch.projectionMatrix = viewport.camera.combined
 
         batch.shader = alphaReductionShader.shader
@@ -260,7 +267,6 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         ScreenUtils.clear(0f, 0f, 0f, 0f)
 
         batch.begin()
-        viewport.update(active.width, active.height)
         batch.projectionMatrix = viewport.camera.combined
         batch.shader = shader.shader
         shader.prepare(screen)
@@ -275,6 +281,7 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         )
         batch.flush()
         active.end()
+
         viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         batch.projectionMatrix = viewport.camera.combined
         shader.shader.setUniformf("u_dir", 0f, 1f)
@@ -317,6 +324,10 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         earlyRenderTasks.clear()
         lateRenderTasks.forEach { it.dispose() }
         lateRenderTasks.clear()
+
+        shakeReferenceTime = -1
+        shootReferenceTime = -1
+        popoutReferenceTime = -1
     }
 
     fun sizeChanged() {
@@ -416,8 +427,8 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         val viewport = screen.viewport
         menu.update()
         val font = FortyFive.resourceManager.forceGet<BitmapFont>(this, lifetime, "redwing100")
-                font.data.setScale(0.2f)
-            val page = menu.currentPage()
+        font.data.setScale(0.2f)
+        val page = menu.currentPage()
         val pageText = page.getText(screen)
         var text = ""
         text += "* ---${page.name}---\n"
@@ -433,6 +444,7 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
             Align.topLeft,
             false
         )
+        shapeRenderer.projectionMatrix = viewport.camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         Gdx.gl.glEnable(GL20.GL_BLEND);
         shapeRenderer.setColor(0f, 0f, 0f, 0.8f)
@@ -541,12 +553,15 @@ class FadeToBlackRenderTask(
         screen.viewport.apply()
         shapeRenderer.projectionMatrix = screen.viewport.camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        val remaining = (fadeFinishesAt - now).toFloat()
-        val alpha = if (reverse) {
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        val remaining = (fadeFinishesAt - now).toFloat().coerceAtLeast(0f)
+        var alpha = if (reverse) {
             remaining / duration.toFloat()
         } else {
             1f - remaining / duration.toFloat()
         }
+        alpha = Interpolation.pow2.apply(alpha)
         shapeRenderer.color = Color(0f, 0f, 0f, alpha)
         shapeRenderer.rect(0f, 0f, screen.viewport.worldWidth, screen.viewport.worldHeight)
         shapeRenderer.end()

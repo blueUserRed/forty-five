@@ -10,11 +10,13 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
-import com.microwavestudios.fortyfive.game.card.RandomCardSelection
-import com.microwavestudios.fortyfive.game.card.Stamp
 import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.onjNamespaces.CardsNamespace
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventActions
+import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventFactory
+import com.microwavestudios.fortyfive.onjNamespaces.GameNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
+import com.microwavestudios.fortyfive.onjNamespaces.SpecialEventNamespace
 import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
 import com.microwavestudios.fortyfive.plugin.PluginManager
@@ -39,6 +41,9 @@ import kotlin.system.measureTimeMillis
 object FortyFive : Game() {
 
     private const val logTag = "forty-five"
+
+    const val DEMO_MODE: Boolean = true
+
 
     /** see [CardTextureManager] */
     val cardTextureManager = CardTextureManager()
@@ -113,7 +118,7 @@ object FortyFive : Game() {
     }
 
     fun toMap() {
-        screenManager.newBaseScreen(MapScreen)
+        screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
         screenManager.screenFinished()
     }
 
@@ -169,7 +174,7 @@ object FortyFive : Game() {
         profileManager = mockProfileManager
         with(OnjConfig) {
             registerNamespace("Common", CommonNamespace)
-            registerNamespace("Cards", CardsNamespace)
+            registerNamespace("Game", GameNamespace)
         }
         ConfigFileManager.init()
         logger.init()
@@ -178,14 +183,16 @@ object FortyFive : Game() {
         pluginManager.init()
         pluginManager.earlyInit()
         soundPlayer.init()
+        SpecialEventFactory.init()
         GraphicsConfig.init()
     }
 
     private fun init() {
         ShaderProgram.pedantic = false
         with(OnjConfig) {
-            registerNamespace("Common", CommonNamespace)
-            registerNamespace("Cards", CardsNamespace)
+            if (getNamespace("Common") == null) registerNamespace("Common", CommonNamespace)
+            if (getNamespace("Game") == null) registerNamespace("Game", GameNamespace)
+            if (getNamespace("SpecialEvent") == null) registerNamespace("SpecialEvent", SpecialEventNamespace)
         }
         initControllers()
         ConfigFileManager.init()
@@ -198,8 +205,9 @@ object FortyFive : Game() {
         pluginManager.earlyInit()
         soundPlayer.init()
         GraphicsConfig.init()
+        SpecialEventFactory.init()
         resourceManager.init()
-        serviceThread.start()
+        if (serviceThread.state == Thread.State.NEW) serviceThread.start()
         cardTextureManager.init()
         if (logger.versionTag != "--dev--") return
         File(".onj").mkdirs()

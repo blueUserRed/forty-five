@@ -263,6 +263,10 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             return timelineBuilder.build()
         }
 
+        inline fun later(crossinline builder: TimelineBuilderDSL.() -> Unit): Timeline = timeline {
+            later { builder(this) }
+        }
+
     }
 
 }

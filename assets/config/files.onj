@@ -52,7 +52,11 @@ configFiles: {
     runGeneratorConfig: {
         file: "config/run_generator_config.onj",
         validatedBy: "onjschemas/run_generator_config.onjschema"
-    }
+    },
+    specialEvents: {
+        file: "config/special_events.onj",
+        validatedBy: "onjschemas/special_events.onjschema"
+    },
 },
 
 displayNames: [

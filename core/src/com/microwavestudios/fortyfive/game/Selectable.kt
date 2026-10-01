@@ -36,7 +36,7 @@ object SelectorFactory {
         controller: GameController,
         popupText: String,
         predicate: (Card) -> Boolean = { true }
-    ): ISelector<Card> = cardInHandSelectorCreator.create(controller, popupText, predicate)
+    ): ISelector<Card> = cardInRevolverSelectorCreator.create(controller, popupText, predicate)
 
     fun getRevolverSlotSelector(
         controller: GameController,

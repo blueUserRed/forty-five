@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector2
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.controller.GameController
-import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
@@ -26,10 +25,10 @@ object GraphicsConfig {
         readConstants(config)
     }
 
-    fun damageOverlay(screen: RenderableScreen, controller: GameController): Timeline.TimelineAction {
+    fun damageOverlay(screen: RenderableScreen): GameAnimation {
         val overlayActor = CustomImageActor(damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
-        val anim = FadeInAndOutAnimation(
+        return FadeInAndOutAnimation(
             0f, 0f,
             overlayActor,
             screen,
@@ -38,15 +37,6 @@ object GraphicsConfig {
             damageOverlayFadeOut,
             Vector2(viewport.worldWidth, viewport.worldHeight)
         )
-        return object : Timeline.TimelineAction() {
-
-            override fun start(timeline: Timeline) {
-                super.start(timeline)
-                controller.playGameAnimation(anim)
-            }
-
-            override fun isFinished(timeline: Timeline): Boolean = anim.isFinished()
-        }
     }
 
     fun cashOrbAnimation(
@@ -67,8 +57,6 @@ object GraphicsConfig {
         velocityRampStart = 500,
         velocityRamp = 1.2f
     )
-
-    fun iconName(name: String): String = iconConfig[name]!!
 
     fun encounterModifierDisplayName(modifier: EncounterModifier): String {
         val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
@@ -103,21 +91,18 @@ object GraphicsConfig {
         return if (isDark) cardFontColors["dark-$situation"]!! else cardFontColors["light-$situation"]!!
     }
 
-    fun encounterBackgroundFor(biome: String): ResourceHandle = config
-        .get<OnjArray>("encounterBackgrounds")
+    fun encounterBackgroundsFor(biome: String): List<Pair<ResourceHandle, Boolean>> = config
+        .get<OnjArray>("biomeBackgrounds")
         .value
         .map { it as OnjObject }
         .find { it.get<String>("biome") == biome }
-        ?.get<String>("background")
-        ?: throw RuntimeException("no background for biome $biome")
-
-    fun secondaryBackgroundFor(biome: String): ResourceHandle = config
-        .get<OnjArray>("encounterBackgrounds")
-        .value
-        .map { it as OnjObject }
-        .find { it.get<String>("biome") == biome }
-        ?.get<String>("secondaryBackground")
-        ?: throw RuntimeException("no secondary background for biome $biome")
+        ?.get<OnjArray>("backgrounds")
+        ?.value
+        ?.map {
+            it as OnjObject
+            it.get<String>("background") to it.get<Boolean>("isDark")
+        }
+        ?: throw RuntimeException("no background for biome: '$biome'")
 
     fun revolverSlotIcon(slot: Int): ResourceHandle = slotIcons[slot - 1]
 
@@ -126,11 +111,6 @@ object GraphicsConfig {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun readConstants(config: OnjObject) {
-
-        iconConfig = config
-            .get<OnjObject>("icons")
-            .value
-            .mapValues { it.value.value as String }
 
         val damageOverlay = config.get<OnjObject>("damageOverlay")
 
@@ -162,8 +142,6 @@ object GraphicsConfig {
     private var cardFont by Delegates.notNull<String>()
     private var cardFontScale by Delegates.notNull<Float>()
     private lateinit var cardFontColors: Map<String, Color>
-
-    private lateinit var iconConfig: Map<String, String>
 
     private lateinit var damageOverlayTexture: String
     private var damageOverlayDuration by Delegates.notNull<Int>()

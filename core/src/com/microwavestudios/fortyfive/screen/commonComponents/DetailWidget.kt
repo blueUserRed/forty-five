@@ -74,7 +74,7 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
 
         override fun generateDetailActor(addFadeInAction: Boolean): Actor {
             val actor = AdvancedTextWidget(
-                Triple("red wing", Color.FortyWhite, 19),
+                Triple("red wing", Colors.FortyWhite, 19),
                 screen
             )
             actor.backgroundHandle = defBackground
@@ -97,7 +97,7 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
 
         override fun generateDetailActor(addFadeInAction: Boolean): Actor {
             val actor = AdvancedTextWidget(
-                Triple("red wing", Color.FortyWhite, 15),
+                Triple("red wing", Colors.FortyWhite, 15),
                 screen
             )
             val group = CustomGroup(screen)
@@ -169,7 +169,7 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
 
                 firstSubtexts.forEach {
                     val actor = AdvancedTextWidget(
-                        Triple("roadgeek", Color.FortyWhite, smallFontSize), screen
+                        Triple("roadgeek", Colors.FortyWhite, smallFontSize), screen
                     )
                     actor.marginBottom = 20f
                     actor.backgroundHandle = defBackgroundSmall
@@ -206,7 +206,7 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
                     1.33f, 1.33f
                 )
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek", Color.FortyWhite, bigFontSize),
+                    Triple("roadgeek", Colors.FortyWhite, bigFontSize),
                     screen
                 )
                 actor.width = 260f
@@ -232,13 +232,13 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
             val innerWidth = mainText.width - mainText.paddingLeft - mainText.paddingRight
             texts.forEachIndexed { i, it ->
                 if (i != 0) {
-                    val imgActor = CustomImageActor("forty_white_rounded", screen)
+                    val imgActor = CustomImageActor("white_texture", screen)
                     imgActor.width = innerWidth
-                    imgActor.height = 2f
+                    imgActor.height = 1f
                     mainText.addActor(imgActor)
                 }
                 val actor = AdvancedTextWidget(
-                    Triple("roadgeek", Color.FortyWhite, bigFontSize),
+                    Triple("roadgeek", Colors.FortyWhite, bigFontSize),
                     screen
                 )
                 actor.width = innerWidth
@@ -260,7 +260,7 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
 
                 secondSubtexts.forEach {
                     val actor = AdvancedTextWidget(
-                        Triple("roadgeek", Color.FortyWhite, smallFontSize), screen
+                        Triple("roadgeek", Colors.FortyWhite, smallFontSize), screen
                     )
                     actor.marginBottom = 20f
                     actor.backgroundHandle = defBackgroundSmall
@@ -338,11 +338,11 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
 
         companion object {
             private val defaultEffects: List<AdvancedTextParser.AdvancedTextEffect> = mutableListOf(
-                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$fwhite\$", Color.FortyWhite),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$red\$", Color.Red),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$green\$", Color.Green),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$blue\$", Color.Blue),
-                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$brown\$", Color.DarkBrown),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$fwhite\$", Colors.FortyWhite),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$red\$", Colors.Red),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$green\$", Colors.Green),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$blue\$", Colors.Blue),
+                AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect("\$brown\$", Colors.DarkBrown),
                 AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$minimal\$", 25),
                 AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$small\$", 21),
                 AdvancedTextParser.AdvancedTextEffect.AdvancedFontSizeTextEffect("\$tiny\$", 16),

@@ -39,6 +39,31 @@ hoverDetailDescriptions: [
         description: "$status$WEAK (t)$status$\ndmg of attacks are halfed rounded down for t turns",
     },
     {
+        keyword: "HEAT REPELLENT",
+        groupName: "status",
+        description: "$status$HEAT REPELLENT$status$\nWhenever you apply $status$BURNING$status$ to an enemy with heat repellent, you get $status$BURNING$status$ (x), where x is the paramter of the inflicted burning",
+    },
+    {
+        keyword: "WARD OF THE WITCH",
+        groupName: "status",
+        description: "$status$WARD OF THE WITCH$status$\nWhenever the revolver rotates, this enemy gets SHIELD(1).",
+    },
+    {
+        keyword: "POISON IMMUNITY",
+        groupName: "status",
+        description: "$status$POISON IMMUNITY (t)$status$\nThe $status$POISON$status$ Statuseffect can't be applied to this enemy for t turns",
+    },
+    {
+        keyword: "OMINOUS",
+        groupName: "status",
+        description: "$status$OMINOUS (d, t)$status$\nWhenever a bullet enters the revolver in an uneven slot while an enemy has $status$OMINOUS$status$: target bullet in the revolver gets -d dmg. $status$OMINOUS$status$ is active for t turns.",
+    },
+    {
+        keyword: "DETERRING AURA",
+        groupName: "status",
+        description: "$status$DETERRING AURA$status$\nBullets with less dmg than their starting dmg can't be used to parry this enemy",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait", // TODO: should be keyword
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",
@@ -224,5 +249,20 @@ defaultTextEffects: [
     $Color {
         indicator:"$costDecrease$",
         color: color.green,
+    },
+
+    $Color {
+        indicator:"$enemyDamageDecrease$",
+        color: color.light_grey,
+    },
+
+    $Color {
+        indicator:"$enemyDamageIncrease$",
+        color: color.red,
+    },
+
+    $Color {
+        indicator:"$specialEventAction$",
+        color: color.bright_red,
     },
 ]

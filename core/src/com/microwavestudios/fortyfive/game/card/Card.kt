@@ -643,36 +643,33 @@ class Card(
         val triggeredEffects = effects.filter {
             it.checkTrigger(situation, triggerInformation, controller, this@Card)
         }
-        if (situation is GameSituation.CardRightClicked && triggeredEffects.isNotEmpty()) {
+        if (triggeredEffects.isEmpty()) return@later
+        if (situation is GameSituation.CardRightClicked) {
             val result = controller.tryPay(rightClickCost ?: 0, presentation.animTarget())
             if (!result) FortyFive.logger.warn(logTag, "Right Click triggered but can't pay for it")
         }
-        triggeredEffects.forEach { effect ->
-            later {
-                if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) {
-                    later {
-                        isInTriggerPosition = true
+        triggeredEffects.forEach { effect -> later {
+            if (!isInTriggerPosition && !effect.data.isHidden && !inZone(Zone.STACK, Zone.LIMBO)) later {
+                isInTriggerPosition = true
 
-                        val afterlifeShouldBeOpen = inZone(Zone.AFTERLIFE) || effect.animatesInAfterlife()
-                        val afterlife = controller.afterlife
-                        if (afterlife.isClosed && afterlifeShouldBeOpen) include(afterlife.openTimeline())
-                        if (afterlife.isOpen && !afterlifeShouldBeOpen) include(afterlife.closeTimeline())
+                val afterlifeShouldBeOpen = inZone(Zone.AFTERLIFE) || effect.animatesInAfterlife()
+                val afterlife = controller.afterlife
+                if (afterlife.isClosed && afterlifeShouldBeOpen) include(afterlife.openTimeline())
+                if (afterlife.isOpen && !afterlifeShouldBeOpen) include(afterlife.closeTimeline())
 
-                        val screenShakeTimeline = Timeline.timeline {
-                            delay(210)
-                            FortyFive.currentRenderPipeline?.getScreenShakeTimeline()?.let { include(it) }
-                        }
-
-                        val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
-                        val anim = presentation.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
-
-                        action { controller.dispatchAnimTimeline(screenShakeTimeline) }
-                        include(anim)
-                    }
+                val screenShakeTimeline = Timeline.timeline {
+                    delay(210)
+                    FortyFive.currentRenderPipeline?.getScreenShakeTimeline()?.let { include(it) }
                 }
-                include(effect.trigger(this@Card, triggerInformation, controller, situation))
+
+                val animateLikeOnShot = triggerInformation.isOnShot && !effect.useAlternateOnShotTriggerPosition()
+                val anim = presentation.animateToTriggerPosition(controller, animateLikeOnShot, afterlifeShouldBeOpen)
+
+                action { controller.dispatchAnimTimeline(screenShakeTimeline) }
+                include(anim)
             }
-        }
+            include(effect.trigger(this@Card, triggerInformation, controller, situation))
+        } }
 
         later {
             if (!presentation.inTriggerPosition) return@later
@@ -1169,14 +1166,14 @@ class CardActor(
             .also { it.stop() }
 
     private val selectionDropShadow = SquareDropShadow(
-        color = Color.GOLDENROD,
+        color = Colors.GOLDENROD,
         scale = 1.2f,
         offX = 0f,
         offY = 0f
     )
 
     private val defaultFocusDropShadow = SquareDropShadow(
-        color = Color.Black,
+        color = Colors.Black,
         scale = 1.1f,
         offX = 3f,
         offY = -3f
@@ -1408,7 +1405,7 @@ class CardActor(
         controller: GameController,
         isOnShot: Boolean,
         afterlifeOpen: Boolean
-    ): Timeline = Timeline.timeline { later {
+    ): Timeline = Timeline.later {
         prevPosition = Vector2(x, y)
         val target = when (card.zone) {
             Zone.REVOLVER -> if (isOnShot) {
@@ -1450,7 +1447,7 @@ class CardActor(
             (parent as? Layout)?.invalidate()
         }
         delay(100)
-    } }
+    }
 
     override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
         // baaaaaaaaaad
@@ -1463,7 +1460,7 @@ class CardActor(
         invalidateHierarchy()
     }
 
-    fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.timeline {
+    fun animateBack(controller: GameController, prevCoordinates: Vector2): Timeline = Timeline.later {
         val target = controller
             .revolver
             .slots

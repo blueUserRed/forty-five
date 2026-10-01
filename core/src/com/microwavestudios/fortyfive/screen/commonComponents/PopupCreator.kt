@@ -12,7 +12,7 @@ import com.microwavestudios.fortyfive.screen.actors.CustomBox
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.utils.Color
+import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.alpha
 
@@ -79,7 +79,7 @@ object PopupCreator {
                 relativeWidth(100f)
                 syncHeight()
                 verticalSpacer(50f)
-                val title = label("red wing", "", Color.FortyWhite, (32 * 1.4).toInt()) {
+                val title = label("red wing", "", Colors.FortyWhite, (32 * 1.4).toInt()) {
                     setAlignment(Align.center)
                     relativeWidth(90f)
                     syncHeight()
@@ -88,7 +88,7 @@ object PopupCreator {
                 val body = label(
                     "roadgeek",
                     "",
-                    Color.FortyWhite,
+                    Colors.FortyWhite,
                     28
                 ) {
                     wrap = true
@@ -117,7 +117,7 @@ object PopupCreator {
             event as ShowPopup<Any?>
             clearChildren()
             event.options.forEach { (text, value) ->
-                label("roadgeek", text, Color.FortyWhite, 35, backgroundHints = buttonBackgroundHints()) {
+                label("roadgeek", text, Colors.FortyWhite, 35, backgroundHints = buttonBackgroundHints()) {
                     height = 50f
                     width = 200f
                     setAlignment(Align.center)
