@@ -101,7 +101,7 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private val revolver by lazy {
-        NewRevolver(screen)
+        NewRevolver(screen, gameEvents)
 //        Revolver(
 //            "revolver_drum",
 //            "revolver_slot_texture",
@@ -492,8 +492,6 @@ class EncounterScreen : ScreenCreator() {
         val enemyHeight = 400f
         val enemyWidth = enemyHeight * 0.6f
 
-        var enemySelected = false
-
         box {
             enemy.actor = this
             flexDirection = FlexDirection.COLUMN
@@ -510,9 +508,22 @@ class EncounterScreen : ScreenCreator() {
                 drawOffsetY = bgOffY * 1.1f
             }
 
-            onInput(GameInputs.interact) {
-                if (enemySelected || enemy.isDefeated) return@onInput
-                gameEvents.fire(GameControllerImpl.Events.EnemySelected(enemy, controller))
+            observeInputState(
+                GameInputs.States.focused,
+                {
+                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, true))
+                },
+                {
+                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(null, true))
+                },
+            )
+
+            onInput(GameInputs.targetEnemy) {
+                gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, false))
+            }
+
+            onInput(GameInputs.shootEnemy) {
+                gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
             }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
@@ -582,9 +593,9 @@ class EncounterScreen : ScreenCreator() {
                         amplitude = 14f,
                         frequency = 0.4f
                     )
-                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelected> { (e, controller) ->
+                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelectionChanged> { (e, controller) ->
                         val onlyOne = controller.allEnemies.size == 1
-                        enemySelected = e === enemy
+                        val enemySelected = e === enemy
                         isVisible = !onlyOne && enemySelected
                     }
                 }
@@ -781,6 +792,24 @@ class EncounterScreen : ScreenCreator() {
         actor(revolver.getActor(this@EncounterScreen)) {
             x = 380f
             y = 20f
+
+            group {
+                backgroundHandle = "encounter_reserves_bg"
+                width = 50f
+                height = 50f
+                centerX(offset = 1f)
+                centerY(offset = 1f)
+                reservesAnimationTarget = this
+                fixedZIndex = 10
+                label("red wing", "", Colors.White, 24) {
+                    gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
+                        setText("$new/$base")
+                    }
+                    syncDimensions()
+                    centerX()
+                    centerY()
+                }
+            }
         }
 
         actor(cardHand.getActor(this@EncounterScreen)) {
@@ -788,15 +817,6 @@ class EncounterScreen : ScreenCreator() {
             height = 300f
             y = 79f
             onLayoutAndNow { x = worldWidth - width }
-
-//            val proto = RandomCardSelection
-//                .allCardPrototypes
-//                .find { it.name == "incendiaryBullet" }!!
-//            val max = GameControllerImpl.Config.hardMaxCards
-//            repeat(12) {
-//                val card = proto.create(screen, CardType.fromString("incendiaryBullet"), CardPresentation.defaultProvider)
-//                cardHand.addCard(card)
-//            }
         }
 
         image {
@@ -1074,9 +1094,9 @@ class EncounterScreen : ScreenCreator() {
                     xAnim.state("open")
                 }
             )
-            onInput(GameInputs.interact){
-                gameEvents.fire(GameControllerImpl.Events.ShootButtonPressed)
-            }
+//            onInput(GameInputs.interact){
+//                gameEvents.fire(GameControllerImpl.Events.ShootButtonPressed)
+//            }
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
@@ -1353,7 +1373,7 @@ class EncounterScreen : ScreenCreator() {
                     image {
                         width = 60f
                         height = 60f
-                        backgroundHandle = "map_node_get_card"
+                        backgroundHandle = "map_node_choose_card"
                         marginLeft = 10f
                         marginRight = 10f
                     }

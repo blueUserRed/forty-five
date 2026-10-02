@@ -22,6 +22,7 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
@@ -37,6 +38,7 @@ import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
+import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
@@ -1487,6 +1489,11 @@ class CardActor(
             removeAction(moveAction)
             removeAction(scaleAction)
             inTriggerPosition = false
+            if (card.inZone(Zone.REVOLVER)) {
+                // TODO: uggglyyyyyyyyyy
+                fixedZIndex = NewRevolver.cardZIndex
+                (controller.revolver.forceGetActor() as? CustomGroup)?.resortZIndices()
+            }
         }
     }
 

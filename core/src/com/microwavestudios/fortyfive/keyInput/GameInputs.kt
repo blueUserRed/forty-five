@@ -296,6 +296,25 @@ object GameInputs {
         Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
     ))
 
+    val targetEnemy = Input("targetEnemy", arrayOf(
+        Input.Cause.Mouse(MouseButton.RIGHT),
+        Input.Cause.Keyboard(
+            Keys.ENTER,
+            modifierKeys = arrayOf(ModifierKey.SHIFT),
+            requireStates = arrayOf(States.trueFocused)
+        ),
+        Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
+    ))
+
+    val shootEnemy = Input("shootEnemy", arrayOf(
+        Input.Cause.Mouse(MouseButton.LEFT),
+        Input.Cause.Keyboard(
+            Keys.ENTER,
+            requireStates = arrayOf(States.trueFocused)
+        ),
+        Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
+    ))
+
     val skipCredits = Input("skipCredits", arrayOf(
         Input.Cause.Keyboard(Keys.ENTER),
         Input.Cause.ControllerButtonBased(ControllerButton.A)

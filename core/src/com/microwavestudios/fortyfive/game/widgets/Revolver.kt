@@ -60,7 +60,7 @@ interface IRevolverSlot : Selectable<IRevolverSlot> {
 
     fun cardPosition(): Vector2
 
-    fun forceGetActor(): RevolverSlot
+    fun forceGetActor(): InputActor
 }
 
 /**

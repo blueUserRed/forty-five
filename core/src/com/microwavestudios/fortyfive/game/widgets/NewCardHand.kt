@@ -7,6 +7,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.EventPipeline
+import com.microwavestudios.fortyfive.utils.contains
 import kotlin.random.Random
 
 class NewCardHand : ICardHand {
@@ -38,6 +39,7 @@ class NewCardHand : ICardHand {
         cardActor.observeInputState(
             GameInputs.States.focused,
             {
+                if (cardActor !in actor) return@observeInputState
                 cardActor.fixedZIndex = 100
                 actor.resortZIndices()
                 cardActor.width = cardSize * 1.13f
@@ -45,6 +47,7 @@ class NewCardHand : ICardHand {
                 cardActor.drawOffsetY = 16f
             },
             {
+                if (cardActor !in actor) return@observeInputState
                 cardActor.fixedZIndex = cards.indexOf(card)
                 actor.resortZIndices()
                 cardActor.width = cardSize
@@ -58,7 +61,9 @@ class NewCardHand : ICardHand {
         require(card in cards) { "card $card not in card hand" }
         val actor = createdActor
         requireNotNull(actor)
-        actor.removeActor(card.presentation.forceGetActor())
+        val cardActor = card.presentation.forceGetActor()
+        cardActor.drawOffsetY = 0f
+        actor.removeActor(cardActor)
         cards.remove(card)
     }
 

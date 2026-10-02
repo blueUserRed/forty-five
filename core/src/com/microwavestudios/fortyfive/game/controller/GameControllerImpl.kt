@@ -93,7 +93,13 @@ class GameControllerImpl(
     override lateinit var allEnemies: List<Enemy>
         private set
 
-    private lateinit var targetedEnemy: Enemy
+    override lateinit var baseSelectedEnemy: Enemy
+        private set
+    override var temporarySelectedEnemy: Enemy? = null
+        private set
+
+    private val targetedEnemy: Enemy
+        get() = temporarySelectedEnemy ?: baseSelectedEnemy
 
     override lateinit var encounterContext: EncounterContext
         private set
@@ -199,18 +205,27 @@ class GameControllerImpl(
         allEnemies = encounter.createEnemies()
         gameEvents.fire(Events.SetupEnemies(allEnemies, controller))
 
-        var selectedEnemy: Enemy = allEnemies.first()
-        gameEvents.fire(Events.EnemySelected(selectedEnemy, controller))
-
-        gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
-            selectedEnemy = enemy
+        gameEvents.watchFor<Events.EnemyClicked> { (enemy, justFocus) ->
+            require(justFocus || enemy != null)
+            if (justFocus) {
+                temporarySelectedEnemy = enemy
+            } else {
+                baseSelectedEnemy = enemy!!
+            }
+            gameEvents.fire(Events.EnemySelectionChanged(targetedEnemy, controller))
         }
+
+        gameEvents.fire(Events.EnemyClicked(allEnemies.first(), false))
 
         allEnemies.forEach { enemy ->
             enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
-                if (selectedEnemy != enemy) return@watchFor
-                val newEnemy = allEnemies.firstOrNull { !it.isDefeated } ?: allEnemies.first()
-                gameEvents.fire(Events.EnemySelected(newEnemy, controller))
+                when {
+                    temporarySelectedEnemy == enemy -> temporarySelectedEnemy = null
+                    baseSelectedEnemy == enemy ->
+                        baseSelectedEnemy = allEnemies.firstOrNull { !it.isDefeated } ?: allEnemies.first()
+                    else -> return@watchFor
+                }
+                gameEvents.fire(Events.EnemySelectionChanged(targetedEnemy, controller))
             }
         }
     }
@@ -244,7 +259,10 @@ class GameControllerImpl(
             if (inParryMenu) renderPipeline.startParryEffect() else renderPipeline.stopParryEffect()
         }
         gameEvents.watchFor<CardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
-        gameEvents.watchFor<Events.ShootButtonPressed> { if (!isUIFrozen) shoot() }
+        gameEvents.watchFor<Events.ShootAtEnemy> { (enemy) ->
+            if (enemy !== targetedEnemy) FortyFive.logger.warn(logTag, "Enemy shot at does not match targeted enemy!")
+            if (!isUIFrozen) shoot()
+        }
         gameEvents.watchFor<Events.HolsterButtonPressed> { if (!isUIFrozen) endTurn() }
         gameEvents.watchFor<Events.AfterlifeOpenToggle> {
             // The afterlife opening and closing is handled on the main timeline because it could be important for
@@ -254,9 +272,6 @@ class GameControllerImpl(
                 return@watchFor
             }
             appendMainTimeline(afterlife.toggleTimeline())
-        }
-        gameEvents.watchFor<Events.EnemySelected> { (enemy) ->
-            targetedEnemy = enemy
         }
         gameEvents.watchFor<Events.CardChangeZoneEvent> { event ->
             if (!event.before) {
@@ -1768,7 +1783,9 @@ class GameControllerImpl(
         data class SelectionChangedEvent(val text: String?)
         data class SetupEnemies(val enemies: List<Enemy>, val controller: GameController)
         data class EncounterModifierAdded(val modifier: EncounterModifier)
-        data class EnemySelected(val selected: Enemy, val controller: GameController)
+        data class EnemySelectionChanged(val selected: Enemy, val controller: GameController)
+        data class EnemyClicked(val enemy: Enemy?, val justFocus: Boolean)
+        data class ShootAtEnemy(val enemy: Enemy)
         data class PutCardsUnderStack(
             val amount: Int,
             val cardAddedCallback: (card: Card) -> Unit,
@@ -1781,7 +1798,6 @@ class GameControllerImpl(
         )
         data class AddedPlayerStatusEffect(val statusEffect: StatusEffect)
         data class RemovedPlayerStatusEffect(val statusEffect: StatusEffect)
-        data object ShootButtonPressed
         data object HolsterButtonPressed
         data object AfterlifeOpenToggle
         data class CardRightClickEvent(val card: Card)
