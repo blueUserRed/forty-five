@@ -811,7 +811,7 @@ class EncounterScreen : ScreenCreator() {
                     nextAction.action.secondaryIcon
                 )
                 is NextEnemyAction.None -> {}
-                is NextEnemyAction.HiddenEnemyAction -> showAction({ "?" },  "enemy_action_unknown", null)
+                is NextEnemyAction.HiddenEnemyAction -> showAction({ "?" },  "unknown_icon", null)
             }
         }
     }
