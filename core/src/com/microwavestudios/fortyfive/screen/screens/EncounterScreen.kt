@@ -1334,7 +1334,7 @@ class EncounterScreen : ScreenCreator() {
                     image {
                         width = 60f
                         height = 60f
-                        backgroundHandle = "map_node_get_card"
+                        backgroundHandle = "map_node_choose_card"
                         marginLeft = 10f
                         marginRight = 10f
                     }

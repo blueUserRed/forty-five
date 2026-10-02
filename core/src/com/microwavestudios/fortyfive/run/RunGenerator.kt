@@ -86,8 +86,8 @@ class RunGenerator {
             rewards,
             forBiome,
             forArea,
-            100,
-            100,
+            40,
+            40,
             mapGenerator
         )
     }
@@ -348,15 +348,15 @@ class RunGenerator {
                         listOf(),
                         true,
                         0,
-                        20, 10,
+                        15, 10,
                         random.nextLong(),
                         3
                     ).also {
                         it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
                     }
                 },
-                2, null,
-                20
+                1, null,
+                27
             ),
 //            BaseMapGenerator.MapGeneratorFillEvent(
 //                {
@@ -410,7 +410,7 @@ class RunGenerator {
                     )
                 },
                 4, null,
-                1
+                2
             )
         )
 

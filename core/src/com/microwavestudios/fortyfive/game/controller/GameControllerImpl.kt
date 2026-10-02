@@ -322,6 +322,19 @@ class GameControllerImpl(
                         .collectTimeline()
                         .let { include(it) }
                 }
+                later {
+                    activeEnemies
+                        .map { it.executeStatusEffectsAfterTurn() }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
+
+                later {
+                    playerStatusEffects
+                        .mapNotNull { it.executeOnEndTurn(StatusEffectTarget.PlayerTarget) }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
             }
         }
         gameEvents.watchFor<Events.TurnBeginEvent> { event ->
@@ -336,6 +349,18 @@ class GameControllerImpl(
                         null,
                         controller
                     ))
+                }
+                later {
+                    activeEnemies
+                        .map { it.executeStatusEffectsOnTurnBegin() }
+                        .collectTimeline()
+                        .let { include(it) }
+                }
+                later {
+                    playerStatusEffects
+                        .mapNotNull { it.executeOnTurnBegin(StatusEffectTarget.PlayerTarget) }
+                        .collectTimeline()
+                        .let { include(it) }
                 }
                 include(checkTrigger(situation, event.triggerInformation))
                 later {
@@ -1597,20 +1622,6 @@ class GameControllerImpl(
         if (hasWon) {
             include(winTimeline())
             return@later
-        }
-
-        later {
-            activeEnemies
-                .map { it.executeStatusEffectsAfterTurn() }
-                .collectTimeline()
-                .let { include(it) }
-        }
-
-        later {
-            playerStatusEffects
-                .mapNotNull { it.executeOnEndTurn(StatusEffectTarget.PlayerTarget) }
-                .collectTimeline()
-                .let { include(it) }
         }
 
         later {

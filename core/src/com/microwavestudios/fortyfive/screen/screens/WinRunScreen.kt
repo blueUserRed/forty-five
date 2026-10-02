@@ -409,7 +409,7 @@ class WinRunScreen : ScreenCreator() {
             backgroundHandle = "win_popup_item_card"
 
             image {
-                backgroundHandle = "map_node_get_card"
+                backgroundHandle = "map_node_choose_card"
                 width = 40f
                 height = 30f
                 marginLeft = 10f

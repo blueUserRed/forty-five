@@ -440,10 +440,6 @@ textures: [
         file: "blobs/map/nodes/shop.png"
     },
     {
-        name: "map_node_get_card",
-        file: "blobs/map/nodes/get_card.png"
-    },
-    {
         name: "map_node_choose_card",
         file: "blobs/map/nodes/choose_card.png"
     },

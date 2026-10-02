@@ -109,6 +109,10 @@ class Enemy(
         enemyEvents.fire(StatusEffectsChangedEvent)
     }
 
+    fun executeStatusEffectsOnTurnBegin(): Timeline = _statusEffects
+        .mapNotNull { it.executeOnTurnBegin(StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
+
     fun executeStatusEffectsAfterTurn(): Timeline = _statusEffects
         .mapNotNull { it.executeOnEndTurn(StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()

@@ -643,6 +643,9 @@ class Profile private constructor(
         const val logTag: String = "Profile"
 
         val limitedTakeAlong: Array<CardType> = arrayOf(
+            CardType.fromString("bullet"),
+            CardType.fromString("bullet"),
+            CardType.fromString("bullet"),
             CardType.fromString("bigBullet"),
             CardType.fromString("silverBullet"),
             CardType.fromString("workerBullet"),
