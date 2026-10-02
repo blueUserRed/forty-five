@@ -1201,7 +1201,7 @@ cards: [
         deckMaximum: 1,
         effects: [
             {
-                trigger: enterZone(zone.revolver, onlySelfTriggers),
+                trigger: enterZone(zone.revolver, allCardsTrigger),
                 inZones: [zone.revolver],
                 effect: buffDmg(bSelectSourceBullet(), 4#val)
             }
