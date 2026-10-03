@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.game.widgets
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.keyInput.GameInputs
@@ -22,6 +23,9 @@ class NewCardHand : ICardHand {
     private var cards: MutableList<Card> = mutableListOf()
 
     private val addedListenerToCards: MutableList<Card> = mutableListOf()
+
+    private val childrenInCorrectOrder: List<CardActor>
+        get() = cards.map { it.presentation.forceGetActor() }
 
 
     override fun allCards(): List<Card> = cards
@@ -86,6 +90,9 @@ class NewCardHand : ICardHand {
         val minOverlap = 30f
         val heightVariance = 7f
         val gapVariancePercent = 0.3f
+
+        touchable = Touchable.childrenOnly
+        childrenInCorrectOrderGetter = { childrenInCorrectOrder }
 
         onLayout {
             val random = Random(893324497834)

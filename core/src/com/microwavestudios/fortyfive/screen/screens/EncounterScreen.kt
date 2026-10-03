@@ -265,64 +265,58 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.encounterModifierDisplay() = box {
+        y = worldHeight * 0.6f
         width = 500f
-        x = worldWidth - 100f
-        onLayoutAndNow { height = children.sumOf { it.height.toDouble() }.toFloat() + 50f }
-        onLayoutAndNow { y = worldHeight * 0.8f - height }
-        backgroundHandle = "encounter_modifier_background"
-        flexDirection = FlexDirection.COLUMN
-        verticalAlign = CustomAlign.SPACE_AROUND
+        syncHeight()
+        backgroundHandle = "encounter_encounter_modifier_bg"
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
-        isVisible = false
+
+        dropShadow = BakedDropShadow(
+            "encounter_encounter_modifier_bg",
+            screen,
+            0f, 0f,
+            1.3f, 1.3f
+        )
 
         val xAnim = propertyAnimation(
             xPositionAbstractProperty(),
             AnimState("open", worldWidth - width + 50f),
-            AnimState("closed", worldWidth - 100f),
+            AnimState("closed", worldWidth - 90f),
             defaultTime = 100,
             defaultInterpolation = Interpolation.pow2,
             initialState = "closed"
         )
-
         observeInputState(
             GameInputs.States.focused,
             { xAnim.state("open") },
             { xAnim.state("closed") },
         )
 
+        verticalSpacer(20f)
+
         fun encounterModifier(encounterModifier: EncounterModifier) = box {
-            flexDirection = FlexDirection.ROW
             relativeWidth(100f)
-            height = 80f
-            verticalAlign = CustomAlign.CENTER
-            horizontalSpacer(30f)
-            box {
-                width = 50f
-                height = 50f
+            syncHeight()
+            flexDirection = FlexDirection.ROW
+            horizontalSpacer(35f)
+            image {
+                width = 45f
+                height = 45f
                 backgroundHandle = encounterModifier.iconHandle
             }
-            horizontalSpacer(20f)
+            horizontalSpacer(15f)
             box {
-                onLayoutAndNow { width = parent.width - 50f - 160f }
+                onLayoutAndNow { width = parent.width - 35f - 15f - 45f }
                 syncHeight()
                 flexDirection = FlexDirection.COLUMN
-
-                label("roadgeek", encounterModifier.displayName, fontSize = (24 * 0.9).toInt()) {
-                    touchable = Touchable.disabled
+                label("roadgeek", encounterModifier.displayName, Colors.FIREBRICK, fontSize = 25) {
                     syncDimensions()
                 }
-                verticalSpacer(3f)
-                box {
-                    backgroundHandle = "black_texture"
-                    height = 1.5f
+                verticalSpacer(5f)
+                label("roadgeek", encounterModifier.description, fontSize = 20) {
                     relativeWidth(100f)
-                }
-                verticalSpacer(3f)
-                label("roadgeek", encounterModifier.description, fontSize = (24 * 0.6).toInt()) {
-                    touchable = Touchable.disabled
                     wrap = true
-                    relativeWidth(100f)
                     syncHeight()
                 }
             }
@@ -331,8 +325,8 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.EncounterModifierAdded> { (modifier) ->
             isVisible = true
             encounterModifier(modifier)
+            verticalSpacer(15f)
         }
-
     }
 
     private fun CustomGroup.putCardsUnderStackPopup() = group {
@@ -559,7 +553,8 @@ class EncounterScreen : ScreenCreator() {
             )
 
             actor(statusEffectBar) {
-                relativeWidth(100f)
+                relativeWidth(87f)
+                logicalOffsetX = 30f
                 height = 70f
             }
 

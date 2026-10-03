@@ -284,7 +284,7 @@ class NewRevolver(
             repeat(5) { i -> group {
                 height = slotSize
                 width = slotSize
-                label("red wing", Utils.convertSlotRepresentation(i + 1).toString(), Colors.LIGHT_GRAY, 40) {
+                label("red wing", Utils.convertSlotRepresentation(i + 1).toString(), Colors.Taupe_gray, 40) {
                     syncWidth()
                     syncHeight()
                     centerX()

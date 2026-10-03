@@ -371,6 +371,11 @@ textures: [
         file: "blobs/encounter_screen/player_health_bar.png"
     },
     {
+        name: "encounter_encounter_modifier_bg",
+        file: "blobs/encounter_screen/encounter_encounter_modifier_bg.png",
+        dropShadow: defaultDropShadowConfig
+    },
+    {
         name: "background_wasteland1",
         file: "blobs/backgrounds/wasteland/wasteland1.png"
     },
