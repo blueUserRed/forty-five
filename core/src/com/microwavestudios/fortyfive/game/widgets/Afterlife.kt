@@ -104,6 +104,7 @@ class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) : I
                 var diff = xBefore - thisX
                 if (index == 1) diff -= 15f
                 val action = PropertyAction(
+                    Float::class,
                     actor,
                     actor::drawOffsetX,
                     diff,

@@ -88,7 +88,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             if (additional.isEmpty()) return builder.toString()
             builder.append("\nbase: $baseDmg\n")
             additional.forEach { (icon, dmg) ->
-                builder.append(if (dmg < 0) "-" else "+")
+                builder.append(if (dmg < 0) "" else "+")
                 builder.append(dmg)
                 builder.append("§§$icon§§\n")
             }
@@ -105,8 +105,8 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             data ?: return ""
             val additional = additionalFn(damage, data).sumOf { it.second }
             return when {
-                additional > 0 -> "$damage\$enemyDamageIncrease\$+$additional\$enemyDamageIncrease\$"
-                additional < 0 -> "$damage\$enemyDamageDecrease\$-$additional\$enemyDamageDecrease\$"
+                additional > 0 -> "$damage\$enemyDamageIncrease\$ +$additional\$enemyDamageIncrease\$"
+                additional < 0 -> "$damage\$enemyDamageDecrease\$ $additional\$enemyDamageDecrease\$"
                 else -> damage.toString()
             }
         }

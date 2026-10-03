@@ -18,10 +18,16 @@ class FloatInterpolator() : Interpolator<Float> {
     override fun interpolate(start: Float, end: Float, percent: Float): Float = start + (end - start) * percent
 }
 
+class DoubleInterpolator() : Interpolator<Double> {
+
+    override fun interpolate(start: Double, end: Double, percent: Float): Double = start + (end - start) * percent
+}
+
 object DefaultInterpolators {
 
     private val interpolators: Map<KClass<*>, Interpolator<*>> = mapOf(
-        Float::class to FloatInterpolator()
+        Float::class to FloatInterpolator(),
+        Double::class to DoubleInterpolator(),
     )
 
     fun <T : Any> getDefaultInterpolator(type: KClass<T>): Interpolator<T>? {

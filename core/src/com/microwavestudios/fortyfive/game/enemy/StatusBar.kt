@@ -57,7 +57,7 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
     init {
         screen.lifetime.tieDisposable(polygonBatch)
         enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { hpChanged() }
-        enemy.enemyEvents.watchFor<Enemy.StatusEffectsChangedEvent> { statusEffectsChanged() }
+//        enemy.enemyEvents.watchFor<Enemy.StatusEffectsChangedEvent> { statusEffectsChanged() }
     }
 
     fun statusEffectsChanged() {
@@ -116,9 +116,11 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         )
         fixUvCoords(region)
         val (gX, gY) = localToStageCoordinates(Vector2(0f, 0f))
+//        polygonBatch.draw(region, gX + 4, gY + 1)
         polygonBatch.draw(region, gX + barX + 4, gY + barY + 1)
         polygonBatch.end()
         batch.begin()
+//        batch.projectionMatrix = screen.viewport.camera.combined
         mainBar.draw(batch, barX, barY, barWidth, barHeight)
         if (enemy.currentCover > 0) drawShieldOverlay(batch, barX, barY, barWidth, barHeight)
 //        drawStatusEffects(batch, barX, barY, barWidth, barHeight)

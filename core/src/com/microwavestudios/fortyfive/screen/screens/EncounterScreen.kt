@@ -20,9 +20,15 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
 import com.microwavestudios.fortyfive.game.BannerAnimation
+import com.microwavestudios.fortyfive.game.Bewitched
+import com.microwavestudios.fortyfive.game.Bounty
+import com.microwavestudios.fortyfive.game.BurningPlayer
 import com.microwavestudios.fortyfive.game.EncounterModifier
+import com.microwavestudios.fortyfive.game.Frozen
 import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.StatusEffect
+import com.microwavestudios.fortyfive.game.Weak
 import com.microwavestudios.fortyfive.game.card.ActorCardPresentation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
@@ -48,6 +54,7 @@ import com.microwavestudios.fortyfive.game.widgets.NewCardHand
 import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.game.widgets.StatusEffectBarCreator
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
@@ -204,8 +211,6 @@ class EncounterScreen : ScreenCreator() {
             y = worldHeight * 0.4f
         }
 
-        playerStatusEffectDisplay()
-
         group {
             backgroundHandle = "transparent_black_texture"
             x = 0f
@@ -256,68 +261,6 @@ class EncounterScreen : ScreenCreator() {
 
         gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
             event.finishedPromise.resolve(Unit)
-        }
-    }
-
-    private fun CustomGroup.playerStatusEffectDisplay() = box {
-        badTexture("status effect background", comment = "??????")
-        backgroundHandle = "status_effect_background"
-        height = 90f
-        horizontalAlign = CustomAlign.CENTER
-        verticalAlign = CustomAlign.CENTER
-        flexDirection = FlexDirection.ROW
-        onLayoutAndNow { width = parent.width * 0.5f }
-        x = parent.width / 2 - 180
-        y = worldHeight - height + 10
-        isVisible = false
-
-        val effects: MutableList<StatusEffect> = mutableListOf()
-        val updaters: MutableList<() -> Unit> = mutableListOf()
-
-        fun effect(effect: StatusEffect) = box {
-            relativeHeight(100f)
-            width = 200f
-            horizontalAlign = CustomAlign.CENTER
-            verticalAlign = CustomAlign.CENTER
-            flexDirection = FlexDirection.ROW
-            touchable = Touchable.enabled
-            val text = DetailDescriptionHandler.descriptions[effect.name.lowercase()]?.second
-            detailWidget = DetailWidget.ComplexBigDetailActor(
-                screen,
-                DetailDescriptionHandler.allTextEffects,
-                text = { listOf(text ?: "") }
-            )
-            bindDetailToInputState(GameInputs.States.focused)
-            image {
-                backgroundHandle = effect.iconHandle
-                width = 50f
-                height = 50f
-            }
-            label("red wing", effect.getDisplayText(), fontSize = 45) {
-                syncDimensions()
-                updaters.add { setText(effect.getDisplayText()) }
-            }
-        }
-
-        fun effectsChanged() {
-            clearChildren()
-            updaters.clear()
-            effects.forEach { effect(it) }
-        }
-
-        gameEvents.watchFor<UpdateUiEvent> {
-            updaters.forEach { it() }
-        }
-
-        gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
-            effects.add(event.statusEffect)
-            effectsChanged()
-            isVisible = true
-        }
-        gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
-            effects.removeIf { it === event.statusEffect }
-            effectsChanged()
-            if (effects.isEmpty()) isVisible = false
         }
     }
 
@@ -500,30 +443,9 @@ class EncounterScreen : ScreenCreator() {
             width = enemyWidth
             height = enemyHeight
 
-            keyboardFocusable = KeyboardFocusable.LEAF
-            touchable = Touchable.enabled
-
             gameEvents.watchFor<UpdateUiEvent> {
                 drawOffsetX = bgOffX * 1.1f
                 drawOffsetY = bgOffY * 1.1f
-            }
-
-            observeInputState(
-                GameInputs.States.focused,
-                {
-                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, true))
-                },
-                {
-                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(null, true))
-                },
-            )
-
-            onInput(GameInputs.targetEnemy) {
-                gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, false))
-            }
-
-            onInput(GameInputs.shootEnemy) {
-                gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
             }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
@@ -557,7 +479,27 @@ class EncounterScreen : ScreenCreator() {
             group {
                 relativeWidth(100f)
                 height = enemyHeight * 0.65f
-                touchable = Touchable.disabled
+
+                keyboardFocusable = KeyboardFocusable.LEAF
+                touchable = Touchable.enabled
+
+                observeInputState(
+                    GameInputs.States.focused,
+                    {
+                        gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, true))
+                    },
+                    {
+                        gameEvents.fire(GameControllerImpl.Events.EnemyClicked(null, true))
+                    },
+                )
+
+                onInput(GameInputs.targetEnemy) {
+                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, false))
+                }
+
+                onInput(GameInputs.shootEnemy) {
+                    gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
+                }
 
                 image {
                     // TODO: add anims back
@@ -609,6 +551,16 @@ class EncounterScreen : ScreenCreator() {
                     relativeWidth(110f)
                     relativeHeight(100f)
                 }
+            }
+
+            val statusEffectBar = StatusEffectBarCreator.createStatusBar(
+                this@EncounterScreen,
+                StatusEffectBarCreator.StatusEffectBarTarget.EnemyTarget(enemy, gameEvents)
+            )
+
+            actor(statusEffectBar) {
+                relativeWidth(100f)
+                height = 70f
             }
 
         }
@@ -783,6 +735,7 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.playerBar() = group {
+        touchable = Touchable.childrenOnly
 
         x = 0f
         y = 0f
@@ -845,6 +798,19 @@ class EncounterScreen : ScreenCreator() {
         }
 
         playerHealthBar()
+
+        val statusEffectBar = StatusEffectBarCreator.createStatusBar(
+            this@EncounterScreen,
+            StatusEffectBarCreator.StatusEffectBarTarget.PlayerTarget(gameEvents),
+            4f
+        )
+
+        actor(statusEffectBar) {
+            x = 0f
+            y = 0f
+            width = 320f
+            height = 110f
+        }
 
         box {
             width = 130f

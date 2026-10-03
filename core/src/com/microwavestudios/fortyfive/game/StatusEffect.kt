@@ -465,7 +465,7 @@ class Frozen(shots: Int, private val skipFirstRotation: Boolean) : StatusEffect(
     private val active: Boolean
         get() = !skipFirstRotation || skipped
 
-    override val name: String = "Frost"
+    override val name: String = "frozen"
 
     override fun canStackWith(other: StatusEffect): Boolean = other is Frozen
 
@@ -509,7 +509,7 @@ class PoisonImmunity(
     continueForever: Boolean
 ) : TurnBasedStatusEffect("poison_immunity_icon", turns) {
 
-    override val name: String = "poisonimmunity"
+    override val name: String = "poison immunity"
 
     init {
         if (continueForever) continueForever()
@@ -614,7 +614,7 @@ class Bounty(turns: Int, reserves: Int) : StatusEffect("bounty_icon") {
 
 class HeatRepellent : PassiveEnemyAction("heat_repellent_icon") {
 
-    override val name: String = "heatrepellent"
+    override val name: String = "heat repellent"
 
     override fun executeBeforeStatusEffectApplied(
         statusEffect: StatusEffect,
@@ -641,7 +641,7 @@ class HeatRepellent : PassiveEnemyAction("heat_repellent_icon") {
 
 class WardOfTheWitch : PassiveEnemyAction("ward_of_the_witch_icon") {
 
-    override val name: String = "wardofthewitch"
+    override val name: String = "ward of the witch"
 
     override fun executeAfterRotation(
         rotation: RevolverRotation,
@@ -720,7 +720,7 @@ class Ominous(
 
 class DeterringAura : PassiveEnemyAction("deterring_aura_icon") {
 
-    override val name: String = "deterringaura"
+    override val name: String = "deterring aura"
 
     override fun allowCardForParrying(
         card: Card,

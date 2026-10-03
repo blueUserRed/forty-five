@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
@@ -130,6 +131,7 @@ open class NewLabel(
     init {
         initInput(this, screen)
         initDebugBounds(this, screen)
+        touchable = Touchable.disabled
         screen.screenEvents.watchFor<IScreen.ScreenResizedEvent> { paramsChanged() }
     }
 

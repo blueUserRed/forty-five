@@ -67,9 +67,10 @@ class NewCardHand : ICardHand {
         cards.remove(card)
     }
 
-    override fun triggerPositionForCardActor(card: CardActor): Vector2 {
-        TODO("Not yet implemented")
-    }
+    override fun triggerPositionForCardActor(card: CardActor): Vector2 = Vector2(
+        card.x,
+        card.y + 300f
+    )
 
     fun getActor(creator: ScreenCreator): CustomGroup {
         createdActor?.let { return it }

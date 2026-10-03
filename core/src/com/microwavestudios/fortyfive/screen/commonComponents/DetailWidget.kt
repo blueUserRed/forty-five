@@ -30,7 +30,7 @@ sealed class DetailWidget(protected val screen: RenderableScreen) {
 
     open fun addFadeInAction(singleTextParent: Actor) {
         shownAlpha = 0f
-        val propertyAction = PropertyAction(this, this::shownAlpha, 1f)
+        val propertyAction = PropertyAction(Float::class, this, this::shownAlpha, 1f)
         propertyAction.duration = 0.2F
         propertyAction.interpolation = Interpolation.linear
         singleTextParent.addAction(propertyAction)

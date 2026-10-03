@@ -1499,6 +1499,7 @@ class CardActor(
 
     fun descendAnimation(): Timeline = Timeline.timeline {
         val action = PropertyAction(
+            Float::class,
             this@CardActor,
             ::drawOffsetY,
             y - 1000f

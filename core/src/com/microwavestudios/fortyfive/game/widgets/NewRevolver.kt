@@ -1,9 +1,11 @@
 package com.microwavestudios.fortyfive.game.widgets
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
@@ -13,18 +15,25 @@ import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
+import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
+import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.asPromise
+import com.microwavestudios.fortyfive.utils.collectParallelTimeline
 import com.microwavestudios.fortyfive.utils.component1
 import com.microwavestudios.fortyfive.utils.component2
 import com.microwavestudios.fortyfive.utils.contains
+import com.microwavestudios.fortyfive.utils.degrees
 import com.microwavestudios.fortyfive.utils.requireNull
 import com.microwavestudios.fortyfive.utils.setPosition
+import com.microwavestudios.fortyfive.utils.unreachable
 import java.text.NumberFormat
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.ranges.contains
@@ -49,6 +58,7 @@ class NewRevolver(
     private val addedListenerToCards: MutableList<Card> = mutableListOf()
 
     private var createdActor: CustomGroup? = null
+    private lateinit var revolverDrum: CustomImageActor
 
     fun getActor(creator: ScreenCreator): CustomGroup {
         createdActor?.let { return it }
@@ -66,12 +76,8 @@ class NewRevolver(
         if (card != null) {
             requireNull(slot.card) { "slot already contains a card: $slot, $card, in slot: ${slot.card}" }
             slot.card = card
-            val cardActor = card.presentation.forceGetActor()
-            cardActor.fixedZIndex = cardZIndex
-            cardActor.width = cardSize
-            cardActor.height = cardSize
-            createdActor!!.addActor(cardActor)
-            if (card !in addedListenerToCards) addListenerToCard(card)
+            setupCard(card)
+            slot.slotActor.position(angleForIndex(slot.num - 1))
         } else {
             val cardInSlot = slot.card
             requireNotNull(cardInSlot) { "cant remove card from slot without card: $slot" }
@@ -79,6 +85,15 @@ class NewRevolver(
             createdActor!!.removeActor(cardInSlot.presentation.forceGetActor())
         }
         createdActor!!.invalidateHierarchy()
+    }
+
+    private fun setupCard(card: Card) {
+        val cardActor = card.presentation.forceGetActor()
+        cardActor.fixedZIndex = cardZIndex
+        cardActor.width = cardSize
+        cardActor.height = cardSize
+        createdActor!!.addActor(cardActor)
+        if (card !in addedListenerToCards) addListenerToCard(card)
     }
 
     private fun addListenerToCard(card: Card) {
@@ -102,7 +117,12 @@ class NewRevolver(
     }
 
     override fun preAddCard(slot: Int, card: Card) {
-        TODO("Not yet implemented")
+        requireNotNull(createdActor)
+        require(slot in 1..5) { "slot must be in 1..5" }
+        val slot = slots[slot - 1]
+        setupCard(card)
+        val cardActor = card.presentation.forceGetActor()
+        cardActor.setPosition(slot.slotActor.cardPosition())
     }
 
     override fun removeCard(slot: Int) {
@@ -121,18 +141,111 @@ class NewRevolver(
     }
 
     override fun getCardTriggerPosition(): Vector2 =
-        Vector2(slotActors[0].x - slotSize * 2, slotActors[4].y + slotSize * 2)
+        Vector2(slots[0].slotActor.x - slotSize * 2, slots[4].slotActor.y + slotSize * 2)
 
-    override fun getMirroredCardTriggerPosition(): Vector2 {
-        TODO("Not yet implemented")
-    }
+    override fun getMirroredCardTriggerPosition(): Vector2 =
+        Vector2(slots[3].slotActor.x - slotSize * 2, slots[4].slotActor.y + slotSize * 2)
 
-    override fun getCardOnShotTriggerPosition(): Vector2 {
-        TODO("Not yet implemented")
-    }
+    override fun getCardOnShotTriggerPosition(): Vector2 =
+        Vector2(slots[4].slotActor.x, slots[4].slotActor.y + slots[0].slotActor.height * 3)
 
     override fun rotate(rotation: RevolverRotation): Timeline {
-        TODO("Not yet implemented")
+        if (rotation.amount == 0) return Timeline.emptyTimeline
+        return when (rotation) {
+            is RevolverRotation.Right -> rotateRight(rotation.amount)
+            is RevolverRotation.Left -> rotateLeft(rotation.amount)
+            else -> unreachable()
+        }
+    }
+
+    private fun rotateRight(amount: Int): Timeline = Timeline.timeline {
+        val oneSlotAngle = -(2 * Math.PI) / 5
+        val totalRotationAngle = amount * oneSlotAngle
+        val duration = 0.4f * amount
+        val interpolation = Interpolation.pow4Out
+
+        val slotAnimTimeline = slotActors.map { slot ->
+            val action = PropertyAction(Double::class, slot, slot::rotationOff, totalRotationAngle)
+            action.duration = duration
+            action.interpolation = interpolation
+            Timeline.timeline {
+                action { slot.addAction(action) }
+                delayUntil { action.isComplete }
+            }
+        }.collectParallelTimeline()
+
+        val revolverDrumAction = PropertyAction(
+            Float::class, revolverDrum,
+            { revolverDrum.rotation },
+            { value -> revolverDrum.rotation = value },
+            revolverDrum.rotation + totalRotationAngle.degrees.toFloat()
+        )
+        revolverDrumAction.duration = duration
+        revolverDrumAction.interpolation = interpolation
+        val revolverDrumTimeline = Timeline.timeline {
+            action { revolverDrum.addAction(revolverDrumAction) }
+            delayUntil { revolverDrumAction.isComplete }
+        }
+
+        parallelActions(
+            slotAnimTimeline.asAction(),
+            revolverDrumTimeline.asAction()
+        )
+        later {
+            revolverDrum.rotation %= 360f
+            slotActors.forEach { slot ->
+                var num = slot.num - 1
+                num += 500 // prevent negative, gets removed by % 5
+                num -= amount
+                num %= 5
+                slot.num = num + 1
+            }
+            slotActors.forEach { it.rotationOff = 0.0 }
+        }
+    }
+    private fun rotateLeft(amount: Int): Timeline = Timeline.timeline {
+        val oneSlotAngle = (2 * Math.PI) / 5
+        val totalRotationAngle = amount * oneSlotAngle
+        val duration = 0.4f * amount
+        val interpolation = Interpolation.pow4Out
+
+        val slotAnimTimeline = slotActors.map { slot ->
+            val action = PropertyAction(Double::class, slot, slot::rotationOff, totalRotationAngle)
+            action.duration = duration
+            action.interpolation = interpolation
+            Timeline.timeline {
+                action { slot.addAction(action) }
+                delayUntil { action.isComplete }
+            }
+        }.collectParallelTimeline()
+
+        val revolverDrumAction = PropertyAction(
+            Float::class, revolverDrum,
+            { revolverDrum.rotation },
+            { value -> revolverDrum.rotation = value },
+            revolverDrum.rotation + totalRotationAngle.degrees.toFloat()
+        )
+        revolverDrumAction.duration = duration
+        revolverDrumAction.interpolation = interpolation
+        val revolverDrumTimeline = Timeline.timeline {
+            action { revolverDrum.addAction(revolverDrumAction) }
+            delayUntil { revolverDrumAction.isComplete }
+        }
+
+        parallelActions(
+            slotAnimTimeline.asAction(),
+            revolverDrumTimeline.asAction()
+        )
+        later {
+            revolverDrum.rotation %= 360f
+            slotActors.forEach { slot ->
+                var num = slot.num - 1
+                num += amount
+                num %= 5
+                slot.num = num + 1
+            }
+            slotActors.forEach { it.rotationOff = 0.0 }
+        }
     }
 
     override fun forceGetActor(): Actor = createdActor!!
@@ -171,7 +284,7 @@ class NewRevolver(
             repeat(5) { i -> group {
                 height = slotSize
                 width = slotSize
-                label("red wing", Utils.convertSlotRepresentation(i).toString(), Colors.LIGHT_GRAY, 40) {
+                label("red wing", Utils.convertSlotRepresentation(i + 1).toString(), Colors.LIGHT_GRAY, 40) {
                     syncWidth()
                     syncHeight()
                     centerX()
@@ -198,7 +311,7 @@ class NewRevolver(
             fixedZIndex = 4
         }
 
-        image {
+        revolverDrum = image {
             backgroundHandle = "encounter_revolver_drum_top"
             relativeWidth(100f)
             heightByAspectRatio(1.0)
@@ -218,10 +331,17 @@ class NewRevolver(
 
         private val selectionPromise: Promise<IRevolverSlot>? = null
 
+        var rotationOff: Double = 0.0
+            set(value) {
+                field = value
+                position(angleForIndex(num - 1) + value)
+            }
+
         var card: Card? = null
             internal set
 
         init {
+            name = "revolver slot $num"
             width = slotSize
             height = slotSize
             backgroundHandle = "encounter_revolver_slot_gradient"
@@ -291,7 +411,7 @@ class NewRevolver(
     ) : IRevolverSlot {
 
 
-        private val slotActor: NewRevolverSlotActor
+        val slotActor: NewRevolverSlotActor
             get() = slotActors.find { it.num == num }!!
 
         override var card: Card?
