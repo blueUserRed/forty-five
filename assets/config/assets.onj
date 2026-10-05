@@ -359,8 +359,16 @@ textures: [
         file: "blobs/encounter_screen/revolver_slot_gradient.png",
     },
     {
-        name: "encounter_revolver_slot_gold_shadow",
-        file: "blobs/encounter_screen/revolver_slot_gold_shadow.png",
+        name: "encounter_revolver_slot_glow",
+        file: "blobs/encounter_screen/revolver_slot_glow.png",
+        dropShadow: {
+            shadowColor: color.brightYellow,
+            brighten: 0.1,
+            originalColor: 1.0,
+            maxRadius: 280.0,
+            radiusStep: 6.0,
+            pointsOnCircle: 200.0,
+        }
     },
     {
         name: "encounter_reserves_bg",
@@ -1404,6 +1412,10 @@ colorTextures: [
     {
         name: "transparent_black_texture",
         color: color.backgroundTransparent
+    },
+    {
+        name: "transparent_texture",
+        color: color("00000000")
     },
     {
         name: "tutorial_info_actor_background",

@@ -198,6 +198,11 @@ interface AnimatedActor {
         fun start()
         fun stop()
         fun reset()
+
+        fun stopAndReset() {
+            stop()
+            reset()
+        }
     }
 
     private class AnimMethodBasedAnimationController(

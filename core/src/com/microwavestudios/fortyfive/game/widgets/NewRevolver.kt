@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.utils.Align
 import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
@@ -13,6 +14,7 @@ import com.microwavestudios.fortyfive.game.widgets.RevolverSlot.Companion.revolv
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.CustomImageActor
@@ -49,8 +51,10 @@ class NewRevolver(
     }
 
     private val slotActors: Array<out NewRevolverSlotActor> = Array(5) {
-        NewRevolverSlotActor(it + 1, this, events, screen)
+        NewRevolverSlotActor(it + 1, events, screen)
     }
+
+    private val revolverEvents: EventPipeline = EventPipeline()
 
     private val orderedChildren: List<Actor> by lazy {
         listOf(slotActors[4], slotActors[0], slotActors[1], slotActors[2], slotActors[3])
@@ -285,12 +289,35 @@ class NewRevolver(
             repeat(5) { i -> group {
                 height = slotSize
                 width = slotSize
+                originCenter()
+                var selectionMode = false
+                val rotationAnim = animateRotationSinus(amplitude = 5f, frequency = 27f)
+                rotationAnim.stop()
+
                 label("red wing", Utils.convertSlotRepresentation(i + 1).toString(), Colors.Taupe_gray, 40) {
-                    syncWidth()
-                    syncHeight()
+                    relativeWidth(100f)
+                    relativeHeight(100f)
                     centerX()
                     centerY()
+                    originCenter()
+                    setAlignment(Align.center)
+                    revolverEvents.watchFor<SlotEnteredSelectionModeEvent> { e ->
+                        if (e.slot != i + 1) return@watchFor
+                        selectionMode = true
+                        fontColor = Colors.BrightYellow
+                    }
+                    revolverEvents.watchFor<SlotLeftSelectionModeEvent> { e ->
+                        if (e.slot != i + 1) return@watchFor
+                        selectionMode = false
+                        fontColor = Colors.Taupe_gray
+                        rotationAnim.stopAndReset()
+                    }
                 }
+                slotActors[i].observeInputState(
+                    GameInputs.States.focused,
+                    { if (selectionMode) rotationAnim.start() },
+                    { if (selectionMode) rotationAnim.stopAndReset() },
+                )
                 val r = revolverWidth / 2
                 val innerR = r - 73f
                 val angle = angleForIndex(i)
@@ -323,14 +350,13 @@ class NewRevolver(
     }
 
 
-    class NewRevolverSlotActor(
+    inner class NewRevolverSlotActor(
         var num: Int,
-        val revolver: IRevolver,
         private val events: EventPipeline,
         screen: RenderableScreen,
     ) : CustomGroup(screen) {
 
-        private val selectionPromise: Promise<IRevolverSlot>? = null
+        private var selectionPromise: Promise<IRevolverSlot>? = null
 
         var rotationOff: Double = 0.0
             set(value) {
@@ -341,13 +367,22 @@ class NewRevolver(
         var card: Card? = null
             internal set
 
+        private val selectionDropShadow = BakedDropShadow(
+            "encounter_revolver_slot_glow",
+            screen
+        ).also {
+            it.showDropShadow = false
+            it.scaleX = 1.8f
+            it.scaleY = 1.8f
+        }
+
         init {
             name = "revolver slot $num"
             width = slotSize
             height = slotSize
             alpha = 0.4f
             backgroundHandle = "encounter_revolver_slot_gradient"
-//            backgroundHandle = "encounter_revolver_slot_gold_shadow"
+            dropShadow = selectionDropShadow
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             joinGroup(revolverSlotGroup)
@@ -363,7 +398,7 @@ class NewRevolver(
                 }
             )
             onInput(GameInputs.interact) {
-                selectionPromise?.resolve(revolver.slots.find { it.num == num }!!)
+                selectionPromise?.resolve(slots.find { it.num == num }!!)
                 card?.presentation?.forceGetActor()?.clickedViaSlot(false)
             }
             onInput(GameInputs.triggerCard) {
@@ -372,7 +407,7 @@ class NewRevolver(
             isDropTarget = true
             onDrop { actor ->
                 if (actor !is CardActor) return@onDrop
-                events.fire(CardHand.CardDraggedOntoSlotEvent(actor.card, revolver.slots.find { it.num == num }!!))
+                events.fire(CardHand.CardDraggedOntoSlotEvent(actor.card, slots.find { it.num == num }!!))
             }
         }
 
@@ -400,11 +435,15 @@ class NewRevolver(
         fun cardPosition(): Vector2 = calcCardPosition()
 
         fun enterSelectionMode(promise: Promise<IRevolverSlot>) {
-            TODO("Not yet implemented")
+            selectionPromise = promise
+            selectionDropShadow.showDropShadow = true
+            revolverEvents.fire(SlotEnteredSelectionModeEvent(num))
         }
 
         fun exitSelectionMode() {
-            TODO("Not yet implemented")
+            selectionPromise = null
+            selectionDropShadow.showDropShadow = false
+            revolverEvents.fire(SlotLeftSelectionModeEvent(num))
         }
 
     }
@@ -454,4 +493,7 @@ class NewRevolver(
         private fun angleForIndex(i: Int): Double = slotAngleOff * i + rotationOff
 
     }
+
+    private class SlotEnteredSelectionModeEvent(val slot: Int)
+    private class SlotLeftSelectionModeEvent(val slot: Int)
 }

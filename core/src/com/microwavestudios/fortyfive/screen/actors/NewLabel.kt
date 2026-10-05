@@ -37,12 +37,12 @@ import kotlin.math.absoluteValue
  * resolution/font size
  */
 open class NewLabel(
-    val screen: RenderableScreen,
+    override val screen: RenderableScreen,
     text: String,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
     DebugActor by DebugActorImpl(), InputActor by InputActorImpl(),
-    KotlinStyledActor, OffSettable {
+    KotlinStyledActor, OffSettable, AnimatedActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -57,6 +57,8 @@ open class NewLabel(
     override var drawOffsetY: Float = 0f
     override var logicalOffsetX: Float = 0f
     override var logicalOffsetY: Float = 0f
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: ResourceHandle? by backgroundHandleObserver
@@ -141,6 +143,7 @@ open class NewLabel(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         updateTemplate()
         super.draw(batch, parentAlpha)
         if (batch == null) return
