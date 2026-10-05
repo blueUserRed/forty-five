@@ -339,6 +339,10 @@ textures: [
         file: "blobs/encounter_screen/bottom_bar.png"
     },
     {
+        name: "encounter_bottom_bar_shadow",
+        file: "blobs/encounter_screen/bottom_bar_shadow.png"
+    },
+    {
         name: "encounter_revolver_handle",
         file: "blobs/encounter_screen/revolver_handle.png"
     },
@@ -352,7 +356,11 @@ textures: [
     },
     {
         name: "encounter_revolver_slot_gradient",
-        file: "blobs/encounter_screen/revolver_slot_gradient.png"
+        file: "blobs/encounter_screen/revolver_slot_gradient.png",
+    },
+    {
+        name: "encounter_revolver_slot_gold_shadow",
+        file: "blobs/encounter_screen/revolver_slot_gold_shadow.png",
     },
     {
         name: "encounter_reserves_bg",
@@ -374,6 +382,14 @@ textures: [
         name: "encounter_encounter_modifier_bg",
         file: "blobs/encounter_screen/encounter_encounter_modifier_bg.png",
         dropShadow: defaultDropShadowConfig
+    },
+    {
+        name: "encounter_pass_button",
+        file: "blobs/encounter_screen/pass.png"
+    },
+    {
+        name: "encounter_parry_button",
+        file: "blobs/encounter_screen/parry.png"
     },
     {
         name: "background_wasteland1",

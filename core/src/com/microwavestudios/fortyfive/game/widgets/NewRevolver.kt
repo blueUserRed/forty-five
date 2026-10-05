@@ -23,6 +23,7 @@ import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
+import com.microwavestudios.fortyfive.utils.alpha
 import com.microwavestudios.fortyfive.utils.asPromise
 import com.microwavestudios.fortyfive.utils.collectParallelTimeline
 import com.microwavestudios.fortyfive.utils.component1
@@ -162,12 +163,11 @@ class NewRevolver(
         val oneSlotAngle = -(2 * Math.PI) / 5
         val totalRotationAngle = amount * oneSlotAngle
         val duration = 0.4f * amount
-        val interpolation = Interpolation.pow4Out
 
         val slotAnimTimeline = slotActors.map { slot ->
             val action = PropertyAction(Double::class, slot, slot::rotationOff, totalRotationAngle)
             action.duration = duration
-            action.interpolation = interpolation
+            action.interpolation = defaultInterpolation
             Timeline.timeline {
                 action { slot.addAction(action) }
                 delayUntil { action.isComplete }
@@ -181,7 +181,7 @@ class NewRevolver(
             revolverDrum.rotation + totalRotationAngle.degrees.toFloat()
         )
         revolverDrumAction.duration = duration
-        revolverDrumAction.interpolation = interpolation
+        revolverDrumAction.interpolation = defaultInterpolation
         val revolverDrumTimeline = Timeline.timeline {
             action { revolverDrum.addAction(revolverDrumAction) }
             delayUntil { revolverDrumAction.isComplete }
@@ -207,12 +207,11 @@ class NewRevolver(
         val oneSlotAngle = (2 * Math.PI) / 5
         val totalRotationAngle = amount * oneSlotAngle
         val duration = 0.4f * amount
-        val interpolation = Interpolation.pow4Out
 
         val slotAnimTimeline = slotActors.map { slot ->
             val action = PropertyAction(Double::class, slot, slot::rotationOff, totalRotationAngle)
             action.duration = duration
-            action.interpolation = interpolation
+            action.interpolation = defaultInterpolation
             Timeline.timeline {
                 action { slot.addAction(action) }
                 delayUntil { action.isComplete }
@@ -226,7 +225,7 @@ class NewRevolver(
             revolverDrum.rotation + totalRotationAngle.degrees.toFloat()
         )
         revolverDrumAction.duration = duration
-        revolverDrumAction.interpolation = interpolation
+        revolverDrumAction.interpolation = defaultInterpolation
         val revolverDrumTimeline = Timeline.timeline {
             action { revolverDrum.addAction(revolverDrumAction) }
             delayUntil { revolverDrumAction.isComplete }
@@ -263,6 +262,8 @@ class NewRevolver(
             x = 0f
             y = 0f
             fixedZIndex = 0
+            originCenter()
+            rotation = 3f
         }
 
         image {
@@ -344,7 +345,9 @@ class NewRevolver(
             name = "revolver slot $num"
             width = slotSize
             height = slotSize
+            alpha = 0.4f
             backgroundHandle = "encounter_revolver_slot_gradient"
+//            backgroundHandle = "encounter_revolver_slot_gold_shadow"
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             joinGroup(revolverSlotGroup)
@@ -438,6 +441,7 @@ class NewRevolver(
         private const val slotSize: Float = 98f
         private const val cardSize: Float = 110f
         private const val revolverWidth: Float = 350f
+        private val defaultInterpolation: Interpolation = Interpolation.swingOut
         const val cardZIndex = 3
 
 

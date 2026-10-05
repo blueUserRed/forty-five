@@ -127,7 +127,7 @@ object FortyFive : Game() {
 
             override val encounter: Encounter = Encounter(
                 enemiesGroups = listOf("The-Fangs", "Witch", "Pyro"),
-                encounterModifierNames = setOf("rain", "bewitchedmist", "moist"),
+                encounterModifierNames = setOf("rain", "moist"),
                 forceCards = null,
                 forceConcreteEnemies = null,
                 shuffleCards = true,

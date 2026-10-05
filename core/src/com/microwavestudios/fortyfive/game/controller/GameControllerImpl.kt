@@ -236,7 +236,9 @@ class GameControllerImpl(
 
     private fun bindGameEventListeners() {
         gameEvents.watchFor<Any> { e ->
-            if (e !is EncounterScreen.UpdateUiEvent) FortyFive.logger.debug(logTag, "Game Event: $e")
+            if (e !is EncounterScreen.UpdateUiEvent && e !is Events.EnemySelectionChanged) {
+                FortyFive.logger.debug(logTag, "Game Event: $e")
+            }
         }
         gameEvents.watchFor<Events.TimelineBuildingEvent> { event ->
             event.append { later {

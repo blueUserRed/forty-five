@@ -737,6 +737,14 @@ class EncounterScreen : ScreenCreator() {
         width = worldWidth
         height = worldHeight / 2
 
+        image {
+            x = 0f
+            y = 0f
+            backgroundHandle = "encounter_bottom_bar_shadow"
+            relativeWidth(100f)
+            heightByAspectRatio(1920.0 / 510.0)
+        }
+
         actor(revolver.getActor(this@EncounterScreen)) {
             x = 380f
             y = 20f
@@ -775,22 +783,9 @@ class EncounterScreen : ScreenCreator() {
             heightByAspectRatio(1920.0 / 183.0)
         }
 
-        group {
-            x = -10f
-            y = 200f
-            focusBackgrounds(
-                normal = "encounter_holster",
-                focus = "encounter_holster_hover"
-            )
-            rotation = -5f
-            width = 320f
-            heightByAspectRatio(1513.0 / 335.0)
-            touchable = Touchable.enabled
-            keyboardFocusable = KeyboardFocusable.LEAF
-            onInput(GameInputs.interact) {
-                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
-            }
-        }
+        holsterButton()
+
+        parryButtons()
 
         playerHealthBar()
 
@@ -830,105 +825,145 @@ class EncounterScreen : ScreenCreator() {
                 }
                 syncDimensions()
             }
+        }
+    }
 
+    private fun CustomGroup.parryButtons() = group {
+        x = 0f
+        y = 140f
+        width = 320f
+        height = 400f
+        touchable = Touchable.childrenOnly
+
+        var parryPromise: Promise<Boolean>? = null
+
+        val parryButton = group {
+            x = -5f
+            y = 130f
+            rotation = -5f
+            backgroundHandle = "encounter_parry_button"
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            relativeWidth(100f)
+            heightByAspectRatio(1595.0 / 339.0)
+            joinGroup("parry-buttons")
+            onInput(GameInputs.interact) {
+                parryPromise?.resolve(true)
+            }
         }
 
-//        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
-//
-//        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-//            if (event.inParryMenu) buttonModal.push() else buttonModal.finished()
-//        }
-//
-//        shootButton()
-//        holsterButton()
-//
-//        actor(revolver) {
-//            touchable = Touchable.enabled
-//            name("revolver")
-//            centerX()
-//            y = -30f
-//            syncDimensions()
-//        }
-//
-//        label("red wing", "10", Colors.Red, 90) {
-//            centerX()
-//            y = 210f
-//            width = 50f
-//            setAlignment(Align.center)
-//            isVisible = false
-//            gameEvents.watchFor<GameControllerImpl.Events.SteelNervesCountdown> { (newNumber) ->
-//                setText(newNumber.toString())
-//                isVisible = true
-//            }
-//        }
-//
-//        actor(cardHand) {
-//            name("cardHand")
-//            centerX()
-//            y = 0f
-//            width = worldWidth
-//            gameEvents.link(events)
-//        }
-//
-//        group {
-//            backgroundHandle = "wood_box"
-//            x = 70f
-//            y = 180f
-//            width = 120f
-//            height = 120f
-//            reservesAnimationTarget = this
-//            animateRotationSinus(
-//                frequency = 0.15f
-//            )
-//
-//            image {
-//                backgroundHandle = "reserves_texture"
-//                width = 60f
-//                height = 60f
-//                x = 30f
-//                y = 90f
-//            }
-//
-//            label("red wing", "0/0", Colors.White, (32 * 1.1).toInt()) {
-//                centerX()
-//                centerY()
-//                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
-//                    setText("${new}/$base")
-//                }
-//                syncDimensions()
-//            }
-//        }
-//
-//        group {
-//            backgroundHandle = "wood_box"
-//            x = worldWidth - 70f - 120f
-//            y = 180f
-//            width = 120f
-//            height = 120f
-//            deckAnimationTarget = this
-//
-//            animateRotationSinus(
-//                frequency = 0.15f
-//            )
-//
-//            image {
-//                backgroundHandle = "deck_icon"
-//                width = 60f
-//                height = 60f
-//                x = 30f
-//                y = 90f
-//            }
-//
-//            label("red wing", "", Colors.White, (32 * 1.1).toInt()) {
-//                gameEvents.watchFor<UpdateUiEvent> { (controller) ->
-//                    setText(controller.cardStack.size().toString())
-//                }
-//                centerX()
-//                centerY()
-//                syncDimensions()
-//            }
-//        }
+        val passButton = group {
+            x = -5f
+            y = 50f
+            rotation = -5f
+            backgroundHandle = "encounter_pass_button"
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            relativeWidth(100f)
+            heightByAspectRatio(1595.0 / 339.0)
+            joinGroup("parry-buttons")
+            onInput(GameInputs.interact) {
+                parryPromise?.resolve(false)
+            }
+        }
 
+        val parryUiModal = InputManager.Modal(listOf("parry-buttons"), screen)
+        val parryUiFilter = InputManager.FocusFilter(listOf("parry-buttons"), screen)
+        parryUiFilter.start()
+
+        val parryAnimation = propertyAnimation(
+            parryButton.xPositionAbstractProperty(),
+            AnimState("open", -18f),
+            AnimState("hover", -5f),
+            AnimState("closed", -350f),
+            initialState = "closed",
+            defaultInterpolation = Interpolation.pow2,
+            defaultTime = 200
+        )
+
+        val passAnimation = propertyAnimation(
+            passButton.xPositionAbstractProperty(),
+            AnimState("open", -18f),
+            AnimState("hover", -5f),
+            AnimState("closed", -350f),
+            initialState = "closed",
+            defaultInterpolation = Interpolation.pow2,
+            defaultTime = 200
+        )
+
+        arrayOf(parryAnimation, passAnimation).forEach {
+            it.transition("open", "closed", 500, Interpolation.pow2)
+            it.transition("closed", "open", 500, Interpolation.pow2)
+        }
+
+        parryButton.observeInputState(
+            GameInputs.States.focused,
+            { if (parryPromise != null) parryAnimation.state("hover") },
+            { if (parryPromise != null) parryAnimation.state("open") },
+        )
+
+        passButton.observeInputState(
+            GameInputs.States.focused,
+            { if (parryPromise != null) passAnimation.state("hover") },
+            { if (parryPromise != null) passAnimation.state("open") },
+        )
+
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+            if (event.inParryMenu) {
+                parryPromise = event.resolutionPromise
+                passAnimation.state("open")
+                parryAnimation.state("open")
+                parryUiFilter.end()
+                parryUiModal.push()
+            } else {
+                parryPromise = null
+                passAnimation.state("closed")
+                parryAnimation.state("closed")
+                parryUiFilter.start()
+                parryUiModal.finished()
+            }
+        }
+    }
+
+    private fun CustomGroup.holsterButton() = group {
+        x = -10f
+        y = 200f
+
+        joinGroup("encounter_screen_holster_button")
+
+        val holsterFilter = InputManager.FocusFilter(listOf("encounter_screen_holster_button"), screen)
+
+        val xAnim = propertyAnimation<CustomGroup, Float>(
+            xPositionAbstractProperty(),
+            AnimState("open", -10f),
+            AnimState("closed", -330f),
+            initialState = "open",
+            defaultTime = 150,
+            defaultInterpolation = Interpolation.pow2,
+        )
+
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+            if (event.inParryMenu) {
+                xAnim.state("closed")
+                holsterFilter.start()
+            } else {
+                xAnim.state("open")
+                holsterFilter.end()
+            }
+        }
+
+        focusBackgrounds(
+            normal = "encounter_holster",
+            focus = "encounter_holster_hover"
+        )
+        rotation = -5f
+        width = 320f
+        heightByAspectRatio(1513.0 / 335.0)
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        onInput(GameInputs.interact) {
+            gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
+        }
     }
 
     private fun CustomGroup.playerHealthBar() {
@@ -1133,128 +1168,128 @@ class EncounterScreen : ScreenCreator() {
         }
     }
 
-    private fun CustomGroup.holsterButton() {
-        var parryPromise: Promise<Boolean>? = null
-        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-            parryPromise = event.resolutionPromise
-        }
-        group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
-            name("holster_button")
-            joinGroup("holster-button")
-            val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
-            var closed = false
-            touchable = Touchable.enabled
-            keyboardFocusable = KeyboardFocusable.LEAF
-            focusShortcut(GameInputs.focusShortcutHolsterButton)
-            x = 990f
-            y = 60f
-            val xAnim = propertyAnimation<CustomGroup, Float>(
-                xPositionAbstractProperty(),
-                AnimState("open", 990f),
-                AnimState("hover", 1000f),
-                AnimState("closed", 600f),
-                initialState = "open",
-                defaultTime = 100,
-                defaultInterpolation = Interpolation.pow2
-            )
-            xAnim.transition("*", "closed", 400, Interpolation.linear)
-            xAnim.transition("closed", "*", 400, Interpolation.linear)
-
-            width = 250f
-            height = 250f * (543f / 655f)
-
-            onInput(GameInputs.interact) {
-                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
-            }
-            backgroundHandle = "end_turn_button_texture"
-            observeInputState(
-                GameInputs.States.focused,
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "end_turn_button_hover_texture"
-                    xAnim.state("hover")
-                },
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "end_turn_button_texture"
-                    xAnim.state("open")
-                }
-            )
-            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
-                if (inParryMenu) {
-                    xAnim.state("closed")
-                    closed = true
-                    filter.start()
-                    touchable = Touchable.disabled
-                } else {
-                    xAnim.state("open")
-                    closed = false
-                    filter.end()
-                    touchable = Touchable.enabled
-                }
-            }
-        }
-
-        group(backgroundHints = arrayOf("parry_button_texture", "parry_button_hover_texture")) {
-            name("parry_button")
-            joinGroup("parry-button")
-            val filter = InputManager.FocusFilter(listOf("parry-button"), screen)
-            filter.start()
-            var closed = true
-            keyboardFocusable = KeyboardFocusable.LEAF
-            touchable = Touchable.disabled
-            focusShortcut(GameInputs.focusShortcutHolsterButton)
-            x = 990f
-            y = 60f
-            val xAnim = propertyAnimation<CustomGroup, Float>(
-                xPositionAbstractProperty(),
-                AnimState("open", 980f),
-                AnimState("hover", 990f),
-                AnimState("closed", 600f),
-                initialState = "closed",
-                defaultTime = 100,
-                defaultInterpolation = Interpolation.pow2
-            )
-            xAnim.transition("*", "closed", 400, Interpolation.linear)
-            xAnim.transition("closed", "*", 400, Interpolation.linear)
-            width = 250f
-            height = 250f * (543f / 655f)
-
-            onInput(GameInputs.interact) {
-                parryPromise?.let {
-                    if (it.isNotResolved) it.resolve(true)
-                }
-            }
-            backgroundHandle = "parry_button_texture"
-            xAnim.state(if (closed) "closed" else "open")
-            observeInputState(
-                GameInputs.States.focused,
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "parry_button_hover_texture"
-                    xAnim.state("hover")
-                },
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "parry_button_texture"
-                    xAnim.state("open")
-                }
-            )
-            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
-                if (!inParryMenu) {
-                    xAnim.state("closed")
-                    filter.start()
-                    closed = true
-                    touchable = Touchable.disabled
-                } else {
-                    xAnim.state("open")
-                    filter.end()
-                    closed = false
-                    touchable = Touchable.enabled
-                }
-            }
-        }
-    }
+//    private fun CustomGroup.holsterButton() {
+//        var parryPromise: Promise<Boolean>? = null
+//        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+//            parryPromise = event.resolutionPromise
+//        }
+//        group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
+//            name("holster_button")
+//            joinGroup("holster-button")
+//            val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
+//            var closed = false
+//            touchable = Touchable.enabled
+//            keyboardFocusable = KeyboardFocusable.LEAF
+//            focusShortcut(GameInputs.focusShortcutHolsterButton)
+//            x = 990f
+//            y = 60f
+//            val xAnim = propertyAnimation<CustomGroup, Float>(
+//                xPositionAbstractProperty(),
+//                AnimState("open", 990f),
+//                AnimState("hover", 1000f),
+//                AnimState("closed", 600f),
+//                initialState = "open",
+//                defaultTime = 100,
+//                defaultInterpolation = Interpolation.pow2
+//            )
+//            xAnim.transition("*", "closed", 400, Interpolation.linear)
+//            xAnim.transition("closed", "*", 400, Interpolation.linear)
+//
+//            width = 250f
+//            height = 250f * (543f / 655f)
+//
+//            onInput(GameInputs.interact) {
+//                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
+//            }
+//            backgroundHandle = "end_turn_button_texture"
+//            observeInputState(
+//                GameInputs.States.focused,
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "end_turn_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "end_turn_button_texture"
+//                    xAnim.state("open")
+//                }
+//            )
+//            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
+//                if (inParryMenu) {
+//                    xAnim.state("closed")
+//                    closed = true
+//                    filter.start()
+//                    touchable = Touchable.disabled
+//                } else {
+//                    xAnim.state("open")
+//                    closed = false
+//                    filter.end()
+//                    touchable = Touchable.enabled
+//                }
+//            }
+//        }
+//
+//        group(backgroundHints = arrayOf("parry_button_texture", "parry_button_hover_texture")) {
+//            name("parry_button")
+//            joinGroup("parry-button")
+//            val filter = InputManager.FocusFilter(listOf("parry-button"), screen)
+//            filter.start()
+//            var closed = true
+//            keyboardFocusable = KeyboardFocusable.LEAF
+//            touchable = Touchable.disabled
+//            focusShortcut(GameInputs.focusShortcutHolsterButton)
+//            x = 990f
+//            y = 60f
+//            val xAnim = propertyAnimation<CustomGroup, Float>(
+//                xPositionAbstractProperty(),
+//                AnimState("open", 980f),
+//                AnimState("hover", 990f),
+//                AnimState("closed", 600f),
+//                initialState = "closed",
+//                defaultTime = 100,
+//                defaultInterpolation = Interpolation.pow2
+//            )
+//            xAnim.transition("*", "closed", 400, Interpolation.linear)
+//            xAnim.transition("closed", "*", 400, Interpolation.linear)
+//            width = 250f
+//            height = 250f * (543f / 655f)
+//
+//            onInput(GameInputs.interact) {
+//                parryPromise?.let {
+//                    if (it.isNotResolved) it.resolve(true)
+//                }
+//            }
+//            backgroundHandle = "parry_button_texture"
+//            xAnim.state(if (closed) "closed" else "open")
+//            observeInputState(
+//                GameInputs.States.focused,
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "parry_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "parry_button_texture"
+//                    xAnim.state("open")
+//                }
+//            )
+//            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
+//                if (!inParryMenu) {
+//                    xAnim.state("closed")
+//                    filter.start()
+//                    closed = true
+//                    touchable = Touchable.disabled
+//                } else {
+//                    xAnim.state("open")
+//                    filter.end()
+//                    closed = false
+//                    touchable = Touchable.enabled
+//                }
+//            }
+//        }
+//    }
 
     private fun CustomGroup.winPopup() {
 
