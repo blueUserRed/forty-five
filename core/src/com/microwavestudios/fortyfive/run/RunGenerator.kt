@@ -31,8 +31,8 @@ class RunGenerator {
 
         val unadjustedDifficulty = if (FortyFive.DEMO_MODE) 2 else forDifficulty
 
-        val modifiers = generateRunModifiers(forBiome, unadjustedDifficulty, type)
-        val challenges = generateChallenges(type, unadjustedDifficulty)
+        val modifiers = if (FortyFive.DEMO_MODE) listOf() else generateRunModifiers(forBiome, unadjustedDifficulty, type)
+        val challenges = if (FortyFive.DEMO_MODE) listOf() else generateChallenges(type, unadjustedDifficulty)
         val behaviours = Run.accumulateBehaviours(modifiers, challenges)
 
         val baseDifficulty = if (type == RunType.CONSTRUCTED) {
@@ -224,7 +224,7 @@ class RunGenerator {
         ): BaseMapGenerator {
             val options = when (type) {
                 RunType.LIMITED -> listOf(
-                    10 to MapGenType.ThreeLine,
+                    20 to MapGenType.ThreeLine,
                     20 to MapGenType.PointCloud,
                     20 to MapGenType.Radial
                 )
@@ -319,7 +319,7 @@ class RunGenerator {
                     }
                 },
                 null, null,
-                100
+                150
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 { // hard encounter
@@ -340,7 +340,7 @@ class RunGenerator {
                     }
                 },
                 null, null,
-                20
+                30
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 {
@@ -358,13 +358,15 @@ class RunGenerator {
                 2, null,
                 20
             ),
-//            BaseMapGenerator.MapGeneratorFillEvent(
-//                {
-//                    ApplyStampMapEvent(null)
-//                },
-//                4, null,
-//                5
-//            ),
+            BaseMapGenerator.MapGeneratorFillEvent(
+                {
+                    ApplyStampMapEvent(null).also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                    }
+                },
+                4, null,
+                15
+            ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 {
                     SpecialEventMapEvent().also {
@@ -402,15 +404,15 @@ class RunGenerator {
                         setOf(),
                         "npc.traveling_merchant",
                         mutableSetOf(),
-                        3..5,
-                        mutableListOf(),
+                        5..8,
+                        null,
                         0,
                         20,
                         20,
                     )
                 },
-                4, null,
-                1
+                2, null,
+                2
             )
         )
 
@@ -457,9 +459,9 @@ class RunGenerator {
             biome: String
         ): BaseMapGenerator = PointCloudMapGenerator.PointCloudMapGeneratorData(
             nodeProtectedArea = 20f,
-            amountNodes = 16,
-            roadLength = 240f,
-            roadHeight = 110f,
+            amountNodes = 35,
+            roadLength = 350f,
+            roadHeight = 200f,
             exclusionRadius = 10f,
             locationSignProtectedAreaWidth = 25f,
             locationSignProtectedAreaHeight = 30f,
@@ -523,11 +525,11 @@ class RunGenerator {
             biome = biome,
             nodeProtectedArea = 20f,
             altLinesOffset = (50f..65f).random(random),
-            mainLineNodes = 8,
-            altLinesPadding = 0..2,
-            varianceX = 12f,
+            mainLineNodes = 18,
+            altLinesPadding = 0..5,
+            varianceX = 7f,
             varianceY = 12f,
-            roadLength = 270f,
+            roadLength = 350f,
             horizontalExtension = 80f,
             verticalExtension = 50f,
             locationSignProtectedAreaWidth = 25f,

@@ -121,8 +121,6 @@ object FortyFive : Game() {
     }
 
     fun toMap() {
-//        screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
-
         val context = object : EncounterContext {
 
             override val encounter: Encounter = Encounter(
@@ -144,7 +142,9 @@ object FortyFive : Game() {
             override fun completed() {
             }
         }
-        screenManager.appendScreen(EncounterScreen, context)
+
+        screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
+//        screenManager.appendScreen(EncounterScreen, context)
 
         screenManager.screenFinished()
     }

@@ -411,7 +411,7 @@ class WinRunScreen : ScreenCreator() {
             image {
                 backgroundHandle = "map_node_choose_card"
                 width = 40f
-                height = 30f
+                height = 40f
                 marginLeft = 10f
                 marginRight = 10f
             }

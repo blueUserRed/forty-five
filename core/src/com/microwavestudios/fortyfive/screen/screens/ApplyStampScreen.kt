@@ -126,9 +126,14 @@ class ApplyStampScreen : ScreenCreator() {
 
                 bindDetailToInputState(GameInputs.States.focused)
 
-                image {
+                box {
                     squareDim(65f)
-                    backgroundHandle = stamp.icon
+                    backgroundHandle = "white_texture"
+                    image {
+                        relativeWidth(100f)
+                        relativeHeight(100f)
+                        backgroundHandle = stamp.icon
+                    }
                 }
                 horizontalSpacer(40f)
                 label("red wing", stamp.title, Colors.Magenta, 60) {
@@ -252,6 +257,7 @@ class ApplyStampScreen : ScreenCreator() {
         } else {
             profile.swapCardInCollection(old, new)
         }
+        context.completed()
         FortyFive.screenManager.screenFinished()
     }
 
@@ -266,4 +272,6 @@ class ApplyStampScreen : ScreenCreator() {
 
 interface ApplyStampScreenContext {
     var stampName: String?
+
+    fun completed()
 }

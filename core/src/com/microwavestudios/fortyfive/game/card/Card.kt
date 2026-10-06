@@ -1105,12 +1105,12 @@ class CardActor(
             val list = card.currentHoverTexts.map { it.second }.toMutableList()
             list.add(card.shortDescription)
             if (card.flavourText.isNotBlank()) list.add("\$flavourText$${card.flavourText}\$flavourText$")
-            list.add("allowed in deck: ${if (card.deckMaximum == -1) "unlimited" else card.deckMaximum }")
+            list.add("allowed in deck: ${if (card.deckMaximum == -1) "unlimited" else card.deckMaximum}")
             list
         },
         topText = {
             card.stamp?.let { stamp ->
-                $$"$stamp$§§$${stamp.icon}§§  $${stamp.title}$stamp$\n\n\n$${stamp.description}"
+                $$"$giant$§§$${stamp.icon}§§$giant$ $stamp$$${stamp.title}$stamp$\n\n\n$${stamp.description}"
             } ?: ""
         },
         subtexts = getEffectTexts()
