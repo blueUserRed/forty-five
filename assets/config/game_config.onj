@@ -11,12 +11,12 @@ cardDrawConfig: {
 
 rewardConfig: {
     percentage: 1.0,
-    rerollBasePrice: 30,
-    rerollPriceIncrease: 30,
+    rerollBasePrice: 15,
+    rerollPriceIncrease: 15,
 },
 
 playerConfig: {
-    lives: 35
+    lives: 45
 },
 
 reservesConfig: {

@@ -55,7 +55,7 @@ abstract class Stamp(
             The revolver rotates left instead of right when shooting or parrying with this bullet.
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_bewitched"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Bewitched)
     }
@@ -66,7 +66,7 @@ abstract class Stamp(
            This Bullet has $keyword$POISON TIP$keyword$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_poison_tip"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.PoisonTip)
     }
@@ -77,7 +77,7 @@ abstract class Stamp(
             This bullet has $trait$JAMMED$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_jammed"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Jammed)
     }
@@ -88,7 +88,7 @@ abstract class Stamp(
             This bullet has $trait$UNDEAD$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_undead"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Undead)
     }
@@ -99,7 +99,7 @@ abstract class Stamp(
             This bullet has $trait$SPRAY$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_gauge"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Spray)
     }
@@ -110,7 +110,7 @@ abstract class Stamp(
             This bullet has $trait$HIGH VELOCITY$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_high_velocity"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.HighVelocity)
     }
@@ -121,7 +121,7 @@ abstract class Stamp(
             This bullet has $trait$PHANTOM$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_phantom"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Phantom)
     }
@@ -132,7 +132,7 @@ abstract class Stamp(
             When shooting this Bullet at an enemy, add 1 to every parameter of all status effects this enemy has.
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_catalyst"
 
         override fun behaviours(): List<BulletBehaviour> = listOf(BulletBehaviour.Catalyst)
     }
@@ -143,17 +143,12 @@ abstract class Stamp(
             This bullet has $trait$SPIRIT$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_spirit"
 
-        override fun modifyBaseCost(card: Card, original: Int): Int {
-            if(original > 1)
-            {
-                val newCost = original - 1
-                return newCost
-            }
-
-            //Runs if base cost is 1 or less
-            return original
+        override fun modifyBaseCost(card: Card, original: Int): Int = if (original > 1) {
+            original - 1
+        } else {
+            original
         }
 
         override fun canBeAppliedTo(card: Card): Boolean = card.originalBaseCost >= 2
@@ -167,7 +162,7 @@ abstract class Stamp(
             This bullet has $trait$PIERCING$trait$
         """.trimIndent().replace('\n', ' ')
 
-        override val icon: ResourceHandle = "card_stamp_test"
+        override val icon: ResourceHandle = "stamp_fifty_cal"
 
         override fun traitEffects(): List<String> {
             return listOf("piercing")

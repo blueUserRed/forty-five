@@ -248,6 +248,8 @@ class ShopScreen : ScreenCreator() {
         this as CustomScrollableBox
         relativeWidth(childrenSize)
         relativeHeight(59f)
+        flexDirection = FlexDirection.ROW
+        wrap = CustomWrap.WRAP
         backgroundHandle = "shop_items_background"
         minVerticalDistBetweenElements = 15F
         minHorizontalDistBetweenElements = 15F
@@ -383,7 +385,7 @@ class ShopScreen : ScreenCreator() {
         image { //line between
             backgroundHandle = "white_texture"
             relativeWidth(100f)
-            height = 2f
+            height = 1f
             marginTop = 8f
             marginBottom = 12f
         }

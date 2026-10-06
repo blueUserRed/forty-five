@@ -22,6 +22,7 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.keyInput.ActorWithDragFeatures
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
@@ -37,6 +38,7 @@ import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
+import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.KotlinStyledActor
 import com.microwavestudios.fortyfive.screen.actors.OffSettable
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
@@ -1103,12 +1105,12 @@ class CardActor(
             val list = card.currentHoverTexts.map { it.second }.toMutableList()
             list.add(card.shortDescription)
             if (card.flavourText.isNotBlank()) list.add("\$flavourText$${card.flavourText}\$flavourText$")
-            list.add("allowed in deck: ${if (card.deckMaximum == -1) "unlimited" else card.deckMaximum }")
+            list.add("allowed in deck: ${if (card.deckMaximum == -1) "unlimited" else card.deckMaximum}")
             list
         },
         topText = {
             card.stamp?.let { stamp ->
-                $$"$stamp$§§$${stamp.icon}§§  $${stamp.title}$stamp$\n\n\n$${stamp.description}"
+                $$"$giant$§§$${stamp.icon}§§$giant$ $stamp$$${stamp.title}$stamp$\n\n\n$${stamp.description}"
             } ?: ""
         },
         subtexts = getEffectTexts()
@@ -1487,11 +1489,17 @@ class CardActor(
             removeAction(moveAction)
             removeAction(scaleAction)
             inTriggerPosition = false
+            if (card.inZone(Zone.REVOLVER)) {
+                // TODO: uggglyyyyyyyyyy
+                fixedZIndex = NewRevolver.cardZIndex
+                (controller.revolver.forceGetActor() as? CustomGroup)?.resortZIndices()
+            }
         }
     }
 
     fun descendAnimation(): Timeline = Timeline.timeline {
         val action = PropertyAction(
+            Float::class,
             this@CardActor,
             ::drawOffsetY,
             y - 1000f

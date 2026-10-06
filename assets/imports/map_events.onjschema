@@ -67,7 +67,7 @@ $MapEvent {
         types: string[],
         person: string,
         amountCards: int[2],
-        currentCards: string[]?,
+        currentCards: cardType[]?,
         amountOfRerolls: int,
         rerollPriceIncrease: int,
         rerollBasePrice: int,

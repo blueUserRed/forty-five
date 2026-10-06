@@ -599,6 +599,7 @@ class CustomScrollableBox(backgroundHints: Array<String> = arrayOf(), screen: Re
             val target = if (reverse) maxScrollableDistanceInDirection else 0f
             if (scrolledDistance.epsilonEquals(target, 0.0001f)) return@later
             val action = PropertyAction(
+                Float::class,
                 this@CustomScrollableBox,
                 ::scrolledDistance,
                 target,

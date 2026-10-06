@@ -83,14 +83,14 @@ var outlaws = [
         name: "Outlaw-1",
         title: "Outlaw",
         texture: "enemy_outlaw",
-        baseHealth: 100,
+        baseHealth: 55,
         actions: [
             {
                 weight: 10#actionVal,
                 action: action_damage(6, 10, false)
             },
             {
-                weight: 7#actionVal,
+                weight: 4#actionVal,
                 action: action_shield(8, 11)
             },
             {
@@ -107,7 +107,7 @@ var outlaws = [
         name: "Outlaw-2",
         title: "Outlaw",
         texture: "enemy_outlaw",
-        baseHealth: 130,
+        baseHealth: 70,
         actions: [
             {
                 weight: 10#actionVal,
@@ -118,7 +118,7 @@ var outlaws = [
                 action: action_damage(8, 13, true)
             },
             {
-                weight: 7#actionVal,
+                weight: 4#actionVal,
                 action: action_shield(11, 15)
             },
             {
@@ -137,16 +137,16 @@ var pyros = [
     {
         name: "Pyro-1",
         title: "Pyro",
-        baseHealth: 130,
+        baseHealth: 55,
         texture: "enemy_pyro",
         actions: [
             {
                 weight: 22#actionVal,
-                action: action_damage(5, 10, false)
+                action: action_damage(5, 8, false)
             },
             {
                 weight: 4#actionVal,
-                action: action_parryableBurning(3, 7),
+                action: action_parryableBurning(8, 14),
                 overrideTitle: "Pyro-dmg"
             },
             {
@@ -166,7 +166,7 @@ var pyros = [
     {
         name: "Pyro-2",
         title: "Pyro",
-        baseHealth: 160,
+        baseHealth: 80,
         texture: "enemy_pyro",
         actions: [
             {
@@ -187,11 +187,11 @@ var pyros = [
             },
             {
                 weight: 4#actionVal,
-                action: action_parryableBurning(5, 8),
+                action: action_parryableBurning(10, 16),
                 overrideTitle: "Pyro-dmg"
             },
             {
-                weight: 4#actionVal,
+                weight: 7#actionVal,
                 action: action_givePlayerCard("scorchingBullet"#card),
                 overrideTitle: "Hot Potato",
                 overrideIcon: "hot_potato_icon",
@@ -218,7 +218,7 @@ var witches = [
         name: "Witch-1",
         title: "Witch",
         texture: "enemy_witch",
-        baseHealth: 140,
+        baseHealth: 60,
         actions: [
             {
                 weight: 8#actionVal,
@@ -235,7 +235,7 @@ var witches = [
                 ],
             },
             {
-                weight: 4#actionVal,
+                weight: 8#actionVal,
                 action: action_variableDamage(
                     (value.revolverRotationCountInTurn * 3)#actionVal,
                     false,
@@ -255,7 +255,7 @@ var witches = [
         name: "Witch-2",
         title: "Witch",
         texture: "enemy_witch",
-        baseHealth: 170,
+        baseHealth: 90,
         actions: [
             {
                 weight: 8#actionVal,
@@ -295,14 +295,14 @@ var fangs = [
         name: "The-Fangs-1",
         title: "The Fangs",
         texture: "enemy_the_fangs",
-        baseHealth: 120,
+        baseHealth: 45,
         actions: [
             {
-                weight: 8#actionVal,
+                weight: 5#actionVal,
                 action: action_damage(6, 10, false)
             },
             {
-                weight: 6#actionVal,
+                weight: 3#actionVal,
                 action: action_shield(7, 10)
             },
             {
@@ -313,12 +313,12 @@ var fangs = [
                 maxExecutions: 1
             },
             {
-                weight: 4#actionVal,
+                weight: 7#actionVal,
                 action: action_poisonFangs(2)
             },
             {
-                weight: 4#actionVal,
-                action: action_parryablePoison(5, 10)
+                weight: 6#actionVal,
+                action: action_parryablePoison(6, 10)
             },
         ]
     },
@@ -326,7 +326,7 @@ var fangs = [
         name: "The-Fangs-2",
         title: "The Fangs",
         texture: "enemy_the_fangs",
-        baseHealth: 140,
+        baseHealth: 80,
         actions: [
             {
                 weight: 8#actionVal,
@@ -344,12 +344,12 @@ var fangs = [
                 maxExecutions: 1
             },
             {
-                weight: 4#actionVal,
-                action: action_poisonFangs(2)
+                weight: 5#actionVal,
+                action: action_poisonFangs(4)
             },
             {
                 weight: 4#actionVal,
-                action: action_parryablePoison(8, 12)
+                action: action_parryablePoison(9, 15)
             },
         ]
     },
@@ -360,7 +360,7 @@ var scarecrows = [
         name: "Scarecrow-1",
         title: "Scarecrow",
         texture: "enemy_scarecrow",
-        baseHealth: 110,
+        baseHealth: 55,
         actions: [
             {
                 weight: 9#actionVal,
@@ -380,7 +380,7 @@ var scarecrows = [
                 overrideDescription: "The enemy gives itself $status$DETERRING AURA$status$ for the next turn",
             },
             {
-                weight: 6#actionVal,
+                weight: 4#actionVal,
                 action: action_withoutAHeart(),
             }
         ]
@@ -389,7 +389,7 @@ var scarecrows = [
         name: "Scarecrow-2",
         title: "Scarecrow",
         texture: "enemy_scarecrow",
-        baseHealth: 130,
+        baseHealth: 80,
         actions: [
             {
                 weight: 10#actionVal,
@@ -409,7 +409,7 @@ var scarecrows = [
                 overrideDescription: "The enemy gives itself $status$DETERRING AURA$status$ for the next turn",
             },
             {
-                weight: 6#actionVal,
+                weight: 4#actionVal,
                 action: action_withoutAHeart(),
             }
         ]

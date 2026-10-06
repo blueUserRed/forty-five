@@ -1,5 +1,9 @@
 package com.microwavestudios.fortyfive.screen.screens
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -16,13 +20,23 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
 import com.microwavestudios.fortyfive.game.BannerAnimation
+import com.microwavestudios.fortyfive.game.Bewitched
+import com.microwavestudios.fortyfive.game.Bounty
+import com.microwavestudios.fortyfive.game.BurningPlayer
 import com.microwavestudios.fortyfive.game.EncounterModifier
+import com.microwavestudios.fortyfive.game.Frozen
 import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.StatusEffect
+import com.microwavestudios.fortyfive.game.Weak
+import com.microwavestudios.fortyfive.game.card.ActorCardPresentation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.card.CardPresentation
+import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
+import com.microwavestudios.fortyfive.game.card.PresentationProvider
+import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -36,10 +50,15 @@ import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
 import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.NewCardHand
+import com.microwavestudios.fortyfive.game.widgets.NewRevolver
 import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.game.widgets.StatusEffectBarCreator
+import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.rendering.BetterShader
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
+import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.ScreenController
@@ -50,6 +69,7 @@ import com.microwavestudios.fortyfive.screen.actors.setText
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
+import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -88,28 +108,30 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private val revolver by lazy {
-        Revolver(
-            "revolver_drum",
-            "revolver_slot_texture",
-            200f,
-            110f,
-            0.2f,
-            gameEvents,
-            screen
-        ).apply {
-            cardScale = 0.9f
-            radius = 140f
-            rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
-        }
+        NewRevolver(screen, gameEvents)
+//        Revolver(
+//            "revolver_drum",
+//            "revolver_slot_texture",
+//            200f,
+//            110f,
+//            0.2f,
+//            gameEvents,
+//            screen
+//        ).apply {
+//            cardScale = 0.9f
+//            radius = 140f
+//            rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
+//        }
     }
 
     private val cardHand by lazy {
-        CardHand(
-            screen,
-            300f,
-            596f * 0.22f,
-            100f
-        )
+        NewCardHand()
+//        CardHand(
+//            screen,
+//            300f,
+//            596f * 0.22f,
+//            100f
+//        )
     }
 
     private val bgZoom: Float = 1.07f
@@ -160,11 +182,11 @@ class EncounterScreen : ScreenCreator() {
             screen.inputManager.addDragAndDrop(CardActor.cardGroup, underDeckGroup)
 
         image {
-            backgroundHandle = "game_screen_player"
-            x = 20f
+            backgroundHandle = "encounter_player"
+            x = 40f
             y = 0f
-            height = worldHeight
-            width = (1305f / 1512f) * worldHeight
+            relativeHeight(100f)
+            widthByAspectRatio(662.0 / 1080.0)
 
             gameEvents.watchFor<UpdateUiEvent> {
                 drawOffsetX = bgOffX
@@ -188,8 +210,6 @@ class EncounterScreen : ScreenCreator() {
         actor(afterlife.getActor(this@EncounterScreen)) {
             y = worldHeight * 0.4f
         }
-
-        playerStatusEffectDisplay()
 
         group {
             backgroundHandle = "transparent_black_texture"
@@ -242,272 +262,61 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
             event.finishedPromise.resolve(Unit)
         }
-
-//        val borrower = object : ResourceBorrower {}
-//
-//        fun commonPanelHandle(i: Int, proto: EnemyActionPrototype) = when (i) {
-//            0 -> proto.commonPanel1
-//            1 -> proto.commonPanel2
-//            2 -> proto.commonPanel3
-//            else -> unreachable()
-//        }
-//
-//        fun commonPanel(i: Int, panel: String) = group {
-//            width = 170f
-//            onLayoutAndNow { y = parent.height / 2 + 100 }
-//            val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-//                borrower,
-//                screen.lifetime,
-//                panel
-//            )
-//            promise.then { texture ->
-//                height = width * (texture.minHeight / texture.minWidth)
-//                manualBackground = texture
-//            }
-//            val xAnim = propertyAnimation(
-//                xPositionAbstractProperty(),
-//                AnimState("open", parentWidth - (width - 8f) * (i + 1)),
-//                AnimState("closed", parentWidth + 100),
-//                initialState = "closed",
-//                defaultTime = 300,
-//                defaultInterpolation = Interpolation.pow2,
-//            )
-//            xAnim.transition("open", "closed", 0, Interpolation.linear)
-//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-//                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-//                    borrower,
-//                    screen.lifetime,
-//                    commonPanelHandle(i, event.enemyAction.prototype)
-//                )
-//                promise.then { texture ->
-//                    height = width * (texture.minHeight / texture.minWidth)
-//                    manualBackground = texture
-//                }
-//                event.finishedPromise.then {
-//                    xAnim.state("closed")
-//                    manualBackground = null
-//                }
-//                event.append { includeAction(xAnim.stateAction("open")) }
-//            }
-        }
-
-//        fun actionPanel() = group {
-//            height = 220f
-//            onLayoutAndNow { y = parent.height / 2 + 100 - height + 20f }
-//            x = parentWidth + 100f
-//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-//                val promise = FortyFive.resourceManager.request<TextureRegionDrawable>(
-//                    borrower,
-//                    screen.lifetime,
-//                    event.enemyAction.prototype.specialPanel
-//                )
-//                promise.then { texture ->
-//                    width = height * (texture.minWidth / texture.minHeight)
-//                    manualBackground = texture
-//                }
-//                event.finishedPromise.then {
-//                    x = parentWidth + 100f
-//                    manualBackground = null
-//                }
-//                val action = MoveToAction()
-//                action.duration = 0.3f
-//                action.interpolation = Interpolation.Pow(10)
-//                event.append {
-//                    delayUntil { manualBackground != null }
-//                    delay(100)
-//                    action {
-//                        action.x = parentWidth - width - 5f
-//                        action.y = y
-//                        addAction(action)
-//                        event.controller.dispatchAnimTimeline(Timeline.timeline {
-//                            delay(200)
-//                            include(FortyFive.currentRenderPipeline!!.getScreenShakeTimeline())
-//                        })
-//                    }
-//                    delayUntil { action.isComplete }
-//                }
-//            }
-//        }
-//
-//        fun descriptionBox() = box {
-//            width = 500f
-//            height = 300f
-//
-//            onLayoutAndNow { y = parent.height / 2 - 120f - height + 100 }
-//
-//            backgroundHandle = "common_popup_background_black_large"
-//            dropShadow = BakedDropShadow(
-//                "common_popup_background_black_large",
-//                screen,
-//                0f, 0f,
-//                1.3f, 1.3f
-//            )
-//            flexDirection = FlexDirection.COLUMN
-//            verticalAlign = CustomAlign.CENTER
-//            horizontalAlign = CustomAlign.CENTER
-//
-//            val title = label("red wing", "Hot Potato", Color.Red, 35) {
-//                syncDimensions()
-//            }
-//            verticalSpacer(10f)
-//            val body = label("roadgeek", "A scorching Bullet will be put in your hand!", Color.FortyWhite, 22) {
-//                wrap = true
-//                setAlignment(Align.center)
-//                relativeWidth(60f)
-//                syncHeight()
-//            }
-//            val xAnim = propertyAnimation(
-//                xPositionAbstractProperty(),
-//                AnimState("open", parentWidth - width + 60f),
-//                AnimState("closed", parentWidth + 100),
-//                initialState = "closed",
-//                defaultTime = 300,
-//                defaultInterpolation = Interpolation.pow5,
-//            )
-//            xAnim.transition("open", "closed", 0, Interpolation.linear)
-//            gameEvents.watchFor<GameControllerImpl.Events.PlayEnemySpecialAttackAnim> { event ->
-//                val enemyAction = event.enemyAction
-//                val prototype = enemyAction.prototype
-//                title.setText(prototype.title)
-//                val bodyTemplate = TemplateString(prototype.descriptionTemplate, enemyAction.descriptionParams)
-//                body.setText(bodyTemplate.string)
-//                event.finishedPromise.then {
-//                    xAnim.state("closed")
-//                }
-//                event.append {
-//                    includeAction(xAnim.stateAction("open"))
-//                }
-//            }
-//        }
-//
-//        commonPanel(0, "enemy_pyro_action_comic_common_panel_1")
-//        commonPanel(1, "enemy_pyro_action_comic_common_panel_2")
-//        commonPanel(2, "enemy_pyro_action_comic_common_panel_3")
-//        descriptionBox()
-//        actionPanel()
-//    }
-
-    private fun CustomGroup.playerStatusEffectDisplay() = box {
-        badTexture("status effect background", comment = "??????")
-        backgroundHandle = "status_effect_background"
-        height = 90f
-        horizontalAlign = CustomAlign.CENTER
-        verticalAlign = CustomAlign.CENTER
-        flexDirection = FlexDirection.ROW
-        onLayoutAndNow { width = parent.width * 0.5f }
-        x = parent.width / 2 - 180
-        y = worldHeight - height + 10
-        isVisible = false
-
-        val effects: MutableList<StatusEffect> = mutableListOf()
-        val updaters: MutableList<() -> Unit> = mutableListOf()
-
-        fun effect(effect: StatusEffect) = box {
-            relativeHeight(100f)
-            width = 200f
-            horizontalAlign = CustomAlign.CENTER
-            verticalAlign = CustomAlign.CENTER
-            flexDirection = FlexDirection.ROW
-            touchable = Touchable.enabled
-            val text = DetailDescriptionHandler.descriptions[effect.name.lowercase()]?.second
-            detailWidget = DetailWidget.ComplexBigDetailActor(
-                screen,
-                DetailDescriptionHandler.allTextEffects,
-                text = { listOf(text ?: "") }
-            )
-            bindDetailToInputState(GameInputs.States.focused)
-            image {
-                backgroundHandle = effect.iconHandle
-                width = 50f
-                height = 50f
-            }
-            label("red wing", effect.getDisplayText(), fontSize = 45) {
-                syncDimensions()
-                updaters.add { setText(effect.getDisplayText()) }
-            }
-        }
-
-        fun effectsChanged() {
-            clearChildren()
-            updaters.clear()
-            effects.forEach { effect(it) }
-        }
-
-        gameEvents.watchFor<UpdateUiEvent> {
-            updaters.forEach { it() }
-        }
-
-        gameEvents.watchFor<GameControllerImpl.Events.AddedPlayerStatusEffect> { event ->
-            effects.add(event.statusEffect)
-            effectsChanged()
-            isVisible = true
-        }
-        gameEvents.watchFor<GameControllerImpl.Events.RemovedPlayerStatusEffect> { event ->
-            effects.removeIf { it === event.statusEffect }
-            effectsChanged()
-            if (effects.isEmpty()) isVisible = false
-        }
     }
 
     private fun CustomGroup.encounterModifierDisplay() = box {
+        y = worldHeight * 0.6f
         width = 500f
-        x = worldWidth - 100f
-        onLayoutAndNow { height = children.sumOf { it.height.toDouble() }.toFloat() + 50f }
-        onLayoutAndNow { y = worldHeight * 0.8f - height }
-        backgroundHandle = "encounter_modifier_background"
-        flexDirection = FlexDirection.COLUMN
-        verticalAlign = CustomAlign.SPACE_AROUND
+        syncHeight()
+        backgroundHandle = "encounter_encounter_modifier_bg"
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
-        isVisible = false
+
+        dropShadow = BakedDropShadow(
+            "encounter_encounter_modifier_bg",
+            screen,
+            0f, 0f,
+            1.3f, 1.3f
+        )
 
         val xAnim = propertyAnimation(
             xPositionAbstractProperty(),
             AnimState("open", worldWidth - width + 50f),
-            AnimState("closed", worldWidth - 100f),
+            AnimState("closed", worldWidth - 90f),
             defaultTime = 100,
             defaultInterpolation = Interpolation.pow2,
             initialState = "closed"
         )
-
         observeInputState(
             GameInputs.States.focused,
             { xAnim.state("open") },
             { xAnim.state("closed") },
         )
 
+        verticalSpacer(20f)
+
         fun encounterModifier(encounterModifier: EncounterModifier) = box {
-            flexDirection = FlexDirection.ROW
             relativeWidth(100f)
-            height = 80f
-            verticalAlign = CustomAlign.CENTER
-            horizontalSpacer(30f)
-            box {
-                width = 50f
-                height = 50f
+            syncHeight()
+            flexDirection = FlexDirection.ROW
+            horizontalSpacer(35f)
+            image {
+                width = 45f
+                height = 45f
                 backgroundHandle = encounterModifier.iconHandle
             }
-            horizontalSpacer(20f)
+            horizontalSpacer(15f)
             box {
-                onLayoutAndNow { width = parent.width - 50f - 160f }
+                onLayoutAndNow { width = parent.width - 35f - 15f - 45f }
                 syncHeight()
                 flexDirection = FlexDirection.COLUMN
-
-                label("roadgeek", encounterModifier.displayName, fontSize = (24 * 0.9).toInt()) {
-                    touchable = Touchable.disabled
+                label("roadgeek", encounterModifier.displayName, Colors.FIREBRICK, fontSize = 25) {
                     syncDimensions()
                 }
-                verticalSpacer(3f)
-                box {
-                    backgroundHandle = "black_texture"
-                    height = 1.5f
+                verticalSpacer(5f)
+                label("roadgeek", encounterModifier.description, fontSize = 20) {
                     relativeWidth(100f)
-                }
-                verticalSpacer(3f)
-                label("roadgeek", encounterModifier.description, fontSize = (24 * 0.6).toInt()) {
-                    touchable = Touchable.disabled
                     wrap = true
-                    relativeWidth(100f)
                     syncHeight()
                 }
             }
@@ -516,8 +325,8 @@ class EncounterScreen : ScreenCreator() {
         gameEvents.watchFor<GameControllerImpl.Events.EncounterModifierAdded> { (modifier) ->
             isVisible = true
             encounterModifier(modifier)
+            verticalSpacer(15f)
         }
-
     }
 
     private fun CustomGroup.putCardsUnderStackPopup() = group {
@@ -620,8 +429,6 @@ class EncounterScreen : ScreenCreator() {
         val enemyHeight = 400f
         val enemyWidth = enemyHeight * 0.6f
 
-        var enemySelected = false
-
         box {
             enemy.actor = this
             flexDirection = FlexDirection.COLUMN
@@ -630,17 +437,9 @@ class EncounterScreen : ScreenCreator() {
             width = enemyWidth
             height = enemyHeight
 
-            keyboardFocusable = KeyboardFocusable.LEAF
-            touchable = Touchable.enabled
-
             gameEvents.watchFor<UpdateUiEvent> {
                 drawOffsetX = bgOffX * 1.1f
                 drawOffsetY = bgOffY * 1.1f
-            }
-
-            onInput(GameInputs.interact) {
-                if (enemySelected || enemy.isDefeated) return@onInput
-                gameEvents.fire(GameControllerImpl.Events.EnemySelected(enemy, controller))
             }
 
             fun chargeTimeline(): Timeline = Timeline.timeline {
@@ -674,7 +473,27 @@ class EncounterScreen : ScreenCreator() {
             group {
                 relativeWidth(100f)
                 height = enemyHeight * 0.65f
-                touchable = Touchable.disabled
+
+                keyboardFocusable = KeyboardFocusable.LEAF
+                touchable = Touchable.enabled
+
+                observeInputState(
+                    GameInputs.States.focused,
+                    {
+                        gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, true))
+                    },
+                    {
+                        gameEvents.fire(GameControllerImpl.Events.EnemyClicked(null, true))
+                    },
+                )
+
+                onInput(GameInputs.targetEnemy) {
+                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, false))
+                }
+
+                onInput(GameInputs.shootEnemy) {
+                    gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
+                }
 
                 image {
                     // TODO: add anims back
@@ -710,9 +529,9 @@ class EncounterScreen : ScreenCreator() {
                         amplitude = 14f,
                         frequency = 0.4f
                     )
-                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelected> { (e, controller) ->
+                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelectionChanged> { (e, controller) ->
                         val onlyOne = controller.allEnemies.size == 1
-                        enemySelected = e === enemy
+                        val enemySelected = e === enemy
                         isVisible = !onlyOne && enemySelected
                     }
                 }
@@ -720,12 +539,23 @@ class EncounterScreen : ScreenCreator() {
 
             group {
                 relativeWidth(100f)
-                height = enemyHeight * 0.2f
+                height = enemyHeight * 0.1f
                 val statusBar = StatusBar(screen, enemy)
                 actor(statusBar) {
                     relativeWidth(110f)
                     relativeHeight(100f)
                 }
+            }
+
+            val statusEffectBar = StatusEffectBarCreator.createStatusBar(
+                this@EncounterScreen,
+                StatusEffectBarCreator.StatusEffectBarTarget.EnemyTarget(enemy, gameEvents)
+            )
+
+            actor(statusEffectBar) {
+                relativeWidth(87f)
+                logicalOffsetX = 30f
+                height = 70f
             }
 
         }
@@ -908,109 +738,322 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.playerBar() = group {
+        touchable = Touchable.childrenOnly
 
         x = 0f
         y = 0f
         width = worldWidth
-        height = worldWidth * (505f / 1920f)
-        backgroundHandle = "player_bar"
+        height = worldHeight / 2
 
-        val buttonModal = InputManager.Modal(listOf("shoot-button", "parry-button"), screen)
-
-        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-            if (event.inParryMenu) buttonModal.push() else buttonModal.finished()
+        image {
+            x = 0f
+            y = 0f
+            backgroundHandle = "encounter_bottom_bar_shadow"
+            relativeWidth(100f)
+            heightByAspectRatio(1920.0 / 510.0)
         }
 
-        shootButton()
+        actor(revolver.getActor(this@EncounterScreen)) {
+            x = 380f
+            y = 20f
+
+            group {
+                backgroundHandle = "encounter_reserves_bg"
+                width = 50f
+                height = 50f
+                centerX(offset = 1f)
+                centerY(offset = 1f)
+                reservesAnimationTarget = this
+                fixedZIndex = 10
+                label("red wing", "", Colors.White, 24) {
+                    gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
+                        setText("$new/$base")
+                    }
+                    syncDimensions()
+                    centerX()
+                    centerY()
+                }
+            }
+        }
+
+        actor(cardHand.getActor(this@EncounterScreen)) {
+            width = worldWidth / 2 + 20f
+            height = 300f
+            y = 79f
+            onLayoutAndNow { x = worldWidth - width }
+        }
+
+        image {
+            x = 0f
+            y = 0f
+            backgroundHandle = "encounter_bottom_bar"
+            relativeWidth(100f)
+            heightByAspectRatio(1920.0 / 183.0)
+        }
+
         holsterButton()
 
-        actor(revolver) {
-            touchable = Touchable.enabled
-            name("revolver")
-            centerX()
-            y = -30f
-            syncDimensions()
-        }
+        parryButtons()
 
-        label("red wing", "10", Colors.Red, 90) {
-            centerX()
-            y = 210f
-            width = 50f
-            setAlignment(Align.center)
-            isVisible = false
-            gameEvents.watchFor<GameControllerImpl.Events.SteelNervesCountdown> { (newNumber) ->
-                setText(newNumber.toString())
-                isVisible = true
-            }
-        }
+        playerHealthBar()
 
-        actor(cardHand) {
-            name("cardHand")
-            centerX()
+        val statusEffectBar = StatusEffectBarCreator.createStatusBar(
+            this@EncounterScreen,
+            StatusEffectBarCreator.StatusEffectBarTarget.PlayerTarget(gameEvents),
+            4f
+        )
+
+        actor(statusEffectBar) {
+            x = 0f
             y = 0f
-            width = worldWidth
-            gameEvents.link(events)
+            width = 320f
+            height = 110f
         }
 
-        group {
-            backgroundHandle = "wood_box"
-            x = 70f
-            y = 180f
-            width = 120f
+        box {
+            width = 130f
             height = 120f
-            reservesAnimationTarget = this
-            animateRotationSinus(
-                frequency = 0.15f
-            )
+            y = 0f
+            x = worldWidth - width
+            flexDirection = FlexDirection.COLUMN
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.CENTER
 
-            image {
-                backgroundHandle = "reserves_texture"
+            deckAnimationTarget = group {
                 width = 60f
                 height = 60f
-                x = 30f
-                y = 90f
-            }
-
-            label("red wing", "0/0", Colors.White, (32 * 1.1).toInt()) {
-                centerX()
-                centerY()
-                gameEvents.watchFor<GameControllerImpl.Events.ReservesChanged> { (_, new, base) ->
-                    setText("${new}/$base")
-                }
-                syncDimensions()
-            }
-        }
-
-        group {
-            backgroundHandle = "wood_box"
-            x = worldWidth - 70f - 120f
-            y = 180f
-            width = 120f
-            height = 120f
-            deckAnimationTarget = this
-
-            animateRotationSinus(
-                frequency = 0.15f
-            )
-
-            image {
                 backgroundHandle = "deck_icon"
-                width = 60f
-                height = 60f
-                x = 30f
-                y = 90f
+                originCenter()
+                animateRotationSinus(amplitude = 8f, frequency = 0.6f)
             }
 
-            label("red wing", "", Colors.White, (32 * 1.1).toInt()) {
+            label("roadgeek", "", Colors.White, 30) {
                 gameEvents.watchFor<UpdateUiEvent> { (controller) ->
-                    setText(controller.cardStack.size().toString())
+                    text = controller.cardStack.size().toString()
                 }
-                centerX()
-                centerY()
                 syncDimensions()
             }
         }
+    }
 
+    private fun CustomGroup.parryButtons() = group {
+        x = 0f
+        y = 140f
+        width = 320f
+        height = 400f
+        touchable = Touchable.childrenOnly
+
+        var parryPromise: Promise<Boolean>? = null
+
+        val parryButton = group {
+            x = -5f
+            y = 130f
+            rotation = -5f
+            backgroundHandle = "encounter_parry_button"
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            relativeWidth(100f)
+            heightByAspectRatio(1595.0 / 339.0)
+            joinGroup("parry-buttons")
+            onInput(GameInputs.interact) {
+                parryPromise?.resolve(true)
+            }
+        }
+
+        val passButton = group {
+            x = -5f
+            y = 50f
+            rotation = -5f
+            backgroundHandle = "encounter_pass_button"
+            touchable = Touchable.enabled
+            keyboardFocusable = KeyboardFocusable.LEAF
+            relativeWidth(100f)
+            heightByAspectRatio(1595.0 / 339.0)
+            joinGroup("parry-buttons")
+            onInput(GameInputs.interact) {
+                parryPromise?.resolve(false)
+            }
+        }
+
+        val parryUiModal = InputManager.Modal(listOf("parry-buttons"), screen)
+        val parryUiFilter = InputManager.FocusFilter(listOf("parry-buttons"), screen)
+        parryUiFilter.start()
+
+        val parryAnimation = propertyAnimation(
+            parryButton.xPositionAbstractProperty(),
+            AnimState("open", -18f),
+            AnimState("hover", -5f),
+            AnimState("closed", -350f),
+            initialState = "closed",
+            defaultInterpolation = Interpolation.pow2,
+            defaultTime = 200
+        )
+
+        val passAnimation = propertyAnimation(
+            passButton.xPositionAbstractProperty(),
+            AnimState("open", -18f),
+            AnimState("hover", -5f),
+            AnimState("closed", -350f),
+            initialState = "closed",
+            defaultInterpolation = Interpolation.pow2,
+            defaultTime = 200
+        )
+
+        arrayOf(parryAnimation, passAnimation).forEach {
+            it.transition("open", "closed", 500, Interpolation.pow2)
+            it.transition("closed", "open", 500, Interpolation.pow2)
+        }
+
+        parryButton.observeInputState(
+            GameInputs.States.focused,
+            { if (parryPromise != null) parryAnimation.state("hover") },
+            { if (parryPromise != null) parryAnimation.state("open") },
+        )
+
+        passButton.observeInputState(
+            GameInputs.States.focused,
+            { if (parryPromise != null) passAnimation.state("hover") },
+            { if (parryPromise != null) passAnimation.state("open") },
+        )
+
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+            if (event.inParryMenu) {
+                parryPromise = event.resolutionPromise
+                passAnimation.state("open")
+                parryAnimation.state("open")
+                parryUiFilter.end()
+                parryUiModal.push()
+            } else {
+                parryPromise = null
+                passAnimation.state("closed")
+                parryAnimation.state("closed")
+                parryUiFilter.start()
+                parryUiModal.finished()
+            }
+        }
+    }
+
+    private fun CustomGroup.holsterButton() = group {
+        x = -10f
+        y = 200f
+
+        joinGroup("encounter_screen_holster_button")
+
+        val holsterFilter = InputManager.FocusFilter(listOf("encounter_screen_holster_button"), screen)
+
+        val xAnim = propertyAnimation<CustomGroup, Float>(
+            xPositionAbstractProperty(),
+            AnimState("open", -10f),
+            AnimState("closed", -330f),
+            initialState = "open",
+            defaultTime = 150,
+            defaultInterpolation = Interpolation.pow2,
+        )
+
+        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+            if (event.inParryMenu) {
+                xAnim.state("closed")
+                holsterFilter.start()
+            } else {
+                xAnim.state("open")
+                holsterFilter.end()
+            }
+        }
+
+        focusBackgrounds(
+            normal = "encounter_holster",
+            focus = "encounter_holster_hover"
+        )
+        rotation = -5f
+        width = 320f
+        heightByAspectRatio(1513.0 / 335.0)
+        touchable = Touchable.enabled
+        keyboardFocusable = KeyboardFocusable.LEAF
+        onInput(GameInputs.interact) {
+            gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
+        }
+    }
+
+    private fun CustomGroup.playerHealthBar() {
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile)
+
+        val hpBarAnimationSpeed = 5.0
+        val baseHealth = profile.maxHealthInRun!!
+
+        var currentHealth = profile.healthInRun!!
+        var targetPercent = currentHealth.toFloat() / baseHealth.toFloat()
+        var displayedPercent = targetPercent
+
+        gameEvents.watchFor<UpdateUiEvent> {
+            val diff = abs(targetPercent - displayedPercent)
+            val moveDist = hpBarAnimationSpeed * Gdx.graphics.deltaTime * diff
+            when {
+                targetPercent.epsilonEquals(displayedPercent, epsilon = 0.001f) -> displayedPercent = targetPercent
+                targetPercent < displayedPercent -> displayedPercent -= moveDist.toFloat()
+                targetPercent > displayedPercent -> displayedPercent += moveDist.toFloat()
+            }
+        }
+
+        screen.events.watchFor<Profile.HealthChangedEvent> { event ->
+            currentHealth = event.newHealth
+            targetPercent = event.newHealth.toFloat() / baseHealth.toFloat()
+        }
+
+        val bar = object : CustomGroup(screen), ResourceBorrower {
+
+            val whiteTexture =
+                FortyFive.resourceManager.request<Texture>(this, screen.lifetime, "white_texture")
+            private val sliderShader: Promise<BetterShader> =
+                FortyFive.resourceManager.request(this, screen.lifetime, "enemy_status_bar_shader")
+
+            override fun draw(batch: Batch?, parentAlpha: Float) {
+                batch ?: return
+                val whiteTexture = whiteTexture.getOrNull() ?: return
+                val sliderShader = sliderShader.getOrNull() ?: return
+                batch.flush()
+                batch.shader = sliderShader.shader
+                sliderShader.prepare(screen)
+                sliderShader.shader.setUniformf("u_pos", displayedPercent)
+                batch.projectionMatrix = viewport.camera.combined
+                batch.draw(whiteTexture, x, y, width, height)
+                batch.flush()
+                batch.shader = null
+            }
+        }
+
+        group {
+            x = -5f
+            y = 110f
+            width = 350f
+            heightByAspectRatio(1781.0 / 355.0)
+            rotation = -5f
+
+            actor(bar) {
+                relativeWidth(88f)
+                relativeHeight(84f)
+                centerY()
+            }
+
+            group {
+                relativeWidth(100f)
+                relativeHeight(100f)
+                backgroundHandle = "encounter_player_health_bar"
+            }
+
+            label(
+                "red wing",
+                "${profile.healthInRun}/$baseHealth",
+                Colors.White, 35
+            ) {
+                syncDimensions()
+                centerY()
+                onLayoutAndNow { x = parent.width - width - 75f }
+                screen.events.watchFor<Profile.HealthChangedEvent> { event ->
+                    text = "${event.newHealth}/$baseHealth"
+                }
+            }
+        }
     }
 
     private fun CustomGroup.shootButton() {
@@ -1055,9 +1098,9 @@ class EncounterScreen : ScreenCreator() {
                     xAnim.state("open")
                 }
             )
-            onInput(GameInputs.interact){
-                gameEvents.fire(GameControllerImpl.Events.ShootButtonPressed)
-            }
+//            onInput(GameInputs.interact){
+//                gameEvents.fire(GameControllerImpl.Events.ShootButtonPressed)
+//            }
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
                 if (inParryMenu) {
                     xAnim.state("closed")
@@ -1133,128 +1176,128 @@ class EncounterScreen : ScreenCreator() {
         }
     }
 
-    private fun CustomGroup.holsterButton() {
-        var parryPromise: Promise<Boolean>? = null
-        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
-            parryPromise = event.resolutionPromise
-        }
-        group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
-            name("holster_button")
-            joinGroup("holster-button")
-            val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
-            var closed = false
-            touchable = Touchable.enabled
-            keyboardFocusable = KeyboardFocusable.LEAF
-            focusShortcut(GameInputs.focusShortcutHolsterButton)
-            x = 990f
-            y = 60f
-            val xAnim = propertyAnimation<CustomGroup, Float>(
-                xPositionAbstractProperty(),
-                AnimState("open", 990f),
-                AnimState("hover", 1000f),
-                AnimState("closed", 600f),
-                initialState = "open",
-                defaultTime = 100,
-                defaultInterpolation = Interpolation.pow2
-            )
-            xAnim.transition("*", "closed", 400, Interpolation.linear)
-            xAnim.transition("closed", "*", 400, Interpolation.linear)
-
-            width = 250f
-            height = 250f * (543f / 655f)
-
-            onInput(GameInputs.interact) {
-                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
-            }
-            backgroundHandle = "end_turn_button_texture"
-            observeInputState(
-                GameInputs.States.focused,
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "end_turn_button_hover_texture"
-                    xAnim.state("hover")
-                },
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "end_turn_button_texture"
-                    xAnim.state("open")
-                }
-            )
-            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
-                if (inParryMenu) {
-                    xAnim.state("closed")
-                    closed = true
-                    filter.start()
-                    touchable = Touchable.disabled
-                } else {
-                    xAnim.state("open")
-                    closed = false
-                    filter.end()
-                    touchable = Touchable.enabled
-                }
-            }
-        }
-
-        group(backgroundHints = arrayOf("parry_button_texture", "parry_button_hover_texture")) {
-            name("parry_button")
-            joinGroup("parry-button")
-            val filter = InputManager.FocusFilter(listOf("parry-button"), screen)
-            filter.start()
-            var closed = true
-            keyboardFocusable = KeyboardFocusable.LEAF
-            touchable = Touchable.disabled
-            focusShortcut(GameInputs.focusShortcutHolsterButton)
-            x = 990f
-            y = 60f
-            val xAnim = propertyAnimation<CustomGroup, Float>(
-                xPositionAbstractProperty(),
-                AnimState("open", 980f),
-                AnimState("hover", 990f),
-                AnimState("closed", 600f),
-                initialState = "closed",
-                defaultTime = 100,
-                defaultInterpolation = Interpolation.pow2
-            )
-            xAnim.transition("*", "closed", 400, Interpolation.linear)
-            xAnim.transition("closed", "*", 400, Interpolation.linear)
-            width = 250f
-            height = 250f * (543f / 655f)
-
-            onInput(GameInputs.interact) {
-                parryPromise?.let {
-                    if (it.isNotResolved) it.resolve(true)
-                }
-            }
-            backgroundHandle = "parry_button_texture"
-            xAnim.state(if (closed) "closed" else "open")
-            observeInputState(
-                GameInputs.States.focused,
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "parry_button_hover_texture"
-                    xAnim.state("hover")
-                },
-                {
-                    if (closed) return@observeInputState
-                    backgroundHandle = "parry_button_texture"
-                    xAnim.state("open")
-                }
-            )
-            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
-                if (!inParryMenu) {
-                    xAnim.state("closed")
-                    filter.start()
-                    closed = true
-                    touchable = Touchable.disabled
-                } else {
-                    xAnim.state("open")
-                    filter.end()
-                    closed = false
-                    touchable = Touchable.enabled
-                }
-            }
-        }
-    }
+//    private fun CustomGroup.holsterButton() {
+//        var parryPromise: Promise<Boolean>? = null
+//        gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
+//            parryPromise = event.resolutionPromise
+//        }
+//        group(backgroundHints = arrayOf("end_turn_button_texture", "end_turn_button_hover_texture")) {
+//            name("holster_button")
+//            joinGroup("holster-button")
+//            val filter = InputManager.FocusFilter(listOf("holster-button"), screen)
+//            var closed = false
+//            touchable = Touchable.enabled
+//            keyboardFocusable = KeyboardFocusable.LEAF
+//            focusShortcut(GameInputs.focusShortcutHolsterButton)
+//            x = 990f
+//            y = 60f
+//            val xAnim = propertyAnimation<CustomGroup, Float>(
+//                xPositionAbstractProperty(),
+//                AnimState("open", 990f),
+//                AnimState("hover", 1000f),
+//                AnimState("closed", 600f),
+//                initialState = "open",
+//                defaultTime = 100,
+//                defaultInterpolation = Interpolation.pow2
+//            )
+//            xAnim.transition("*", "closed", 400, Interpolation.linear)
+//            xAnim.transition("closed", "*", 400, Interpolation.linear)
+//
+//            width = 250f
+//            height = 250f * (543f / 655f)
+//
+//            onInput(GameInputs.interact) {
+//                gameEvents.fire(GameControllerImpl.Events.HolsterButtonPressed)
+//            }
+//            backgroundHandle = "end_turn_button_texture"
+//            observeInputState(
+//                GameInputs.States.focused,
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "end_turn_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "end_turn_button_texture"
+//                    xAnim.state("open")
+//                }
+//            )
+//            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
+//                if (inParryMenu) {
+//                    xAnim.state("closed")
+//                    closed = true
+//                    filter.start()
+//                    touchable = Touchable.disabled
+//                } else {
+//                    xAnim.state("open")
+//                    closed = false
+//                    filter.end()
+//                    touchable = Touchable.enabled
+//                }
+//            }
+//        }
+//
+//        group(backgroundHints = arrayOf("parry_button_texture", "parry_button_hover_texture")) {
+//            name("parry_button")
+//            joinGroup("parry-button")
+//            val filter = InputManager.FocusFilter(listOf("parry-button"), screen)
+//            filter.start()
+//            var closed = true
+//            keyboardFocusable = KeyboardFocusable.LEAF
+//            touchable = Touchable.disabled
+//            focusShortcut(GameInputs.focusShortcutHolsterButton)
+//            x = 990f
+//            y = 60f
+//            val xAnim = propertyAnimation<CustomGroup, Float>(
+//                xPositionAbstractProperty(),
+//                AnimState("open", 980f),
+//                AnimState("hover", 990f),
+//                AnimState("closed", 600f),
+//                initialState = "closed",
+//                defaultTime = 100,
+//                defaultInterpolation = Interpolation.pow2
+//            )
+//            xAnim.transition("*", "closed", 400, Interpolation.linear)
+//            xAnim.transition("closed", "*", 400, Interpolation.linear)
+//            width = 250f
+//            height = 250f * (543f / 655f)
+//
+//            onInput(GameInputs.interact) {
+//                parryPromise?.let {
+//                    if (it.isNotResolved) it.resolve(true)
+//                }
+//            }
+//            backgroundHandle = "parry_button_texture"
+//            xAnim.state(if (closed) "closed" else "open")
+//            observeInputState(
+//                GameInputs.States.focused,
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "parry_button_hover_texture"
+//                    xAnim.state("hover")
+//                },
+//                {
+//                    if (closed) return@observeInputState
+//                    backgroundHandle = "parry_button_texture"
+//                    xAnim.state("open")
+//                }
+//            )
+//            gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { (inParryMenu) ->
+//                if (!inParryMenu) {
+//                    xAnim.state("closed")
+//                    filter.start()
+//                    closed = true
+//                    touchable = Touchable.disabled
+//                } else {
+//                    xAnim.state("open")
+//                    filter.end()
+//                    closed = false
+//                    touchable = Touchable.enabled
+//                }
+//            }
+//        }
+//    }
 
     private fun CustomGroup.winPopup() {
 
@@ -1400,7 +1443,9 @@ class EncounterScreen : ScreenCreator() {
             TimeUtils.millis(),
             warningParent,
             afterlife,
-            CardPresentation.defaultProvider
+            CardPresentation.defaultProvider,
+            revolver,
+            cardHand
         )
     )
 

@@ -173,6 +173,12 @@ val Float.radians: Float
 val Float.degrees: Float
     get() = Math.toDegrees(this.toDouble()).toFloat()
 
+val Double.radians: Double
+    get() = Math.toRadians(this)
+
+val Double.degrees: Double
+    get() = Math.toDegrees(this)
+
 fun Float.percent(x: Number): Float = (this * x / 100)
 
 private operator fun Float.times(x: Number): Float {

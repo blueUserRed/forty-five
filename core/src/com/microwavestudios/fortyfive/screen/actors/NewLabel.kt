@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
@@ -36,12 +37,12 @@ import kotlin.math.absoluteValue
  * resolution/font size
  */
 open class NewLabel(
-    val screen: RenderableScreen,
+    override val screen: RenderableScreen,
     text: String,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
     DebugActor by DebugActorImpl(), InputActor by InputActorImpl(),
-    KotlinStyledActor, OffSettable {
+    KotlinStyledActor, OffSettable, AnimatedActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -56,6 +57,8 @@ open class NewLabel(
     override var drawOffsetY: Float = 0f
     override var logicalOffsetX: Float = 0f
     override var logicalOffsetY: Float = 0f
+
+    override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     val backgroundHandleObserver = SubscribeableObserver<String?>(null)
     var backgroundHandle: ResourceHandle? by backgroundHandleObserver
@@ -130,6 +133,7 @@ open class NewLabel(
     init {
         initInput(this, screen)
         initDebugBounds(this, screen)
+        touchable = Touchable.disabled
         screen.screenEvents.watchFor<IScreen.ScreenResizedEvent> { paramsChanged() }
     }
 
@@ -139,6 +143,7 @@ open class NewLabel(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateAnimations()
         updateTemplate()
         super.draw(batch, parentAlpha)
         if (batch == null) return

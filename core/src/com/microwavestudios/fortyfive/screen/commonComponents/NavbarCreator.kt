@@ -262,6 +262,7 @@ object NavbarCreator {
             }
 
             fun createAction(end: Float): PropertyAction<Float> = PropertyAction(
+                Float::class,
                 this@box,
                 this@box::logicalOffsetY,
                 baseLogicalOffsetY + end,

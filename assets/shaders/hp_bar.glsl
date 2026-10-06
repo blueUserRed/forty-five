@@ -31,7 +31,9 @@ void main() {
     float pos = u_pos;
     vec2 timeOffset = vec2(u_time, u_time * 0.3) * 0.2;
     float noise = snoise(vec2(v_texCoords.x, v_texCoords.y * 1.2) * 1.2 + timeOffset);
-    noise += snoise(vec2(v_texCoords.x, v_texCoords.y * 0.2) * 10.0 + timeOffset * 4.0) * 0.5;
+//    float noise = snoise(vec2(v_texCoords.x, v_texCoords.y * 1.2) * 1.2 + timeOffset);
+//    noise += snoise(vec2(v_texCoords.x, v_texCoords.y * 0.2) * 2.0 + timeOffset * 4.0) * 0.5;
+//    noise += snoise(vec2(v_texCoords.x, v_texCoords.y * 0.2) * 10.0 + timeOffset * 4.0) * 0.5;
     noise -= 0.5 + (0.5 * 0.5);
     pos += noise * 0.02;
     float p = step(v_texCoords.x, pos);

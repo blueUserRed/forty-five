@@ -94,6 +94,9 @@ interface GameController {
 
     val gameEvents: EventPipeline
 
+    val baseSelectedEnemy: Enemy
+    val temporarySelectedEnemy: Enemy?
+
     /**
      * destroys a card in the *revolver* and puts it in the afterlife
      */

@@ -116,8 +116,8 @@ object BackpackCreator {
                     backpack.touchable = Touchable.childrenOnly
                 }
 
-                val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, 0f)
-                val collectionAction = PropertyAction(deckSide, collectionSide::drawOffsetX, 0f)
+                val deckAction = PropertyAction(Float::class, deckSide, deckSide::drawOffsetX, 0f)
+                val collectionAction = PropertyAction(Float::class, deckSide, collectionSide::drawOffsetX, 0f)
                 deckAction.duration = 0.2f
                 collectionAction.duration = 0.2f
                 deckAction.interpolation = Interpolation.exp10Out
@@ -143,8 +143,8 @@ object BackpackCreator {
                     filter.start()
                 }
 
-                val deckAction = PropertyAction(deckSide, deckSide::drawOffsetX, -800f)
-                val collectionAction = PropertyAction(deckSide, collectionSide::drawOffsetX, 800f)
+                val deckAction = PropertyAction(Float::class, deckSide, deckSide::drawOffsetX, -800f)
+                val collectionAction = PropertyAction(Float::class, deckSide, collectionSide::drawOffsetX, 800f)
                 deckAction.duration = 0.2f
                 collectionAction.duration = 0.2f
                 deckAction.interpolation = Interpolation.exp10Out

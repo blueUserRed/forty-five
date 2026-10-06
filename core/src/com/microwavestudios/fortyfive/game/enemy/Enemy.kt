@@ -106,7 +106,7 @@ class Enemy(
         }
         effect.start(controller)
         _statusEffects.add(effect)
-        enemyEvents.fire(StatusEffectsChangedEvent)
+        enemyEvents.fire(StatusEffectAdded(effect))
     }
 
     fun executeStatusEffectsOnTurnBegin(): Timeline = _statusEffects
@@ -132,7 +132,7 @@ class Enemy(
     fun checkStatusEffectValidity(): List<StatusEffect> {
         val toRemove = _statusEffects.filter { !it.isStillValid() }
         _statusEffects.removeAll(toRemove)
-        if (toRemove.isNotEmpty()) enemyEvents.fire(StatusEffectsChangedEvent)
+        toRemove.forEach { enemyEvents.fire(StatusEffectRemoved(it)) }
         return toRemove
     }
 
@@ -142,7 +142,7 @@ class Enemy(
     fun removeStatusEffect(effect: StatusEffect) {
         val removed = _statusEffects.remove(effect)
         if (!removed) return
-        enemyEvents.fire(StatusEffectsChangedEvent)
+        enemyEvents.fire(StatusEffectRemoved(effect))
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
@@ -199,7 +199,8 @@ class Enemy(
 
     data object HealthChangedEvent
     data object EnemyDefeated
-    data object StatusEffectsChangedEvent
+    data class StatusEffectAdded(val statusEffect: StatusEffect)
+    data class StatusEffectRemoved(val statusEffect: StatusEffect)
     data class PlayChargeAnimationEvent(val timeline: Promise<Timeline> = Promise())
     data class EnemyActionChangedEvent(val nextAction: NextEnemyAction)
 

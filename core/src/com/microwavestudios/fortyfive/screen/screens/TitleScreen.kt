@@ -57,8 +57,6 @@ class TitleScreen : ScreenCreator() {
 
     private val timelines: TimelineController = TimelineController()
 
-    private val testParticleSystem = ParticleSystem(worldWidth, worldHeight)
-
     override fun getRoot(): Group = newGroup {
         x = 0f
         y = 0f
@@ -73,16 +71,13 @@ class TitleScreen : ScreenCreator() {
             backgroundHandle = "title_screen_background"
         }
 
-        for (i in 1..15) {
-            addBullet("title_screen_bullet_$i")
-        }
-
         lateinit var blackOverlay: CustomImageActor
         val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight, events)
         box {
-            x = 120F
-            y = worldHeight * 0.65F
-            addOption("Start", true) { handleContinue() }
+            x = 70F
+            y = worldHeight * 0.6f
+            addOption("Start", false) { FortyFive.toMap() }
+//            addOption("Start", true) { handleContinue() }
             addOption("Settings") { openSettings(blackOverlay, settingsObject) }
             addOption("View Credits") {
                 FortyFive.screenManager.appendScreen(CreditsScreen)
@@ -91,23 +86,23 @@ class TitleScreen : ScreenCreator() {
             addOption("Quit") { handleQuit() }
         }
 
-        box {
-            x = 400f
-            y = worldHeight * 0.65f
-            width = worldWidth * 0.7f
-            flexDirection = FlexDirection.ROW
-            verticalAlign = CustomAlign.CENTER
-            horizontalAlign = CustomAlign.SPACE_AROUND
-
-            profileSelector()
-        }
+//        box {
+//            x = 400f
+//            y = worldHeight * 0.65f
+//            width = worldWidth * 0.7f
+//            flexDirection = FlexDirection.ROW
+//            verticalAlign = CustomAlign.CENTER
+//            horizontalAlign = CustomAlign.SPACE_AROUND
+//
+//            profileSelector()
+//        }
 
         events.watchFor<SelectedProfileChanged> { event ->
             currentlySelectedProfile = event.newProfile
             FortyFive.globalSave.lastUsedProfile = event.newProfile?.name
         }
 
-        label("red wing", "rework stage 3", Colors.Black, 32) {
+        label("red wing", "demo", Colors.Black, 32) {
             onLayoutAndNow {
                 x = worldWidth - width - 10
                 y = worldHeight - height - 10
@@ -135,7 +130,6 @@ class TitleScreen : ScreenCreator() {
         }
         actor(settings) {
             centerX()
-//            fixedZIndex = 10000
         }
 
         addDefaultOverlays(
@@ -149,52 +143,20 @@ class TitleScreen : ScreenCreator() {
             hasTutorial = false,
         )
 
-        screen.afterMs(0) { // run when screen is shown
-            val profileManager = FortyFive.profileManager
-            val current = profileManager.currentProfile?.name
-            profileManager.deselectProfile()
-            val preview = if (current != null) {
-                profileManager.availableProfiles.find { it.name == current }
-            } else {
-                val lastUsed = FortyFive.globalSave.lastUsedProfile
-                profileManager.availableProfiles.find { it.name == lastUsed }
-            }
-            events.fire(SelectedProfileChanged(preview ?: profileManager.availableProfiles.first()))
+        screen.afterMs(0) {
+            val success = FortyFive.profileManager.selectProfile(FortyFive.profileManager.availableProfiles.first())
         }
-
-//        testParticleSystem.emitter {
-//
-//            xRange = (-400f..worldWidth)
-//            yRange = ((worldHeight + 200f)..(worldHeight + 400f))
-//            xVelocityRange = (-3f..3f)
-//            yVelocityRange = (-10f..10f)
-//            spawnPerFrame = 70
-////            speedCap = (40f..40f)
-//            ttlRange = (1500L..1500L)
-//
-//            initParticle { particle ->
-//                particle.applyForce(0f, -0.5f)
+//        screen.afterMs(0) { // run when screen is shown
+//            val profileManager = FortyFive.profileManager
+//            val current = profileManager.currentProfile?.name
+//            profileManager.deselectProfile()
+//            val preview = if (current != null) {
+//                profileManager.availableProfiles.find { it.name == current }
+//            } else {
+//                val lastUsed = FortyFive.globalSave.lastUsedProfile
+//                profileManager.availableProfiles.find { it.name == lastUsed }
 //            }
-//
-//            onUpdate {
-//                if (globalForce.x > 0) {
-//                    globalForce.x = (globalForce.x - 0.03f).coerceAtLeast(0f)
-//                }
-//                if (globalForce.x < 0.2f && Utils.coinFlip(0.05f)) {
-//                    globalForce.x += 0.3f
-//                }
-////                if (spawnPerFrame!! > 70) spawnPerFrame = spawnPerFrame!! - 1
-////                if (spawnPerFrame!! < 70) spawnPerFrame = spawnPerFrame!! + 1
-////                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! + 20
-////                if (Utils.coinFlip(0.05f)) spawnPerFrame = spawnPerFrame!! - 20
-//                if (Utils.coinFlip(0.5f)) spawnPerFrame = spawnPerFrame!! + 3
-//                if (Utils.coinFlip(0.5f)) spawnPerFrame = spawnPerFrame!! - 3
-//                spawnPerFrame = spawnPerFrame!!.between(20, 100)
-//                println(this.particles.size)
-//            }
-//
-//            renderer = TextureParticleRenderer("particle_rain", 20f * 0.7f, 35f * 0.7f,
-//                com.badlogic.gdx.graphics.Color(0f, 0f, 0.7f, 0.6f), true, screen, this)
+//            events.fire(SelectedProfileChanged(preview ?: profileManager.availableProfiles.first()))
 //        }
     }
 
@@ -279,7 +241,7 @@ class TitleScreen : ScreenCreator() {
         displayText: String,
         onlyAvailableWhenProfileIsSelected: Boolean = false,
         action: () -> Unit
-    ) = label("red wing", displayText, fontSize = 62) {
+    ) = label("red wing", displayText, fontSize = 50) {
         syncWidth()
         syncHeight()
         touchable = Touchable.enabled
@@ -299,14 +261,6 @@ class TitleScreen : ScreenCreator() {
             { underline = true },
             { underline = false }
         )
-    }
-
-    private fun Group.addBullet(name: String) = box {
-        positionType = PositionType.ABSOLUTE
-        width = worldWidth
-        height = worldHeight
-        name(name)
-        backgroundHandle = name
     }
 
     override fun getScreenControllers(): List<ScreenController> = listOf(

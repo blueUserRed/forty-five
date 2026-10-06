@@ -471,7 +471,7 @@ class ApplyStampMapEvent(
 
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
-    override val nodeTexture: ResourceHandle = "map_node_choose_card"
+    override val nodeTexture: ResourceHandle = "map_node_apply_stamp"
 
     override val displayName: String = "You get a stamp"
 

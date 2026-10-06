@@ -63,7 +63,7 @@ difficulties: [
         ]
     },
     {
-        difficulty: 3,
+        difficulty: 2,
         changes: [],
     }
 ],

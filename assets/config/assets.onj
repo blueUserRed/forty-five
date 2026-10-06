@@ -291,6 +291,10 @@ textures: [
         file: "blobs/icons/enemy_actions/scaling_damage_witch.png",
     },
     {
+        name: "deck_icon",
+        file: "blobs/icons/deck.png",
+    },
+    {
         name: "player_bar",
         file: "blobs/game_screen/player_bar.png"
     },
@@ -325,6 +329,75 @@ textures: [
     {
         name: "status_effect_background",
         file: "blobs/game_screen/status_effect_background.png"
+    },
+    {
+        name: "encounter_player",
+        file: "blobs/encounter_screen/player.png"
+    },
+    {
+        name: "encounter_bottom_bar",
+        file: "blobs/encounter_screen/bottom_bar.png"
+    },
+    {
+        name: "encounter_bottom_bar_shadow",
+        file: "blobs/encounter_screen/bottom_bar_shadow.png"
+    },
+    {
+        name: "encounter_revolver_handle",
+        file: "blobs/encounter_screen/revolver_handle.png"
+    },
+    {
+        name: "encounter_revolver_drum_bottom",
+        file: "blobs/encounter_screen/revolver_drum_bottom.png"
+    },
+    {
+        name: "encounter_revolver_drum_top",
+        file: "blobs/encounter_screen/revolver_drum_top.png"
+    },
+    {
+        name: "encounter_revolver_slot_gradient",
+        file: "blobs/encounter_screen/revolver_slot_gradient.png",
+    },
+    {
+        name: "encounter_revolver_slot_glow",
+        file: "blobs/encounter_screen/revolver_slot_glow.png",
+        dropShadow: {
+            shadowColor: color.brightYellow,
+            brighten: 0.1,
+            originalColor: 1.0,
+            maxRadius: 280.0,
+            radiusStep: 6.0,
+            pointsOnCircle: 200.0,
+        }
+    },
+    {
+        name: "encounter_reserves_bg",
+        file: "blobs/encounter_screen/reserves_bg.png"
+    },
+    {
+        name: "encounter_holster",
+        file: "blobs/encounter_screen/holster.png"
+    },
+    {
+        name: "encounter_holster_hover",
+        file: "blobs/encounter_screen/holster_hover.png"
+    },
+    {
+        name: "encounter_player_health_bar",
+        file: "blobs/encounter_screen/player_health_bar.png"
+    },
+    {
+        name: "encounter_encounter_modifier_bg",
+        file: "blobs/encounter_screen/encounter_encounter_modifier_bg.png",
+        dropShadow: defaultDropShadowConfig
+    },
+    {
+        name: "encounter_pass_button",
+        file: "blobs/encounter_screen/pass.png"
+    },
+    {
+        name: "encounter_parry_button",
+        file: "blobs/encounter_screen/parry.png"
     },
     {
         name: "background_wasteland1",
@@ -450,6 +523,10 @@ textures: [
     {
         name: "map_node_special_event",
         file: "blobs/map/nodes/special_event.png"
+    },
+    {
+        name: "map_node_apply_stamp",
+        file: "blobs/map/nodes/apply_stamp.png"
     },
     {
         name: "map_player",
@@ -1126,10 +1203,6 @@ textures: [
         file: "blobs/game_screen/wood_box.png",
     },
     {
-        name: "deck_icon",
-        file: "blobs/game_screen/deck_icon.png",
-    },
-    {
         name: "reserves_texture",
         file: "blobs/game_screen/reserves.png",
     },
@@ -1146,12 +1219,48 @@ textures: [
         file: "blobs/cards/symbols/text/t_equals.png",
     },
     {
-        name: "particle_rain",
-        file: "blobs/particles/rain2.png",
+        name: "stamp_bewitched",
+        file: "blobs/cards/symbols/stamps/bewitched.png",
     },
     {
-        name: "card_stamp_test",
-        file: "blobs/cards/symbols/stamps/test_stamp.png",
+        name: "stamp_catalyst",
+        file: "blobs/cards/symbols/stamps/catalyst.png",
+    },
+    {
+        name: "stamp_fifty_cal",
+        file: "blobs/cards/symbols/stamps/fifty_cal.png",
+    },
+    {
+        name: "stamp_gauge",
+        file: "blobs/cards/symbols/stamps/gauge.png",
+    },
+    {
+        name: "stamp_high_velocity",
+        file: "blobs/cards/symbols/stamps/high_velocity.png",
+    },
+    {
+        name: "stamp_jammed",
+        file: "blobs/cards/symbols/stamps/jammed.png",
+    },
+    {
+        name: "stamp_phantom",
+        file: "blobs/cards/symbols/stamps/phantom.png",
+    },
+    {
+        name: "stamp_poison_tip",
+        file: "blobs/cards/symbols/stamps/poison_tip.png",
+    },
+    {
+        name: "stamp_spirit",
+        file: "blobs/cards/symbols/stamps/spirit.png",
+    },
+    {
+        name: "stamp_undead",
+        file: "blobs/cards/symbols/stamps/undead.png",
+    },
+    {
+        name: "particle_rain",
+        file: "blobs/particles/rain2.png",
     },
 ],
 
@@ -1291,6 +1400,10 @@ colorTextures: [
     {
         name: "transparent_black_texture",
         color: color.backgroundTransparent
+    },
+    {
+        name: "transparent_texture",
+        color: color("00000000")
     },
     {
         name: "tutorial_info_actor_background",

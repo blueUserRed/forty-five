@@ -49,7 +49,7 @@ interface IRevolver {
 
     fun rotate(rotation: RevolverRotation): Timeline
 
-    fun forceGetActor(): Revolver
+    fun forceGetActor(): Actor
 }
 
 interface IRevolverSlot : Selectable<IRevolverSlot> {
@@ -60,7 +60,7 @@ interface IRevolverSlot : Selectable<IRevolverSlot> {
 
     fun cardPosition(): Vector2
 
-    fun forceGetActor(): RevolverSlot
+    fun forceGetActor(): InputActor
 }
 
 /**

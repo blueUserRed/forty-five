@@ -71,15 +71,6 @@ runRewardPools: [
         rewardProbability: 1.0,
         rewards: [
             [
-                $CashReward {
-                    amount: 200
-                },
-                $CashReward {
-                    amount: 250
-                },
-                $CashReward {
-                    amount: 300
-                },
             ]
         ]
     },
@@ -89,15 +80,6 @@ runRewardPools: [
         rewardProbability: 1.0,
         rewards: [
             [
-                $CashReward {
-                    amount: 300
-                },
-                $CashReward {
-                    amount: 350
-                },
-                $CashReward {
-                    amount: 400
-                },
             ]
         ]
     }
@@ -120,19 +102,19 @@ encounterModifierPools: [
         majorDifficulty: 2,
         modifierProbability: 0.3,
         maxModifiers: 1,
-        modifiers: [ "rain", "moist", "bewitchedMist" ]
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost" ]
     },
     {
         majorDifficulty: 3,
         modifierProbability: 0.5,
         maxModifiers: 2,
-        modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost" ]
     },
     {
         majorDifficulty: 5,
         modifierProbability: 0.7,
         maxModifiers: 3,
-        modifiers: [ "rain", "moist", "bewitchedMist", "frost", "steelnerves" ]
+        modifiers: [ "rain", "moist", "bewitchedMist", "frost" ]
     },
 ],
 
@@ -149,8 +131,8 @@ hardEncounterDifficultyMultiplier: 1.3,
 
 stepConfig: {
     limited: {
-        minSteps: [5, 10],
-        maxSteps: [15, 25],
+        minSteps: [14, 16],
+        maxSteps: [25, 29],
     },
     constructed: {
         minSteps: [5, 10],
@@ -171,8 +153,6 @@ enemies: [
     {
         majorDifficulty: 2,
         amount: [1, 2],
-//        amount: [1, 1],
-//        allowedEnemies: [ "Scarecrow" ],
         allowedEnemies: [
             "Outlaw", "Pyro",
             "Witch", "The-Fangs",
@@ -188,7 +168,6 @@ allowedEnemyConfigurations: [
     [ "Outlaw", "Witch" ],
     [ "Outlaw", "Witch", "Witch" ],
     [ "Outlaw", "Outlaw", "Witch" ],
-    [ "Pyro" ],
     [ "Outlaw", "Pyro" ],
     [ "Outlaw", "Outlaw", "Pyro" ],
     [ "Outlaw", "Pyro", "Pyro" ],
@@ -196,7 +175,6 @@ allowedEnemyConfigurations: [
     [ "The-Fangs" ],
     [ "The-Fangs", "Pyro" ],
     [ "The-Fangs", "Pyro", "Pyro" ],
-    [ "The-Fangs", "Witch" ],
     [ "The-Fangs", "The-Fangs" ],
     [ "The-Fangs", "The-Fangs", "Pyro" ],
     [ "The-Fangs", "The-Fangs", "Witch" ],
@@ -249,7 +227,7 @@ enemyProbabilityIncrease: [
 
 enemyProbabilityRandomPoints: 120,
 
-enemyHealthAdjustment: 0.6,
+enemyHealthAdjustment: 0.5,
 enemyDamageAdjustment: 0.3,
 
 difficultyScaling: {
@@ -313,16 +291,16 @@ stampPools: [
         majorDifficulty: 0,
         stamps: []
     },
+//    {
+//        majorDifficulty: 1,
+//        stamps: [ "bewitched", "poisonTip", "fiftyCal" ]
+//    },
+//    {
+//        majorDifficulty: 3,
+//        stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity" ]
+//    },
     {
-        majorDifficulty: 1,
-        stamps: [ "bewitched", "poisonTip", "fiftyCal" ]
-    },
-    {
-        majorDifficulty: 3,
-        stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity" ]
-    },
-    {
-        majorDifficulty: 4,
+        majorDifficulty: 2,
         stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity", "phantom", "catalyst", "spirit" ]
     },
 ],

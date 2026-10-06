@@ -509,6 +509,8 @@ class Profile private constructor(
                 return try {
                     tryLoadPreview(name)
                 } catch (e: ProfileLoadException) {
+                    FortyFive.logger.warn(logTag, "failed loading preview '$name'")
+                    FortyFive.logger.stackTrace(e)
                     Preview(name, File("profiles/$name/profile_data.onj"), e.failure, true)
                 }
             }
