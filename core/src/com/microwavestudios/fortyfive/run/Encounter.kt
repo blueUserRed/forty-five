@@ -272,7 +272,9 @@ object EncounterGenerator {
         require(currentDistance != -1) { "node distance is -1" }
         val maxDistance = maxDistance(startNode)
         val percent = currentDistance.toFloat() / maxDistance.toFloat()
-        return placeholder.difficultyScaling.scale(placeholder.scaleMin, placeholder.scaleMax, percent)
+
+        val scaled = placeholder.difficultyScaling.scale(placeholder.scaleMin, placeholder.scaleMax, percent)
+        return scaled
     }
 
     private fun maxDistance(node: MapNodeBuilder): Int {

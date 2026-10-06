@@ -19,6 +19,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
     abstract val defaultTitle: String
     abstract val defaultDescription: String
     abstract val defaultIcon: ResourceHandle
+    open val defaultSecondaryIcon: ResourceHandle? = null
 
     abstract val indicatorText: String
 
@@ -28,8 +29,11 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
     val description: String
         get() = data?.overrideDescription ?: defaultDescription
 
-    val icon: String
+    val icon: ResourceHandle
         get() = data?.overrideIcon ?: defaultIcon
+
+    val secondaryIcon: ResourceHandle?
+        get() = data?.overrideSecondaryIcon ?: defaultSecondaryIcon
 
     open fun onSelected(
         enemy: Enemy,
@@ -121,7 +125,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         private var damage: Int? = null
 
         override val defaultTitle: String = "Attack"
-        override val defaultIcon: ResourceHandle = "enemy_action_damage"
+        override val defaultIcon: ResourceHandle = "damage_icon"
 
         override val defaultDescription: String
             get() = buildDefaultDescription(damage, data, isPiercing, null, ::getAdditionalDamage)
@@ -169,7 +173,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
     ) : EnemyAction(data), DamageAction {
 
         override val defaultTitle: String = "Attack"
-        override val defaultIcon: ResourceHandle = "enemy_action_damage"
+        override val defaultIcon: ResourceHandle = "damage_icon"
 
         override val defaultDescription: String
             get() = data?.let { data ->
@@ -216,40 +220,40 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
             DamagePlayerVariable(damage, isPiercing, additionalExplanation, data)
     }
 
-    class ApplyShield(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
+    class ApplyCover(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
 
-        private var shield: Int? = null
+        private var cover: Int? = null
 
         override val defaultTitle: String = "Shield"
 
         override val defaultDescription: String
-            get() = shield?.let { "The Enemy gives itself $shield shield" } ?: ""
+            get() = cover?.let { "The Enemy gives itself $cover cover" } ?: ""
 
-        override val defaultIcon: ResourceHandle = "enemy_action_cover"
+        override val defaultIcon: ResourceHandle = "cover_icon"
 
         override val indicatorText: String
-            get() = shield?.toString() ?: ""
+            get() = cover?.toString() ?: ""
 
         override fun onSelected(
             enemy: Enemy,
             controller: GameController
         ) {
-            requireNull(shield) { "Cant reuse EnemyActions" }
+            requireNull(cover) { "Cant reuse EnemyActions" }
             requireNotNull(data)
-            shield = (min..max).random(data.controller.random)
+            cover = (min..max).random(data.controller.random)
         }
 
         override fun getTimeline(
             enemy: Enemy,
             controller: GameController
         ): Timeline = Timeline.timeline { later {
-            val shield = shield
+            val shield = cover
             requireNotNull(shield)
             requireNotNull(data)
             include(data.enemy.addCoverTimeline(shield))
         } }
 
-        override fun copy(data: EnemyActionData?): EnemyAction = ApplyShield(min, max, data)
+        override fun copy(data: EnemyActionData?): EnemyAction = ApplyCover(min, max, data)
     }
 
     class ParryableBurning(val min: Int, val max: Int, data: EnemyActionData?) : EnemyAction(data) {
@@ -267,7 +271,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 """.trimIndent()
             } ?: ""
 
-        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+        override val defaultIcon: ResourceHandle = "parryable_burning_icon"
 
         override val indicatorText: String
             get() = burningValue?.toString() ?: ""
@@ -315,7 +319,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 The enemy will put a [${data.controller.titleOfCard(card)}] into you hand!
             """.trimIndent() } ?: ""
 
-        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+        override val defaultIcon: ResourceHandle = "unknown_icon"
 
         override val indicatorText: String = ""
 
@@ -353,10 +357,12 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
 
     class GivePlayerStatus(val statusEffect: StatusEffectCreator, data: EnemyActionData?) : EnemyAction(data) {
 
-        private val dummyStatusEffect: StatusEffect = statusEffect(null, null, false)
+        private val dummyStatusEffect: StatusEffect =
+            statusEffect(data?.controller, null, false)
 
         override val defaultTitle: String = ""
-        override val defaultDescription: String = "The enemy gives you ${dummyStatusEffect.toDisplayString()}"
+        override val defaultDescription: String
+            get() = "The enemy gives you ${dummyStatusEffect.toDisplayString()}"
 
         override val defaultIcon: ResourceHandle
             get() = dummyStatusEffect.iconHandle
@@ -380,7 +386,13 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         override val defaultDescription: String = ""
         override val indicatorText: String = ""
 
-        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+        private var isRight: Boolean? = null
+
+        override val defaultIcon: ResourceHandle = when (isRight) {
+            null -> "unknown_icon"
+            true -> "bewitched_right_icon"
+            false -> "bewitched_left_icon"
+        }
 
         override fun getTimeline(
             enemy: Enemy,
@@ -388,8 +400,10 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         ): Timeline = Timeline.timeline { later {
             val rotations = controller.revolverRotationCountInTurn
             val rotation = if (rotations % 2 == 0) {
+                isRight = true
                 RevolverRotation.Right(1)
             } else {
+                isRight = false
                 RevolverRotation.Left(1)
             }
             include(controller.rotateRevolverTimeline(rotation))
@@ -405,7 +419,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         override val defaultDescription: String =
             $$"You get $status$POISON$status$ (2) for every bullet in the revolver"
 
-        override val defaultIcon: ResourceHandle = "enemy_action_burning"
+        override val defaultIcon: ResourceHandle = "poison_fangs_icon"
         override val indicatorText: String = ""
 
         override fun getTimeline(
@@ -436,7 +450,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
                 """.trimIndent()
             } ?: ""
 
-        override val defaultIcon: ResourceHandle = "poison_icon"
+        override val defaultIcon: ResourceHandle = "parryable_poison_icon"
 
         override val indicatorText: String
             get() = poisonValue?.toString() ?: ""
@@ -479,7 +493,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
 
         override val defaultTitle: String = "Without a heart"
         override val defaultDescription: String = "two random bullets in the players hand get their dmg values halved"
-        override val defaultIcon: ResourceHandle = "poison_icon"
+        override val defaultIcon: ResourceHandle = "without_a_heart_icon"
         override val indicatorText: String = ""
 
         override fun getTimeline(
@@ -525,6 +539,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         val overrideTitle: String? = null,
         val overrideDescription: String? = null,
         val overrideIcon: ResourceHandle? = null,
+        val overrideSecondaryIcon: ResourceHandle? = null,
     )
 }
 

@@ -275,10 +275,6 @@ textures: [
         file: "blobs/icons/enemy_actions/bewitched_right.png",
     },
     {
-        name: "deck_icon",
-        file: "blobs/icons/deck.png",
-    },
-    {
         name: "poison_fangs_icon",
         file: "blobs/icons/enemy_actions/poison_fangs.png",
     },
@@ -293,6 +289,10 @@ textures: [
     {
         name: "scaling_damage_witch_icon",
         file: "blobs/icons/enemy_actions/scaling_damage_witch.png",
+    },
+    {
+        name: "deck_icon",
+        file: "blobs/icons/deck.png",
     },
     {
         name: "player_bar",
@@ -894,58 +894,6 @@ textures: [
     {
         name: "enemy_status_bar_effect_box",
         file: "blobs/game_screen/status_bar/effect_box.png",
-    },
-    {
-        name: "enemy_action_burning",
-        file: "blobs/enemies/action_symbols/burning.png",
-    },
-    {
-        name: "enemy_action_cover",
-        file: "blobs/enemies/action_symbols/cover.png",
-    },
-    {
-        name: "enemy_action_damage",
-        file: "blobs/enemies/action_symbols/damage.png",
-    },
-    {
-        name: "enemy_action_fire_resistance",
-        file: "blobs/enemies/action_symbols/fire_resistance.png",
-    },
-    {
-        name: "enemy_action_hot_potato",
-        file: "blobs/enemies/action_symbols/hot_potato.png",
-    },
-    {
-        name: "enemy_action_inferno",
-        file: "blobs/enemies/action_symbols/inferno.png",
-    },
-    {
-        name: "enemy_action_bewitched",
-        file: "blobs/enemies/action_symbols/bewitched.png",
-    },
-    {
-        name: "enemy_action_left_turn",
-        file: "blobs/enemies/action_symbols/left_turn.png",
-    },
-    {
-        name: "enemy_action_and_its_gone",
-        file: "blobs/enemies/action_symbols/and_its_gone.png",
-    },
-    {
-        name: "enemy_action_goodbyes",
-        file: "blobs/enemies/action_symbols/goodbyes.png",
-    },
-    {
-        name: "enemy_action_heads_up",
-        file: "blobs/enemies/action_symbols/heads_up.png",
-    },
-    {
-        name: "enemy_action_piercing",
-        file: "blobs/enemies/action_symbols/piercing.png",
-    },
-    {
-        name: "enemy_action_unknown",
-        file: "blobs/enemies/action_symbols/unknown.png",
     },
     {
         name: "enemy_pyro",

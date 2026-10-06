@@ -17,6 +17,7 @@ var action = {
     overrideTitle?: string,
     overrideDescription?: string,
     overrideIcon?: string,
+    overrideSecondaryIcon?: string?
 };
 
 var enemy = {
