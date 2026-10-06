@@ -381,7 +381,7 @@ class ShopScreen : ScreenCreator() {
         }
 
         image { //line between
-            backgroundHandle = "forty_white_rounded"
+            backgroundHandle = "white_texture"
             relativeWidth(100f)
             height = 2f
             marginTop = 8f

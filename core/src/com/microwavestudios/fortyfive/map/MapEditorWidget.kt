@@ -773,7 +773,6 @@ class MapEditorWidget(
             "map_node_exit",
             "map_node_fight",
             "map_node_shop",
-            "map_node_get_card",
             "map_node_choose_card",
             "map_node_dialog"
         )

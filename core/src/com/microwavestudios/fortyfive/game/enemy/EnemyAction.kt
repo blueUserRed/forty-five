@@ -229,7 +229,7 @@ abstract class EnemyAction(protected val data: EnemyActionData?) {
         override val defaultDescription: String
             get() = cover?.let { "The Enemy gives itself $cover cover" } ?: ""
 
-        override val defaultIcon: ResourceHandle = "cover.png"
+        override val defaultIcon: ResourceHandle = "cover_icon"
 
         override val indicatorText: String
             get() = cover?.toString() ?: ""

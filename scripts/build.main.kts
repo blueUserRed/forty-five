@@ -118,7 +118,7 @@ fun cleanupAssets(tmpDir: File) {
         ?.forEach { it.deleteRecursively() }
 
     debug("removing font files")
-    (tmpDir / "blobs/fonts2")
+    (tmpDir / "blobs/fonts")
         .listFiles()!!
         .filter { it.extension in arrayOf("ttf", "otf") }
         .forEach { it.delete() }

@@ -33,6 +33,8 @@ abstract class StatusEffect(
 
     open fun executeOnEndTurn(target: StatusEffectTarget): Timeline? = null
 
+    open fun executeOnTurnBegin(target: StatusEffectTarget): Timeline? = null
+
     open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
 
     open fun executeAfterShot(): Timeline? = null
@@ -434,7 +436,7 @@ class Shield(private var shield: Int) : StatusEffect("shield_icon") {
         return 0
     }
 
-    override fun executeOnEndTurn(target: StatusEffectTarget): Timeline = Timeline.timeline {
+    override fun executeOnTurnBegin(target: StatusEffectTarget): Timeline = Timeline.timeline {
         action { shield /= 2 }
     }
 
