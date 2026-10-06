@@ -39,9 +39,9 @@ cards: [
         title: "Big Bullet",
         flavourText: "",
         description: "Don't ask me how it fits, it just does.",
-        baseDamage: 16,
+        baseDamage: 14,
         cost: 2,
-        tags: ["pool0", "rarity3", "basic"],
+        tags: ["pool0", "rarity2", "basic"],
         price: 50,
         deckMaximum: null
     },
@@ -81,7 +81,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool0", "rarity3", "basic"],
+        tags: ["pool0", "rarity2", "basic"],
         price: 50,
     },
     {
@@ -119,7 +119,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3", "other"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -132,7 +132,7 @@ cards: [
         effects: [],
         cost: 1,
         deckMaximum: 3,
-        tags: ["pool1", "rarity3", "rotate"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -166,7 +166,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool1", "rarity1", "basic"],
+        tags: ["pool1", "rarity2", "basic"],
         price: 100,
     },
     {
@@ -197,7 +197,7 @@ cards: [
         traitEffects: [ "everlasting" ],
         effects: [],
         cost: 1,
-        tags: ["pool1", "rarity1", "basic"],
+        tags: ["pool1", "rarity3", "basic"],
         price: 50,
     },
     {
@@ -206,10 +206,10 @@ cards: [
         flavourText: "Big Fucking Bullet",
         description: "",
         baseDamage: 50,
-        deckMaximum: 2,
+        deckMaximum: 1,
         effects: [],
         cost: 5,
-        tags: ["pool1", "rarity1", "basic"],
+        tags: ["pool1", "rarity2", "basic"],
         price: 60,
     },
     {
@@ -218,11 +218,11 @@ cards: [
         flavourText: "no, you CAN'T make a portal out of it",
         description: "$trait$REINFORCED$trait$",
         baseDamage: 10,
-        deckMaximum: 3,
+        deckMaximum: 2,
         traitEffects: ["reinforced"],
         effects: [],
         cost: 3,
-        tags: ["pool1", "rarity1", "basic"],
+        tags: ["pool1", "rarity2", "basic"],
         price: 50,
     },
     {
@@ -247,7 +247,7 @@ cards: [
         effects: [ ],
         deckMaximum: null,
         cost: 0,
-        tags: ["pool1", "rarity1", "basic"],
+        tags: ["pool1", "rarity2", "basic"],
         price: 30,
     },
     {
@@ -340,7 +340,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3", "statuseffect"],
+        tags: ["pool1", "rarity1", "statuseffect"],
         price: 50,
     },
     {
@@ -353,7 +353,7 @@ cards: [
         deckMaximum: 2,
         effects: [],
         cost: 2,
-        tags: ["pool2", "rarity3", "rotate"],
+        tags: ["pool2", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -391,7 +391,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1", "destroy"],
+        tags: ["pool1", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -431,7 +431,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "destroy"],
+        tags: ["pool1", "not used", "unobtainable", "rarity2", "destroy"],
         price: 40,
     },
     {
@@ -466,7 +466,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "rotate"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -491,18 +491,18 @@ cards: [
         name: "scorchingBullet",
         title: "Scorching Bullet",
         flavourText: "§§card_symbol_text_t_equals§§",
-        description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
+        description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 7 dmg",
         baseDamage: 0,
         deckMaximum: null,
         effects: [
             {
                 trigger: turnEnd(),
                 inZones: [zone.revolver, zone.hand],
-                effect: damagePlayer(10#val)
+                effect: damagePlayer(7#val)
             }
         ],
         dark: true,
-        cost: 3,
+        cost: 2,
         tags: ["weight", "unobtainable", "other"],
         price: 50,
     },
@@ -527,7 +527,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity1", "other"],
+        tags: ["pool2", "rarity3", "other"],
         price: 50,
     },
     {
@@ -552,7 +552,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "no-shot", "other"],
+        tags: ["pool2", "rarity3", "no-shot", "other"],
         price: 50,
     },
     {
@@ -669,7 +669,7 @@ cards: [
         ],
         cost: 0,
         forbiddenSlots: [3],
-        tags: ["pool1", "rarity3", "no-shot"],
+        tags: ["pool1", "rarity1", "no-shot"],
         price: 50,
     },
     {
@@ -687,7 +687,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3", "statuseffect"],
+        tags: ["pool1", "rarity1", "statuseffect"],
         price: 50,
     },
     {
@@ -709,7 +709,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2", "statuseffect"],
+        tags: ["pool1", "rarity2", "not used", "unobtainable", "statuseffect"],
         price: 60,
     },
     {
@@ -744,7 +744,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity1", "destroy", "rotate"],
+        tags: ["pool2", "rarity1", "not used", "unobtainable", "destroy", "rotate"],
         price: 50,
     },
     {
@@ -765,7 +765,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "destroy"],
+        tags: ["pool1", "rarity1", "destroy"],
         price: 50,
     },
     {
@@ -774,7 +774,7 @@ cards: [
         flavourText: "",
         description: "$trigger$While in revolver:$trigger$ $trigger$Whenever a bullet is destroyed:$trigger$\nDraw a card and this bullet gets +8 dmg.",
         baseDamage: 1,
-        deckMaximum: 1,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: cardDestroyed(allCardsTrigger),
@@ -795,7 +795,7 @@ cards: [
         name: "goldBullet",
         title: "Gold Bullet",
         flavourText: "Not everything that glitters is gold. This is tho",
-        description: "$trigger$On-Leave:$trigger$\nDraw x cards, x being the number of times this bullet has turned in the revolver.",
+        description: "$trigger$On-Leave:$trigger$\nDraw x cards, x being the number of times this bullet has rotated in the revolver.",
         baseDamage: 9,
         deckMaximum: 1,
         effects: [
@@ -905,7 +905,7 @@ cards: [
         ],
         additionalHoverInfos: ["home"],
         cost: 1,
-        tags: ["pool1", "rarity1", "rotate"],
+        tags: ["pool1", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -940,7 +940,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "basic"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 40,
     },
     {
@@ -987,7 +987,7 @@ cards: [
         ],
         dark: true,
         cost: 2,
-        tags: ["pool2", "rarity1", "destroy"],
+        tags: ["pool2", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -1006,7 +1006,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: ["pool2", "rarity1", "rotate"],
+        tags: ["pool2", "rarity2", "rotate"],
         price: 50,
     },
     {
@@ -1071,7 +1071,7 @@ cards: [
         name: "kamikazeBullet",
         title: "Kamikaze Bullet",
         flavourText: "Isn't like every bullet technically a kamikaze bullet?",
-        description: "$trigger$On-Placedown:$trigger$\nAs an extra cost: destroy target other bullet.",
+        description: "$trigger$On-Placedown:$trigger$\nAs an extra cost: destroy target other bullet.\n$trigger$On-Destroy:$trigger$\ndeal 7 dmg to targeted enemy",
         baseDamage: 12,
         deckMaximum: 3,
         effects: [
@@ -1079,10 +1079,14 @@ cards: [
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
                 canPreventEnteringGame: true,
                 effect: destroy(bSelectRevolverTarget(false, false, "Choose card to destroy"))
+            },
+            {
+                trigger: cardDestroyed(onlySelfTriggers),
+                effect: damageDirect(7#val, false)
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "destroy"],
+        tags: ["pool1", "rarity1", "destroy"],
         price: 50,
     },
     {
@@ -1100,7 +1104,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool2", "rarity1", "destroy"],
+        tags: ["pool2", "rarity2", "destroy"],
         price: 70,
     },
     {
@@ -1136,7 +1140,7 @@ cards: [
             }
         ],
         cost: 3,
-        tags: ["pool2", "rarity1", "other", "explore"],
+        tags: ["pool2", "rarity2", "other", "explore"],
         price: 80,
     },
     {
@@ -1153,15 +1157,16 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "explore"],
+        tags: ["pool2", "rarity2", "explore"],
         price: 40,
     },
     {
         name: "carnageBullet",
         title: "Carnage Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet in the revolver",
+        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet in the revolver\n$keyword$DEFENSE$keyword$ (4)",
         baseDamage: 11,
+        parryNumber: 4,
         deckMaximum: 3,
         effects: [
             {
@@ -1170,7 +1175,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "destroy"],
+        tags: ["pool2", "rarity2", "destroy"],
         price: 50,
     },
     {
@@ -1189,7 +1194,7 @@ cards: [
             }
         ],
         cost: 0,
-        tags: ["pool2", "rarity1", "explore", "other"],
+        tags: ["pool2", "rarity2", "explore", "other"],
         price: 50,
     },
     {
@@ -1214,7 +1219,7 @@ cards: [
         name: "supportBullet",
         title: "Support Bullet",
         flavourText: "\"Support is on the way, be at ease little sister, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\" -Letter to Salem",
-        description: "$trigger$On Enter:$trigger$\nChose a bullet in a slot.\n$trigger$While in revolver:$trigger$\nThe chosen bullet gets +10 dmg",
+        description: "$trigger$On Enter:$trigger$\nChose a bullet in a slot.\n$trigger$While in revolver:$trigger$\nThe chosen bullet gets +8 dmg",
         baseDamage: 5,
         effects: [
             {
@@ -1269,7 +1274,7 @@ cards: [
                 )#bSelect)
             }
         ],
-        cost: 3,
+        cost: 1,
         tags: ["pool2", "rarity1", "no-shot"],
         price: 50,
     },
@@ -1324,7 +1329,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity1", "explore"],
+        tags: ["pool2", "rarity2", "explore"],
         price: 50,
     },
     {
@@ -1368,7 +1373,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1", "statuseffect"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1404,7 +1409,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "rotate"],
+        tags: ["pool1", "rarity1", "rotate"],
         price: 50,
     },
     {
@@ -1425,7 +1430,7 @@ cards: [
             },
         ],
         cost: 3,
-        tags: ["pool1", "rarity2", "destroy", "explore"],
+        tags: ["pool1", "rarity2", "not used", "unobtainable", "destroy", "explore"],
         price: 50,
     },
     {
@@ -1434,7 +1439,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Turn-Begin:$trigger$\nyou draw 1 Card",
         baseDamage: 1,
-        deckMaximum: 3,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
@@ -1443,8 +1448,8 @@ cards: [
             },
         ],
         dark: true,
-        cost: 2,
-        tags: ["pool1", "rarity3", "basic"],
+        cost: 1,
+        tags: ["pool1", "rarity1", "basic"],
         price: 50,
     },
     {
@@ -1453,7 +1458,7 @@ cards: [
         flavourText: "",
         description: "This bullet has +3 dmg for every Bullet currently in the Afterlife",
         baseDamage: 1,
-        deckMaximum: 1,
+        deckMaximum: 2,
         effects: [
             {
                 trigger: leaveZone(zone.limbo, onlySelfTriggers, false),
@@ -1466,7 +1471,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool2", "rarity2", "destroy"],
+        tags: ["pool2", "rarity1", "destroy"],
         price: 50,
     },
     {
@@ -1493,7 +1498,7 @@ cards: [
         flavourText: "",
         description: "This bullet has +1 dmg for every card in your hand",
         baseDamage: 1,
-        deckMaximum: 1,
+        deckMaximum: 2,
         variableTexture: numberBasedVariableTexture(countCards(inZone(zone.hand)) atMost 20, 0),
         effects: [
             {
@@ -1507,7 +1512,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: ["pool1", "rarity3", "explore"],
+        tags: ["pool1", "rarity2", "explore"],
         price: 50,
     },
     {
@@ -1545,7 +1550,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3", "statuseffect"],
+        tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
     {
@@ -1580,7 +1585,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity1", "rotate"],
+        tags: ["pool1", "rarity1", "not used", "unobtainable", "rotate"],
         price: 50,
     },
     {
@@ -1589,7 +1594,7 @@ cards: [
         flavourText: "",
         description: "$trait$JAMMED$trait$\n$keyword$HARDENED$keyword$ (2)",
         baseDamage: 9,
-        deckMaximum: 1,
+        deckMaximum: 3,
         rotation: $Dont {},
         effects: [
             {
@@ -1603,7 +1608,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity2", "no-shot", "basic"],
+        tags: ["pool1", "rarity1", "no-shot", "basic"],
         price: 50,
     },
     {
@@ -1630,31 +1635,35 @@ cards: [
         name: "possessedBullet",
         title: "Possessed Bullet",
         flavourText: "",
-        description: "$trigger$On-Destroy:$trigger$\nThe revolver rotates left once",
-        baseDamage: 5,
+        description: "$trigger$On-Destroy:$trigger$\nThe revolver rotates left once and you gain 1 reserve",
+        baseDamage: 3,
         deckMaximum: 3,
         effects: [
             {
                 trigger: cardDestroyed(onlySelfTriggers),
                 effect: turnRevolver("left", 1)
+            },
+            {
+                trigger: cardDestroyed(onlySelfTriggers),
+                effect: reserveGain(1#val)
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3", "destroy", "rotate"],
+        tags: ["pool1", "rarity2", "destroy", "rotate"],
         price: 50,
     },
     {
         name: "spiderBullet",
         title: "Spider Bullet",
         flavourText: "Im sorry to everyone with arachnophobia... tho, if I had that, i probably wouldn't look at that hairy thing just to read an apology. Ew",
-        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet inflicts a Statuseffect:$trigger$\nThis bullet gets +5 dmg and you draw 1 card",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet inflicts a Statuseffect:$trigger$\nThis bullet gets +8 dmg and you draw 1 card",
         baseDamage: 3,
         deckMaximum: 2,
         effects: [
             {
                 trigger: statusEffectInflicted(true),
                 inZones: [zone.revolver],
-                effect: buffDmg(bSelectSelf(), 5#val)
+                effect: buffDmg(bSelectSelf(), 8#val)
             },
             {
                 trigger: statusEffectInflicted(true),
@@ -1664,7 +1673,7 @@ cards: [
         ],
         cost: 2,
         dark: true,
-        tags: ["pool1", "rarity2", "statuseffect"],
+        tags: ["pool1", "rarity1", "statuseffect"],
         price: 50,
     },
     {
@@ -1673,7 +1682,7 @@ cards: [
         flavourText: "",
         description: "$keyword$HARDENED$keyword (2)",
         baseDamage: 12,
-        deckMaximum: 2,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
@@ -1686,7 +1695,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool1", "rarity3", "basic"],
+        tags: ["pool1", "rarity1", "basic"],
         price: 50,
     },
     {
@@ -1698,7 +1707,7 @@ cards: [
         deckMaximum: 1,
         effects: [],
         cost: 11,
-        tags: ["pool1", "rarity1", "other"],
+        tags: ["pool1", "rarity1", "not used", "unobtainable", "other"],
         price: 50,
     },
     {
@@ -1777,7 +1786,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool2", "rarity2", "no-shot"],
+        tags: ["pool2", "rarity1", "no-shot"],
         price: 50,
     },
     {
@@ -1798,7 +1807,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity1", "no-shot"],
+        tags: ["pool2", "rarity2", "no-shot"],
         price: 50,
     },
     {
@@ -1814,7 +1823,7 @@ cards: [
                 effect: draw(value.mostUniqueStatusEffectsOnEnemy)
             },
         ],
-        cost: 2,
+        cost: 1,
         tags: ["pool1", "rarity2", "statuseffect"],
         price: 50,
     },
@@ -1860,7 +1869,7 @@ cards: [
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nIf the enemy has $status$POISON$status$:\ntarget other bullet in the revolver gets +x, where x is half of the POISON Parameter of the enemy rounded down, for as long as it is in the revolver",
         baseDamage: 6,
-        deckMaximum: 1,
+        deckMaximum: 3,
         effects: [
             {
                 trigger: shot(),
@@ -1875,8 +1884,8 @@ cards: [
                 )
             },
         ],
-        cost: 3,
-        tags: ["pool1", "rarity2", "statuseffect"],
+        cost: 1,
+        tags: ["pool1", "rarity1", "statuseffect"],
         price: 50,
     },
     {
@@ -1902,7 +1911,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool2", "rarity1", "explore", "other" ],
+        tags: [ "pool2", "rarity2", "explore", "other" ],
         price: 50,
     },
     {
@@ -1950,7 +1959,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: [ "pool2", "rarity1", "destroy" ],
+        tags: [ "pool2", "rarity2", "destroy" ],
         price: 50,
     },
     {
@@ -1968,7 +1977,7 @@ cards: [
             },
         ],
         cost: 2,
-        tags: [ "pool2", "rarity1", "destroy" ],
+        tags: [ "pool2", "rarity2", "destroy" ],
         price: 50,
     },
     {
@@ -1994,7 +2003,7 @@ cards: [
         ],
         dark: true,
         cost: 3,
-        tags: [ "pool2", "rarity1", "destroy" ],
+        tags: [ "pool2", "rarity2", "destroy" ],
         price: 50,
     },
     {
@@ -2041,7 +2050,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity1", "other" ],
+        tags: [ "pool1", "rarity2", "other" ],
         price: 50,
     },
     {
@@ -2058,7 +2067,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3", "destroy" ],
+        tags: [ "pool1", "rarity3", "not used", "unobtainable", "destroy" ],
         price: 50,
     },
     {
@@ -2075,7 +2084,7 @@ cards: [
             },
         ],
         cost: 0,
-        tags: [ "pool1", "rarity3", "explore" ],
+        tags: [ "pool1", "rarity3", "not used", "unobtainable", "explore" ],
         price: 50,
     },
     {
@@ -2083,7 +2092,7 @@ cards: [
         title: "Amplifying Bullet",
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\nWhenever a bullet gets a buff that is caused by another Bulleteffect:\n it additionally gets +4 dmg",
-        baseDamage: 6,
+        baseDamage: 9,
         deckMaximum: 1,
         effects: [
             {
@@ -2123,7 +2132,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: [ "pool1", "rarity3", "basic", "statuseffect" ],
+        tags: [ "pool1", "rarity2", "basic", "statuseffect" ],
         price: 50,
     },
     {
@@ -2145,7 +2154,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3", "statuseffect" ],
+        tags: [ "pool1", "rarity3", "not used", "unobtainable", "statuseffect" ],
         price: 50,
     },
     {
@@ -2166,7 +2175,7 @@ cards: [
             },
         ],
         cost: 1,
-        tags: [ "pool1", "rarity3", "no-shot" ],
+        tags: [ "pool1", "rarity1", "no-shot" ],
         price: 50,
     },
     {
@@ -2174,7 +2183,7 @@ cards: [
         title: "Poison Arrow",
         flavourText: "",
         description: "$trigger$While in Revolver:$trigger$\nAs long as at least one enemy has $status$POISON$status$:\nPoison Arrow has $trait$EVERLASTING$trait$.\n\nWhen no enemy has $status$POISON$status$:\nDestroy Poison Arrow\n\n$trigger$On-Turn-Begin$trigger$:\nYou get $status$POISON$status$ (2)",
-        baseDamage: 2,
+        baseDamage: 6,
         deckMaximum: 1,
         effects: [
             {
@@ -2203,7 +2212,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: [ "pool1", "rarity1", "statuseffect" ],
+        tags: [ "pool1", "rarity2", "statuseffect" ],
         price: 50,
     },
     {
@@ -2224,7 +2233,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: [ "pool1", "rarity1", "destroy" ],
+        tags: [ "pool1", "rarity2", "destroy" ],
         price: 50,
     },
 
