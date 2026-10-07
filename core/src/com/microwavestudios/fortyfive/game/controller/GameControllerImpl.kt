@@ -519,7 +519,7 @@ class GameControllerImpl(
     } }
 
     private fun putCardInHandAfterDestroyTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline {
-        val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+        val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard, destroyedCard = card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.HAND, before = true, triggerInfo)
         includeLater({
             gameEvents.fire(beforeEvent)
@@ -545,7 +545,7 @@ class GameControllerImpl(
     }
 
     private fun putCardInAfterlifeAfterDestroyTimeline(card: Card, sourceCard: Card?): Timeline = Timeline.timeline {
-        val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard)
+        val triggerInfo = createTriggerInfo(card, sourceCard = sourceCard, destroyedCard = card)
         val beforeEvent = Events.CardChangeZoneEvent(card, Zone.REVOLVER, Zone.AFTERLIFE, before = true, triggerInfo)
         includeLater({
             gameEvents.fire(beforeEvent)
@@ -1749,13 +1749,15 @@ class GameControllerImpl(
         isOnShot: Boolean = false,
         amountOfCardsDrawn: Int = 0,
         sourceCard: Card? = null,
+        destroyedCard: Card? = null,
     ): TriggerInformation = TriggerInformation(
         controller = this,
         targetedEnemies = card?.targetedEnemies(controller) ?: listOf(targetedEnemy),
         multiplier = multiplier,
         isOnShot = isOnShot,
         amountOfCardsDrawn = amountOfCardsDrawn,
-        sourceCard = sourceCard
+        sourceCard = sourceCard,
+        destroyedCard = destroyedCard
     )
 
     override fun toString(): String = "GameController"

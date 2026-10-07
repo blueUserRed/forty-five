@@ -1001,7 +1001,7 @@ cards: [
             {
                 trigger: rotation() mustMatchPredicate (isSelf() and inRevolverSlot(5)),
                 inZones: [zone.revolver],
-                effect: buffDmg(bSelectSelf(), damageOfCard(inRevolverSlot(2)))
+                effect: buffDmg(bSelectSelf(), inRevolverSlot(2)#first#damageOrZero)
             }
         ],
         dark: true,
@@ -1096,11 +1096,12 @@ cards: [
         description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nDeal x dmg to the enemy, where x is the dmg value of the destroyed bullet times 2",
         baseDamage: 10,
         deckMaximum: 1,
+        dark: true,
         effects: [
             {
                 trigger: cardDestroyed(allCardsTrigger),
                 inZones: [zone.revolver],
-                effect: damageDirect(value.sourceCardDamage * 2, false)
+                effect: damageDirect(destroyedCardRef()#damage, false)
             }
         ],
         cost: 3,

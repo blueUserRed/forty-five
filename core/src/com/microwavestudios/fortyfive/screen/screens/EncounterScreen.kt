@@ -657,7 +657,7 @@ class EncounterScreen : ScreenCreator() {
             syncHeight()
         }
         verticalSpacer(20f)
-        label("roadgeek", "gkghkjgklhklhiuhuiohlkjhsdf", Colors.GRAY, 24) {
+        label("roadgeek", "", Colors.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
                 setText(event.texts.first)
             }
@@ -666,7 +666,7 @@ class EncounterScreen : ScreenCreator() {
             syncHeight()
         }
         verticalSpacer(20f)
-        label("roadgeek", "sjfldsjflösdkjföldsjflösjdfoijclkjdls", Colors.GRAY, 24) {
+        label("roadgeek", "", Colors.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
                 setText(event.texts.second)
             }

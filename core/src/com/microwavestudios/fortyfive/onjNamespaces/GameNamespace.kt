@@ -25,6 +25,7 @@ import onj.value.*
 import kotlin.math.floor
 import kotlin.reflect.KClass
 
+// TODO: better error messages for null pointers
 @Suppress("unused") // variables and functions are read via reflection
 @OnjNamespace
 object GameNamespace {
@@ -37,6 +38,7 @@ object GameNamespace {
         "EffectValue" to OnjEffectValue::class,
         "CardModifierPredicate" to OnjCardModifierPredicate::class,
         "CardPredicate" to OnjCardPredicate::class,
+        "CardRef" to OnjCardRef::class,
         "Zone" to OnjZone::class,
         "Trigger" to OnjTrigger::class,
         "VariableTextureSelector" to OnjVariableTextureSelector::class,
@@ -64,9 +66,6 @@ object GameNamespace {
                 controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
             }
             "amountOfCardsDrawn" with OnjEffectValue { _, _, triggerValue, _ -> triggerValue!!.amountOfCardsDrawn }
-            "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation, _ ->
-                triggerInformation!!.sourceCard!!.curDamage(controller)
-            }
             "uniqueCardsInTheStack" with OnjEffectValue { controller, _, _, _ ->
                 controller
                     .cardStack
@@ -1282,6 +1281,29 @@ object GameNamespace {
         controller.afterlife.cards.indexOf(card)
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Card Refs
+    //////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun destroyedCardRef(): OnjCardRef = OnjCardRef { _, _, info -> info!!.destroyedCard!! }
+
+    @RegisterOnjFunction(schema = "use Game; params: [CardRef]", type = OnjFunctionType.CONVERSION)
+    fun damage(cardRef: OnjCardRef): OnjEffectValue = OnjEffectValue { controller, card, triggerInfo, self ->
+        cardRef.value(controller, self, triggerInfo)!!.curDamage(controller)
+    }
+
+    @RegisterOnjFunction(schema = "use Game; params: [CardRef]", type = OnjFunctionType.CONVERSION)
+    fun damageOrZero(cardRef: OnjCardRef): OnjEffectValue = OnjEffectValue { controller, card, triggerInfo, self ->
+        cardRef.value(controller, self, triggerInfo)?.curDamage(controller) ?: 0
+    }
+
+    @RegisterOnjFunction(schema = "use Game; params: [CardPredicate]", type = OnjFunctionType.CONVERSION)
+    fun first(predicate: OnjCardPredicate): OnjCardRef = OnjCardRef { controller, self, triggerInfo ->
+        controller.allCards.find { predicate.value.check(it, controller, self) }
+    }
+
     //////////////////////////////////////////////////////////////////////////////////
     // General
     //////////////////////////////////////////////////////////////////////////////////
@@ -1369,6 +1391,16 @@ class OnjEffectValue(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--effect-value--'")
+    }
+}
+
+class OnjCardRef(
+    override val value: (controller: GameController, self: Card?, triggerInfo: TriggerInformation?) -> Card?
+) : OnjValue() {
+
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--card-ref--'")
     }
 }
 

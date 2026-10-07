@@ -789,13 +789,13 @@ abstract class Effect(val data: EffectData) {
             includeLater(
                 {
                     get<List<Card>>("selectedCards")
-                        .map { controller.destroyCardTimeline(it) }
+                        .map { controller.destroyCardTimeline(it, sourceCard = card) }
                         .collectTimeline()
                 },
                 { !destroySelf }
             )
             includeLater(
-                { controller.destroyCardTimeline(card) },
+                { controller.destroyCardTimeline(card, sourceCard = card) },
                 { destroySelf }
             )
         }
@@ -1262,6 +1262,7 @@ data class TriggerInformation(
     val isOnShot: Boolean = false,
     val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null,
+    val destroyedCard: Card? = null
 ) {
     val multiplierOr1: Int
         get() = multiplier ?: 1
