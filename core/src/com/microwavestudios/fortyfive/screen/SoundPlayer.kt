@@ -116,8 +116,8 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
             .associate { it.second to it.first }
     }
 
-    override fun changeMusicTo(theme: Theme, transitionDuration: Int) = Timeline.timeline {
-        if (theme == currentMusicTheme) return@timeline
+    override fun changeMusicTo(theme: Theme, transitionDuration: Int) = Timeline.later {
+        if (theme == currentMusicTheme) return@later
 
         val nextMusicLifetime = EndableLifetime()
         val nextMusic: Promise<Music> = FortyFive.resourceManager.request(
@@ -125,6 +125,8 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
             nextMusicLifetime,
             theme.resourceHandle
         )
+
+        action { currentMusicTheme = theme }
 
         delayUntilPromiseResolves(nextMusic)
 

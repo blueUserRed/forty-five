@@ -23,6 +23,7 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.actors.CustomLabel
 import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.ScreenController
+import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.NewLabel
@@ -85,6 +86,7 @@ class MapScreen : ScreenCreator() {
     private val mapScreenController = object : ScreenController() {
 
         override fun onActive() {
+            FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN)
             val teleportPlayerTo = context.teleportPlayerTo ?: return
             mapWidget.teleportPlayer(teleportPlayerTo)
         }

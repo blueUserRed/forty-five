@@ -56,8 +56,10 @@ object MapEventFactory {
         "CompleteRunMapEvent" to { CompleteRunMapEvent.fromOnj(it) },
         "FinishTutorialRunMapEvent" to { FinishTutorialRunMapEvent() },
         "SpecialEventMapEvent" to { SpecialEventMapEvent.fromOnj(it) },
-        "ApplyStampMapEvent" to {
-            ApplyStampMapEvent(it.get<String?>("stampName"))
+        "ApplyStampMapEvent" to { onj ->
+            ApplyStampMapEvent(onj.get<String?>("stampName"), onj.get<Boolean>("isCompleted")).also {
+                it.setStandardValuesFromConfig(onj)
+            }
         }
     )
 
@@ -467,9 +469,9 @@ class ShopMapEvent(
 
 class ApplyStampMapEvent(
     override var stampName: String?,
+    override var isCompleted: Boolean = false
 ) : MapEvent(), ApplyStampScreenContext, Completable {
 
-    override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
     override val nodeTexture: ResourceHandle = "map_node_apply_stamp"
 
@@ -483,6 +485,7 @@ class ApplyStampMapEvent(
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ApplyStampMapEvent")
         "stampName" with stampName
+        includeStandardConfig()
     }
 
     override fun completed() {

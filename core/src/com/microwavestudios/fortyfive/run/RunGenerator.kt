@@ -360,15 +360,6 @@ class RunGenerator {
             ),
             BaseMapGenerator.MapGeneratorFillEvent(
                 {
-                    ApplyStampMapEvent(null).also {
-                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
-                    }
-                },
-                4, null,
-                15
-            ),
-            BaseMapGenerator.MapGeneratorFillEvent(
-                {
                     SpecialEventMapEvent().also {
                         it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
                         it.addBlockCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
@@ -413,7 +404,16 @@ class RunGenerator {
                 },
                 2, null,
                 2
-            )
+            ),
+            BaseMapGenerator.MapGeneratorFixedEvent(
+                {
+                    ApplyStampMapEvent(null).also {
+                        it.addStartCondition(MapPredicate.Not(MapPredicate.CurrentNodeCompleted))
+                    }
+                },
+                2, null,
+                2
+            ),
         )
 
         fun lastEncounter(
