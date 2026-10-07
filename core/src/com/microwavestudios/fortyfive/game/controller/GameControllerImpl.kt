@@ -277,7 +277,7 @@ class GameControllerImpl(
         }
         gameEvents.watchFor<Events.CardChangeZoneEvent> { event ->
             if (!event.before) {
-                event.card.changeZone(event.newZone, this)
+                event.card.changeZone(event.newZone, controller)
                 if (event.newZone == Zone.REVOLVER) event.append {
                     _encounterBehaviours.forEach { (_, behaviour) ->
                         val timeline = behaviour.executeAfterBulletWasPlacedInRevolver(event.card, controller)
@@ -293,6 +293,8 @@ class GameControllerImpl(
                         .collectTimeline()
                         .let { include(it) }
                 }
+            } else {
+                event.card.beforeZoneChange(event.newZone, controller)
             }
             val situation = GameSituation.ZoneChange(event.card, event.oldZone, event.newZone, event.before, event.afterShot)
             event.append {
@@ -871,12 +873,12 @@ class GameControllerImpl(
                 return@later
             }
             val card = afterlife.cards.firstOrNull() ?: return@later
+            include(afterlife.scrollToBeginTimeline())
+            delay(200)
             val info = createTriggerInfo(card)
             val event = Events.CardChangeZoneEvent(card, Zone.AFTERLIFE, Zone.REVOLVER, true, info)
             gameEvents.fire(event)
             include(event.createTimeline())
-            include(afterlife.scrollToBeginTimeline())
-            delay(200)
             include(card.presentation.spawnAnimation(reverse = true))
             action { card.presentation.setAlphaZero() }
             delay(200)

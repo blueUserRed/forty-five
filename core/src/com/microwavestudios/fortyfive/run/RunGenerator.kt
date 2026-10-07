@@ -144,7 +144,7 @@ class RunGenerator {
             }
             val collection = collections.random(random)
             collections.remove(collection)
-            require(collection.isNotEmpty()) { "run reward collection is empty" }
+            if (collection.isEmpty()) return@repeat
             val reward = collection.random(random)
             rewards.add(reward)
         }

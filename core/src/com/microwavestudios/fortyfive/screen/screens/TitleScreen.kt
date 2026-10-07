@@ -144,7 +144,7 @@ class TitleScreen : ScreenCreator() {
         )
 
         screen.afterMs(0) {
-            val success = FortyFive.profileManager.selectProfile(FortyFive.profileManager.availableProfiles.first())
+            FortyFive.profileManager.selectProfile(FortyFive.profileManager.availableProfiles.first())
         }
 //        screen.afterMs(0) { // run when screen is shown
 //            val profileManager = FortyFive.profileManager

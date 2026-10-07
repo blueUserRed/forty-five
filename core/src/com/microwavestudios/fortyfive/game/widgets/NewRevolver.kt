@@ -145,14 +145,19 @@ class NewRevolver(
         return slots[slot - 1].card
     }
 
-    override fun getCardTriggerPosition(): Vector2 =
-        Vector2(slots[0].slotActor.x - slotSize * 2, slots[4].slotActor.y + slotSize * 2)
+    override fun getCardTriggerPosition(): Vector2 = Vector2(-164f, 421f)
 
-    override fun getMirroredCardTriggerPosition(): Vector2 =
-        Vector2(slots[3].slotActor.x - slotSize * 2, slots[4].slotActor.y + slotSize * 2)
+    override fun getMirroredCardTriggerPosition(): Vector2 {
+        val createdActor = createdActor
+        requireNotNull(createdActor)
+        val middleX = createdActor.width / 2f
+        val triggerPosX = getCardOnShotTriggerPosition().x
+        val offset = abs(middleX - triggerPosX)
+        val newX = middleX + offset + cardSize
+        return Vector2(newX, 350f)
+    }
 
-    override fun getCardOnShotTriggerPosition(): Vector2 =
-        Vector2(slots[4].slotActor.x, slots[4].slotActor.y + slots[0].slotActor.height * 3)
+    override fun getCardOnShotTriggerPosition(): Vector2 = Vector2(126f, 519f)
 
     override fun rotate(rotation: RevolverRotation): Timeline {
         if (rotation.amount == 0) return Timeline.emptyTimeline
@@ -256,7 +261,6 @@ class NewRevolver(
     private fun ScreenCreator.createWithReceiver() = newGroup {
         width = revolverWidth
         heightByAspectRatio(1856.0 / 2347.0)
-
         onLayout { slotActors.forEach { it.position(angleForIndex(it.num - 1)) } }
 
         image {

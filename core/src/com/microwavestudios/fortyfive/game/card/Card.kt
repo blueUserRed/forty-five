@@ -301,10 +301,13 @@ class Card(
         include(controller.destroyCardTimeline(this@Card, replaceBy))
     }
 
+    fun beforeZoneChange(newZone: Zone, controller: GameController) {
+        if (presentation.inTriggerPosition) presentation.skipAnimateBack()
+    }
+
     fun changeZone(newZone: Zone, controller: GameController) {
         val oldZone = zone
         zone = newZone
-        if (presentation.inTriggerPosition) presentation.skipAnimateBack()
         if (newZone == Zone.REVOLVER) {
             enteredInSlot = controller.slotOfCard(this)!!
             enteredOnTurn = controller.turnCounter

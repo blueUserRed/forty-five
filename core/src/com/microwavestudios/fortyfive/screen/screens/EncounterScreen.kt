@@ -109,29 +109,10 @@ class EncounterScreen : ScreenCreator() {
 
     private val revolver by lazy {
         NewRevolver(screen, gameEvents)
-//        Revolver(
-//            "revolver_drum",
-//            "revolver_slot_texture",
-//            200f,
-//            110f,
-//            0.2f,
-//            gameEvents,
-//            screen
-//        ).apply {
-//            cardScale = 0.9f
-//            radius = 140f
-//            rotationOff = (Math.PI / 2f) + (2f * Math.PI) / 5f
-//        }
     }
 
     private val cardHand by lazy {
         NewCardHand()
-//        CardHand(
-//            screen,
-//            300f,
-//            596f * 0.22f,
-//            100f
-//        )
     }
 
     private val bgZoom: Float = 1.07f
@@ -208,7 +189,7 @@ class EncounterScreen : ScreenCreator() {
 
         playerBar()
         actor(afterlife.getActor(this@EncounterScreen)) {
-            y = worldHeight * 0.4f
+            y = worldHeight * 0.5f
         }
 
         group {
@@ -271,6 +252,7 @@ class EncounterScreen : ScreenCreator() {
         backgroundHandle = "encounter_encounter_modifier_bg"
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
+        isVisible = false
 
         dropShadow = BakedDropShadow(
             "encounter_encounter_modifier_bg",
@@ -675,7 +657,7 @@ class EncounterScreen : ScreenCreator() {
             syncHeight()
         }
         verticalSpacer(20f)
-        label("roadgeek", "", Colors.GRAY, 24) {
+        label("roadgeek", "gkghkjgklhklhiuhuiohlkjhsdf", Colors.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
                 setText(event.texts.first)
             }
@@ -684,7 +666,7 @@ class EncounterScreen : ScreenCreator() {
             syncHeight()
         }
         verticalSpacer(20f)
-        label("roadgeek", "", Colors.GRAY, 24) {
+        label("roadgeek", "sjfldsjflösdkjföldsjflösjdfoijclkjdls", Colors.GRAY, 24) {
             gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
                 setText(event.texts.second)
             }
@@ -705,7 +687,7 @@ class EncounterScreen : ScreenCreator() {
         )
         width = 680f
         height = width * (1057f / 1845f)
-        centerX()
+        x = worldWidth * 0.4f
         y = 340f
         flexDirection = FlexDirection.COLUMN
         horizontalAlign = CustomAlign.SPACE_AROUND
