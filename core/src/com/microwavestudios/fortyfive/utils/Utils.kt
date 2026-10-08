@@ -383,6 +383,8 @@ fun <T> List<T>.with(element: T): List<T> {
     return MutableList(size + 1) { i -> if (i == size) element else get(i) }
 }
 
+fun <T> T.wrapList(): List<T> = listOf(this)
+
 inline fun <reified U> Iterable<*>.findInstance(): U? {
     forEach { cur ->
         if (cur is U) return cur

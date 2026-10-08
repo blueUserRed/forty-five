@@ -108,6 +108,7 @@ object NavbarCreator {
         horizontalSpacer(20f)
 
         val cashLabel = label("red wing", "\$${profile.playerMoney}", Color.BLACK, 32) {
+            name("navbar_cash")
             syncDimensions()
         }
         screen.events.watchFor<Profile.MoneyChangedEvent> { event ->

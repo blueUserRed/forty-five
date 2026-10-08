@@ -1395,7 +1395,7 @@ class EncounterScreen : ScreenCreator() {
                     modal.finished()
                     continuePromise?.resolve(Unit)
                     FortyFive.soundPlayer.situation("money_earned", screen)
-                    val navBarSymbol = screen.namedActorOrError("cash_symbol")
+                    val navBarSymbol = screen.namedActorOrError("navbar_cash")
                     val winPopupSymbol = screen.namedActorOrError("overkill_cash_symbol")
                     val renderPipeline = FortyFive.currentRenderPipeline!!
                     val moneyAnim = GraphicsConfig.cashOrbAnimation(

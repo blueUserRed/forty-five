@@ -123,7 +123,7 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
         val nextMusic: Promise<Music> = FortyFive.resourceManager.request(
             this@SoundPlayer,
             nextMusicLifetime,
-            theme.resourceHandle
+            theme.resourceHandles.random()
         )
 
         action { currentMusicTheme = theme }
@@ -233,10 +233,10 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
         val volume: Float
     )
 
-    enum class Theme(val resourceHandle: ResourceHandle) {
-        TITLE("main_theme"),
-        MAIN("map_theme"),
-        BATTLE("encounter_theme")
+    enum class Theme(val resourceHandles: List<ResourceHandle>) {
+        TITLE("main_theme".wrapList()),
+        MAIN("map_theme".wrapList()),
+        BATTLE(listOf("encounter_theme_1", "encounter_theme_2"))
     }
 
     companion object {

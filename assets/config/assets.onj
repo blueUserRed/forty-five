@@ -103,96 +103,52 @@ var defaultDropShadowConfig = {
 
 textures: [
     {
-        name: "revolver_slot_texture",
-        file: "blobs/game_screen/revolver_slot.png"
-    },
-    {
-        name: "revolver_drum",
-        file: "blobs/game_screen/revolver_drum.png"
-    },
-    {
         name: "reserves_orb",
-        file: "blobs/game_screen/reserves_orb.png"
+        file: "blobs/encounter_screen/reserves_orb.png"
     },
     {
         name: "card_orb",
-        file: "blobs/game_screen/card_orb.png"
-    },
-    {
-        name: "normal_bullet",
-        file: "blobs/game_screen/normal_bullet.png"
-    },
-    {
-        name: "end_turn_button_texture",
-        file: "blobs/game_screen/end_turn.png"
-    },
-    {
-        name: "end_turn_button_hover_texture",
-        file: "blobs/game_screen/end_turn_hover.png"
-    },
-    {
-        name: "shoot_button_texture",
-        file: "blobs/game_screen/shoot.png"
-    },
-    {
-        name: "shoot_button_hover_texture",
-        file: "blobs/game_screen/shoot_hover.png"
-    },
-    {
-        name: "parry_button_texture",
-        file: "blobs/game_screen/parry.png"
-    },
-    {
-        name: "parry_button_hover_texture",
-        file: "blobs/game_screen/parry_hover.png"
-    },
-    {
-        name: "pass_button_texture",
-        file: "blobs/game_screen/pass.png"
-    },
-    {
-        name: "pass_button_hover_texture",
-        file: "blobs/game_screen/pass_hover.png"
+        file: "blobs/encounter_screen/card_orb.png"
     },
     {
         name: "enemy_turn_banner",
-        file: "blobs/game_screen/enemy_turn_banner.png"
+        file: "blobs/encounter_screen/enemy_turn_banner.png"
     },
     {
         name: "player_turn_banner",
-        file: "blobs/game_screen/player_turn_banner.png"
+        file: "blobs/encounter_screen/player_turn_banner.png"
     },
     {
         name: "enemy_gravestone",
-        file: "blobs/game_screen/enemy_gravestone.png"
+        file: "blobs/encounter_screen/enemy_gravestone.png"
     },
     {
         name: "hit_overlay",
-        file: "blobs/game_screen/hit_overlay.png"
+        file: "blobs/encounter_screen/hit_overlay.png"
     },
     {
         name: "afterlife_arrow_left",
-        file: "blobs/game_screen/afterlife/afterlife_arrow_left.png"
+        file: "blobs/encounter_screen/afterlife/afterlife_arrow_left.png"
     },
     {
         name: "afterlife_arrow_right",
-        file: "blobs/game_screen/afterlife/afterlife_arrow_right.png"
+        file: "blobs/encounter_screen/afterlife/afterlife_arrow_right.png"
     },
     {
         name: "afterlife_background",
-        file: "blobs/game_screen/afterlife/afterlife_background.png"
+        file: "blobs/encounter_screen/afterlife/afterlife_background.png"
     },
     {
         name: "afterlife_bullet_affected",
-        file: "blobs/game_screen/afterlife/afterlife_bullet_affected.png"
+        file: "blobs/encounter_screen/afterlife/afterlife_bullet_affected.png"
     },
     {
         name: "afterlife_card_slot",
-        file: "blobs/game_screen/afterlife/afterlife_card_slot.png"
+        file: "blobs/encounter_screen/afterlife/afterlife_card_slot.png"
     },
     {
         name: "afterlife_icon",
-        file: "blobs/game_screen/afterlife/afterlife_icon.png"
+        file: "blobs/encounter_screen/afterlife/afterlife_icon.png"
     },
     {
         name: "shield_icon",
@@ -320,39 +276,27 @@ textures: [
     },
     {
         name: "player_bar",
-        file: "blobs/game_screen/player_bar.png"
-    },
-    {
-        name: "encounter_modifier_background",
-        file: "blobs/game_screen/encounter_modifier_background.png"
+        file: "blobs/encounter_screen/player_bar.png"
     },
     {
         name: "under_deck_background",
-        file: "blobs/game_screen/under_deck_background.png"
-    },
-    {
-        name: "game_screen_player",
-        file: "blobs/game_screen/player.png"
+        file: "blobs/encounter_screen/under_deck_background.png"
     },
     {
         name: "win_popup_background",
-        file: "blobs/game_screen/win_popup/background.png"
+        file: "blobs/encounter_screen/win_popup/background.png"
     },
     {
         name: "win_popup_spacer",
-        file: "blobs/game_screen/win_popup/spacer.png"
+        file: "blobs/encounter_screen/win_popup/spacer.png"
     },
     {
         name: "win_popup_item_cash",
-        file: "blobs/game_screen/win_popup/item_cash.png"
+        file: "blobs/encounter_screen/win_popup/item_cash.png"
     },
     {
         name: "win_popup_item_card",
-        file: "blobs/game_screen/win_popup/item_card.png"
-    },
-    {
-        name: "status_effect_background",
-        file: "blobs/game_screen/status_effect_background.png"
+        file: "blobs/encounter_screen/win_popup/item_card.png"
     },
     {
         name: "encounter_player",
@@ -422,6 +366,10 @@ textures: [
     {
         name: "encounter_parry_button",
         file: "blobs/encounter_screen/parry.png"
+    },
+    {
+        name: "wood_box",
+        file: "blobs/encounter_screen/wood_box.png"
     },
     {
         name: "background_wasteland1",
@@ -574,10 +522,6 @@ textures: [
         file: "blobs/map/detail/encounter_button_disabled.png",
     },
     {
-        name: "nav_bar_background",
-        file: "blobs/ui_elements/statusbar/background_old.png"
-    },
-    {
         name: "map_decoration_grass",
         file: "blobs/map/decorations/grass.png"
     },
@@ -723,18 +667,6 @@ textures: [
     {
         name: "ice_texture",
         file: "blobs/shader_textures/ice.jpg"
-    },
-    {
-        name: "statusbar_background",
-        file: "blobs/ui_elements/statusbar/statusbar_background.png"
-    },
-    {
-        name: "statusbar_background_left",
-        file: "blobs/ui_elements/statusbar/statusbar_background_left.png"
-    },
-    {
-        name: "statusbar_option",
-        file: "blobs/ui_elements/statusbar/option.png"
     },
     {
         name: "backpack_1",
@@ -897,19 +829,15 @@ textures: [
     },
     {
         name: "enemy_status_bar_main_bar",
-        file: "blobs/game_screen/status_bar/main_bar.png",
+        file: "blobs/encounter_screen/status_bar/main_bar.png",
     },
     {
         name: "enemy_status_bar_hp_label",
-        file: "blobs/game_screen/status_bar/hp_label.png",
+        file: "blobs/encounter_screen/status_bar/hp_label.png",
     },
     {
         name: "enemy_status_bar_shield_overlay",
-        file: "blobs/game_screen/status_bar/shield_overlay.png",
-    },
-    {
-        name: "enemy_status_bar_effect_box",
-        file: "blobs/game_screen/status_bar/effect_box.png",
+        file: "blobs/encounter_screen/status_bar/shield_overlay.png",
     },
     {
         name: "enemy_pyro",
@@ -1212,15 +1140,7 @@ textures: [
     },
     {
         name: "shield_icon_large",
-        file: "blobs/game_screen/shield_large.png",
-    },
-    {
-        name: "wood_box",
-        file: "blobs/game_screen/wood_box.png",
-    },
-    {
-        name: "reserves_texture",
-        file: "blobs/game_screen/reserves.png",
+        file: "blobs/encounter_screen/shield_large.png",
     },
     {
         name: "card_symbol_text_a_equals",
@@ -1497,7 +1417,7 @@ ninepatches: [
     },
     {
         name: "afterlife_scrollbar",
-        file: "blobs/game_screen/afterlife/scrollbar.png",
+        file: "blobs/encounter_screen/afterlife/scrollbar.png",
         top: 10,
         bottom: 10,
         left: 10,
@@ -1506,7 +1426,7 @@ ninepatches: [
     },
     {
         name: "afterlife_scrollbar_background",
-        file: "blobs/game_screen/afterlife/scrollbar_background.png",
+        file: "blobs/encounter_screen/afterlife/scrollbar_background.png",
         top: 10,
         bottom: 10,
         left: 10,
@@ -1640,8 +1560,12 @@ music: [
         file: "blobs/music/map_theme.wav"
     },
     {
-        name: "encounter_theme",
-        file: "blobs/music/encounter_theme.wav"
+        name: "encounter_theme_1",
+        file: "blobs/music/encounter_theme1.wav"
+    },
+    {
+        name: "encounter_theme_2",
+        file: "blobs/music/encounter_theme2.wav"
     },
     {
         name: "microwave_theme", // Now part of the official .forty-five soundtrack

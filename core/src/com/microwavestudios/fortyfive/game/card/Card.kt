@@ -1165,6 +1165,9 @@ class CardActor(
 
     private var selectionPromise: Promise<CardActor>? = null
 
+    val inSelectionMode: Boolean
+        get() = selectionPromise != null
+
     private var rotationOnSelectionEnter: Float = 0f
     private val selectionAnimation: AnimatedActor.AnimationController =
         animateRotationSinus(amplitude = Math.PI.toFloat() * 0.5f, frequency = 30f, phase = 0f)

@@ -35,7 +35,6 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
     private val mainBar: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_main_bar")
     private val hpLabel: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_hp_label")
     private val shieldOverlay: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_shield_overlay")
-    private val effectBox: Promise<Drawable> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_effect_box")
     private val whiteTexture: Promise<TextureRegion> = resourceManager.request(this, screen.lifetime, "white_texture")
     private val sliderShader: Promise<BetterShader> = resourceManager.request(this, screen.lifetime, "enemy_status_bar_shader")
 

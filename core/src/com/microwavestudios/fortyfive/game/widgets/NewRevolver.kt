@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
-import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
@@ -26,7 +25,6 @@ import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.alpha
-import com.microwavestudios.fortyfive.utils.asPromise
 import com.microwavestudios.fortyfive.utils.collectParallelTimeline
 import com.microwavestudios.fortyfive.utils.component1
 import com.microwavestudios.fortyfive.utils.component2
@@ -35,11 +33,9 @@ import com.microwavestudios.fortyfive.utils.degrees
 import com.microwavestudios.fortyfive.utils.requireNull
 import com.microwavestudios.fortyfive.utils.setPosition
 import com.microwavestudios.fortyfive.utils.unreachable
-import java.text.NumberFormat
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.ranges.contains
 
 class NewRevolver(
     private val screen: RenderableScreen,
@@ -87,6 +83,7 @@ class NewRevolver(
             val cardInSlot = slot.card
             requireNotNull(cardInSlot) { "cant remove card from slot without card: $slot" }
             slot.card = null
+            cardInSlot.presentation.forceGetActor().leaveInputStateManually(GameInputs.States.manuallyFocused)
             createdActor!!.removeActor(cardInSlot.presentation.forceGetActor())
         }
         createdActor!!.invalidateHierarchy()
@@ -433,6 +430,8 @@ class NewRevolver(
         }
 
         override fun draw(batch: Batch?, parentAlpha: Float) {
+            val cardInSelectionMode = card?.presentation?.forceGetActor()?.inSelectionMode ?: false
+            selectionDropShadow.showDropShadow = cardInSelectionMode || selectionPromise != null
             super.draw(batch, parentAlpha)
         }
 
@@ -440,13 +439,11 @@ class NewRevolver(
 
         fun enterSelectionMode(promise: Promise<IRevolverSlot>) {
             selectionPromise = promise
-            selectionDropShadow.showDropShadow = true
             revolverEvents.fire(SlotEnteredSelectionModeEvent(num))
         }
 
         fun exitSelectionMode() {
             selectionPromise = null
-            selectionDropShadow.showDropShadow = false
             revolverEvents.fire(SlotLeftSelectionModeEvent(num))
         }
 
