@@ -340,6 +340,7 @@ class WinRunScreen : ScreenCreator() {
             label("red wing", buttonText, Colors.FortyWhite, 32) {
                 touchable = Touchable.disabled
                 width = 200f
+                setAlignment(Align.center)
                 syncHeight()
             }
 

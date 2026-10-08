@@ -99,6 +99,17 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 connectNodes(node, bestMatch!!)
             }
         }
+
+        nodes.forEachIndexed { circleIndex, circle ->
+            val connectionProbability = data.circles[circleIndex].connectionProbability
+            circle.forEachIndexed { index, node ->
+                val connect = Utils.coinFlip(connectionProbability, random)
+                if (!connect) return@forEachIndexed
+                val nextNodeIndex = (index + 1) % circle.size
+                val nextNode = circle[nextNodeIndex]
+                connectNodes(node, nextNode)
+            }
+        }
     }
 
     private fun nodeOnCircle(radius: Float, angle: Float): MapNodeBuilder = newNode(
@@ -114,13 +125,15 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
     data class Circle(
         val radius: Float,
         val numNodes: Int,
-        val angleVariance: Float
+        val angleVariance: Float,
+        val connectionProbability: Float,
     ) {
 
         fun asOnj(): OnjObject = buildOnjObject {
             "radius" with radius
             "numNodes" with numNodes
             "angleVariance" with angleVariance
+            "connectionProbability" with connectionProbability
         }
 
         companion object {
@@ -129,6 +142,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 radius = onj.get<Double>("radius").toFloat(),
                 numNodes = onj.get<Long>("numNodes").toInt(),
                 angleVariance = onj.get<Double>("angleVariance").toFloat(),
+                connectionProbability = onj.get<Double>("connectionProbability").toFloat(),
             )
         }
     }

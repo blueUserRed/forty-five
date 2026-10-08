@@ -90,6 +90,7 @@ $MapGenerator {
             radius: float,
             numNodes: int,
             angleVariance: float,
+            connectionProbability: float,
         }[],
         ...mapGeneratorSharedKeys
     }

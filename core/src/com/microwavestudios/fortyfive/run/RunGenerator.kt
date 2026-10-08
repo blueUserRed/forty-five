@@ -224,8 +224,8 @@ class RunGenerator {
         ): BaseMapGenerator {
             val options = when (type) {
                 RunType.LIMITED -> listOf(
-                    20 to MapGenType.ThreeLine,
-                    20 to MapGenType.PointCloud,
+                    0 to MapGenType.ThreeLine,
+                    0 to MapGenType.PointCloud,
                     20 to MapGenType.Radial
                 )
                 RunType.CONSTRUCTED -> listOf(
@@ -608,11 +608,11 @@ class RunGenerator {
                 )
             },
             circles = listOf(
-                RadialMapGenerator.Circle(20f, 3, 0.005f),
-                RadialMapGenerator.Circle(50f, 6, 0.005f),
-                RadialMapGenerator.Circle(70f, 12, 0.005f),
-                RadialMapGenerator.Circle(90f, 15, 0.005f),
-                RadialMapGenerator.Circle(110f, 18, 0.005f),
+                RadialMapGenerator.Circle(20f, 3, 0.005f, 0.1f),
+                RadialMapGenerator.Circle(50f, 6, 0.005f, 0.2f),
+                RadialMapGenerator.Circle(70f, 12, 0.005f, 0.3f),
+                RadialMapGenerator.Circle(90f, 15, 0.005f, 0.4f),
+                RadialMapGenerator.Circle(110f, 18, 0.005f, 0.5f),
             ),
             randomStepsToLastNode = 4,
             decorations = decorationsFor(biome, random),

@@ -14,7 +14,6 @@ val assetDirs = arrayOf(
     "maps",
     "onjschemas",
     "profiles",
-    "saves",
     "plugins",
     "shaders",
 )
@@ -96,12 +95,6 @@ fun cleanupAssets(tmpDir: File) {
 
     debug("removing log file")
     (tmpDir / "logging/forty-five.log").delete()
-
-    debug("removing save files")
-    (tmpDir / "saves")
-        .listFiles()!!
-        .filter { !it.name.startsWith("default_") }
-        .forEach { it.delete() }
 
     debug("removing profiles")
     (tmpDir / "profiles")
