@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.sin
@@ -276,6 +277,11 @@ interface OffSettable {
 interface OnLayoutActor {
 
     fun onLayout(callback: () -> Unit)
+}
+
+interface BackgroundActor {
+
+    var backgroundHandle: ResourceHandle?
 }
 
 interface HasPaddingActor {

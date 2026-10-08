@@ -41,7 +41,7 @@ open class NewLabel(
     text: String,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
-    DebugActor by DebugActorImpl(), InputActor by InputActorImpl(),
+    DebugActor by DebugActorImpl(), InputActor by InputActorImpl(), BackgroundActor,
     KotlinStyledActor, OffSettable, AnimatedActor {
 
     override var fixedZIndex: Int = 0
@@ -61,7 +61,7 @@ open class NewLabel(
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
 
     val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
+    override var backgroundHandle: ResourceHandle? by backgroundHandleObserver
     private val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
 
     private val fontHandleObserver = SubscribeableObserver<String?>(null)

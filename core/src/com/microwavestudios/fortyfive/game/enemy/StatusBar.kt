@@ -116,42 +116,12 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
         )
         fixUvCoords(region)
         val (gX, gY) = localToStageCoordinates(Vector2(0f, 0f))
-//        polygonBatch.draw(region, gX + 4, gY + 1)
         polygonBatch.draw(region, gX + barX + 4, gY + barY + 1)
         polygonBatch.end()
         batch.begin()
-//        batch.projectionMatrix = screen.viewport.camera.combined
         mainBar.draw(batch, barX, barY, barWidth, barHeight)
         if (enemy.currentCover > 0) drawShieldOverlay(batch, barX, barY, barWidth, barHeight)
-//        drawStatusEffects(batch, barX, barY, barWidth, barHeight)
         drawHpLabel(batch, barX, barY, barWidth, barHeight)
-    }
-
-    private fun drawStatusEffects(batch: Batch, barX: Float, barY: Float, barWidth: Float, barHeight: Float) {
-        val effectBox = effectBox.getOrNull() ?: return
-        val boxWidth = 60f
-        val boxHeight = 24f
-        var i = 0
-        var x = barX
-        var y = barY - boxHeight + 5f
-        enemy.statusEffects.forEach { effect ->
-            i++
-            effectBox.draw(batch, x, y, boxWidth, boxHeight)
-            val icon = statusEffectIcons[effect.name]?.getOrNull() ?: return@forEach
-            val iconHeight = boxHeight - 4f
-            val iconWidth = iconHeight * (icon.minWidth / icon.minHeight)
-            icon.draw(batch, x + 3f, y + boxHeight / 2 - iconHeight / 2, iconWidth, iconHeight)
-            val layout = hpGlyphLayout
-            roadgeek.data.setScale(0.2f)
-            val text = effect.getDisplayText()
-            layout.setText(roadgeek, text, Colors.White, 0f, Align.left, false)
-            roadgeek.draw(batch, layout, x + iconWidth + 6f, y + 6f + layout.height)
-            x += boxWidth + 3f
-            if (i % 3 == 0) {
-                x = barX
-                y += boxHeight
-            }
-        }
     }
 
     private fun drawShieldOverlay(batch: Batch, barX: Float, barY: Float, barWidth: Float, barHeight: Float) {

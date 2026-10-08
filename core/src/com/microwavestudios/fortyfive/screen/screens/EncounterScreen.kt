@@ -1330,7 +1330,7 @@ class EncounterScreen : ScreenCreator() {
                         name("overkill_cash_symbol")
                         width = 40f
                         height = 30f
-                        backgroundHandle = "cash_symbol"
+                        backgroundHandle = "cash_icon"
                         marginLeft = 10f
                         marginRight = 10f
                     }

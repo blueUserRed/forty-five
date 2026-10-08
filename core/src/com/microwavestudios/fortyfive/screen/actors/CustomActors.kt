@@ -193,7 +193,7 @@ open class CustomImageActor(
     override val screen: RenderableScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
 ) : Image(), Maskable, ZIndexActor, DisableActor, OnLayoutActor, AnimatedActor,
-    OffSettable, InputActor by InputActorImpl(), DropShadowActor,
+    OffSettable, InputActor by InputActorImpl(), DropShadowActor, BackgroundActor,
     KotlinStyledActor, DebugActor by DebugActorImpl() {
 
     override var fixedZIndex: Int = 0
@@ -222,7 +222,7 @@ open class CustomImageActor(
     override var logicalOffsetY: Float = 0F
 
     private val backgroundHandleObserver = SubscribeableObserver(drawableHandle)
-    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
+    override var backgroundHandle: ResourceHandle? by backgroundHandleObserver
 
     val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
@@ -456,7 +456,7 @@ open class CustomVerticalGroup(
 open class CustomGroup(
     override val screen: RenderableScreen,
     private val backgroundHints: Array<ResourceHandle> = arrayOf()
-) : WidgetGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor, KotlinStyledActor,
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, OffSettable, OnLayoutActor, KotlinStyledActor, BackgroundActor,
     DropShadowActor, AnimatedActor, InputActor by InputActorImpl(), DebugActor by DebugActorImpl() {
 
     override val animationsNeedingUpdate: MutableList<AnimatedActor.NeedsUpdate> = mutableListOf()
@@ -491,7 +491,7 @@ open class CustomGroup(
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     private val backgroundHandleObserver = SubscribeableObserver<String?>(null)
-    var backgroundHandle: ResourceHandle? by backgroundHandleObserver
+    override var backgroundHandle: ResourceHandle? by backgroundHandleObserver
     protected val background: Drawable? by automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     override var dropShadow: DropShadow? = null
 

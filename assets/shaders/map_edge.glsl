@@ -20,7 +20,7 @@ out vec4 outColor;
 uniform float u_lineLength;
 
 void main() {
-    float patternLength = 3.0;
+    float patternLength = 1.5;
     float patternBlack = 0.6;
     // vec4 color = v_color * texture2D(u_texture, v_texCoords);
     float dist = v_texCoords.y * u_lineLength * 0.05;

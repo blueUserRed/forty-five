@@ -251,7 +251,7 @@ class WinRunScreen : ScreenCreator() {
             group {
                 width = 80f
                 height = 70f
-                backgroundHandle = "cash_symbol"
+                backgroundHandle = "cash_icon"
                 badTexture("cash symbol on win screen popup", lowRes = true)
             }
 
@@ -332,7 +332,12 @@ class WinRunScreen : ScreenCreator() {
             touchable = Touchable.enabled
             defaultButtonConfig()
 
-            label("red wing", "Claim Rewards", Colors.FortyWhite, 32) {
+            val profile = FortyFive.profileManager.currentProfile!!
+            val run = profile.activeRun!!
+            val hasRewards = run.rewards.isNotEmpty() || (!FortyFive.DEMO_MODE && cardsToExtract.isNotEmpty())
+            val buttonText = if (hasRewards) "Claim Rewards" else "Continue"
+
+            label("red wing", buttonText, Colors.FortyWhite, 32) {
                 touchable = Touchable.disabled
                 width = 200f
                 syncHeight()
@@ -389,7 +394,7 @@ class WinRunScreen : ScreenCreator() {
             label("red wing", "rewards:", Colors.FortyWhite, 32) {
                 syncDimensions()
             }
-            if (cardsToExtract.isNotEmpty()) extractCardsReward()
+            if (cardsToExtract.isNotEmpty() && !FortyFive.DEMO_MODE) extractCardsReward()
             rewards(run.rewards)
         }
     }
@@ -441,7 +446,7 @@ class WinRunScreen : ScreenCreator() {
                 name("reward_cash_symbol")
                 width = 40f
                 height = 30f
-                backgroundHandle = "cash_symbol"
+                backgroundHandle = "cash_icon"
                 marginLeft = 10f
                 marginRight = 10f
             }

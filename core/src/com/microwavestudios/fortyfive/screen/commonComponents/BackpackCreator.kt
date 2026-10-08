@@ -24,6 +24,7 @@ import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.pluralS
+import com.microwavestudios.fortyfive.utils.unreachable
 
 object BackpackCreator {
 
@@ -106,6 +107,34 @@ object BackpackCreator {
 
         val navbarObject = NavbarCreator.NavBarObject(
             if (isCollection) "Collection" else "Backpack",
+            { box, addOpenListener, addCloseListener -> with(box) {
+                image {
+                    squareDim(40f)
+                    backgroundHandle = "map_icon"
+
+                    var isOpen = false
+
+                    fun setBg() {
+                        val focused = isInInputState(GameInputs.States.focused)
+                        backgroundHandle = when {
+                            focused -> "map_icon_hover"
+                            isOpen -> "map_icon_active"
+                            !isOpen -> "map_icon"
+                            else -> unreachable()
+                        }
+                    }
+
+                    addOpenListener {
+                        isOpen = true
+                        setBg()
+                    }
+                    addCloseListener {
+                        isOpen = false
+                        setBg()
+                    }
+                    observeInputState(GameInputs.States.focused, ::setBg, ::setBg)
+                }
+            } },
             { Timeline.timeline {
 
                 action {

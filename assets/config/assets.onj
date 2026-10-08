@@ -199,6 +199,30 @@ textures: [
         file: "blobs/icons/shield.png",
     },
     {
+        name: "cash_icon",
+        file: "blobs/icons/cash.png",
+    },
+    {
+        name: "map_icon",
+        file: "blobs/icons/map.png",
+    },
+    {
+        name: "map_icon_hover",
+        file: "blobs/icons/map_hover.png",
+    },
+    {
+        name: "map_icon_active",
+        file: "blobs/icons/map_active.png",
+    },
+    {
+        name: "settings_icon",
+        file: "blobs/icons/settings.png",
+    },
+    {
+        name: "health_icon",
+        file: "blobs/icons/health.png",
+    },
+    {
         name: "poison_icon",
         file: "blobs/icons/status_effects/poison.png",
     },
@@ -554,10 +578,6 @@ textures: [
         file: "blobs/ui_elements/statusbar/background_old.png"
     },
     {
-        name: "cash_symbol",
-        file: "blobs/ui_elements/statusbar/cash_symbol.png"
-    },
-    {
         name: "map_decoration_grass",
         file: "blobs/map/decorations/grass.png"
     },
@@ -715,10 +735,6 @@ textures: [
     {
         name: "statusbar_option",
         file: "blobs/ui_elements/statusbar/option.png"
-    },
-    {
-        name: "statusbar_lives",
-        file: "blobs/ui_elements/statusbar/statusbar_lives.png"
     },
     {
         name: "backpack_1",
@@ -1261,6 +1277,10 @@ textures: [
     {
         name: "particle_rain",
         file: "blobs/particles/rain2.png",
+    },
+    {
+        name: "navbar_bg",
+        file: "blobs/ui_elements/navbar/navbar_bg.png",
     },
 ],
 

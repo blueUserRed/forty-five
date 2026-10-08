@@ -23,6 +23,7 @@ import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
+import java.awt.Color
 
 object RunBoardCreator {
 
@@ -78,6 +79,13 @@ object RunBoardCreator {
 
         val navBarObject = NavbarCreator.NavBarObject(
             "Run Board",
+            { box, _, _ -> with(box) {
+                label("red wing", "R", Colors.Black, 30) {
+                    squareDim(40f)
+                    setAlignment(Align.center)
+                    focusBackgrounds("white_texture", "grey_texture")
+                }
+            } },
             openTimeline,
             closeTimeline
         )

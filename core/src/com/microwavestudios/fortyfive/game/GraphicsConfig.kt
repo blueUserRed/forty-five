@@ -44,7 +44,7 @@ object GraphicsConfig {
         end: () -> Vector2,
         renderPipeline: RenderPipeline
     ) = RenderPipeline.OrbAnimation(
-        orbTexture = "cash_symbol",
+        orbTexture = "cash_icon",
         width = 30f,
         height = 30f,
         segments = 20,

@@ -39,7 +39,7 @@ class TitleScreen : ScreenCreator() {
     val worldWidth = 1600f
     val worldHeight = 900f
 
-    override val background: String = "background_bewitched_forest"
+    override val background: String = "black_texture"
 
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
 

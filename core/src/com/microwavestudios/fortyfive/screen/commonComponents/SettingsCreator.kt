@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.utils.Align
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.animation.AnimState
+import com.microwavestudios.fortyfive.animation.rotationAbstractProperty
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
@@ -101,6 +103,26 @@ object SettingsCreator {
 
         return group to NavbarCreator.NavBarObject(
             "Settings",
+            { box, _, _ -> with(box) {
+                image {
+                    squareDim(40f)
+                    backgroundHandle = "settings_icon"
+                    val propertyAnimation = propertyAnimation(
+                        rotationAbstractProperty(),
+                        AnimState("normal", 0f),
+                        AnimState("focus", -20f),
+                        initialState = "normal",
+                        defaultTime = 350,
+                        defaultInterpolation = Interpolation.swingOut
+                    )
+                    observeInputState(
+                        GameInputs.States.focused,
+                        { propertyAnimation.state("focus") },
+                        { propertyAnimation.state("normal") },
+                    )
+                    originCenter()
+                }
+            } },
             openTimelineCreator,
             closeTimelineCreator
         )

@@ -15,6 +15,7 @@ import com.microwavestudios.fortyfive.animation.DefaultInterpolators
 import com.microwavestudios.fortyfive.animation.Interpolator
 import com.microwavestudios.fortyfive.animation.PropertyAnimation
 import com.microwavestudios.fortyfive.keyInput.GameInputs
+import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.RenderableScreen
@@ -30,6 +31,7 @@ import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.commonComponents.RunBoardCreator.getSharedRunBoard
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator.getSharedPopup
+import com.microwavestudios.fortyfive.screen.commonComponents.ToTitleScreenCreator
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.TemplateString
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -534,7 +536,10 @@ abstract class ScreenCreator : ResourceBorrower {
         }
     }
 
-    fun CustomGroup.focusBackgrounds(normal: ResourceHandle, focus: ResourceHandle) {
+    fun <T> T.focusBackgrounds(
+        normal: ResourceHandle,
+        focus: ResourceHandle
+    ) where T : InputActor, T : BackgroundActor {
         backgroundHandle = normal
         observeInputState(
             GameInputs.States.focused,
@@ -598,14 +603,7 @@ abstract class ScreenCreator : ResourceBorrower {
     ) {
         screen.events.link(events)
         val navbarObjects = mutableListOf<NavbarCreator.NavBarObject>()
-
-        val settings: CustomGroup? = if (hasSettings) {
-            val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight, events)
-            navbarObjects.add(settingsObject)
-            settings
-        } else {
-            null
-        }
+        if (hasTitleScreen) navbarObjects.add(ToTitleScreenCreator.getSharedTitleScreen(this@ScreenCreator))
 
         val backpack = if (hasBackpack) {
             val (backpack, backpackObject) = getSharedBackpack(worldWidth, worldHeight, events, events, false)
@@ -631,12 +629,19 @@ abstract class ScreenCreator : ResourceBorrower {
             null
         }
 
+        val settings: CustomGroup? = if (hasSettings) {
+            val (settings, settingsObject) = getSharedSettingsMenu(worldWidth, worldHeight, events)
+            navbarObjects.add(settingsObject)
+            settings
+        } else {
+            null
+        }
+
         if (hasNavbar) {
             val navbar = getSharedNavBar(
                 worldWidth, worldHeight,
                 navbarObjects,
-                screen,
-                isLeft = navbarIsLeft
+                screen
             )
             actor(navbar) {
                 onLayoutAndNow { y = worldHeight - height }
