@@ -8,9 +8,11 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
@@ -37,6 +39,7 @@ import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
 import com.microwavestudios.fortyfive.game.card.PresentationProvider
 import com.microwavestudios.fortyfive.game.card.RandomCardSelection
+import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.enemy.Enemy
@@ -94,6 +97,8 @@ class EncounterScreen : ScreenCreator() {
 
     val gameEvents: EventPipeline = EventPipeline()
 
+    private val context: EncounterContext by lazy { context() }
+
     private lateinit var reservesAnimationTarget: Actor
     private lateinit var deckAnimationTarget: Actor
 
@@ -117,7 +122,9 @@ class EncounterScreen : ScreenCreator() {
 
     private val bgZoom: Float = 1.07f
     private val bgScreenController by lazy {
-        BiomeBackgroundScreenController(screen, bgZoom)
+        val controller = BiomeBackgroundScreenController(screen, bgZoom)
+        context.forceBackground?.let { controller.forceBackground(it) }
+        controller
     }
 
     private var bgOffX: Float = 0f
@@ -177,10 +184,10 @@ class EncounterScreen : ScreenCreator() {
 
         group {
             enemyParent = this@group
-            x = 800f
-            y = 250f
-            width = 800f
-            height = 600f
+            x = 0f
+            y = 0f
+            width = worldWidth
+            height = worldHeight
         }
 
         encounterModifierDisplay()
@@ -403,10 +410,10 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun createEnemy(
-        x: Float, y: Float,
+        index: Int,
         enemy: Enemy,
         controller: GameController
-    ): Float = with(enemyParent) {
+    ) = with(enemyParent) {
 
         val enemyHeight = 400f
         val enemyWidth = enemyHeight * 0.6f
@@ -414,8 +421,9 @@ class EncounterScreen : ScreenCreator() {
         box {
             enemy.actor = this
             flexDirection = FlexDirection.COLUMN
-            this.x = x
-            this.y = y
+            val coords = bgScreenController.enemyCoordsForChosenBackground()[index]
+            x = coords.x
+            y = coords.y
             width = enemyWidth
             height = enemyHeight
 
@@ -541,7 +549,6 @@ class EncounterScreen : ScreenCreator() {
             }
 
         }
-        return enemyWidth
     }
 
     private fun CustomGroup.actionIndicator(enemy: Enemy, enemyHeight: Float) = box {
@@ -1612,12 +1619,15 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun setupEnemies(event: GameControllerImpl.Events.SetupEnemies) {
-        var x = 10f
-        var y = 160f
-        event.enemies.forEach { enemy ->
-            val neededWidth = createEnemy(x, y, enemy, event.controller)
-            x += neededWidth
-            y -= 30f
+        val enemies = event.enemies
+        val indexOff = when (enemies.size) {
+            1 -> 1
+            2 -> 1
+            3 -> 0
+            else -> unreachable()
+        }
+        enemies.forEachIndexed { index, enemy ->
+            createEnemy(index + indexOff, enemy, event.controller)
         }
     }
 

@@ -25,6 +25,7 @@ import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.resources.ResourceManager
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.ISoundPlayer
@@ -121,28 +122,6 @@ object FortyFive : Game() {
     }
 
     fun toMap() {
-        val context = object : EncounterContext {
-
-            override val encounter: Encounter = Encounter(
-                enemiesGroups = listOf("The-Fangs", "Witch", "Pyro"),
-                encounterModifierNames = setOf("rain", "moist"),
-                forceCards = null,
-                forceConcreteEnemies = null,
-                shuffleCards = true,
-                unadjustedMajorDifficulty = 2,
-                majorDifficulty = 2,
-                minorDifficulty = 1f,
-                isHard = false,
-                difficultyScalingInfo = 0f,
-                special = false
-            )
-
-            override val isExtraction: Boolean = false
-
-            override fun completed() {
-            }
-        }
-
         screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
 //        screenManager.appendScreen(EncounterScreen, context)
 

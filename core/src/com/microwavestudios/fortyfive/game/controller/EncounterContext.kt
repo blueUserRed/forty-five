@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.game.controller
 
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.Encounter
 
 interface EncounterContext {
@@ -9,6 +10,9 @@ interface EncounterContext {
     val isExtraction: Boolean
 
     val forceCards: List<CardType>?
+        get() = null
+
+    val forceBackground: ResourceHandle?
         get() = null
 
     fun completed()

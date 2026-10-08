@@ -112,7 +112,15 @@ object EncounterGenerator {
             logTag,
             "couldn't generate concrete enemies for configuration: $groupNames and difficulty: $majorDifficulty"
         )
+
         // generate enemies that don't match exactly
+
+        val maxDifficulty = groupNames.sumOf { enemyGroups[it]!!.variants.keys.max() }
+        if (maxDifficulty < majorDifficulty) { // can't generate difficult enough enemies
+            return groupNames
+                .map { name -> enemyGroups[name]!!.variants.entries.maxBy { it.key }.value }
+        }
+
         val config = mutableListOf<String>()
         var diff = 0
         repeat(enemyAmount) { i ->
@@ -191,7 +199,7 @@ object EncounterGenerator {
         requireNotNull(thirdEnemyGroup) { "Unknown enemy $thirdEnemy" }
 
         val firstEnemyGroupList = firstEnemyGroup.variants.toList()
-        val secondEnemyGroupList = firstEnemyGroup.variants.toList()
+        val secondEnemyGroupList = secondEnemyGroup.variants.toList()
         val offset = (0..firstEnemyGroupList.size).random(random)
         val secondOffset = (0..secondEnemyGroupList.size).random(random)
         firstEnemyGroupList.indices.forEach { i ->

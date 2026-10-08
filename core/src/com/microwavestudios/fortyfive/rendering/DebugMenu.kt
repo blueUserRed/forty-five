@@ -2,6 +2,8 @@ package com.microwavestudios.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
@@ -130,12 +132,19 @@ abstract class DebugMenuPage(val name: String) {
         val key: Int,
         var set: Boolean
     ) {
+        private val listeners: MutableList<(Boolean) -> Unit> = mutableListOf()
+
         override fun toString(): String = "[${if (set) "x" else " "}] $name <${Keys.toString(key)}>"
 
         operator fun getValue(thisRef: Any?, property: KProperty<*>): Boolean = set
 
         operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
             set = value
+            listeners.forEach { it(value) }
+        }
+
+        fun addChangeListener(listener: (Boolean) -> Unit) {
+            listeners.add(listener)
         }
     }
 
@@ -155,6 +164,8 @@ class ScreenDebugMenuPage : DebugMenuPage("Screen/Input") {
 
     val makeLaggy = debugSwitch("make laggy", Keys.L, false)
 
+    val rootCoordsPrinter = debugSwitch("print root coords onclick", Keys.P, false)
+
     override fun getText(screen: RenderableScreen): String = """
         focused with keyboard: ${
             screen.inputManager.keyboardFocused?.actor?.let {
@@ -172,6 +183,7 @@ class ScreenDebugMenuPage : DebugMenuPage("Screen/Input") {
             }
         }
         
+        $rootCoordsPrinter
         $makeLaggy
     """.trimIndent()
 }

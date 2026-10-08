@@ -5,10 +5,12 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.controllers.ControllerListener
 import com.badlogic.gdx.controllers.Controllers
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.profile.GlobalSave
+import com.microwavestudios.fortyfive.rendering.ScreenDebugMenuPage
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.CustomDirection
 import com.microwavestudios.fortyfive.screen.actors.CustomScrollableBox
@@ -54,6 +56,10 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
     private val modals: Stack<Modal> = Stack()
 
     private val filters: MutableList<FocusFilter> = mutableListOf()
+
+    private val screenDebugMenuPage: ScreenDebugMenuPage by lazy {
+        screen.findDebugMenuPage<ScreenDebugMenuPage>()!!
+    }
 
     private var currentDragAndDropModal: Modal? = null
     private var currentKeyboardDragAndDropActor: InputActor? = null
@@ -525,10 +531,16 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
     }
 
     private fun hit(x: Int, y: Int): Actor? {
+        val transformed = screenToRootCoords(x, y)
+        val root = screen.stage.root
+        return root.hit(transformed.x, transformed.y, true)
+    }
+
+    private fun screenToRootCoords(x: Int, y: Int): Vector2 {
         val root = screen.stage.root
         val worldSpace = screen.viewport.unproject(Vector2(x, y))
         val transformed = root.localToParentCoordinates(worldSpace)
-        return root.hit(transformed.x, transformed.y, true)
+        return transformed
     }
 
     override fun keyDown(keycode: Int): Boolean {
@@ -612,6 +624,9 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
         pointer: Int,
         button: Int
     ): Boolean {
+        if (screenDebugMenuPage.rootCoordsPrinter.set) {
+            println(screenToRootCoords(screenX, screenY))
+        }
         cancelKeyboardDragAndDrop()
         val hit = hit(screenX, screenY)
         if (currentlyDraggedActor != null) {
