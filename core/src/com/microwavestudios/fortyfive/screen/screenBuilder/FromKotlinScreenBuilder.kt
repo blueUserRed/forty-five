@@ -40,7 +40,6 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
         val root = creator.getRoot()
         screen.stage.root = root
         screen.background = creator.background
-        namedActors.putAll(creator.namedActors)
         controllers.forEach { screen.addScreenController(it) }
         return screen
     }

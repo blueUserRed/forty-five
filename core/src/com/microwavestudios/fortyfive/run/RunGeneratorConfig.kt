@@ -98,6 +98,18 @@ object RunGeneratorConfig {
             }
     }
 
+    val talismanPools: Map<Int, List<String>> by lazy {
+        configFile
+            .get<OnjArray>("talismanPools")
+            .value
+            .associate { obj ->
+                obj as OnjObject
+                val difficulty = obj.get<Long>("majorDifficulty").toInt()
+                val talismans = obj.get<OnjArray>("talismans").value.map { it.value as String }
+                difficulty to talismans
+            }
+    }
+
     val enemyConfig: List<EnemyConfig> by lazy {
         configFile
             .get<OnjArray>("enemies")

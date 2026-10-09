@@ -1,6 +1,9 @@
 package com.microwavestudios.fortyfive.game.card
 
 import com.microwavestudios.fortyfive.config.ConfigFileManager
+import com.microwavestudios.fortyfive.game.Talisman
+import com.microwavestudios.fortyfive.game.TalismanFactory
+import com.microwavestudios.fortyfive.run.RunGeneratorConfig
 import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.zipIndexed
 import onj.value.OnjArray
@@ -91,6 +94,24 @@ object RandomCardSelection {
         }
         changesAcc.addAll(default)
         return changesAcc
+    }
+
+    fun getRandomTalisman(
+        hasTalismans: List<Talisman>,
+        majorDifficulty: Int,
+        random: Random
+    ): Talisman? {
+        val talismanConfig = RunGeneratorConfig.talismanPools
+        val relevantPool = talismanConfig
+            .entries
+            .filter { it.key <= majorDifficulty }
+            .maxByOrNull { it.key }
+        requireNotNull(relevantPool) { "no talisman pool for major difficulty: $majorDifficulty" }
+        val options = relevantPool.value.toMutableList()
+        options.removeAll(hasTalismans.map { it.name })
+        if (options.isEmpty()) return null
+        val chosen = options.random(random)
+        return TalismanFactory.getTalisman(chosen)
     }
 
 

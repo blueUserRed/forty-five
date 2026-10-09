@@ -80,7 +80,7 @@ object RunBoardCreator {
         val navBarObject = NavbarCreator.NavBarObject(
             "Run Board",
             { box, _, _ -> with(box) {
-                label("red wing", "R", Colors.Black, 30) {
+                label("red wing", "R", Colors.Black, 30, backgroundHints = arrayOf("white_texture", "grey_texture")) {
                     squareDim(40f)
                     setAlignment(Align.center)
                     focusBackgrounds("white_texture", "grey_texture")

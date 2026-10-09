@@ -304,3 +304,15 @@ stampPools: [
         stamps: [ "bewitched", "poisonTip", "fiftyCal", "jammed", "undead", "gauge", "highVelocity", "phantom", "catalyst", "spirit" ]
     },
 ],
+
+
+//////////////////////////////////////////////////////
+// Talismans
+//////////////////////////////////////////////////////
+
+talismanPools: [
+    {
+        majorDifficulty: 0,
+        talismans: [ "talismanBullet", "goldNugget", "fieldRations", "sleepingBag", "overstock"  ]
+    }
+],

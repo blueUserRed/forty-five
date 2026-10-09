@@ -108,7 +108,7 @@ object BackpackCreator {
         val navbarObject = NavbarCreator.NavBarObject(
             if (isCollection) "Collection" else "Backpack",
             { box, addOpenListener, addCloseListener -> with(box) {
-                image {
+                image(backgroundHints = arrayOf("map_icon", "map_icon_hover", "map_icon_active")) {
                     squareDim(40f)
                     backgroundHandle = "map_icon"
 

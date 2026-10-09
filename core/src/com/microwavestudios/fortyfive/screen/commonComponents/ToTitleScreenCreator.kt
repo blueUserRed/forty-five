@@ -18,7 +18,7 @@ object ToTitleScreenCreator {
         return NavbarCreator.NavBarObject(
             "Title screen",
             { box, _, _ -> with(box) {
-                label("red wing", "T", Colors.Black, 30) {
+                label("red wing", "T", Colors.Black, 30, backgroundHints = arrayOf("white_texture", "grey_texture")) {
                     squareDim(40f)
                     setAlignment(Align.center)
                     focusBackgrounds("white_texture", "grey_texture")

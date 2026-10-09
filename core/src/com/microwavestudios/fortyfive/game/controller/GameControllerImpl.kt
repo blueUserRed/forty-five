@@ -17,7 +17,6 @@ import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.run.RunGeneratorConfig
-import com.microwavestudios.fortyfive.screen.Inject
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -25,6 +24,8 @@ import com.microwavestudios.fortyfive.screen.commonComponents.IWarningParent
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
 import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
+import com.microwavestudios.fortyfive.screen.screens.GetTalismanScreen
+import com.microwavestudios.fortyfive.screen.screens.GetTalismanScreenContext
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
 import com.microwavestudios.fortyfive.screen.screens.WinRunScreen
 import com.microwavestudios.fortyfive.utils.*
@@ -1419,7 +1420,7 @@ class GameControllerImpl(
     }
 
     private fun addTalisman(talisman: Talisman) {
-        // TODO: display
+        gameEvents.fire(Events.ShowTalismanEvent(talisman))
         talisman.behaviours().forEach { addEncounterBehaviour(it) }
     }
 
@@ -1583,10 +1584,19 @@ class GameControllerImpl(
         val money = -allEnemies.sumOf { it.currentHealth }
         val playerGetsCard = !encounter.special &&
                 !encounterContext.isExtraction &&
-                Utils.coinFlip(Config.playerGetsRewardCardChance, random)
+                Utils.coinFlip(Config.cardRewardChance, random)
+        val playerGetsTalisman =  !encounter.special &&
+                !encounterContext.isExtraction &&
+                Utils.coinFlip(Config.talismanRewardChance, random)
+        val talisman = if (playerGetsTalisman) {
+            RandomCardSelection.getRandomTalisman(profile.talismans, encounter.unadjustedMajorDifficulty, random)
+        } else {
+            null
+        }
         val event = Events.ShowPlayerWonPopup(
             gotCard = playerGetsCard,
-            cashAmount = money
+            cashAmount = money,
+            talisman = talisman
         )
         action {
             gameEvents.fire(event)
@@ -1619,6 +1629,13 @@ class GameControllerImpl(
 
             if (playerGetsCard) {
                 FortyFive.screenManager.ensureNextScreen(ChooseCardScreen, chooseCardContext)
+            }
+
+            if (talisman != null) {
+                FortyFive.screenManager.ensureNextScreen(GetTalismanScreen, object : GetTalismanScreenContext {
+                    override val talisman: Talisman = talisman
+                    override fun completed() {}
+                })
             }
 
             if (encounterContext.isExtraction) {
@@ -1778,9 +1795,11 @@ class GameControllerImpl(
         const val cardsToDrawInFirstRound = 6
         const val cardsToDraw = 2
         const val shotEmptyDamage = 5
-        const val playerGetsRewardCardChance = 1f
+        const val cardRewardChance = 1f
         const val rewardRerollPriceIncrease = 30
         const val rewardRerollBasePrice = 30
+        const val talismanRewardChance = 1f
+//        const val talismanRewardChance = 0.05f
     }
 
     object Events {
@@ -1803,6 +1822,7 @@ class GameControllerImpl(
             val texts: Pair<String, String>,
             val resolutionPromise: Promise<Boolean /*= parried*/> = Promise()
         )
+        data class ShowTalismanEvent(val talisman: Talisman)
         data class SelectionChangedEvent(val text: String?)
         data class SetupEnemies(val enemies: List<Enemy>, val controller: GameController)
         data class EncounterModifierAdded(val modifier: EncounterModifier)
@@ -1817,6 +1837,7 @@ class GameControllerImpl(
         data class ShowPlayerWonPopup(
             val gotCard: Boolean,
             val cashAmount: Int,
+            val talisman: Talisman?,
             val popupPromise: Promise<Unit> = Promise()
         )
         data class AddedPlayerStatusEffect(val statusEffect: StatusEffect)

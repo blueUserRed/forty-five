@@ -275,6 +275,26 @@ textures: [
         file: "blobs/icons/deck.png",
     },
     {
+        name: "field_rations_talisman_icon",
+        file: "blobs/icons/talismans/field_rations.png",
+    },
+    {
+        name: "gold_nugget_talisman_icon",
+        file: "blobs/icons/talismans/gold_nugget.png",
+    },
+    {
+        name: "overstock_talisman_icon",
+        file: "blobs/icons/talismans/overstock.png",
+    },
+    {
+        name: "sleeping_bag_talisman_icon",
+        file: "blobs/icons/talismans/sleeping_bag.png",
+    },
+    {
+        name: "talisman_bullet_talisman_icon",
+        file: "blobs/icons/talismans/talisman_bullet.png",
+    },
+    {
         name: "player_bar",
         file: "blobs/encounter_screen/player_bar.png"
     },
@@ -370,6 +390,10 @@ textures: [
     {
         name: "wood_box",
         file: "blobs/encounter_screen/wood_box.png"
+    },
+    {
+        name: "encounter_talisman_arrow",
+        file: "blobs/encounter_screen/talisman_arrow.png"
     },
     {
         name: "background_wasteland1",

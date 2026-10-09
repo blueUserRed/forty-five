@@ -76,6 +76,12 @@ class RunSave private constructor(val profile: Profile) {
         map = DetailMap.readFromFile(runMapFile)
     }
 
+    fun addTalisman(talisman: Talisman) {
+        require(talisman !in _talismans) { "talisman $talisman cant be added twice!" }
+        _talismans.add(talisman)
+        dirty()
+    }
+
     fun addCardToBackpack(card: CardType) {
         _backpack.add(card)
         backpackDecks.forEach { it.checkDeck(_backpack) }

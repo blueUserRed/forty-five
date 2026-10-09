@@ -81,11 +81,6 @@ abstract class ScreenCreator : ResourceBorrower {
      */
     var _context: Any? = null
 
-    private val _namedActors: MutableMap<String, Actor> = mutableMapOf()
-    val namedActors: Map<String, Actor>
-        get() = _namedActors
-
-
     fun start(screen: RenderableScreen, context: Any?) {
         this.screen = screen
         this._context = context
@@ -200,8 +195,8 @@ abstract class ScreenCreator : ResourceBorrower {
     }
 
     fun Actor.name(name: String) {
-        _namedActors[name] = this
         this.name = name
+        screen.addNamedActor(name, this)
     }
 
     /**

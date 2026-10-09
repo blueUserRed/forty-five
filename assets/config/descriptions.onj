@@ -265,4 +265,14 @@ defaultTextEffects: [
         indicator:"$specialEventAction$",
         color: color.bright_red,
     },
+
+    $Color {
+        indicator:"$talisman$",
+        color: color.orange,
+    },
+
+    $FontSize {
+        indicator:"$title$",
+        fontSize: 22,
+    },
 ]

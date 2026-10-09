@@ -110,7 +110,10 @@ class SpecialEventScreen : ScreenCreator() {
         addDefaultOverlays(worldWidth, worldHeight, EventPipeline(), hasBackpack = true)
     }
 
-    private fun CustomBox.eventOption(text: String, actions: List<SpecialEventAction>) = box {
+    private fun CustomBox.eventOption(
+        text: String,
+        actions: List<SpecialEventAction>
+    ) = box(backgroundHints = arrayOf("white_texture", "grey_texture")) {
         relativeWidth(80f)
         syncHeight()
         focusBackgrounds("white_texture", "grey_texture")

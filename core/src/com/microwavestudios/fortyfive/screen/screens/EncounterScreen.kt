@@ -1,18 +1,15 @@
 package com.microwavestudios.fortyfive.screen.screens
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.AlphaAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
@@ -22,23 +19,12 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.AnimState
 import com.microwavestudios.fortyfive.animation.xPositionAbstractProperty
 import com.microwavestudios.fortyfive.game.BannerAnimation
-import com.microwavestudios.fortyfive.game.Bewitched
-import com.microwavestudios.fortyfive.game.Bounty
-import com.microwavestudios.fortyfive.game.BurningPlayer
 import com.microwavestudios.fortyfive.game.EncounterModifier
-import com.microwavestudios.fortyfive.game.Frozen
 import com.microwavestudios.fortyfive.game.GraphicsConfig
-import com.microwavestudios.fortyfive.game.Poison
-import com.microwavestudios.fortyfive.game.StatusEffect
-import com.microwavestudios.fortyfive.game.Weak
-import com.microwavestudios.fortyfive.game.card.ActorCardPresentation
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.card.CardPresentation
-import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
-import com.microwavestudios.fortyfive.game.card.PresentationProvider
-import com.microwavestudios.fortyfive.game.card.RandomCardSelection
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
@@ -52,10 +38,8 @@ import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.game.widgets.Afterlife
 import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenController.BiomeBackgroundScreenController
-import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.NewCardHand
 import com.microwavestudios.fortyfive.game.widgets.NewRevolver
-import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.game.widgets.StatusEffectBarCreator
 import com.microwavestudios.fortyfive.profile.Profile
@@ -193,8 +177,9 @@ class EncounterScreen : ScreenCreator() {
         encounterModifierDisplay()
         parryPopup()
         targetSelectionPopup()
-
         playerBar()
+        talismanBar()
+
         actor(afterlife.getActor(this@EncounterScreen)) {
             y = worldHeight * 0.5f
         }
@@ -236,6 +221,42 @@ class EncounterScreen : ScreenCreator() {
             hasBackpack = true,
             warnings = warningParent
         )
+    }
+
+    private fun CustomGroup.talismanBar() = box box@{
+        flexDirection = FlexDirection.ROW
+        height = 80f
+        syncWidth()
+        centerX()
+        onLayoutAndNow { y = worldHeight - height }
+        isVisible = false
+        image {
+            backgroundHandle = "encounter_talisman_arrow"
+            relativeHeight(100f)
+            widthByAspectRatio(1.0)
+        }
+        image {
+            backgroundHandle = "encounter_talisman_arrow"
+            relativeHeight(100f)
+            widthByAspectRatio(1.0)
+            originCenter()
+            rotation = 180f
+        }
+        gameEvents.watchFor<GameControllerImpl.Events.ShowTalismanEvent> { e ->
+            isVisible = true
+            val talisman = e.talisman
+            val icon = newGroup {
+                name("icon-${talisman.name}")
+                squareDim(80f)
+                backgroundHandle = talisman.iconHandle
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                detailWidget = talisman.buildHoverDetail(screen)
+                bindDetailToInputState(GameInputs.States.focused)
+            }
+            val box = this@box
+            box.addActorAt(box.children.size - 1, icon)
+        }
     }
 
     private fun CustomGroup.enemySpecialAttackAnim() = group {
@@ -932,27 +953,37 @@ class EncounterScreen : ScreenCreator() {
 
         val xAnim = propertyAnimation<CustomGroup, Float>(
             xPositionAbstractProperty(),
-            AnimState("open", -10f),
-            AnimState("closed", -330f),
+            AnimState("open", -18f),
+            AnimState("hover", -5f),
+            AnimState("closed", -350f),
             initialState = "open",
-            defaultTime = 150,
             defaultInterpolation = Interpolation.pow2,
+            defaultTime = 200
         )
+        xAnim.transition("open", "closed", 500, Interpolation.pow2)
+        xAnim.transition("closed", "open", 500, Interpolation.pow2)
+
+        var inParryMenu = false
 
         gameEvents.watchFor<GameControllerImpl.Events.ParryStateChange> { event ->
             if (event.inParryMenu) {
+                inParryMenu = true
                 xAnim.state("closed")
                 holsterFilter.start()
             } else {
+                inParryMenu = false
                 xAnim.state("open")
                 holsterFilter.end()
             }
         }
 
-        focusBackgrounds(
-            normal = "encounter_holster",
-            focus = "encounter_holster_hover"
+        observeInputState(
+            GameInputs.States.focused,
+            { if (!inParryMenu) xAnim.state("hover") },
+            { if (!inParryMenu) xAnim.state("open") },
         )
+
+        backgroundHandle = "encounter_holster"
         rotation = -5f
         width = 320f
         heightByAspectRatio(1513.0 / 335.0)
@@ -1376,6 +1407,29 @@ class EncounterScreen : ScreenCreator() {
                     }
 
                     label("red wing", "You get a card", Colors.FortyWhite, 32)
+                }
+
+                box {
+                    relativeWidth(62f)
+                    flexDirection = FlexDirection.ROW
+                    verticalAlign = CustomAlign.CENTER
+                    height = 70f
+                    backgroundHandle = "win_popup_item_card"
+                    marginTop = 10f
+
+                    val talismanImg = image {
+                        width = 60f
+                        height = 60f
+                        marginLeft = 10f
+                        marginRight = 10f
+                    }
+
+                    gameEvents.watchFor<GameControllerImpl.Events.ShowPlayerWonPopup> { (_, _, talisman) ->
+                        isVisible = talisman != null
+                        talismanImg.backgroundHandle = talisman?.iconHandle
+                    }
+
+                    label("red wing", "You get a talisman", Colors.FortyWhite, 32)
                 }
             }
 

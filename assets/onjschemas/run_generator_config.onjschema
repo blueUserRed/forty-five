@@ -86,3 +86,8 @@ stampPools: {
     majorDifficulty: int,
     stamps: string[]
 }[],
+
+talismanPools: {
+    majorDifficulty: int,
+    talismans: string[],
+}[]

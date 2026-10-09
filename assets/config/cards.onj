@@ -1118,7 +1118,7 @@ cards: [
         traitEffects: [ "spray" ],
         effects: [
             {
-                trigger: shot(),
+                trigger: leaveZone(zone.revolver, onlySelfTriggers),
                 effect: giveStatus(burning(2#val, burningPercent, false))
             }
         ],
@@ -1165,7 +1165,7 @@ cards: [
         name: "carnageBullet",
         title: "Carnage Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet in the revolver\n$keyword$DEFENSE$keyword$ (4)",
+        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet in the revolver\n\n$keyword$DEFENSE$keyword$ (4)",
         baseDamage: 11,
         parryNumber: 4,
         deckMaximum: 3,

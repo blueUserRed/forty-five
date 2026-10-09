@@ -66,6 +66,7 @@ interface IProfile {
     fun earnMoney(amount: Int)
     fun payMoney(amount: Int)
     fun getCardForRun(card: CardType)
+    fun getTalismanForRun(talisman: Talisman)
     fun checkDecks()
     fun extractableCards(): List<CardType>
     fun readFromDisk()
@@ -398,9 +399,16 @@ class Profile private constructor(
     }
 
     override fun getCardForRun(card: CardType) {
-        val runSave = runSave ?: throw RuntimeException("not in a run")
+        val runSave = runSave
+        requireNotNull(runSave) { "not in run" }
         runSave.addCardToBackpack(card)
         checkDecks()
+    }
+
+    override fun getTalismanForRun(talisman: Talisman) {
+        val runSave = runSave
+        requireNotNull(runSave) { "not in run" }
+        runSave.addTalisman(talisman)
     }
 
     override fun checkDecks() {

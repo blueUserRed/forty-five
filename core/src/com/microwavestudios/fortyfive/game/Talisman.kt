@@ -1,22 +1,43 @@
 package com.microwavestudios.fortyfive.game
 
+import com.microwavestudios.fortyfive.game.card.DetailDescriptionHandler
+import com.microwavestudios.fortyfive.resources.ResourceHandle
+import com.microwavestudios.fortyfive.screen.RenderableScreen
+import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
 import com.microwavestudios.fortyfive.utils.requireNot
+import com.microwavestudios.fortyfive.utils.with
 
 abstract class Talisman {
 
     abstract val name: String
     abstract val title: String
     abstract val description: String
+    abstract val iconHandle: ResourceHandle
     open val flavourText: String? = null
 
     open fun behaviours(): List<EncounterBehaviour> = listOf()
 
+    fun buildHoverDetail(screen: RenderableScreen): DetailWidget {
+        val text: () -> List<String> = {
+            // picking your languages escape character for your custom markup is a bad idea:
+            val texts = listOf($$"$talisman$\$title$$$title$title$\$talisman$", description)
+            flavourText?.let { texts.with(it) } ?: texts
+        }
+        val widget = DetailWidget.ComplexBigDetailActor(
+            screen = screen,
+            text = text,
+            effects = DetailDescriptionHandler.allTextEffects,
+            subtexts = { DetailDescriptionHandler.extractAllExtraDescriptions(text()) }
+        )
+        return widget
+    }
 
     object TalismanBullet : Talisman() {
 
         override val title: String = "Talisman Bullet"
         override val name: String = "talismanBullet"
         override val description: String = "All bullets have +3 dmg"
+        override val iconHandle: ResourceHandle = "talisman_bullet_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.ChangeDamageOfAllBullets(3, title)
@@ -28,6 +49,7 @@ abstract class Talisman {
         override val name: String = "goldNugget"
         override val title: String = "Gold Nugget"
         override val description: String = "Start the Encounter with +2 handcards"
+        override val iconHandle: ResourceHandle = "gold_nugget_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.AddCardsInInitialDraw(2)
@@ -43,6 +65,7 @@ abstract class Talisman {
             Every turn, you start the turn with 1 less.
             This can't reduce reserves to less than 2.
         """.trimIndent().replace('\n', ' ')
+        override val iconHandle: ResourceHandle = "field_rations_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.FieldRations(8)
@@ -56,6 +79,7 @@ abstract class Talisman {
         override val description: String = """
             You start the turn with +1 reserves, as long as the revolver didn't rotate last turn.
         """.trimIndent().replace('\n', ' ')
+        override val iconHandle: ResourceHandle = "sleeping_bag_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.SleepingBag()
@@ -70,6 +94,8 @@ abstract class Talisman {
             Whenever you place a bullet in the revolver,
             return a different bullet from the revolver to your hand.
         """.trimIndent().replace('\n', ' ')
+        override val iconHandle: ResourceHandle
+            get() = TODO("lasso icon")
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.Lasso
@@ -84,6 +110,8 @@ abstract class Talisman {
             Every second Bullet that enters the revolver: 
             You get status $status$FROZEN$status$(1)
         """.trimIndent().replace('\n', ' ')
+        override val iconHandle: ResourceHandle
+            get() = TODO("winters grace icon")
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.WintersGrace()
@@ -99,6 +127,8 @@ abstract class Talisman {
             As long as your deck has at least 25 cards:
             You start the turn with +1 reserve
         """.trimIndent().replace('\n', ' ')
+
+        override val iconHandle: ResourceHandle = "overstock_talisman_icon"
 
         override val flavourText: String = """
             Maybe 3 extra pairs of underwear and the 10 bottles whisky were a little bit overkill, I admit.

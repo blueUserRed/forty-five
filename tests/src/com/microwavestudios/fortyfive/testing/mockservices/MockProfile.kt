@@ -134,6 +134,9 @@ class MockProfile(
     override fun getCardForRun(card: CardType) {
     }
 
+    override fun getTalismanForRun(talisman: Talisman) {
+    }
+
     override fun checkDecks() {
     }
 

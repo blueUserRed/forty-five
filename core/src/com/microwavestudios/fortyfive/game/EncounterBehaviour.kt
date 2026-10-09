@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Zone
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
+import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.utils.Timeline
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -250,12 +251,10 @@ abstract class EncounterBehaviour {
             action { lastRevolverTurn = controller.turnCounter }
         }
 
-        override fun modifyReserves(
-            controller: GameController,
-            reserves: Int
-        ): Int {
+        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             val rotatedLastTurn = controller.turnCounter - 1 == lastRevolverTurn
-            return if (rotatedLastTurn) reserves else reserves + 1
+            val target = (controller.screen as? RenderableScreen)?.namedActorOrNull("icon-sleepingBag")
+            if (!rotatedLastTurn) controller.gainReserves(1, target?.let { { it } })
         }
     }
 

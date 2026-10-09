@@ -174,7 +174,7 @@ class ChooseCardScreen : ScreenCreator() {
         }
 
         dropTargets()
-        addDefaultOverlays(worldWidth, worldHeight, events, hasTutorial = false, hasBackpack = true)
+        addDefaultOverlays(worldWidth, worldHeight, events, hasTutorial = false, hasBackpack = true, hasTitleScreen = false)
         initCards()
     }
 
