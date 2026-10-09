@@ -1582,17 +1582,23 @@ class GameControllerImpl(
 
     private fun winTimeline(): Timeline = Timeline.timeline { later {
         val money = -allEnemies.sumOf { it.currentHealth }
+
         val playerGetsCard = !encounter.special &&
                 !encounterContext.isExtraction &&
                 Utils.coinFlip(Config.cardRewardChance, random)
-        val playerGetsTalisman =  !encounter.special &&
-                !encounterContext.isExtraction &&
-                Utils.coinFlip(Config.talismanRewardChance, random)
-        val talisman = if (playerGetsTalisman) {
-            RandomCardSelection.getRandomTalisman(profile.talismans, encounter.unadjustedMajorDifficulty, random)
-        } else {
-            null
+
+        val talisman = encounterContext.forceTalisman ?: run {
+            val talismanChance = Config.talismanRewardChance + profile.talismanRewardChanceBoost.toFloat()
+            val playerGetsTalisman =  !encounter.special &&
+                    !encounterContext.isExtraction &&
+                    Utils.coinFlip(talismanChance, random)
+            if (playerGetsTalisman) {
+                RandomCardSelection.getRandomTalisman(profile.talismans, encounter.unadjustedMajorDifficulty, random)
+            } else {
+                null
+            }
         }
+
         val event = Events.ShowPlayerWonPopup(
             gotCard = playerGetsCard,
             cashAmount = money,
@@ -1788,18 +1794,50 @@ class GameControllerImpl(
     }
 
     object Config {
-//        const val baseReserves = 20
-        const val baseReserves = 4
-        const val softMaxCards = 12
-        const val hardMaxCards = 20
-        const val cardsToDrawInFirstRound = 6
-        const val cardsToDraw = 2
-        const val shotEmptyDamage = 5
-        const val cardRewardChance = 1f
-        const val rewardRerollPriceIncrease = 30
-        const val rewardRerollBasePrice = 30
-        const val talismanRewardChance = 1f
-//        const val talismanRewardChance = 0.05f
+
+        private val configFile by lazy {
+            ConfigFileManager.getConfigFile("gameConfig")
+        }
+
+        val baseReserves: Int by lazy {
+            configFile.get<Long>("baseReserves").toInt()
+        }
+
+        val softMaxCards: Int by lazy {
+            configFile.get<Long>("softMaxCards").toInt()
+        }
+
+        val hardMaxCards: Int by lazy {
+            configFile.get<Long>("hardMaxCards").toInt()
+        }
+
+        val cardsToDrawInFirstRound: Int by lazy {
+            configFile.get<Long>("cardsToDrawInFirstRound").toInt()
+        }
+
+        val cardsToDraw: Int by lazy {
+            configFile.get<Long>("cardsToDraw").toInt()
+        }
+
+        val shotEmptyDamage: Int by lazy {
+            configFile.get<Long>("shotEmptyDamage").toInt()
+        }
+
+        val rewardRerollPriceIncrease: Int by lazy {
+            configFile.get<Long>("rewardRerollPriceIncrease").toInt()
+        }
+
+        val rewardRerollBasePrice: Int by lazy {
+            configFile.get<Long>("rewardRerollBasePrice").toInt()
+        }
+
+        val cardRewardChance: Float by lazy {
+            configFile.get<Double>("cardRewardChance").toFloat()
+        }
+
+        val talismanRewardChance: Float by lazy {
+            configFile.get<Double>("talismanRewardChance").toFloat()
+        }
     }
 
     object Events {

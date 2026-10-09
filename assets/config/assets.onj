@@ -295,6 +295,10 @@ textures: [
         file: "blobs/icons/talismans/talisman_bullet.png",
     },
     {
+        name: "lasso_talisman_icon",
+        file: "blobs/icons/talismans/lasso.png",
+    },
+    {
         name: "player_bar",
         file: "blobs/encounter_screen/player_bar.png"
     },

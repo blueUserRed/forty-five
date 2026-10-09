@@ -124,13 +124,6 @@ object FortyFive : Game() {
     fun toMap() {
         screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
 //        screenManager.appendScreen(EncounterScreen, context)
-//        screenManager.appendScreen(GetTalismanScreen, object : GetTalismanScreenContext {
-//
-//            override val talisman: Talisman = Talisman.GoldNugget
-//            override fun completed() {
-//            }
-//        })
-
         screenManager.screenFinished()
     }
 

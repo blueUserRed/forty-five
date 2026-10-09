@@ -4,7 +4,7 @@ specialEvents: {
     name: string,
     title: string,
     description: string,
-    allowedInBiomes: string[],
+    conditions: SpecialEventCondition[],
     weight: int,
     options: {
         text: string,

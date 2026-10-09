@@ -3,15 +3,21 @@ package com.microwavestudios.fortyfive.map.events.specialevent
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.GraphicsConfig
+import com.microwavestudios.fortyfive.game.Talisman
+import com.microwavestudios.fortyfive.game.TalismanFactory
+import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.map.MapNode
 import com.microwavestudios.fortyfive.onjNamespaces.OnjSpecialEventAction
+import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreen
 import com.microwavestudios.fortyfive.screen.screens.ChooseCardScreenContext
+import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
+import com.microwavestudios.fortyfive.screen.screens.GetTalismanScreen
+import com.microwavestudios.fortyfive.screen.screens.GetTalismanScreenContext
 import com.microwavestudios.fortyfive.screen.screens.LoseRunScreen
 import com.microwavestudios.fortyfive.screen.screens.MapScreenContext
-import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.weightedRandom
 import com.microwavestudios.fortyfive.utils.zipToFirst
@@ -23,7 +29,7 @@ data class SpecialEvent(
     val name: String,
     val title: String,
     val description: String,
-    val allowedInBiomes: List<String>,
+    val conditions: List<SpecialEventCondition>,
     val weight: Int,
     val options: List<Pair<String, List<SpecialEventAction>>>
 )
@@ -78,6 +84,15 @@ object SpecialEventActions {
         }
     }
 
+    fun useSteps(amount: Int): SpecialEventAction = {
+        Timeline.later {
+            val profile = FortyFive.profileManager.currentProfile
+            requireNotNull(profile)
+            require(profile.isRunActive)
+            repeat(amount) { profile.stepTaken() }
+        }
+    }
+
     fun getRandomCard(): SpecialEventAction = { (_, nextScreens) ->
         val context = object : ChooseCardScreenContext {
             override var seed: Long = Random.nextLong() // TODO: get seed from somewhere
@@ -117,6 +132,55 @@ object SpecialEventActions {
                 healPlayer(amount)(data)
             }
             include(action)
+        }
+    }
+
+    fun boostTalismanRewardChance(increase: Double): SpecialEventAction = { _ ->
+        require(increase > 0.0) { "increase must be positive" }
+        Timeline.later {
+            val profile = FortyFive.profileManager.currentProfile!!
+            profile.boostTalismanRewardChance(increase)
+        }
+    }
+
+    fun getTalisman(talisman: String): SpecialEventAction = { data ->
+        val context = object : GetTalismanScreenContext {
+
+            override val talisman: Talisman = TalismanFactory.getTalisman(talisman)
+
+            override fun completed() {}
+        }
+
+        Timeline.later {
+            data.nextScreens.append(GetTalismanScreen, context)
+        }
+    }
+
+    fun fightForTalisman(talisman: String, enemyGroups: List<String>): SpecialEventAction = { data ->
+        val profile = FortyFive.profileManager.currentProfile
+        requireNotNull(profile)
+        val majorDiff = profile.currentMapSaver.currentMap.majorDifficulty
+        val encounter = Encounter(
+            enemiesGroups = enemyGroups,
+            encounterModifierNames = setOf(),
+            forceCards = null,
+            forceConcreteEnemies = null,
+            shuffleCards = true,
+            unadjustedMajorDifficulty = majorDiff,
+            majorDifficulty = majorDiff,
+            minorDifficulty = 1f,
+            isHard = false,
+            difficultyScalingInfo = 0f,
+            special = true,
+        )
+        val encounterContext = object : EncounterContext {
+            override val encounter: Encounter = encounter
+            override val isExtraction: Boolean = false
+            override val forceTalisman: Talisman = TalismanFactory.getTalisman(talisman)
+            override fun completed() {}
+        }
+        Timeline.later {
+            data.nextScreens.append(EncounterScreen, encounterContext)
         }
     }
 
@@ -186,7 +250,7 @@ object SpecialEventFactory {
         val biome = profile.currentMapSaver.currentMap.biome
         val allowed = specialEvents
             .values
-            .filter { biome in it.allowedInBiomes }
+            .filter { event -> event.conditions.all { it() } }
         require(allowed.isNotEmpty()) { "No special event for biome: $biome" }
         val winner = allowed
             .zipToFirst { it.weight }
@@ -215,11 +279,34 @@ object SpecialEventFactory {
                             .map { (it as OnjSpecialEventAction).value }
                         text to options
                     }
-                val biomes = event.get<OnjArray>("allowedInBiomes").value.map { it.value as String }
                 val weight = event.get<Long>("weight").toInt()
-                SpecialEvent(name, title, description, biomes, weight, options)
+                val conditions = event.get<OnjArray>("conditions").value.map {
+                    @Suppress("UNCHECKED_CAST")
+                    it.value as SpecialEventCondition
+                }
+                SpecialEvent(name, title, description, conditions, weight, options)
             }
         specialEvents = events.associateByTo(mutableMapOf()) { it.name }
+    }
+
+}
+
+typealias SpecialEventCondition = () -> Boolean
+
+object SpecialEventConditions {
+
+    fun inBiome(biome: String): SpecialEventCondition = {
+        val profile = FortyFive.profileManager.currentProfile!!
+        profile.currentMapSaver.currentMap.biome == biome
+    }
+
+    fun playerHasTalisman(talisman: String): SpecialEventCondition = {
+        val profile = FortyFive.profileManager.currentProfile!!
+        talisman in profile.talismans.map { it.name }
+    }
+
+    fun not(specialEventCondition: SpecialEventCondition): SpecialEventCondition = {
+        !specialEventCondition()
     }
 
 }

@@ -39,6 +39,7 @@ interface IProfile {
     val backpackDecks: List<Deck>?
     val encountersStartedInRun: Int?
     val talismans: List<Talisman>
+    val talismanRewardChanceBoost: Double
     var currentNodeIndex: Int
     var lastNodeIndex: Int?
     val currentMapSaver: MapSaver
@@ -67,6 +68,7 @@ interface IProfile {
     fun payMoney(amount: Int)
     fun getCardForRun(card: CardType)
     fun getTalismanForRun(talisman: Talisman)
+    fun boostTalismanRewardChance(increase: Double)
     fun checkDecks()
     fun extractableCards(): List<CardType>
     fun readFromDisk()
@@ -164,6 +166,9 @@ class Profile private constructor(
 
     override val talismans: List<Talisman>
         get() = runSave?.talismans ?: listOf()
+
+    override val talismanRewardChanceBoost: Double
+        get() = runSave?.talismanRewardChanceBoost ?: 0.0
 
     override var currentNodeIndex: Int by DataDelegate(ProfileData::currentNode)
 
@@ -409,6 +414,13 @@ class Profile private constructor(
         val runSave = runSave
         requireNotNull(runSave) { "not in run" }
         runSave.addTalisman(talisman)
+    }
+
+    override fun boostTalismanRewardChance(increase: Double) {
+        require(increase > 0) { "increase must be positive" }
+        val runSave = runSave
+        requireNotNull(runSave) { "not in run" }
+        runSave.talismanRewardChanceBoost += increase
     }
 
     override fun checkDecks() {

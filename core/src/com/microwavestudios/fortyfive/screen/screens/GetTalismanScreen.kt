@@ -90,29 +90,23 @@ class GetTalismanScreen : ScreenCreator() {
             horizontalAlign = CustomAlign.CENTER
             verticalAlign = CustomAlign.SPACE_AROUND
 
-            label("red wing", "You get a Talisman:", Colors.FortyWhite, 33) {
+            verticalSpacer(20f)
+
+            label("red wing", "You get a Talisman:", Colors.FortyWhite, 38) {
                 syncDimensions()
             }
 
-            label("red wing", context.talisman.title, Colors.Orange, 48) {
+            label("red wing", context.talisman.title, Colors.Orange, 70) {
                 syncDimensions()
             }
-            box {
-                height = 200f
-                relativeWidth(80f)
-                flexDirection = FlexDirection.ROW
-                verticalAlign = CustomAlign.CENTER
-                horizontalAlign = CustomAlign.SPACE_AROUND
 
-                image {
-                    squareDim(130f)
-                    backgroundHandle = context.talisman.iconHandle
-                    touchable = Touchable.enabled
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    detailWidget = context.talisman.buildHoverDetail(screen)
-                    bindDetailToInputState(GameInputs.States.focused)
-                }
-
+            image {
+                squareDim(130f)
+                backgroundHandle = context.talisman.iconHandle
+                touchable = Touchable.enabled
+                keyboardFocusable = KeyboardFocusable.LEAF
+                detailWidget = context.talisman.buildHoverDetail(screen)
+                bindDetailToInputState(GameInputs.States.focused)
             }
 
             box {

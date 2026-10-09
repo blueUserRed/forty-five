@@ -19,7 +19,7 @@ configFiles: {
     },
     gameConfig: {
         file: "config/game_config.onj",
-        validatedBy: null,
+        validatedBy: "onjschemas/game_config.onjschema",
     },
     graphicsConfig: {
         file: "config/graphics_config.onj",

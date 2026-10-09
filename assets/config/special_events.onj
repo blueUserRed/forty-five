@@ -3,10 +3,10 @@ use SpecialEvent;
 
 specialEvents: [
     {
-        name: "bushOfThorns",
+        name: "bushOfThornsWasteland",
         title: "Bush of Thorns",
         description: "In the middle of the dessert, you find a bush growing from the sand. Long, spiky thorns completely cover the severely dehydrated plant. You think you see something inside, you think there might even be a subtle golden glow, but there is no way of reaching whatever is hiding in there while avoiding the thorns.",
-        allowedInBiomes: [ "wasteland" ],
+        conditions: [ inBiome("wasteland") ],
         weight: 10,
         options: [
             {
@@ -20,10 +20,10 @@ specialEvents: [
         ]
     },
     {
-        name: "bushOfThorns",
+        name: "bushOfThornsBewitched",
         title: "Bush of Thorns",
         description: "In a particularly dense portion of the forest, you find a bush growing between some trees. Long, spiky thorns completely cover the plant, which clings to one of the trees as if to choke it. You think you see something inside, you think there might even be a subtle golden glow, but there is no way of reaching whatever is hiding in there while avoiding the thorns.",
-        allowedInBiomes: [ "bewitched_forest" ],
+        conditions: [ inBiome("bewitched_forest") ],
         weight: 10,
         options: [
             {
@@ -40,7 +40,7 @@ specialEvents: [
         name: "mysterySpring",
         title: "Mystery Spring",
         description: "Between some rocks, a steady flow of water emerges. You watch as it makes its way across to stone to the ground, where it collects in a large puddle. It is so clear, you can see the ground underneath with no problem.",
-        allowedInBiomes: [ "wasteland", "bewitched_forest" ],
+        conditions: [],
         weight: 10,
         options: [
             {
@@ -57,7 +57,7 @@ specialEvents: [
         name: "abandonedWell",
         title: "Abandoned Well",
         description: "Your water reserves had already run dry a few days before, so as you spot the well, you feel some hope rising up in you. However, as you lean over it, you notice a strong chemical smell. With your tongue feeling like sandpaper in your mouth, you think about whether the risk is worth it.",
-        allowedInBiomes: [ "wasteland", "bewitched_forest" ],
+        conditions: [],
         weight: 10,
         options: [
             {
@@ -73,8 +73,8 @@ specialEvents: [
     {
         name: "toWherever",
         title: "3:10 to wherever",
-        description: "You come across a lonely train station in the desert. Wind chimes move in the wind, but otherwise, there is dead silence. In the distance, however, a train can be seen slowly approaching.",
-        allowedInBiomes: [ "wasteland", "bewitched_forest" ],
+        description: "You come across a lonely train station. Wind chimes climper in the hot air, but otherwise, there is dead silence. In the distance, you can see an old train slowly approaching the station.",
+        conditions: [],
         weight: 10,
         options: [
             {
@@ -89,6 +89,44 @@ specialEvents: [
                 text: "Board the train for two stops. $specialEventAction$[You get put onto a random node two spaces away from this node]$specialEventAction$",
                 actions: [ putPlayerOnNodeWithDistance(2) ]
             }
+        ]
+    },
+    {
+        name: "ancientShrineWasteland",
+        title: "Ancient Shrine",
+        description: "Somewhere between the endless sea of dunes, you come across a small oasis. Surrounded by some bushes and a few palm trees, you spot a shrine that must have stood there for hundreds of years. The stone is weathered, and what is left of the inscription is not recognizable. As your eyes wander across the unreadable text, an old artifact reflects the sun into you eyes. You think about taking it with you, but you fear it might anger the god it belongs to.",
+        conditions: [ inBiome("wasteland"), not(playerHasTalisman("talismanBullet")) ],
+        weight: 10,
+        options: [
+            {
+                text: "Take the artifact with you $specialEventAction$[Take 10 damage, get talisman bullet]$specialEventAction$",
+                actions: [ damagePlayer(10), getTalisman("talismanBullet") ]
+            },
+            {
+                text: "Pray to the god $specialEventAction$[use 3 steps, add 10% to the probability of getting a talisman after an encounter]$specialEventAction$",
+                actions: [ useSteps(3), boostTalismanRewardChance(0.1) ]
+            },
+            {
+                text: "Leave",
+                actions: []
+            },
+        ]
+    },
+    {
+        name: "mineshaft",
+        title: "Mineshaft",
+        description: "On your route you come across an abandoned looking mining operation, as you spot a shimmering gold nugget and decide to take a closer look. The almost magical aura of precious metal draws you in. Suddenly, you hear someone shouting behind you. Two Outlaws are standing behind you.",
+        conditions: [ not(playerHasTalisman("goldNugget")) ],
+        weight: 10000,
+        options: [
+            {
+                text: "Fight $specialEventAction$[Start an encounter, receive Gold Nugget as reward]$specialEventAction$",
+                actions: [ fightForTalisman("goldNugget", ["Outlaw", "Outlaw"]) ]
+            },
+            {
+                text: "Run away $specialEventAction$[use 4 steps]$specialEventAction$",
+                actions: [ useSteps(4) ]
+            },
         ]
     },
 ],

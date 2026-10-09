@@ -1,28 +1,16 @@
 
-import "imports/colors.onj" as color;
-import "config/graphics_config.onj" as graphicsConfig;
+baseReserves: 4,
 
-cardDrawConfig: {
-    firstRound: 6,
-    roundStart: 2,
-    softMaxCards: 12,
-    hardMaxCards: 20,
-},
+softMaxCards: 12,
+hardMaxCards: 20,
 
-rewardConfig: {
-    percentage: 1.0,
-    rerollBasePrice: 15,
-    rerollPriceIncrease: 15,
-},
+cardsToDrawInFirstRound: 6,
+cardsToDraw: 2,
 
-playerConfig: {
-    lives: 45
-},
+shotEmptyDamage: 5,
 
-reservesConfig: {
-    roundStart: 4
-},
+rewardRerollPriceIncrease: 30,
+rewardRerollBasePrice: 30,
 
-damageConfig: {
-    shotEmptyDamage: 5
-},
+cardRewardChance: 1.0,
+talismanRewardChance: 1.0 / 15.0,

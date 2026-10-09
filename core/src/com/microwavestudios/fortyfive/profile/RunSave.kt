@@ -30,6 +30,7 @@ class RunSave private constructor(val profile: Profile) {
     var backpackDecks: MutableList<Deck> by DataDelegate(RunSaveData::backpackDecks)
     var currentDeckId: Int by DataDelegate(RunSaveData::currentDeckId)
     var cardsTakenAlong: List<CardType> by DataDelegate(RunSaveData::cardsTakenAlong)
+    var talismanRewardChanceBoost: Double by DataDelegate(RunSaveData::talismanRewardChanceBoost)
 
     var usedSteps: Int by DataDelegate(
         RunSaveData::usedSteps,
@@ -172,6 +173,7 @@ class RunSave private constructor(val profile: Profile) {
         var currentDeckId: Int,
         var encountersStarted: Int,
         var cardsTakenAlong: List<CardType>,
+        var talismanRewardChanceBoost: Double,
         var run: Run
     ) {
 
@@ -186,6 +188,7 @@ class RunSave private constructor(val profile: Profile) {
             "currentDeckId" with currentDeckId
             "talismans" with talismans.map { it.name }
             "cardsTakenAlong" with cardsTakenAlong.map { it.asOnj() }
+            "talismanRewardChanceBoost" with talismanRewardChanceBoost
             "run" with run.asOnj()
         }
 
@@ -218,6 +221,7 @@ class RunSave private constructor(val profile: Profile) {
                     .value
                     .map { CardType.fromOnj(it as OnjObject) }
                     .toMutableList(),
+                onj.get<Double>("talismanRewardChanceBoost"),
                 Run.fromOnj(onj.get<OnjObject>("run"))
             )
         }
@@ -280,6 +284,7 @@ class RunSave private constructor(val profile: Profile) {
                 0,
                 0,
                 cardsToTakeAlong,
+                0.0,
                 run
             )
             save.write()

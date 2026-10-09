@@ -313,6 +313,6 @@ stampPools: [
 talismanPools: [
     {
         majorDifficulty: 0,
-        talismans: [ "talismanBullet", "goldNugget", "fieldRations", "sleepingBag", "overstock"  ]
+        talismans: [ "talismanBullet", "goldNugget", "fieldRations", "sleepingBag", "overstock", "lasso"  ]
     }
 ],

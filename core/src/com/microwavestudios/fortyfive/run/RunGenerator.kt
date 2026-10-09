@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.run
 
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.map.ApplyStampMapEvent
 import com.microwavestudios.fortyfive.map.ChooseCardMapEvent
 import com.microwavestudios.fortyfive.map.EmptyMapEvent
@@ -348,7 +349,8 @@ class RunGenerator {
                         listOf(),
                         true,
                         0,
-                        15, 10,
+                        GameControllerImpl.Config.rewardRerollPriceIncrease,
+                        GameControllerImpl.Config.rewardRerollBasePrice,
                         random.nextLong(),
                         3
                     ).also {

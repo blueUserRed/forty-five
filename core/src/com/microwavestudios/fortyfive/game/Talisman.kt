@@ -94,8 +94,7 @@ abstract class Talisman {
             Whenever you place a bullet in the revolver,
             return a different bullet from the revolver to your hand.
         """.trimIndent().replace('\n', ' ')
-        override val iconHandle: ResourceHandle
-            get() = TODO("lasso icon")
+        override val iconHandle: ResourceHandle = "lasso_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
             EncounterBehaviour.Lasso

@@ -70,7 +70,7 @@ class SpecialEventScreen : ScreenCreator() {
             heightByAspectRatio(1.4164)
 
             centerX()
-            centerY(offset = -50f)
+            centerY()
 
             flexDirection = FlexDirection.COLUMN
             horizontalAlign = CustomAlign.CENTER
@@ -85,7 +85,7 @@ class SpecialEventScreen : ScreenCreator() {
 
             verticalSpacer(50f)
 
-            advancedText("roadgeek", Colors.Black, 30) {
+            advancedText("roadgeek", Colors.Black, 25) {
                 relativeWidth(80f)
                 syncHeight()
                 setRawText(event.description, DetailDescriptionHandler.allTextEffects)
