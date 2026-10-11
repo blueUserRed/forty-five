@@ -79,6 +79,11 @@ fun Actor.rotationAbstractProperty(): AbstractProperty<Float> = AbstractProperty
     { rotation = it }
 )
 
+fun Actor.scaleAbstractProperty(): AbstractProperty<Float> = AbstractProperty.fromLambdas(
+    { if (scaleX == scaleY) scaleX else scaleX / 2 + scaleY / 2 },
+    { setScale(it) }
+)
+
 class PropertyAnimation<T : Any>(
     private val actor: Actor,
     private val property: AbstractProperty<T>,

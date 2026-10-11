@@ -89,7 +89,7 @@ situations: [
         sound: "card_destroy_sound",
     },
     {
-        name: "title_screen_card_drop",
+        name: "swoosh",
         sound: "swoosh_sound",
     },
     {

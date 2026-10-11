@@ -100,8 +100,6 @@ class Revolver(
 
     override val slots: Array<out RevolverSlot> = Array(5) {
         val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotSize, screen, events, animationDuration)
-        slot.reportDimensionsWithScaling = true
-        slot.ignoreScalingWhenDrawing = true
         addActor(slot)
         screen.addNamedActor("revolverSlot-$it", slot)
         slot
@@ -345,8 +343,6 @@ class RevolverSlot(
     init {
         width = size
         height = size
-        reportDimensionsWithScaling = true
-        ignoreScalingWhenDrawing = true
         touchable = Touchable.enabled
         keyboardFocusable = KeyboardFocusable.LEAF
         joinGroup(revolverSlotGroup)

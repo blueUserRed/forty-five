@@ -227,21 +227,6 @@ open class CustomImageActor(
     val loadedDrawableResourceGetter = automaticResourceGetter<Drawable>(backgroundHandleObserver, screen.lifetime, backgroundHints)
     val loadedDrawable: Drawable? by loadedDrawableResourceGetter
 
-    /**
-     * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
-     * already applied
-     */
-    var reportDimensionsWithScaling: Boolean = false
-        set(value) {
-            field = value
-            invalidateHierarchy()
-        }
-
-    /**
-     * if set to true, the scale of the image will be ignored when drawing
-     */
-    var ignoreScalingWhenDrawing: Boolean = false
-
     private val onLayout: MutableList<() -> Unit> = mutableListOf()
 
     init {
@@ -276,20 +261,14 @@ open class CustomImageActor(
         validate()
         x += drawOffsetX
         y += drawOffsetY
-        val width = if (ignoreScalingWhenDrawing) width else width * scaleX
-        val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
         if (mask == null) {
             val c = batch.color.cpy()
             batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
-            if (rotation != 0f) {
-                val drawable = drawable
-                if (drawable !is TransformDrawable) throw RuntimeException(
-                    "attempted to rotate an image, but the " +
-                            "drawable does not implement TransformDrawable"
-                )
+            val drawable = drawable
+            if (drawable is TransformDrawable) {
                 dropShadow?.doDropShadow(batch, screen, drawable, this, 1f, 1f, rotation)
-                drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
+                drawable.draw(batch, x, y, width / 2, height / 2, width, height, scaleX, scaleY, rotation)
             } else {
                 dropShadow?.doDropShadow(batch, screen, drawable, this)
                 drawable.draw(batch, x, y, width, height)

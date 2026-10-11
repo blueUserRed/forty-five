@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.animation.AbstractProperty
 import com.microwavestudios.fortyfive.animation.DefaultInterpolators
 import com.microwavestudios.fortyfive.utils.plus
 import com.microwavestudios.fortyfive.utils.times
@@ -103,8 +104,7 @@ class BounceOutAction(
 class PropertyAction<T>(
     val typeClass: KClass<T>,
     val obj: Any,
-    val getter: () -> T,
-    val setter: (T) -> Unit,
+    val property: AbstractProperty<T>,
     val end: T,
     val invalidateHierarchyOf: Layout? = null
 ): TemporalAction() where T : Any {
@@ -118,8 +118,22 @@ class PropertyAction<T>(
     ) : this(
         typeClass,
         obj,
-        { property.getter.call() },
-        { value -> property.setter.call(value) },
+        AbstractProperty.fromKotlin(property),
+        end,
+        invalidateHierarchyOf
+    )
+
+    constructor(
+        typeClass: KClass<T>,
+        obj: Any,
+        getter: () -> T,
+        setter: (T) -> Unit,
+        end: T,
+        invalidateHierarchyOf: Layout? = null
+    ) : this(
+        typeClass,
+        obj,
+        AbstractProperty.fromLambdas(getter, setter),
         end,
         invalidateHierarchyOf
     )
@@ -127,7 +141,7 @@ class PropertyAction<T>(
     private var initialValue: T? = null
 
     override fun begin() {
-        initialValue = getter()
+        initialValue = property.get()
         super.begin()
     }
 
@@ -135,7 +149,7 @@ class PropertyAction<T>(
         val interpolator = DefaultInterpolators.getDefaultInterpolator(typeClass)
         requireNotNull(interpolator) { "no interpolator found for $typeClass" }
         val result = interpolator.interpolate(initialValue!!, end, percent)
-        setter(result)
+        property.set(result)
         invalidateHierarchyOf?.invalidateHierarchy()
     }
 

@@ -350,11 +350,6 @@ class IconAdvancedTextPart(
 
     private var calculatedLayout = false
 
-    init {
-        reportDimensionsWithScaling = true
-        ignoreScalingWhenDrawing = true
-    }
-
     private fun recalcLayout() {
         iconHeight = fontSize.toFloat()
         val drawable = loadedDrawable!!

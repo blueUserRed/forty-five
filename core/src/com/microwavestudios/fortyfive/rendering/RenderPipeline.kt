@@ -75,6 +75,11 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
     private var popoutReferenceTime: Long = -1
     private var shakeReferenceTime: Long = -1
 
+    private val defaultVignettePower: Float = 3f
+    private val defaultVignetteStrength: Float = 1.3f
+    private var vignettePower: Float = 3f
+    private var vignetteStrength: Float = 1.3f
+
     private val parryPostProcessingStep: (source: FrameBuffer) -> Unit by lazy {
         if (parryShader.isNotResolved) FortyFive.resourceManager.forceResolve(parryShader)
         shaderPostProcessingStep(parryShader.getOrError())
@@ -317,6 +322,13 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         postprocessor.shader.setUniformf("u_popoutTime", TimeUtils.timeSinceMillis(popoutReferenceTime).toFloat() / 1000f)
         postprocessor.shader.setUniformi("u_doShake", if (shakeReferenceTime == -1L) 0 else 1)
         postprocessor.shader.setUniformf("u_shakeTime", TimeUtils.timeSinceMillis(shakeReferenceTime).toFloat() / 1000f)
+        postprocessor.shader.setUniformf("u_vignetteStrength", vignetteStrength)
+        postprocessor.shader.setUniformf("u_vignettePower", vignettePower)
+    }
+
+    fun changeVignetteForScreen(strength: Float, power: Float) {
+        vignetteStrength = strength
+        vignettePower = power
     }
 
     fun screenChanged(newScreen: RenderableScreen) {
@@ -331,6 +343,8 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
         shakeReferenceTime = -1
         shootReferenceTime = -1
         popoutReferenceTime = -1
+        vignetteStrength = defaultVignetteStrength
+        vignettePower = defaultVignettePower
     }
 
     fun sizeChanged() {
