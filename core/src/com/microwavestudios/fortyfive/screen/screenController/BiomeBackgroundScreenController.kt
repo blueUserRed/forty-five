@@ -42,7 +42,7 @@ class BiomeBackgroundScreenController(
         }
     }
 
-    fun enemyCoordsForChosenBackground(): Array<Vector2> {
+    fun enemyCoordsForChosenBackground(): Array<Pair<Vector2, Float>> {
         val chosenBackground = chosenBackground
         requireNotNull(chosenBackground) { "cant call 'enemyCoordsForChosenBackground' before screen initialised" }
         val coords = screenEnemyPositions[chosenBackground]
@@ -57,21 +57,21 @@ class BiomeBackgroundScreenController(
     companion object {
 
         // TODO: move to graphics_config.onj
-        private val screenEnemyPositions = mutableMapOf<String, Array<Vector2>>(
+        private val screenEnemyPositions = mutableMapOf<String, Array<Pair<Vector2, Float>>>(
             "background_wasteland1" to arrayOf(
-                Vector2(696f, 416f),
-                Vector2(986f, 253f),
-                Vector2(1234f, 411f),
+                Vector2(700f, 362f) to 0.7f,
+                Vector2(950f, 362f) to 0.7f,
+                Vector2(1200f, 362f) to 0.7f,
             ),
             "background_wasteland2" to arrayOf(
-                Vector2(570f, 483f),
-                Vector2(830f, 294f),
-                Vector2(1214f, 420f),
+                Vector2(700f, 260f) to 0.8f,
+                Vector2(920f, 290f) to 0.7f,
+                Vector2(1190f, 410f) to 0.6f,
             ),
             "background_wasteland3" to arrayOf(
-                Vector2(658f, 403f),
-                Vector2(898f, 275f),
-                Vector2(1214f, 420f),
+                Vector2(780f, 403f) to 0.6f,
+                Vector2(1010f, 250f) to 0.8f,
+                Vector2(1214f, 390f) to 0.6f,
             ),
         )
     }

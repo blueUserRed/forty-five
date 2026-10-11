@@ -436,17 +436,18 @@ class EncounterScreen : ScreenCreator() {
         controller: GameController
     ) = with(enemyParent) {
 
-        val enemyHeight = 400f
-        val enemyWidth = enemyHeight * 0.6f
+//        val enemyHeight = 500f
+//        val enemyWidth = 200f
 
         box {
             enemy.actor = this
             flexDirection = FlexDirection.COLUMN
-            val coords = bgScreenController.enemyCoordsForChosenBackground()[index]
+            val (coords, bgScale) = bgScreenController.enemyCoordsForChosenBackground()[index]
+            val scale = enemy.inherentScale * bgScale
             x = coords.x
             y = coords.y
-            width = enemyWidth
-            height = enemyHeight
+            width = 200f
+            syncHeight()
 
             gameEvents.watchFor<UpdateUiEvent> {
                 drawOffsetX = bgOffX * 1.1f
@@ -479,11 +480,9 @@ class EncounterScreen : ScreenCreator() {
                 event.timeline.resolve(chargeTimeline())
             }
 
-            actionIndicator(enemy, enemyHeight)
+            actionIndicator(enemy)
 
             group {
-                relativeWidth(100f)
-                height = enemyHeight * 0.65f
 
                 keyboardFocusable = KeyboardFocusable.LEAF
                 touchable = Touchable.enabled
@@ -506,34 +505,35 @@ class EncounterScreen : ScreenCreator() {
                     gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
                 }
 
-                image {
-                    // TODO: add anims back
+                val enemyImage = image {
                     var heightPercent = 1f
                     backgroundHandle = enemy.drawableHandle
-                    relativeHeight(100f)
                     centerX()
                     onLayout {
-                        height = parent.height * heightPercent
+                        height = 400f * heightPercent * scale
                         val drawable = drawable ?: return@onLayout
                         width = height * (drawable.minWidth / drawable.minHeight)
                     }
 
                     enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
                         backgroundHandle = "enemy_gravestone"
-                        heightPercent = 0.6f
+                        heightPercent = 0.6f * scale
                         invalidate()
                     }
                 }
 
+                relativeWidth(100f)
+                onLayoutAndNow { height = enemyImage.height }
+
                 image {
                     backgroundHandle = "card_symbol_marked"
                     centerX()
-                    onLayoutAndNow { this.y = parent.height / 2 - height / 2 + 30f }
+                    y = 180f * scale
                     relativeWidth(40f)
                     touchable = Touchable.disabled
                     onLayoutAndNow { height = width }
                     animateRotationSinus(
-                        amplitude = Math.PI.toFloat() * 1.8f,
+                        amplitude = 5.5f,
                     )
                     animateUpAndDownSinus(
                         method = AnimatedActor.AnimationMethod.DRAW_OFFSET,
@@ -544,16 +544,17 @@ class EncounterScreen : ScreenCreator() {
                         val onlyOne = controller.allEnemies.size == 1
                         val enemySelected = e === enemy
                         isVisible = !onlyOne && enemySelected
+                        invalidate()
                     }
                 }
             }
 
             group {
-                relativeWidth(100f)
-                height = enemyHeight * 0.1f
+                height = 40f
+                width = 230f
                 val statusBar = StatusBar(screen, enemy)
                 actor(statusBar) {
-                    relativeWidth(110f)
+                    relativeWidth(100f)
                     relativeHeight(100f)
                 }
             }
@@ -564,6 +565,7 @@ class EncounterScreen : ScreenCreator() {
             )
 
             actor(statusEffectBar) {
+//                debug()
                 relativeWidth(87f)
                 logicalOffsetX = 30f
                 height = 70f
@@ -572,7 +574,7 @@ class EncounterScreen : ScreenCreator() {
         }
     }
 
-    private fun CustomGroup.actionIndicator(enemy: Enemy, enemyHeight: Float) = box {
+    private fun CustomGroup.actionIndicator(enemy: Enemy) = box {
 
         fun showAction(
             text: () -> String?,
@@ -626,7 +628,7 @@ class EncounterScreen : ScreenCreator() {
         flexDirection = FlexDirection.ROW
         horizontalAlign = CustomAlign.CENTER
         verticalAlign = CustomAlign.CENTER
-        height = enemyHeight * 0.15f
+        height = 50f
         touchable = Touchable.enabled
         bindDetailToInputState(GameInputs.States.focused)
         enemy.enemyEvents.watchFor<Enemy.EnemyActionChangedEvent> { event ->

@@ -700,7 +700,11 @@ class Ominous(
         stackTurnEffect(other)
     }
 
-    override fun getDisplayText(): String = "($damage, $currentDuration)"
+    override fun getDisplayText(): String = if (continueForever) {
+        "($damage, inf)"
+    } else {
+        "($damage, $currentDuration)"
+    }
 
     override fun equals(other: Any?): Boolean = other is Ominous
 

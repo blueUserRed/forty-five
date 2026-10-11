@@ -83,6 +83,7 @@ var outlaws = [
         name: "Outlaw-1",
         title: "Outlaw",
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         baseHealth: 45,
         actions: [
             {
@@ -107,6 +108,7 @@ var outlaws = [
         name: "Outlaw-2",
         title: "Outlaw",
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         baseHealth: 70,
         actions: [
             {
@@ -139,6 +141,7 @@ var pyros = [
         title: "Pyro",
         baseHealth: 45,
         texture: "enemy_pyro",
+        inherentScale: 0.7,
         actions: [
             {
                 weight: 12#actionVal,
@@ -168,6 +171,7 @@ var pyros = [
         title: "Pyro",
         baseHealth: 80,
         texture: "enemy_pyro",
+        inherentScale: 0.7,
         actions: [
             {
                 weight: 9#actionVal,
@@ -218,6 +222,7 @@ var witches = [
         name: "Witch-1",
         title: "Witch",
         texture: "enemy_witch",
+        inherentScale: 1.0,
         baseHealth: 50,
         actions: [
             {
@@ -255,6 +260,7 @@ var witches = [
         name: "Witch-2",
         title: "Witch",
         texture: "enemy_witch",
+        inherentScale: 1.0,
         baseHealth: 90,
         actions: [
             {
@@ -295,6 +301,7 @@ var fangs = [
         name: "The-Fangs-1",
         title: "The Fangs",
         texture: "enemy_the_fangs",
+        inherentScale: 0.8,
         baseHealth: 45,
         actions: [
             {
@@ -326,6 +333,7 @@ var fangs = [
         name: "The-Fangs-2",
         title: "The Fangs",
         texture: "enemy_the_fangs",
+        inherentScale: 0.8,
         baseHealth: 80,
         actions: [
             {
@@ -360,6 +368,7 @@ var scarecrows = [
         name: "Scarecrow-1",
         title: "Scarecrow",
         texture: "enemy_scarecrow",
+        inherentScale: 0.9,
         baseHealth: 40,
         actions: [
             {
@@ -367,17 +376,17 @@ var scarecrows = [
                 action: action_damage(5, 7, false)
             },
             {
-                weight: 2#actionVal,
-                action: action_passiveEffect(ominous(2#val, 1#val, true)),
+                weight: 5#actionVal,
+                action: action_passiveEffect(ominous(2#val, 1#val, false)),
                 overrideTitle: "Ominous",
-                overrideDescription: "The enemy gives itself $status$OMINOUS$status$ for the remainder of the encounter",
-                maxExecutions: 1,
+                overrideDescription: "The enemy gives itself $status$OMINOUS$status$",
             },
             {
-                weight: 5#actionVal,
+                weight: 3#actionVal,
                 action: action_passiveEffect(deterringAura()),
+                maxExecutions: 1,
                 overrideTitle: "Deterring Aura",
-                overrideDescription: "The enemy gives itself $status$DETERRING AURA$status$ for the next turn",
+                overrideDescription: "The enemy gives itself $status$DETERRING AURA$status$ for the remainder of the encounter",
             },
             {
                 weight: 4#actionVal,
@@ -389,6 +398,7 @@ var scarecrows = [
         name: "Scarecrow-2",
         title: "Scarecrow",
         texture: "enemy_scarecrow",
+        inherentScale: 0.9,
         baseHealth: 80,
         actions: [
             {
@@ -423,6 +433,7 @@ enemies: [
         title: "Outlaw",
         baseHealth: 50,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: []
     },
 
@@ -441,6 +452,7 @@ enemies: [
         title: "Scarecrow",
         baseHealth: 30,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: []
     },
     {
@@ -448,6 +460,7 @@ enemies: [
         title: "Outlaw",
         baseHealth: 25,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: [
             {
                 weight: 1#actionVal,
@@ -461,6 +474,7 @@ enemies: [
         title: "Outlaw",
         baseHealth: 45,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: [
             {
                 weight: 1#actionVal,
@@ -474,6 +488,7 @@ enemies: [
         title: "Outlaw",
         baseHealth: 42,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: [
             {
                 weight: 1#actionVal,
@@ -487,6 +502,7 @@ enemies: [
         title: "Outlaw",
         baseHealth: 55,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: [
             {
                 weight: 1#actionVal,
@@ -500,6 +516,7 @@ enemies: [
         title: "Outlaw",
         baseHealth: 75,
         texture: "enemy_outlaw",
+        inherentScale: 0.8,
         actions: [
             {
                 weight: 1#actionVal,
