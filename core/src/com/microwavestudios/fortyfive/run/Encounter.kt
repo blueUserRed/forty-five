@@ -223,7 +223,7 @@ object EncounterGenerator {
     fun generate(
         placeholder: EncounterPlaceholderMapEvent,
         node: MapNodeBuilder,
-        startNode: MapNodeBuilder,
+        maxDistance: Int,
         run: Run
     ): Encounter {
 
@@ -244,7 +244,7 @@ object EncounterGenerator {
             .map { EncounterModifier.getFromName(it) }
             .sumOf { it.difficultyChange.toDouble() }
 
-        val difficultyScaling = difficultyScale(node, placeholder, startNode)
+        val difficultyScaling = difficultyScale(node, placeholder, maxDistance)
         difficultyAdjustment += difficultyScaling
 
         if (placeholder.genHard) {
@@ -274,22 +274,13 @@ object EncounterGenerator {
     private fun difficultyScale(
         node: MapNodeBuilder,
         placeholder: EncounterPlaceholderMapEvent,
-        startNode: MapNodeBuilder
+        maxDistance: Int,
     ): Float {
         val currentDistance = node.distance
         require(currentDistance != -1) { "node distance is -1" }
-        val maxDistance = maxDistance(startNode)
         val percent = currentDistance.toFloat() / maxDistance.toFloat()
-
         val scaled = placeholder.difficultyScaling.scale(placeholder.scaleMin, placeholder.scaleMax, percent)
         return scaled
-    }
-
-    private fun maxDistance(node: MapNodeBuilder): Int {
-        val localMaxDist = node.edgesTo.maxOf { it.distance }
-        if (localMaxDist <= node.distance) return node.distance
-        val maxEdges = node.edgesTo.filter { it.distance == localMaxDist }
-        return maxEdges.maxOf { maxDistance(it) }
     }
 
     private fun generateEnemies(

@@ -284,7 +284,8 @@ fun <T> Collection<Pair<Int, T>>.weightedRandom(random: Random = Random): T =
 fun <T> Collection<Pair<Int, T>>.weightedRandomOrNull(random: Random = Random): T? {
     if (isEmpty()) return null
     val total = this.sumOf { abs(it.first) }
-    val choice = (0..total).random(random)
+    if (total == 0) return random(random).second
+    val choice = (1..total).random(random)
     var acc = 0
     this.forEach { (weight, value) ->
         acc += abs(weight)

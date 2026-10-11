@@ -533,7 +533,7 @@ cards: [
     {
         name: "finalBullet",
         title: "Final Bullet",
-        flavourText: "\"He came to our land, married on of our own and then brought war. We forged bullets to defend ourselves. But this was his plan all along. An empire, built with our bullets...\" - a forgotten note",
+        flavourText: "\"He came to our land, married one of our own and then brought war. We forged bullets to defend ourselves. But this was his plan all along. An empire, built with our bullets...\" - a forgotten note",
         description: "$trigger$On-Leave:$trigger$\nYou lose the game\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +12 dmg",
         baseDamage: 20,
         deckMaximum: 1,

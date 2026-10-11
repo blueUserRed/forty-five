@@ -94,9 +94,30 @@ specialEvents: [
     {
         name: "ancientShrineWasteland",
         title: "Ancient Shrine",
-        description: "Somewhere between the endless sea of dunes, you come across a small oasis. Surrounded by some bushes and a few palm trees, you spot a shrine that must have stood there for hundreds of years. The stone is weathered, and what is left of the inscription is not recognizable. As your eyes wander across the unreadable text, an old artifact reflects the sun into you eyes. You think about taking it with you, but you fear it might anger the god it belongs to.",
+        description: "Somewhere in the endless sea of dunes, you come across a small oasis. Surrounded by some bushes and a few palm trees, you spot a shrine that must have stood there for hundreds of years. The stone is weathered, and what is left of the inscription is not recognizable. As your eyes wander across the unreadable text, an old artifact reflects the sun into you eyes. You think about taking it with you, but you fear it might anger the god it belongs to.",
         conditions: [ inBiome("wasteland"), not(playerHasTalisman("talismanBullet")) ],
-        weight: 10,
+        weight: 5,
+        options: [
+            {
+                text: "Take the artifact with you $specialEventAction$[Take 10 damage, get talisman bullet]$specialEventAction$",
+                actions: [ damagePlayer(10), getTalisman("talismanBullet") ]
+            },
+            {
+                text: "Pray to the god $specialEventAction$[use 3 steps, add 10% to the probability of getting a talisman after an encounter]$specialEventAction$",
+                actions: [ useSteps(3), boostTalismanRewardChance(0.1) ]
+            },
+            {
+                text: "Leave",
+                actions: []
+            },
+        ]
+    },
+    {
+        name: "ancientShrineBewitched",
+        title: "Ancient Shrine",
+        description: "Somewhere in the dense forest, you come across a small clearing. In the middle, you spot a shrine that must have stood there for hundreds of years. The stone is weathered, and what is left of the inscription is not recognizable. As your eyes wander across the unreadable text, an old artifact reflects the sun into you eyes. You think about taking it with you, but you fear it might anger the god it belongs to.",
+        conditions: [ inBiome("bewitched_forest"), not(playerHasTalisman("talismanBullet")) ],
+        weight: 5,
         options: [
             {
                 text: "Take the artifact with you $specialEventAction$[Take 10 damage, get talisman bullet]$specialEventAction$",
@@ -117,7 +138,7 @@ specialEvents: [
         title: "Mineshaft",
         description: "On your route you come across an abandoned looking mining operation, as you spot a shimmering gold nugget and decide to take a closer look. The almost magical aura of precious metal draws you in. Suddenly, you hear someone shouting behind you. Two Outlaws are standing behind you.",
         conditions: [ not(playerHasTalisman("goldNugget")) ],
-        weight: 10000,
+        weight: 5,
         options: [
             {
                 text: "Fight $specialEventAction$[Start an encounter, receive Gold Nugget as reward]$specialEventAction$",

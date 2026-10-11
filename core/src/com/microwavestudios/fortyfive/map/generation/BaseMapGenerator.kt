@@ -171,7 +171,7 @@ abstract class BaseMapGenerator {
         _allNodes.add(it)
         val width = data.nodeProtectedArea
         val halfWidth = width / 2
-        nodeColliders.add(Rectangle(x - halfWidth, y - halfWidth, width, width))
+        addNodeCollider(Rectangle(x - halfWidth, y - halfWidth, width, width))
     }
 
     private fun setupLastNode(node: MapNodeBuilder) {
@@ -269,10 +269,11 @@ abstract class BaseMapGenerator {
     fun generateEncounters() {
         val startNode = startNode
         requireNotNull(startNode) { "call generateMapEvents() before generateEncounters()" }
+        val maxDistance = _allNodes.maxOf { it.distance }
         _allNodes.forEach { node ->
             val event = node.event
             if (event !is EncounterPlaceholderMapEvent) return@forEach
-            val encounter = EncounterGenerator.generate(event, node, startNode, run)
+            val encounter = EncounterGenerator.generate(event, node, maxDistance, run)
             val encounterEvent = EncounterMapEvent(encounter, event.genExtraction)
             event.startConditions.forEach { encounterEvent.addStartCondition(it) }
             event.blockConditions.forEach { encounterEvent.addBlockCondition(it) }
