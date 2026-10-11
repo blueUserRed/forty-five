@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.utils.Align
+import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
@@ -158,11 +159,17 @@ class NewRevolver(
 
     override fun rotate(rotation: RevolverRotation): Timeline {
         if (rotation.amount == 0) return Timeline.emptyTimeline
-        return when (rotation) {
+        val rotationTimeline = when (rotation) {
             is RevolverRotation.Right -> rotateRight(rotation.amount)
             is RevolverRotation.Left -> rotateLeft(rotation.amount)
             else -> unreachable()
         }
+        return Timeline.parallel(
+            rotationTimeline,
+            Timeline.timeline {
+                action { FortyFive.soundPlayer.situation("revolver_rotation", screen) }
+            }
+        )
     }
 
     private fun rotateRight(amount: Int): Timeline = Timeline.timeline {

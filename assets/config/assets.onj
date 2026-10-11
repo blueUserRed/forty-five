@@ -220,7 +220,7 @@ textures: [
     },
     {
         name: "deterring_aura_icon",
-        file: "blobs/icons/status_effects/ominous.png",
+        file: "blobs/icons/status_effects/deterring_aura.png",
     },
     {
         name: "damage_icon",

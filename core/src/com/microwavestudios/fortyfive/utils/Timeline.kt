@@ -263,6 +263,12 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
             return timelineBuilder.build()
         }
 
+        fun parallel(vararg timelines: Timeline): Timeline = timeline {
+            parallelActions(
+                *timelines.map { it.asAction() }.toTypedArray()
+            )
+        }
+
         inline fun later(crossinline builder: TimelineBuilderDSL.() -> Unit): Timeline = timeline {
             later { builder(this) }
         }

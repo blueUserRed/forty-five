@@ -473,18 +473,18 @@ cards: [
         name: "unpleasantGradientBullet",
         title: "Unpleasant Gradient Bullet",
         flavourText: "This is definitely more than unpleasant. This is a hate crime",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 8 dmg to the target enemies",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 6 dmg to all enemies",
         baseDamage: 5,
         deckMaximum: 2,
         effects: [
             {
                 trigger: turnBegin(),
                 inZones: [zone.revolver],
-                effect: damageDirect(8#val, true)
+                effect: damageDirect(6#val, true)
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "no-shot"],
+        tags: ["pool1", "rarity1", "no-shot"],
         price: 50,
     },
     {
@@ -527,7 +527,7 @@ cards: [
             }
         ],
         cost: 2,
-        tags: ["pool2", "rarity3", "other"],
+        tags: ["pool2", "rarity2", "other"],
         price: 50,
     },
     {
@@ -804,7 +804,7 @@ cards: [
                 effect: draw(value.rotationAmount)
             }
         ],
-        cost: 3,
+        cost: 2,
         additionalHoverInfos: ["rotations"],
         tags: ["pool1", "rarity1", "basic"],
         price: 70,
@@ -921,7 +921,7 @@ cards: [
                 effect: givePlayerStatus(shield(value.rotationAmount * 2.0))
             }
         ],
-        cost: 2,
+        cost: 1,
         additionalHoverInfos: ["rotations"],
         tags: ["pool2", "rarity2", "rotate"],
         price: 50,
@@ -1112,7 +1112,7 @@ cards: [
         name: "molotovBullet",
         title: "Molotov Bullet",
         flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
-        description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
+        description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (2)",
         baseDamage: 2,
         deckMaximum: 3,
         traitEffects: [ "spray" ],
@@ -1140,7 +1140,7 @@ cards: [
                 effect: drawOneMoreCardWhileBulletIsInRevolver()
             }
         ],
-        cost: 3,
+        cost: 2,
         tags: ["pool2", "rarity2", "other", "explore"],
         price: 80,
     },
@@ -1234,7 +1234,7 @@ cards: [
         ],
         cost: 1,
         deckMaximum: 2,
-        tags: ["pool1", "rarity2", "other"],
+        tags: ["pool1", "rarity1", "other"],
         price: 50,
     },
     {
@@ -1568,7 +1568,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity3", "no-shot"],
+        tags: ["pool1", "rarity3", "not used", "unobtainable", "no-shot"],
         price: 50,
     },
     {
@@ -1629,7 +1629,7 @@ cards: [
             }
         ],
         cost: 4,
-        tags: ["pool1", "rarity1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -1650,7 +1650,7 @@ cards: [
             }
         ],
         cost: 1,
-        tags: ["pool1", "rarity2", "destroy", "rotate"],
+        tags: ["pool1", "rarity2", "destroy", "not used", "unobtainable", "rotate"],
         price: 50,
     },
     {
@@ -1794,13 +1794,13 @@ cards: [
         name: "icedOutBullet",
         title: "Iced Out Bullet",
         flavourText: "",
-        description: "$trigger$On-Placedown:$trigger$\nin slot 4" + slot.4 + ":\nyou get $status$FROZEN$status$ (4)\n$trigger$On-Leave:$trigger$\ndraw 1 card",
-        baseDamage: 1,
+        description: "$trigger$On-Placedown:$trigger$\nin slot 4" + slot.4 + ":\nyou get $status$FROZEN$status$ (3)\n$trigger$On-Leave:$trigger$\ndraw 1 card",
+        baseDamage: 7,
         deckMaximum: 1,
         effects: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers) mustMatchPredicate inRevolverSlot(4),
-                effect: givePlayerStatus(frozen(4#val))
+                effect: givePlayerStatus(frozen(3#val))
             },
             {
                 trigger: leaveZone(zone.revolver, onlySelfTriggers),

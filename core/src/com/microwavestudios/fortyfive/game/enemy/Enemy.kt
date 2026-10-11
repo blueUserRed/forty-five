@@ -42,6 +42,8 @@ class Enemy(
             field = max(value, -300)
             enemyEvents.fire(HealthChangedEvent)
             if (defeated) enemyEvents.fire(EnemyDefeated)
+            nextEnemyAction = NextEnemyAction.None
+            enemyEvents.fire(EnemyActionChangedEvent(nextEnemyAction))
         }
 
     val isDefeated: Boolean

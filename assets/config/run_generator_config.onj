@@ -131,8 +131,8 @@ hardEncounterDifficultyMultiplier: 1.3,
 
 stepConfig: {
     limited: {
-        minSteps: [14, 16],
-        maxSteps: [25, 29],
+        minSteps: [13, 15],
+        maxSteps: [24, 27],
     },
     constructed: {
         minSteps: [5, 10],
@@ -163,9 +163,8 @@ enemies: [
 
 allowedEnemyConfigurations: [
     [ "Outlaw" ],
-    [ "Outlaw", "Outlaw" ],
     [ "Outlaw", "Outlaw", "Outlaw" ],
-    [ "Outlaw", "Witch" ],
+    [ "Witch", "Outlaw" ],
     [ "Outlaw", "Witch", "Witch" ],
     [ "Outlaw", "Outlaw", "Witch" ],
     [ "Outlaw", "Pyro" ],
@@ -180,10 +179,8 @@ allowedEnemyConfigurations: [
     [ "The-Fangs", "The-Fangs", "Witch" ],
     [ "The-Fangs", "Pyro", "Witch" ],
     [ "Scarecrow" ],
-    [ "Scarecrow", "Scarecrow" ],
-    [ "Scarecrow", "Witch" ],
+    [ "Witch", "Scarecrow" ],
     [ "Scarecrow", "Pyro" ],
-    [ "Scarecrow", "Outlaw" ],
     [ "Scarecrow", "The-Fangs" ],
     [ "Scarecrow", "Scarecrow", "Scarecrow" ],
     [ "Scarecrow", "Scarecrow", "Witch" ],
@@ -227,12 +224,12 @@ enemyProbabilityIncrease: [
 
 enemyProbabilityRandomPoints: 120,
 
-enemyHealthAdjustment: 0.5,
+enemyHealthAdjustment: 0.4,
 enemyDamageAdjustment: 0.3,
 
 difficultyScaling: {
     limited: {
-        encounterStartedScale: 0.17,
+        encounterStartedScale: 0.15,
         relativeMin: 0.0,
         relativeMax: 0.5,
         scaling: $PowerScaling {

@@ -9,8 +9,8 @@ cardsToDraw: 2,
 
 shotEmptyDamage: 5,
 
-rewardRerollPriceIncrease: 30,
-rewardRerollBasePrice: 30,
+rewardRerollPriceIncrease: 12,
+rewardRerollBasePrice: 12,
 
 cardRewardChance: 1.0,
-talismanRewardChance: 1.0 / 15.0,
+talismanRewardChance: 1.0 / 12.0,
