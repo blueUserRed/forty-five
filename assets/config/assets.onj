@@ -966,6 +966,10 @@ textures: [
         file: "blobs/microwave_studios.png",
     },
     {
+        name: "crested_fox_logo",
+        file: "blobs/crested_fox.png",
+    },
+    {
         name: "logo_red",
         file: "blobs/logo_red.png",
     },
@@ -1408,6 +1412,10 @@ colorTextures: [
     {
         name: "dark_brown_grey_texture",
         color: color("1a1716")
+    },
+    {
+        name: "brighter_black_texture",
+        color: color("06090C")
     },
     {
         name: "lighter_brown_grey_texture",

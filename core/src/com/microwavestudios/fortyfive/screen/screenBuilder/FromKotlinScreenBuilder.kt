@@ -23,8 +23,8 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
             namedActors = namedActors,
             transitions = creator.transitions,
             screenBuilder = this,
-            music = null,
-            playAmbientSounds = creator.playAmbientSounds
+            playAmbientSounds = creator.playAmbientSounds,
+            doPostProcessing = creator.doPostProcessing
         )
         val debugMenuPages = commonDebugMenuPages + creator.debugMenuPages()
         val previousMenu = previousScreen?.debugMenu

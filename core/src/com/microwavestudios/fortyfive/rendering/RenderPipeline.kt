@@ -139,12 +139,15 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
 
     private fun postprocessAndRenderToScreen(frameBuffer: FrameBuffer) {
         val viewport = screen.viewport
+        val postProcess = screen.doPostProcessing
         val postprocessors = mutableListOf<((FrameBuffer) -> Unit)>({ source ->
-            if (postprocessor.isNotResolved) FortyFive.resourceManager.forceResolve(postprocessor)
-            val postprocessor = postprocessor.getOrError()
-            batch.shader = postprocessor.shader
-            postprocessor.prepare(screen)
-            setPostprocessorUniforms(postprocessor)
+            if (postProcess) {
+                if (postprocessor.isNotResolved) FortyFive.resourceManager.forceResolve(postprocessor)
+                val postprocessor = postprocessor.getOrError()
+                batch.shader = postprocessor.shader
+                postprocessor.prepare(screen)
+                setPostprocessorUniforms(postprocessor)
+            }
             batch.draw(
                 source.colorBufferTexture,
                 0f, 0f,
@@ -152,7 +155,7 @@ class RenderPipeline(screen: RenderableScreen) : ResourceBorrower {
                 0f, 0f, 1f, 1f // flips the y-axis
             )
             batch.flush()
-            batch.shader = null
+            if (postProcess) batch.shader = null
         })
         postprocessors.addAll(additionalPostProcessingSteps)
 

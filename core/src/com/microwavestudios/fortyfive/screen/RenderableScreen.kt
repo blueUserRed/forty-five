@@ -81,8 +81,8 @@ open class RenderableScreen(
     private val namedActors: MutableMap<String, Actor>,
     val transitions: Map<String, ScreenManager.ScreenTransition>,
     val screenBuilder: ScreenBuilder,
-    val music: ResourceHandle?,
-    val playAmbientSounds: Boolean
+    val playAmbientSounds: Boolean,
+    val doPostProcessing: Boolean
 ) : ScreenAdapter(), IScreen, ResourceBorrower {
 
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()

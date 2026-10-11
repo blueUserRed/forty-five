@@ -61,6 +61,12 @@ abstract class ScreenCreator : ResourceBorrower {
      */
     abstract val playAmbientSounds: Boolean
 
+    /**
+     * if true, the [RenderPipeline][com.microwavestudios.fortyfive.rendering.RenderPipeline] will use apply the default
+     * postprocessor
+     */
+    open val doPostProcessing: Boolean = true
+
     abstract val background: ResourceHandle?
 
     /**
