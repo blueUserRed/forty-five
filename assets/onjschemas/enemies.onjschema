@@ -26,6 +26,7 @@ var enemy = {
     baseHealth: int,
     texture: string,
     inherentScale: float,
+    shadowScale: float,
     actions: action[],
 };
 

@@ -392,6 +392,10 @@ textures: [
         file: "blobs/encounter_screen/parry.png"
     },
     {
+        name: "encounter_enemy_shadow",
+        file: "blobs/encounter_screen/enemy_shadow.png"
+    },
+    {
         name: "wood_box",
         file: "blobs/encounter_screen/wood_box.png"
     },

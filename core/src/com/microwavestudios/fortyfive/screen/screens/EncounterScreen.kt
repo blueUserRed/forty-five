@@ -505,20 +505,42 @@ class EncounterScreen : ScreenCreator() {
                     gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
                 }
 
+
+                image {
+                    backgroundHandle = "encounter_enemy_shadow"
+                    relativeWidth(140f * scale * enemy.shadowScale)
+                    height = 110f * scale * enemy.shadowScale
+                    centerX()
+                    y = -20f
+                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
+                        isVisible = false
+                    }
+                }
+
                 val enemyImage = image {
                     var heightPercent = 1f
                     backgroundHandle = enemy.drawableHandle
                     centerX()
+                    y = 0f
                     onLayout {
                         height = 400f * heightPercent * scale
                         val drawable = drawable ?: return@onLayout
                         width = height * (drawable.minWidth / drawable.minHeight)
                     }
-
                     enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
-                        backgroundHandle = "enemy_gravestone"
-                        heightPercent = 0.6f * scale
-                        invalidate()
+                        isVisible = false
+                    }
+                }
+
+                image {
+                    backgroundHandle = "enemy_gravestone"
+                    centerX()
+                    relativeWidth(100f * scale)
+                    heightByAspectRatio(470.0 / 520.0)
+                    y = 0f
+                    isVisible = false
+                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
+                        isVisible = true
                     }
                 }
 

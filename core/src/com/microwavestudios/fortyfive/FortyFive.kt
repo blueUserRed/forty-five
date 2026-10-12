@@ -123,33 +123,6 @@ object FortyFive : Game() {
 
     fun toMap() {
         screenManager.newBaseScreen(MapScreen, MapScreenContext.default)
-
-        val context = object : EncounterContext {
-            override val encounter: Encounter = Encounter(
-                enemiesGroups = listOf(),
-                forceConcreteEnemies = listOf("Pyro-1", "Scarecrow-1", "Outlaw-1"),
-//                forceConcreteEnemies = listOf("Pyro-1", "Outlaw-1", "The-Fangs-1"),
-//                forceConcreteEnemies = listOf("Witch-1", "Witch-1", "Witch-1"),
-                encounterModifierNames = setOf(),
-                forceCards = null,
-                shuffleCards = true,
-                unadjustedMajorDifficulty = 2,
-                majorDifficulty = 2,
-                minorDifficulty = 1f,
-                isHard = false,
-                difficultyScalingInfo = 0f,
-                special = true
-            )
-
-            override val forceBackground: ResourceHandle = "background_wasteland5"
-
-            override val isExtraction: Boolean = false
-
-            override fun completed() {}
-
-        }
-
-        screenManager.appendScreen(EncounterScreen, context)
         screenManager.screenFinished()
     }
 

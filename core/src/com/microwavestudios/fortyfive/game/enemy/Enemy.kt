@@ -22,6 +22,7 @@ data class EnemyPrototype(
 class Enemy(
     val name: String,
     val inherentScale: Float,
+    val shadowScale: Float,
     val drawableHandle: ResourceHandle,
     val health: Int,
     private val brain: EnemyBrain
@@ -226,6 +227,7 @@ class Enemy(
             val enemy = Enemy(
                 onj.get<String>("name"),
                 onj.get<Double>("inherentScale").toFloat(),
+                onj.get<Double>("shadowScale").toFloat(),
                 drawableHandle,
                 health,
                 EnemyBrain.fromOnj(onj)
