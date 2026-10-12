@@ -73,6 +73,16 @@ class BiomeBackgroundScreenController(
                 Vector2(1010f, 250f) to 0.8f,
                 Vector2(1214f, 390f) to 0.6f,
             ),
+            "background_wasteland4" to arrayOf(
+                Vector2(780f, 250f) to 0.7f,
+                Vector2(1010f, 280f) to 0.7f,
+                Vector2(1220f, 270f) to 0.7f,
+            ),
+            "background_wasteland5" to arrayOf(
+                Vector2(910f, 410f) to 0.5f,
+                Vector2(1105f, 330f) to 0.6f,
+                Vector2(1300f, 270f) to 0.7f,
+            ),
         )
     }
 }

@@ -565,7 +565,7 @@ class EncounterScreen : ScreenCreator() {
             )
 
             actor(statusEffectBar) {
-//                debug()
+                debug()
                 relativeWidth(87f)
                 logicalOffsetX = 30f
                 height = 70f

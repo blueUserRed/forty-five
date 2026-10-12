@@ -80,6 +80,14 @@ biomeBackgrounds: [
                 background: "background_wasteland3",
                 isDark: true,
             },
+            {
+                background: "background_wasteland4",
+                isDark: false,
+            },
+            {
+                background: "background_wasteland5",
+                isDark: false,
+            },
         ]
     },
     {
