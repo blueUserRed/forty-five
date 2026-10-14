@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.game.controller
 
 import com.microwavestudios.fortyfive.game.Talisman
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.run.Encounter
 
@@ -17,6 +18,9 @@ interface EncounterContext {
         get() = null
 
     val forceTalisman: Talisman?
+        get() = null
+
+    val forceCreatedEnemies: List<Enemy>?
         get() = null
 
     fun completed()

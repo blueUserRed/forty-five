@@ -1,6 +1,8 @@
 package com.microwavestudios.fortyfive.testing
 
+import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
+import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
@@ -8,10 +10,13 @@ import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Events
 import com.microwavestudios.fortyfive.game.enemy.Enemy
+import com.microwavestudios.fortyfive.game.enemy.EnemyAction
+import com.microwavestudios.fortyfive.game.enemy.EnemyBrain
 import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
 import com.microwavestudios.fortyfive.testing.mockcomponents.MockAfterlife
 import com.microwavestudios.fortyfive.testing.mockcomponents.MockCardHand
 import com.microwavestudios.fortyfive.testing.mockcomponents.MockCardPresentation
@@ -25,6 +30,8 @@ import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.findInstance
+import java.io.PrintStream
+import java.io.File
 import java.util.Stack
 
 @Suppress("NOTHING_TO_INLINE")
@@ -40,33 +47,54 @@ abstract class GameControllerTest {
     protected lateinit var controller: GameControllerImpl
         private set
 
+    protected open val testTimeout: Int = 4000
+
     val events = screen.events
 
     private val eventListeners: MutableList<(event: Any) -> Unit> = mutableListOf()
     private val titleStack: Stack<String> = Stack()
 
-    fun run(): Boolean {
+    fun run(testLogDir: File?): String? {
+        val doFileLogging = testLogDir != null
+        val outputHandle = if (doFileLogging) {
+            val testLog = File("${testLogDir.canonicalPath}/$name.log")
+            testLog.createNewFile()
+            FortyFive.logger.addOutput(PrintStream(testLog), true)
+        } else {
+            null
+        }
         setup()
         val timeline = testTimeline()
         try {
             timeline.startTimeline()
+            var lastEventTimeStamp: Long = TimeUtils.millis()
+            controller.gameEvents.watchFor<Any> { e ->
+                if (e is EncounterScreen.UpdateUiEvent) return@watchFor
+                lastEventTimeStamp = TimeUtils.millis()
+            }
             while (!timeline.isFinished) {
                 timeline.updateTimeline()
                 controller.update()
+                val timeSinceLastEvent = TimeUtils.millis() - lastEventTimeStamp
+                if (timeSinceLastEvent > testTimeout) {
+                    throw TestException("test timed out")
+                }
             }
         } catch (e: TestException) {
-            FortyFive.logger.severe(name, "Test $name failed:")
+            FortyFive.logger.severe(name, "Test ${curTestTitle()} failed:")
             FortyFive.logger.dump(
                 FortyFiveLogger.LogLevel.SEVERE,
                 e.message!!
             )
-            return false
+            return e.message!!
         } catch (e: Exception) {
             FortyFive.logger.severe(name, "Test $name threw Exception:")
             FortyFive.logger.stackTrace(e)
-            return false
+            return e.stackTraceToString()
+        } finally {
+            if (doFileLogging) FortyFive.logger.removeOutput(outputHandle!!)
         }
-        return true
+        return null
     }
 
     protected abstract fun testTimeline(): Timeline
@@ -86,8 +114,17 @@ abstract class GameControllerTest {
             isHard = false
         )
         val context = object : EncounterContext {
+
             override val encounter: Encounter = encounter
+
             override val isExtraction: Boolean = false
+
+            override val forceCreatedEnemies: List<Enemy>?
+                get() {
+                    val scriptedEnemies = scriptedEnemies() ?: return null
+                    return generateScriptedEnemies(scriptedEnemies)
+                }
+
             override fun completed() { }
         }
         val profile = MockProfile(
@@ -116,11 +153,11 @@ abstract class GameControllerTest {
             seed(),
             warningParent,
             afterlife,
-            MockCardPresentation.mockProvider
+            MockCardPresentation.mockProvider,
+            revolver,
+            cardHand
         )
         this.controller = controller
-        controller.injectManual("revolver", revolver)
-        controller.injectManual("cardHand", cardHand)
         controller.init(context)
         screen.addScreenController(controller)
 
@@ -136,11 +173,36 @@ abstract class GameControllerTest {
         events.watchFor<Events.PlayPlayerDamagedEffects> { it.animationTimeline = Timeline.emptyTimeline }
     }
 
+    private fun generateScriptedEnemies(enemyActions: List<Pair<Int, List<Pair<Int, EnemyAction?>>>>): List<Enemy> {
+        var enemyCounter = 0
+        return enemyActions.map { (health, actions) ->
+            val actions = actions.map { (turn, action) ->
+                EnemyBrain.EnemyActionOption(
+                    action = action,
+                    weight = { _, _ -> 1 },
+                    maxExecutions = -1,
+                    selectionConditions = listOf({ _, _ -> controller.turnCounter == turn}),
+                    variants = listOf(EnemyBrain.EnemyActionVariant(1, false)),
+                    executions = 0,
+                    overrideTitle = null,
+                    overrideDescription = null,
+                    overrideIcon = null,
+                    overrideSecondaryIcon = null
+                )
+            }
+            val brain = EnemyBrain(actions)
+            val enemy = Enemy("ScriptedEnemy-$enemyCounter", 1f, 1f, "enemy_outlaw", health, brain)
+            enemyCounter++
+            enemy
+        }
+    }
+
     protected open fun prepare() {}
 
     protected abstract fun seed(): Long
     protected abstract fun deck(): List<CardType>
-    protected abstract fun enemies(): List<String>
+    protected open fun enemies(): List<String> = listOf()
+    protected open fun scriptedEnemies(): List<Pair<Int, List<Pair<Int, EnemyAction?>>>>? = null
 
     ///////////////////////////////
     // helpers
@@ -151,7 +213,9 @@ abstract class GameControllerTest {
     protected fun cardInAfterlife(slot: Int): Card? = afterlife.cards.getOrNull(slot)
 
     protected fun revolverSlot(num: Int): IRevolverSlot = revolver.slots[Utils.convertSlotRepresentation(num) - 1]
-    
+
+    protected fun cardInSlot(num: Int): Card? = revolver.slots[Utils.convertSlotRepresentation(num) - 1].card
+
     protected fun curPlayerHealth(): Int = controller.curPlayerLives
         
     protected fun curReserves(): Int = controller.curReserves
@@ -233,6 +297,20 @@ abstract class GameControllerTest {
         override fun toString(): String = "${ANSI.white}(${this@aName}${ANSI.white}).${ANSI.cyan}name ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
 
+    protected fun AssertionValue<Card?>.aCurDamage(): AssertionValue<Int?> = object : AssertionValue<Int?>() {
+
+        override fun get(): Int? = this@aCurDamage.get()?.curDamage(controller)
+
+        override fun toString(): String = "${ANSI.white}(${this@aCurDamage}${ANSI.white}).${ANSI.cyan}curDamage ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
+    protected fun AssertionValue<Card?>.aBaseDamage(): AssertionValue<Int?> = object : AssertionValue<Int?>() {
+
+        override fun get(): Int? = this@aBaseDamage.get()?.baseDamage
+
+        override fun toString(): String = "${ANSI.white}(${this@aBaseDamage}${ANSI.white}).${ANSI.cyan}baseDamage ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
     protected fun AssertionValue<Enemy>.aCurrentHealth(): AssertionValue<Int> = object : AssertionValue<Int>() {
 
         override fun get(): Int = this@aCurrentHealth.get().currentHealth
@@ -247,6 +325,15 @@ abstract class GameControllerTest {
         override fun toString(): String =
             "${ANSI.white}(${this@aFindStatusEffect}${ANSI.white})." +
                     "${ANSI.cyan}findStatusEffect<${T::class.simpleName}> ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
+    protected inline fun AssertionValue<Poison?>.aPoisonValue(): AssertionValue<Int?> = object : AssertionValue<Int?>() {
+
+        override fun get(): Int? = this@aPoisonValue.get()?.damage
+
+        override fun toString(): String =
+            "${ANSI.white}(${this@aPoisonValue}${ANSI.white})." +
+                    "${ANSI.cyan}poisonValue ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
     
     protected fun <T> deferred(getter: () -> T): AssertionValue<T> = AssertionValue.deferred(getter)
@@ -307,7 +394,7 @@ abstract class GameControllerTest {
 
     internal inline fun Timeline.TimelineBuilderDSL.switchEnemy(enemy: Enemy) {
         waitForFreeUi()
-        fire { Events.EnemySelected(enemy) }
+        fire { Events.EnemyClicked(enemy, false) }
     }
 
     internal inline fun Timeline.TimelineBuilderDSL.holster() {
@@ -315,9 +402,9 @@ abstract class GameControllerTest {
         fire { Events.HolsterButtonPressed }
     }
 
-    internal inline fun Timeline.TimelineBuilderDSL.shoot() {
+    internal inline fun Timeline.TimelineBuilderDSL.shootAtTargetedEnemy() {
         waitForFreeUi()
-        fire { Events.ShootButtonPressed }
+        fire { Events.ShootAtEnemy(controller.targetedEnemy()) }
         waitForFreeUi()
     }
 

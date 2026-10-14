@@ -179,6 +179,7 @@ object FortyFive : Game() {
         with(OnjConfig) {
             registerNamespace("Common", CommonNamespace)
             registerNamespace("Game", GameNamespace)
+            registerNamespace("SpecialEvent", SpecialEventNamespace)
         }
         ConfigFileManager.init()
         logger.init()

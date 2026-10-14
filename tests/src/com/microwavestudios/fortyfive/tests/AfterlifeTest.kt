@@ -35,7 +35,7 @@ class AfterlifeTest : GameControllerTest() {
             assert(aCardInAfterlife(6).aName() equal "miniBullet")
         }
         test("descend") {
-            shoot()
+            shootAtTargetedEnemy()
             val enemyHealth = enemy(0).health - 11 - (3 * 2)
             waitForFreeUi()
             assert(aEnemy(0).aCurrentHealth() equal enemyHealth)

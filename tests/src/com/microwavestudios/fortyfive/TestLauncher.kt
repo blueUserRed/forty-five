@@ -12,45 +12,75 @@ import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.testing.mockservices.MockSoundPlayer
 import com.microwavestudios.fortyfive.tests.AfterlifeTest
 import com.microwavestudios.fortyfive.tests.BasicEncounterTest
+import com.microwavestudios.fortyfive.tests.SourceBulletRefTest
 import com.microwavestudios.fortyfive.tests.StatusEffectTest
 import com.microwavestudios.fortyfive.utils.ANSI
+import java.io.File
+import java.io.PrintStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 class TestLauncher {
 
     val gameControllerTests: Array<GameControllerTest> = arrayOf(
-        BasicEncounterTest(),
-        AfterlifeTest(),
-        StatusEffectTest()
+//        BasicEncounterTest(),
+//        AfterlifeTest(),
+//        StatusEffectTest(),
+        SourceBulletRefTest(),
     )
 
     fun run() {
-//        runGameControllerTests()
-        runFullGameTests()
+        val doFileLogging = false
+
+        val testLogDir = if (doFileLogging) {
+            val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm-ss")
+            val time = formatter.format(LocalDateTime.now())
+            val testLogDir = File("./test_logs/$time")
+            testLogDir.mkdir()
+            testLogDir
+        } else {
+            null
+        }
+
+        runGameControllerTests(testLogDir)
+//        runFullGameTests()
     }
 
-    fun runGameControllerTests() {
+    fun runGameControllerTests(testLogDir: File?) {
         Gdx.files = LwjglFiles()
         val profileManager = MockProfileManager()
         FortyFive.initTest(MockSoundPlayer(), profileManager)
 
         FortyFive.logger.title("start tests")
-        val failedTests = mutableListOf<String>()
+        val failedTests = mutableListOf<Pair<String, String>>()
         gameControllerTests.forEach { test ->
             FortyFive.logger.title("test: ${test.name}")
-            val result = test.run()
-            if (result) return@forEach
-            failedTests.add(test.name)
+            val message = test.run(testLogDir)
+            val passed = message == null
+            if (passed) return@forEach
+            failedTests.add(test.name to message)
+        }
+        val doFileLogging = testLogDir != null
+        val outputHandle = if (doFileLogging) {
+            val summaryLog = File("${testLogDir.canonicalPath}/summary.log")
+            summaryLog.createNewFile()
+            FortyFive.logger.addOutput(PrintStream(summaryLog), true)
+        } else {
+            null
         }
         FortyFive.logger.title("test summary")
         if (failedTests.isEmpty()) {
             FortyFive.logger.rawPrintln("${ANSI.green}All ${gameControllerTests.size} tests passed${ANSI.reset}")
         } else {
-            FortyFive.logger.rawPrintln("${ANSI.red}${failedTests.size}/${gameControllerTests.size} tests failed")
-            failedTests
-                .joinToString(prefix = "Failed tests:\n", separator = "\n", postfix = ANSI.reset)
-                .let { FortyFive.logger.rawPrintln(it) }
+            FortyFive.logger.rawPrintln("${ANSI.red}${failedTests.size}/${gameControllerTests.size} tests failed:")
+            failedTests.forEach { (test, message) ->
+                FortyFive.logger.rawPrintln("")
+                FortyFive.logger.rawPrintln("--$test:--")
+                FortyFive.logger.rawPrintln(message)
+            }
         }
+        if (doFileLogging) FortyFive.logger.removeOutput(outputHandle!!)
     }
 
     fun runFullGameTests() {

@@ -54,6 +54,9 @@ class MockProfile(
     override val encountersStartedInRun: Int?
         get() = notAvailableInMock()
 
+    override val talismanRewardChanceBoost: Double
+        get() = 0.0
+
     override var currentNodeIndex: Int
         get() = data.currentNode
         set(value) {
@@ -135,6 +138,10 @@ class MockProfile(
     }
 
     override fun getTalismanForRun(talisman: Talisman) {
+    }
+
+    override fun boostTalismanRewardChance(increase: Double) {
+        TODO("Not yet implemented")
     }
 
     override fun checkDecks() {

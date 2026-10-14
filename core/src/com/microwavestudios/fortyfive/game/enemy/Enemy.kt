@@ -43,9 +43,11 @@ class Enemy(
             val defeated = field > 0 && value <= 0
             field = max(value, -300)
             enemyEvents.fire(HealthChangedEvent)
-            if (defeated) enemyEvents.fire(EnemyDefeated)
-            nextEnemyAction = NextEnemyAction.None
-            enemyEvents.fire(EnemyActionChangedEvent(nextEnemyAction))
+            if (defeated) {
+                enemyEvents.fire(EnemyDefeated)
+                nextEnemyAction = NextEnemyAction.None
+                enemyEvents.fire(EnemyActionChangedEvent(nextEnemyAction))
+            }
         }
 
     val isDefeated: Boolean
@@ -194,6 +196,10 @@ class Enemy(
                 .mapNotNull { it.onEnemyDeath(StatusEffectTarget.EnemyTarget(this@Enemy)) }
                 .collectTimeline()
                 .let { include(it) }
+            action {
+                val statusEffects = statusEffects.toMutableList()
+                statusEffects.forEach { removeStatusEffect(it) }
+            }
         }
     }
 

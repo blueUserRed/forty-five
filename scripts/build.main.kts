@@ -16,6 +16,7 @@ val assetDirs = arrayOf(
     "profiles",
     "plugins",
     "shaders",
+    "test-logs",
 )
 
 build()
@@ -92,6 +93,9 @@ fun cleanupAssets(tmpDir: File) {
         .listFiles()
         ?.filter { it.name != "packed" }
         ?.forEach { it.deleteRecursively() }
+
+    debug("removing test-logs")
+    (tmpDir / "blobs/test-logs").deleteRecursively()
 
     debug("removing log file")
     (tmpDir / "logging/forty-five.log").delete()

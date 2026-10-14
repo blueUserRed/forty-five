@@ -1051,6 +1051,7 @@ abstract class Effect(val data: EffectData) {
         val behaviour: BulletBehaviour,
         val bulletSelector: BulletSelector,
         val sourceCardPredicate: CardPredicate,
+        val targetCardPredicate: CardPredicate,
         data: EffectData
     ) : Effect(data) {
 
@@ -1065,9 +1066,12 @@ abstract class Effect(val data: EffectData) {
             action { timeline = this }
             later {
                 val cards = timeline.get<List<Card>>("selectedCards")
-                cards.forEach { card ->
-                    val condition = { sourceCardPredicate.check(card, controller, card) }
-                    card.addTemporaryBehaviour(behaviour, condition)
+                cards.forEach { selectedCard ->
+                    val condition = {
+                        sourceCardPredicate.check(card, controller, card) &&
+                                targetCardPredicate.check(selectedCard, controller, selectedCard)
+                    }
+                    selectedCard.addTemporaryBehaviour(behaviour, condition)
                 }
             }
         }
@@ -1075,7 +1079,7 @@ abstract class Effect(val data: EffectData) {
         override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun copy(data: EffectData): Effect =
-            AddTemporaryBehaviour(behaviour, bulletSelector, sourceCardPredicate, data)
+            AddTemporaryBehaviour(behaviour, bulletSelector, sourceCardPredicate, targetCardPredicate, data)
 
     }
 

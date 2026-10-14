@@ -15,6 +15,7 @@ assets/maps/areas/*
 assets/drop_shadows/*
 assets/plugins/*
 assets/profiles/*
+assets/test_logs
 /onj/build
 assets/error_logs/*
 website/out/*

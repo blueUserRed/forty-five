@@ -423,7 +423,7 @@ class Card(
             conditions.add(condition)
             return
         }
-        behaviours[behaviour] = true to mutableListOf(condition)
+        behaviours[behaviour] = false to mutableListOf(condition)
         behaviour.additionalEffects()?.let { _effects.addAll(it) }
         behaviour.init(this)
     }

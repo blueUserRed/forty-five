@@ -15,7 +15,9 @@ import java.time.format.DateTimeFormatter
  */
 class FortyFiveLogger {
 
-    private lateinit var outputs: List<Pair<PrintStream, Boolean>>
+    private val outputs: MutableList<Triple<PrintStream, Int, Boolean>> = mutableListOf()
+    private var outputCount = 0
+
     private var logLevel: LogLevel = LogLevel.DEBUG
 
     private val messageTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
@@ -30,10 +32,14 @@ class FortyFiveLogger {
     fun init() {
         val config = ConfigFileManager.getConfigFile("logConfig")
 
-        outputs = config
+        config
             .get<OnjArray>("logTargets")
             .value
-            .map { outputOrError(it as OnjNamedObject) }
+            .forEach { config ->
+                config as OnjNamedObject
+                val (stream, doAnsiColor) = outputOrError(config)
+                addOutput(stream, doAnsiColor)
+            }
 
         logLevel = logLevelOrError(config.get<String>("logLevel"))
         versionTag = config.get<String>("versionTag")
@@ -49,10 +55,20 @@ class FortyFiveLogger {
         """.trimIndent())
     }
 
+    fun addOutput(output: PrintStream, doAnsiColor: Boolean): Int {
+        val outputCountBefore = outputCount
+        outputCount++
+        outputs.add(Triple(output, outputCountBefore, doAnsiColor))
+        return outputCountBefore
+    }
+
+    fun removeOutput(handle: Int) {
+        outputs.removeIf { it.second == handle }
+    }
+
     private fun writeln(s: String) = outputs.forEach { it.first.println(s) }
 
     private fun writelnFormatted(tag: String, message: String, level: LogLevel) {
-        //TODO: this could use TemplateString
         val time = messageTimeFormatter.format(LocalDateTime.now())
 
         val (beginAnsi, endAnsi) = when (level) {
@@ -61,7 +77,7 @@ class FortyFiveLogger {
             LogLevel.SEVERE -> ANSI.red to ANSI.reset
         }
 
-        outputs.forEach { (stream, shouldUseAnsi) ->
+        outputs.forEach { (stream, _, shouldUseAnsi) ->
             if (shouldUseAnsi) stream.println("$beginAnsi[$time $tag] $message$endAnsi")
             else stream.println("[$time $tag] $message")
         }
@@ -161,7 +177,7 @@ class FortyFiveLogger {
     }
 
     fun rawPrintln(s: String) {
-        outputs.forEach { it.first.println(s) }
+        writeln(s)
     }
 
     private fun outputOrError(config: OnjNamedObject): Pair<PrintStream, Boolean> = when (val name = config.name) {

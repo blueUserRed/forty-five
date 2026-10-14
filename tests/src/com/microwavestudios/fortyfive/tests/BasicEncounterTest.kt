@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.tests
 
 import com.microwavestudios.fortyfive.game.card.CardType
+import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.testing.GameControllerTest
 import com.microwavestudios.fortyfive.utils.Timeline
 
@@ -42,8 +43,8 @@ class BasicEncounterTest : GameControllerTest() {
             assert(aCurReserves() equal 5)
         }
         test("shot") {
-            shoot()
-            action { enemy0HealthCrossCheck -= 16 }
+            action { enemy0HealthCrossCheck -= cardInSlot(5)!!.curDamage(controller) }
+            shootAtTargetedEnemy()
             assert(aCardInSlot(5).aName() equal "bullet")
             assert(aCardInSlot(2).aName() equal "workerBullet")
             assert(aCardInSlot(4).isNull())
@@ -52,22 +53,20 @@ class BasicEncounterTest : GameControllerTest() {
         }
         test("enemy switch and shot") {
             switchEnemy(enemy(1))
-            shoot()
-            action { enemy1HealthCrossCheck -= 6 }
+            action { enemy1HealthCrossCheck -= cardInSlot(5)!!.curDamage(controller) }
+            shootAtTargetedEnemy()
             assert(aCardInSlot(3).aName() equal "workerBullet")
             assert(aEnemy(1).aCurrentHealth() equal deferred { enemy1HealthCrossCheck })
         }
         test("bewitched bullet") {
             dragCardOnSlot("bewitchedBullet", 5)
-            shoot()
-            action { enemy1HealthCrossCheck -= 7 }
+            action { enemy1HealthCrossCheck -= cardInSlot(5)!!.curDamage(controller) }
+            shootAtTargetedEnemy()
             assert(aCardInSlot(2).aName() equal "workerBullet")
             assert(aEnemy(1).aCurrentHealth() equal deferred { enemy1HealthCrossCheck })
         }
         dragCardOnSlot("bullet", 5)
         dragCardOnSlot("bullet", 4)
-        holster()
-        waitForTurnBegin()
         holster()
         test("parry") {
             handleNextParry(true)
@@ -86,6 +85,14 @@ class BasicEncounterTest : GameControllerTest() {
         CardType(null, "bigBullet", null),
     )
 
-    override fun enemies(): List<String> = listOf("Outlaw-1", "Outlaw-1")
-
+    override fun scriptedEnemies(): List<Pair<Int, List<Pair<Int, EnemyAction?>>>> = listOf(
+        40 to listOf(
+            0 to EnemyAction.DamagePlayer(5, 5, false, null),
+            1 to EnemyAction.DamagePlayer(5, 5, false, null),
+        ),
+        40 to listOf(
+            0 to EnemyAction.DamagePlayer(5, 5, false, null),
+            1 to EnemyAction.DamagePlayer(5, 5, false, null),
+        ),
+    )
 }

@@ -18,7 +18,7 @@ class StatusEffectTest : GameControllerTest() {
             dragCardOnSlot("incendiaryBullet", 5)
             dragCardOnSlot("iceBullet", 3)
             assert(aFindPlayerStatusEffect<Frozen>().isNotNull())
-            shoot()
+            shootAtTargetedEnemy()
             assert(aFindPlayerStatusEffect<Frozen>().isNotNull())
             action { enemyHealthCrossCheck -= 7 }
             assert(aCardInSlot(5).isNull())
@@ -27,7 +27,7 @@ class StatusEffectTest : GameControllerTest() {
         }
         test("poison bullet") {
             dragCardOnSlot("poisonBullet", 5)
-            shoot()
+            shootAtTargetedEnemy()
             assert(aFindPlayerStatusEffect<Frozen>().isNull())
             action { enemyHealthCrossCheck -= 4 + 2 }
             assert(aEnemy(0).aCurrentHealth() equal deferred { enemyHealthCrossCheck })
@@ -41,16 +41,16 @@ class StatusEffectTest : GameControllerTest() {
         }
         test("incendiary effect") {
             dragCardOnSlot("bullet", 5)
-            shoot()
+            shootAtTargetedEnemy()
             action { enemyHealthCrossCheck -= 6 + 3 }
             dragCardOnSlot("bullet", 5)
-            shoot()
+            shootAtTargetedEnemy()
             action { enemyHealthCrossCheck -= 4 + 2 }
-            shoot()
+            shootAtTargetedEnemy()
             action { enemyHealthCrossCheck -= 6 + 3 }
             dragCardOnSlot("bullet", 5)
             assert(aEnemy(0).aFindStatusEffect<Burning>().isNotNull())
-            shoot()
+            shootAtTargetedEnemy()
             action { enemyHealthCrossCheck -= 6 + 3 }
             waitForFreeUi()
             assert(aEnemy(0).aFindStatusEffect<Burning>().isNull())

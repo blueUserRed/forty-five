@@ -203,7 +203,7 @@ class GameControllerImpl(
     }
 
     private fun setupEnemies() {
-        allEnemies = encounter.createEnemies()
+        allEnemies = encounterContext.forceCreatedEnemies ?: encounter.createEnemies()
         gameEvents.fire(Events.SetupEnemies(allEnemies, controller))
 
         gameEvents.watchFor<Events.EnemyClicked> { (enemy, justFocus) ->
@@ -480,10 +480,9 @@ class GameControllerImpl(
     }
 
     private fun initCards() {
-        val deck = if (profile.isRunActive) profile.currentRunDeck!! else profile.currentCollectionDeck
         val cards = encounter.forceCards
             ?: encounterContext.forceCards
-            ?: deck.cards
+            ?: (if (profile.isRunActive) profile.currentRunDeck!! else profile.currentCollectionDeck).cards
 
         val stack = mutableListOf<Card>()
 
@@ -1175,7 +1174,7 @@ class GameControllerImpl(
                 include(rotateRevolverTimeline(card.getRotationDirection(controller)))
                 action { resultValue.resolve(remainingDamage) }
             } else {
-                action { resultValue.resolve(remainingDamage) }
+                action { resultValue.resolve(value) }
             }
         }
     } }

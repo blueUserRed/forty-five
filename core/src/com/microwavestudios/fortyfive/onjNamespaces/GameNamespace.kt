@@ -558,15 +558,17 @@ object GameNamespace {
         )
     )
 
-    @RegisterOnjFunction(schema = "use Game; params: [Behaviour, BulletSelector, CardPredicate]")
-    fun addTemporaryBehaviourLimitBySourceBullet(
+    @RegisterOnjFunction(schema = "use Game; params: [Behaviour, BulletSelector, CardPredicate, CardPredicate]")
+    fun addTemporaryBehaviour(
         behaviour: OnjBulletBehaviour,
         targetSelector: OnjBulletSelector,
-        sourceCardPredicate: OnjCardPredicate
+        sourceCardPredicate: OnjCardPredicate,
+        targetCardPredicate: OnjCardPredicate,
     ): OnjEffect = OnjEffect(Effect.AddTemporaryBehaviour(
         behaviour.value,
         targetSelector.value,
         sourceCardPredicate.value,
+        targetCardPredicate.value,
         EffectData()
     ))
 
@@ -876,6 +878,9 @@ object GameNamespace {
     @RegisterOnjFunction(schema = "use Game; params: [CardPredicate, CardPredicate]", type = OnjFunctionType.INFIX)
     fun or(first: OnjCardPredicate, second: OnjCardPredicate): OnjCardPredicate =
         OnjCardPredicate(CardPredicate.or(first.value, second.value))
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun alwaysTrueCardPredicate(): OnjCardPredicate = OnjCardPredicate { _, _, _ -> true }
 
     //////////////////////////////////////////////////////////////////////////////////
     // Bullet Selectors

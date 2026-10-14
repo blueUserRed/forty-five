@@ -1207,7 +1207,7 @@ cards: [
         deckMaximum: 1,
         effects: [
             {
-                trigger: enterZone(zone.revolver, allCardsTrigger),
+                trigger: enterZone(zone.revolver, not(isSelf())),
                 inZones: [zone.revolver],
                 effect: buffDmg(bSelectSourceBullet(), 4#val)
             }
@@ -2099,19 +2099,21 @@ cards: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
-                effect: addTemporaryBehaviourLimitBySourceBullet(
+                effect: addTemporaryBehaviour(
                     amplifyBehaviour(4),
                     inZone(zone.revolver)#bSelect,
-                    inZone(zone.revolver)
+                    inZone(zone.revolver),
+                    inZone(zone.revolver),
                 )
             },
             {
                 trigger: enterZone(zone.revolver, allCardsTrigger) mustMatchPredicate inZone(zone.revolver),
                 isHidden: true,
-                effect: addTemporaryBehaviourLimitBySourceBullet(
+                effect: addTemporaryBehaviour(
                     amplifyBehaviour(4),
                     bSelectSituationBullets(),
-                    inZone(zone.revolver)
+                    inZone(zone.revolver),
+                    inZone(zone.revolver),
                 )
             },
         ],
@@ -2190,10 +2192,11 @@ cards: [
             {
                 trigger: enterZone(zone.revolver, onlySelfTriggers),
                 isHidden: true,
-                effect: addTemporaryBehaviourLimitBySourceBullet(
+                effect: addTemporaryBehaviour(
                     everlastingBehaviour(),
                     bSelectSelf(),
-                    inZone(zone.revolver) and ($AnyEnemyHasStatusEffect { value: poison(0#val) }#cardPredicate)
+                    inZone(zone.revolver) and ($AnyEnemyHasStatusEffect { value: poison(0#val) }#cardPredicate),
+                    alwaysTrueCardPredicate()
                 )
             },
             {
