@@ -49,23 +49,11 @@ class StatusBar(screen: RenderableScreen, private val enemy: Enemy) : CustomGrou
 
     private val emitter = textEffectEmitter()
 
-    private val statusEffectIcons: MutableMap<String, Promise<Drawable>> = mutableMapOf()
-
     private var lastKnownHealth: Int = enemy.health
 
     init {
         screen.lifetime.tieDisposable(polygonBatch)
         enemy.enemyEvents.watchFor<Enemy.HealthChangedEvent> { hpChanged() }
-//        enemy.enemyEvents.watchFor<Enemy.StatusEffectsChangedEvent> { statusEffectsChanged() }
-    }
-
-    fun statusEffectsChanged() {
-        enemy.statusEffects.forEach { effect ->
-            if (statusEffectIcons.containsKey(effect.name)) return@forEach
-            val iconHandle = effect.iconHandle
-            val promise = resourceManager.request<Drawable>(this, screen.lifetime, iconHandle)
-            statusEffectIcons[effect.name] = promise
-        }
     }
 
     fun hpChanged() {

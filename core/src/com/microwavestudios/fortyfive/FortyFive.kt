@@ -10,10 +10,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
-import com.microwavestudios.fortyfive.game.controller.EncounterContext
 import com.microwavestudios.fortyfive.map.DetailMap
-import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEvent
-import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventActions
 import com.microwavestudios.fortyfive.map.events.specialevent.SpecialEventFactory
 import com.microwavestudios.fortyfive.onjNamespaces.GameNamespace
 import com.microwavestudios.fortyfive.onjNamespaces.CommonNamespace
@@ -25,9 +22,7 @@ import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
-import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.resources.ResourceManager
-import com.microwavestudios.fortyfive.run.Encounter
 import com.microwavestudios.fortyfive.screen.ISoundPlayer
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
@@ -39,7 +34,6 @@ import com.microwavestudios.fortyfive.utils.*
 import onj.customization.OnjConfig
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.min
 import kotlin.system.measureTimeMillis
 
 object FortyFive : Game() {
@@ -50,33 +44,40 @@ object FortyFive : Game() {
 
 
     /** see [CardTextureManager] */
-    val cardTextureManager = CardTextureManager()
+    var cardTextureManager = CardTextureManager()
+        private set
 
     /** see [ServiceThread] */
-    val serviceThread = ServiceThread()
+    var serviceThread = ServiceThread()
+        private set
 
     /** see [SoundPlayer] */
     var soundPlayer: ISoundPlayer = SoundPlayer()
         private set
 
     /** see [FortyFiveLogger] */
-    val logger = FortyFiveLogger()
+    var logger = FortyFiveLogger()
+        private set
 
     /** see [ResourceManager] */
-    val resourceManager = ResourceManager()
+    var resourceManager = ResourceManager()
+        private set
 
     var profileManager: IProfileManager = ProfileManager()
         private set
 
     /** see [ScreenManager] */
-    val screenManager = ScreenManager(TitleScreen, null)
+    var screenManager = ScreenManager(TitleScreen, null)
+        private set
 
-    val globalSave = GlobalSave()
+    var globalSave = GlobalSave()
+        private set
 
-    val pluginManager = PluginManager()
+    var pluginManager = PluginManager()
+        private set
 
 
-    private val _lifetime: EndableLifetime = EndableLifetime()
+    private var _lifetime: EndableLifetime = EndableLifetime()
     val gameLifetime: Lifetime
         get() = _lifetime
 
@@ -98,8 +99,24 @@ object FortyFive : Game() {
 
     private val timedCallbacks: MutableMap<() -> Unit, Long> = mutableMapOf()
 
+    private val controllerListener = object : ControllerAdapter() {
+
+        override fun connected(controller: Controller?) {
+            controller?.let {
+                currentScreen?.inputManager?.controllerConnected(it)
+            }
+        }
+
+        override fun disconnected(controller: Controller?) {
+            controller?.let {
+                currentScreen?.inputManager?.controllerDisconnected(it)
+            }
+        }
+    }
+
+
     override fun create() {
-        init()
+        initControllers()
         pluginManager.start()
 
         if (appArguments.bakeRun) {
@@ -173,33 +190,44 @@ object FortyFive : Game() {
         currentRenderPipeline?.sizeChanged()
     }
 
-    fun initTest(mockSoundPlayer: ISoundPlayer, mockProfileManager: IProfileManager) {
+    fun reset() {
+        with(OnjConfig) {
+            deregisterNamespace("Common")
+            deregisterNamespace("Game")
+            deregisterNamespace("SpecialEvent")
+        }
+        cardTextureManager = CardTextureManager()
+        serviceThread = ServiceThread()
+        soundPlayer = SoundPlayer()
+        logger = FortyFiveLogger()
+        resourceManager = ResourceManager()
+        profileManager = ProfileManager()
+        screenManager = ScreenManager(TitleScreen, null)
+        globalSave = GlobalSave()
+        pluginManager = PluginManager()
+        _lifetime = EndableLifetime()
+        steamHandler = SteamHandler()
+        currentRenderPipeline = null
+        currentScreen = null
+        screen = null
+        cleanExit = true
+        mainThreadTasks.clear()
+        timedCallbacks.clear()
+        if (Gdx.app != null) Controllers.removeListener(controllerListener)
+    }
+
+    fun initGlobalsForTest(mockSoundPlayer: ISoundPlayer, mockProfileManager: IProfileManager) {
         soundPlayer = mockSoundPlayer
         profileManager = mockProfileManager
+    }
+
+    fun init() {
+        ShaderProgram.pedantic = false
         with(OnjConfig) {
             registerNamespace("Common", CommonNamespace)
             registerNamespace("Game", GameNamespace)
             registerNamespace("SpecialEvent", SpecialEventNamespace)
         }
-        ConfigFileManager.init()
-        logger.init()
-        profileManager.init()
-        globalSave.readFromDisk()
-        pluginManager.init()
-        pluginManager.earlyInit()
-        soundPlayer.init()
-        SpecialEventFactory.init()
-        GraphicsConfig.init()
-    }
-
-    private fun init() {
-        ShaderProgram.pedantic = false
-        with(OnjConfig) {
-            if (getNamespace("Common") == null) registerNamespace("Common", CommonNamespace)
-            if (getNamespace("Game") == null) registerNamespace("Game", GameNamespace)
-            if (getNamespace("SpecialEvent") == null) registerNamespace("SpecialEvent", SpecialEventNamespace)
-        }
-        initControllers()
         ConfigFileManager.init()
         TemplateString.init()
         logger.init()
@@ -220,21 +248,9 @@ object FortyFive : Game() {
     }
 
     private fun initControllers() {
+        if (Gdx.app == null) return
         globalSave.currentControllerUid = Controllers.getControllers().firstOrNull()?.uniqueId
-        Controllers.addListener(object : ControllerAdapter() {
-
-            override fun connected(controller: Controller?) {
-                controller?.let {
-                    currentScreen?.inputManager?.controllerConnected(it)
-                }
-            }
-
-            override fun disconnected(controller: Controller?) {
-                controller?.let {
-                    currentScreen?.inputManager?.controllerDisconnected(it)
-                }
-            }
-        })
+        Controllers.addListener(controllerListener)
     }
 
     override fun dispose() {

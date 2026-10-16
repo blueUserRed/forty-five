@@ -40,7 +40,7 @@ open class NewLabel(
     override val screen: RenderableScreen,
     text: String,
     private val backgroundHints: Array<ResourceHandle> = arrayOf(),
-) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor,
+) : Widget(), ZIndexActor, DisableActor, OnLayoutActor, DropShadowActor, ResourceBorrower,
     DebugActor by DebugActorImpl(), InputActor by InputActorImpl(), BackgroundActor,
     KotlinStyledActor, OffSettable, AnimatedActor {
 
@@ -118,6 +118,10 @@ open class NewLabel(
 
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
+
+    private val shaderPromise: Promise<BetterShader> by lazy {
+        FortyFive.resourceManager.request(this, FortyFive.gameLifetime, "text_shader")
+    }
 
     private val shapeRenderer: ShapeRenderer by lazy {
         val renderer = ShapeRenderer()
@@ -279,15 +283,6 @@ open class NewLabel(
 
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
-
-
-    companion object : ResourceBorrower {
-
-        val shaderPromise: Promise<BetterShader> by lazy {
-            FortyFive.resourceManager.request(this, FortyFive.gameLifetime, "text_shader")
-        }
-
-    }
 
 }
 

@@ -14,7 +14,6 @@ encounterModifiers: {
     lookalike: encounterModifierConfig,
     moist: encounterModifierConfig,
     steelNerves: encounterModifierConfig,
-    draft: encounterModifierConfig,
     anOfferYouCantRefuse: encounterModifierConfig,
     bulletSkipping: encounterModifierConfig,
     sacrifice: encounterModifierConfig,

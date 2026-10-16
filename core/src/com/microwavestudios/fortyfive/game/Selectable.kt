@@ -4,8 +4,8 @@ import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.GameController
 import com.microwavestudios.fortyfive.game.controller.GameControllerImpl
+import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
-import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.asPromise
@@ -123,7 +123,7 @@ class CardInRevolverSelector(
         selectables.forEach { actor ->
             val card = actor.card
             val slot = controller.revolver.slots.find { it.card == card }
-            slot?.forceGetActor()?.joinGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+            slot?.forceGetActor()?.joinGroup(revolverSlotWithCardInSelectionMode)
         }
         controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(popupText))
     }
@@ -132,7 +132,7 @@ class CardInRevolverSelector(
         selectables.forEach { actor ->
             val card = actor.card
             val slot = controller.revolver.slots.find { it.card == card }
-            slot?.forceGetActor()?.leaveGroup(RevolverSlot.revolverSlotWithCardInSelectionMode)
+            slot?.forceGetActor()?.leaveGroup(revolverSlotWithCardInSelectionMode)
         }
         controller.gameEvents.fire(GameControllerImpl.Events.SelectionChangedEvent(null))
     }
@@ -140,13 +140,17 @@ class CardInRevolverSelector(
     override fun getModal(): InputManager.Modal {
         val screen = controller.screen
         requireRenderableScreen(screen)
-        return InputManager.Modal(listOf(RevolverSlot.revolverSlotWithCardInSelectionMode), screen)
+        return InputManager.Modal(listOf(revolverSlotWithCardInSelectionMode), screen)
     }
 
     override fun getSelectables(): List<CardActor> =
         controller.cardsInRevolver().filter { predicate(it) }.map { it.presentation.forceGetActor() }
 
     override fun mapSelectable(selectable: CardActor): Card = selectable.card
+
+    companion object {
+        private const val revolverSlotWithCardInSelectionMode = "revolver-slot-with-card-in-selection-mode"
+    }
 }
 
 class RevolverSlotSelector(
@@ -166,7 +170,7 @@ class RevolverSlotSelector(
     override fun getModal(): InputManager.Modal {
         val screen = controller.screen
         requireRenderableScreen(screen)
-        return InputManager.Modal(listOf(RevolverSlot.revolverSlotGroup), screen)
+        return InputManager.Modal(listOf(IRevolver.revolverSlotGroup), screen)
     }
 
     override fun getSelectables(): List<IRevolverSlot> = controller.revolver.slots.filter { predicate(it) }

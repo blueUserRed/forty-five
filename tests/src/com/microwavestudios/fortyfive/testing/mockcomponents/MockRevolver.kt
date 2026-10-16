@@ -1,12 +1,12 @@
 package com.microwavestudios.fortyfive.testing.mockcomponents
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
 import com.microwavestudios.fortyfive.game.widgets.IRevolver
 import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
-import com.microwavestudios.fortyfive.game.widgets.Revolver
-import com.microwavestudios.fortyfive.game.widgets.RevolverSlot
+import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.testing.notAvailableInMock
 import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.Timeline
@@ -70,7 +70,7 @@ class MockRevolver : IRevolver {
         slots[0].card = firstCard
     }
 
-    override fun forceGetActor(): Revolver = notAvailableInMock()
+    override fun forceGetActor(): Actor = notAvailableInMock()
 
     private fun getSlot(num: Int): MockRevolverSlot {
         require(num in 1..5) { "slot number must be in 1..5" }
@@ -88,7 +88,7 @@ class MockRevolverSlot(
 
     override fun cardPosition(): Vector2 = Vector2(0f, 0f)
 
-    override fun forceGetActor(): RevolverSlot = notAvailableInMock()
+    override fun forceGetActor(): InputActor = notAvailableInMock()
 
     override fun enterSelectionMode(promise: Promise<IRevolverSlot>) {
     }

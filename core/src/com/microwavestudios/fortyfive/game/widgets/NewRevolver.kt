@@ -10,7 +10,6 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
 import com.microwavestudios.fortyfive.game.controller.RevolverRotation
-import com.microwavestudios.fortyfive.game.widgets.RevolverSlot.Companion.revolverSlotGroup
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
@@ -393,7 +392,7 @@ class NewRevolver(
             dropShadow = selectionDropShadow
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
-            joinGroup(revolverSlotGroup)
+            joinGroup(IRevolver.revolverSlotGroup)
             val slotNum = Utils.convertSlotRepresentation(num)
             focusShortcut(GameInputs.focusShortcutRevolverSlots[slotNum - 1])
             observeInputState(
@@ -415,7 +414,7 @@ class NewRevolver(
             isDropTarget = true
             onDrop { actor ->
                 if (actor !is CardActor) return@onDrop
-                events.fire(CardHand.CardDraggedOntoSlotEvent(actor.card, slots.find { it.num == num }!!))
+                events.fire(ICardHand.CardDraggedOntoSlotEvent(actor.card, slots.find { it.num == num }!!))
             }
         }
 

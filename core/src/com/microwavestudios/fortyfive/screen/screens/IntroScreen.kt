@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.scaleAbstractProperty
 import com.microwavestudios.fortyfive.screen.ScreenManager
-import com.microwavestudios.fortyfive.screen.screenController.IntroScreenController
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
@@ -156,7 +155,6 @@ class IntroScreen : ScreenCreator() {
 
     override fun getScreenControllers(): List<ScreenController> = listOf(
         timelines,
-//        IntroScreenController(screen)
     )
 
     companion object : ScreenManager.ScreenCreatorCompanion {

@@ -8,12 +8,9 @@ import com.microwavestudios.fortyfive.game.StatusEffect
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.Enemy
-import com.microwavestudios.fortyfive.game.widgets.Afterlife
-import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.IAfterlife
 import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolver
-import com.microwavestudios.fortyfive.game.widgets.Revolver
 import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Promise

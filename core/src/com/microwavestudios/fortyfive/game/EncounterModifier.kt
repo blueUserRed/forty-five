@@ -79,15 +79,6 @@ sealed class EncounterModifier {
         override fun behaviours(): List<EncounterBehaviour> = listOf(EncounterBehaviour.DrawMoreCards(1))
     }
 
-    data object Draft : EncounterModifier() {
-        override val displayName: String = "Draft"
-        override val iconHandle: ResourceHandle = "encounter_modifier_rain"
-        override val description: String = "You draft your deck from random cards before the encounter."
-        override val difficultyChange: Float = 1f
-
-        override fun intermediateScreen(): String = "draftScreen"
-    }
-
     data object AnOfferYouCantRefuse : EncounterModifier() {
         override val displayName: String = "An Offer you can't refuse"
         override val iconHandle: ResourceHandle = "encounter_modifier_rain"
@@ -154,7 +145,6 @@ sealed class EncounterModifier {
             "lookalike" -> Lookalike
             "moist" -> Moist
             "drawonemorecard" -> DrawOneMoreCard
-            "draft" -> Draft
             "anofferyoucantrefuse" -> AnOfferYouCantRefuse
             "bulletskipping" -> BulletSkipping
             "sacrifice" -> Sacrifice

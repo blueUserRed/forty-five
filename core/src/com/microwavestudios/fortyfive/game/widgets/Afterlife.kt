@@ -29,21 +29,6 @@ import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 
-interface IAfterlife {
-
-    val cards: List<Card>
-    val isOpen: Boolean
-    val isClosed: Boolean
-    val afterlifeIsVisible: Boolean
-
-    fun pushCard(card: Card)
-    fun scrollToBeginTimeline(): Timeline
-    fun popCardTimeline(): Timeline
-    fun toggleTimeline(): Timeline
-    fun openTimeline(): Timeline
-    fun closeTimeline(): Timeline
-}
-
 class Afterlife(val screen: RenderableScreen, val gameEvents: EventPipeline) : IAfterlife {
 
     private var actor: CustomBox? = null

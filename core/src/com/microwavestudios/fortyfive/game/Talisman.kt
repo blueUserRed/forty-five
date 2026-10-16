@@ -36,11 +36,11 @@ abstract class Talisman {
 
         override val title: String = "Talisman Bullet"
         override val name: String = "talismanBullet"
-        override val description: String = "All bullets have +3 dmg"
+        override val description: String = "All bullets have +2 dmg"
         override val iconHandle: ResourceHandle = "talisman_bullet_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
-            EncounterBehaviour.ChangeDamageOfAllBullets(3, title)
+            EncounterBehaviour.ChangeDamageOfAllBullets(2, title)
         )
     }
 

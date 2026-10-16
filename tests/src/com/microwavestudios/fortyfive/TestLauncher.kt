@@ -10,10 +10,9 @@ import com.microwavestudios.fortyfive.testing.ApplicationListenerRelay
 import com.microwavestudios.fortyfive.testing.GameControllerTest
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.testing.mockservices.MockSoundPlayer
-import com.microwavestudios.fortyfive.tests.AfterlifeTest
-import com.microwavestudios.fortyfive.tests.BasicEncounterTest
-import com.microwavestudios.fortyfive.tests.SourceBulletRefTest
-import com.microwavestudios.fortyfive.tests.StatusEffectTest
+import com.microwavestudios.fortyfive.encounterTests.talismans.TalismanBulletAndGoldNuggetTest
+import com.microwavestudios.fortyfive.fullGameTests.BasicFullGameTest
+import com.microwavestudios.fortyfive.testing.FullGameTest
 import com.microwavestudios.fortyfive.utils.ANSI
 import java.io.File
 import java.io.PrintStream
@@ -27,10 +26,17 @@ class TestLauncher {
 //        BasicEncounterTest(),
 //        AfterlifeTest(),
 //        StatusEffectTest(),
-        SourceBulletRefTest(),
+//        TemporaryBehaviourTest(),
+        TalismanBulletAndGoldNuggetTest(),
+    )
+
+    val fullGameTests: Array<FullGameTest> = arrayOf(
+        BasicFullGameTest()
     )
 
     fun run() {
+        Gdx.files = LwjglFiles()
+
         val doFileLogging = false
 
         val testLogDir = if (doFileLogging) {
@@ -43,14 +49,14 @@ class TestLauncher {
             null
         }
 
-        runGameControllerTests(testLogDir)
-//        runFullGameTests()
+//        runGameControllerTests(testLogDir)
+        runFullGameTests()
     }
 
     fun runGameControllerTests(testLogDir: File?) {
-        Gdx.files = LwjglFiles()
         val profileManager = MockProfileManager()
-        FortyFive.initTest(MockSoundPlayer(), profileManager)
+        FortyFive.init()
+        FortyFive.initGlobalsForTest(MockSoundPlayer(), profileManager)
 
         FortyFive.logger.title("start tests")
         val failedTests = mutableListOf<Pair<String, String>>()
@@ -95,20 +101,20 @@ class TestLauncher {
         config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4)
         config.setWindowIcon(Files.FileType.Internal, "blobs/icon.png")
 
-        val listener = object : ApplicationAdapter() {
-
-            override fun render() {
-                println("hi")
+        fullGameTests.forEach { test ->
+            println("-----------------${test.name}-----------------")
+            val relay = ApplicationListenerRelay(listOf(FortyFive, test))
+            try {
+                FortyFive.reset()
+                FortyFive.init()
+                Lwjgl3Application(relay, config)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            if (!FortyFive.cleanExit) {
+                println("${ANSI.red}Test failed: cleanExit is false${ANSI.reset}")
             }
         }
-
-        val relay = ApplicationListenerRelay(listOf(FortyFive, listener))
-
-        try {
-            Lwjgl3Application(relay, config)
-        } catch (e: Exception) {
-        }
-//        Lwjgl3Application(relay, config)
     }
 
     companion object {

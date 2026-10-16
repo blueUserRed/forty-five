@@ -1,4 +1,4 @@
-package com.microwavestudios.fortyfive.tests
+package com.microwavestudios.fortyfive.encounterTests
 
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction

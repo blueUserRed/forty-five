@@ -10,7 +10,6 @@ import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.screen.SoundPlayer
-import com.microwavestudios.fortyfive.game.widgets.CardHand
 import com.microwavestudios.fortyfive.game.widgets.IAfterlife
 import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolver
@@ -261,7 +260,7 @@ class GameControllerImpl(
             val renderPipeline = FortyFive.currentRenderPipeline ?: return@watchFor
             if (inParryMenu) renderPipeline.startParryEffect() else renderPipeline.stopParryEffect()
         }
-        gameEvents.watchFor<CardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
+        gameEvents.watchFor<ICardHand.CardDraggedOntoSlotEvent> { loadBulletFromHandInRevolver(it.card, it.slot.num) }
         gameEvents.watchFor<Events.ShootAtEnemy> { (enemy) ->
             if (enemy !== targetedEnemy) FortyFive.logger.warn(logTag, "Enemy shot at does not match targeted enemy!")
             if (!isUIFrozen) shoot()

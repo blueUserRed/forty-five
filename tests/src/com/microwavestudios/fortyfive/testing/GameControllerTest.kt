@@ -4,6 +4,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.StatusEffect
+import com.microwavestudios.fortyfive.game.Talisman
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.game.controller.EncounterContext
@@ -12,7 +13,7 @@ import com.microwavestudios.fortyfive.game.controller.GameControllerImpl.Events
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.game.enemy.EnemyBrain
-import com.microwavestudios.fortyfive.game.widgets.CardHand
+import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Encounter
@@ -144,7 +145,7 @@ abstract class GameControllerTest {
             healthInRun = 100,
             maxHealthInRun = 100,
             currentRunDeck = null,
-            talismans = listOf()
+            talismans = talismans()
         )
         (FortyFive.profileManager as MockProfileManager).currentProfile = profile
         val controller = GameControllerImpl(
@@ -203,6 +204,7 @@ abstract class GameControllerTest {
     protected abstract fun deck(): List<CardType>
     protected open fun enemies(): List<String> = listOf()
     protected open fun scriptedEnemies(): List<Pair<Int, List<Pair<Int, EnemyAction?>>>>? = null
+    protected open fun talismans(): List<Talisman> = listOf()
 
     ///////////////////////////////
     // helpers
@@ -242,11 +244,32 @@ abstract class GameControllerTest {
         override fun toString(): String = "${ANSI.cyan}aCurReservers${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
 
+    protected fun aAmountHandCards(): AssertionValue<Int> = object : AssertionValue<Int>() {
+
+        override fun get(): Int = cardHand.amountOfCards
+
+        override fun toString(): String = "${ANSI.cyan}aAmountHandCards${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
     protected fun aCardInSlot(slot: Int): AssertionValue<Card?> = object : AssertionValue<Card?>() {
 
         override fun get(): Card? = revolverSlot(slot).card
 
         override fun toString(): String = "${ANSI.cyan}aCardInSlot($slot)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
+    protected fun aCardInHand(index: Int): AssertionValue<Card?> = object : AssertionValue<Card?>() {
+
+        override fun get(): Card? = cardHand.allCards().getOrNull(index)
+
+        override fun toString(): String = "${ANSI.cyan}aCardInSlot($index)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
+    }
+
+    protected fun aCardInHand(name: String): AssertionValue<Card?> = object : AssertionValue<Card?>() {
+
+        override fun get(): Card? = cardHand.allCards().find { it.name == name }
+
+        override fun toString(): String = "${ANSI.cyan}aCardInSlot($name)${ANSI.reset} ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
     
     protected fun aCurrentPlayerHealth(): AssertionValue<Int> = object : AssertionValue<Int>() {
@@ -335,6 +358,18 @@ abstract class GameControllerTest {
             "${ANSI.white}(${this@aPoisonValue}${ANSI.white})." +
                     "${ANSI.cyan}poisonValue ${ANSI.grey}(='${get()}')${ANSI.reset}"
     }
+
+    protected operator fun AssertionValue<Int?>.plus(other: AssertionValue<Int?>): AssertionValue<Int?> = object : AssertionValue<Int?>() {
+
+        override fun get(): Int? = this@plus.get()?.let { first -> other.get()?.let { second -> first + second } }
+
+        override fun toString(): String =
+            "${ANSI.white}(${this@plus} ${ANSI.cyan}+ $other ${ANSI.grey}(='${get()}')${ANSI.white})${ANSI.reset}"
+
+    }
+
+    protected operator fun AssertionValue<Int?>.plus(other: Int?): AssertionValue<Int?> =
+        this + AssertionValue.immediate(other)
     
     protected fun <T> deferred(getter: () -> T): AssertionValue<T> = AssertionValue.deferred(getter)
 
@@ -411,7 +446,7 @@ abstract class GameControllerTest {
     internal inline fun Timeline.TimelineBuilderDSL.dragCardOnSlot(card: String, slot: Int) {
         waitForFreeUi()
         fire {
-            CardHand.CardDraggedOntoSlotEvent(cardInHand(card), revolverSlot(slot))
+            ICardHand.CardDraggedOntoSlotEvent(cardInHand(card), revolverSlot(slot))
         }
         waitForFreeUi()
     }

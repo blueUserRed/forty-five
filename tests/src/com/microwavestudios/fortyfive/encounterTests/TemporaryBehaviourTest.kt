@@ -1,4 +1,4 @@
-package com.microwavestudios.fortyfive.tests
+package com.microwavestudios.fortyfive.encounterTests
 
 import com.microwavestudios.fortyfive.game.Poison
 import com.microwavestudios.fortyfive.game.card.CardType
@@ -6,9 +6,9 @@ import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.testing.GameControllerTest
 import com.microwavestudios.fortyfive.utils.Timeline
 
-class SourceBulletRefTest : GameControllerTest() {
+class TemporaryBehaviourTest : GameControllerTest() {
 
-    override val name: String = "SourceBulletRefTest"
+    override val name: String = "temporaryBehaviourTest"
 
     override fun testTimeline(): Timeline = Timeline.timeline {
         waitForTurnBegin()

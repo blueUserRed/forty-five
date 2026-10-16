@@ -1,5 +1,7 @@
 package com.microwavestudios.fortyfive;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
@@ -37,6 +39,8 @@ public class DesktopLauncher {
 
         Exception exception = null;
         try {
+            Gdx.files = new LwjglFiles();
+            FortyFive.INSTANCE.init();
             new Lwjgl3Application(FortyFive.INSTANCE, config);
         } catch (Exception e) {
             exception = e;
