@@ -1,8 +1,8 @@
 package com.microwavestudios.fortyfive
 
-import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
@@ -12,7 +12,9 @@ import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.testing.mockservices.MockSoundPlayer
 import com.microwavestudios.fortyfive.encounterTests.talismans.TalismanBulletAndGoldNuggetTest
 import com.microwavestudios.fortyfive.fullGameTests.BasicFullGameTest
+import com.microwavestudios.fortyfive.screen.InputProcessorProvider
 import com.microwavestudios.fortyfive.testing.FullGameTest
+import com.microwavestudios.fortyfive.testing.mockservices.InputInterceptor
 import com.microwavestudios.fortyfive.utils.ANSI
 import java.io.File
 import java.io.PrintStream
@@ -56,7 +58,7 @@ class TestLauncher {
     fun runGameControllerTests(testLogDir: File?) {
         val profileManager = MockProfileManager()
         FortyFive.init()
-        FortyFive.initGlobalsForTest(MockSoundPlayer(), profileManager)
+        FortyFive.overrideGlobalsForTest(MockSoundPlayer(), profileManager)
 
         FortyFive.logger.title("start tests")
         val failedTests = mutableListOf<Pair<String, String>>()
@@ -104,8 +106,17 @@ class TestLauncher {
         fullGameTests.forEach { test ->
             println("-----------------${test.name}-----------------")
             val relay = ApplicationListenerRelay(listOf(FortyFive, test))
+            val interceptor = InputInterceptor()
+            val inputInterceptorProvider = InputProcessorProvider { stage, inputManager ->
+                interceptor.intercept(stage, inputManager)
+            }
+            test.preInit(interceptor)
             try {
                 FortyFive.reset()
+                FortyFive.overrideGlobalsForTest(
+                    mockProfileManager = test.mockProfileManager,
+                    inputProcessorProvider = inputInterceptorProvider
+                )
                 FortyFive.init()
                 Lwjgl3Application(relay, config)
             } catch (e: Exception) {

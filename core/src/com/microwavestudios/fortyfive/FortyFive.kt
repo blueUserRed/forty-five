@@ -24,6 +24,7 @@ import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
 import com.microwavestudios.fortyfive.screen.ISoundPlayer
+import com.microwavestudios.fortyfive.screen.InputProcessorProvider
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.screen.RenderableScreen
@@ -74,6 +75,10 @@ object FortyFive : Game() {
         private set
 
     var pluginManager = PluginManager()
+        private set
+
+    /** allows defining alternative input processors. Useful for testing */
+    var inputProcessorProvider: InputProcessorProvider = InputProcessorProvider.default
         private set
 
 
@@ -216,9 +221,14 @@ object FortyFive : Game() {
         if (Gdx.app != null) Controllers.removeListener(controllerListener)
     }
 
-    fun initGlobalsForTest(mockSoundPlayer: ISoundPlayer, mockProfileManager: IProfileManager) {
+    fun overrideGlobalsForTest(
+        mockSoundPlayer: ISoundPlayer = SoundPlayer(),
+        mockProfileManager: IProfileManager = ProfileManager(),
+        inputProcessorProvider: InputProcessorProvider = InputProcessorProvider.default,
+    ) {
         soundPlayer = mockSoundPlayer
         profileManager = mockProfileManager
+        this.inputProcessorProvider = inputProcessorProvider
     }
 
     fun init() {

@@ -16,7 +16,9 @@ import com.microwavestudios.fortyfive.game.enemy.EnemyBrain
 import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolverSlot
 import com.microwavestudios.fortyfive.profile.Profile
+import com.microwavestudios.fortyfive.profile.RunSave
 import com.microwavestudios.fortyfive.run.Encounter
+import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.screen.screens.EncounterScreen
 import com.microwavestudios.fortyfive.testing.mockcomponents.MockAfterlife
 import com.microwavestudios.fortyfive.testing.mockcomponents.MockCardHand
@@ -142,10 +144,21 @@ abstract class GameControllerTest {
                 wonRuns = 0,
                 runBoards = mutableMapOf()
             ),
-            healthInRun = 100,
-            maxHealthInRun = 100,
-            currentRunDeck = null,
-            talismans = talismans()
+            runSaveData = MockProfile.MockRunSaveData(
+                currentNode = 0,
+                lastNode = 0,
+                playerHealth = 100,
+                usedSteps = 0,
+                backpack = mutableListOf(),
+                backpackDecks = mutableListOf(),
+                talismans = talismans().toMutableList(),
+                currentDeckId = 101,
+                encountersStarted = 0,
+                cardsTakenAlong = listOf(),
+                talismanRewardChanceBoost = 0.0,
+                run = null
+            ),
+            mockMapSaver = null
         )
         (FortyFive.profileManager as MockProfileManager).currentProfile = profile
         val controller = GameControllerImpl(

@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.screen.commonComponents
 
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.run.Run
 import com.microwavestudios.fortyfive.screen.actors.CustomBox
@@ -11,7 +12,7 @@ import com.microwavestudios.fortyfive.utils.Colors
 object ProfileCardCreator {
 
     fun ScreenCreator.getSharedProfileCard(
-        profile: Profile.Preview
+        profile: IProfile.IPreview
     ): CustomGroup = newBox {
 
         width = 250f
@@ -27,13 +28,13 @@ object ProfileCardCreator {
         }
     }
 
-    private fun CustomBox.failedCard(creator: ScreenCreator, profile: Profile.Preview) = with(creator) {
+    private fun CustomBox.failedCard(creator: ScreenCreator, profile: IProfile.IPreview) = with(creator) {
         label("red wing", "Profile ${profile.name}", fontSize = (32 * 1.3).toInt()) { syncHeight() }
         val message = when (profile.loadFailure) {
             null -> ""
-            Profile.LoadFailure.MARKED_CORRUPTED, Profile.LoadFailure.CORRUPTED_FILES -> "Profile is corrupted!"
-            Profile.LoadFailure.VERSION_TOO_NEW -> "Profile was created by a newer version of the game; try upgrading the game"
-            Profile.LoadFailure.VERSION_TOO_OLD -> "Profile was created by an older version of the game; try downgrading the game"
+            IProfile.LoadFailure.MARKED_CORRUPTED, IProfile.LoadFailure.CORRUPTED_FILES -> "Profile is corrupted!"
+            IProfile.LoadFailure.VERSION_TOO_NEW -> "Profile was created by a newer version of the game; try upgrading the game"
+            IProfile.LoadFailure.VERSION_TOO_OLD -> "Profile was created by an older version of the game; try downgrading the game"
         }
         label("red wing", message, Colors.Red, (32 * 0.8).toInt()) {
             syncHeight()
@@ -43,7 +44,7 @@ object ProfileCardCreator {
         }
     }
 
-    private fun CustomBox.normalCard(creator: ScreenCreator, profile: Profile.Preview) = with(creator) {
+    private fun CustomBox.normalCard(creator: ScreenCreator, profile: IProfile.IPreview) = with(creator) {
         label("red wing", "Profile ${profile.name}", fontSize = (32 * 1.3).toInt()) { syncHeight() }
         if (profile.exists) {
             label("red wing", "current area: ${profile.currentArea}", fontSize = 32) { syncHeight() }

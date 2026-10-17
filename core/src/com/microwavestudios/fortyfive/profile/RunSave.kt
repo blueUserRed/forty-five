@@ -18,7 +18,16 @@ import java.io.File
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
-class RunSave private constructor(val profile: Profile) {
+interface IRunSave {
+
+    interface IPreview {
+
+        val playerHealth: Int
+        val run: Run
+    }
+}
+
+class RunSave private constructor(val profile: Profile) : IRunSave {
 
     private lateinit var data: RunSaveData
 
@@ -129,14 +138,14 @@ class RunSave private constructor(val profile: Profile) {
         backpackDecks.forEach { it.checkDeck(backpack) }
     }
 
-    class Preview(val dataFile: File) {
+    class Preview(val dataFile: File) : IRunSave.IPreview {
 
         private lateinit var data: RunSaveData
 
-        val playerHealth: Int
+        override val playerHealth: Int
             get() = data.playerHealth
 
-        val run: Run
+        override val run: Run
             get() = data.run
 
         val backpack: List<CardType>

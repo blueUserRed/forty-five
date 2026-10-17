@@ -5,19 +5,32 @@ import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.testing.notAvailableInMock
 
-class MockProfileManager() : IProfileManager {
+class MockProfileManager(
+    private val profileCreator: () -> List<MockProfile> = { listOf() }
+) : IProfileManager {
 
     override var currentProfile: IProfile? = null
 
-    override val availableProfiles: List<Profile.Preview> = listOf()
+    override lateinit var availableProfiles: List<IProfile.IPreview>
+        private set
+
+    private lateinit var profiles: List<MockProfile>
 
     override fun init() {
+        profiles = profileCreator()
+        availableProfiles = profiles.map { it.constructPreview() }
     }
 
     override fun deselectProfile() {
+        currentProfile = null
     }
 
-    override fun selectProfile(preview: Profile.Preview): Boolean = notAvailableInMock()
+    override fun selectProfile(preview: IProfile.IPreview): Boolean {
+        val index = availableProfiles.indexOf(preview)
+        require(index != -1) { "unknown preview: ${preview.name}" }
+        currentProfile = profiles[index]
+        return true
+    }
 
     override fun rereadPreviews() {
     }

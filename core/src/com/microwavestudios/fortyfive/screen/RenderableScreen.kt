@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.GL20
@@ -145,7 +146,10 @@ open class RenderableScreen(
     val keyboardFocusShapeRenderer: ShapeRenderer = ShapeRenderer()
 
     val inputManager = InputManager(this)
-    private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
+
+    private var inputProcessor: InputMultiplexer = InputMultiplexer(
+        FortyFive.inputProcessorProvider.getInputProcessor(stage, inputManager)
+    )
 
     val textEffectParticleSystem: ParticleSystem = ParticleSystem(viewport.worldWidth, viewport.worldHeight).also {
         it.addBaseForce(0f, -1f)
@@ -162,8 +166,6 @@ open class RenderableScreen(
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
         inputManager.init()
-        inputMultiplexer.addProcessor(inputManager)
-        inputMultiplexer.addProcessor(stage)
         inputManager.onInput(GameInputs.toggleDebugMenu) { debugMenu?.toggle() }
         inputManager.onInput(GameInputs.nextDebugMenuPage) { debugMenu?.nextDebugPage() }
         inputManager.onInput(GameInputs.previousDebugMenuPage) { debugMenu?.previousDebugPage() }
@@ -273,13 +275,13 @@ open class RenderableScreen(
     }
 
     fun active() {
-        Gdx.input.inputProcessor = inputMultiplexer
+        Gdx.input.inputProcessor = inputProcessor
         Utils.setCursor(defaultCursor)
         screenControllers.forEach { it.onActive() }
     }
 
     fun transitionAway() {
-        inputMultiplexer.clear()
+        inputProcessor.clear()
         enterState(transitionAwayScreenState)
         _screenControllers.forEach(ScreenController::onTransitionAway)
     }

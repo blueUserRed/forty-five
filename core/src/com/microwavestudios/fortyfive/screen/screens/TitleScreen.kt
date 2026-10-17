@@ -10,6 +10,7 @@ import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
 import com.microwavestudios.fortyfive.particle.ParticleSystem
 import com.microwavestudios.fortyfive.particle.TextureParticleRenderer
+import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
@@ -54,7 +55,7 @@ class TitleScreen : ScreenCreator() {
 
     private val events: EventPipeline = EventPipeline()
 
-    private var currentlySelectedProfile: Profile.Preview? = null
+    private var currentlySelectedProfile: IProfile.IPreview? = null
 
     private val timelines: TimelineController = TimelineController()
 
@@ -269,7 +270,7 @@ class TitleScreen : ScreenCreator() {
         timelines, //  ParticleSystemScreenController(testParticleSystem, screen)
     )
 
-    private class SelectedProfileChanged(val newProfile: Profile.Preview?)
+    private class SelectedProfileChanged(val newProfile: IProfile.IPreview?)
 
     companion object : ScreenManager.ScreenCreatorCompanion {
         override val creatorClass: KClass<out ScreenCreator> = TitleScreen::class

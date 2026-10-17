@@ -2,6 +2,7 @@ package com.microwavestudios.fortyfive.screen
 
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
+import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
@@ -69,6 +70,7 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
 
     private var currentMusic: Music? = null
     private var currentMusicLifetime: EndableLifetime? = null
+    private var nextMusicLifetime: EndableLifetime? = null
     private var currentMusicTheme: Theme? = null
 
     private var nextMusic: Music? = null
@@ -125,8 +127,8 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
             nextMusicLifetime,
             theme.resourceHandles.random()
         )
-
-        action { currentMusicTheme = theme }
+        currentMusicTheme = theme
+        this@SoundPlayer.nextMusicLifetime = nextMusicLifetime
 
         delayUntilPromiseResolves(nextMusic)
 
@@ -147,6 +149,7 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
             currentMusicLifetime?.die()
             currentMusic = nextMusic.getOrError()
             currentMusicLifetime = nextMusicLifetime
+            this@SoundPlayer.nextMusicLifetime = null
             this@SoundPlayer.nextMusic = null
         }
 
@@ -207,7 +210,9 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
     }
 
     override fun end() {
+        musicTimeline.stopTimeline()
         currentMusicLifetime?.die()
+        nextMusicLifetime?.die()
     }
 
     private data class AmbientSound(

@@ -75,6 +75,25 @@ interface IProfile {
     fun dirty()
     fun write()
 
+
+    interface IPreview {
+
+        val loadedSuccessfully: Boolean
+        val name: String
+        val loadFailure: LoadFailure?
+        val exists: Boolean
+        val currentArea: String?
+        val money: Int?
+        val collection: List<CardType>?
+        val runPreview: IRunSave.IPreview?
+
+        fun read()
+
+    }
+
+    enum class LoadFailure {
+        VERSION_TOO_OLD, VERSION_TOO_NEW, CORRUPTED_FILES, MARKED_CORRUPTED
+    }
 }
 
 class Profile private constructor(
@@ -492,30 +511,31 @@ class Profile private constructor(
     }
 
     class Preview(
-        val name: String,
+        override val name: String,
         val dataFile: File,
-        val loadFailure: LoadFailure?,
-        val exists: Boolean
-    ) {
+        override val loadFailure: IProfile.LoadFailure?,
+        override val exists: Boolean
+    ) : IProfile.IPreview {
 
-        val loadedSuccessfully: Boolean
+        override val loadedSuccessfully: Boolean
             get() = loadFailure == null
 
         private var data: ProfileData? = null
 
-        var runPreview: RunSave.Preview? = null
+        override var runPreview: RunSave.Preview? = null
             private set
 
-        val collection: List<CardType>?
+        override val collection: List<CardType>?
             get() = data?.cardCollection
 
-        val currentArea: String?
+        override val currentArea: String?
             get() = data?.currentMap
 
-        val money: Int?
+        override val money: Int?
             get() = data?.playerMoney
 
-        fun read() {
+
+        override fun read() {
             if (!loadedSuccessfully || !exists) return
             val onj = OnjParser.parseFile(dataFile)
             dataFileSchema.assertMatches(onj)
@@ -552,25 +572,25 @@ class Profile private constructor(
                 } catch (e: Exception) {
                     FortyFive.logger.warn(logTag, "Error loading version file for profile $name")
                     FortyFive.logger.stackTrace(e)
-                    throw ProfileLoadException(LoadFailure.CORRUPTED_FILES)
+                    throw ProfileLoadException(IProfile.LoadFailure.CORRUPTED_FILES)
                 }
                 if (markedCorrupted) {
                     FortyFive.logger.warn(logTag, "Profile $name marked corrupted")
-                    throw ProfileLoadException(LoadFailure.MARKED_CORRUPTED)
+                    throw ProfileLoadException(IProfile.LoadFailure.MARKED_CORRUPTED)
                 }
                 if (version > profileVersion) {
                     FortyFive.logger.warn(
                         logTag,
                         "Version mismatch in profile $name: profile: $version, game: $profileVersion"
                     )
-                    throw ProfileLoadException(LoadFailure.VERSION_TOO_NEW)
+                    throw ProfileLoadException(IProfile.LoadFailure.VERSION_TOO_NEW)
                 }
                 if (version < profileVersion) {
                     FortyFive.logger.warn(
                         logTag,
                         "Version mismatch in profile $name: profile: $version, game: $profileVersion"
                     )
-                    throw ProfileLoadException(LoadFailure.VERSION_TOO_OLD)
+                    throw ProfileLoadException(IProfile.LoadFailure.VERSION_TOO_OLD)
                 }
                 try {
                     val preview = Preview(name, File("profiles/$name/profile_data.onj"), null, true)
@@ -580,7 +600,7 @@ class Profile private constructor(
                 } catch (e: Exception) {
                     FortyFive.logger.warn(logTag, "Failure loading profile $name")
                     FortyFive.logger.stackTrace(e)
-                    throw ProfileLoadException(LoadFailure.CORRUPTED_FILES)
+                    throw ProfileLoadException(IProfile.LoadFailure.CORRUPTED_FILES)
                 }
             }
         }
@@ -736,11 +756,7 @@ class Profile private constructor(
         }
     }
 
-    enum class LoadFailure {
-        VERSION_TOO_OLD, VERSION_TOO_NEW, CORRUPTED_FILES, MARKED_CORRUPTED
-    }
-
-    private class ProfileLoadException(val failure: LoadFailure) : Exception()
+    private class ProfileLoadException(val failure: IProfile.LoadFailure) : Exception()
 
     data class RunBoard(
         val areaName: String,

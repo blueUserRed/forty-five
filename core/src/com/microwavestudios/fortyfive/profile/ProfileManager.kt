@@ -5,7 +5,7 @@ import com.microwavestudios.fortyfive.FortyFive
 interface IProfileManager {
 
     val currentProfile: IProfile?
-    val availableProfiles: List<Profile.Preview>
+    val availableProfiles: List<IProfile.IPreview>
 
     fun init()
 
@@ -14,7 +14,7 @@ interface IProfileManager {
     /**
      * @return true when the profile was loaded successfully
      */
-    fun selectProfile(preview: Profile.Preview): Boolean
+    fun selectProfile(preview: IProfile.IPreview): Boolean
 
     fun rereadPreviews()
 
@@ -27,7 +27,7 @@ class ProfileManager : IProfileManager {
     override var currentProfile: IProfile? = null
         private set
 
-    override lateinit var availableProfiles: List<Profile.Preview>
+    override lateinit var availableProfiles: List<IProfile.IPreview>
         private set
 
 
@@ -46,7 +46,7 @@ class ProfileManager : IProfileManager {
         rereadPreviews()
     }
 
-    override fun selectProfile(preview: Profile.Preview): Boolean {
+    override fun selectProfile(preview: IProfile.IPreview): Boolean {
         if (!preview.loadedSuccessfully) {
             FortyFive.logger.warn(logTag, "can't select profile ${preview.name}")
             return false
