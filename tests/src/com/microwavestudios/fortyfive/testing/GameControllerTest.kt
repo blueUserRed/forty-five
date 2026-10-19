@@ -158,6 +158,7 @@ abstract class GameControllerTest {
                 talismanRewardChanceBoost = 0.0,
                 run = null
             ),
+            overrideMaxHealthInRun = 100,
             mockMapSaver = null
         )
         (FortyFive.profileManager as MockProfileManager).currentProfile = profile

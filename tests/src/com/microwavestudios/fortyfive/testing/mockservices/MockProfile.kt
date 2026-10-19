@@ -16,7 +16,8 @@ class MockProfile(
     override val name: String,
     val data: Profile.ProfileData,
     val runSaveData: MockRunSaveData?,
-    val mockMapSaver: MapSaver?
+    val mockMapSaver: MapSaver?,
+    val overrideMaxHealthInRun: Int? = null
 ) : IProfile {
 
     override val playerMoney: Int
@@ -95,7 +96,7 @@ class MockProfile(
         }
 
     override val maxHealthInRun: Int?
-        get() = runSaveData?.run?.maxPlayerHealth
+        get() = overrideMaxHealthInRun ?: runSaveData?.run?.maxPlayerHealth
 
     override val areaMapSaver: MapSaver
         get() = mockMapSaver ?: notAvailableInMock()
