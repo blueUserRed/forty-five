@@ -2,7 +2,6 @@ package com.microwavestudios.fortyfive
 
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
@@ -11,10 +10,11 @@ import com.microwavestudios.fortyfive.testing.GameControllerTest
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.testing.mockservices.MockSoundPlayer
 import com.microwavestudios.fortyfive.encounterTests.talismans.TalismanBulletAndGoldNuggetTest
-import com.microwavestudios.fortyfive.fullGameTests.BasicFullGameTest
+import com.microwavestudios.fortyfive.fullGameTests.ShopFullGameTest
 import com.microwavestudios.fortyfive.screen.InputProcessorProvider
 import com.microwavestudios.fortyfive.testing.FullGameTest
 import com.microwavestudios.fortyfive.testing.mockservices.InputInterceptor
+import com.microwavestudios.fortyfive.testing.mockservices.MockGlobalSave
 import com.microwavestudios.fortyfive.utils.ANSI
 import java.io.File
 import java.io.PrintStream
@@ -33,7 +33,7 @@ class TestLauncher {
     )
 
     val fullGameTests: Array<FullGameTest> = arrayOf(
-        BasicFullGameTest()
+        ShopFullGameTest()
     )
 
     fun run() {
@@ -92,6 +92,12 @@ class TestLauncher {
     }
 
     fun runFullGameTests() {
+        // avoid FortyFive.logger here because it gets disposed/reinitialized all the time
+        println("---------------------------------------------------------------")
+        println("------------------------Full game tests------------------------")
+        println("---------------------------------------------------------------")
+        println()
+
         val appArgs = FortyFive.AppArguments(false, listOf(), false, null)
         FortyFive.appArguments = appArgs
 
@@ -103,8 +109,10 @@ class TestLauncher {
         config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4)
         config.setWindowIcon(Files.FileType.Internal, "blobs/icon.png")
 
+        val failedTests = mutableMapOf<String, String>()
+
         fullGameTests.forEach { test ->
-            println("-----------------${test.name}-----------------")
+            println("------------------------ ${test.name} ------------------------")
             val relay = ApplicationListenerRelay(listOf(FortyFive, test))
             val interceptor = InputInterceptor()
             val inputInterceptorProvider = InputProcessorProvider { stage, inputManager ->
@@ -115,15 +123,28 @@ class TestLauncher {
                 FortyFive.reset()
                 FortyFive.overrideGlobalsForTest(
                     mockProfileManager = test.mockProfileManager,
-                    inputProcessorProvider = inputInterceptorProvider
+                    inputProcessorProvider = inputInterceptorProvider,
+                    mockGlobalSave = MockGlobalSave(test.globalSaveData())
                 )
+                FortyFive.soundPlayer.masterVolume = 0f
                 FortyFive.init()
                 Lwjgl3Application(relay, config)
             } catch (e: Exception) {
                 e.printStackTrace()
+                failedTests[test.name] = "Test threw an exception:\n${e.stackTraceToString()}"
             }
             if (!FortyFive.cleanExit) {
-                println("${ANSI.red}Test failed: cleanExit is false${ANSI.reset}")
+                failedTests[test.name] = "Test failed because the cleanExit flag is set to false"
+            }
+            if (test.resourcesWereLoadedOnClose) {
+                failedTests[test.name] = "Test failed because resources were loaded when the game was closed"
+            }
+            println("\n")
+            val message = failedTests[test.name]
+            if (message == null) {
+                println("${ANSI.green}Test ${test.name} successful${ANSI.reset}\n\n")
+            } else {
+                println("${ANSI.red}Test ${test.name} failed:${ANSI.reset}\n$message\n\n")
             }
         }
     }

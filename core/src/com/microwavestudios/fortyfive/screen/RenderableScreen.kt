@@ -74,6 +74,7 @@ interface IScreen : ResourceBorrower {
  * What screen is shown is managed by the [ScreenManager]
  */
 open class RenderableScreen(
+    val name: String,
     val viewport: Viewport,
     batch: Batch,
     private val controllerContext: Any?,
@@ -398,5 +399,6 @@ open class RenderableScreen(
         const val logTag = "screen"
 
         const val transitionAwayScreenState = "transition away"
+        const val transitionToScreenState = "transition to"
     }
 }

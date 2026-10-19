@@ -228,19 +228,10 @@ data class MapNodeBuilder(
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition? = null,
-//    var nodeTexture: ResourceHandle? = null,
     var distance: Int = -1,
     var event: MapEvent? = null,
     val additionalEvent: MapEvent? = null,
-//    val additionalNodeTexture: ResourceHandle? = null,
 ) : ResourceBorrower {
-
-    private var buildEdges: MutableList<MapNode> = mutableListOf()
-
-    private var inBuild: Boolean = false
-
-    var asNode: MapNode? = null
-        private set
 
     private var nodeTextureCache: Promise<Drawable>? = null
 
@@ -252,10 +243,6 @@ data class MapNodeBuilder(
         nodeTextureCache = FortyFive.resourceManager.request(this, screen.lifetime, nodeTexture)
         screen.lifetime.onEnd { nodeTextureCache = null }
         return nodeTextureCache
-    }
-
-    fun invalidateCaches() {
-        nodeTextureCache = null
     }
 
     fun isLinkedTo(node: MapNodeBuilder): Boolean {
@@ -281,9 +268,13 @@ data class MapNodeBuilder(
     }
 
     fun build(): MapNode {
-        if (inBuild) return asNode!!
-        inBuild = true
-        asNode = MapNode(
+        return build(mutableMapOf())
+    }
+
+    private fun build(cache: MutableMap<MapNodeBuilder, MapNode>): MapNode {
+        cache[this]?.let { return it }
+        val buildEdges = mutableListOf<MapNode>()
+        val asNode = MapNode(
             index,
             buildEdges,
             x, y,
@@ -292,10 +283,11 @@ data class MapNodeBuilder(
             distance,
             event,
         )
+        cache[this] = asNode
         for (edge in edgesTo) {
-            buildEdges.add(edge.build())
+            buildEdges.add(edge.build(cache))
         }
-        return asNode!!
+        return asNode
     }
 
     fun connect(other: MapNodeBuilder, dir: Direction = Direction.LEFT, addAsNext: Boolean = true): Boolean {
@@ -320,10 +312,7 @@ data class MapNodeBuilder(
     }
 
     override fun equals(other: Any?): Boolean = other != null &&
-        other is MapNodeBuilder &&
-        other.x == this.x &&
-        other.y == this.y &&
-        other.index == this.index
+        other is MapNodeBuilder && other.index == this.index
 
     override fun hashCode(): Int {
         return (x * 1000 + y * 20).toInt() + index * 222

@@ -226,6 +226,7 @@ class MapEditorScreen : ScreenCreator() {
         val event = BuildMapEvent()
         events.fire(event)
         file.writeText(event.map!!.asOnjObject().toString())
+        FortyFive.logger.debug("MapEditor", "saved!")
     }
 
     private fun saveTo() {

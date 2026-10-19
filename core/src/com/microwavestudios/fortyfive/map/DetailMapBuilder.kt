@@ -46,11 +46,11 @@ class DetailMapBuilder(
     }
 
     fun build(): DetailMap {
-        startNode.build()
+        val builtStartNode = startNode.build()
         return DetailMap(
             name,
-            startNode.asNode!!,
-            endNode.asNode!!,
+            builtStartNode,
+            endNode.index,
             decorations.filter { !it.animated }.map { it.build() },
             decorations.filter { it.animated }.map { it.build() },
             isArea,

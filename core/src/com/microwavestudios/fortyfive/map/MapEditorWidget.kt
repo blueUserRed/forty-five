@@ -52,7 +52,7 @@ class MapEditorWidget(
         FortyFive.resourceManager.request(this, screen.lifetime, "map_edge_shader")
 
     private val nodeDrawable: Promise<Drawable> = FortyFive.resourceManager.request(this, screen.lifetime, "map_node_default")
-    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, "map_path")
+    private val edgeTexture: Promise<TextureRegion> = FortyFive.resourceManager.request(this, screen.lifetime, "white_texture")
 
     private var screenDragged: Boolean = false
 

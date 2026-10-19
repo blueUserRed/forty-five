@@ -3,6 +3,12 @@ package com.microwavestudios.fortyfive.profile
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.plugin.ManagedPlugin
+import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.globalSaveSchema
+import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.globalSaveVersion
+import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.logTag
+import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.savePath
+import com.microwavestudios.fortyfive.profile.GlobalSave.GlobalSaveData
+import com.microwavestudios.fortyfive.profile.GlobalSave.PluginSaveData
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -15,7 +21,37 @@ import java.io.IOException
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
-class GlobalSave {
+
+interface IGlobalSave {
+
+
+    var soundEffectVolume: Float
+    var musicVolume: Float
+    var masterVolume: Float
+    var enableScreenShake: Boolean
+    var skipIntroScreen: Boolean
+    var lastUsedProfile: String?
+    var useBorderlessWindowFullscreen: Boolean
+    var fullscreen: Boolean
+
+    // not stored in the savefile but still important to persist between screens
+    var currentControllerUid: String?
+
+    var enableControllerVibration: Boolean
+
+
+
+    fun readFromDisk()
+    fun write()
+    fun verifyPluginSaveData(plugin: ManagedPlugin)
+    fun getPluginSaveData(name: String): PluginSaveData
+    fun setPluginActivation(name: String, active: Boolean)
+    fun setPluginAgreement(name: String, agreed: Boolean)
+    fun setToCorrectWindowMode()
+}
+
+
+class GlobalSave : IGlobalSave {
 
     private var dirty: Boolean = false
 
@@ -32,38 +68,38 @@ class GlobalSave {
         pluginConfig = mutableListOf()
     )
 
-    var soundEffectVolume: Float by DataDelegate(
+    override var soundEffectVolume: Float by DataDelegate(
         GlobalSaveData::soundEffectVolume,
         onSet = { FortyFive.soundPlayer.soundEffectVolume = it }
     )
 
-    var musicVolume: Float by DataDelegate(
+    override var musicVolume: Float by DataDelegate(
         GlobalSaveData::musicVolume,
         onSet = { FortyFive.soundPlayer.musicVolume = it }
     )
 
-    var masterVolume: Float by DataDelegate(
+    override var masterVolume: Float by DataDelegate(
         GlobalSaveData::masterVolume,
         onSet = { FortyFive.soundPlayer.masterVolume = it }
     )
 
-    var enableScreenShake: Boolean by DataDelegate(GlobalSaveData::enableScreenShake)
-    var skipIntroScreen: Boolean by DataDelegate(GlobalSaveData::skipIntroScreen)
-    var lastUsedProfile: String? by DataDelegate(GlobalSaveData::lastUsedProfile)
+    override var enableScreenShake: Boolean by DataDelegate(GlobalSaveData::enableScreenShake)
+    override var skipIntroScreen: Boolean by DataDelegate(GlobalSaveData::skipIntroScreen)
+    override var lastUsedProfile: String? by DataDelegate(GlobalSaveData::lastUsedProfile)
 
-    var useBorderlessWindowFullscreen: Boolean by DataDelegate(
+    override var useBorderlessWindowFullscreen: Boolean by DataDelegate(
         GlobalSaveData::useBorderlessWindowFullscreen,
         onSet = { setToCorrectWindowMode() }
     )
-    var fullscreen: Boolean by DataDelegate(
+    override var fullscreen: Boolean by DataDelegate(
         GlobalSaveData::fullscreen,
         onSet = { setToCorrectWindowMode() }
     )
 
     // not stored in the savefile but still important to persist between screens
-    var currentControllerUid: String? = null
+    override var currentControllerUid: String? = null
 
-    var enableControllerVibration: Boolean by DataDelegate(
+    override var enableControllerVibration: Boolean by DataDelegate(
         GlobalSaveData::enableControllerVibration
     )
 
@@ -71,7 +107,7 @@ class GlobalSave {
         dirty = true
     }
 
-    fun readFromDisk() {
+    override fun readFromDisk() {
         try {
             val file = File(savePath)
             val onj = OnjParser.parseFile(file)
@@ -103,7 +139,7 @@ class GlobalSave {
         dirty = false
     }
 
-    fun write() {
+    override fun write() {
         if (!dirty) return
         val onj = data.asOnj()
         try {
@@ -117,7 +153,7 @@ class GlobalSave {
         dirty = false
     }
 
-    fun verifyPluginSaveData(plugin: ManagedPlugin) {
+    override fun verifyPluginSaveData(plugin: ManagedPlugin) {
         val data = getPluginSaveData(plugin.name)
         if (data.jarFileHash == plugin.jarFileHash) return
         val newData = PluginSaveData(plugin.name, true, false, plugin.jarFileHash)
@@ -126,7 +162,7 @@ class GlobalSave {
         dirty()
     }
 
-    fun getPluginSaveData(name: String): PluginSaveData {
+    override fun getPluginSaveData(name: String): PluginSaveData {
         data.pluginConfig.find { it.name == name }?.let { return it }
         val newData = PluginSaveData(name, false, false, null)
         data.pluginConfig.add(newData)
@@ -134,7 +170,7 @@ class GlobalSave {
         return newData
     }
 
-    fun setPluginActivation(name: String, active: Boolean) {
+    override fun setPluginActivation(name: String, active: Boolean) {
         val pluginData = getPluginSaveData(name)
         val newPluginData = pluginData.copy(isDisabled = !active)
         data.pluginConfig.remove(pluginData)
@@ -142,7 +178,7 @@ class GlobalSave {
         dirty()
     }
 
-    fun setPluginAgreement(name: String, agreed: Boolean) {
+    override fun setPluginAgreement(name: String, agreed: Boolean) {
         val pluginData = getPluginSaveData(name)
         val newPluginData = pluginData.copy(agreedToRisk = agreed)
         data.pluginConfig.remove(pluginData)
@@ -150,7 +186,7 @@ class GlobalSave {
         dirty()
     }
 
-    fun setToCorrectWindowMode() {
+    override fun setToCorrectWindowMode() {
         if (!fullscreen) {
             Gdx.graphics.setUndecorated(false)
             Gdx.graphics.setWindowedMode(1600, 900)

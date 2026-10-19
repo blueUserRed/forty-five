@@ -68,6 +68,9 @@ class ResourceManager {
     lateinit var cardDirectories: Map<String?, String>
         private set
 
+    /** listeners that get called if the game closes with resources still loaded (useful for tests) */
+    private val resourceLeakListeners: MutableList<(String) -> Unit> = mutableListOf()
+
     /**
      * Loads the resource with the specified [handle], if it isn't already loaded, and returns it.
      * Note that this function will block the render thread for the time it takes to load the resource.
@@ -148,6 +151,13 @@ class ResourceManager {
             throw RuntimeException("couldn't find card texture at: $file")
         }
         return file
+    }
+
+    /**
+     * add listeners that gets called if the game closes with resources still loaded (useful for tests)
+     */
+    fun addResourceLeakListener(listener: (String) -> Unit) {
+        resourceLeakListeners.add(listener)
     }
 
     private fun collectResources(): CollectedResources {
@@ -411,11 +421,16 @@ class ResourceManager {
             message.append("resource $resource was still loaded when the Game closed!\n")
             for (borrower in resource.borrowedBy) message.append("is borrowed by: $borrower\n")
         }
+        resources.forEach {
+            if (it.state != Resource.ResourceState.NOT_LOADED) it.dispose()
+        }
         if (message.isEmpty()) return
+        val messageString = message.toString()
+        resourceLeakListeners.forEach { it(messageString) }
         FortyFive.logger.warn(
             logTag, "Resources were loaded when the game closed. This could " +
                 "be indicative of a memory leak. Summary:")
-        FortyFive.logger.dump(FortyFiveLogger.LogLevel.MEDIUM, message.toString())
+        FortyFive.logger.dump(FortyFiveLogger.LogLevel.MEDIUM, messageString)
     }
 
     data class FontVariant(val resourceHandle: ResourceHandle, val size: Int)

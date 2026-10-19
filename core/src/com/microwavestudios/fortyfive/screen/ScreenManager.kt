@@ -147,6 +147,7 @@ class ScreenManager(
             action {
                 currentScreen?.dispose()
                 this@ScreenManager.currentScreen = screen
+                screen.enterState(RenderableScreen.transitionToScreenState)
                 FortyFive.currentScreen = screen
                 nextScreen = null
                 if (FortyFive.currentRenderPipeline == null) {
@@ -160,6 +161,7 @@ class ScreenManager(
                 later { include(it()) }
             }
             action {
+                screen.leaveState(RenderableScreen.transitionToScreenState)
                 val profile = FortyFive.profileManager.currentProfile
                 profile?.currentMapSaver?.currentMap?.invalidateCachedAssets()
                 profile?.write()

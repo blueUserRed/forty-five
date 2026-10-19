@@ -28,7 +28,7 @@ import java.io.File
 data class DetailMap(
     val name: String,
     val startNode: MapNode,
-    val endNode: MapNode,
+    private val endNodeIndex: Int,
     val decorations: List<MapDecoration>,
     val animatedDecorations: List<MapDecoration>,
     val isArea: Boolean,
@@ -43,6 +43,11 @@ data class DetailMap(
      */
     val uniqueNodes by lazy {
         startNode.getUniqueNodes()
+    }
+
+    val endNode: MapNode by lazy {
+        uniqueNodes.find { it.index == endNodeIndex } ?:
+            throw RuntimeException("not node with endNodeIndex $endNodeIndex")
     }
 
     /**
@@ -182,7 +187,7 @@ data class DetailMap(
             return DetailMap(
                 file.nameWithoutExtension,
                 nodes[startNodeIndex].build(),
-                endNode.asNode!!,
+                endNode.index,
                 decorations,
                 animatedDecorations,
                 isArea,

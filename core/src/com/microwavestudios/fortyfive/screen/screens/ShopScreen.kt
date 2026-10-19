@@ -10,7 +10,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.config.Npc
-import com.microwavestudios.fortyfive.config.displayName
 import com.microwavestudios.fortyfive.game.Deck
 import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardActor
@@ -38,7 +37,7 @@ class ShopScreen : ScreenCreator() {
     val worldWidth = 1600f
     val worldHeight = 900f
 
-    override val background: String = "background_bewitched_forest"
+    override val background: String = "black_texture"
 
     override val viewport: Viewport = FitViewport(worldWidth, worldHeight)
 
@@ -109,8 +108,8 @@ class ShopScreen : ScreenCreator() {
             backgroundHandle = "transparent_black_texture"
         }
 
-        dropTarget(worldHeight * 0.5F, "shop_add_to_deck", true)
-        dropTarget(worldHeight * 0.06F, "shop_add_to_backpack", false)
+        dropTarget(toDeckName, worldHeight * 0.5F, "shop_add_to_deck", true)
+        dropTarget(toBackpackName, worldHeight * 0.06F, "shop_add_to_backpack", false)
 
         box {
             width = worldWidth.percent(63)
@@ -259,6 +258,10 @@ class ShopScreen : ScreenCreator() {
         paddingBottom = 30f
 
         events.watchFor<CardsChangedEvent> { (cards, lifetime) ->
+            children.forEach { child ->
+                if (child !is CardActor) return@forEach
+                child.leaveAllGroups()
+            }
             clearChildren()
             cardFocusGrid.clear()
             cards.forEachIndexed { index, card -> card(card, index, lifetime) }
@@ -266,6 +269,7 @@ class ShopScreen : ScreenCreator() {
             var y = 0
             walk().forEach { child ->
                 if (child !is CardActor) return@forEach
+                child.joinGroup(cardGroup)
                 cardFocusGrid.set(x, y, child)
                 x++
                 if (x >= 4) {
@@ -402,7 +406,8 @@ class ShopScreen : ScreenCreator() {
     }
 
 
-    private fun Group.dropTarget(yStart: Float, textureName: String, addToDeck: Boolean) = image {
+    private fun Group.dropTarget(name: String, yStart: Float, textureName: String, addToDeck: Boolean) = image {
+        name(name)
         relativeHeight(40F)
         relativeWidth(30F)
         y = yStart
@@ -415,13 +420,14 @@ class ShopScreen : ScreenCreator() {
 
         isDropTarget = true
 
-        if (addToDeck) {
-            events.watchFor<RecheckAddToDeck> {
+        events.watchFor<RecheckAddToDeck> {
+            if (addToDeck) {
                 leaveGroup(shopDropTargetGroup)
                 if (currentDeck.canAddCards()) joinGroup(shopDropTargetGroup)
+            } else {
+                leaveGroup(shopDropTargetGroup)
+                if (currentDeck.hasEnoughCards()) joinGroup(shopDropTargetGroup)
             }
-        } else {
-            joinGroup(shopDropTargetGroup)
         }
 
         observeInputState(
@@ -443,11 +449,11 @@ class ShopScreen : ScreenCreator() {
             FortyFive.soundPlayer.situation("card_bought", screen)
             profile.payMoney(info.price)
             val deck = currentDeck
-            if (profile.isRunActive) profile.addCardToBackpack(info.card.type)
-            else profile.addCardToCollection(info.card.type)
             if (addToDeck && deck.canAddCards()) {
                 deck.addToDeck(deck.nextFreeSlot(), info.card.type)
             }
+            if (profile.isRunActive) profile.addCardToBackpack(info.card.type)
+            else profile.addCardToCollection(info.card.type)
             context.boughtIndices.add(info.index)
             updateCardStates()
             events.fire(BackpackCreator.CardsModifiedEvent)
@@ -473,7 +479,10 @@ class ShopScreen : ScreenCreator() {
     }
 
     companion object : ScreenManager.ScreenCreatorCompanion {
-        const val shopDropTargetGroup = "shop-drop-target"
+        const val shopDropTargetGroup = "shop-drop-target-group"
+        const val cardGroup = "shop-card-group"
+        const val toDeckName = "shop-to-deck-drop-target"
+        const val toBackpackName = "shop-to-backpack-drop-target"
 
         override val creatorClass: KClass<out ScreenCreator> = ShopScreen::class
     }

@@ -287,6 +287,8 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
         group.remove(actor)
     }
 
+    fun getAllActorsInGroup(group: String): List<InputActor>? = groups[group]
+
     /**
      * adds a new [DragAndDrop] that enables dragging actors in group [source] to
      * group [target]

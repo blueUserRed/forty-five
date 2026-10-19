@@ -19,6 +19,7 @@ import com.microwavestudios.fortyfive.oven.BakeTask
 import com.microwavestudios.fortyfive.oven.Oven
 import com.microwavestudios.fortyfive.plugin.PluginManager
 import com.microwavestudios.fortyfive.profile.GlobalSave
+import com.microwavestudios.fortyfive.profile.IGlobalSave
 import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
@@ -71,7 +72,7 @@ object FortyFive : Game() {
     var screenManager = ScreenManager(TitleScreen, null)
         private set
 
-    var globalSave = GlobalSave()
+    var globalSave: IGlobalSave = GlobalSave()
         private set
 
     var pluginManager = PluginManager()
@@ -224,10 +225,12 @@ object FortyFive : Game() {
     fun overrideGlobalsForTest(
         mockSoundPlayer: ISoundPlayer = SoundPlayer(),
         mockProfileManager: IProfileManager = ProfileManager(),
+        mockGlobalSave: IGlobalSave = GlobalSave(),
         inputProcessorProvider: InputProcessorProvider = InputProcessorProvider.default,
     ) {
         soundPlayer = mockSoundPlayer
         profileManager = mockProfileManager
+        globalSave = mockGlobalSave
         this.inputProcessorProvider = inputProcessorProvider
     }
 

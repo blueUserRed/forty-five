@@ -35,12 +35,12 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         generateMapEvents()
         generateEncounters()
 
-        startNode.build()
+        val builtStartNode = startNode.build()
 
         return DetailMap(
             name = name,
-            startNode = this.startNode!!.asNode!!,
-            endNode = this.endNode!!.asNode!!,
+            startNode = builtStartNode,
+            endNodeIndex = this.endNode!!.index,
             decorations = genDecorations,
             animatedDecorations = genAnimatedDecorations,
             isArea = false,

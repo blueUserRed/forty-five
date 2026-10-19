@@ -32,7 +32,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         generateMapEvents()
         generateEncounters()
 
-        firstNode.build()
+        val builtStartNode = firstNode.build()
 
         val (animatedDecorations, decorations) = data
             .decorations
@@ -43,8 +43,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
 
         return DetailMap(
             name = name,
-            startNode = this.startNode!!.asNode!!,
-            endNode = this.endNode!!.asNode!!,
+            startNode = builtStartNode,
+            endNodeIndex = this.endNode!!.index,
             decorations = genDecorations,
             animatedDecorations = genAnimatedDecorations,
             isArea = false,

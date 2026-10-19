@@ -55,11 +55,11 @@ class SeededMapGenerator(
         val decos = generateDecorations(nodes, restrictions.decorations)
         val animatedDecos = generateDecorations(nodes, restrictions.animatedDecorations)
         this.nodes = nodes
-        build()
+        val builtStartNode = build()
         return DetailMap(
             name,
-            mainLine.lineNodes.first().asNode!!,
-            lastNode.asNode!!,
+            builtStartNode,
+            lastNode.index,
             decos,
             animatedDecos,
             false,

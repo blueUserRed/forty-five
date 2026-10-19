@@ -1,21 +1,33 @@
 package com.microwavestudios.fortyfive.testing
 
 import com.badlogic.gdx.ApplicationListener
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.InputProcessor
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
+import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.keyInput.KeyCode
+import com.microwavestudios.fortyfive.profile.GlobalSave
 import com.microwavestudios.fortyfive.profile.IProfile
 import com.microwavestudios.fortyfive.profile.IProfileManager
+import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.profile.Profile
+import com.microwavestudios.fortyfive.resources.Resource
+import com.microwavestudios.fortyfive.run.RunGenerator
+import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.testing.mockservices.InputInterceptor
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfile
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Timeline.TimelineBuilderDSL
+import com.microwavestudios.fortyfive.utils.Vector2
+import com.microwavestudios.fortyfive.utils.component1
+import com.microwavestudios.fortyfive.utils.component2
 
 abstract class FullGameTest : ApplicationListener {
 
@@ -24,6 +36,12 @@ abstract class FullGameTest : ApplicationListener {
     private val testTimeline: Timeline = Timeline().also { it.startTimeline() }
 
     protected lateinit var artificialInputSender: InputProcessor
+        private set
+
+    private var mouseX: Int = 0
+    private var mouseY: Int = 0
+
+    var resourcesWereLoadedOnClose: Boolean = false
         private set
 
     open val mockProfileManager = MockProfileManager({
@@ -40,7 +58,7 @@ abstract class FullGameTest : ApplicationListener {
                 ),
                 mutableListOf(),
                 1,
-                0,
+                playerMoney(),
                 "",
                 0,
                 null,
@@ -65,9 +83,9 @@ abstract class FullGameTest : ApplicationListener {
                 0,
                 listOf(),
                 0.0,
-                null
+                RunGenerator().generateRun(2, "wasteland", "aqua_balle", RunType.LIMITED)
             ),
-            null
+            mapSaver()
         ))}
     )
 
@@ -84,6 +102,10 @@ abstract class FullGameTest : ApplicationListener {
 
     override fun create() {
         testTimeline.appendAction(testTimeline().asAction())
+        testTimeline.appendAction(Timeline.later {
+            Gdx.app.exit()
+        }.asAction())
+        FortyFive.resourceManager.addResourceLeakListener { resourcesWereLoadedOnClose = true }
     }
 
     override fun resize(width: Int, height: Int) {
@@ -100,11 +122,56 @@ abstract class FullGameTest : ApplicationListener {
 
     protected open fun cardCollection(): List<CardType> = listOf()
 
+    protected open fun mapSaver(): MapSaver? = null
+
+    protected open fun playerMoney(): Int = 0
+
+    open fun globalSaveData(): GlobalSave.GlobalSaveData = GlobalSave.GlobalSaveData(
+        soundEffectVolume = 0f,
+        musicVolume = 0f,
+        masterVolume = 0f,
+        enableScreenShake = true,
+        skipIntroScreen = skipIntroScreen(),
+        lastUsedProfile = null,
+        useBorderlessWindowFullscreen = false,
+        fullscreen = false,
+        enableControllerVibration = true,
+        pluginConfig = mutableListOf()
+    )
+    
+    protected open fun skipIntroScreen(): Boolean = false
+
+    protected fun TimelineBuilderDSL.assert(test: () -> Boolean, message: String) {
+        action {
+            if (test()) return@action
+            throw AssertionTestException(name, message)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.assert(test: () -> Boolean, message: () -> String) {
+        action {
+            if (test()) return@action
+            throw AssertionTestException(name, message())
+        }
+    }
+
+    protected fun TimelineBuilderDSL.assertOnScreen(name: String) {
+        assert(
+            { FortyFive.currentScreen?.name == name },
+            { "Expected to be on screen $name, actually on screen ${FortyFive.currentScreen?.name}" }
+        )
+    }
 
     protected fun TimelineBuilderDSL.waitUntilScreenIsLoaded() {
         delayUntil {
-            FortyFive.currentScreen?.screenState?.contains(RenderableScreen.transitionAwayScreenState)?.not() ?: false
+            FortyFive.currentScreen?.screenState?.contains(RenderableScreen.transitionToScreenState)?.not() ?: false
         }
+    }
+
+    protected fun TimelineBuilderDSL.waitForNextScreen() {
+        var screen: RenderableScreen? = null
+        action { screen = FortyFive.currentScreen }
+        delayUntil { FortyFive.currentScreen != screen }
     }
 
     protected fun TimelineBuilderDSL.brieflyPressKey(key: KeyCode) {
@@ -113,4 +180,74 @@ abstract class FullGameTest : ApplicationListener {
             artificialInputSender.keyUp(key)
         }
     }
+
+    protected fun TimelineBuilderDSL.moveMouseToWindowRelative(
+        relativeX: Float,
+        relativeY: Float,
+        drag: Boolean = false
+    ) {
+        action {
+            val x = (Gdx.graphics.width * relativeX).toInt()
+            val y = (Gdx.graphics.height * relativeY).toInt()
+            setMousePos(x, y, dragged = drag)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.moveMouseBy(x: Int, y: Int, drag: Boolean = false) {
+        action {
+            val newX = mouseX + x
+            val newY = mouseY + y
+            setMousePos(newX, newY, dragged = drag)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.moveMouseToNamedActor(actorName: String, drag: Boolean = false) {
+        later {
+            val screen = FortyFive.currentScreen
+            requireNotNull(screen) { "screen is null" }
+            val actor = screen.namedActorOrNull(actorName)
+            requireNotNull(actor) { "no actor with name $actorName" }
+            moveMouseToActor(actor, drag)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.moveMouseToActor(actor: Actor, drag: Boolean = false) {
+        action {
+            val screen = FortyFive.currentScreen
+            requireNotNull(screen) { "screen is null" }
+            val pos = Vector2(actor.width / 2, actor.height / 2)
+            actor.localToStageCoordinates(pos)
+            screen.viewport.project(pos)
+            pos.y = Gdx.graphics.height - pos.y
+            setMousePos(pos.x.toInt(), pos.y.toInt(), dragged = drag)
+        }
+    }
+
+    protected fun setMousePos(x: Int, y: Int, dragged: Boolean = false) {
+        mouseX = x
+        mouseY = y
+        if (dragged) {
+            artificialInputSender.touchDragged(x, y, 0)
+        } else {
+            artificialInputSender.mouseMoved(x, y)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.leftClick() {
+        action {
+            artificialInputSender.touchDown(mouseX, mouseY, 0, Input.Buttons.LEFT)
+            artificialInputSender.touchUp(mouseX, mouseY, 0, Input.Buttons.LEFT)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.holdLeftClick(block: TimelineBuilderDSL.() -> Unit) {
+        action {
+            artificialInputSender.touchDown(mouseX, mouseY, 0, Input.Buttons.LEFT)
+        }
+        later { block() }
+        action {
+            artificialInputSender.touchUp(mouseX, mouseY, 0, Input.Buttons.LEFT)
+        }
+    }
+
 }

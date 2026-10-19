@@ -239,13 +239,21 @@ class MapScreen : ScreenCreator() {
             encounterModifiers()
         }
 
-        val startButton = label("red wing", "Start", fontSize = 32) {
-            name("StartButton")
+        val startButton = label(
+            "red wing",
+            "Start",
+            fontSize = 32,
+            backgroundHints = arrayOf("map_detail_encounter_button", "map_detail_encounter_button_hover")
+        ) {
+            name("mapStartButton")
             setAlignment(Align.center)
             width = 200f * 0.8f
             height = 60f
             fontColor = Colors.Red
-            backgroundHandle = "map_detail_encounter_button"
+            focusBackgrounds(
+                "map_detail_encounter_button",
+                "map_detail_encounter_button_hover"
+            )
             touchable = Touchable.enabled
             keyboardFocusable = KeyboardFocusable.LEAF
             marginBottom = 27f
@@ -277,12 +285,10 @@ class MapScreen : ScreenCreator() {
             observeInputState(
                 GameInputs.States.focused,
                 {
-                    backgroundHandle = "map_detail_encounter_button_hover"
                     fontColor = Colors.White
                     dropShadow.showDropShadow = true
                 },
                 {
-                    backgroundHandle = "map_detail_encounter_button"
                     fontColor = Colors.Red
                     dropShadow.showDropShadow = false
                 },

@@ -15,6 +15,7 @@ class FromKotlinScreenBuilder(val creator: ScreenCreator) : ScreenBuilder {
 
     override fun build(controllerContext: Any?, previousScreen: RenderableScreen?): RenderableScreen {
         val screen = RenderableScreen(
+            name = name,
             viewport = creator.viewport,
             batch = SpriteBatch(),
             controllerContext = controllerContext,
