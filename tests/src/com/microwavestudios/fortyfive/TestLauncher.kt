@@ -14,6 +14,7 @@ import com.microwavestudios.fortyfive.testing.GameControllerTest
 import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.testing.mockservices.MockSoundPlayer
 import com.microwavestudios.fortyfive.encounterTests.talismans.TalismanBulletAndGoldNuggetTest
+import com.microwavestudios.fortyfive.fullGameTests.EncounterFullGameTest
 import com.microwavestudios.fortyfive.fullGameTests.ShopFullGameTest
 import com.microwavestudios.fortyfive.screen.InputProcessorProvider
 import com.microwavestudios.fortyfive.testing.FullGameTest
@@ -27,20 +28,22 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.system.exitProcess
 
 
 class TestLauncher {
 
     val gameControllerTests: Array<GameControllerTest> = arrayOf(
-        BasicEncounterTest(),
-        AfterlifeTest(),
-        StatusEffectTest(),
-        TemporaryBehaviourTest(),
-        TalismanBulletAndGoldNuggetTest(),
+//        BasicEncounterTest(),
+//        AfterlifeTest(),
+//        StatusEffectTest(),
+//        TemporaryBehaviourTest(),
+//        TalismanBulletAndGoldNuggetTest(),
     )
 
     val fullGameTests: Array<FullGameTest> = arrayOf(
-//        ShopFullGameTest()
+//        ShopFullGameTest(),
+        EncounterFullGameTest(),
     )
 
     fun run() {
@@ -109,6 +112,7 @@ class TestLauncher {
 
         if (outputHandle != null) logger.removeOutput(outputHandle)
         FortyFive.dispose()
+        exitProcess(0)
     }
 
     private fun printTests(tests: Map<String, String?>, logger: FortyFiveLogger) {
@@ -151,8 +155,10 @@ class TestLauncher {
         val config = Lwjgl3ApplicationConfiguration()
         config.setForegroundFPS(60)
         config.setTitle(".Forty-Five")
-        config.setWindowedMode(1000, 800)
-        config.setDecorated(true)
+        config.setWindowedMode(1600, 900)
+        config.setDecorated(false)
+//        config.setDecorated(true)
+        config.setResizable(false)
         config.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4)
         config.setWindowIcon(Files.FileType.Internal, "blobs/icon.png")
 

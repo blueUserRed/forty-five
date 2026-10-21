@@ -245,6 +245,7 @@ class TitleScreen : ScreenCreator() {
         onlyAvailableWhenProfileIsSelected: Boolean = false,
         action: () -> Unit
     ) = label("red wing", displayText, fontSize = 50) {
+        name("title-screen-option-$displayText")
         syncWidth()
         syncHeight()
         touchable = Touchable.enabled

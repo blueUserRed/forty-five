@@ -33,7 +33,7 @@ class ShopFullGameTest : FullGameTest() {
         moveMouseToWindowRelative(0.9f, 0.5f)
         delay(10)
         leftClick()
-        delay(700)
+        delay(400)
         moveMouseToNamedActor("mapStartButton")
         delay(10)
         leftClick()
@@ -95,7 +95,7 @@ class ShopFullGameTest : FullGameTest() {
         // attempt to buy card again ------------------------------------------------------------------------
 
         moveMouseToActor(cardToBuy)
-        delay(100)
+        delay(10)
         holdLeftClick {
             moveMouseBy(0, 10, drag = true)
             delay(10)
@@ -120,9 +120,9 @@ class ShopFullGameTest : FullGameTest() {
         val toExpensiveCard = inputManager.getAllActorsInGroup(ShopScreen.cardGroup)!![2].actor
         toExpensiveCard as CardActor
 
-        delay(100)
+        delay(10)
         moveMouseToActor(toExpensiveCard)
-        delay(100)
+        delay(10)
         holdLeftClick {
             moveMouseBy(0, 10, drag = true)
             delay(10)
@@ -144,9 +144,9 @@ class ShopFullGameTest : FullGameTest() {
         val cardToBuy2 = inputManager.getAllActorsInGroup(ShopScreen.cardGroup)!![3].actor
         cardToBuy2 as CardActor
 
-        delay(100)
+        delay(10)
         moveMouseToActor(cardToBuy2)
-        delay(100)
+        delay(10)
         holdLeftClick {
             moveMouseBy(0, 10, drag = true)
             delay(10)

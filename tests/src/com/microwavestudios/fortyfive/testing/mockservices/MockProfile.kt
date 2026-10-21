@@ -154,7 +154,9 @@ class MockProfile(
 
     override fun startRun(run: Run) = notAvailableInMock()
 
-    override fun encounterStarted() = notAvailableInMock()
+    override fun encounterStarted() {
+        runSaveData?.encountersStarted++
+    }
 
     override fun loseRun() = notAvailableInMock()
 
