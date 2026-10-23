@@ -875,6 +875,7 @@ class EncounterScreen : ScreenCreator() {
         var parryPromise: Promise<Boolean>? = null
 
         val parryButton = group {
+            name("parry-button")
             x = -5f
             y = 130f
             rotation = -5f
@@ -890,6 +891,7 @@ class EncounterScreen : ScreenCreator() {
         }
 
         val passButton = group {
+            name("pass-button")
             x = -5f
             y = 50f
             rotation = -5f
@@ -963,6 +965,8 @@ class EncounterScreen : ScreenCreator() {
     }
 
     private fun CustomGroup.holsterButton() = group {
+        name("holster-button")
+
         x = -10f
         y = 200f
 
@@ -1001,6 +1005,8 @@ class EncounterScreen : ScreenCreator() {
             { if (!inParryMenu) xAnim.state("hover") },
             { if (!inParryMenu) xAnim.state("open") },
         )
+
+        focusShortcut(GameInputs.focusShortcutHolsterButton)
 
         backgroundHandle = "encounter_holster"
         rotation = -5f

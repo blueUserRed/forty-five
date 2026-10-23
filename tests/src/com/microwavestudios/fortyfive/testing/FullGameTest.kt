@@ -3,20 +3,16 @@ package com.microwavestudios.fortyfive.testing
 import com.badlogic.gdx.ApplicationListener
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.game.Deck
-import com.microwavestudios.fortyfive.game.card.Card
 import com.microwavestudios.fortyfive.game.card.CardType
 import com.microwavestudios.fortyfive.keyInput.KeyCode
 import com.microwavestudios.fortyfive.profile.GlobalSave
-import com.microwavestudios.fortyfive.profile.IProfile
-import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.profile.Profile
-import com.microwavestudios.fortyfive.resources.Resource
 import com.microwavestudios.fortyfive.run.RunGenerator
 import com.microwavestudios.fortyfive.run.RunType
 import com.microwavestudios.fortyfive.screen.RenderableScreen
@@ -26,8 +22,6 @@ import com.microwavestudios.fortyfive.testing.mockservices.MockProfileManager
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.Timeline.TimelineBuilderDSL
 import com.microwavestudios.fortyfive.utils.Vector2
-import com.microwavestudios.fortyfive.utils.component1
-import com.microwavestudios.fortyfive.utils.component2
 
 abstract class FullGameTest : ApplicationListener {
 
@@ -43,6 +37,10 @@ abstract class FullGameTest : ApplicationListener {
 
     var resourcesWereLoadedOnClose: Boolean = false
         private set
+
+    protected open val testTimeout: Int = 8_000
+
+    private var timeoutReferenceTime: Long = 0
 
     open val mockProfileManager = MockProfileManager({
         listOf(MockProfile(
@@ -95,6 +93,9 @@ abstract class FullGameTest : ApplicationListener {
 
     override fun render() {
         testTimeline.updateTimeline()
+        val now = TimeUtils.millis()
+        val timeDiff = now - timeoutReferenceTime
+        if (timeDiff >= testTimeout) throw TestException("Test timed out")
     }
 
     abstract fun testTimeline(): Timeline
@@ -106,6 +107,7 @@ abstract class FullGameTest : ApplicationListener {
             Gdx.app.exit()
         }.asAction())
         FortyFive.resourceManager.addResourceLeakListener { resourcesWereLoadedOnClose = true }
+        resetReferenceTime()
     }
 
     override fun resize(width: Int, height: Int) {
@@ -141,8 +143,13 @@ abstract class FullGameTest : ApplicationListener {
     
     protected open fun skipIntroScreen(): Boolean = false
 
+    protected fun resetReferenceTime() {
+        timeoutReferenceTime = TimeUtils.millis()
+    }
+
     protected fun TimelineBuilderDSL.assert(test: () -> Boolean, message: String) {
         action {
+            resetReferenceTime()
             if (test()) return@action
             throw AssertionTestException(name, message)
         }
@@ -150,6 +157,7 @@ abstract class FullGameTest : ApplicationListener {
 
     protected fun TimelineBuilderDSL.assert(test: () -> Boolean, message: () -> String) {
         action {
+            resetReferenceTime()
             if (test()) return@action
             throw AssertionTestException(name, message())
         }
@@ -174,9 +182,21 @@ abstract class FullGameTest : ApplicationListener {
         delayUntil { FortyFive.currentScreen != screen }
     }
 
-    protected fun TimelineBuilderDSL.brieflyPressKey(key: KeyCode) {
+    protected fun TimelineBuilderDSL.pressKey(key: KeyCode) {
         action {
+            resetReferenceTime()
             artificialInputSender.keyDown(key)
+            artificialInputSender.keyUp(key)
+        }
+    }
+
+    protected fun TimelineBuilderDSL.holdKey(key: KeyCode, block: TimelineBuilderDSL.() -> Unit) {
+        action {
+            resetReferenceTime()
+            artificialInputSender.keyDown(key)
+        }
+        later { block() }
+        action {
             artificialInputSender.keyUp(key)
         }
     }
@@ -224,6 +244,7 @@ abstract class FullGameTest : ApplicationListener {
     }
 
     protected fun setMousePos(x: Int, y: Int, dragged: Boolean = false) {
+        resetReferenceTime()
         mouseX = x
         mouseY = y
         if (dragged) {
@@ -235,6 +256,7 @@ abstract class FullGameTest : ApplicationListener {
 
     protected fun TimelineBuilderDSL.leftClick() {
         action {
+            resetReferenceTime()
             artificialInputSender.touchDown(mouseX, mouseY, 0, Input.Buttons.LEFT)
             artificialInputSender.touchUp(mouseX, mouseY, 0, Input.Buttons.LEFT)
         }
@@ -242,6 +264,7 @@ abstract class FullGameTest : ApplicationListener {
 
     protected fun TimelineBuilderDSL.holdLeftClick(block: TimelineBuilderDSL.() -> Unit) {
         action {
+            resetReferenceTime()
             artificialInputSender.touchDown(mouseX, mouseY, 0, Input.Buttons.LEFT)
         }
         later { block() }

@@ -4,17 +4,19 @@ import com.badlogic.gdx.Input.Keys
 
 object GameInputs {
 
-    val interact = Input("interact", arrayOf(
-        Input.Cause.Mouse(MouseButton.LEFT),
-        Input.Cause.Keyboard(
-            Keys.ENTER,
-            requireStates = arrayOf(States.trueFocused)
-        ),
-        Input.Cause.ControllerButtonBased(
-            ControllerButton.A,
-            requireStates = arrayOf(States.trueFocused)
+    val interact = Input(
+        "interact", arrayOf(
+            Input.Cause.Mouse(MouseButton.LEFT),
+            Input.Cause.Keyboard(
+                Keys.ENTER,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerButtonBased(
+                ControllerButton.A,
+                requireStates = arrayOf(States.trueFocused)
+            )
         )
-    ))
+    )
 
     val focusNext = Input(
         "focusNext",
@@ -100,28 +102,21 @@ object GameInputs {
         )
     )
 
-    val focusShortcutShootButton = Input(
-        "focusShortcutShootButton",
-        arrayOf(
-            Input.Cause.Keyboard(Keys.S, modifierKeys = arrayOf(ModifierKey.SHIFT))
-        )
-    )
-
     val focusShortcutHolsterButton = Input(
         "focusShortcutHolsterButton",
         arrayOf(
-            Input.Cause.Keyboard(Keys.H, modifierKeys = arrayOf(ModifierKey.SHIFT))
+            Input.Cause.Keyboard(Keys.H)
         )
     )
 
-   val focusShortcutCardHand = Input(
+    val focusShortcutCardHand = Input(
         "focusShortcutCardHand",
         arrayOf(
-            Input.Cause.Keyboard(Keys.C, modifierKeys = arrayOf(ModifierKey.SHIFT))
+            Input.Cause.Keyboard(Keys.C)
         )
     )
 
-   val focusShortcutAfterlife = Input(
+    val focusShortcutAfterlife = Input(
         "focusShortcutAfterlife",
         arrayOf(
             Input.Cause.Keyboard(Keys.A, modifierKeys = arrayOf(ModifierKey.SHIFT))
@@ -159,13 +154,15 @@ object GameInputs {
         ),
     )
 
-   val anyMouseClick = Input("anyMouseClick", arrayOf(
-       Input.Cause.Mouse(MouseButton.LEFT),
-       Input.Cause.Mouse(MouseButton.RIGHT),
-       Input.Cause.Mouse(MouseButton.BACK),
-       Input.Cause.Mouse(MouseButton.FORWARD),
-       Input.Cause.Mouse(MouseButton.MIDDLE),
-   ))
+    val anyMouseClick = Input(
+        "anyMouseClick", arrayOf(
+            Input.Cause.Mouse(MouseButton.LEFT),
+            Input.Cause.Mouse(MouseButton.RIGHT),
+            Input.Cause.Mouse(MouseButton.BACK),
+            Input.Cause.Mouse(MouseButton.FORWARD),
+            Input.Cause.Mouse(MouseButton.MIDDLE),
+        )
+    )
 
     val cancel = Input(
         "cancel",
@@ -276,92 +273,124 @@ object GameInputs {
         )
     )
 
-    val initDragAndDrop = Input("initDragAndDrop", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(InputManager.BaseStates.keyboardFocus)),
-        Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
-    ))
+    val initDragAndDrop = Input(
+        "initDragAndDrop", arrayOf(
+            Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(InputManager.BaseStates.keyboardFocus)),
+            Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
+        )
+    )
 
-    val confirmDragAndDrop = Input("confirmDragAndDrop", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused)),
-        Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
-    ))
+    val confirmDragAndDrop = Input(
+        "confirmDragAndDrop", arrayOf(
+            Input.Cause.Keyboard(Keys.ENTER, requireStates = arrayOf(States.trueFocused)),
+            Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
+        )
+    )
 
-    val triggerCard = Input("triggerCard", arrayOf(
-        Input.Cause.Mouse(MouseButton.RIGHT),
-        Input.Cause.Keyboard(
-            Keys.ENTER,
-            modifierKeys = arrayOf(ModifierKey.SHIFT),
-            requireStates = arrayOf(States.trueFocused)
-        ),
-        Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
-    ))
+    val triggerCard = Input(
+        "triggerCard", arrayOf(
+            Input.Cause.Mouse(MouseButton.RIGHT),
+            Input.Cause.Keyboard(
+                Keys.ENTER,
+                modifierKeys = arrayOf(ModifierKey.SHIFT),
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
+        )
+    )
 
-    val targetEnemy = Input("targetEnemy", arrayOf(
-        Input.Cause.Mouse(MouseButton.RIGHT),
-        Input.Cause.Keyboard(
-            Keys.ENTER,
-            modifierKeys = arrayOf(ModifierKey.SHIFT),
-            requireStates = arrayOf(States.trueFocused)
-        ),
-        Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
-    ))
+    val targetEnemy = Input(
+        "targetEnemy", arrayOf(
+            Input.Cause.Mouse(MouseButton.RIGHT),
+            Input.Cause.Keyboard(
+                Keys.ENTER,
+                modifierKeys = arrayOf(ModifierKey.SHIFT),
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerButtonBased(ControllerButton.X, requireStates = arrayOf(States.trueFocused))
+        )
+    )
 
-    val shootEnemy = Input("shootEnemy", arrayOf(
-        Input.Cause.Mouse(MouseButton.LEFT),
-        Input.Cause.Keyboard(
-            Keys.ENTER,
-            requireStates = arrayOf(States.trueFocused)
-        ),
-        Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
-    ))
+    val shootEnemy = Input(
+        "shootEnemy", arrayOf(
+            Input.Cause.Mouse(MouseButton.LEFT),
+            Input.Cause.Keyboard(
+                Keys.ENTER,
+                requireStates = arrayOf(States.trueFocused)
+            ),
+            Input.Cause.ControllerButtonBased(ControllerButton.A, requireStates = arrayOf(States.trueFocused))
+        )
+    )
 
-    val skipCredits = Input("skipCredits", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER),
-        Input.Cause.ControllerButtonBased(ControllerButton.A)
-    ))
+    val skipCredits = Input(
+        "skipCredits", arrayOf(
+            Input.Cause.Keyboard(Keys.ENTER),
+            Input.Cause.ControllerButtonBased(ControllerButton.A)
+        )
+    )
 
-    val dialogContinue = Input("dialogContinue", arrayOf(
-        Input.Cause.Keyboard(Keys.ENTER),
-        Input.Cause.ControllerButtonBased(ControllerButton.A)
-    ))
+    val dialogContinue = Input(
+        "dialogContinue", arrayOf(
+            Input.Cause.Keyboard(Keys.ENTER),
+            Input.Cause.ControllerButtonBased(ControllerButton.A)
+        )
+    )
 
 
-    val mapEditorDelete = Input("mapEditorDelete", arrayOf(
-        Input.Cause.Keyboard(Keys.DEL),
-        Input.Cause.Keyboard(Keys.BACKSPACE),
-    ))
-    val mapEditorConnect = Input("mapEditorConnect", arrayOf(
-        Input.Cause.Keyboard(Keys.C),
-    ))
-    val mapEditorMove = Input("mapEditorMove", arrayOf(
-        Input.Cause.Keyboard(Keys.M),
-    ))
-    val mapEditorScale = Input("mapEditorScale", arrayOf(
-        Input.Cause.Keyboard(Keys.S),
-    ))
-    val mapEditorSwitchMode = Input("mapEditorSwitchMode", arrayOf(
-        Input.Cause.Keyboard(Keys.X),
-    ))
-    val mapEditorNext = Input("mapEditorNext", arrayOf(
-        Input.Cause.Keyboard(Keys.J),
-    ))
-    val mapEditorPrevious = Input("mapEditorPrevious", arrayOf(
-        Input.Cause.Keyboard(Keys.H),
-    ))
+    val mapEditorDelete = Input(
+        "mapEditorDelete", arrayOf(
+            Input.Cause.Keyboard(Keys.DEL),
+            Input.Cause.Keyboard(Keys.BACKSPACE),
+        )
+    )
+    val mapEditorConnect = Input(
+        "mapEditorConnect", arrayOf(
+            Input.Cause.Keyboard(Keys.C),
+        )
+    )
+    val mapEditorMove = Input(
+        "mapEditorMove", arrayOf(
+            Input.Cause.Keyboard(Keys.M),
+        )
+    )
+    val mapEditorScale = Input(
+        "mapEditorScale", arrayOf(
+            Input.Cause.Keyboard(Keys.S),
+        )
+    )
+    val mapEditorSwitchMode = Input(
+        "mapEditorSwitchMode", arrayOf(
+            Input.Cause.Keyboard(Keys.X),
+        )
+    )
+    val mapEditorNext = Input(
+        "mapEditorNext", arrayOf(
+            Input.Cause.Keyboard(Keys.J),
+        )
+    )
+    val mapEditorPrevious = Input(
+        "mapEditorPrevious", arrayOf(
+            Input.Cause.Keyboard(Keys.H),
+        )
+    )
 
     object States {
 
-        val trueFocused = InputState("trueFocused", arrayOf(
-            InputManager.BaseStates.keyboardFocus,
-            InputManager.BaseStates.mouseHover
-        ))
+        val trueFocused = InputState(
+            "trueFocused", arrayOf(
+                InputManager.BaseStates.keyboardFocus,
+                InputManager.BaseStates.mouseHover
+            )
+        )
 
         val manuallyFocused = InputState("manuallyFocused")
 
-        val focused = InputState("focused", arrayOf(
-            trueFocused,
-            manuallyFocused
-        ))
+        val focused = InputState(
+            "focused", arrayOf(
+                trueFocused,
+                manuallyFocused
+            )
+        )
 
         val awaitingDrop = InputState(
             "awaitingDrop",

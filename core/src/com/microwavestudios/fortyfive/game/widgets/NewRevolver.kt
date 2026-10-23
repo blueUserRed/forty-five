@@ -354,6 +354,10 @@ class NewRevolver(
             y = 50f
             fixedZIndex = 5
         }
+        GameInputs.focusShortcutRevolverSlots.forEachIndexed { index, input ->
+            val slot = Utils.convertSlotRepresentation(index + 1)
+            focusShortcut(input, { slots[slot - 1].forceGetActor() })
+        }
     }
 
 
