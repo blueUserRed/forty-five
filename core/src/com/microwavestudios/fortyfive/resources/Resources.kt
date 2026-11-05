@@ -157,13 +157,15 @@ abstract class Resource(
         if (!stayLoaded && borrowedBy.isEmpty()) dispose()
     }
 
-    override fun dispose() = synchronized(this) {
-        disposables.forEach(Disposable::dispose)
-        variants = listOf()
-        disposables = listOf()
-        promise = Promise()
-        startedLoading = false
-        state = ResourceState.NOT_LOADED
+    override fun dispose() = runBlocking {
+        mutex.withLock {
+            disposables.forEach(Disposable::dispose)
+            variants = listOf()
+            disposables = listOf()
+            promise = Promise()
+            startedLoading = false
+            state = ResourceState.NOT_LOADED
+        }
     }
 
     override fun toString(): String = combinedHandle

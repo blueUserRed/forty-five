@@ -53,7 +53,9 @@ import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.setText
+import com.microwavestudios.fortyfive.screen.commonComponents.DefaultEnemyActor
 import com.microwavestudios.fortyfive.screen.commonComponents.DetailWidget
+import com.microwavestudios.fortyfive.screen.commonComponents.EnemyActorFactory
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.*
 import kotlin.math.abs
@@ -61,7 +63,7 @@ import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
-class EncounterScreen : ScreenCreator() {
+class EncounterScreen : ScreenCreator(), EncounterScreenOffsetProvider {
 
     override val name: String = "gameScreen"
 
@@ -111,8 +113,10 @@ class EncounterScreen : ScreenCreator() {
         controller
     }
 
-    private var bgOffX: Float = 0f
-    private var bgOffY: Float = 0f
+    override var bgOffX: Float = 0f
+        private set
+    override var bgOffY: Float = 0f
+        private set
 
     private val shieldIconPromise: Promise<Drawable> by lazy {
         FortyFive.resourceManager.request(this, this.screen.lifetime, "shield_icon_large")
@@ -427,167 +431,6 @@ class EncounterScreen : ScreenCreator() {
             syncDimensions()
             onLayoutAndNow { y = underDeck.y + underDeck.height - height - 40f }
             centerX()
-        }
-    }
-
-    private fun createEnemy(
-        index: Int,
-        enemy: Enemy,
-        controller: GameController
-    ) = with(enemyParent) {
-        box {
-            enemy.actor = this
-            flexDirection = FlexDirection.COLUMN
-            val (coords, bgScale) = bgScreenController.enemyCoordsForChosenBackground()[index]
-            val scale = enemy.inherentScale * bgScale
-            x = coords.x
-            y = coords.y
-            width = 200f
-            syncHeight()
-
-            gameEvents.watchFor<UpdateUiEvent> {
-                drawOffsetX = bgOffX * 1.1f
-                drawOffsetY = bgOffY * 1.1f
-            }
-
-            fun chargeTimeline(): Timeline = Timeline.timeline {
-                val origX = x
-                val forwardAction = MoveToAction()
-                forwardAction.x = origX - 50f
-                forwardAction.y = y
-                forwardAction.duration = 0.2f
-                forwardAction.interpolation = Interpolation.pow4
-                val backAction = MoveToAction()
-                backAction.x = origX
-                backAction.y = y
-                backAction.duration = 0.4f
-                backAction.interpolation = Interpolation.smooth
-                action { addAction(forwardAction) }
-                delayUntil { forwardAction.isComplete }
-                action {
-                    removeAction(forwardAction)
-                    addAction(backAction)
-                }
-                delayUntil { backAction.isComplete }
-                action { removeAction(backAction) }
-            }
-
-            enemy.enemyEvents.watchFor<Enemy.PlayChargeAnimationEvent> { event ->
-                event.timeline.resolve(chargeTimeline())
-            }
-
-            actionIndicator(enemy)
-
-            group {
-
-                keyboardFocusable = KeyboardFocusable.LEAF
-                touchable = Touchable.enabled
-
-                observeInputState(
-                    GameInputs.States.focused,
-                    {
-                        gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, true))
-                    },
-                    {
-                        gameEvents.fire(GameControllerImpl.Events.EnemyClicked(null, true))
-                    },
-                )
-
-                onInput(GameInputs.targetEnemy) {
-                    gameEvents.fire(GameControllerImpl.Events.EnemyClicked(enemy, false))
-                }
-
-                onInput(GameInputs.shootEnemy) {
-                    gameEvents.fire(GameControllerImpl.Events.ShootAtEnemy(enemy))
-                }
-
-
-                image {
-                    backgroundHandle = "encounter_enemy_shadow"
-                    relativeWidth(140f * scale * enemy.shadowScale)
-                    height = 110f * scale * enemy.shadowScale
-                    centerX()
-                    y = -20f
-                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
-                        isVisible = false
-                    }
-                }
-
-                val enemyImage = image {
-                    var heightPercent = 1f
-                    backgroundHandle = enemy.drawableHandle
-                    centerX()
-                    y = 0f
-                    onLayout {
-                        height = 400f * heightPercent * scale
-                        val drawable = drawable ?: return@onLayout
-                        width = height * (drawable.minWidth / drawable.minHeight)
-                    }
-                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
-                        isVisible = false
-                    }
-                }
-
-                image {
-                    backgroundHandle = "enemy_gravestone"
-                    centerX()
-                    relativeWidth(100f * scale)
-                    heightByAspectRatio(470.0 / 520.0)
-                    y = 0f
-                    isVisible = false
-                    enemy.enemyEvents.watchFor<Enemy.EnemyDefeated> {
-                        isVisible = true
-                    }
-                }
-
-                relativeWidth(100f)
-                onLayoutAndNow { height = enemyImage.height }
-
-                image {
-                    backgroundHandle = "card_symbol_marked"
-                    centerX()
-                    y = 180f * scale
-                    relativeWidth(40f)
-                    touchable = Touchable.disabled
-                    onLayoutAndNow { height = width }
-                    animateRotationSinus(
-                        amplitude = 5.5f,
-                    )
-                    animateUpAndDownSinus(
-                        method = AnimatedActor.AnimationMethod.DRAW_OFFSET,
-                        amplitude = 14f,
-                        frequency = 0.4f
-                    )
-                    gameEvents.watchFor<GameControllerImpl.Events.EnemySelectionChanged> { (e, controller) ->
-                        val onlyOne = controller.allEnemies.size == 1
-                        val enemySelected = e === enemy
-                        isVisible = !onlyOne && enemySelected
-                        invalidate()
-                    }
-                }
-            }
-
-            group {
-                height = 40f
-                width = 230f
-                val statusBar = StatusBar(screen, enemy)
-                actor(statusBar) {
-                    relativeWidth(100f)
-                    relativeHeight(100f)
-                }
-            }
-
-            val statusEffectBar = StatusEffectBarCreator.createStatusBar(
-                this@EncounterScreen,
-                StatusEffectBarCreator.StatusEffectBarTarget.EnemyTarget(enemy, gameEvents)
-            )
-
-            actor(statusEffectBar) {
-                relativeWidth(87f)
-                logicalOffsetX = 30f
-                height = 70f
-            }
-
         }
     }
 
@@ -1463,7 +1306,11 @@ class EncounterScreen : ScreenCreator() {
             else -> unreachable()
         }
         enemies.forEachIndexed { index, enemy ->
-            createEnemy(index + indexOff, enemy, event.controller)
+            val (coords, bgScale) = bgScreenController.enemyCoordsForChosenBackground()[index + indexOff]
+            val enemyActor = EnemyActorFactory.createEnemyActor(enemy, event.controller)
+            enemyActor.createActor(
+                enemyParent, this@EncounterScreen, coords, bgScale, this@EncounterScreen, { actionIndicator(it) }
+            )
         }
     }
 
@@ -1485,4 +1332,9 @@ class EncounterScreen : ScreenCreator() {
     }
 
     data class UpdateUiEvent(val controller: GameController)
+}
+
+interface EncounterScreenOffsetProvider {
+    val bgOffX: Float
+    val bgOffY: Float
 }

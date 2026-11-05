@@ -61,14 +61,14 @@ abstract class Talisman {
         override val name: String = "fieldRations"
         override val title: String = "Field Rations"
         override val description: String = """
-            You start the encounter with 8 reserves in a turn.
+            You start the encounter with 6 reserves in a turn.
             Every turn, you start the turn with 1 less.
             This can't reduce reserves to less than 2.
         """.trimIndent().replace('\n', ' ')
         override val iconHandle: ResourceHandle = "field_rations_talisman_icon"
 
         override fun behaviours(): List<EncounterBehaviour> = listOf(
-            EncounterBehaviour.FieldRations(8)
+            EncounterBehaviour.FieldRations(6)
         )
     }
 
