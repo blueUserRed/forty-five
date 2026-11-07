@@ -61,14 +61,6 @@ shaders: {
     },
     ...resourceSharedKeys
 }[],
-animations: {
-    name: string,
-    atlasFile: string,
-    frames?: string[],
-    initialFrame: int,
-    frameTime: int,
-    ...resourceSharedKeys
-}[],
 colorTextures: {
     name: string,
     color: Color,
@@ -81,13 +73,6 @@ ninepatches: {
     right: int,
     top: int,
     bottom: int,
-    scale: float,
-    ...resourceSharedKeys
-}[],
-particles: {
-    name: string,
-    file: string,
-    textureDir: string,
     scale: float,
     ...resourceSharedKeys
 }[],
@@ -108,6 +93,4 @@ music: {
     file: string,
     ...resourceSharedKeys
 }[],
-cards: {
-    directory: string
-}
+cardDir: string

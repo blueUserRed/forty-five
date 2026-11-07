@@ -2,12 +2,7 @@ package com.microwavestudios.fortyfive.profile
 
 import com.badlogic.gdx.Gdx
 import com.microwavestudios.fortyfive.FortyFive
-import com.microwavestudios.fortyfive.plugin.ManagedPlugin
-import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.globalSaveSchema
-import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.globalSaveVersion
-import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.logTag
-import com.microwavestudios.fortyfive.profile.GlobalSave.Companion.savePath
-import com.microwavestudios.fortyfive.profile.GlobalSave.GlobalSaveData
+import com.microwavestudios.fortyfive.plugin.Plugin
 import com.microwavestudios.fortyfive.profile.GlobalSave.PluginSaveData
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
@@ -23,7 +18,6 @@ import kotlin.reflect.KProperty
 
 
 interface IGlobalSave {
-
 
     var soundEffectVolume: Float
     var musicVolume: Float
@@ -43,7 +37,7 @@ interface IGlobalSave {
 
     fun readFromDisk()
     fun write()
-    fun verifyPluginSaveData(plugin: ManagedPlugin)
+    fun verifyPluginSaveData(plugin: Plugin)
     fun getPluginSaveData(name: String): PluginSaveData
     fun setPluginActivation(name: String, active: Boolean)
     fun setPluginAgreement(name: String, agreed: Boolean)
@@ -153,7 +147,7 @@ class GlobalSave : IGlobalSave {
         dirty = false
     }
 
-    override fun verifyPluginSaveData(plugin: ManagedPlugin) {
+    override fun verifyPluginSaveData(plugin: Plugin) {
         val data = getPluginSaveData(plugin.name)
         if (data.jarFileHash == plugin.jarFileHash) return
         val newData = PluginSaveData(plugin.name, true, false, plugin.jarFileHash)

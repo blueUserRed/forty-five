@@ -13,6 +13,7 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.InputActor
 import com.microwavestudios.fortyfive.keyInput.InputActorImpl
 import com.microwavestudios.fortyfive.rendering.BetterShader
+import com.microwavestudios.fortyfive.resources.FontResource
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.resources.ResourceManager
@@ -129,6 +130,18 @@ open class NewLabel(
         renderer
     }
 
+    private val fontGroups: List<FontGroup> by lazy {
+        FortyFive
+            .resourceManager
+            .resources
+            .filterIsInstance<FontResource>()
+            .groupBy { it.groupName }
+            .map { (groupName, fonts) ->
+                val variants = fonts.map { FontVariant(it.combinedHandle, it.size) }
+                FontGroup(groupName, variants)
+            }
+    }
+
     var useShader: Boolean = true
 
     var template: TemplateString? = null
@@ -187,9 +200,7 @@ open class NewLabel(
         }
         val currentFontHandle = fontGetter.currentResourceHandle ?: return
         validate()
-        val variant = FortyFive
-            .resourceManager
-            .fonts
+        val variant = fontGroups
             .flatMap { it.variants }
             .find { it.resourceHandle == currentFontHandle }
         requireNotNull(variant) { "no variant for font handle: '$currentFontHandle'" }
@@ -220,17 +231,17 @@ open class NewLabel(
     private fun paramsChanged() {
         invalidateHierarchy()
         val fontGroup = fontGroup ?: return
-        val group = FortyFive.resourceManager.fonts.find { it.name == fontGroup }
+        val group = fontGroups.find { it.name == fontGroup }
         requireNotNull(group) { "unknown font group: '$fontGroup'" }
         require(group.variants.isNotEmpty()) { "font '$fontGroup' has no variants" }
         fontHandle = overrideFontHandle ?: findBestVariant(group).resourceHandle
     }
 
-    private fun findBestVariant(group: ResourceManager.FontGroup): ResourceManager.FontVariant {
+    private fun findBestVariant(group: FontGroup): FontVariant {
         val fontSize = fontSize
         val pixelRatio = screen.viewport.screenWidth / screen.viewport.worldWidth
         val pixelSize = fontSize * pixelRatio
-        var bestCandidate: ResourceManager.FontVariant = group.variants.first()
+        var bestCandidate: FontVariant = group.variants.first()
         val biggerFontBias = 0
         val best = group
             .variants
@@ -262,9 +273,7 @@ open class NewLabel(
 
     override fun layout() {
         bitmapFont?.let { font ->
-            val variant = FortyFive
-                .resourceManager
-                .fonts
+            val variant = fontGroups
                 .flatMap { it.variants }
                 .find { it.resourceHandle == fontHandle }
             requireNotNull(variant) { "no variant for font handle: '$fontHandle'" }
@@ -283,6 +292,9 @@ open class NewLabel(
 
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
+
+    data class FontVariant(val resourceHandle: ResourceHandle, val size: Int)
+    data class FontGroup(val name: String, val variants: List<FontVariant>)
 
 }
 

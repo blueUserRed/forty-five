@@ -11,6 +11,7 @@ import com.microwavestudios.fortyfive.game.enemy.StatusBar
 import com.microwavestudios.fortyfive.game.widgets.StatusEffectBarCreator
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
+import com.microwavestudios.fortyfive.plugin.PluginApi
 import com.microwavestudios.fortyfive.screen.actors.AnimatedActor
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
@@ -18,7 +19,6 @@ import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screens.EncounterScreen.UpdateUiEvent
 import com.microwavestudios.fortyfive.screen.screens.EncounterScreenOffsetProvider
 import com.microwavestudios.fortyfive.utils.Timeline
-import com.microwavestudios.fortyfive.utils.requireNull
 
 interface EnemyActor {
 
@@ -35,42 +35,29 @@ interface EnemyActor {
 
 object EnemyActorFactory {
 
-    private val selectors: MutableMap<String, (Enemy) -> EnemyActorCreator> = mutableMapOf()
-
-    private lateinit var currentSelector: (Enemy) -> EnemyActorCreator
+    private val selectors: MutableList<(Enemy) -> EnemyActorCreator?> = mutableListOf()
 
     init {
-        addSelector("default", {
+        addSelector {
             { enemy: Enemy, controller: GameController -> DefaultEnemyActor(enemy, controller) }
-        })
-        switchSelector("default")
+        }
     }
 
-    fun addSelector(name: String, selector: (Enemy) -> EnemyActorCreator) {
-        requireNull(selectors[name]) { "EnemyActor selector with name '$name' already exists" }
-        selectors[name] = selector
-    }
-
-    fun switchSelector(to: String) {
-        val selector = selectors[to]
-        requireNotNull(selector) { "No EnemyActor selector with name '$to'" }
-        currentSelector = selector
+    fun addSelector(selector: (Enemy) -> EnemyActorCreator?) {
+        selectors.add(0, selector)
     }
 
     fun createEnemyActor(enemy: Enemy, controller: GameController): EnemyActor {
-        val creator = currentSelector(enemy)
-        return creator(enemy, controller)
-    }
-
-    fun createEnemyActorWithSelector(enemy: Enemy, controller: GameController, selectorName: String): EnemyActor {
-        val selector = selectors[selectorName]
-        requireNotNull(selector) { "No EnemyActor selector with name '$selectorName'" }
-        val creator = selector(enemy)
-        return creator(enemy, controller)
+        selectors.forEach { selector ->
+            val cur = selector(enemy)
+            if (cur != null) return cur(enemy, controller)
+        }
+        throw RuntimeException("no actor creator for enemy $enemy")
     }
 
 }
 
+@PluginApi
 typealias EnemyActorCreator = (Enemy, GameController) -> EnemyActor
 
 class DefaultEnemyActor(

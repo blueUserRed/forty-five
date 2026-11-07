@@ -123,7 +123,7 @@ object FortyFive : Game() {
 
     override fun create() {
         initControllers()
-        pluginManager.start()
+        pluginManager.startListeners()
 
         if (appArguments.bakeRun) {
             Oven().bake(appArguments.bakeTasks)
@@ -167,7 +167,7 @@ object FortyFive : Game() {
     override fun render() {
         screenManager.update()
         val renderTime = measureTimeMillis {
-            pluginManager.onRender()
+            pluginManager.renderListeners()
             timedCallbacks.iterateRemoving { (callback, time), remove ->
                 if (TimeUtils.millis() < time) return@iterateRemoving
                 callback()
@@ -248,7 +248,7 @@ object FortyFive : Game() {
         steamHandler = SteamHandler()
         globalSave.readFromDisk()
         pluginManager.init()
-        pluginManager.earlyInit()
+        pluginManager.earlyInitListeners()
         soundPlayer.init()
         GraphicsConfig.init()
         SpecialEventFactory.init()
@@ -269,7 +269,7 @@ object FortyFive : Game() {
     override fun dispose() {
         logger.debug(logTag, "game closing")
         DebugActorImpl.dumpActorsWithDebugWarnings()
-        pluginManager.onEnd()
+        pluginManager.endListeners()
         profileManager.currentProfile?.write()
         globalSave.write()
         _lifetime.die()

@@ -1377,9 +1377,6 @@ shaders: [
     }
 ],
 
-animations: [
-],
-
 colorTextures: [
     {
         name: "transparent_black_texture",
@@ -1481,9 +1478,6 @@ ninepatches: [
         right: 10,
         scale: 0.5
     },
-],
-
-particles: [
 ],
 
 frameAnimations: [
@@ -1620,6 +1614,4 @@ music: [
         file: "blobs/music/microwave.wav"
     },
 ],
-cards: {
-    directory: "blobs/cards",
-}
+cardDir: "blobs/cards",

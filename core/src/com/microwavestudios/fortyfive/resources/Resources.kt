@@ -17,15 +17,62 @@ import com.badlogic.gdx.utils.Disposable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.DeferredFrameAnimation
 import com.microwavestudios.fortyfive.rendering.BetterShaderPreProcessor
+import com.microwavestudios.fortyfive.resources.ResourceManager.Companion.DROP_SHADOW_END
 import com.microwavestudios.fortyfive.utils.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
 import onj.value.OnjObject
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.forEach
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.system.measureTimeMillis
 
+class ResourceFactory {
+
+    private val types: MutableMap<String, ResourceType> = mutableMapOf()
+
+    private data class ResourceType(val keyName: String, val creator: ResourceCreator, val schema: OnjSchema)
+
+    fun addResourceType(keyName: String, schema: OnjSchema, creator: ResourceCreator,) {
+        requireNull(types[keyName]) { "Resource type with keyName '$keyName' already exists" }
+        types[keyName] = ResourceType(keyName, creator, schema)
+    }
+
+    fun createResourceFromOnjArray(keyName: String, namespace: String?, arr: OnjArray): List<Resource> {
+        val type = types[keyName]
+        requireNotNull(type) { "unknown resource type: '$keyName'" }
+        return arr.value.flatMap { obj ->
+            require(obj is OnjObject) { "resource entries in assets.onj must be objects" }
+            type.schema.assertMatches(obj)
+            type.creator.create(namespace, obj)
+        }
+    }
+
+    fun interface ResourceCreator {
+        fun create(namespace: String?, obj: OnjObject): List<Resource>
+    }
+
+    init {
+        addResourceType("textures", TextureResource.schema, TextureResource::fromOnj)
+        addResourceType("fonts", FontResource.schema, FontResource::fromOnj)
+        addResourceType("pixmapFonts", PixmapFontResource.schema, PixmapFontResource::fromOnj)
+        addResourceType("textureAtlases", AtlasResource.schema, AtlasResource::fromOnj)
+        addResourceType("cursors", CursorResource.schema, CursorResource::fromOnj)
+        addResourceType("shaders", ShaderResource.schema, ShaderResource::fromOnj)
+        addResourceType("colorTextures", ColorTextureResource.schema, ColorTextureResource::fromOnj)
+        addResourceType("ninepatches", NinepatchResource.schema, NinepatchResource::fromOnj)
+        addResourceType("frameAnimations", DeferredFrameAnimationResource.schema, DeferredFrameAnimationResource::fromOnj)
+        addResourceType("sounds", SoundResource.schema, SoundResource::fromOnj)
+        addResourceType("music", MusicResource.schema, MusicResource::fromOnj)
+    }
+
+}
 
 abstract class Resource(
     val namespace: String?,
@@ -176,7 +223,7 @@ abstract class Resource(
 
     companion object {
         const val logTag = "Resource"
-        const val warnThreshold: Int = 30
+        const val warnThreshold: Int = 60
     }
 
 }
@@ -235,11 +282,71 @@ class TextureResource(
         }
     }
 
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                    use Common;
+                    
+                    name: string,
+                    file: string,
+                    tileable?: boolean,
+                    dropShadow?: {
+                        shadowColor: Color,
+                        originalColor: float,
+                        maxRadius: float,
+                        radiusStep: float,
+                        pointsOnCircle: float,
+                        brighten: float,
+                    },
+                    tileScale?: float,
+                    useMipMaps?: boolean,
+                    stayLoaded?: boolean,
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resources = mutableListOf<Resource>()
+            val name = obj.get<String>("name")
+            val dropShadowData = obj
+                .getOr<OnjObject?>("dropShadow", null)
+                ?.let { DropShadowData.fromOnj(it) }
+            val resource = TextureResource(
+                namespace,
+                name,
+                obj.get<String>("file"),
+                obj.getOr("tileable", false),
+                obj.getOr("tileScale", 1.0).toFloat(),
+                obj.getOr("useMipMaps", true),
+                dropShadowData
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            resources.add(resource)
+
+            dropShadowData ?: return resources
+            val resourceDropShadow = TextureResource(
+                namespace,
+                name + DROP_SHADOW_END,
+                "drop_shadows/$name$DROP_SHADOW_END.png",
+                false,
+                1f,
+                false,
+                null
+            )
+            resourceDropShadow.stayLoaded = obj.getOr("stayLoaded", false)
+            resources.add(resourceDropShadow)
+            return resources
+        }
+
+    }
+
 }
 
 class FontResource(
     namespace: String?,
     handle: ResourceHandle,
+    val groupName: String,
+    val size: Int,
     private val imageFile: String,
     private val fontFile: String,
     private val markupEnabled: Boolean,
@@ -269,6 +376,39 @@ class FontResource(
         pixmap = null
         fontData = null
         super.dispose()
+    }
+
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                variants: {
+                    size: int,
+                    resourceHandle: string,
+                    fontFile: string,
+                    imageFile: string
+                }[],
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resources = mutableListOf<Resource>()
+            val fontName = obj.get<String>("name")
+            obj.get<OnjArray>("variants").value.forEach { variant ->
+                variant as OnjObject
+                val resourceHandle = variant.get<ResourceHandle>("resourceHandle")
+                val fontFile = variant.get<ResourceHandle>("fontFile")
+                val imageFile = variant.get<ResourceHandle>("imageFile")
+                val size = variant.get<Long>("size").toInt()
+                val resource = FontResource(namespace, resourceHandle, fontName, size, imageFile, fontFile, false)
+                resource.stayLoaded = obj.getOr("stayLoaded", false)
+                resources.add(resource)
+            }
+            return resources
+        }
+
     }
 }
 
@@ -316,6 +456,41 @@ class AtlasResource(
         this.pages = null
         super.dispose()
     }
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                file: string,
+                regions: {
+                    handle: string,
+                    regionName: string
+                }[],
+                stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resources = mutableListOf<Resource>()
+            val name = obj.get<String>("name")
+            val file = obj.get<String>("file")
+            val atlasResource = AtlasResource(namespace, name, file)
+            atlasResource.stayLoaded = obj.getOr("stayLoaded", false)
+            val regionResources = obj.get<OnjArray>("regions").value.map {
+                it as OnjObject
+                val handle = it.get<String>("handle")
+                val regionName = it.get<String>("regionName")
+                val resource = AtlasRegionResource(namespace, handle, regionName, atlasResource.combinedHandle)
+                resource.stayLoaded = it.getOr("stayLoaded", false)
+                resource
+            }
+            resources.add(atlasResource)
+            resources.addAll(regionResources)
+            return resources
+        }
+
+    }
 }
 
 class AtlasRegionResource(
@@ -326,7 +501,7 @@ class AtlasRegionResource(
 ) : Resource(namespace, handle), ResourceBorrower {
 
     private val atlasResource: AtlasResource by lazy {
-        val atlasResource = FortyFive.resourceManager.resources.find { it.handle == atlasResourceHandle }
+        val atlasResource = FortyFive.resourceManager.resources.find { it.combinedHandle == atlasResourceHandle }
             ?: throw RuntimeException("No atlas with handle $atlasResourceHandle")
         atlasResource as? AtlasResource
             ?: throw RuntimeException("resource with handle $atlasResourceHandle is not an atlas")
@@ -396,6 +571,33 @@ class CursorResource(
         disposables = listOf(cursor)
         variants = listOf(cursor)
     }
+
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                file: string,
+                hotspotX: int,
+                hotspotY: int,
+                stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = CursorResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("file"),
+                obj.get<Long>("hotspotX").toInt(),
+                obj.get<Long>("hotspotY").toInt()
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
+    }
 }
 
 class ShaderResource(
@@ -422,6 +624,34 @@ class ShaderResource(
         variants = listOf(shader, shader.shader)
         preProcessor = null
         preProcessedCode = null
+    }
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                file: string,
+                constantArgs: {
+                    ...*
+                },
+                stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = ShaderResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("file"),
+                obj.get<OnjObject>("constantArgs").value.entries.associate { (key, value) ->
+                    "ca_$key" to value.value as Any
+                }
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
     }
 }
 
@@ -452,26 +682,29 @@ class ColorTextureResource(
         pixmap = null // disposed via disposables list
         super.dispose()
     }
-}
 
-class ParticleResource(
-    namespace: String?,
-    handle: ResourceHandle,
-    private val file: String,
-    private val textureDirectory: String,
-    private val scale: Float
-) : Resource(namespace, handle) {
+    companion object {
 
-    override suspend fun prepareLoadingAllThreads() {
-        // TODO: figure out how to load resources early
-    }
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                use Common;
 
-    override fun finishLoadingMainThread() {
-        val effect = ParticleEffect()
-        effect.load(Gdx.files.internal(file), Gdx.files.internal(textureDirectory))
-        effect.scaleEffect(scale)
-        variants = listOf(effect)
-        disposables = listOf(effect)
+                name: string,
+                color: Color,
+                stayLoaded?: boolean,
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = ColorTextureResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<Color>("color")
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
     }
 }
 
@@ -508,6 +741,38 @@ class NinepatchResource(
         pixmap = null
         super.dispose()
     }
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                file: string,
+                left: int,
+                right: int,
+                top: int,
+                bottom: int,
+                scale: float,
+                stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = NinepatchResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("file"),
+                obj.get<Long>("left").toInt(),
+                obj.get<Long>("right").toInt(),
+                obj.get<Long>("top").toInt(),
+                obj.get<Long>("bottom").toInt(),
+                obj.getOr("scale", 1.0).toFloat()
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
+    }
 }
 
 class PixmapFontResource(
@@ -525,6 +790,28 @@ class PixmapFontResource(
     override fun finishLoadingMainThread() {
         variants = listOf(font!!)
         disposables = listOf(font!!)
+    }
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                fontFile: string,
+                stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = PixmapFontResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("fontFile")
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
     }
 }
 
@@ -545,6 +832,33 @@ class DeferredFrameAnimationResource(
     override fun finishLoadingMainThread() {
         variants = listOf(anim!!)
         disposables = listOf(anim!!)
+    }
+
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+                name: string,
+                preview: string,
+                atlas: string,
+                frameTime: int,
+                stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = DeferredFrameAnimationResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("preview"),
+                obj.get<String>("atlas"),
+                obj.get<Long>("frameTime").toInt()
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
     }
 
 }
@@ -570,6 +884,28 @@ class SoundResource(
         super.dispose()
         sound = null
     }
+
+    companion object {
+
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+               name: string,
+               file: string,
+               stayLoaded?: boolean
+            """)
+        }
+
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = SoundResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("file")
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
+
+    }
 }
 
 class MusicResource(
@@ -594,27 +930,26 @@ class MusicResource(
         super.dispose()
         music = null
     }
-}
 
-class PixmapResource(
-    namespace: String?,
-    handle: ResourceHandle,
-    private val file: String,
-) : Resource(namespace, handle) {
+    companion object {
 
-    private var pixmap: Pixmap? = null
+        val schema: OnjSchema by lazy {
+            OnjSchemaParser.parse("""
+               name: string,
+               file: string,
+               stayLoaded?: boolean
+            """)
+        }
 
-    override suspend fun prepareLoadingAllThreads() {
-        pixmap = Pixmap(Gdx.files.internal(file))
-    }
+        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
+            val resource = MusicResource(
+                namespace,
+                obj.get<String>("name"),
+                obj.get<String>("file")
+            )
+            resource.stayLoaded = obj.getOr("stayLoaded", false)
+            return resource.wrapList()
+        }
 
-    override fun finishLoadingMainThread() {
-        variants = listOf(pixmap!!)
-        disposables = listOf(pixmap!!)
-    }
-
-    override fun dispose() {
-        super.dispose()
-        pixmap = null
     }
 }

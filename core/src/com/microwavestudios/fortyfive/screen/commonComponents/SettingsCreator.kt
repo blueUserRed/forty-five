@@ -12,7 +12,7 @@ import com.microwavestudios.fortyfive.animation.rotationAbstractProperty
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.InputManager
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
-import com.microwavestudios.fortyfive.plugin.ManagedPlugin
+import com.microwavestudios.fortyfive.plugin.Plugin
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Colors
@@ -332,7 +332,7 @@ object SettingsCreator {
 
     private fun CustomBox.pluginSettings(
         creator: ScreenCreator,
-        plugin: ManagedPlugin,
+        plugin: Plugin,
         events: EventPipeline,
         settings: MutableList<BindTarget<*>>,
         parentWidth: Float

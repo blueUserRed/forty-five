@@ -27,8 +27,9 @@ object DetailDescriptionHandler {
 
     init {
         val onj = ConfigFileManager.getConfigFile("descriptions")
-        val pluginFiles = FortyFive.pluginManager.collectDescriptionFiles()
-        val allFiles = pluginFiles.map { it.second } + onj
+//        val pluginFiles = FortyFive.pluginManager.collectDescriptionFiles()
+//        val allFiles = pluginFiles.map { it.second } + onj
+        val allFiles = listOf(onj)
         groups = allFiles
             .flatMap { it.get<OnjArray>("hoverDetailDescriptionGroups").value }
             .filterIsInstance<OnjObject>()
