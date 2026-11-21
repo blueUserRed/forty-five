@@ -20,6 +20,21 @@ class PluginManager {
     var activePlugins: MutableList<Plugin> = mutableListOf()
         private set
 
+    val trustedPluginData: List<TrustedPluginData> by lazy {
+        ConfigFileManager
+            .getConfigFile("trustedPlugins")
+            .get<OnjArray>("plugins")
+            .value
+            .map {
+                it as OnjObject
+                TrustedPluginData(
+                    it.get<String>("name"),
+                    it.get<String>("jarFileShaHash"),
+                    it.get<Boolean>("enableByDefault"),
+                )
+            }
+    }
+
     fun init() {
         val pluginDir = File(pluginPath)
         val allPlugins = pluginDir
@@ -73,6 +88,7 @@ class PluginManager {
             }
             val endPoints = onj.getOr<OnjObject?>("endPoints", null)
             val ffListeners = endPoints?.getOr<OnjArray?>("FFListener", null)?.value?.map { it.value as String }
+            val enemyExtensionPoints = endPoints?.getOr<OnjArray?>("EnemyExtensionPoint", null)?.value?.map { it.value as String }
             return Plugin(
                 name,
                 onj.get<String>("title"),
@@ -80,7 +96,8 @@ class PluginManager {
                 onj.get<String>("description"),
                 parentDir,
                 jarFile,
-                ffListeners
+                ffListeners,
+                enemyExtensionPoints
             )
         } catch (e: OnjParserException) {
             FortyFive.logger.warn(logTag, "Failed to load plugin in directory: '${parentDir.name}'")
@@ -119,6 +136,8 @@ class PluginManager {
     fun endListeners() {
         activePlugins.forEach { it.endListeners() }
     }
+
+    data class TrustedPluginData(val name: String, val jarFileShaHash: String, val enableByDefault: Boolean)
 
     companion object {
 

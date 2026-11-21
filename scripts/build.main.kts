@@ -1,8 +1,14 @@
+import java.io.BufferedInputStream
 import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 import kotlin.system.exitProcess
+import kotlin.system.measureTimeMillis
 
 val assetDirs = arrayOf(
     "blobs",
@@ -20,6 +26,11 @@ val assetDirs = arrayOf(
     "test_maps",
 )
 
+val trustedPluginsDir = "../trustedPlugins"
+val trustedPlugins = arrayOf(
+    PluginConfig("moreAnims", install = true, enableByDefault = true)
+)
+
 build()
 
 fun build() {
@@ -28,13 +39,14 @@ fun build() {
     }
     val (tag, dirName, tmpDir, convertToExe) = interviewUser()
     debug("running gradle dist task")
-    command("./gradlew.bat", "dist")
+//    command("./gradlew.bat", "dist")
     if (tmpDir.exists()) tmpDir.deleteRecursively()
     tmpDir.mkdirs()
-    copyJar(tmpDir)
-    cleanupJar(tmpDir)
+//    copyJar(tmpDir)
+//    cleanupJar(tmpDir)
     copyAssets(tmpDir)
     cleanupAssets(tmpDir)
+    setupPlugins(tmpDir)
     changeLoggingVersionTag(tmpDir, tag)
     if (convertToExe) {
         copyJre(tmpDir)
@@ -78,6 +90,44 @@ fun cleanupJar(tmpDir: File) {
 fun copyAssets(tmpDir: File) {
     debug("copying assets")
     File("assets").copyRecursively(tmpDir)
+}
+
+fun setupPlugins(tmpDir: File) {
+    val trustedPluginsDir = File(trustedPluginsDir)
+    val pluginsInstallDir = tmpDir / "plugins"
+    val onjFile = StringBuilder()
+    onjFile.newLine().append("""
+        // This file contains Information that allows the game to identify trusted (official) plugins.
+        // Changes made here may cause the game to trust/automatically enable untrusted plugins and run foreign code!
+        // Do not edit!
+    """.trimIndent()).newLine().newLine()
+    onjFile.append("plugins: [").newLine()
+    debug("configuring trusted plugins")
+    trustedPlugins.forEach { plugin ->
+        val pluginDir = trustedPluginsDir / plugin.dir
+        if (!pluginDir.exists()) error("no dir for plugin ${plugin.name}")
+        val jars = pluginDir
+            .listFiles()!!
+            .filter { it.extension == "jar" }
+        if (jars.size != 1) error("trusted plugin must contain exactly one jar at the top level")
+        val jar = jars.first()
+        debug("hashing jar for plugin ${plugin.name}")
+        val hash = hashFile(jar)
+        if (plugin.install) {
+            debug("installing plugin ${plugin.name}")
+            pluginDir.copyRecursively(pluginsInstallDir)
+        }
+        onjFile.indent().append("{").newLine()
+        onjFile
+            .indent(2).append("name: \"").append(plugin.name).append("\",").newLine()
+            .indent(2).append("jarFileShaHash: \"").append(hash).append("\",").newLine()
+            .indent(2).append("enableByDefault: ").append(plugin.enableByDefault).append(",").newLine()
+        onjFile.indent().append("},").newLine()
+    }
+    onjFile.append("]").newLine()
+    val configFile = tmpDir / "config/trusted_plugins.onj"
+    configFile.createNewFile()
+    configFile.writeText(onjFile.toString())
 }
 
 fun cleanupAssets(tmpDir: File) {
@@ -165,6 +215,13 @@ data class BuildConfig(
     }
 }
 
+data class PluginConfig(
+    val dir: String,
+    val name: String = dir,
+    val install: Boolean = false,
+    val enableByDefault: Boolean = false
+)
+
 // should be good enough
 fun isInCorrectDirectory(): Boolean =
     File("LICENSE").exists() &&
@@ -219,4 +276,27 @@ fun askYesNoQuestion(question: String, default: Boolean): Boolean {
     }
 }
 
+@OptIn(ExperimentalEncodingApi::class)
+fun hashFile(file: File): String {
+    val buffer = ByteArray(4096)
+    val stream = BufferedInputStream(FileInputStream(file))
+    val digest = MessageDigest.getInstance("SHA-256")
+    var count = 0
+    while (true) {
+        count = stream.read(buffer)
+        if (count <= 0) break
+        digest.update(buffer, 0, count)
+    }
+    stream.close()
+    val hash = digest.digest()
+    return Base64.encode(hash)
+}
+
 operator fun File.div(childPath: String): File = File(this.canonicalPath + "/$childPath")
+
+fun StringBuilder.newLine(): StringBuilder = append("\n")
+fun StringBuilder.indent(): StringBuilder = append("    ")
+fun StringBuilder.indent(amount: Int): StringBuilder {
+    repeat(amount) { indent() }
+    return this
+}

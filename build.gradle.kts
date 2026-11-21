@@ -8,7 +8,7 @@ plugins {
 
 buildscript {
     val kotlinVersion by extra("2.2.20")
-    val gdxVersion by extra("1.11.0")
+    val gdxVersion by extra("1.14.2")
     val gdxControllersVersion by extra("2.0.1")
 
     repositories {

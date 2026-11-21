@@ -148,20 +148,25 @@ class GlobalSave : IGlobalSave {
     }
 
     override fun verifyPluginSaveData(plugin: Plugin) {
-        val data = getPluginSaveData(plugin.name)
-        if (data.jarFileHash == plugin.jarFileHash) return
-        val newData = PluginSaveData(plugin.name, true, false, plugin.jarFileHash)
-        this.data.pluginConfig.remove(data)
-        this.data.pluginConfig.add(newData)
-        dirty()
+        var pluginData = data.pluginConfig.find { it.name == plugin.name }
+        if (pluginData != null && pluginData.jarFileHash != plugin.jarFileHash) {
+            data.pluginConfig.remove(pluginData)
+            pluginData = null
+        }
+        if (pluginData == null) {
+            val enable = plugin.trustedPluginData?.enableByDefault ?: false
+            val newPluginData = PluginSaveData(
+                plugin.name, !enable, plugin.isTrusted, plugin.jarFileHash
+            )
+            data.pluginConfig.add(newPluginData)
+            dirty()
+        }
     }
 
     override fun getPluginSaveData(name: String): PluginSaveData {
-        data.pluginConfig.find { it.name == name }?.let { return it }
-        val newData = PluginSaveData(name, false, false, null)
-        data.pluginConfig.add(newData)
-        dirty()
-        return newData
+        val data = data.pluginConfig.find { it.name == name }
+        requireNotNull(data) { "unknown plugin: '$name'" }
+        return data
     }
 
     override fun setPluginActivation(name: String, active: Boolean) {

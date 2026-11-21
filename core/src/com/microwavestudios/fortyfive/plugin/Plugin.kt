@@ -29,6 +29,17 @@ class Plugin(
         jarFile?.let { Utils.hashFile(it) }
     }
 
+    val trustedPluginData: PluginManager.TrustedPluginData? by lazy {
+        jarFileHash?.let { hash ->
+            FortyFive.pluginManager.trustedPluginData.find { data ->
+                data.name == name && hash == data.jarFileShaHash
+            }
+        }
+    }
+
+    val isTrusted: Boolean
+        get() = trustedPluginData != null
+
     private val ffListeners: MutableList<FFListener> = mutableListOf()
     private val enemyExtensionPoints: MutableList<EnemyExtensionPoint> = mutableListOf()
 
@@ -71,6 +82,9 @@ class Plugin(
         ffListeners.forEach { it.end() }
     }
 
+    @PluginApi
+    fun resolve(path: String): File = File(directory.canonicalPath + "/" + path)
+
     private inline fun <reified T> instantiateClass(classLoader: ClassLoader, fqdn: String): T? {
         val instance = try {
             val clazz = Class.forName(fqdn, true, classLoader)
@@ -89,6 +103,17 @@ class Plugin(
             return null
         }
         return instance
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Plugin
+        return name == other.name
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
     }
 
 }

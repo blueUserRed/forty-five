@@ -21,4 +21,5 @@ configFiles: {
     npcs: fileConfig,
     runGeneratorConfig: fileConfig,
     specialEvents: fileConfig,
+    trustedPlugins: fileConfig,
 },

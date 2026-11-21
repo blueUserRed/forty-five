@@ -16,7 +16,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.DeferredFrameAnimation
+import com.microwavestudios.fortyfive.plugin.PluginApi
 import com.microwavestudios.fortyfive.rendering.BetterShaderPreProcessor
+import com.microwavestudios.fortyfive.resources.ResourceFactory.ResourceCreator
 import com.microwavestudios.fortyfive.resources.ResourceManager.Companion.DROP_SHADOW_END
 import com.microwavestudios.fortyfive.utils.*
 import kotlinx.coroutines.runBlocking
@@ -26,6 +28,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import java.io.File
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -33,29 +36,52 @@ import kotlin.reflect.KClass
 import kotlin.reflect.cast
 import kotlin.system.measureTimeMillis
 
-class ResourceFactory {
+interface ResourceFactory {
+
+    @PluginApi
+    fun addResourceType(keyName: String, schema: OnjSchema, creator: ResourceCreator)
+
+    fun createResourceFromOnjArray(
+        keyName: String,
+        namespace: String?,
+        arr: OnjArray,
+        basePath: File
+    ): List<Resource>
+
+    @PluginApi
+    fun interface ResourceCreator {
+
+        @PluginApi
+        fun create(namespace: String?, obj: OnjObject): List<Resource>
+    }
+}
+
+class ResourceFactoryImpl : ResourceFactory {
 
     private val types: MutableMap<String, ResourceType> = mutableMapOf()
 
     private data class ResourceType(val keyName: String, val creator: ResourceCreator, val schema: OnjSchema)
 
-    fun addResourceType(keyName: String, schema: OnjSchema, creator: ResourceCreator,) {
+    override fun addResourceType(keyName: String, schema: OnjSchema, creator: ResourceCreator) {
         requireNull(types[keyName]) { "Resource type with keyName '$keyName' already exists" }
         types[keyName] = ResourceType(keyName, creator, schema)
     }
 
-    fun createResourceFromOnjArray(keyName: String, namespace: String?, arr: OnjArray): List<Resource> {
+    override fun createResourceFromOnjArray(
+        keyName: String,
+        namespace: String?,
+        arr: OnjArray,
+        basePath: File
+    ): List<Resource> {
         val type = types[keyName]
         requireNotNull(type) { "unknown resource type: '$keyName'" }
         return arr.value.flatMap { obj ->
             require(obj is OnjObject) { "resource entries in assets.onj must be objects" }
             type.schema.assertMatches(obj)
-            type.creator.create(namespace, obj)
+            val resources = type.creator.create(namespace, obj)
+            resources.forEach { it.basePath = basePath }
+            resources
         }
-    }
-
-    fun interface ResourceCreator {
-        fun create(namespace: String?, obj: OnjObject): List<Resource>
     }
 
     init {
@@ -92,13 +118,17 @@ abstract class Resource(
     private var promise: Promise<Resource> = Promise()
     private val activePromises: MutableList<Promise<*>> = mutableListOf()
 
+    var basePath: File = File("")
+
     var startedLoading: Boolean = false
         private set
 
     var stayLoaded: Boolean = false
 
+    @PluginApi
     abstract suspend fun prepareLoadingAllThreads()
 
+    @PluginApi
     abstract fun finishLoadingMainThread()
 
     fun <T> get(variantType: KClass<T>): T? where T : Any {
@@ -204,6 +234,7 @@ abstract class Resource(
         if (!stayLoaded && borrowedBy.isEmpty()) dispose()
     }
 
+    @PluginApi
     override fun dispose() = runBlocking {
         mutex.withLock {
             disposables.forEach(Disposable::dispose)
@@ -213,6 +244,12 @@ abstract class Resource(
             startedLoading = false
             state = ResourceState.NOT_LOADED
         }
+    }
+
+    @PluginApi
+    protected fun resolve(path: String): File {
+        requireNot(path.contains("..")) { "asset paths cannot contain '..'" }
+        return File(basePath.canonicalPath + "/" + path)
     }
 
     override fun toString(): String = combinedHandle
@@ -241,7 +278,7 @@ class TextureResource(
     private var pixmap: Pixmap? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        pixmap = Pixmap(Gdx.files.internal(file))
+        pixmap = Pixmap(resolve(file).handle())
     }
 
     override fun finishLoadingMainThread() {
@@ -356,8 +393,8 @@ class FontResource(
     private var fontData: BitmapFontData? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        pixmap = Pixmap(Gdx.files.internal(imageFile))
-        fontData = BitmapFontData(Gdx.files.internal(fontFile), false)
+        pixmap = Pixmap(resolve(imageFile).handle())
+        fontData = BitmapFontData(resolve(fontFile).handle(), false)
     }
 
     override fun finishLoadingMainThread() {
@@ -426,7 +463,7 @@ class AtlasResource(
     override suspend fun prepareLoadingAllThreads() {
         prepMutex.withLock {
             if (state != ResourceState.NOT_LOADED) return
-            val fileHandle = Gdx.files.internal(file)
+            val fileHandle = resolve(file).handle()
             val data = TextureAtlasData(fileHandle, fileHandle.parent(), false)
             val pages = mutableMapOf<String, Pixmap>()
             data.pages.forEach { page ->
@@ -511,6 +548,7 @@ class AtlasRegionResource(
     private var atlasPromise: Promise<TextureAtlas>? = null
 
     override fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
+		// TODO: forceResolve with this resource will fail because promiseMatches is always false
         atlasPromise = FortyFive.resourceManager.request<TextureAtlas>(borrower, lifetime, atlasResourceHandle)
         return atlasPromise!!.map {
             loadFromAtlas()
@@ -557,7 +595,7 @@ class CursorResource(
     private var pixmap: Pixmap? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        val cursorPixmap = Pixmap(Gdx.files.internal(file))
+        val cursorPixmap = Pixmap(resolve(file).handle())
         val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
         pixmap.drawPixmap(cursorPixmap, 0, 0)
         cursorPixmap.dispose()
@@ -611,7 +649,7 @@ class ShaderResource(
     private var preProcessedCode: Pair<String, String>? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        val preProcessor = BetterShaderPreProcessor(Gdx.files.internal(file), constantArgs)
+        val preProcessor = BetterShaderPreProcessor(resolve(file).handle(), constantArgs)
         val code = preProcessor.preProcess()
         if (code !is Either.Left) throw RuntimeException("shader $handle is only meant for exporting")
         preProcessedCode = code.value
@@ -722,7 +760,7 @@ class NinepatchResource(
     private var pixmap: Pixmap? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        pixmap = Pixmap(Gdx.files.internal(file))
+        pixmap = Pixmap(resolve(file).handle())
     }
 
     override fun finishLoadingMainThread() {
@@ -784,7 +822,7 @@ class PixmapFontResource(
     private var font: PixmapFont? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        font = PixmapFont(Gdx.files.internal(fontFile))
+        font = PixmapFont(resolve(fontFile).handle())
     }
 
     override fun finishLoadingMainThread() {
@@ -872,7 +910,7 @@ class SoundResource(
     private var sound: Sound? = null
 
     override suspend fun prepareLoadingAllThreads() {
-        sound = Gdx.audio.newSound(Gdx.files.internal(file))
+        sound = Gdx.audio.newSound(resolve(file).handle())
     }
 
     override fun finishLoadingMainThread() {
@@ -918,7 +956,7 @@ class MusicResource(
 
 
     override suspend fun prepareLoadingAllThreads() {
-        music = Gdx.audio.newMusic(Gdx.files.internal(file))
+        music = Gdx.audio.newMusic(resolve(file).handle())
     }
 
     override fun finishLoadingMainThread() {

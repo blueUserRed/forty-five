@@ -69,7 +69,7 @@ object ConfigFileManager {
 
     fun initPluginConfigFiles(plugins: List<Plugin>) {
         val pluginFiles = listOf(
-            "assets" to "onjschemas/assets.onjschema",
+            "assets" to null,
         )
         val pluginConfigFiles = mutableMapOf<String, List<ConfigFile>>()
         plugins.forEach { plugin ->

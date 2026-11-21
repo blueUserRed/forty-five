@@ -153,6 +153,7 @@ object SettingsCreator {
         singleSettingSelector("Use borderless window when in fullscreen:", "useBorderlessWindowFullscreen")
 
         header(creator, "Plugins")
+        verticalSpacer(20f)
         plugins(creator, parentWidth, events, settings)
     }
 
@@ -338,114 +339,254 @@ object SettingsCreator {
         parentWidth: Float
     ) = with(creator) {
         box {
-            flexDirection = FlexDirection.ROW
-            horizontalAlign = CustomAlign.SPACE_AROUND
-            verticalAlign = CustomAlign.CENTER
+            flexDirection = FlexDirection.COLUMN
             width = parentWidth
-            height = 270f
-            marginTop = 10f
-
+            horizontalAlign = CustomAlign.CENTER
+            verticalAlign = CustomAlign.SPACE_AROUND
+            syncHeight()
             joinGroup(settingsGroup)
-            backgroundHandle = "single_setting_background"
+            backgroundHandle = "dark_brown_grey_texture"
 
-            box {
-                relativeWidth(60f)
+            verticalSpacer(10f)
+            label("red wing", plugin.title, color = ScreenCreator.fortyWhite, fontSize = 32) {
+                relativeWidth(90f)
                 syncHeight()
-                flexDirection = FlexDirection.COLUMN
-                verticalAlign = CustomAlign.CENTER
-                horizontalAlign = CustomAlign.START
-
-                verticalSpacer(10f)
-                label("red wing", plugin.title, color = ScreenCreator.fortyWhite, fontSize = 28) {
-                    relativeWidth(95f)
-                    syncHeight()
-                    wrap = true
-                    joinGroup(settingsGroup)
-                    keyboardFocusable = KeyboardFocusable.LEAF
-                    touchable = Touchable.enabled
-                    setAlignment(Align.center)
-                }
-                label("roadgeek", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
-                    relativeWidth(95f)
-                    syncHeight()
-                    wrap = true
-                }
-                verticalSpacer(10f)
+                wrap = true
+                joinGroup(settingsGroup)
+                keyboardFocusable = KeyboardFocusable.LEAF
+                touchable = Touchable.enabled
+                setAlignment(Align.center)
             }
-            val pluginSaveData = FortyFive.globalSave.getPluginSaveData(plugin.name)
-            val needsAgreement = plugin.isRisky && !pluginSaveData.agreedToRisk
+            verticalSpacer(15f)
+
             box {
-                relativeWidth(30f)
-                syncHeight()
-                flexDirection = FlexDirection.COLUMN
+                flexDirection = FlexDirection.ROW
                 horizontalAlign = CustomAlign.SPACE_AROUND
-                verticalAlign = CustomAlign.CENTER
-                if (plugin.isRisky) {
-                    label("red wing", "Contains executable\ncode!", color = Colors.Red, fontSize = 24) {
-                        relativeWidth(100f)
+                width = parentWidth
+                syncHeight()
+
+                box {
+                    flexDirection = FlexDirection.COLUMN
+                    verticalAlign = CustomAlign.CENTER
+                    relativeWidth(55f)
+                    syncHeight()
+                    verticalSpacer(10f)
+                    label("roadgeek", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
+                        relativeWidth(85f)
                         syncHeight()
-                        setAlignment(Align.center)
+                        wrap = true
                     }
                     verticalSpacer(10f)
                 }
-                if (needsAgreement) {
-                    box(backgroundHints = buttonBackgroundHints()) {
-                        defaultButtonConfig()
-                        relativeWidth(80f)
-                        height = 50f
-                        horizontalAlign = CustomAlign.CENTER
-                        verticalAlign = CustomAlign.CENTER
-                        label("red wing", "View Risk", Colors.FortyWhite, 22) {
-                            touchable = Touchable.disabled
+
+                box {
+                    flexDirection = FlexDirection.COLUMN
+                    horizontalAlign = CustomAlign.CENTER
+                    relativeWidth(40f)
+                    height = 200f
+                    val pluginSaveData = FortyFive.globalSave.getPluginSaveData(plugin.name)
+                    val needsAgreement = plugin.isRisky && !pluginSaveData.agreedToRisk
+                    if (plugin.isRisky && !plugin.isTrusted) {
+                        label("red wing", "Contains executable\ncode!", color = Colors.Red, fontSize = 24) {
+                            relativeWidth(100f)
+                            syncHeight()
+                            setAlignment(Align.center)
+                        }
+                        verticalSpacer(10f)
+                    }
+                    if (plugin.isTrusted) {
+                        label("red wing", "Official plugin", color = Colors.CYAN, fontSize = 24) {
+                            relativeWidth(100f)
+                            syncHeight()
+                            setAlignment(Align.center)
+                        }
+                        verticalSpacer(10f)
+                    }
+                    if (needsAgreement) {
+                        box(backgroundHints = buttonBackgroundHints()) {
+                            defaultButtonConfig()
+                            relativeWidth(80f)
+                            height = 50f
+                            horizontalAlign = CustomAlign.CENTER
+                            verticalAlign = CustomAlign.CENTER
+                            label("red wing", "View Risk", Colors.FortyWhite, 22) {
+                                touchable = Touchable.disabled
+                                syncDimensions()
+                            }
+                            joinGroup(settingsGroup)
+                            touchable = Touchable.enabled
+                            keyboardFocusable = KeyboardFocusable.LEAF
+                            onInput(GameInputs.interact) {
+                                val popup = PopupCreator.ShowPopup(
+                                    "Agree to plugin risk",
+                                    "This plugin contains executable code. If you choose to activate it, the plugin gains " +
+                                            "full access to your computer, files, etc. Only enable plugins that are from a " +
+                                            "known origin that you can trust. After you agree to this, you still have " +
+                                            "to enable the plugin separately.",
+                                    listOf(
+                                        "Agree" to true,
+                                        "Disagree" to false
+                                    )
+                                ) { result ->
+                                    if (!result) return@ShowPopup
+                                    FortyFive.globalSave.setPluginAgreement(plugin.name, true)
+                                    events.fire(ReloadPluginSettings)
+                                }
+                                events.fire(popup)
+                            }
+                        }
+                    } else {
+                        val bindTarget = FortyFive.pluginManager.activatedBindTargetForPlugin(plugin)
+                        settings.add(bindTarget)
+                        lateinit var restartLabel: NewLabel
+                        val callback = {
+                            events.fire(SettingChanged)
+                            restartLabel.isVisible = !bindTarget.inSync
+                        }
+                        selector("redwing100", bindTarget, 0.32f * 0.8f, Colors.FortyWhite, callback) {
+                            height = 50f
+                            width = 250f
+                            joinGroup(settingsGroup)
+                            touchable = Touchable.enabled
+                            keyboardFocusable = KeyboardFocusable.LEAF
+                            onInput(GameInputs.switchSelectorToLeft) { switch(-1) }
+                            onInput(GameInputs.switchSelectorToRight) { switch(1) }
+                        }
+                        restartLabel = label("red wing", "Restart required", Colors.HemoglobinRed, 22) {
+                            isVisible = false
                             syncDimensions()
                         }
-                        joinGroup(settingsGroup)
-                        touchable = Touchable.enabled
-                        keyboardFocusable = KeyboardFocusable.LEAF
-                        onInput(GameInputs.interact) {
-                            val popup = PopupCreator.ShowPopup(
-                                "Agree to plugin risk",
-                                "This plugin contains executable code. If you choose to activate it, the plugin gains " +
-                                        "full access to your computer, files, etc. Only enable plugins that are from a " +
-                                        "known origin that you can trust. After you agree to this, you still have " +
-                                        "to enable the plugin separately.",
-                                listOf(
-                                    "Agree" to true,
-                                    "Disagree" to false
-                                )
-                            ) { result ->
-                                if (!result) return@ShowPopup
-                                FortyFive.globalSave.setPluginAgreement(plugin.name, true)
-                                events.fire(ReloadPluginSettings)
-                            }
-                            events.fire(popup)
-                        }
-                    }
-                } else {
-                    val bindTarget = FortyFive.pluginManager.activatedBindTargetForPlugin(plugin)
-                    settings.add(bindTarget)
-                    lateinit var restartLabel: NewLabel
-                    val callback = {
-                        events.fire(SettingChanged)
-                        restartLabel.isVisible = !bindTarget.inSync
-                    }
-                    selector("redwing100", bindTarget, 0.32f * 0.8f, Colors.FortyWhite, callback) {
-                        height = 50f
-                        width = 250f
-                        joinGroup(settingsGroup)
-                        touchable = Touchable.enabled
-                        keyboardFocusable = KeyboardFocusable.LEAF
-                        onInput(GameInputs.switchSelectorToLeft) { switch(-1) }
-                        onInput(GameInputs.switchSelectorToRight) { switch(1) }
-                    }
-                    restartLabel = label("red wing", "Restart required", Colors.HemoglobinRed, 22) {
-                        isVisible = false
-                        syncDimensions()
                     }
                 }
             }
         }
     }
+
+//    private fun CustomBox.pluginSettings(
+//        creator: ScreenCreator,
+//        plugin: Plugin,
+//        events: EventPipeline,
+//        settings: MutableList<BindTarget<*>>,
+//        parentWidth: Float
+//    ) = with(creator) {
+//        box {
+//            flexDirection = FlexDirection.ROW
+//            horizontalAlign = CustomAlign.SPACE_AROUND
+//            verticalAlign = CustomAlign.CENTER
+//            width = parentWidth
+//            height = 270f
+//            marginTop = 10f
+//
+//            joinGroup(settingsGroup)
+//            backgroundHandle = "dark_brown_grey_texture"
+//
+//            box {
+//                relativeWidth(60f)
+//                syncHeight()
+//                flexDirection = FlexDirection.COLUMN
+//                verticalAlign = CustomAlign.SPACE_AROUND
+//                horizontalAlign = CustomAlign.START
+//
+//                verticalSpacer(10f)
+//                label("red wing", plugin.title, color = ScreenCreator.fortyWhite, fontSize = 32) {
+//                    relativeWidth(95f)
+//                    syncHeight()
+//                    wrap = true
+//                    joinGroup(settingsGroup)
+//                    keyboardFocusable = KeyboardFocusable.LEAF
+//                    touchable = Touchable.enabled
+//                    setAlignment(Align.center)
+//                }
+//                verticalSpacer(10f)
+//                label("roadgeek", plugin.description, color = ScreenCreator.fortyWhite, fontSize = 18) {
+//                    relativeWidth(85f)
+//                    syncHeight()
+//                    wrap = true
+//                }
+//                verticalSpacer(10f)
+//            }
+//            val pluginSaveData = FortyFive.globalSave.getPluginSaveData(plugin.name)
+//            val needsAgreement = plugin.isRisky && !pluginSaveData.agreedToRisk
+//            box {
+//                relativeWidth(30f)
+//                syncHeight()
+//                flexDirection = FlexDirection.COLUMN
+//                horizontalAlign = CustomAlign.SPACE_AROUND
+//                verticalAlign = CustomAlign.CENTER
+//                if (plugin.isRisky && !plugin.isTrusted) {
+//                    label("red wing", "Contains executable\ncode!", color = Colors.Red, fontSize = 24) {
+//                        relativeWidth(100f)
+//                        syncHeight()
+//                        setAlignment(Align.center)
+//                    }
+//                    verticalSpacer(10f)
+//                }
+//                if (plugin.isTrusted) {
+//                    label("red wing", "Official plugin", color = Colors.CYAN, fontSize = 24) {
+//                        relativeWidth(100f)
+//                        syncHeight()
+//                        setAlignment(Align.center)
+//                    }
+//                    verticalSpacer(10f)
+//                }
+//                if (needsAgreement) {
+//                    box(backgroundHints = buttonBackgroundHints()) {
+//                        defaultButtonConfig()
+//                        relativeWidth(80f)
+//                        height = 50f
+//                        horizontalAlign = CustomAlign.CENTER
+//                        verticalAlign = CustomAlign.CENTER
+//                        label("red wing", "View Risk", Colors.FortyWhite, 22) {
+//                            touchable = Touchable.disabled
+//                            syncDimensions()
+//                        }
+//                        joinGroup(settingsGroup)
+//                        touchable = Touchable.enabled
+//                        keyboardFocusable = KeyboardFocusable.LEAF
+//                        onInput(GameInputs.interact) {
+//                            val popup = PopupCreator.ShowPopup(
+//                                "Agree to plugin risk",
+//                                "This plugin contains executable code. If you choose to activate it, the plugin gains " +
+//                                        "full access to your computer, files, etc. Only enable plugins that are from a " +
+//                                        "known origin that you can trust. After you agree to this, you still have " +
+//                                        "to enable the plugin separately.",
+//                                listOf(
+//                                    "Agree" to true,
+//                                    "Disagree" to false
+//                                )
+//                            ) { result ->
+//                                if (!result) return@ShowPopup
+//                                FortyFive.globalSave.setPluginAgreement(plugin.name, true)
+//                                events.fire(ReloadPluginSettings)
+//                            }
+//                            events.fire(popup)
+//                        }
+//                    }
+//                } else {
+//                    val bindTarget = FortyFive.pluginManager.activatedBindTargetForPlugin(plugin)
+//                    settings.add(bindTarget)
+//                    lateinit var restartLabel: NewLabel
+//                    val callback = {
+//                        events.fire(SettingChanged)
+//                        restartLabel.isVisible = !bindTarget.inSync
+//                    }
+//                    selector("redwing100", bindTarget, 0.32f * 0.8f, Colors.FortyWhite, callback) {
+//                        height = 50f
+//                        width = 250f
+//                        joinGroup(settingsGroup)
+//                        touchable = Touchable.enabled
+//                        keyboardFocusable = KeyboardFocusable.LEAF
+//                        onInput(GameInputs.switchSelectorToLeft) { switch(-1) }
+//                        onInput(GameInputs.switchSelectorToRight) { switch(1) }
+//                    }
+//                    restartLabel = label("red wing", "Restart required", Colors.HemoglobinRed, 22) {
+//                        isVisible = false
+//                        syncDimensions()
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun CustomBox.singleSettingSelector(
         creator: ScreenCreator,

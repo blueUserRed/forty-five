@@ -1,0 +1,14 @@
+///schema=onjschemas/trusted_plugins.onjschema
+
+///////////////////////////////////////////////////////////////////////////////
+// This version of the file is only used for development!
+// When a full build is created using the build script, it will be overwritten
+///////////////////////////////////////////////////////////////////////////////
+
+plugins: [
+    {
+        name: "moreAnims",
+        enableByDefault: true,
+        jarFileShaHash: "b45cfnuR3nejc5gjXYaEj+fVGQEStls6a9+9xwhIgT4=",
+    }
+]

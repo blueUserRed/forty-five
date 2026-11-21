@@ -659,6 +659,16 @@ class InputManager(val screen: RenderableScreen) : InputProcessor {
         return false
     }
 
+    override fun touchCancelled(
+        screenX: Int,
+        screenY: Int,
+        pointer: Int,
+        button: Int
+    ): Boolean {
+        // TODO
+        return false
+    }
+
     override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
         val hit = hit(screenX, screenY)
         if (currentlyDraggedActor == null) {

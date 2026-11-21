@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.card.Card
+import com.microwavestudios.fortyfive.plugin.Plugin
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -56,7 +57,7 @@ typealias ResourceHandle = String
  */
 class ResourceManager {
 
-    val resourceFactory: ResourceFactory by lazy { ResourceFactory() }
+    val resourceFactory: ResourceFactory by lazy { ResourceFactoryImpl() }
 
     /** list of all available resources */
     lateinit var resources: List<Resource>
@@ -162,21 +163,26 @@ class ResourceManager {
         val resources = mutableListOf<Resource>()
         val cardDirectories = mutableMapOf<String?, String>()
 
-        val assetFiles = mutableMapOf<String?, OnjObject>()
+        val assetFiles = mutableMapOf<Plugin?, OnjObject>()
         assetFiles[null] = ConfigFileManager.getConfigFile("assets")
         val plugins = FortyFive.pluginManager.activePlugins
         plugins.forEach { plugin ->
-            ConfigFileManager.getConfigFile(plugin.name, "assets")?.let { assetFiles[plugin.name] = it }
+            ConfigFileManager.getConfigFile(plugin.name, "assets")?.let { assetFiles[plugin] = it }
         }
 
-        assetFiles.forEach { (namespace, file) ->
+        assetFiles.forEach { (plugin, file) ->
             file.value.forEach { (key, value) ->
                 if (key == "cardDir") {
-                    cardDirectories[namespace] = value.value as String
+                    cardDirectories[plugin?.name] = value.value as String
                     return@forEach
                 }
                 require(value is OnjArray) { "keys in assets files must have array values" }
-                val res = resourceFactory.createResourceFromOnjArray(key, namespace, value)
+                val res = resourceFactory.createResourceFromOnjArray(
+                    key,
+                    plugin?.name,
+                    value,
+                    plugin?.directory ?: File(".")
+                )
                 resources.addAll(res)
             }
         }

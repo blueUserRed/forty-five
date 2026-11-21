@@ -458,7 +458,7 @@ object Utils {
     fun hashFile(file: File): String {
         val buffer = ByteArray(4096)
         val stream = BufferedInputStream(FileInputStream(file))
-        val digest = MessageDigest.getInstance("MD5")
+        val digest = MessageDigest.getInstance("SHA-256")
         var count = 0
         while (true) {
             count = stream.read(buffer)

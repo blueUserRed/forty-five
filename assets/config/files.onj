@@ -57,6 +57,10 @@ configFiles: {
         file: "config/special_events.onj",
         validatedBy: "onjschemas/special_events.onjschema"
     },
+    trustedPlugins: {
+        file: "config/trusted_plugins.onj",
+        validatedBy: "onjschemas/trusted_plugins.onjschema"
+    },
 },
 
 displayNames: [
