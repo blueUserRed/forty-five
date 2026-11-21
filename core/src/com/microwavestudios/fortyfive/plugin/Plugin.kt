@@ -12,6 +12,7 @@ class Plugin(
     val creator: String,
     val description: String,
     val directory: File,
+    val pluginConfigFile: File,
     val jarFile: File?,
     private val ffListenerFqdns: List<String>?,
     private val enemyExtensionPointFqdns: List<String>?,
@@ -29,10 +30,15 @@ class Plugin(
         jarFile?.let { Utils.hashFile(it) }
     }
 
+    val configFileHash: String? by lazy {
+        Utils.hashFile(pluginConfigFile)
+    }
+
     val trustedPluginData: PluginManager.TrustedPluginData? by lazy {
-        jarFileHash?.let { hash ->
+        val configHash = configFileHash
+        jarFileHash?.let { jarHash ->
             FortyFive.pluginManager.trustedPluginData.find { data ->
-                data.name == name && hash == data.jarFileShaHash
+                data.name == name && jarHash == data.jarFileShaHash && configHash == data.configFileHash
             }
         }
     }

@@ -1,5 +1,6 @@
 plugins: {
     name: string,
     jarFileShaHash: string,
+    configFileHash: string,
     enableByDefault: boolean,
 }[],

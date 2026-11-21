@@ -9,6 +9,7 @@ plugins: [
     {
         name: "moreAnims",
         enableByDefault: true,
+        configFileHash: "eBfYvDpd2FwNhTNmX5xf3NzcfxdW7r8Rdu4lWLSpwl8=",
         jarFileShaHash: "b45cfnuR3nejc5gjXYaEj+fVGQEStls6a9+9xwhIgT4=",
     }
 ]

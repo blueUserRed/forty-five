@@ -156,7 +156,8 @@ class GlobalSave : IGlobalSave {
         if (pluginData == null) {
             val enable = plugin.trustedPluginData?.enableByDefault ?: false
             val newPluginData = PluginSaveData(
-                plugin.name, !enable, plugin.isTrusted, plugin.jarFileHash
+                plugin.name, !enable, plugin.isTrusted,
+                plugin.jarFileHash, plugin.configFileHash
             )
             data.pluginConfig.add(newPluginData)
             dirty()
@@ -249,13 +250,15 @@ class GlobalSave : IGlobalSave {
         val name: String,
         val isDisabled: Boolean,
         val agreedToRisk: Boolean,
-        val jarFileHash: String?
+        val jarFileHash: String?,
+        val configFileHash: String?,
     ) {
         fun asOnj(): OnjObject = buildOnjObject {
             "name" with name
             "isDisabled" with isDisabled
             "agreedToRisk" with agreedToRisk
             "jarFileHash" with jarFileHash
+            "configFileHash" with configFileHash
         }
 
         companion object {
@@ -264,6 +267,7 @@ class GlobalSave : IGlobalSave {
                 onj.get<Boolean>("isDisabled"),
                 onj.get<Boolean>("agreedToRisk"),
                 onj.get<String?>("jarFileHash"),
+                onj.get<String?>("configFileHash"),
             )
         }
     }

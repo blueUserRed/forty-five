@@ -8,7 +8,6 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 import kotlin.system.exitProcess
-import kotlin.system.measureTimeMillis
 
 val assetDirs = arrayOf(
     "blobs",
@@ -24,6 +23,8 @@ val assetDirs = arrayOf(
     "shaders",
     "test_logs",
     "test_maps",
+    "logo.png",
+    "steam_appid.txt",
 )
 
 val trustedPluginsDir = "../trustedPlugins"
@@ -39,11 +40,11 @@ fun build() {
     }
     val (tag, dirName, tmpDir, convertToExe) = interviewUser()
     debug("running gradle dist task")
-//    command("./gradlew.bat", "dist")
+    command("./gradlew.bat", "dist")
     if (tmpDir.exists()) tmpDir.deleteRecursively()
     tmpDir.mkdirs()
-//    copyJar(tmpDir)
-//    cleanupJar(tmpDir)
+    copyJar(tmpDir)
+    cleanupJar(tmpDir)
     copyAssets(tmpDir)
     cleanupAssets(tmpDir)
     setupPlugins(tmpDir)
@@ -90,6 +91,8 @@ fun cleanupJar(tmpDir: File) {
 fun copyAssets(tmpDir: File) {
     debug("copying assets")
     File("assets").copyRecursively(tmpDir)
+    File("LICENSE").copyTo(tmpDir / "LICENSE")
+    File("readme.md").copyTo(tmpDir / "readme.md")
 }
 
 fun setupPlugins(tmpDir: File) {
@@ -111,16 +114,19 @@ fun setupPlugins(tmpDir: File) {
             .filter { it.extension == "jar" }
         if (jars.size != 1) error("trusted plugin must contain exactly one jar at the top level")
         val jar = jars.first()
-        debug("hashing jar for plugin ${plugin.name}")
-        val hash = hashFile(jar)
+        val pluginConfigFile = pluginDir / "plugin.onj"
+        debug("hashing files for plugin ${plugin.name}")
+        val jarHash = hashFile(jar)
+        val configHash = hashFile(pluginConfigFile)
         if (plugin.install) {
             debug("installing plugin ${plugin.name}")
-            pluginDir.copyRecursively(pluginsInstallDir)
+            pluginDir.copyRecursively(pluginsInstallDir / pluginDir.name)
         }
         onjFile.indent().append("{").newLine()
         onjFile
             .indent(2).append("name: \"").append(plugin.name).append("\",").newLine()
-            .indent(2).append("jarFileShaHash: \"").append(hash).append("\",").newLine()
+            .indent(2).append("jarFileShaHash: \"").append(jarHash).append("\",").newLine()
+            .indent(2).append("configFileHash: \"").append(configHash).append("\",").newLine()
             .indent(2).append("enableByDefault: ").append(plugin.enableByDefault).append(",").newLine()
         onjFile.indent().append("},").newLine()
     }

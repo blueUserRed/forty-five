@@ -30,6 +30,7 @@ class PluginManager {
                 TrustedPluginData(
                     it.get<String>("name"),
                     it.get<String>("jarFileShaHash"),
+                    it.get<String>("configFileHash"),
                     it.get<Boolean>("enableByDefault"),
                 )
             }
@@ -95,6 +96,7 @@ class PluginManager {
                 onj.get<String>("creator"),
                 onj.get<String>("description"),
                 parentDir,
+                pluginConfig,
                 jarFile,
                 ffListeners,
                 enemyExtensionPoints
@@ -137,7 +139,12 @@ class PluginManager {
         activePlugins.forEach { it.endListeners() }
     }
 
-    data class TrustedPluginData(val name: String, val jarFileShaHash: String, val enableByDefault: Boolean)
+    data class TrustedPluginData(
+        val name: String,
+        val jarFileShaHash: String,
+        val configFileHash: String,
+        val enableByDefault: Boolean
+    )
 
     companion object {
 
@@ -147,14 +154,6 @@ class PluginManager {
 
         private val pluginSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/plugin/plugin.onjschema")
-        }
-
-        private val cardsSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/plugin/cards.onjschema")
-        }
-
-        private val descriptionSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/descriptions.onjschema")
         }
     }
 
