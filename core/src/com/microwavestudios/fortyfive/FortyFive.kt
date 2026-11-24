@@ -7,6 +7,9 @@ import com.badlogic.gdx.controllers.ControllerAdapter
 import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.TimeUtils
+import com.microwavestudios.fortyfive.audio.AudioInterface
+import com.microwavestudios.fortyfive.audio.AudioThread
+import com.microwavestudios.fortyfive.audio.AudioThreadMessage
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.game.*
 import com.microwavestudios.fortyfive.game.card.CardTextureManager
@@ -96,7 +99,10 @@ object FortyFive : Game() {
     var currentScreen: RenderableScreen? = null
 
     var cleanExit: Boolean = true
+
+    // set by Launcher
     lateinit var appArguments: AppArguments
+    lateinit var audioInterface: AudioInterface
 
     private val mainThreadTasks: ConcurrentHashMap<() -> Any?, Promise<*>> = ConcurrentHashMap()
 
@@ -122,6 +128,11 @@ object FortyFive : Game() {
 
 
     override fun create() {
+
+        val audioThread = AudioThread(audioInterface)
+        audioThread.start()
+        inMs(1000) { audioThread.sendMessage(AudioThreadMessage.StreamAudioOnce("microwave_theme")) }
+
         initControllers()
         pluginManager.startListeners()
 

@@ -1,4 +1,3 @@
-///schema=onjschemas/assets.onjschema
 import "imports/colors.onj" as color;
 
 use Common;
@@ -1513,7 +1512,7 @@ frameAnimations: [
     },
 ],
 
-sounds: [
+soundFiles: [
     {
         name: "revolver_shot_sound",
         file: "blobs/sounds/revolver_shot.wav"
@@ -1590,9 +1589,9 @@ sounds: [
         name: "metal_on_metal_sound",
         file: "blobs/sounds/metal_on_metal.wav"
     },
-],
-
-music: [
+    //////////////////////
+    // Long Audios
+    //////////////////////
     {
         name: "main_theme",
         file: "blobs/music/main_theme.wav"
@@ -1614,4 +1613,106 @@ music: [
         file: "blobs/music/microwave.wav"
     },
 ],
+
+//sounds: [
+//    {
+//        name: "revolver_shot_sound",
+//        file: "blobs/sounds/revolver_shot.wav"
+//    },
+//    {
+//        name: "button_1_sound",
+//        file: "blobs/sounds/button_1.wav"
+//    },
+//    {
+//        name: "card_hover_sound",
+//        file: "blobs/sounds/card_hover.wav"
+//    },
+//    {
+//        name: "card_laydown_sound",
+//        file: "blobs/sounds/card_laydown.wav"
+//    },
+//    {
+//        name: "card_pickup_sound",
+//        file: "blobs/sounds/card_pickup.wav"
+//    },
+//    {
+//        name: "not_allowed_sound",
+//        file: "blobs/sounds/not_allowed.wav"
+//    },
+//    {
+//        name: "button_2_sound",
+//        file: "blobs/sounds/button_2.wav"
+//    },
+//    {
+//        name: "holster_sound",
+//        file: "blobs/sounds/holster.wav"
+//    },
+//    {
+//        name: "holster_remove_sound",
+//        file: "blobs/sounds/holster_remove.wav"
+//    },
+//    {
+//        name: "parry_sound",
+//        file: "blobs/sounds/parry.wav"
+//    },
+//    {
+//        name: "heal_sound",
+//        file: "blobs/sounds/heal.wav"
+//    },
+//    {
+//        name: "money_sound",
+//        file: "blobs/sounds/money.wav"
+//    },
+//    {
+//        name: "revolver_drum_sound",
+//        file: "blobs/sounds/revolver_drum.wav"
+//    },
+//    {
+//        name: "walk_sound",
+//        file: "blobs/sounds/walk.wav"
+//    },
+//    {
+//        name: "snake_sound",
+//        file: "blobs/sounds/snake.wav"
+//    },
+//    {
+//        name: "owl_sound",
+//        file: "blobs/sounds/owl.wav"
+//    },
+//    {
+//        name: "swoosh_sound",
+//        file: "blobs/sounds/swoosh.wav"
+//    },
+//    {
+//        name: "card_destroy_sound",
+//        file: "blobs/sounds/card_destroy.wav"
+//    },
+//    {
+//        name: "metal_on_metal_sound",
+//        file: "blobs/sounds/metal_on_metal.wav"
+//    },
+//],
+
+//music: [
+//    {
+//        name: "main_theme",
+//        file: "blobs/music/main_theme.wav"
+//    },
+//    {
+//        name: "map_theme",
+//        file: "blobs/music/map_theme.wav"
+//    },
+//    {
+//        name: "encounter_theme_1",
+//        file: "blobs/music/encounter_theme1.wav"
+//    },
+//    {
+//        name: "encounter_theme_2",
+//        file: "blobs/music/encounter_theme2.wav"
+//    },
+//    {
+//        name: "microwave_theme", // Now part of the official .forty-five soundtrack
+//        file: "blobs/music/microwave.wav"
+//    },
+//],
 cardDir: "blobs/cards",

@@ -94,8 +94,9 @@ class ResourceFactoryImpl : ResourceFactory {
         addResourceType("colorTextures", ColorTextureResource.schema, ColorTextureResource::fromOnj)
         addResourceType("ninepatches", NinepatchResource.schema, NinepatchResource::fromOnj)
         addResourceType("frameAnimations", DeferredFrameAnimationResource.schema, DeferredFrameAnimationResource::fromOnj)
-        addResourceType("sounds", SoundResource.schema, SoundResource::fromOnj)
-        addResourceType("music", MusicResource.schema, MusicResource::fromOnj)
+        addResourceType("soundFiles", SoundFileResource.schema, SoundFileResource::fromOnj)
+//        addResourceType("sounds", SoundResource.schema, SoundResource::fromOnj)
+//        addResourceType("music", MusicResource.schema, MusicResource::fromOnj)
     }
 
 }
@@ -901,93 +902,41 @@ class DeferredFrameAnimationResource(
 
 }
 
-class SoundResource(
+class SoundFileResource(
     namespace: String?,
     handle: ResourceHandle,
-    private val file: String,
+    private val path: String
 ) : Resource(namespace, handle) {
 
-    private var sound: Sound? = null
+    init {
+        stayLoaded = true
+    }
 
     override suspend fun prepareLoadingAllThreads() {
-        sound = Gdx.audio.newSound(resolve(file).handle())
     }
 
     override fun finishLoadingMainThread() {
-        variants = listOf(sound!!)
-        disposables = listOf(sound!!)
-    }
-
-    override fun dispose() {
-        super.dispose()
-        sound = null
+        variants = listOf(resolve(path))
     }
 
     companion object {
 
         val schema: OnjSchema by lazy {
             OnjSchemaParser.parse("""
-               name: string,
-               file: string,
-               stayLoaded?: boolean
+                name: string,
+                file: string,
             """)
         }
 
         fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
-            val resource = SoundResource(
+            val resource = SoundFileResource(
                 namespace,
                 obj.get<String>("name"),
-                obj.get<String>("file")
+                obj.get<String>("file"),
             )
-            resource.stayLoaded = obj.getOr("stayLoaded", false)
             return resource.wrapList()
         }
 
     }
-}
 
-class MusicResource(
-    namespace: String?,
-    handle: ResourceHandle,
-    private val file: String,
-) : Resource(namespace, handle) {
-
-    private var music: Music? = null
-
-
-    override suspend fun prepareLoadingAllThreads() {
-        music = Gdx.audio.newMusic(resolve(file).handle())
-    }
-
-    override fun finishLoadingMainThread() {
-        variants = listOf(music!!)
-        disposables = listOf(music!!)
-    }
-
-    override fun dispose() {
-        super.dispose()
-        music = null
-    }
-
-    companion object {
-
-        val schema: OnjSchema by lazy {
-            OnjSchemaParser.parse("""
-               name: string,
-               file: string,
-               stayLoaded?: boolean
-            """)
-        }
-
-        fun fromOnj(namespace: String?, obj: OnjObject): List<Resource> {
-            val resource = MusicResource(
-                namespace,
-                obj.get<String>("name"),
-                obj.get<String>("file")
-            )
-            resource.stayLoaded = obj.getOr("stayLoaded", false)
-            return resource.wrapList()
-        }
-
-    }
 }

@@ -20,13 +20,13 @@ import kotlinx.coroutines.channels.trySendBlocking
  *
  * Keep in mind that operations involving OpenGL have to be done on the main thread, because
  * only that thread holds the OpenGL Context. Attempting to e.g. upload a Texture to the GPU
- * from another thread will result in undefined behaviour.
+ * from another thread will result in undefined behavior.
  *
  * The main thread can communicate with the ServiceThread using the [sendMessage] function.
  */
 class ServiceThread : Thread("ServiceThread") {
 
-    private val channel: Channel<ServiceThreadMessage> = Channel(Channel.Factory.UNLIMITED)
+    private val channel: Channel<ServiceThreadMessage> = Channel(Channel.UNLIMITED)
 
     @OptIn(DelicateCoroutinesApi::class)
     private val cardDrawingDispatcher = newSingleThreadContext("card-drawer")

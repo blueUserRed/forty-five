@@ -4,6 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglFiles;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.microwavestudios.fortyfive.audio.AlAudioInterface;
+import com.microwavestudios.fortyfive.audio.AlStreamableAudio;
+import com.microwavestudios.fortyfive.rendering.RenderTask;
+import com.microwavestudios.fortyfive.screen.RenderableScreen;
+import kotlin.Unit;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,10 +26,10 @@ import java.time.format.DateTimeFormatter;
 public class DesktopLauncher {
 
     public static void main(String[] args) {
-
         ArgParser argParser = new ArgParser(args);
         FortyFive.AppArguments arguments = argParser.parse();
         FortyFive.INSTANCE.setAppArguments(arguments);
+        FortyFive.INSTANCE.setAudioInterface(new AlAudioInterface());
 
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 

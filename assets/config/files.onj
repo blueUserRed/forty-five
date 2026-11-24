@@ -3,7 +3,7 @@
 configFiles: {
     assets: {
         file: "config/assets.onj",
-        validatedBy: "onjschemas/assets.onjschema",
+        validatedBy: null,
     },
     cards: {
         file: "config/cards.onj",

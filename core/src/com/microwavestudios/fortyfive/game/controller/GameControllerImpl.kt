@@ -62,20 +62,18 @@ class GameControllerImpl(
     override var turnCounter: Int = 0
         private set
 
-    private val _playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
     override val playerStatusEffects: List<StatusEffect>
-        get() = _playerStatusEffects
+        field: MutableList<StatusEffect> = mutableListOf()
 
     override val isEverlastingDisabled: Boolean
         get() = _encounterBehaviours.any { it.second.disableEverlasting() } ||
-                _playerStatusEffects.any { it.disableEverlasting() }
+                playerStatusEffects.any { it.disableEverlasting() }
 
     override val cardsInHand: List<Card>
         get() = cardHand.allCards()
 
-    private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
     override val encounterModifiers: List<EncounterModifier>
-        get() = _encounterModifiers
+        field: MutableList<EncounterModifier> = mutableListOf()
 
     private val _encounterBehaviours: MutableList<Pair<(GameController) -> Boolean, EncounterBehaviour>> = mutableListOf()
     override val encounterBehaviours: List<EncounterBehaviour>
@@ -993,7 +991,7 @@ class GameControllerImpl(
         val newDamage = if (isPiercing) {
             damage
         } else {
-            _playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
+            playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
         }
         if (newDamage != damage) {
             val event = Events.PlayShieldAnimation(controller)
@@ -1018,7 +1016,7 @@ class GameControllerImpl(
         )
         includeLater(
             {
-                _playerStatusEffects
+                playerStatusEffects
                     .mapNotNull { it.executeAfterDamage(newDamage, StatusEffectTarget.PlayerTarget) }
                     .collectTimeline()
             },
@@ -1071,7 +1069,7 @@ class GameControllerImpl(
             if (dontApplyEffectPromise.isResolved) return@later
             FortyFive.logger.debug(logTag, "status effect $effect applied to player")
             var stacked = false
-            _playerStatusEffects
+            playerStatusEffects
                 .find { it.canStackWith(effect) }
                 ?.let {
                     FortyFive.logger.debug(logTag, "stacked with $it")
@@ -1080,7 +1078,7 @@ class GameControllerImpl(
                 }
             if (!stacked) {
                 effect.start(controller)
-                _playerStatusEffects.add(effect)
+                playerStatusEffects.add(effect)
                 gameEvents.fire(Events.AddedPlayerStatusEffect(effect)) // separate event for UI purposes
             }
             val info = createTriggerInfo(null, sourceCard = source)
@@ -1091,7 +1089,7 @@ class GameControllerImpl(
     } }
 
     private fun updateStatusEffects() {
-        _playerStatusEffects.iterateRemoving { effect, remover ->
+        playerStatusEffects.iterateRemoving { effect, remover ->
             if (effect.isStillValid()) return@iterateRemoving
             remover()
             gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
@@ -1123,7 +1121,7 @@ class GameControllerImpl(
 
     override fun removeAllPlayerStatusEffectsTimeline(): Timeline = Timeline.timeline {
         action {
-            _playerStatusEffects.iterateRemoving { effect, remover ->
+            playerStatusEffects.iterateRemoving { effect, remover ->
                 remover()
                 gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
             }
@@ -1132,7 +1130,7 @@ class GameControllerImpl(
 
     override fun removePlayerStatusEffect(effect: StatusEffect): Timeline = Timeline.timeline {
         action {
-            val removed = _playerStatusEffects.remove(effect)
+            val removed = playerStatusEffects.remove(effect)
             if (!removed) return@action
             gameEvents.fire(Events.RemovedPlayerStatusEffect(effect))
         }
@@ -1352,7 +1350,7 @@ class GameControllerImpl(
             include(event.createTimeline())
         }
         later {
-            _playerStatusEffects
+            playerStatusEffects
                 .mapNotNull { it.executeAfterShot() }
                 .collectTimeline()
                 .let { include(it) }
@@ -1412,7 +1410,7 @@ class GameControllerImpl(
     }
 
     override fun addEncounterModifier(modifier: EncounterModifier) {
-        _encounterModifiers.add(modifier)
+        encounterModifiers.add(modifier)
         modifier.behaviours().forEach { addEncounterBehaviour(it) }
         gameEvents.fire(Events.EncounterModifierAdded(modifier))
     }

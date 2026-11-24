@@ -9,6 +9,8 @@ import kotlin.contracts.contract
 
 fun unreachable(): Nothing = throw RuntimeException("unreachable reached")
 
+fun illegalState(message: String): Nothing = throw RuntimeException(message)
+
 @Suppress("NOTHING_TO_INLINE")
 inline fun requireNull(value: Any?) {
     contract {

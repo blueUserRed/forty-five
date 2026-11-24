@@ -119,69 +119,69 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
     }
 
     override fun changeMusicTo(theme: Theme, transitionDuration: Int) = Timeline.later {
-        if (theme == currentMusicTheme) return@later
-
-        val nextMusicLifetime = EndableLifetime()
-        val nextMusic: Promise<Music> = FortyFive.resourceManager.request(
-            this@SoundPlayer,
-            nextMusicLifetime,
-            theme.resourceHandles.random()
-        )
-        currentMusicTheme = theme
-        this@SoundPlayer.nextMusicLifetime = nextMusicLifetime
-
-        delayUntilPromiseResolves(nextMusic)
-
-        action {
-            val music = nextMusic.getOrError()
-            music.volume = 0f
-            music.isLooping = true
-            music.play()
-            this@SoundPlayer.nextMusic = music
-            this@SoundPlayer.transitionStartTime = TimeUtils.millis()
-            this@SoundPlayer.transitionDuration = transitionDuration
-        }
-
-        delay(transitionDuration)
-
-        action {
-            currentMusic?.stop()
-            currentMusicLifetime?.die()
-            currentMusic = nextMusic.getOrError()
-            currentMusicLifetime = nextMusicLifetime
-            this@SoundPlayer.nextMusicLifetime = null
-            this@SoundPlayer.nextMusic = null
-        }
+//        if (theme == currentMusicTheme) return@later
+//
+//        val nextMusicLifetime = EndableLifetime()
+//        val nextMusic: Promise<Music> = FortyFive.resourceManager.request(
+//            this@SoundPlayer,
+//            nextMusicLifetime,
+//            theme.resourceHandles.random()
+//        )
+//        currentMusicTheme = theme
+//        this@SoundPlayer.nextMusicLifetime = nextMusicLifetime
+//
+//        delayUntilPromiseResolves(nextMusic)
+//
+//        action {
+//            val music = nextMusic.getOrError()
+//            music.volume = 0f
+//            music.isLooping = true
+//            music.play()
+//            this@SoundPlayer.nextMusic = music
+//            this@SoundPlayer.transitionStartTime = TimeUtils.millis()
+//            this@SoundPlayer.transitionDuration = transitionDuration
+//        }
+//
+//        delay(transitionDuration)
+//
+//        action {
+//            currentMusic?.stop()
+//            currentMusicLifetime?.die()
+//            currentMusic = nextMusic.getOrError()
+//            currentMusicLifetime = nextMusicLifetime
+//            this@SoundPlayer.nextMusicLifetime = null
+//            this@SoundPlayer.nextMusic = null
+//        }
 
     }.let { musicTimeline.appendAction(it.asAction()) }
 
     override fun situation(name: String, screen: IScreen) {
-        val situation = situations.find { it.name == name } ?: run {
-            FortyFive.logger.warn(logTag, "No sound config for situation $name")
-            return
-        }
-        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, situation.sound ?: return)
-        soundPromise.then { sound ->
-            sound.play(situation.volume * soundEffectVolume * masterVolume)
-        }
+//        val situation = situations.find { it.name == name } ?: run {
+//            FortyFive.logger.warn(logTag, "No sound config for situation $name")
+//            return
+//        }
+//        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, situation.sound ?: return)
+//        soundPromise.then { sound ->
+//            sound.play(situation.volume * soundEffectVolume * masterVolume)
+//        }
     }
 
     override fun playSoundFull(soundHandle: ResourceHandle, screen: IScreen) {
-        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, soundHandle)
-        soundPromise.then { sound ->
-            sound.play(soundEffectVolume * masterVolume)
-        }
+//        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, soundHandle)
+//        soundPromise.then { sound ->
+//            sound.play(soundEffectVolume * masterVolume)
+//        }
     }
 
     override fun update(screen: IScreen, playAmbientSounds: Boolean) {
-        if (playAmbientSounds) updateAmbientSounds(screen)
-        musicTimeline.updateTimeline()
-
-        if (nextMusic == null) return
-        val timeInTransition = TimeUtils.millis() - transitionStartTime
-        val transitionProgress = (timeInTransition.toFloat() / transitionDuration.toFloat()).coerceAtMost(1f)
-        currentMusic?.volume = musicVolume * masterVolume * (1 - transitionProgress)
-        nextMusic?.volume = musicVolume * masterVolume * transitionProgress
+//        if (playAmbientSounds) updateAmbientSounds(screen)
+//        musicTimeline.updateTimeline()
+//
+//        if (nextMusic == null) return
+//        val timeInTransition = TimeUtils.millis() - transitionStartTime
+//        val transitionProgress = (timeInTransition.toFloat() / transitionDuration.toFloat()).coerceAtMost(1f)
+//        currentMusic?.volume = musicVolume * masterVolume * (1 - transitionProgress)
+//        nextMusic?.volume = musicVolume * masterVolume * transitionProgress
     }
 
     private fun updateAmbientSounds(screen: IScreen) {
@@ -202,17 +202,17 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
     }
 
     override fun playMusicOnce(musicHandle: ResourceHandle, screen: IScreen) {
-        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen.lifetime, musicHandle)
-        musicPromise.then { music ->
-            music.play()
-            music.volume = musicVolume * masterVolume
-        }
+//        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen.lifetime, musicHandle)
+//        musicPromise.then { music ->
+//            music.play()
+//            music.volume = musicVolume * masterVolume
+//        }
     }
 
     override fun end() {
-        musicTimeline.stopTimeline()
-        currentMusicLifetime?.die()
-        nextMusicLifetime?.die()
+//        musicTimeline.stopTimeline()
+//        currentMusicLifetime?.die()
+//        nextMusicLifetime?.die()
     }
 
     private data class AmbientSound(

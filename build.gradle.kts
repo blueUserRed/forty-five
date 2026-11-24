@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("eclipse")
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.2.20"
+    id("org.jetbrains.kotlin.jvm") version "2.4.20"
 }
 
 buildscript {
-    val kotlinVersion by extra("2.2.20")
+    val kotlinVersion by extra("2.4.20")
     val gdxVersion by extra("1.14.2")
     val gdxControllersVersion by extra("2.0.1")
 
@@ -43,10 +43,14 @@ allprojects {
 }
 
 project(":desktop") {
-
-    apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "java")
-
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "kotlin")
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
     val gdxVersion = rootProject.extra["gdxVersion"]
     val gdxControllersVersion = rootProject.extra["gdxControllersVersion"]
     dependencies {
@@ -78,11 +82,7 @@ project(":tests") {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-        sourceSets.all {
-            languageSettings.enableLanguageFeature("ExplicitBackingFields")
-        }
     }
-
     val gdxVersion = rootProject.extra["gdxVersion"]
     val gdxControllersVersion = rootProject.extra["gdxControllersVersion"]
     dependencies {
@@ -105,17 +105,15 @@ project(":core") {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-        sourceSets.all {
-            languageSettings.enableLanguageFeature("ExplicitBackingFields")
-        }
     }
     val gdxControllersVersion = rootProject.extra["gdxControllersVersion"]
+    val kotlinVersion = rootProject.extra["kotlinVersion"]
     dependencies {
         val gdxVersion = rootProject.extra["gdxVersion"]
         implementation(project(":onj"))
         api("com.badlogicgames.gdx:gdx:$gdxVersion")
         implementation("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
         implementation("com.code-disaster.steamworks4j:steamworks4j:1.9.0")
         implementation("com.badlogicgames.gdx:gdx-tools:$gdxVersion")
