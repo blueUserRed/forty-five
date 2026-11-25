@@ -9,7 +9,8 @@ import com.microwavestudios.fortyfive.game.card.*
 import com.microwavestudios.fortyfive.game.enemy.Enemy
 import com.microwavestudios.fortyfive.game.enemy.EnemyAction
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
-import com.microwavestudios.fortyfive.screen.SoundPlayer
+import com.microwavestudios.fortyfive.audio.SoundPlayer
+import com.microwavestudios.fortyfive.audio.Themes
 import com.microwavestudios.fortyfive.game.widgets.IAfterlife
 import com.microwavestudios.fortyfive.game.widgets.ICardHand
 import com.microwavestudios.fortyfive.game.widgets.IRevolver
@@ -152,7 +153,7 @@ class GameControllerImpl(
 
         profile = FortyFive.profileManager.currentProfile!!
 
-        FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.BATTLE)
+        FortyFive.soundPlayer.changeTheme(Themes.BATTLE)
 
         encounter = encounterContext.encounter
         encounter.encounterModifier.forEach {
@@ -1602,7 +1603,7 @@ class GameControllerImpl(
         )
         action {
             gameEvents.fire(event)
-            FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN, 5_000)
+            FortyFive.soundPlayer.changeTheme(Themes.MAP, 5_000)
         }
         delayUntil { event.popupPromise.isResolved }
         if (money > 0) {

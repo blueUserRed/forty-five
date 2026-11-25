@@ -56,7 +56,7 @@ abstract class ScreenCreator : ResourceBorrower {
     abstract val viewport: Viewport
 
     /**
-     * if true, the [SoundPlayer][com.microwavestudios.fortyfive.screen.SoundPlayer] plays ambient sounds
+     * if true, the [SoundPlayer][com.microwavestudios.fortyfive.audio.SoundPlayer] plays ambient sounds
      * in line with the biome the player is in
      */
     abstract val playAmbientSounds: Boolean

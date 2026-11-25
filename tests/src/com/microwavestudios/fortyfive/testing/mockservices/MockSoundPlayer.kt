@@ -2,8 +2,8 @@ package com.microwavestudios.fortyfive.testing.mockservices
 
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.IScreen
-import com.microwavestudios.fortyfive.screen.ISoundPlayer
-import com.microwavestudios.fortyfive.screen.SoundPlayer
+import com.microwavestudios.fortyfive.audio.ISoundPlayer
+import com.microwavestudios.fortyfive.audio.SoundPlayer
 
 class MockSoundPlayer : ISoundPlayer {
 
@@ -14,7 +14,7 @@ class MockSoundPlayer : ISoundPlayer {
     override fun init() {
     }
 
-    override fun changeMusicTo(
+    override fun changeTheme(
         theme: SoundPlayer.Theme,
         transitionDuration: Int
     ) {
@@ -23,7 +23,7 @@ class MockSoundPlayer : ISoundPlayer {
     override fun situation(name: String, screen: IScreen) {
     }
 
-    override fun playSoundFull(
+    override fun playSoundOnce(
         soundHandle: ResourceHandle,
         screen: IScreen
     ) {
@@ -32,8 +32,8 @@ class MockSoundPlayer : ISoundPlayer {
     override fun update(screen: IScreen, playAmbientSounds: Boolean) {
     }
 
-    override fun playMusicOnce(
-        musicHandle: ResourceHandle,
+    override fun streamAudioOnce(
+        handle: ResourceHandle,
         screen: IScreen
     ) {
     }

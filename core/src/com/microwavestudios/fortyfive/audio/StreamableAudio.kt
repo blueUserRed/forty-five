@@ -1,10 +1,12 @@
 package com.microwavestudios.fortyfive.audio
 
 import com.badlogic.gdx.utils.Disposable
+import com.microwavestudios.fortyfive.utils.Lifetime
 
 interface StreamableAudio : Disposable {
 
     var looping: Boolean
+    val playingLifetime: Lifetime
 
     fun play()
     fun pause()
@@ -12,5 +14,6 @@ interface StreamableAudio : Disposable {
     fun setVolume(volume: Float)
     fun update()
     fun isPlaying(): Boolean
+    fun setPan(pan: Float)
 
 }

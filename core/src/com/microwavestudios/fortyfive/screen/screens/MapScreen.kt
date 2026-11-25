@@ -20,10 +20,9 @@ import com.microwavestudios.fortyfive.profile.MapSaver
 import com.microwavestudios.fortyfive.profile.RunSave
 import com.microwavestudios.fortyfive.screen.BakedDropShadow
 import com.microwavestudios.fortyfive.screen.ScreenManager
-import com.microwavestudios.fortyfive.screen.actors.CustomLabel
-import com.microwavestudios.fortyfive.screen.commonComponents.TutorialInfoActor
 import com.microwavestudios.fortyfive.screen.ScreenController
-import com.microwavestudios.fortyfive.screen.SoundPlayer
+import com.microwavestudios.fortyfive.audio.SoundPlayer
+import com.microwavestudios.fortyfive.audio.Themes
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
 import com.microwavestudios.fortyfive.screen.actors.NewLabel
@@ -33,7 +32,6 @@ import com.microwavestudios.fortyfive.screen.commonComponents.WarningParent
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
-import com.microwavestudios.fortyfive.utils.requireNot
 import kotlin.reflect.KClass
 
 class MapScreen : ScreenCreator() {
@@ -86,7 +84,7 @@ class MapScreen : ScreenCreator() {
     private val mapScreenController = object : ScreenController() {
 
         override fun onActive() {
-            FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.MAIN)
+            FortyFive.soundPlayer.changeTheme(Themes.MAP)
             val teleportPlayerTo = context.teleportPlayerTo ?: return
             mapWidget.teleportPlayer(teleportPlayerTo)
         }

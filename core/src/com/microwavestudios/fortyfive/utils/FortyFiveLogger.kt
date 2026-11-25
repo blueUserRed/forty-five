@@ -29,7 +29,7 @@ class FortyFiveLogger {
     /**
      * initializes the logger
      */
-    fun init() {
+    @Synchronized fun init() {
         val config = ConfigFileManager.getConfigFile("logConfig")
 
         config
@@ -55,14 +55,14 @@ class FortyFiveLogger {
         """.trimIndent())
     }
 
-    fun addOutput(output: PrintStream, doAnsiColor: Boolean): Int {
+    @Synchronized fun addOutput(output: PrintStream, doAnsiColor: Boolean): Int {
         val outputCountBefore = outputCount
         outputCount++
         outputs.add(Triple(output, outputCountBefore, doAnsiColor))
         return outputCountBefore
     }
 
-    fun removeOutput(handle: Int) {
+    @Synchronized fun removeOutput(handle: Int) {
         outputs.removeIf { it.second == handle }
     }
 
@@ -88,7 +88,7 @@ class FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    fun debug(tag: String, message: String) {
+    @Synchronized fun debug(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.DEBUG)) return
         writelnFormatted(tag, message, LogLevel.DEBUG)
     }
@@ -98,7 +98,7 @@ class FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    fun warn(tag: String, message: String) {
+    @Synchronized fun warn(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.MEDIUM)) return
         writelnFormatted(tag, message, LogLevel.MEDIUM)
     }
@@ -108,14 +108,14 @@ class FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    fun severe(tag: String, message: String) {
+    @Synchronized fun severe(tag: String, message: String) {
         writelnFormatted(tag, message, LogLevel.SEVERE)
     }
 
     /**
      * logs the exception and exits the application
      */
-    fun fatal(exception: java.lang.Exception) {
+    @Synchronized fun fatal(exception: java.lang.Exception) {
         severe("fatal",  "Encountered an exception that could not be recovered from")
         stackTrace(exception)
         FortyFive.cleanExit = false
@@ -125,7 +125,7 @@ class FortyFiveLogger {
     /**
      * logs the message and exits the application
      */
-    fun fatal(message: String) {
+    @Synchronized fun fatal(message: String) {
         severe("fatal",  "Encountered an error that could not be recovered from")
         severe("fatal", message)
         FortyFive.cleanExit = false
@@ -138,7 +138,7 @@ class FortyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
-    fun log(level: LogLevel, tag: String, message: String) {
+    @Synchronized fun log(level: LogLevel, tag: String, message: String) {
         if (!logLevel.shouldLog(level)) return
         writelnFormatted(tag, message, level)
     }
@@ -147,7 +147,7 @@ class FortyFiveLogger {
      * logs larger stings that contain multiple line breaks
      * @param level the level of the message
      */
-    fun dump(level: LogLevel, message: String, title: String? = null) {
+    @Synchronized fun dump(level: LogLevel, message: String, title: String? = null) {
         if (!logLevel.shouldLog(level)) return
         title?.let { writeln("-> $it:") }
         val lines = message.lines()
@@ -160,7 +160,7 @@ class FortyFiveLogger {
     /**
      * logs the stackTrace of an exception. will always be logged, regardless of the log level
      */
-    fun stackTrace(e: Exception) {
+    @Synchronized fun stackTrace(e: Exception) {
         outputs.forEach { e.printStackTrace(it.first) }
     }
 
@@ -168,15 +168,15 @@ class FortyFiveLogger {
      * logs a message formatted as a title. This should be used when a big change in the state of the game happens
      * and makes navigating the log file easier
      */
-    fun title(message: String) {
+    @Synchronized fun title(message: String) {
         writeln("-------------$message-------------")
     }
 
-    fun rawPrint(s: String) {
+    @Synchronized fun rawPrint(s: String) {
         outputs.forEach { it.first.print(s) }
     }
 
-    fun rawPrintln(s: String) {
+    @Synchronized fun rawPrintln(s: String) {
         writeln(s)
     }
 

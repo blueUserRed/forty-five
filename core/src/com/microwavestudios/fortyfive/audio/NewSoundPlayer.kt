@@ -1,16 +1,14 @@
 package com.microwavestudios.fortyfive.audio
 
-import com.badlogic.gdx.audio.Sound
+import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
 import com.microwavestudios.fortyfive.screen.IScreen
-import com.microwavestudios.fortyfive.screen.ISoundPlayer
-import com.microwavestudios.fortyfive.screen.SoundPlayer
 import com.microwavestudios.fortyfive.utils.Lifetime
-import com.microwavestudios.fortyfive.utils.Promise
 import com.microwavestudios.fortyfive.utils.mapFirst
+import com.microwavestudios.fortyfive.utils.random
 import com.microwavestudios.fortyfive.utils.toIntRange
 import com.microwavestudios.fortyfive.utils.zip
 import onj.value.OnjArray
@@ -18,7 +16,7 @@ import onj.value.OnjObject
 import onj.value.OnjValue
 import kotlin.collections.map
 
-class NewSoundPlayer : ISoundPlayer, ResourceBorrower {
+class NewSoundPlayer(private val audioThread: AudioThread) : ISoundPlayer, ResourceBorrower {
 
     private lateinit var situations: List<Situation>
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
@@ -27,17 +25,20 @@ class NewSoundPlayer : ISoundPlayer, ResourceBorrower {
     override var masterVolume: Float = 1f
         set(value) {
             field = value
-//            currentMusic?.volume = masterVolume * musicVolume
+            volumeChanged()
         }
 
     override var musicVolume: Float = 1f
         set(value) {
             field = value
-//            currentMusic?.volume = masterVolume * musicVolume
+            volumeChanged()
         }
 
     override var soundEffectVolume: Float = 1f
-
+        set(value) {
+            field = value
+            volumeChanged()
+        }
 
     override fun init() {
         val onj = ConfigFileManager.getConfigFile("soundConfig")
@@ -80,37 +81,67 @@ class NewSoundPlayer : ISoundPlayer, ResourceBorrower {
             .associate { it.second to it.first }
     }
 
-    override fun changeMusicTo(
-        theme: SoundPlayer.Theme,
-        transitionDuration: Int
-    ) {
-        TODO("Not yet implemented")
+    private fun volumeChanged() {
+        val message = AudioThreadMessage.VolumeChanged(masterVolume, musicVolume, soundEffectVolume)
+        send(message)
+    }
+
+    override fun changeTheme(theme: Theme, transitionDuration: Int) {
+        val message = AudioThreadMessage.ChangeTheme(theme)
+        send(message)
     }
 
     override fun situation(name: String, screen: IScreen) {
-        TODO("Not yet implemented")
+        val situation = situations.find { it.name == name } ?: run {
+            FortyFive.logger.warn(logTag, "No sound config for situation $name")
+            return
+        }
+        situation.sound?.let { sound ->
+            val message = AudioThreadMessage.PlaySoundOnce(sound, screen.lifetime, situation.volume)
+            send(message)
+        }
     }
 
-    override fun playSoundFull(
+    override fun playSoundOnce(
         soundHandle: ResourceHandle,
-        screen: IScreen
+        screen: IScreen,
+        keepCached: Lifetime
     ) {
-        TODO("Not yet implemented")
+        val message = AudioThreadMessage.PlaySoundOnce(soundHandle, keepCached)
+        send(message)
     }
 
     override fun update(screen: IScreen, playAmbientSounds: Boolean) {
-        TODO("Not yet implemented")
+        if (!playAmbientSounds) return
+        val now = TimeUtils.millis()
+        val biome = FortyFive.profileManager.currentProfile?.currentMapSaver?.currentMap?.biome
+            ?: return
+        val sounds = biomeAmbience[biome] ?: run {
+            FortyFive.logger.warn(SoundPlayer.logTag, "No ambience defined for biome $biome")
+            return
+        }
+        ambientSounds.filter { it.key.name in sounds }.forEach { (ambient, nextPlayTime) ->
+            if (nextPlayTime > now) return@forEach
+            val message = AudioThreadMessage.PlaySoundOnce(
+                ambient.sound,
+                screen.lifetime,
+                ambient.volume,
+                (-1f..1f).random()
+            )
+            send(message)
+            ambientSounds[ambient] = now + ambient.delay.random()
+        }
     }
 
-    override fun playMusicOnce(
-        musicHandle: ResourceHandle,
+    override fun streamAudioOnce(
+        handle: ResourceHandle,
         screen: IScreen
     ) {
-        TODO("Not yet implemented")
+        val message = AudioThreadMessage.StreamAudioOnce(handle)
+        send(message)
     }
 
     override fun end() {
-        TODO("Not yet implemented")
     }
 
     private data class AmbientSound(
@@ -119,15 +150,10 @@ class NewSoundPlayer : ISoundPlayer, ResourceBorrower {
         val volume: Float,
         val delay: IntRange,
         val soundPlayer: NewSoundPlayer
-    ) {
-        private var soundPromise: Promise<Sound>? = null
+    )
 
-        fun getSoundPromise(lifetime: Lifetime): Promise<Sound> {
-            if (soundPromise == null) {
-                soundPromise = FortyFive.resourceManager.request(soundPlayer, lifetime, sound)
-            }
-            return soundPromise!!
-        }
+    private fun send(message: AudioThreadMessage) {
+        audioThread.sendMessage(message)
     }
 
     private data class Situation(
@@ -135,4 +161,8 @@ class NewSoundPlayer : ISoundPlayer, ResourceBorrower {
         val sound: ResourceHandle?,
         val volume: Float
     )
+    
+    companion object {
+        private const val logTag = "SoundPlayer"
+    }
 }

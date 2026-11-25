@@ -8,7 +8,8 @@ import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.animation.scaleAbstractProperty
 import com.microwavestudios.fortyfive.screen.ScreenManager
 import com.microwavestudios.fortyfive.screen.ScreenController
-import com.microwavestudios.fortyfive.screen.SoundPlayer
+import com.microwavestudios.fortyfive.audio.SoundPlayer
+import com.microwavestudios.fortyfive.audio.Themes
 import com.microwavestudios.fortyfive.screen.actors.CustomAlign
 import com.microwavestudios.fortyfive.screen.actors.CustomGroup
 import com.microwavestudios.fortyfive.screen.actors.FlexDirection
@@ -16,7 +17,6 @@ import com.microwavestudios.fortyfive.screen.actors.PropertyAction
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.utils.Colors
-import com.microwavestudios.fortyfive.utils.FortyFiveLogger
 import com.microwavestudios.fortyfive.utils.Timeline
 import com.microwavestudios.fortyfive.utils.alpha
 import kotlin.reflect.KClass
@@ -49,7 +49,7 @@ class IntroScreen : ScreenCreator() {
         val logoTimeline = logo()
         val studiosTimeline = studios()
 
-        FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
+        FortyFive.soundPlayer.changeTheme(Themes.TITLE)
         screen.afterMs(0) {
             FortyFive.currentRenderPipeline!!.changeVignetteForScreen(1f, 2f)
         }

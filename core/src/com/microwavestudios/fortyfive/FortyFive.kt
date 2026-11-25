@@ -27,10 +27,11 @@ import com.microwavestudios.fortyfive.profile.IProfileManager
 import com.microwavestudios.fortyfive.profile.ProfileManager
 import com.microwavestudios.fortyfive.rendering.RenderPipeline
 import com.microwavestudios.fortyfive.resources.ResourceManager
-import com.microwavestudios.fortyfive.screen.ISoundPlayer
+import com.microwavestudios.fortyfive.audio.ISoundPlayer
+import com.microwavestudios.fortyfive.audio.NewSoundPlayer
 import com.microwavestudios.fortyfive.screen.InputProcessorProvider
 import com.microwavestudios.fortyfive.screen.ScreenManager
-import com.microwavestudios.fortyfive.screen.SoundPlayer
+import com.microwavestudios.fortyfive.audio.SoundPlayer
 import com.microwavestudios.fortyfive.screen.RenderableScreen
 import com.microwavestudios.fortyfive.screen.actors.DebugActorImpl
 import com.microwavestudios.fortyfive.screen.screens.*
@@ -54,10 +55,6 @@ object FortyFive : Game() {
 
     /** see [ServiceThread] */
     var serviceThread = ServiceThread()
-        private set
-
-    /** see [SoundPlayer] */
-    var soundPlayer: ISoundPlayer = SoundPlayer()
         private set
 
     /** see [FortyFiveLogger] */
@@ -91,6 +88,13 @@ object FortyFive : Game() {
         get() = _lifetime
 
     lateinit var steamHandler: SteamHandler
+        private set
+
+    lateinit var audioThread: AudioThread
+        private set
+
+    /** see [SoundPlayer] */
+    lateinit var soundPlayer: ISoundPlayer
         private set
 
     var currentRenderPipeline: RenderPipeline? = null
@@ -128,11 +132,6 @@ object FortyFive : Game() {
 
 
     override fun create() {
-
-        val audioThread = AudioThread(audioInterface)
-        audioThread.start()
-        inMs(1000) { audioThread.sendMessage(AudioThreadMessage.StreamAudioOnce("microwave_theme")) }
-
         initControllers()
         pluginManager.startListeners()
 
@@ -257,6 +256,9 @@ object FortyFive : Game() {
         logger.init()
         profileManager.init()
         steamHandler = SteamHandler()
+        audioThread = AudioThread(audioInterface)
+        audioThread.start()
+        soundPlayer = NewSoundPlayer(audioThread)
         globalSave.readFromDisk()
         pluginManager.init()
         pluginManager.earlyInitListeners()
@@ -287,6 +289,7 @@ object FortyFive : Game() {
         soundPlayer.end()
         currentScreen?.dispose()
         currentRenderPipeline?.dispose()
+        audioThread.close()
         serviceThread.close()
         resourceManager.end()
         super.dispose()

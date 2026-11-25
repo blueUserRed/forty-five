@@ -1,6 +1,7 @@
 package com.microwavestudios.fortyfive.audio
 
 import com.microwavestudios.fortyfive.utils.illegalState
+import org.lwjgl.openal.AL
 import org.lwjgl.openal.AL10
 import org.lwjgl.openal.ALC
 import org.lwjgl.openal.ALC10
@@ -24,6 +25,12 @@ class AlAudioInterface : AudioInterface {
         require(ALC10.alcMakeContextCurrent(context)) {
             "Could not make OpenAL context current"
         }
+        val caps = ALC.createCapabilities(device)
+        ALC.setCapabilities(caps)
+        AL.setCurrentThread(AL.createCapabilities(caps))
+        AL10.alListener3f(AL10.AL_POSITION, 0f, 0f, 0f)
+        AL10.alDistanceModel(AL10.AL_NONE)
+        AL10.alDopplerFactor(0f)
     }
 
     override fun createSoundData(file: File): SoundData {

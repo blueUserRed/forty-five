@@ -8,29 +8,23 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.keyInput.GameInputs
 import com.microwavestudios.fortyfive.keyInput.KeyboardFocusable
-import com.microwavestudios.fortyfive.particle.ParticleSystem
-import com.microwavestudios.fortyfive.particle.TextureParticleRenderer
 import com.microwavestudios.fortyfive.profile.IProfile
-import com.microwavestudios.fortyfive.profile.Profile
 import com.microwavestudios.fortyfive.screen.ScreenController
 import com.microwavestudios.fortyfive.screen.ScreenManager
-import com.microwavestudios.fortyfive.screen.SoundPlayer
+import com.microwavestudios.fortyfive.audio.SoundPlayer
+import com.microwavestudios.fortyfive.audio.Theme
+import com.microwavestudios.fortyfive.audio.Themes
 import com.microwavestudios.fortyfive.screen.actors.*
 import com.microwavestudios.fortyfive.screen.commonComponents.NavbarCreator
 import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator
-import com.microwavestudios.fortyfive.screen.commonComponents.PopupCreator.getSharedPopup
 import com.microwavestudios.fortyfive.screen.commonComponents.ProfileCardCreator.getSharedProfileCard
 import com.microwavestudios.fortyfive.screen.commonComponents.SettingsCreator.getSharedSettingsMenu
 import com.microwavestudios.fortyfive.screen.screenBuilder.ScreenCreator
-import com.microwavestudios.fortyfive.screen.screenController.ParticleSystemScreenController
 import com.microwavestudios.fortyfive.screen.screenController.TimelineController
 import com.microwavestudios.fortyfive.utils.Colors
 import com.microwavestudios.fortyfive.utils.EventPipeline
 import com.microwavestudios.fortyfive.utils.Timeline
-import com.microwavestudios.fortyfive.utils.Utils
 import com.microwavestudios.fortyfive.utils.alpha
-import com.microwavestudios.fortyfive.utils.between
-import com.microwavestudios.fortyfive.utils.minus
 import kotlin.reflect.KClass
 
 class TitleScreen : ScreenCreator() {
@@ -146,7 +140,7 @@ class TitleScreen : ScreenCreator() {
         )
 
         screen.afterMs(0) {
-            FortyFive.soundPlayer.changeMusicTo(SoundPlayer.Theme.TITLE)
+            FortyFive.soundPlayer.changeTheme(Themes.TITLE)
             FortyFive.profileManager.selectProfile(FortyFive.profileManager.availableProfiles.first())
         }
 //        screen.afterMs(0) { // run when screen is shown

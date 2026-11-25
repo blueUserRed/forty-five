@@ -1,15 +1,13 @@
-package com.microwavestudios.fortyfive.screen
+package com.microwavestudios.fortyfive.audio
 
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
-import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.microwavestudios.fortyfive.FortyFive
 import com.microwavestudios.fortyfive.config.ConfigFileManager
 import com.microwavestudios.fortyfive.resources.ResourceBorrower
 import com.microwavestudios.fortyfive.resources.ResourceHandle
-import com.microwavestudios.fortyfive.screen.SoundPlayer.Companion.logTag
-import com.microwavestudios.fortyfive.screen.SoundPlayer.Theme
+import com.microwavestudios.fortyfive.screen.IScreen
 import com.microwavestudios.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
@@ -26,23 +24,23 @@ interface ISoundPlayer {
     var soundEffectVolume: Float
 
     fun init()
-    fun changeMusicTo(theme: Theme, transitionDuration: Int = 3_000)
+    fun changeTheme(theme: Theme, transitionDuration: Int = 3_000)
     fun situation(name: String, screen: IScreen)
-    fun playSoundFull(soundHandle: ResourceHandle, screen: IScreen)
+    fun playSoundOnce(soundHandle: ResourceHandle, screen: IScreen, keepCached: Lifetime = screen.lifetime)
     fun update(screen: IScreen, playAmbientSounds: Boolean)
-    fun playMusicOnce(musicHandle: ResourceHandle, screen: IScreen)
+    fun streamAudioOnce(handle: ResourceHandle, screen: IScreen)
     fun end()
 }
 
 /**
  * handles music, volume control and playing sound
  *
- * the [changeMusicTo] function can be used to change the background music
+ * the [changeTheme] function can be used to change the background music
  *
  * Sound effects are usually handled by calling the [situation] function. The name parameter is usually
  * something descriptive, e.g. 'revolver_rotation'. The SoundPlayer then looks the situation up in
  * the `assets/config/sounds.onj` file and plays the associated sound.
- * Sounds can also be played manually using [playSoundFull] or [playMusicOnce].
+ * Sounds can also be played manually using [playSoundOnce] or [streamAudioOnce].
  *
  * Also handles ambient sounds.
  */
@@ -118,7 +116,7 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
             .associate { it.second to it.first }
     }
 
-    override fun changeMusicTo(theme: Theme, transitionDuration: Int) = Timeline.later {
+    override fun changeTheme(theme: Theme, transitionDuration: Int) = Timeline.later {
 //        if (theme == currentMusicTheme) return@later
 //
 //        val nextMusicLifetime = EndableLifetime()
@@ -166,7 +164,7 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
 //        }
     }
 
-    override fun playSoundFull(soundHandle: ResourceHandle, screen: IScreen) {
+    override fun playSoundOnce(soundHandle: ResourceHandle, screen: IScreen, keepCached: Lifetime) {
 //        val soundPromise = FortyFive.resourceManager.request<Sound>(this, screen.lifetime, soundHandle)
 //        soundPromise.then { sound ->
 //            sound.play(soundEffectVolume * masterVolume)
@@ -201,7 +199,7 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
         }
     }
 
-    override fun playMusicOnce(musicHandle: ResourceHandle, screen: IScreen) {
+    override fun streamAudioOnce(handle: ResourceHandle, screen: IScreen) {
 //        val musicPromise = FortyFive.resourceManager.request<Music>(this, screen.lifetime, musicHandle)
 //        musicPromise.then { music ->
 //            music.play()
@@ -238,11 +236,11 @@ class SoundPlayer : ISoundPlayer, ResourceBorrower {
         val volume: Float
     )
 
-    enum class Theme(val resourceHandles: List<ResourceHandle>) {
-        TITLE("main_theme".wrapList()),
-        MAIN("map_theme".wrapList()),
-        BATTLE(listOf("encounter_theme_1", "encounter_theme_2"))
-    }
+//    enum class Theme(val resourceHandles: List<ResourceHandle>) {
+//        TITLE("main_theme".wrapList()),
+//        MAIN("map_theme".wrapList()),
+//        BATTLE(listOf("encounter_theme_1", "encounter_theme_2"))
+//    }
 
     companion object {
         const val logTag = "SoundPlayer"

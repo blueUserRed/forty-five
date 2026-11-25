@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.audio
 
+import com.microwavestudios.fortyfive.FortyFive
 import org.lwjgl.openal.AL10
 import java.io.File
 import java.nio.ByteBuffer
@@ -7,6 +8,9 @@ import java.nio.ByteOrder
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
+import com.microwavestudios.fortyfive.audio.AlUtils.alBool
+import com.microwavestudios.fortyfive.utils.EndableLifetime
+import com.microwavestudios.fortyfive.utils.Lifetime
 
 class AlStreamableAudio(
     private val file: File
@@ -34,7 +38,11 @@ class AlStreamableAudio(
     private var endReached: Boolean = false
     override var looping: Boolean = false
 
+    override val playingLifetime: Lifetime
+        field = EndableLifetime()
+
     init {
+        AL10.alSourcef(sourceId, AL10.AL_ROLLOFF_FACTOR, 0f)
         stream = AudioSystem.getAudioInputStream(file)
         format = stream.format
         channels = format.channels
@@ -45,10 +53,20 @@ class AlStreamableAudio(
         realBufferSize = bufferSizeFrames * format.frameSize // <- not the same because of integer division
         tmpArr = ByteArray(realBufferSize)
 
+        if (channels == 2) AL10.alSourcei(sourceId, AL10.AL_SOURCE_RELATIVE, alBool(false))
+
         fillBuffers(buffers)
         buffers.forEach { buffer ->
             AL10.alSourceQueueBuffers(sourceId, buffer)
         }
+    }
+
+    override fun setPan(pan: Float) {
+        if (channels == 2 && pan != 0f) {
+            FortyFive.logger.warn("SoundInstance", "Cant set pan on sound '$file', is stereo")
+            return
+        }
+        AL10.alSource3f(sourceId, AL10.AL_POSITION, pan, 0f, 0f)
     }
 
     override fun play() {
@@ -63,6 +81,7 @@ class AlStreamableAudio(
 
     override fun stop() {
         shouldBePlaying = false
+        playingLifetime.die()
         AL10.alSourceStop(sourceId)
     }
 
@@ -124,7 +143,6 @@ class AlStreamableAudio(
         if (filled == 0) return
         var srcBuffer = ByteBuffer.wrap(tmpArr)
         srcBuffer = srcBuffer.slice(0, filled)
-        srcBuffer.limit(filled)
         srcBuffer.order(ByteOrder.LITTLE_ENDIAN)
         val dataBuffer = AlUtils.fixByteOrder(srcBuffer, sampleSize)
         AL10.alBufferData(
@@ -146,6 +164,8 @@ class AlStreamableAudio(
     companion object {
         const val numBuffers = 4
         const val targetBufferSize = 10_000
+
+        const val approxMemUsage = (numBuffers + 1) * targetBufferSize
     }
 
 }

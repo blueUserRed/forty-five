@@ -23,6 +23,9 @@ object AlUtils {
         return dest
     }
 
+    fun isStereo(format: Int): Boolean =
+        format == AL10.AL_FORMAT_STEREO8 || format == AL10.AL_FORMAT_STEREO16
+
     fun getAlFormat(channels: Int, sampleSize: Int, file: File): Int = when (channels) {
         1 if sampleSize == 8 -> AL10.AL_FORMAT_MONO8
         2 if sampleSize == 8 -> AL10.AL_FORMAT_STEREO8
@@ -32,5 +35,7 @@ object AlUtils {
             "Unsupported wav file format for file: '${file.path}', format: $channels channels, $sampleSize bits"
         )
     }
+
+    fun alBool(bool: Boolean): Int = if (bool) AL10.AL_TRUE else AL10.AL_FALSE
 
 }

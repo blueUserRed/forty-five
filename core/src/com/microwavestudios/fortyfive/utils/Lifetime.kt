@@ -10,6 +10,10 @@ import com.badlogic.gdx.utils.Disposable
  */
 interface Lifetime {
 
+    val alive: Boolean
+    val died: Boolean
+        get() = !alive
+
     /**
      * [callback] gets called when the lifetime dies, or immediately if it is already dead.
      */
@@ -48,6 +52,8 @@ interface Lifetime {
         /** lifetime that never dies */
         val endless = object : Lifetime {
 
+            override val alive: Boolean = true
+
             override fun onEnd(callback: () -> Unit) {
             }
         }
@@ -67,7 +73,11 @@ fun EndableLifetime(): EndableLifetime = object : EndableLifetime {
 
     private val callbacks: MutableList<() -> Unit> = mutableListOf()
 
-    private var died: Boolean = false
+    override val alive: Boolean
+        get() = !died
+
+    override var died: Boolean = false
+        private set
 
     override fun onEnd(callback: () -> Unit) {
         if (died) {

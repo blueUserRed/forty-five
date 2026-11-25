@@ -1,5 +1,6 @@
 package com.microwavestudios.fortyfive.audio
 
+import com.microwavestudios.fortyfive.FortyFive
 import org.lwjgl.openal.AL10
 import java.io.File
 import java.nio.ByteBuffer
@@ -9,8 +10,9 @@ import javax.sound.sampled.AudioSystem
 
 class AlWavSoundData private constructor(
     dataBuffer: ByteBuffer,
-    alFormat: Int,
+    private val alFormat: Int,
     sampleRate: Int,
+    private val file: File
 ) : SoundData {
 
     private val buffer: Int = AL10.alGenBuffers()
@@ -24,7 +26,11 @@ class AlWavSoundData private constructor(
         )
     }
 
-    override fun createInstance(): AlSoundInstance = AlSoundInstance(buffer)
+    override fun createInstance(): AlSoundInstance = AlSoundInstance(
+        buffer,
+        AlUtils.isStereo(alFormat),
+        file
+    )
 
     override fun dispose() {
         AL10.alDeleteBuffers(buffer)
@@ -34,9 +40,12 @@ class AlWavSoundData private constructor(
         internal val dataBuffer: ByteBuffer,
         internal val alFormat: Int,
         internal val sampleRate: Int,
+        internal val file: File,
     )
 
     companion object {
+
+        private const val logTag = "AlSoundData"
 
         /**
          * loads all data necessary for creating a sound into memory and returns it.
@@ -52,15 +61,22 @@ class AlWavSoundData private constructor(
             val data = stream.readAllBytes()
             stream.close()
 
+            if (data.size > AlStreamableAudio.approxMemUsage) {
+                FortyFive.logger.warn(
+                    logTag,
+                    "Audio '$file' takes ${data.size} bytes in memory. Consider streaming it instead"
+                )
+            }
+
             val srcBuffer = ByteBuffer.wrap(data)
             srcBuffer.order(ByteOrder.LITTLE_ENDIAN)
             val dataBuffer = AlUtils.fixByteOrder(srcBuffer, sampleSize)
-            return ConstructionData(dataBuffer, alFormat, sampleRate)
+            return ConstructionData(dataBuffer, alFormat, sampleRate, file)
         }
 
         fun createFromConstructionData(constructionData: ConstructionData): AlWavSoundData {
-            val (dataBuffer, alFormat, sampleRate) = constructionData
-            return AlWavSoundData(dataBuffer, alFormat, sampleRate)
+            val (dataBuffer, alFormat, sampleRate, file) = constructionData
+            return AlWavSoundData(dataBuffer, alFormat, sampleRate, file)
         }
 
         fun createFromFile(file: File): AlWavSoundData = createFromConstructionData(loadConstructionData(file))
