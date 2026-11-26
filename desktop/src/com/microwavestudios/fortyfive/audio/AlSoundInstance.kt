@@ -1,7 +1,7 @@
 package com.microwavestudios.fortyfive.audio
 
 import com.microwavestudios.fortyfive.FortyFive
-import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import com.microwavestudios.fortyfive.audio.AlUtils.alBool
 import com.microwavestudios.fortyfive.utils.EndableLifetime
 import com.microwavestudios.fortyfive.utils.Lifetime
@@ -13,7 +13,7 @@ class AlSoundInstance(
     private val file: File
 ) : SoundInstance {
 
-    private val sourceId: Int = AL10.alGenSources()
+    private val sourceId: Int = AL11.alGenSources()
 
     override val playingLifetime: Lifetime
         field = EndableLifetime()
@@ -21,9 +21,9 @@ class AlSoundInstance(
     private var shouldBePlaying: Boolean = false
 
     init {
-        AL10.alSourcei(sourceId, AL10.AL_BUFFER, bufferId)
-        AL10.alSourcef(sourceId, AL10.AL_ROLLOFF_FACTOR, 0f)
-        if (isStereo) AL10.alSourcei(sourceId, AL10.AL_SOURCE_RELATIVE, alBool(false))
+        AL11.alSourcei(sourceId, AL11.AL_BUFFER, bufferId)
+        AL11.alSourcef(sourceId, AL11.AL_ROLLOFF_FACTOR, 0f)
+        if (isStereo) AL11.alSourcei(sourceId, AL11.AL_SOURCE_RELATIVE, alBool(false))
     }
 
     override fun setPan(pan: Float) {
@@ -31,27 +31,27 @@ class AlSoundInstance(
             FortyFive.logger.warn("SoundInstance", "Cant set pan on sound '$file', is stereo")
             return
         }
-        AL10.alSource3f(sourceId, AL10.AL_POSITION, pan, 0f, 0f)
+        AL11.alSource3f(sourceId, AL11.AL_POSITION, pan, 0f, 0f)
     }
 
     override fun setLooping(looping: Boolean) {
-        AL10.alSourcei(sourceId, AL10.AL_LOOPING, alBool(looping))
+        AL11.alSourcei(sourceId, AL11.AL_LOOPING, alBool(looping))
     }
 
     override fun play() {
         shouldBePlaying = true
-        AL10.alSourcePlay(sourceId)
+        AL11.alSourcePlay(sourceId)
     }
 
     override fun pause() {
         shouldBePlaying = false
-        AL10.alSourcePause(sourceId)
+        AL11.alSourcePause(sourceId)
     }
 
     override fun stop() {
         shouldBePlaying = false
         playingLifetime.die()
-        AL10.alSourceStop(sourceId)
+        AL11.alSourceStop(sourceId)
     }
 
     override fun isPlaying(): Boolean {
@@ -59,15 +59,15 @@ class AlSoundInstance(
     }
 
     override fun setVolume(volume: Float) {
-        AL10.alSourcef(sourceId, AL10.AL_GAIN, volume)
+        AL11.alSourcef(sourceId, AL11.AL_GAIN, volume)
     }
 
     override fun dispose() {
-        AL10.alDeleteSources(sourceId)
+        AL11.alDeleteSources(sourceId)
     }
 
     override fun update() {
-        val rawIsPlaying = AL10.alGetSourcei(sourceId, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING
+        val rawIsPlaying = AL11.alGetSourcei(sourceId, AL11.AL_SOURCE_STATE) == AL11.AL_PLAYING
         if (shouldBePlaying && !rawIsPlaying) {
             stop()
         }

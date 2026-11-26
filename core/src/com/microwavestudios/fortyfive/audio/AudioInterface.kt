@@ -12,6 +12,10 @@ interface AudioInterface {
 
     fun finishLoadingSoundData(preloaded: Any): SoundData
 
-    fun createStreamableAudio(file: File): StreamableAudio
+    fun createStreamableAudio(file: File): LoopableStreamableAudio
+
+    fun createMultipartStreamableAudio(files: Sequence<File>): StreamableAudio
+
+    fun createSynchronizedAudioStream(tracks: List<File>): LoopableStreamableAudio
 
 }

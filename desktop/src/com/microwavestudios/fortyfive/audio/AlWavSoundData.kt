@@ -1,7 +1,7 @@
 package com.microwavestudios.fortyfive.audio
 
 import com.microwavestudios.fortyfive.FortyFive
-import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -15,10 +15,10 @@ class AlWavSoundData private constructor(
     private val file: File
 ) : SoundData {
 
-    private val buffer: Int = AL10.alGenBuffers()
+    private val buffer: Int = AL11.alGenBuffers()
 
     init {
-        AL10.alBufferData(
+        AL11.alBufferData(
             buffer,
             alFormat,
             dataBuffer,
@@ -33,7 +33,7 @@ class AlWavSoundData private constructor(
     )
 
     override fun dispose() {
-        AL10.alDeleteBuffers(buffer)
+        AL11.alDeleteBuffers(buffer)
     }
 
     data class ConstructionData(

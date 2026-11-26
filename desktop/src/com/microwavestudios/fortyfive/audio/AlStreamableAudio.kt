@@ -1,7 +1,7 @@
 package com.microwavestudios.fortyfive.audio
 
 import com.microwavestudios.fortyfive.FortyFive
-import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -14,10 +14,10 @@ import com.microwavestudios.fortyfive.utils.Lifetime
 
 class AlStreamableAudio(
     private val file: File
-) : StreamableAudio {
+) : LoopableStreamableAudio {
 
     private val buffers: IntArray = IntArray(numBuffers) {
-        AL10.alGenBuffers()
+        AL11.alGenBuffers()
     }
 
     private var stream: AudioInputStream
@@ -31,7 +31,7 @@ class AlStreamableAudio(
 
     private val tmpArr: ByteArray
 
-    private val sourceId = AL10.alGenSources()
+    private val sourceId = AL11.alGenSources()
 
     private var shouldBePlaying: Boolean = false
 
@@ -42,7 +42,7 @@ class AlStreamableAudio(
         field = EndableLifetime()
 
     init {
-        AL10.alSourcef(sourceId, AL10.AL_ROLLOFF_FACTOR, 0f)
+        AL11.alSourcef(sourceId, AL11.AL_ROLLOFF_FACTOR, 0f)
         stream = AudioSystem.getAudioInputStream(file)
         format = stream.format
         channels = format.channels
@@ -53,11 +53,11 @@ class AlStreamableAudio(
         realBufferSize = bufferSizeFrames * format.frameSize // <- not the same because of integer division
         tmpArr = ByteArray(realBufferSize)
 
-        if (channels == 2) AL10.alSourcei(sourceId, AL10.AL_SOURCE_RELATIVE, alBool(false))
+        if (channels == 2) AL11.alSourcei(sourceId, AL11.AL_SOURCE_RELATIVE, alBool(false))
 
         fillBuffers(buffers)
         buffers.forEach { buffer ->
-            AL10.alSourceQueueBuffers(sourceId, buffer)
+            AL11.alSourceQueueBuffers(sourceId, buffer)
         }
     }
 
@@ -66,23 +66,23 @@ class AlStreamableAudio(
             FortyFive.logger.warn("SoundInstance", "Cant set pan on sound '$file', is stereo")
             return
         }
-        AL10.alSource3f(sourceId, AL10.AL_POSITION, pan, 0f, 0f)
+        AL11.alSource3f(sourceId, AL11.AL_POSITION, pan, 0f, 0f)
     }
 
     override fun play() {
         shouldBePlaying = true
-        AL10.alSourcePlay(sourceId)
+        AL11.alSourcePlay(sourceId)
     }
 
     override fun pause() {
         shouldBePlaying = false
-        AL10.alSourcePause(sourceId)
+        AL11.alSourcePause(sourceId)
     }
 
     override fun stop() {
         shouldBePlaying = false
         playingLifetime.die()
-        AL10.alSourceStop(sourceId)
+        AL11.alSourceStop(sourceId)
     }
 
     override fun isPlaying(): Boolean {
@@ -90,11 +90,11 @@ class AlStreamableAudio(
     }
 
     override fun setVolume(volume: Float) {
-        AL10.alSourcef(sourceId, AL10.AL_GAIN, volume)
+        AL11.alSourcef(sourceId, AL11.AL_GAIN, volume)
     }
 
     fun isStarved(): Boolean {
-        val rawIsPlaying = AL10.alGetSourcei(sourceId, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING
+        val rawIsPlaying = AL11.alGetSourcei(sourceId, AL11.AL_SOURCE_STATE) == AL11.AL_PLAYING
         return shouldBePlaying && !rawIsPlaying
     }
 
@@ -104,11 +104,11 @@ class AlStreamableAudio(
             stop()
             return
         }
-        val processedBuffers = AL10.alGetSourcei(sourceId, AL10.AL_BUFFERS_PROCESSED)
+        val processedBuffers = AL11.alGetSourcei(sourceId, AL11.AL_BUFFERS_PROCESSED)
         repeat(processedBuffers) {
-            val bufferId = AL10.alSourceUnqueueBuffers(sourceId)
+            val bufferId = AL11.alSourceUnqueueBuffers(sourceId)
             fillBuffer(bufferId, tmpArr)
-            AL10.alSourceQueueBuffers(sourceId, bufferId)
+            AL11.alSourceQueueBuffers(sourceId, bufferId)
         }
         if (isStarved()) play()
     }
@@ -145,7 +145,7 @@ class AlStreamableAudio(
         srcBuffer = srcBuffer.slice(0, filled)
         srcBuffer.order(ByteOrder.LITTLE_ENDIAN)
         val dataBuffer = AlUtils.fixByteOrder(srcBuffer, sampleSize)
-        AL10.alBufferData(
+        AL11.alBufferData(
             buffer,
             alFormat,
             dataBuffer,
@@ -155,9 +155,9 @@ class AlStreamableAudio(
 
     override fun dispose() {
         buffers.forEach { buffer ->
-            AL10.alDeleteBuffers(buffer)
+            AL11.alDeleteBuffers(buffer)
         }
-        AL10.alDeleteSources(sourceId)
+        AL11.alDeleteSources(sourceId)
         stream.close()
     }
 

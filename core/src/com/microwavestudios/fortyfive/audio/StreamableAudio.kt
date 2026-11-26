@@ -5,7 +5,6 @@ import com.microwavestudios.fortyfive.utils.Lifetime
 
 interface StreamableAudio : Disposable {
 
-    var looping: Boolean
     val playingLifetime: Lifetime
 
     fun play()
@@ -15,5 +14,11 @@ interface StreamableAudio : Disposable {
     fun update()
     fun isPlaying(): Boolean
     fun setPan(pan: Float)
+
+}
+
+interface LoopableStreamableAudio : StreamableAudio {
+
+    var looping: Boolean
 
 }

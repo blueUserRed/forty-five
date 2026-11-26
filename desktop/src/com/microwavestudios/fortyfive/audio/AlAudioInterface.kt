@@ -2,7 +2,7 @@ package com.microwavestudios.fortyfive.audio
 
 import com.microwavestudios.fortyfive.utils.illegalState
 import org.lwjgl.openal.AL
-import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import org.lwjgl.openal.ALC
 import org.lwjgl.openal.ALC10
 import org.lwjgl.openal.ALC11
@@ -28,9 +28,9 @@ class AlAudioInterface : AudioInterface {
         val caps = ALC.createCapabilities(device)
         ALC.setCapabilities(caps)
         AL.setCurrentThread(AL.createCapabilities(caps))
-        AL10.alListener3f(AL10.AL_POSITION, 0f, 0f, 0f)
-        AL10.alDistanceModel(AL10.AL_NONE)
-        AL10.alDopplerFactor(0f)
+        AL11.alListener3f(AL11.AL_POSITION, 0f, 0f, 0f)
+        AL11.alDistanceModel(AL11.AL_NONE)
+        AL11.alDopplerFactor(0f)
     }
 
     override fun createSoundData(file: File): SoundData {
@@ -50,10 +50,16 @@ class AlAudioInterface : AudioInterface {
         return AlWavSoundData.createFromConstructionData(preloaded)
     }
 
-    override fun createStreamableAudio(file: File): StreamableAudio {
+    override fun createStreamableAudio(file: File): LoopableStreamableAudio {
         checkFileExtension(file)
         return AlStreamableAudio(file)
     }
+
+    override fun createMultipartStreamableAudio(files: Sequence<File>): StreamableAudio =
+        AlMultipartStreamableAudio(files)
+
+    override fun createSynchronizedAudioStream(tracks: List<File>): LoopableStreamableAudio =
+        AlSynchronizedAudioStream(tracks)
 
     private fun checkFileExtension(file: File) {
         require(file.extension == "wav") { "Unsupported audio format for file '$file'" }

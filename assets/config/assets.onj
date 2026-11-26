@@ -1597,8 +1597,16 @@ soundFiles: [
         file: "blobs/music/main_theme.wav"
     },
     {
-        name: "map_theme",
-        file: "blobs/music/map_theme.wav"
+        name: "map_theme_bass",
+        file: "blobs/music/map_theme/bass.wav"
+    },
+    {
+        name: "map_theme_guitar",
+        file: "blobs/music/map_theme/guitar.wav"
+    },
+    {
+        name: "map_theme_harmonica",
+        file: "blobs/music/map_theme/harmonica.wav"
     },
     {
         name: "encounter_theme_1",

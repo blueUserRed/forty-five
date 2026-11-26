@@ -1,7 +1,7 @@
 package com.microwavestudios.fortyfive.audio
 
 import com.microwavestudios.fortyfive.utils.illegalState
-import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -24,18 +24,18 @@ object AlUtils {
     }
 
     fun isStereo(format: Int): Boolean =
-        format == AL10.AL_FORMAT_STEREO8 || format == AL10.AL_FORMAT_STEREO16
+        format == AL11.AL_FORMAT_STEREO8 || format == AL11.AL_FORMAT_STEREO16
 
     fun getAlFormat(channels: Int, sampleSize: Int, file: File): Int = when (channels) {
-        1 if sampleSize == 8 -> AL10.AL_FORMAT_MONO8
-        2 if sampleSize == 8 -> AL10.AL_FORMAT_STEREO8
-        1 if sampleSize == 16 -> AL10.AL_FORMAT_MONO16
-        2 if sampleSize == 16 -> AL10.AL_FORMAT_STEREO16
+        1 if sampleSize == 8 -> AL11.AL_FORMAT_MONO8
+        2 if sampleSize == 8 -> AL11.AL_FORMAT_STEREO8
+        1 if sampleSize == 16 -> AL11.AL_FORMAT_MONO16
+        2 if sampleSize == 16 -> AL11.AL_FORMAT_STEREO16
         else -> illegalState(
             "Unsupported wav file format for file: '${file.path}', format: $channels channels, $sampleSize bits"
         )
     }
 
-    fun alBool(bool: Boolean): Int = if (bool) AL10.AL_TRUE else AL10.AL_FALSE
+    fun alBool(bool: Boolean): Int = if (bool) AL11.AL_TRUE else AL11.AL_FALSE
 
 }

@@ -35,7 +35,7 @@ import com.microwavestudios.fortyfive.utils.degrees
 import com.microwavestudios.fortyfive.utils.requireNull
 import com.microwavestudios.fortyfive.utils.setPosition
 import com.microwavestudios.fortyfive.utils.unreachable
-import org.lwjgl.openal.AL10
+import org.lwjgl.openal.AL11
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin

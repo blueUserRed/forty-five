@@ -7,8 +7,9 @@ import java.io.File
 
 object Themes {
 
-    val TITLE = SimpleTheme("main_theme")
-    val MAP = SimpleTheme("map_theme")
+    val TITLE = MapTheme()
+//    val TITLE = SimpleTheme("main_theme")
+    val MAP = MapTheme()
     val BATTLE = SimpleTheme("main_theme")
 
 }
@@ -51,10 +52,50 @@ class SimpleTheme(
     private val file =
         FortyFive.resourceManager.forceGet<File>(this, FortyFive.gameLifetime, musicHandle)
 
-    private lateinit var streamable: StreamableAudio
+    private lateinit var streamable: LoopableStreamableAudio
 
     override fun init(audioInterface: AudioInterface) {
         streamable = audioInterface.createStreamableAudio(file)
+    }
+
+    override fun start() {
+        streamable.looping = true
+        streamable.play()
+    }
+
+    override fun update() {
+        streamable.update()
+    }
+
+    override fun setVolume(volume: Float) {
+        streamable.setVolume(volume)
+    }
+
+    override fun end() {
+        streamable.stop()
+    }
+
+    override fun dispose() {
+        streamable.dispose()
+    }
+
+}
+
+class MapTheme : Theme, ResourceBorrower {
+
+    private val bassFile =
+        FortyFive.resourceManager.forceGet<File>(this, FortyFive.gameLifetime, "map_theme_bass")
+    private val guitarFile =
+        FortyFive.resourceManager.forceGet<File>(this, FortyFive.gameLifetime, "map_theme_guitar")
+    private val harmonicaFile =
+        FortyFive.resourceManager.forceGet<File>(this, FortyFive.gameLifetime, "map_theme_harmonica")
+
+    private lateinit var streamable: LoopableStreamableAudio
+
+    override fun init(audioInterface: AudioInterface) {
+        streamable = audioInterface.createSynchronizedAudioStream(
+            listOf(guitarFile, bassFile, harmonicaFile)
+        )
     }
 
     override fun start() {
